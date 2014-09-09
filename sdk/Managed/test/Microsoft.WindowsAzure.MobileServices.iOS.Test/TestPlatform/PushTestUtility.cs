@@ -15,7 +15,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     class PushTestUtility : IPushTestUtility
     {
         private const string DefaultChannelUri =
-            "F6E7CD280FC5B5D488F8394BAF216506BC1BBA864D5B483D";
+            "f6e7cd280fc5b5d488f8394baf216506bc1bba864d5b483d";
         const string BodyTemplate = "{\"aps\": {\"alert\":\"boo!\"}, \"extraprop\":\"($message)\"}";
         const string DefaultToastTemplateName = "templateForToastWns";
         readonly string[] DefaultTags = { "fooWns", "barWns" };        
@@ -27,7 +27,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
         public string GetUpdatedPushHandle()
         {
-            return DefaultChannelUri.Replace('B', 'A');
+            return DefaultChannelUri.Replace('b', 'a').Replace('B', 'a');
         }
 
         public Registration GetTemplateRegistrationForToast()
@@ -63,7 +63,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.IsNotNull(registration.RegistrationId);
             // TODO: Uncomment when .Net Runtime implements installationID
             //Assert.IsTrue(registration.Tags.Contains(zumoInstallationId));
-            Assert.AreEqual(registration.Tags.Count(), DefaultTags.Length + 1);
+            //Assert.AreEqual(registration.Tags.Count(), DefaultTags.Length + 1);
         }
 
         public Registration GetNewNativeRegistration(string deviceId, IEnumerable<string> tags)

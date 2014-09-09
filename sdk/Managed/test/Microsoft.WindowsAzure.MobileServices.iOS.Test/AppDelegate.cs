@@ -5,7 +5,7 @@ using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using MonoTouch.Foundation;
 using MonoTouch.UIKit;
 
-namespace Microsoft.WindowsAzure.Mobile.iOS.Test
+namespace MicrosoftWindowsAzureMobileiOSTest
 {
 	[Register("AppDelegate")]
 	public partial class AppDelegate : UIApplicationDelegate
