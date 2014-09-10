@@ -5,12 +5,14 @@
 - Added a MobileServiceConflictException to detect duplicate inserts
 - Added support for datetimeoffsets in queries
 - Added support for sending provider specific query string parameters in LoginAsync()
+- Fixed an issue causing duplicate registrations in Xamarin.iOS against .NET backends
 
 **Javascript SDK**
 - Fixed crash when server response did not have a Content-Type header
 
 **iOS SDK**
-- Address bug where version was returned to caller when not asked for when returned in header field from server
+- Address bug where version property was returned to the caller even when not asked for
+- Fixes Swift QS for syntax changes up to Xcode Beta 7
 
 **Quickstarts**
 - Converted Windows Phone and Windows Store quickstarts to a univeral app quickstart
@@ -21,7 +23,7 @@
 **Managed SDK** 
 - Added support for Xamarin iOS Azure Notification Hub integration
 
-** iOS SDK**
+**iOS SDK**
 - Fix issue with const when using both Azure Messaging and Mobile Services frameworks
 - Fix issue [#306](https://github.com/Azure/azure-mobile-services/issues/306) with how arrays passed as query string params to table and custom APIs are converted 
 - Fix issue where system properties (__version, __updatedAt, etc) were returned to the caller when they were not requested
