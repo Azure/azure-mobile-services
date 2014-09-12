@@ -236,7 +236,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             hijack.AddResponseContent("[]");
 
             await table.PullAsync(queryKey: "todoItems", query: table.CreateQuery());
-            Assert.AreEqual(hijack.Requests[0].RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.0000000%2B00%3A00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt");
+            Assert.AreEqual(hijack.Requests[0].RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.0000000%2B00%3A00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__deleted");
 
 
             pullResult = "[{\"id\":\"b\",\"String\":\"Updated\",\"__version\":\"def\", \"__updatedAt\":\"2014-02-27T23:01:33.444Z\"}]";
@@ -247,7 +247,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
             var item = await table.LookupAsync("b");
             Assert.AreEqual(item.String, "Updated");
-            Assert.AreEqual(hijack.Requests[2].RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetimeoffset'2014-01-30T23%3A01%3A33.4440000%2B00%3A00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt");
+            Assert.AreEqual(hijack.Requests[2].RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetimeoffset'2014-01-30T23%3A01%3A33.4440000%2B00%3A00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__deleted");
 
         }
 
@@ -264,7 +264,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             hijack.AddResponseContent("[]");
 
             await table.PullAsync(queryKey: "todoItems", query: table.CreateQuery());
-            Assert.AreEqual(hijack.Requests[0].RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.0000000%2B00%3A00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt");
+            Assert.AreEqual(hijack.Requests[0].RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.0000000%2B00%3A00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__deleted");
 
             table = await GetSynctable<ToDoWithStringId>(hijack);
 
@@ -277,7 +277,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
             var item = await table.LookupAsync("b");
             Assert.AreEqual(item.String, "Updated");
-            Assert.AreEqual(hijack.Requests[2].RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetimeoffset'2014-01-30T23%3A01%3A33.4440000%2B00%3A00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt");
+            Assert.AreEqual(hijack.Requests[2].RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetimeoffset'2014-01-30T23%3A01%3A33.4440000%2B00%3A00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__deleted");
         }
 
         [AsyncTestMethod]
@@ -302,7 +302,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             Assert.AreEqual(item.UpdatedAt.ToUniversalTime(), new DateTime(2014, 01, 30, 23, 1, 33, 444, DateTimeKind.Utc));
 
             // we request all the system properties present on DefineTable<> object
-            Assert.AreEqual(hijack.Requests[0].RequestUri.Query, "?$skip=0&$top=50&__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt%2C__version");
+            Assert.AreEqual(hijack.Requests[0].RequestUri.Query, "?$skip=0&$top=50&__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt%2C__version%2C__deleted");
         }
 
         [AsyncTestMethod]
