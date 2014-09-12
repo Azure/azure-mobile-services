@@ -52,12 +52,12 @@
     [timer invalidate];
     [_test addLog:[NSString stringWithFormat:@"Push notification received: %@", userInfo]];
     if (_payload) {
-        NSDictionary *expectedPushInfo = [self zumoPayloadToApsPayload:_payload];
-        if ([self compareExpectedPayload:expectedPushInfo withActual:userInfo]) {
+
+        if ([self compareExpectedPayload:_payload withActual:userInfo]) {
             [_test setTestStatus:TSPassed];
             _completion(YES);
         } else {
-            [_test addLog:[NSString stringWithFormat:@"Error, payloads are different. Expected: %@, actual: %@", expectedPushInfo, userInfo]];
+            [_test addLog:[NSString stringWithFormat:@"Error, payloads are different. Expected: %@, actual: %@", _payload, userInfo]];
             [_test setTestStatus:TSFailed];
             _completion(NO);
         }
@@ -105,33 +105,6 @@
     return allEqual;
 }
 
-- (NSDictionary *)zumoPayloadToApsPayload:(NSDictionary *)originalPayload {
-    NSMutableDictionary *result = [[NSMutableDictionary alloc] init];
-    NSMutableDictionary *aps = [[NSMutableDictionary alloc] init];
-    [result setValue:aps forKey:@"aps"];
-    id alert = originalPayload[@"alert"];
-    if (alert) {
-        [aps setValue:alert forKey:@"alert"];
-    }
-    
-    id badge = originalPayload[@"badge"];
-    if (badge) {
-        [aps setValue:badge forKey:@"badge"];
-    }
-    
-    id sound = originalPayload[@"sound"];
-    if (sound) {
-        [aps setValue:sound forKey:@"sound"];
-    }
-    
-    NSDictionary *payload = originalPayload[@"payload"];
-    if (payload) {
-        [result addEntriesFromDictionary:payload];
-    }
-    
-    return result;
-}
-
 @end
 
 // Main implementation
@@ -155,15 +128,15 @@ static NSString *pushClientKey = @"PushClientKey";
             [result addObject:[self createFeedbackTest]];
         }
         
-        [result addObject:[self createPushTestWithName:@"Push simple alert" forPayload:@{@"alert":@"push received"} withDelay:0]];
-        [result addObject:[self createPushTestWithName:@"Push simple badge" forPayload:@{@"badge":@9} withDelay:0]];
-        [result addObject:[self createPushTestWithName:@"Push simple sound and alert" forPayload:@{@"alert":@"push received",@"sound":@"default"} withDelay:0]];
-        [result addObject:[self createPushTestWithName:@"Push alert with loc info and parameters" forPayload:@{@"alert":@{@"loc-key":@"LOC_STRING",@"loc-args":@[@"first",@"second"]}} withDelay:0]];
-        [result addObject:[self createPushTestWithName:@"Push with only custom info (no alert / badge / sound)" forPayload:@{@"aps":@{},@"foo":@"bar"} withDelay:0]];
-        [result addObject:[self createPushTestWithName:@"Push with alert, badge and sound" forPayload:@{@"aps":@{@"alert":@"simple alert", @"badge":@7, @"sound":@"default"},@"custom":@"value"} withDelay:0]];
-        [result addObject:[self createPushTestWithName:@"Push with alert with non-ASCII characters" forPayload:@{@"alert":@"Latin-ãéìôü ÇñÑ, arabic-لكتاب على الطاولة, chinese-这本书在桌子上"} withDelay:0]];
+        [result addObject:[self createPushTestWithName:@"Push simple alert" forPayload:@{@"alert":@"push received"} expectedPayload:@{@"aps":@{@"alert":@"push received"}} withDelay:0]];
+        [result addObject:[self createPushTestWithName:@"Push simple badge" forPayload:@{@"badge":@9} expectedPayload:@{@"aps":@{@"badge":@9}} withDelay:0]];
+        [result addObject:[self createPushTestWithName:@"Push simple sound and alert" forPayload:@{@"alert":@"push received",@"sound":@"default"} expectedPayload:@{@"aps":@{@"alert":@"push received",@"sound":@"default"}} withDelay:0]];
+        [result addObject:[self createPushTestWithName:@"Push alert with loc info and parameters" forPayload:@{@"alert":@{@"loc-key":@"LOC_STRING",@"loc-args":@[@"first",@"second"]}} expectedPayload:@{@"aps":@{@"alert":@{@"loc-key":@"LOC_STRING",@"loc-args":@[@"first",@"second"]}}} withDelay:0]];
+        [result addObject:[self createPushTestWithName:@"Push with only custom info (no alert / badge / sound)" forPayload:@{@"aps":@{},@"foo":@"bar"} expectedPayload:@{@"aps":@{},@"foo":@"bar"} withDelay:0]];
+        [result addObject:[self createPushTestWithName:@"Push with alert, badge and sound" forPayload:@{@"aps":@{@"alert":@"simple alert", @"badge":@7, @"sound":@"default"},@"custom":@"value"} expectedPayload:@{@"aps":@{@"alert":@"simple alert", @"badge":@7, @"sound":@"default"},@"custom":@"value"} withDelay:0]];
+        [result addObject:[self createPushTestWithName:@"Push with alert with non-ASCII characters" forPayload:@{@"alert":@"Latin-ãéìôü ÇñÑ, arabic-لكتاب على الطاولة, chinese-这本书在桌子上"} expectedPayload:@{@"aps":@{@"alert":@"Latin-ãéìôü ÇñÑ, arabic-لكتاب على الطاولة, chinese-这本书在桌子上"}} withDelay:0]];
     
-        [result addObject:[self createPushTestWithName:@"(Neg) Push with large payload" forPayload:@{@"alert":[@"" stringByPaddingToLength:256 withString:@"*" startingAtIndex:0]} withDelay:0 isNegativeTest:YES]];
+        [result addObject:[self createPushTestWithName:@"(Neg) Push with large payload" forPayload:@{@"alert":[@"" stringByPaddingToLength:256 withString:@"*" startingAtIndex:0]} expectedPayload:nil withDelay:0]];
     }
     
     return result;
@@ -210,11 +183,7 @@ static NSString *pushClientKey = @"PushClientKey";
     return result;
 }
 
-+ (ZumoTest *)createPushTestWithName:(NSString *)name forPayload:(NSDictionary *)payload withDelay:(int)seconds {
-    return [self createPushTestWithName:name forPayload:payload withDelay:seconds isNegativeTest:NO];
-}
-
-+ (void)sendNotificationViaInsert:(MSClient *)client test:(ZumoTest *)test seconds:(int)seconds deviceToken:(NSString *)deviceToken payload:(NSDictionary *)payload completion:(ZumoTestCompletion)completion isNegative:(BOOL)isNegative {
++ (void)sendNotificationViaInsert:(MSClient *)client test:(ZumoTest *)test seconds:(int)seconds deviceToken:(NSString *)deviceToken payload:(NSDictionary *)payload expectedPayload:(NSDictionary *)expectedPayload completion:(ZumoTestCompletion)completion {
     MSTable *table = [client tableWithName:tableName];
     NSURL *appUrl = [client applicationURL];
     [test addLog:[NSString stringWithFormat:@"Sending a request to %@ / table %@", [appUrl description], tableName]];
@@ -226,7 +195,6 @@ static NSString *pushClientKey = @"PushClientKey";
             completion(NO);
         } else {
             NSTimeInterval timeToWait = 15;
-            NSDictionary *expectedPayload = isNegative ? nil : payload;
             ZumoPushClient *pushClient = [[ZumoPushClient alloc] initForTest:test withPayload:expectedPayload waitFor:timeToWait withTestCompletion:completion];
             [[test propertyBag] setValue:pushClient forKey:pushClientKey];
             
@@ -235,7 +203,7 @@ static NSString *pushClientKey = @"PushClientKey";
     }];
 }
 
-+ (ZumoTest *)createPushTestWithName:(NSString *)name forPayload:(NSDictionary *)payload withDelay:(int)seconds isNegativeTest:(BOOL)isNegative {
++ (ZumoTest *)createPushTestWithName:(NSString *)name forPayload:(NSDictionary *)payload expectedPayload:(NSDictionary *)expectedPayload withDelay:(int)seconds {
     ZumoTest *result = [ZumoTest createTestWithName:name andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         if ([self isRunningOnSimulator]) {
             [test addLog:@"Test running on a simulator, skipping test."];
@@ -261,10 +229,10 @@ static NSString *pushClientKey = @"PushClientKey";
                         return;
                     }
                     
-                    [self sendNotificationViaInsert:client test:test seconds:seconds deviceToken:deviceTokenString payload:payload completion:completion isNegative:isNegative];
+                    [self sendNotificationViaInsert:client test:test seconds:seconds deviceToken:deviceTokenString payload:payload expectedPayload:expectedPayload completion:completion];
                 }];
             } else {
-                [self sendNotificationViaInsert:client test:test seconds:seconds deviceToken:deviceTokenString payload:payload completion:completion isNegative:isNegative];
+                [self sendNotificationViaInsert:client test:test seconds:seconds deviceToken:deviceTokenString payload:payload expectedPayload:expectedPayload completion:completion];
             }
         }
     }];
