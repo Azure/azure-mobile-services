@@ -330,15 +330,16 @@ static NSOperationQueue *pushQueue_;
         return;
     }
     
-    // A pull should always include deleted records
-    query.parameters = @{@"__includeDeleted" : @YES };
-    
     // Get the required system properties from the server
     if ([self.dataSource respondsToSelector:@selector(systemPropetiesForTable:)]) {
         query.table.systemProperties = [self.dataSource systemPropetiesForTable:query.table.name];
     } else {
         query.table.systemProperties = MSSystemPropertyVersion;
     }
+    
+    // A pull should always include deleted records
+    query.parameters = @{@"__includeDeleted" : @YES };
+    query.table.systemProperties |= MSSystemPropertyDeleted;
     
     // Begin the actual pull request
     [self pullWithQueryInternal:query completion:completion];

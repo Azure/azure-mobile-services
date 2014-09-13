@@ -725,6 +725,12 @@ static NSString *const TodoTableNoVersion = @"TodoNoVersion";
 {
     MSTestFilter *testFilter = [[MSTestFilter alloc] init];
     
+    __block NSURLRequest *actualRequest = nil;
+    testFilter.onInspectRequest = ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
+    
     NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
                                    initWithURL:nil
                                    statusCode:200
@@ -750,11 +756,19 @@ static NSString *const TodoTableNoVersion = @"TodoNoVersion";
     }];
     
     XCTAssertTrue([self waitForTest:30.0], @"Test timed out.");
+
+    XCTAssertEqualObjects(actualRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?$inlinecount=none&__includeDeleted=1&__systemProperties=__version,__deleted");
 }
 
 -(void) testPullWithSystemPropeties
 {
     MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    
+    __block NSURLRequest *actualRequest = nil;
+    testFilter.onInspectRequest = ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
     
     NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
                                    initWithURL:nil
@@ -781,11 +795,19 @@ static NSString *const TodoTableNoVersion = @"TodoNoVersion";
     }];
     
     XCTAssertTrue([self waitForTest:30.0], @"Test timed out.");
+    
+    XCTAssertEqualObjects(actualRequest.URL.absoluteString, @"https://someUrl/tables/TodoNoVersion?$inlinecount=none&__includeDeleted=1&__systemProperties=__deleted");
 }
 
 -(void) testPullSuccessWithDeleted
 {
     MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    
+    __block NSURLRequest *actualRequest = nil;
+    testFilter.onInspectRequest = ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
     
     NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
                                    initWithURL:nil
@@ -813,6 +835,8 @@ static NSString *const TodoTableNoVersion = @"TodoNoVersion";
     }];
     
     XCTAssertTrue([self waitForTest:30.0], @"Test timed out.");
+    
+    XCTAssertEqualObjects(actualRequest.URL.absoluteString, @"https://someUrl/tables/TodoNoVersion?$inlinecount=none&__includeDeleted=1&__systemProperties=__deleted");
 }
 
 -(void) testPullWithPushSuccess
