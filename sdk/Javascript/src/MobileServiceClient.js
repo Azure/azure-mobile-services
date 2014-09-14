@@ -14,7 +14,7 @@ var MobileServiceLogin = require('MobileServiceLogin').MobileServiceLogin;
 var Push;
 try {
     Push = require('Push').Push;
-} catch(e) {}
+} catch (e) { }
 
 var _zumoFeatures = {
     JsonApiCall: "AJ",               // Custom API call, where the request body is serialized as JSON
@@ -56,6 +56,7 @@ function MobileServiceClient(applicationUrl, applicationKey) {
     this.currentUser = null;
     this._serviceFilter = null;
     this._login = new MobileServiceLogin(this);
+
     this.getTable = function (tableName) {
         /// <summary>
         /// Gets a reference to a table and its data operations.
@@ -67,7 +68,7 @@ function MobileServiceClient(applicationUrl, applicationKey) {
         Validate.notNullOrEmpty(tableName, 'tableName');
         return new MobileServiceTable(tableName, this);
     };
-    
+
     if (Push) {
         this.push = new Push(this);
     }

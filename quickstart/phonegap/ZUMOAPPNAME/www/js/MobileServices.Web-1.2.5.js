@@ -15,7 +15,7 @@
     /// will define the module's exports when invoked.
     /// </field>
     var $__modules__ = { };
-    var $__fileVersion__ = "1.2.20909.0";
+    var $__fileVersion__ = "1.0.20402.0";
     
     function require(name) {
         /// <summary>
@@ -90,7 +90,18 @@
         var Push;
         try {
             Push = require('Push').Push;
-        } catch(e) {}
+        } catch (e) { }
+        
+        var _zumoFeatures = {
+            JsonApiCall: "AJ",               // Custom API call, where the request body is serialized as JSON
+            GenericApiCall: "AG",            // Custom API call, where the request body is sent 'as-is'
+            AdditionalQueryParameters: "QS", // Table or API call, where the caller passes additional query string parameters
+            OptimisticConcurrency: "OC",     // Table update / delete call, using Optimistic Concurrency (If-Match headers)
+            TableRefreshCall: "RF",          // Refresh table call
+            TableReadRaw: "TR",              // Table reads where the caller uses a raw query string to determine the items to be returned
+            TableReadQuery: "TQ",            // Table reads where the caller uses a function / query OM to determine the items to be returned
+        };
+        var _zumoFeaturesHeaderName = "X-ZUMO-FEATURES";
         
         function MobileServiceClient(applicationUrl, applicationKey) {
             /// <summary>
@@ -121,6 +132,7 @@
             this.currentUser = null;
             this._serviceFilter = null;
             this._login = new MobileServiceLogin(this);
+        
             this.getTable = function (tableName) {
                 /// <summary>
                 /// Gets a reference to a table and its data operations.
@@ -132,7 +144,7 @@
                 Validate.notNullOrEmpty(tableName, 'tableName');
                 return new MobileServiceTable(tableName, this);
             };
-            
+        
             if (Push) {
                 this.push = new Push(this);
             }
@@ -212,7 +224,7 @@
             return client;
         };
         
-        MobileServiceClient.prototype._request = function (method, uriFragment, content, ignoreFilters, headers, callback) {
+        MobileServiceClient.prototype._request = function (method, uriFragment, content, ignoreFilters, headers, features, callback) {
             /// <summary>
             /// Perform a web request and include the standard Mobile Services headers.
             /// </summary>
@@ -233,11 +245,19 @@
             /// <param name="headers" type="Object">
             /// Optional request headers
             /// </param>
+            /// <param name="features" type="Array">
+            /// Codes for features which are used in this request, sent to the server for telemetry.
+            /// </param>
             /// <param name="callback" type="function(error, response)">
             /// Handler that will be called on the response.
             /// </param>
         
             // Account for absent optional arguments
+            if (_.isNull(callback) && (typeof features === 'function')) {
+                callback = features;
+                features = null;
+            }
+        
             if (_.isNull(callback) && (typeof headers === 'function')) {
                 callback = headers;
                 headers = null;
@@ -282,6 +302,10 @@
                 options.headers["X-ZUMO-VERSION"] = this.version;
             }
         
+            if (_.isNull(options.headers[_zumoFeaturesHeaderName]) && features && features.length) {
+                options.headers[_zumoFeaturesHeaderName] = features.join(',');
+            }
+        
             // Add any content as JSON
             if (!_.isNull(content)) {
                 if (!_.isString(content)) {
@@ -318,6 +342,33 @@
                 Platform.webRequest(options, handler);
             }
         };
+        
+        MobileServiceClient.prototype.loginWithOptions = Platform.async(
+             function (provider, options, callback) {
+                 /// <summary>
+                 /// Log a user into a Mobile Services application given a provider name with
+                 /// given options.
+                 /// </summary>
+                 /// <param name="provider" type="String" mayBeNull="false">
+                 /// Name of the authentication provider to use; one of 'facebook', 'twitter', 'google', 
+                 /// 'windowsazureactivedirectory' (can also use 'aad')
+                 /// or 'microsoftaccount'.
+                 /// </param>
+                 /// <param name="options" type="Object" mayBeNull="true">
+                 /// Contains additional parameter information, valid values are:
+                 ///    token: provider specific object with existing OAuth token to log in with
+                 ///    useSingleSignOn: Only applies to Windows 8 clients.  Will be ignored on other platforms.
+                 /// Indicates if single sign-on should be used. Single sign-on requires that the 
+                 /// application's Package SID be registered with the Microsoft Azure Mobile Service, 
+                 /// but it provides a better experience as HTTP cookies are supported so that users 
+                 /// do not have to login in everytime the application is launched.
+                 ///    parameters: Any additional provider specific query string parameters.
+                 /// </param>
+                 /// <param name="callback" type="Function" mayBeNull="true">
+                 /// Optional callback accepting (error, user) parameters.
+                 /// </param>
+                 this._login.loginWithOptions(provider, options, callback);
+        });
         
         MobileServiceClient.prototype.login = Platform.async(
             function (provider, token, useSingleSignOn, callback) {
@@ -407,6 +458,17 @@
                     urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
                 }
         
+                var features = [];
+                if (!_.isNullOrEmpty(body)) {
+                    features.push(_.isString(body) ?
+                        _zumoFeatures.GenericApiCall :
+                        _zumoFeatures.JsonApiCall);
+                }
+        
+                if (!_.isNull(parameters)) {
+                    features.push(_zumoFeatures.AdditionalQueryParameters);
+                }
+        
                 // Make the request
                 this._request(
                     method,
@@ -414,6 +476,7 @@
                     body,
                     null,
                     headers,
+                    features,
                     function (error, response) {
                         if (!_.isNull(error)) {
                             callback(error, null);
@@ -476,7 +539,6 @@
             return applicationInstallationId;
         }
         
-        
         /// <summary>
         /// Get or set the static _applicationInstallationId by checking the settings
         /// and create the value if necessary.
@@ -488,7 +550,10 @@
         /// </summary>
         MobileServiceClient._userAgent = Platform.getUserAgent();
         
-        
+        /// <summary>
+        /// The features that are sent to the server for telemetry.
+        /// </summary>
+        MobileServiceClient._zumoFeatures = _zumoFeatures;
     };
 
     $__modules__.MobileServiceTable = function (exports) {
@@ -622,10 +687,15 @@
             var tableName = this.getTableName();
             var queryString = null;
             var projection = null;
+            var features = [];
             if (_.isString(query)) {
                 queryString = query;
+                if (!_.isNullOrEmpty(query)) {
+                    features.push(WindowsAzure.MobileServiceClient._zumoFeatures.TableReadRaw);
+                }
             } else if (_.isObject(query) && !_.isNull(query.toOData)) {
                 if (query.getComponents) {
+                    features.push(WindowsAzure.MobileServiceClient._zumoFeatures.TableReadQuery);
                     var components = query.getComponents();
                     projection = components.projection;
                     if (components.table) {
@@ -645,6 +715,8 @@
                     }
                 }
             }
+        
+            addQueryParametersFeaturesIfApplicable(features, parameters);
         
             // Add any user-defined query string parameters
             parameters = addSystemProperties(parameters, this.systemProperties, queryString);
@@ -669,6 +741,9 @@
                 'GET',
                 urlFragment,
                 null,
+                false,
+                null,
+                features,
                 function (error, response) {
                     var values = null;
                     if (_.isNull(error)) {
@@ -751,6 +826,8 @@
                     }
                 }
         
+                var features = addQueryParametersFeaturesIfApplicable([], parameters);
+        
                 // Construct the URL
                 var urlFragment = _.url.combinePathSegments(tableRouteSeperatorName, this.getTableName());
                 parameters = addSystemProperties(parameters, this.systemProperties);
@@ -764,6 +841,9 @@
                     'POST',
                     urlFragment,
                     instance,
+                    false,
+                    null,
+                    features,
                     function (error, response) {
                         if (!_.isNull(error)) {
                             callback(error, null);
@@ -790,7 +870,8 @@
                 /// The callback to invoke when the update is complete.
                 /// </param>
                 var version,
-                    headers = [],
+                    headers = {},
+                    features = [],
                     serverInstance;
         
                 // Account for absent optional arguments
@@ -813,6 +894,13 @@
                 } else {
                     serverInstance = instance;
                 }
+        
+                if (!_.isNullOrEmpty(version)) {
+                    headers['If-Match'] = getEtagFromVersion(version);
+                    features.push(WindowsAzure.MobileServiceClient._zumoFeatures.OptimisticConcurrency);
+                }
+        
+                features = addQueryParametersFeaturesIfApplicable(features, parameters);
                 parameters = addSystemProperties(parameters, this.systemProperties);
         
                 // Construct the URL
@@ -825,10 +913,6 @@
                     urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
                 }
         
-                if (!_.isNullOrEmpty(version)) {
-                    headers['If-Match'] = getEtagFromVersion(version);
-                }
-        
                 // Make the request
                 this.getMobileServiceClient()._request(
                     'PATCH',
@@ -836,6 +920,7 @@
                     serverInstance,
                     false,
                     headers,
+                    features,
                     function (error, response) {
                         if (!_.isNull(error)) {
                             setServerItemIfPreconditionFailed(error);
@@ -904,11 +989,17 @@
                     urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
                 }
         
+                var features = [WindowsAzure.MobileServiceClient._zumoFeatures.TableRefreshCall];
+                features = addQueryParametersFeaturesIfApplicable(features, parameters);
+        
                 // Make the request
                 this.getMobileServiceClient()._request(
                     'GET',
                     urlFragment,
                     instance,
+                    false,
+                    null,
+                    features,
                     function (error, response) {
                         if (!_.isNull(error)) {
                             callback(error, null);
@@ -965,6 +1056,8 @@
                         this.getTableName(),
                         encodeURIComponent(id.toString()));
         
+                var features = addQueryParametersFeaturesIfApplicable([], parameters);
+        
                 parameters = addSystemProperties(parameters, this.systemProperties);
                 if (!_.isNull(parameters)) {
                     var queryString = _.url.getQueryString(parameters);
@@ -976,6 +1069,9 @@
                     'GET',
                     urlFragment,
                     null,
+                    false,
+                    null,
+                    features,
                     function (error, response) {
                         if (!_.isNull(error)) {
                             callback(error, null);
@@ -1010,18 +1106,22 @@
                 // Validate the arguments
                 Validate.notNull(instance, 'instance');
                 Validate.isValidId(instance[idPropertyName], 'instance.' + idPropertyName);
-                parameters = addSystemProperties(parameters, this.systemProperties);
-                if (!_.isNull(parameters)) {
-                    Validate.isValidParametersObject(parameters);
-                }
                 Validate.notNull(callback, 'callback');
         
-                var headers = [];
-        
+                var headers = {};
+                var features = [];
                 if (_.isString(instance[idPropertyName])) {
                     if (!_.isNullOrEmpty(instance.__version)) {
                         headers['If-Match'] = getEtagFromVersion(instance.__version);
+                        features.push(WindowsAzure.MobileServiceClient._zumoFeatures.OptimisticConcurrency);
                     }
+                }
+        
+                features = addQueryParametersFeaturesIfApplicable(features, parameters);
+        
+                parameters = addSystemProperties(parameters, this.systemProperties);
+                if (!_.isNull(parameters)) {
+                    Validate.isValidParametersObject(parameters);
                 }
         
                 // Contruct the URL
@@ -1041,6 +1141,7 @@
                     null,
                     false,
                     headers,
+                    features,
                     function (error, response) {
                         if (!_.isNull(error)) {
                             setServerItemIfPreconditionFailed(error);
@@ -1163,6 +1264,27 @@
             }
             return result.replace(/\\\"/g, '"');
         }
+        
+        // Updates and returns the headers parameters with features used in the call
+        function addQueryParametersFeaturesIfApplicable(features, userQueryParameters) {
+            var hasQueryParameters = false;
+            if (userQueryParameters) {
+                if (Array.isArray(userQueryParameters)) {
+                    hasQueryParameters = userQueryParameters.length > 0;
+                } else if (_.isObject(userQueryParameters)) {
+                    for (var k in userQueryParameters) {
+                        hasQueryParameters = true;
+                        break;
+                    }
+                }
+            }
+        
+            if (hasQueryParameters) {
+                features.push(WindowsAzure.MobileServiceClient._zumoFeatures.AdditionalQueryParameters);
+            }
+        
+            return features;
+        }
     };
 
     $__modules__.MobileServiceLogin = function (exports) {
@@ -1238,6 +1360,53 @@
         // good enough).
         Platform.addToMobileServicesClientNamespace({ MobileServiceLogin: MobileServiceLogin });
         
+        MobileServiceLogin.prototype.loginWithOptions = function (provider, options, callback) {
+            /// <summary>
+            /// Log a user into a Mobile Services application given a provider name with
+            /// given options.
+            /// </summary>
+            /// <param name="provider" type="String" mayBeNull="false">
+            /// Name of the authentication provider to use; one of 'facebook', 'twitter', 'google', 
+            /// 'windowsazureactivedirectory' (can also use 'aad')
+            /// or 'microsoftaccount'.
+            /// </param>
+            /// <param name="options" type="Object" mayBeNull="true">
+            /// Contains additional parameter information, valid values are:
+            ///    token: provider specific object with existing OAuth token to log in with
+            ///    useSingleSignOn: Only applies to Windows 8 clients.  Will be ignored on other platforms.
+            /// Indicates if single sign-on should be used. Single sign-on requires that the 
+            /// application's Package SID be registered with the Microsoft Azure Mobile Service, 
+            /// but it provides a better experience as HTTP cookies are supported so that users 
+            /// do not have to login in everytime the application is launched.
+            ///    parameters: Any additional provider specific query string parameters.
+            /// </param>
+            /// <param name="callback" type="Function" mayBeNull="true">
+            /// Optional callback accepting (error, user) parameters.
+            /// </param>
+        
+            Validate.isString(provider, 'provider');
+            Validate.notNull(provider, 'provider');
+        
+            if (_.isNull(callback)) {
+                if (!_.isNull(options) && typeof options === 'function') {
+                    callback = options;
+                    options = null;
+                } else {
+                    Validate.notNull(null, 'callback');
+                }
+            }    
+        
+            // loginWithOptions('a.b.c')
+            if (!options && this._isAuthToken(provider)) {
+                this.loginWithMobileServiceToken(provider, callback);
+            } else {
+                // loginWithOptions('facebook', {});
+                // loginWithOptions('facebook');
+                options = options || {};
+                this.loginWithProvider(provider, options.token, options.useSingleSignOn, options.parameters, callback);
+            }
+        };
+        
         MobileServiceLogin.prototype.login = function (provider, token, useSingleSignOn, callback) {
             /// <summary>
             /// Log a user into a Mobile Services application given a provider name and optional token object
@@ -1283,9 +1452,9 @@
                     useSingleSignOn = false;
                 }
             }
-            
+        
             // Determine if the provider is actually a Mobile Services authentication token
-            if (_.isNull(token) && _.isString(provider) && provider.split('.').length === 3) {
+            if (_.isNull(token) && this._isAuthToken(provider)) {
                 token = provider;
                 provider = null;
             }
@@ -1306,11 +1475,15 @@
                     // The mobile service REST API uses '/login/aad' for Microsoft Azure Active Directory
                     provider = 'aad';
                 }
-                this.loginWithProvider(provider, token, useSingleSignOn, callback);
+                this.loginWithProvider(provider, token, useSingleSignOn, {}, callback);
             }
             else {
                 this.loginWithMobileServiceToken(token, callback);
             }
+        };
+        
+        MobileServiceLogin.prototype._isAuthToken = function (value) {
+            return value && _.isString(value) && value.split('.').length === 3
         };
         
         MobileServiceLogin.prototype.loginWithMobileServiceToken = function(authenticationToken, callback) {
@@ -1340,7 +1513,7 @@
                 });
         };
         
-        MobileServiceLogin.prototype.loginWithProvider = function(provider, token, useSingleSignOn, callback) {
+        MobileServiceLogin.prototype.loginWithProvider = function(provider, token, useSingleSignOn, parameters, callback) {
             /// <summary>
             /// Log a user into a Mobile Services application given a provider name and optional token object.
             /// </summary>
@@ -1348,35 +1521,21 @@
             /// Name of the authentication provider to use; one of 'facebook', 'twitter', 'google',
             /// 'windowsazureactivedirectory' (can also use 'aad'), or 'microsoftaccount'.
             /// </param>
-            /// <param name="token" type="Object" mayBeNull="true">
+            /// <param name="token" type="Object">
             /// Optional, provider specific object with existing OAuth token to log in with.
             /// </param>
-            /// <param name="useSingleSignOn" type="Boolean" mayBeNull="true">
+            /// <param name="useSingleSignOn" type="Boolean">
             /// Optional, indicates if single sign-on should be used.  Single sign-on requires that the
             /// application's Package SID be registered with the Microsoft Azure Mobile Service, but it
             /// provides a better experience as HTTP cookies are supported so that users do not have to
             /// login in everytime the application is launched. Is false be default.
             /// </param>
-            /// <param name="callback" type="Function" mayBeNull="true">
+            /// <param name="parameters" type="Object">
+            /// Any additional provider specific query string parameters. 
+            /// </param>
+            /// <param name="callback" type="Function">
             /// The callback to execute when the login completes: callback(error, user).
             /// </param>
-        
-            // Account for absent optional arguments
-            if (_.isNull(callback))
-            {
-                if (_.isNull(useSingleSignOn) && (typeof token === 'function')) {
-                    callback = token;
-                    token = null;
-                    useSingleSignOn = false;
-                } else if (typeof useSingleSignOn === 'function') {
-                    callback = useSingleSignOn;
-                    useSingleSignOn = false;
-                    if (!_.isNull(token) && _.isBool(token)) {
-                        useSingleSignOn = token;
-                        token = null;
-                    }
-                }
-            }
         
             // Validate arguments
             Validate.isString(provider, 'provider');
@@ -1396,10 +1555,10 @@
             
             // Either login with the token or the platform specific login control.
             if (!_.isNull(token)) {
-                loginWithProviderAndToken(this, provider, token, callback);
+                loginWithProviderAndToken(this, provider, token, parameters, callback);
             }
             else {
-                loginWithLoginControl(this, provider, useSingleSignOn, callback);
+                loginWithLoginControl(this, provider, useSingleSignOn, parameters, callback);
             }
         };
         
@@ -1479,7 +1638,7 @@
             onLoginComplete(error, mobileServiceToken, client, callback);
         }
         
-        function loginWithProviderAndToken(login, provider, token, callback) {
+        function loginWithProviderAndToken(login, provider, token, parameters, callback) {
             /// <summary>
             /// Log a user into a Mobile Services application given a provider name and token object.
             /// </summary>
@@ -1493,6 +1652,9 @@
             /// <param name="token" type="Object">
             /// Provider specific object with existing OAuth token to log in with.
             /// </param>
+            /// <param name="parameters" type="Object">
+            /// Any additional provider specific query string parameters.
+            /// </param>
             /// <param name="callback" type="Function" mayBeNull="true">
             /// The callback to execute when the login completes: callback(error, user).
             /// </param>
@@ -1504,11 +1666,17 @@
             // one-at-a-time restriction.
             login._loginState = { inProcess: true, cancelCallback: null };
         
+            var url = loginUrl + '/' + provider;
+            if (!_.isNull(parameters)) {
+                var queryString = _.url.getQueryString(parameters);
+                url = _.url.combinePathAndQuery(url, queryString);
+            }
+        
             // Invoke the POST endpoint to exchange provider-specific token for a 
             // Microsoft Azure Mobile Services token
             client._request(
                 'POST',
-                loginUrl + '/' + provider,
+                url,
                 token,
                 login.ignoreFilters,
                 function (error, response) {
@@ -1517,7 +1685,7 @@
                 });
         }
         
-        function loginWithLoginControl(login, provider, useSingleSignOn, callback) {
+        function loginWithLoginControl(login, provider, useSingleSignOn, parameters, callback) {
             /// <summary>
             /// Log a user into a Mobile Services application using a platform specific
             /// login control that will present the user with the given provider's login web page.
@@ -1534,6 +1702,9 @@
             /// provides a better experience as HTTP cookies are supported so that users do not have to
             /// login in everytime the application is launched. Is false be default.
             /// </param>
+            /// <param name="parameters" type="Object">
+            /// Any additional provider specific query string parameters.
+            /// </param>
             /// <param name="callback" type="Function"  mayBeNull="true">
             /// The callback to execute when the login completes: callback(error, user).
             /// </param>
@@ -1544,6 +1715,11 @@
                 loginUrl,
                 provider);
             var endUri = null;
+        
+            if (!_.isNull(parameters)) {
+                var queryString = _.url.getQueryString(parameters);
+                startUri = _.url.combinePathAndQuery(startUri, queryString);
+            }
         
             // If not single sign-on, then we need to construct a non-null end uri.
             if (!useSingleSignOn) {
@@ -1571,6 +1747,857 @@
         }
     };
 
+    $__modules__.Push = function (exports) {
+        // ----------------------------------------------------------------------------
+        // Copyright (c) Microsoft Corporation. All rights reserved.
+        // ----------------------------------------------------------------------------
+        
+        /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\base.js" />
+        /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\ui.js" />
+        /// <reference path="..\Generated\MobileServices.DevIntellisense.js" />
+        
+        var _ = require('Extensions'),
+            Validate = require('Validate'),
+            Platform = require('Platform'),
+            RegistrationManager = require('RegistrationManager').RegistrationManager,
+            apns = function (push) {
+                this._push = push;
+            },
+            gcm = function (push) {
+                this._push = push;
+            };
+        
+        function Push(mobileServicesClient) {
+            this._apns = null;
+            this._gcm = null;
+            this._registrationManager = null;
+        
+            Object.defineProperties(this, {
+                'apns': {
+                    get: function () {
+                        if (!this._apns) {
+                            var name = _.format('MS-PushContainer-apns-{0}', mobileServicesClient.applicationUrl);
+                            this._registrationManager = new RegistrationManager(mobileServicesClient, 'apns', name);
+                            this._apns = new apns(this);
+                        }
+                        return this._apns;
+                    }
+                },
+                'gcm': {
+                    get: function () {
+                        if (!this._gcm) {
+                            var name = _.format('MS-PushContainer-gcm-{0}', mobileServicesClient.applicationUrl);
+                            this._registrationManager = new RegistrationManager(mobileServicesClient, 'apns', name);
+                            this._gcm = new apns(this);
+                        }
+                        return this._gcm;
+                    }
+                }
+            });
+        }
+        
+        exports.Push = Push;
+        
+        Push.prototype._register = function (platform, pushHandle, tags, callback) {
+            /// <summary>
+            /// Register for native notification
+            /// </summary>
+            /// <param name="deviceToken">
+            /// The deviceToken to register
+            /// </param>
+            /// <param name="tags" mayBeNull="true">
+            /// Array containing the tags for this registeration
+            /// </param>
+            /// <returns>
+            /// Promise that will complete when the nregister is completed
+            /// </returns>
+        
+            var registration = makeCoreRegistration(pushHandle, platform, tags);
+            return this._registrationManager.upsertRegistration(registration, callback);
+        };
+        
+        Push.prototype._registerTemplate = function (platform, deviceToken, name, bodyTemplate, expiryTemplate, tags) {
+            /// <summary>
+            /// Register for template notification
+            /// </summary>
+            /// <param name="deviceToken">The deviceToken to register</param>
+            /// <param name="name">The name of the template</param>
+            /// <param name="bodyTemplate">
+            /// The json body to register
+            /// </param>
+            /// <param name="expiryTemplate">
+            /// The json body to register
+            /// </param>
+            /// <param name="tags">
+            /// Array containing the tags for this registeration
+            /// </param>
+            /// <returns>
+            /// Promise that will complete when the register is completed
+            /// </returns>
+        
+            Validate.notNullOrEmpty(name, 'name');
+            Validate.notNullOrEmpty(bodyTemplate, 'bodyTemplate');
+        
+            var registration = makeCoreRegistration(deviceToken, platform, tags);
+        
+            registration.templateName = name;
+            registration.templateBody = bodyTemplate;
+            if (expiryTemplate) {
+                registration.expiry = expiryTemplate;
+            }
+        
+            return this._registrationManager.upsertRegistration(registration);
+        };
+        
+        Push.prototype._unregister = function (templateName) {
+            /// <summary>
+            /// Unregister for template notification
+            /// </summary>
+            /// <param name="templateName">
+            /// The name of the template
+            /// </param>
+            /// <returns>
+            /// Promise that will complete when the unregister is completed
+            /// </returns>
+        
+            Validate.notNullOrEmpty(templateName, 'templateName');
+        
+            return this._registrationManager.deleteRegistrationWithName(templateName, callback);
+        };
+        
+        Push.prototype._unregisterAll = function (pushHandle) {
+            /// <summary>
+            /// Unregister for all notifications
+            /// </summary>
+            /// <param name="pushHandle">
+            /// The push handle to unregister everything for
+            /// </param>
+            /// <returns>
+            /// Promise that will complete when the unregister is completed
+            /// </returns>
+        
+            Validate.notNullOrEmpty(pushHandle, 'pushHandle');
+        
+            return this._registrationManager.deleteAllRegistrations(pushHandle, callback);
+        };
+        
+        
+        apns.prototype.registerNative = function (deviceToken, tags) {
+            /// <summary>
+            /// Register for native notification
+            /// </summary>
+            /// <param name="deviceToken">
+            /// The deviceToken to register
+            /// </param>
+            /// <param name="tags" mayBeNull="true">
+            /// Array containing the tags for this registeration
+            /// </param>
+            /// <returns>
+            /// Promise that will complete when the register is completed
+            /// </returns>
+            
+            return this._push._register('apns', deviceToken, tags);
+        };
+        
+        apns.prototype.registerTemplate = function (deviceToken, name, bodyTemplate, expiryTemplate, tags) {
+            /// <summary>
+            /// Register for template notification
+            /// </summary>
+            /// <param name="deviceToken">The deviceToken to register</param>
+            /// <param name="name">The name of the template</param>
+            /// <param name="bodyTemplate">
+            /// String defining the body to register
+            /// </param>
+            /// <param name="expiryTemplate">
+            /// String defining the expiry template
+            /// </param>
+            /// <param name="tags">
+            /// Array containing the tags for this registeration
+            /// </param>
+            /// <returns>
+            /// Promise that will complete when the unregister is completed
+            /// </returns>
+        
+            if (_.isNull(tags) && !_.isNull(expiryTemplate) && Array.isArray(expiryTemplate)) {
+                tags = expiryTemplate;
+                expiryTemplate = null;
+            }
+        
+            // TODO: Potentially JSON.stringigy bodyTemplate
+        
+            return this._push._registerTemplate('apns', deviceToken, name, bodyTemplate, expiryTemplate, tags);
+        };
+        
+        apns.prototype.unregisterNative = function () {
+            /// <summary>
+            /// Unregister for native notification
+            /// </summary>
+            /// <returns>
+            /// Promise that will complete when the unregister is completed
+            /// </returns>
+        
+            return this._push._unregister(RegistrationManager.NativeRegistrationName);
+        };
+        
+        apns.prototype.unregisterTemplate = function (templateName) {
+            /// <summary>
+            /// Unregister for template notification
+            /// </summary>
+            /// <param name="templateName">
+            /// The name of the template
+            /// </param>
+            /// <returns>
+            /// Promise that will complete when the unregister is completed
+            /// </returns>
+        
+            return this._push._unregister(templateName);
+        };
+        
+        apns.prototype.unregisterAll = function (deviceToken) {
+            /// <summary>
+            /// DEBUG-ONLY: Unregisters all registrations for the given device token
+            /// </summary>
+            /// <param name="deviceToken">
+            /// The device token
+            /// </param>
+            /// <returns>
+            /// Promise that will complete once all registrations are deleted
+            /// </returns>
+        
+            return this._push._unregisterAll(deviceToken);
+        };
+        
+        gcm.prototype.registerNative = function (deviceId, tags) {
+            /// <summary>
+            /// Register for native notification
+            /// </summary>
+            /// <param name="deviceId">
+            /// The deviceToken to register
+            /// </param>
+            /// <param name="tags" mayBeNull="true">
+            /// Array containing the tags for this registeration
+            /// </param>
+            /// <returns>
+            /// Promise that will complete when the unregister is completed
+            /// </returns>
+        
+            return this._push._register('gcm', deviceId, tags);
+        };
+        
+        gcm.prototype.registerTemplate = function (deviceId, name, bodyTemplate, tags) {
+            /// <summary>
+            /// Register for template notification
+            /// </summary>
+            /// <param name="deviceId">
+            /// The deviceId to register
+            /// </param>
+            /// <param name="name">
+            /// The name of the template
+            /// </param>
+            /// <param name="bodyTemplate">
+            /// String defining the body to register
+            /// </param>
+            /// <param name="tags">
+            /// Array containing the tags for this registeration
+            /// </param>
+            /// <returns>
+            /// Promise that will complete when the unregister is completed
+            /// </returns>
+        
+            return this._push._registerTemplate('gcm', deviceId, name, bodyTemplate, null, tags);
+        };
+        
+        gcm.prototype.unregisterNative = function () {
+            /// <summary>
+            /// Unregister for native notification
+            /// </summary>
+            /// <returns>
+            /// Promise that will complete when the register is completed
+            /// </returns>
+        
+            return this._push._unregister(RegistrationManager.NativeRegistrationName);
+        };
+        
+        gcm.prototype.unregisterTemplate = function (templateName) {
+            /// <summary>
+            /// Unregister for template notification
+            /// </summary>
+            /// <param name="templateName">
+            /// The name of the template
+            /// </param>
+            /// <returns>
+            /// Promise that will complete when the register is completed
+            /// </returns>
+            return this._push._unregister(templateName);
+        };
+        
+        gcm.prototype.unregisterAll = function (deviceId) {
+            /// <summary>
+            /// DEBUG-ONLY: Unregisters all registrations for the given device token
+            /// </summary>
+            /// <param name="deviceId">
+            /// The device id
+            /// </param>
+            /// <returns>
+            /// Promise that will complete once all registrations are deleted
+            /// </returns>
+        
+            return this._push._unregisterAll(deviceId);
+        };
+        
+        
+        function makeCoreRegistration(pushHandle, platform, tags) {
+            Validate.notNullOrEmpty(pushHandle, 'pushHandle');
+            Validate.isString(pushHandle, 'pushHandle');
+        
+            if (platform == 'apns') {
+                pushHandle = pushHandle.toUpperCase();
+            }
+        
+            var registration = {
+                platform: platform,
+                deviceId: pushHandle
+            };
+        
+            if (tags) {
+                Validate.isArray(tags, 'tags');
+                registration.tags = tags;
+            }
+        
+            return registration;
+        }
+    };
+
+    $__modules__.RegistrationManager = function (exports) {
+        // ----------------------------------------------------------------------------
+        // Copyright (c) Microsoft Corporation. All rights reserved.
+        // ----------------------------------------------------------------------------
+        
+        /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\base.js" />
+        /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\ui.js" />
+        /// <reference path="..\Generated\MobileServices.DevIntellisense.js" />
+        
+        // Declare JSHint globals
+        /*global WinJS:false */
+        
+        var _ = require('Extensions'),
+            Validate = require('Validate'),
+            Platform = require('Platform'),
+            LocalStorageManager = require('LocalStorageManager').LocalStorageManager,
+            PushHttpClient = require('PushHttpClient').PushHttpClient;
+        
+        function RegistrationManager(mobileServicesClient, platform, storageKey) {
+            Validate.notNull(mobileServicesClient, 'mobileServicesClient');
+        
+            this._platform = platform || 'wns';
+            this._pushHttpClient = new PushHttpClient(mobileServicesClient);
+            this._storageManager = new LocalStorageManager(storageKey || mobileServicesClient.applicationUrl);
+        }
+        
+        exports.RegistrationManager = RegistrationManager;
+        
+        RegistrationManager.NativeRegistrationName = LocalStorageManager.NativeRegistrationName;
+        
+        RegistrationManager.prototype.upsertRegistration = Platform.async(
+            function (registration, callback) {
+                Validate.notNull(registration, 'registration');
+                Validate.notNull(callback, 'callback');
+        
+                var self = this,
+                    expiredRegistration = function (callback) {
+                        createRegistration(function (error) {
+                            if (error) {
+                                callback(error);
+                                return;
+                            }
+        
+                            upsertRegistration(false, callback);
+                        });
+                    },
+                    upsertRegistration = function (retry, callback) {
+                        self._pushHttpClient.upsertRegistration(registration, function (error) {
+                            if (retry && error && error.request && error.request.status === 410) {
+                                expiredRegistration(callback);
+                                return;
+                            } else if (!error) {
+                                self._storageManager.pushHandle = registration.deviceId;                        
+                            }
+        
+                            callback(error);
+                        });
+                    },
+                    createRegistration = function (callback) {
+                        self._pushHttpClient.createRegistrationId(function (error, registrationId) {
+                            if (error) {
+                                callback(error);
+                                return;
+                            }
+        
+                            registration.registrationId = registrationId;
+        
+                            self._storageManager.updateRegistrationWithName(
+                                registration.templateName,
+                                registration.registrationId,
+                                registration.deviceId);
+        
+                            callback();
+                        });
+                    },
+                    firstRegistration = function (callback) {
+                        var name = registration.templateName || LocalStorageManager.NativeRegistrationName,
+                            cachedRegistrationId = self._storageManager.getRegistrationIdWithName(name);
+        
+                        registration.templateName = name;
+        
+                        if (!_.isNullOrEmpty(cachedRegistrationId)) {
+                            registration.registrationId = cachedRegistrationId;
+                            upsertRegistration(true, callback);
+                        } else {                
+                            createRegistration(function (error) {
+                                if (error) {
+                                    callback(error);
+                                    return;
+                                }
+                                upsertRegistration(true, callback);
+                            });
+                        }
+                    };
+        
+                if (this._storageManager.isRefreshNeeded) {
+                    // We want the existing handle to win (if present), and slowly update them to the new handle
+                    // So use cached value over the passed in value
+                    this._refreshRegistrations(this._storageManager.pushHandle || registration.deviceId, function (error) {
+                        if (error) {
+                            callback(error);
+                            return;
+                        }
+        
+                        firstRegistration(callback);
+                    });        
+                } else {
+                    firstRegistration(callback);
+                }
+            });
+        
+        RegistrationManager.prototype.deleteRegistrationWithName = Platform.async(
+            function (registrationName, callback) {
+                var cachedRegistrationId = this._storageManager.getRegistrationIdWithName(registrationName),
+                    self = this;
+        
+                if (_.isNullOrEmpty(cachedRegistrationId)) {
+                    callback();
+                    return;
+                }
+        
+                this._pushHttpClient.unregister(cachedRegistrationId, function (error) {
+                    if (!error) {
+                        self._storageManager.deleteRegistrationWithName(registrationName);
+                    }
+                    callback(error);
+                });
+            });
+        
+        RegistrationManager.prototype.deleteAllRegistrations = Platform.async(
+            function (pushHandle, callback) {
+                var self = this,
+                    currentHandle = this._storageManager.pushHandle,
+                    deleteRegistrations = function (error, deleteCallback) {
+                        if (error) {
+                            deleteCallback(error);
+                            return;
+                        }
+        
+                        var registrationIds = self._storageManager.getRegistrationIds(),
+                            remaining = registrationIds.length,
+                            errors = [];
+        
+                        if (remaining === 0) {
+                            self._storageManager.deleteAllRegistrations();
+                            deleteCallback();
+                            return;
+                        }
+        
+                        registrationIds.map(function (registrationId) {
+                            self._pushHttpClient.unregister(registrationId, function (error) {
+                                remaining--;
+        
+                                if (error) {
+                                    errors.push(error);
+                                }
+        
+                                if (remaining <= 0) {
+                                    if (errors.length === 0) {
+                                        self._storageManager.deleteAllRegistrations();
+                                        deleteCallback();
+                                    } else {
+                                        deleteCallback(_.createError('Failed to delete registrations for ' + pushHandle));
+                                    }
+                                }                
+                            });
+                        });
+                    };
+        
+                Validate.notNull(pushHandle, 'pushHandle');
+        
+                // Try to refresh with the local storage copy first, then if different use the requested one
+                this._refreshRegistrations(currentHandle || pushHandle, function (error) {
+                    if (_.isNullOrEmpty(currentHandle) || pushHandle === currentHandle) {
+                        deleteRegistrations(error, callback);
+                    } else {
+                        // Delete the current handle's registrations
+                        deleteRegistrations(error, function (error) {
+                            // Now delete the current handle's registrations as well
+                            // This requires the deleteAllRegistrations() call to clear the cached handle
+                            self._refreshRegistrations(pushHandle, function (error) {
+                                deleteRegistrations(error, callback);
+                            });
+                        });
+                    }
+                });
+            });
+        
+        
+        RegistrationManager.prototype.listRegistrations = Platform.async(
+            function (pushHandle, callback) {
+                /// <summary>
+                /// Retrives a list of all registrations from the server
+                /// </summary>
+        
+                Validate.notNullOrEmpty(pushHandle);
+        
+                this._pushHttpClient.listRegistrations(pushHandle, this._platform, callback);
+            });
+        
+        RegistrationManager.prototype._refreshRegistrations = function (pushHandle, callback) {
+            /// <summary>
+            /// Reloads all registrations for the pushHandle passed in
+            /// </summary>
+        
+            var self = this;
+        
+            Validate.notNull(pushHandle, 'pushHandle');
+            Validate.notNull(callback, 'callback');
+        
+            this._pushHttpClient.listRegistrations(pushHandle, this._platform, function (error, registrations) {
+                if (!error) {
+                    self._storageManager.updateAllRegistrations(registrations, pushHandle);
+                }
+        
+                callback(error);
+            });
+        };
+        
+    };
+
+    $__modules__.LocalStorageManager = function (exports) {
+        // ----------------------------------------------------------------------------
+        // Copyright (c) Microsoft Corporation. All rights reserved.
+        // ----------------------------------------------------------------------------
+        
+        /// <reference path='C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\base.js' />
+        /// <reference path='C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\ui.js' />
+        /// <reference path='..\Generated\MobileServices.DevIntellisense.js' />
+        
+        // Declare JSHint globals
+        /*global WinJS:false, Windows:false */
+        
+        var _ = require('Extensions'),
+            Validate = require('Validate'),
+            Platform = require('Platform'),
+            Constants = {
+                Version: 'v1.1.0',
+                Keys: {
+                    Version: 'Version',
+                    PushHandle: 'ChannelUri',
+                    Registrations: 'Registrations',
+                    NativeRegistration: '$Default'
+                },
+            };
+        
+        function LocalStorageManager(storageKey) {    
+            this._registrations = {};
+            this._storageKey = 'MobileServices.Push.' + storageKey;
+        
+            this._isRefreshNeeded = false;
+            Object.defineProperty(this, 'isRefreshNeeded', {
+                get: function () {
+                    /// <summary>
+                    /// Gets a value indicating whether local storage data needs to be refreshed.
+                    /// </summary>
+                    return this._isRefreshNeeded;
+                }
+            });
+        
+            this._pushHandle = null;
+            Object.defineProperty(this, 'pushHandle', {
+                get: function () {
+                    /// <summary>
+                    /// Gets the DeviceId of all registrations in the LocalStorageManager
+                    /// </summary>  
+                    return _.isNull(this._pushHandle) ? '' : this._pushHandle;
+                },
+                set: function (value) {
+                    Validate.notNullOrEmpty(value, 'pushHandle');
+        
+                    if (this._pushHandle !== value) {
+                        this._pushHandle = value;
+                        this._flushToSettings();
+                    }
+                }
+            });
+        
+            // Initialize our state
+            this._initializeRegistrationInfoFromStorage();
+        }
+        
+        exports.LocalStorageManager = LocalStorageManager;
+        
+        LocalStorageManager.NativeRegistrationName = Constants.Keys.NativeRegistration;
+        
+        LocalStorageManager.prototype.getRegistrationIds = function () {
+            /// <summary>
+            /// Gets an array of all registration Ids
+            /// </summary>
+            /// <returns>
+            /// An array of registration Ids in form of ['1','2','3']
+            /// </returns>
+            var result = [];
+            for (var name in this._registrations) {
+                if (this._registrations.hasOwnProperty(name)) {
+                    result.push(this._registrations[name]);
+                }
+            }
+            return result;
+        };
+        
+        LocalStorageManager.prototype.getRegistrationIdWithName = function (registrationName) {
+            /// <summary>
+            /// Get the registration Id from local storage
+            /// </summary>
+            /// <param name="registrationName">
+            /// The name of the registration mapping to search for
+            /// </param>
+            /// <returns>
+            /// The registration Id if it exists or null if it does not.
+            /// </returns>
+        
+            Validate.notNullOrEmpty(registrationName, 'registrationName');
+        
+            return this._registrations[registrationName];
+        };
+        
+        LocalStorageManager.prototype.updateAllRegistrations = function (registrations, pushHandle) {
+            /// <summary>
+            /// Replace all registrations and the pushHandle with those passed in.
+            /// </summary>
+            /// <param name="registrations">
+            /// An array of registrations to update.
+            /// </param>
+            /// <param name="pushHandle">
+            /// The pushHandle to update.
+            /// </param>
+        
+            Validate.notNull(pushHandle, 'pushHandle');
+            if (!registrations) {
+                registrations = [];
+            }
+            this._registrations = {};
+        
+            for (var i = 0; i < registrations.length; i++) {
+                var name = registrations[i].templateName;
+                if (_.isNullOrEmpty(name)) {
+                    name = Constants.Keys.NativeRegistration;
+                }
+                
+                /// All registrations passed to this method will have registrationId as they
+                /// come directly from notification hub where registrationId is the key field.
+                this._registrations[name] = registrations[i].registrationId;
+            }
+        
+            // Need to flush explictly as handle may not have changed
+            this._pushHandle = pushHandle;
+            this._flushToSettings();
+            this._isRefreshNeeded = false;
+        };
+        
+        LocalStorageManager.prototype.updateRegistrationWithName = function (registrationName, registrationId, pushHandle) {
+            /// <summary>
+            /// Update a registration mapping and the deviceId in local storage by registrationName
+            /// </summary>
+            /// <param name="registrationName">
+            /// The name of the registration mapping to update.
+            /// </param>
+            /// <param name="registrationId">
+            /// The registrationId to update.
+            /// </param>
+            /// <param name="registrationDeviceId">
+            /// The device Id to update the ILocalStorageManager to.
+            /// </param>
+        
+            Validate.notNullOrEmpty(registrationName, 'registrationName');
+            Validate.notNullOrEmpty(registrationId, 'registrationId');
+            Validate.notNullOrEmpty(pushHandle, 'pushHandle');
+        
+            // TODO: We could check if the Id or Name has actually changed
+            this._registrations[registrationName] = registrationId;
+        
+            this._pushHandle = pushHandle;
+            this._flushToSettings();
+        };
+        
+        LocalStorageManager.prototype.deleteRegistrationWithName = function (registrationName) {
+            /// <summary>
+            /// Delete a registration from local storage by name
+            /// </summary>
+            /// <param name="registrationName">
+            /// The name of the registration mapping to delete.
+            /// </param>
+        
+            Validate.notNullOrEmpty(registrationName, 'registrationName');
+        
+            if (this._registrations.hasOwnProperty(registrationName)) {
+                delete this._registrations[registrationName];
+                this._flushToSettings();
+            }
+        };
+        
+        LocalStorageManager.prototype.deleteAllRegistrations = function () {
+            /// <summary>
+            /// Clear all registrations from local storage.
+            /// </summary>
+            this._registrations = {};
+            this._flushToSettings();
+        };
+        
+        // Private methods
+        
+        LocalStorageManager.prototype._flushToSettings = function () {
+            /// <summary>
+            /// Writes all registrations to storage
+            /// </summary>
+        
+            var forStorage = {};
+            forStorage[Constants.Keys.Version] = Constants.Version;
+            forStorage[Constants.Keys.PushHandle] = this._pushHandle;
+            forStorage[Constants.Keys.Registrations] = this._registrations;
+        
+            Platform.writeSetting(this._storageKey, JSON.stringify(forStorage));
+        };
+        
+        LocalStorageManager.prototype._initializeRegistrationInfoFromStorage = function () {
+            /// <summary>
+            /// Populates registration information from storage
+            /// </summary>
+        
+            this._registrations = {};
+        
+            try {
+                // Read push handle
+                var data = JSON.parse(Platform.readSetting(this._storageKey));
+        
+                this._pushHandle = data[Constants.Keys.PushHandle];
+                if (!this._pushHandle) {
+                    this._isRefreshNeeded = true;
+                    return;
+                }
+        
+                // Verify this.storage version
+                var version = data[Constants.Keys.Version] || '';
+                this._isRefreshNeeded = (Constants.Version !== version.toLowerCase());
+                if (this._isRefreshNeeded) {
+                    return;
+                }
+        
+                // read registrations
+                this._registrations = data[Constants.Keys.Registrations];
+                
+            } catch (err) {
+                // It is possible that local storage is corrupted by users, bugs or other issues.
+                // If this occurs, force a full refresh.
+                this._isRefreshNeeded = true;
+            }
+        };
+    };
+
+    $__modules__.PushHttpClient = function (exports) {
+        // ----------------------------------------------------------------------------
+        // Copyright (c) Microsoft Corporation. All rights reserved.
+        // ----------------------------------------------------------------------------
+        
+        /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\base.js" />
+        /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\ui.js" />
+        /// <reference path="..\Generated\MobileServices.DevIntellisense.js" />
+        
+        var Platform = require('Platform'),
+            noCacheHeader = { 'If-Modified-Since': 'Mon, 27 Mar 1972 00:00:00 GMT' };
+        
+        function PushHttpClient(mobileServicesClient) {
+            this.mobileServicesClient = mobileServicesClient;
+        }
+        
+        exports.PushHttpClient = PushHttpClient;
+        
+        PushHttpClient.prototype.listRegistrations = function (pushHandle, platform, callback) {
+            this.mobileServicesClient._request(
+                'GET', 
+                '/push/registrations?platform=' + encodeURIComponent(platform) + '&deviceId=' + encodeURIComponent(pushHandle), 
+                null, 
+                null, 
+                noCacheHeader, 
+                function (error, request) {
+                    if (error) {
+                        callback(error);
+                    } else {
+                        callback(null, JSON.parse(request.responseText));
+                    }
+                });
+        };
+        
+        PushHttpClient.prototype.unregister = function (registrationId, callback) {
+            this.mobileServicesClient._request(
+                'DELETE', 
+                '/push/registrations/' + encodeURIComponent(registrationId), 
+                null, 
+                null, 
+                noCacheHeader, 
+                function (error) {
+                    if (error && error.request && error.request.status === 404) {
+                        callback();
+                        return;
+                    }
+                    callback(error);
+                });
+        };
+        
+        PushHttpClient.prototype.createRegistrationId = function (callback) {
+            this.mobileServicesClient._request(
+                'POST', 
+                '/push/registrationIds', 
+                null, 
+                null, 
+                noCacheHeader, 
+                function (error, request) {
+                    if (error) {
+                        callback(error);
+                        return;
+                    }
+        
+                    var locationHeader = request.getResponseHeader('Location');
+                    callback(null, locationHeader.slice(locationHeader.lastIndexOf('/') + 1));
+                });
+        };
+        
+        PushHttpClient.prototype.upsertRegistration = function (registration, callback) {
+            this.mobileServicesClient._request(
+                'PUT', 
+                '/push/registrations/' + encodeURIComponent(registration.registrationId), 
+                registration, 
+                null, 
+                noCacheHeader, 
+                callback);
+        };
+    };
+
     $__modules__.Platform = function (exports) {
         // ----------------------------------------------------------------------------
         // Copyright (c) Microsoft Corporation. All rights reserved.
@@ -1586,7 +2613,7 @@
         var inMemorySettingStore = {};
         
         try {
-            var key = '___z'
+            var key = '___z';
             localStorage.setItem(key, key);
             localStorage.removeItem(key);
             inMemorySettingStore = localStorage;
@@ -1655,6 +2682,8 @@
                 });
             };
         };
+        
+        exports.Promise = Promises;
         
         exports.addToMobileServicesClientNamespace = function (declarations) {
             /// <summary>
@@ -2135,7 +3164,7 @@
         // to install the plugin use the following command
         //   cordova plugin add org.apache.cordova.inappbrowser
         
-        var requiredCordovaVersion = { major: 3, minor: 5 };
+        var requiredCordovaVersion = { major: 3, minor: 0 };
         
         exports.supportsCurrentRuntime = function () {
             /// <summary>
@@ -2156,6 +3185,10 @@
             if (!isSupportedCordovaVersion(foundCordovaVersion)) {
                 var message = "Not a supported version of Cordova. Detected: " + foundCordovaVersion +
                             ". Required: " + requiredCordovaVersion.major + "." + requiredCordovaVersion.minor;
+                throw new Error(message);
+            }
+            if (!hasInAppBrowser) {
+                var message = 'A required plugin: "org.apache.cordova.inappbrowser" was not detected.';
                 throw new Error(message);
             }
         
@@ -2202,6 +3235,10 @@
                        (major === required.major && minor >= required.minor);
             }
             return false;
+        }
+        
+        function hasInAppBrowser() {
+            return !window.open;
         }
         
         function parseOAuthResultFromDoneUrl(url) {

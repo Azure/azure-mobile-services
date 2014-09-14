@@ -7,7 +7,7 @@
 // to install the plugin use the following command
 //   cordova plugin add org.apache.cordova.inappbrowser
 
-var requiredCordovaVersion = { major: 3, minor: 5 };
+var requiredCordovaVersion = { major: 3, minor: 0 };
 
 exports.supportsCurrentRuntime = function () {
     /// <summary>
@@ -28,6 +28,10 @@ exports.login = function (startUri, endUri, callback) {
     if (!isSupportedCordovaVersion(foundCordovaVersion)) {
         var message = "Not a supported version of Cordova. Detected: " + foundCordovaVersion +
                     ". Required: " + requiredCordovaVersion.major + "." + requiredCordovaVersion.minor;
+        throw new Error(message);
+    }
+    if (!hasInAppBrowser) {
+        var message = 'A required plugin: "org.apache.cordova.inappbrowser" was not detected.';
         throw new Error(message);
     }
 
@@ -74,6 +78,10 @@ function isSupportedCordovaVersion(version) {
                (major === required.major && minor >= required.minor);
     }
     return false;
+}
+
+function hasInAppBrowser() {
+    return !window.open;
 }
 
 function parseOAuthResultFromDoneUrl(url) {
