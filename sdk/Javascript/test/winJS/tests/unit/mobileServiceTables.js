@@ -1331,6 +1331,169 @@ $testGroup('MobileServiceTables.js',
         });
     }),
 
+    $test('Features - non-query - no features header if no query parameters')
+    .description('Verify that for insert / update / delete / lookup calls no features header is present if no query string parameters are passed')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.isNull(req.headers["X-ZUMO-FEATURES"]);
+            var response = { status: 200, getResponseHeader: function () { return 'application/json'; } };
+            response.responseText = JSON.stringify({ id: 'abc', title: 'test', price: 100 });
+            callback(null, response);
+        });
+
+        var table = client.getTable('books');
+
+        var testCases = [];
+        testCases.push(function () {
+            return table.insert({ title: 'test', price: 100 }).then(function () { }, function (err) {
+                $assert.fail("Should have succeeded");
+            });
+        });
+        testCases.push(function () {
+            return table.update({ id: 'abc', title: 'test', price: 100 }).then(function () { }, function (err) {
+                $assert.fail("Should have succeeded");
+            });
+        });
+        testCases.push(function () {
+            return table.del({ id: 'abc' }).then(function () { }, function (err) {
+                $assert.fail("Should have succeeded");
+            });
+        });
+        testCases.push(function () {
+            return table.lookup('abc').then(function () { }, function (err) {
+                $assert.fail("Should have succeeded");
+            });
+        });
+
+        return $chain.apply(null, testCases);
+    }),
+
+    $test('Features - non-query - QS features header query parameters are passed')
+    .description('Verify that for insert / update / delete / lookup calls with additional query parameters the features header is present')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.headers["X-ZUMO-FEATURES"], "QS");
+            var response = { status: 200, getResponseHeader: function () { return 'application/json'; } };
+            response.responseText = JSON.stringify({ id: 'abc', title: 'test', price: 100 });
+            callback(null, response);
+        });
+
+        var table = client.getTable('books');
+
+        var testCases = [];
+        testCases.push(function () {
+            return table.insert({ title: 'test', price: 100 }, { a: 'b' }).then(function () { }, function (err) {
+                $assert.fail("Should have succeeded");
+            });
+        });
+        testCases.push(function () {
+            return table.update({ id: 'abc', title: 'test', price: 100 }, { a: 'b' }).then(function () { }, function (err) {
+                $assert.fail("Should have succeeded");
+            });
+        });
+        testCases.push(function () {
+            return table.del({ id: 'abc' }, { a: 'b' }).then(function () { }, function (err) {
+                $assert.fail("Should have succeeded");
+            });
+        });
+        testCases.push(function () {
+            return table.lookup('abc', { a: 'b' }).then(function () { }, function (err) {
+                $assert.fail("Should have succeeded");
+            });
+        });
+
+        return $chain.apply(null, testCases);
+    }),
+
+    $test('Features - refresh')
+    .description('Verify the features headers for MobileTableService.refresh calls')
+    .checkAsync(function () {
+        var lastFeaturesHeader = '';
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            var response = { status: 200, getResponseHeader: function () { return 'application/json'; } };
+            lastFeaturesHeader = req.headers["X-ZUMO-FEATURES"];
+            response.responseText = JSON.stringify({ id: 'abc', features: lastFeaturesHeader });
+            callback(null, response);
+        });
+
+        var table = client.getTable('books');
+        var testCases = [];
+        testCases.push(function () {
+            var obj = { id: 'abc', features: '' };
+            return table.refresh(obj).then(function () {
+                $assert.areEqual("RF", lastFeaturesHeader);
+            }, function (err) {
+                $assert.fail("Should have succeeded");
+            });
+        });
+        testCases.push(function () {
+            var obj = { id: 'abc', features: '' };
+            return table.refresh(obj, { a: 'b' }).then(function () {
+                $assert.areEqual("RF,QS", lastFeaturesHeader);
+            }, function (err) {
+                $assert.fail("Should have succeeded");
+            });
+        });
+
+        return $chain.apply(null, testCases);
+    }),
+
+    $test('Features - read')
+    .description('Verify the features headers for MobileTableService.read calls')
+    .checkAsync(function () {
+        var lastFeaturesHeader = '';
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            var response = { status: 200, getResponseHeader: function () { return 'application/json'; } };
+            lastFeaturesHeader = req.headers["X-ZUMO-FEATURES"];
+            response.responseText = JSON.stringify([{ id: 'abc', features: lastFeaturesHeader }]);
+            callback(null, response);
+        });
+
+        var table = client.getTable('books');
+        var testCases = [];
+        testCases.push(function () {
+            return table.read("$filter=id%20eq%20'abc'").then(function (results) {
+                $assert.areEqual("TR", lastFeaturesHeader);
+            }, function (err) {
+                $assert.fail("Should have succeeded");
+            });
+        });
+        testCases.push(function () {
+            return table.where({ id: 'abc' }).read().then(function (results) {
+                $assert.areEqual("TQ", lastFeaturesHeader);
+            }, function (err) {
+                $assert.fail("Should have succeeded");
+            });
+        });
+        testCases.push(function () {
+            return table.take(1).read().then(function (results) {
+                $assert.areEqual("TQ", lastFeaturesHeader);
+            }, function (err) {
+                $assert.fail("Should have succeeded");
+            });
+        });
+        testCases.push(function () {
+            return table.select("id,features").read({ a: 'b' }).then(function (results) {
+                $assert.areEqual("TQ,QS", lastFeaturesHeader);
+            }, function (err) {
+                $assert.fail("Should have succeeded");
+            });
+        });
+        testCases.push(function () {
+            return table.read().then(function (results) {
+                $assert.isNull(lastFeaturesHeader);
+            }, function (err) {
+                $assert.fail("Should have succeeded");
+            });
+        });
+
+        return $chain.apply(null, testCases);
+    }),
+
     // Optimistic concurrency and system column tests
 
     $test('testInsertStringIdPropertiesNotRemovedFromRequest')

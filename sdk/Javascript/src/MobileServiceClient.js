@@ -16,6 +16,17 @@ try {
     Push = require('Push').Push;
 } catch(e) {}
 
+var _zumoFeatures = {
+    JsonApiCall: "AJ",               // Custom API call, where the request body is serialized as JSON
+    GenericApiCall: "AG",            // Custom API call, where the request body is sent 'as-is'
+    AdditionalQueryParameters: "QS", // Table or API call, where the caller passes additional query string parameters
+    OptimisticConcurrency: "OC",     // Table update / delete call, using Optimistic Concurrency (If-Match headers)
+    TableRefreshCall: "RF",          // Refresh table call
+    TableReadRaw: "TR",              // Table reads where the caller uses a raw query string to determine the items to be returned
+    TableReadQuery: "TQ",            // Table reads where the caller uses a function / query OM to determine the items to be returned
+};
+var _zumoFeaturesHeaderName = "X-ZUMO-FEATURES";
+
 function MobileServiceClient(applicationUrl, applicationKey) {
     /// <summary>
     /// Initializes a new instance of the MobileServiceClient class.
@@ -136,7 +147,7 @@ MobileServiceClient.prototype.withFilter = function (serviceFilter) {
     return client;
 };
 
-MobileServiceClient.prototype._request = function (method, uriFragment, content, ignoreFilters, headers, callback) {
+MobileServiceClient.prototype._request = function (method, uriFragment, content, ignoreFilters, headers, features, callback) {
     /// <summary>
     /// Perform a web request and include the standard Mobile Services headers.
     /// </summary>
@@ -157,11 +168,19 @@ MobileServiceClient.prototype._request = function (method, uriFragment, content,
     /// <param name="headers" type="Object">
     /// Optional request headers
     /// </param>
+    /// <param name="features" type="Array">
+    /// Codes for features which are used in this request, sent to the server for telemetry.
+    /// </param>
     /// <param name="callback" type="function(error, response)">
     /// Handler that will be called on the response.
     /// </param>
 
     // Account for absent optional arguments
+    if (_.isNull(callback) && (typeof features === 'function')) {
+        callback = features;
+        features = null;
+    }
+
     if (_.isNull(callback) && (typeof headers === 'function')) {
         callback = headers;
         headers = null;
@@ -204,6 +223,10 @@ MobileServiceClient.prototype._request = function (method, uriFragment, content,
     }
     if (!_.isNullOrEmpty["X-ZUMO-VERSION"]) {
         options.headers["X-ZUMO-VERSION"] = this.version;
+    }
+
+    if (_.isNull(options.headers[_zumoFeaturesHeaderName]) && features && features.length) {
+        options.headers[_zumoFeaturesHeaderName] = features.join(',');
     }
 
     // Add any content as JSON
@@ -331,6 +354,17 @@ MobileServiceClient.prototype.invokeApi = Platform.async(
             urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
         }
 
+        var features = [];
+        if (!_.isNullOrEmpty(body)) {
+            features.push(_.isString(body) ?
+                _zumoFeatures.GenericApiCall :
+                _zumoFeatures.JsonApiCall);
+        }
+
+        if (!_.isNull(parameters)) {
+            features.push(_zumoFeatures.AdditionalQueryParameters);
+        }
+
         // Make the request
         this._request(
             method,
@@ -338,6 +372,7 @@ MobileServiceClient.prototype.invokeApi = Platform.async(
             body,
             null,
             headers,
+            features,
             function (error, response) {
                 if (!_.isNull(error)) {
                     callback(error, null);
@@ -400,7 +435,6 @@ function getApplicationInstallationId() {
     return applicationInstallationId;
 }
 
-
 /// <summary>
 /// Get or set the static _applicationInstallationId by checking the settings
 /// and create the value if necessary.
@@ -412,4 +446,7 @@ MobileServiceClient._applicationInstallationId = getApplicationInstallationId();
 /// </summary>
 MobileServiceClient._userAgent = Platform.getUserAgent();
 
-
+/// <summary>
+/// The features that are sent to the server for telemetry.
+/// </summary>
+MobileServiceClient._zumoFeatures = _zumoFeatures;
