@@ -389,10 +389,10 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         internal virtual void CreateTableFromObject(string tableName, IEnumerable<ColumnDefinition> columns)
         {
             String tblSql = string.Format("CREATE TABLE IF NOT EXISTS {0} ({1} PRIMARY KEY)", SqlHelpers.FormatTableName(tableName), SqlHelpers.FormatMember(MobileServiceSystemColumns.Id));
-            this.ExecuteNonQuery(tblSql);
+            this.ExecuteNonQuery(tblSql, parameters: null);
 
             string infoSql = string.Format("PRAGMA table_info({0});", SqlHelpers.FormatTableName(tableName));
-            IDictionary<string, JObject> existingColumns = this.ExecuteQuery((TableDefinition)null, infoSql)
+            IDictionary<string, JObject> existingColumns = this.ExecuteQuery((TableDefinition)null, infoSql, parameters: null)
                                                                .ToDictionary(c => c.Value<string>("name"), StringComparer.OrdinalIgnoreCase);
 
             // new columns that do not exist in existing columns
@@ -404,13 +404,18 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                                                  SqlHelpers.FormatTableName(tableName),
                                                  SqlHelpers.FormatMember(column.Property.Name),
                                                  column.SqlType);
-                this.ExecuteNonQuery(createSql);
+                this.ExecuteNonQuery(createSql, parameters: null);
             }
 
             // NOTE: In SQLite you cannot drop columns, only add them.
         }
 
-        private void ExecuteNonQuery(string sql, IDictionary<string, object> parameters = null)
+        /// <summary>
+        /// Executes a sql statement on a given table in local SQLite database.
+        /// </summary>
+        /// <param name="tableName">The name of the table.</param>
+        /// <param name="parameters">The query parameters.</param>
+        protected void ExecuteNonQuery(string sql, IDictionary<string, object> parameters)
         {
             parameters = parameters ?? new Dictionary<string, object>();
 
@@ -427,13 +432,20 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             }
         }
 
-        private IList<JObject> ExecuteQuery(string tableName, string sql, IDictionary<string, object> parameters = null)
+        /// <summary>
+        /// Executes a sql statement on a given table in local SQLite database.
+        /// </summary>
+        /// <param name="tableName">The name of the table.</param>
+        /// <param name="sql">The SQL query to execute.</param>
+        /// <param name="parameters">The query parameters.</param>
+        /// <returns>The result of query.</returns>
+        protected IList<JObject> ExecuteQuery(string tableName, string sql, IDictionary<string, object> parameters)
         {
             TableDefinition table = GetTable(tableName);
             return this.ExecuteQuery(table, sql, parameters);
         }
 
-        private IList<JObject> ExecuteQuery(TableDefinition table, string sql, IDictionary<string, object> parameters = null)
+        private IList<JObject> ExecuteQuery(TableDefinition table, string sql, IDictionary<string, object> parameters)
         {
             table = table ?? new TableDefinition();
             parameters = parameters ?? new Dictionary<string, object>();
