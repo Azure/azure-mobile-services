@@ -611,7 +611,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             await table.PullAsync(null, query, cancellationToken: CancellationToken.None);
             Assert.AreEqual(hijack.Requests.Count, 2);
-            Assert.AreEqual(hijack.Requests[0].RequestUri.Query, "?$filter=(String%20eq%20'world')&$orderby=String%20desc,id&$skip=5&$top=3&param1=val1&__includeDeleted=true&__systemproperties=__version%2C__deleted");
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.Query, "?$filter=(String%20eq%20'world')&$orderby=String%20desc,id&$skip=5&$top=3&param1=val1&__includeDeleted=true&__systemproperties=__version%2C__deleted");
         }
 
         [AsyncTestMethod]

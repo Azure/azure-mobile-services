@@ -37,6 +37,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             return thrown;
         }
 
+        public static void QueryEquals(string query1, string query2)
+        {
+            Assert.AreEqual(Uri.UnescapeDataString(query1), Uri.UnescapeDataString(query2));
+        }
+
         public static void MatchUris(List<HttpRequestMessage> requests, params string[] uris)
         {
             Assert.AreEqual(requests.Count, uris.Length);
