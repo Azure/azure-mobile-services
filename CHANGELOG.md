@@ -5,6 +5,14 @@
 - Added support for following link headers returned from the .NET backend
 - **[Breaking]** Changed MSReadQueryBlock to return MSQueryResult instead of items and totalCount
 
+### Version 1.3 beta2
+**Managed SDK**
+- Updated Nuget references
+- Request __deleted system property for sync
+- Default delta token set to 1970-01-01 for compatibility with Table Storage 
+- Expose protected methods from the MobileServiceSQLiteStore for intercepting sql
+- **[Breaking]** Expose a ReadOnlyCollection instead of IEnumerable from MobileServiceTableOperationError
+
 ### Version 1.3 beta
 **Managed SDK**
 - Added support for incremental sync for .NET backend
