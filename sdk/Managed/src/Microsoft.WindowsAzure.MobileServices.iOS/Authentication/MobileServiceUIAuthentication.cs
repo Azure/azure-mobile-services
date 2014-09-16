@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Threading.Tasks;
 using MonoTouch.Foundation;
 using MonoTouch.UIKit;
-using Xamarin.Auth;
+using Xamarin.Auth._MobileServices;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
