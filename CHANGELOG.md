@@ -1,9 +1,4 @@
 # Microsoft Azure Mobile Services Change Log
-
-### Version 1.2.5
-**Managed SDK**
-- Updated to use a modified build of Xamarin.Auth that will not conflict with any user-included version of Xamarin.Auth
-
 ### Version 1.2.4
 **Managed SDK**
 - Added support for following link headers returned from the .NET backend
