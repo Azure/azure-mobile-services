@@ -2,6 +2,8 @@
 ### Version 1.2.5
 **Managed SDK**
 - Updated to use a modified build of Xamarin.Auth that will not conflict with any user-included version of Xamarin.Auth
+**Javascript SDK**
+- Added support for sending provider specific query string parameters in login using new loginWithOptions method
 
 ### Version 1.2.4
 **Managed SDK**
