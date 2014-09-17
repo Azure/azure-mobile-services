@@ -71,8 +71,8 @@ $testGroup('MobileServiceClient.js',
         });
     }),
     
-    $test('login')
-    .description('Verify login mechanics')
+    $test('login - Verify login mechanics')
+    .tag('login')
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
         client = client.withFilter(function (req, next, callback) {
@@ -88,6 +88,57 @@ $testGroup('MobileServiceClient.js',
             $assert.areEqual(client.currentUser.userId, 'bob');
             $assert.areEqual(client.currentUser.mobileServiceAuthenticationToken, 'zumo');            
         });
+    }),
+
+    $test('loginWithOptions_token')
+    .tag('login')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.type, 'POST');
+            $assert.contains(req.url, "login");
+            $assert.areEqual(req.data, '{"authenticationToken":"token.a.b"}');
+            callback(null, { status: 200, responseText: '{"authenticationToken":"zumo","user":{"userId":"bob"}}' });
+        });
+
+        client._login.ignoreFilters = false;
+
+        return client.loginWithOptions('token.a.b').then(function (currentUser) {
+            $assert.areEqual(client.currentUser.userId, 'bob');
+            $assert.areEqual(client.currentUser.mobileServiceAuthenticationToken, 'zumo');
+        });
+    }),
+
+    $test('loginWithOptions_provider_parameters')
+    .tag('login')
+    .checkAsync(function () {
+        return testLoginParameters(['facebook', { parameters: {display: 'popup' }}],
+                                  "http://www.test.com/login/facebook?display=popup",
+                                  "http://www.test.com/login/done");
+    }),
+
+    $test('loginWithOptions_provider_singlesignon_parameters')
+    .tag('login')
+    .checkAsync(function () {
+        return testLoginParameters(['facebook', { useSingleSignOn: true, parameters: { display: 'popup' } }],
+                                  "http://www.test.com/login/facebook?display=popup",
+                                  null);
+    }),
+
+    $test('loginWithOptions_provider_singlesignon')
+    .tag('login')
+    .checkAsync(function () {
+        return testLoginParameters(['facebook', { useSingleSignOn: true }],
+                                  "http://www.test.com/login/facebook",
+                                  null);
+    }),
+
+    $test('loginWithOptions_provider')
+    .tag('login')
+    .checkAsync(function () {
+        return testLoginParameters(['facebook'],
+                                  "http://www.test.com/login/facebook",
+                                  "http://www.test.com/login/done");
     }),
 
     $test('logout')
@@ -379,3 +430,26 @@ $testGroup('MobileServiceClient.js',
         });
     })
 );
+
+function testLoginParameters(args, expectedStartUri, expectedEndUri) {
+    var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+
+    var _login = Platform.login;
+    Platform.login = function (startUri, endUri, callback) {
+        Platform.login = _login;
+
+        $assert.areEqual(startUri, expectedStartUri);
+        $assert.areEqual(endUri, expectedEndUri);
+        callback(null, {
+            authenticationToken: "zumo",
+            user: {
+                "userId": "bob"
+            }
+        });
+    }
+
+    return client.loginWithOptions.apply(client, args).then(function (currentUser) {
+        $assert.areEqual(client.currentUser.userId, 'bob');
+        $assert.areEqual(client.currentUser.mobileServiceAuthenticationToken, 'zumo');
+    });
+}
