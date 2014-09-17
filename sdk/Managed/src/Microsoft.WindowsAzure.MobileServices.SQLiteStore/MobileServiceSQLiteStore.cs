@@ -415,7 +415,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         /// </summary>
         /// <param name="tableName">The name of the table.</param>
         /// <param name="parameters">The query parameters.</param>
-        protected void ExecuteNonQuery(string sql, IDictionary<string, object> parameters)
+        protected virtual void ExecuteNonQuery(string sql, IDictionary<string, object> parameters)
         {
             parameters = parameters ?? new Dictionary<string, object>();
 
@@ -439,7 +439,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         /// <param name="sql">The SQL query to execute.</param>
         /// <param name="parameters">The query parameters.</param>
         /// <returns>The result of query.</returns>
-        protected IList<JObject> ExecuteQuery(string tableName, string sql, IDictionary<string, object> parameters)
+        protected virtual IList<JObject> ExecuteQuery(string tableName, string sql, IDictionary<string, object> parameters)
         {
             TableDefinition table = GetTable(tableName);
             return this.ExecuteQuery(table, sql, parameters);
