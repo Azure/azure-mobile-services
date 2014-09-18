@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Threading.Tasks;
-using UIKit;
+using MonoTouch.UIKit;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {

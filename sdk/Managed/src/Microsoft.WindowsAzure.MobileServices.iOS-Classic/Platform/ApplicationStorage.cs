@@ -1,6 +1,6 @@
 ﻿using System;
 
-using Foundation;
+using MonoTouch.Foundation;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
