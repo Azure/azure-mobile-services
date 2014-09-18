@@ -266,6 +266,33 @@ MobileServiceClient.prototype._request = function (method, uriFragment, content,
     }
 };
 
+MobileServiceClient.prototype.loginWithOptions = Platform.async(
+     function (provider, options, callback) {
+         /// <summary>
+         /// Log a user into a Mobile Services application given a provider name with
+         /// given options.
+         /// </summary>
+         /// <param name="provider" type="String" mayBeNull="false">
+         /// Name of the authentication provider to use; one of 'facebook', 'twitter', 'google', 
+         /// 'windowsazureactivedirectory' (can also use 'aad')
+         /// or 'microsoftaccount'.
+         /// </param>
+         /// <param name="options" type="Object" mayBeNull="true">
+         /// Contains additional parameter information, valid values are:
+         ///    token: provider specific object with existing OAuth token to log in with
+         ///    useSingleSignOn: Only applies to Windows 8 clients.  Will be ignored on other platforms.
+         /// Indicates if single sign-on should be used. Single sign-on requires that the 
+         /// application's Package SID be registered with the Microsoft Azure Mobile Service, 
+         /// but it provides a better experience as HTTP cookies are supported so that users 
+         /// do not have to login in everytime the application is launched.
+         ///    parameters: Any additional provider specific query string parameters.
+         /// </param>
+         /// <param name="callback" type="Function" mayBeNull="true">
+         /// Optional callback accepting (error, user) parameters.
+         /// </param>
+         this._login.loginWithOptions(provider, options, callback);
+});
+
 MobileServiceClient.prototype.login = Platform.async(
     function (provider, token, useSingleSignOn, callback) {
         /// <summary>

@@ -6,8 +6,10 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using Microsoft.WindowsAzure.MobileServices.Test;
@@ -25,11 +27,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         /// </summary>
         public static TestHarness Harness { get; private set; }
 
+
         /// <summary>
         /// Initialize the test harness.
         /// </summary>
         static App()
         {
+            ConsoleHelper.Attach();
+
             Harness = new TestHarness();
             Harness.LoadTestAssembly(typeof(MobileServiceSerializerTests).GetTypeInfo().Assembly);
         }

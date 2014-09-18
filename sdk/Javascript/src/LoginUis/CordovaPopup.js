@@ -3,9 +3,11 @@
 // ----------------------------------------------------------------------------
 
 // Note: Cordova is PhoneGap.
-// This login UI implementation uses the InAppBrowser plugin which is built into Cordova 2.3.0+.
+// This login UI implementation uses the InAppBrowser plugin,
+// to install the plugin use the following command
+//   cordova plugin add org.apache.cordova.inappbrowser
 
-var requiredCordovaVersion = { major: 2, minor: 3 };
+var requiredCordovaVersion = { major: 3, minor: 5 };
 
 exports.supportsCurrentRuntime = function () {
     /// <summary>
@@ -57,9 +59,9 @@ exports.login = function (startUri, endUri, callback) {
 };
 
 function currentCordovaVersion() {
-    // If running inside Cordova, returns a string similar to "2.3.0". Otherwise, returns a falsey value.
+    // If running inside Cordova, returns a string similar to "3.5.0". Otherwise, returns a falsey value.
     // Note: We can only detect Cordova after its deviceready event has fired, so don't call login until then.
-    return window.device && window.device.cordova;
+    return window.cordova && window.cordova.version;
 }
 
 function isSupportedCordovaVersion(version) {
