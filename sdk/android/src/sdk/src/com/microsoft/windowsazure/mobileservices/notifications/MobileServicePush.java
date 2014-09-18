@@ -520,6 +520,19 @@ public class MobileServicePush {
 		public int size;
 	}
 
+	private ListenableFuture<Void> refreshRegistrationInformationIfNeeded(String pnsHandle) {
+
+		final SettableFuture<Void> resultFuture = SettableFuture.create();
+
+		if (!mIsRefreshNeeded) {
+			resultFuture.set(null);
+
+			return resultFuture;
+		}
+		
+		return refreshRegistrationInformation(pnsHandle);
+	}
+	
 	private ListenableFuture<Void> refreshRegistrationInformation(String pnsHandle) {
 
 		final SettableFuture<Void> resultFuture = SettableFuture.create();
@@ -632,33 +645,39 @@ public class MobileServicePush {
 
 		final SettableFuture<String> resultFuture = SettableFuture.create();
 
-		if (mIsRefreshNeeded) {
-			String pNSHandle = mSharedPreferences.getString(STORAGE_PREFIX + PNS_HANDLE_KEY, "");
+		String pNSHandle = mSharedPreferences.getString(STORAGE_PREFIX + PNS_HANDLE_KEY, "");
 
-			if (isNullOrWhiteSpace(pNSHandle)) {
-				pNSHandle = registration.getPNSHandle();
+		if (isNullOrWhiteSpace(pNSHandle)) {
+			pNSHandle = registration.getPNSHandle();
+		}
+
+		ListenableFuture<Void> refreshRegistrationInformationIfNeededFuture = refreshRegistrationInformationIfNeeded(pNSHandle);
+
+		Futures.addCallback(refreshRegistrationInformationIfNeededFuture, new FutureCallback<Void>() {
+
+			@Override
+			public void onFailure(Throwable exception) {
+				resultFuture.setException(exception);
 			}
 
-			ListenableFuture<Void> refreshRegistrationInformationFuture = refreshRegistrationInformation(pNSHandle);
+			@Override
+			public void onSuccess(Void v) {
 
-			Futures.addCallback(refreshRegistrationInformationFuture, new FutureCallback<Void>() {
+				Futures.addCallback(createRegistrationId(registration), new FutureCallback<String>() {
+					@Override
+					public void onFailure(Throwable exception) {
+						resultFuture.setException(exception);
+					}
 
-				@Override
-				public void onFailure(Throwable exception) {
-					resultFuture.setException(exception);
-				}
+					@Override
+					public void onSuccess(String registrationId) {
+						resultFuture.set(registrationId);
+					}
+				});
+			}
+		});
 
-				@Override
-				public void onSuccess(Void v) {
-					resultFuture.set(registration.getRegistrationId());
-				}
-			});
-
-			return resultFuture;
-
-		} else {
-			return createRegistrationId(registration);
-		}
+		return resultFuture;
 	}
 
 	private ListenableFuture<String> createRegistrationId(final Registration registration) {
