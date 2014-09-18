@@ -40,5 +40,5 @@ PushHttpClient.prototype.createOrUpdateRegistration = function (registration) {
 
 PushHttpClient.prototype._request = Platform.async(
     function (method, uriFragment, content, ignoreFilters, headers, callback) {
-        this.mobileServicesClient._request(method, uriFragment, content, ignoreFilters, headers, callback);
+        this.mobileServicesClient._request(method, uriFragment, content, ignoreFilters, headers, null, callback);
     });
