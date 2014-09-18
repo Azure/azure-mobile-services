@@ -80,6 +80,7 @@ public class EnhancedPushTests extends TestGroup {
 
 	private void unregister(TestCase test, MobileServicePush hub) throws InterruptedException, ExecutionException {
 		test.log("Unregister Native");
+		
 		hub.unregister().get();
 	}
 
@@ -113,9 +114,10 @@ public class EnhancedPushTests extends TestGroup {
 
 	private void unregisterAll(TestCase test, MobileServicePush hub, String gcmId) throws InterruptedException, ExecutionException {
 		test.log("Unregister Native");
+		
 		hub.unregisterAll(gcmId).get();
 	}
-
+	
 	public static void clearNotificationHubStorageData() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.getInstance());
 		Editor editor = sharedPreferences.edit();
@@ -1101,6 +1103,77 @@ public class EnhancedPushTests extends TestGroup {
 		return register;
 	}
 
+	private TestCase createNativePushTestWithRefresh(String testName, final String tag, String jsonPayload) {
+		final JsonElement orginalPayload = new JsonParser().parse(jsonPayload);
+
+		JsonObject newPayload;
+		if (orginalPayload.isJsonObject()) {
+			newPayload = orginalPayload.getAsJsonObject();
+		} else {
+			newPayload = new JsonObject();
+			newPayload.add("message", orginalPayload);
+		}
+
+		final JsonObject payload = newPayload;
+
+		TestCase result = new TestCase(testName) {
+
+			@Override
+			protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
+
+				try {
+
+					final MobileServicePush mobileServicePush = client.getPush();
+					String[] tags = tag != null ? new String[] { tag } : null;
+					
+					unregisterAll(this, mobileServicePush, registrationId);
+
+					removeStorageVersion();
+					
+					MobileServiceClient client2 = new MobileServiceClient(client);
+
+					final MobileServicePush mobileServicePush2 = client2.getPush();
+					
+					register(this, mobileServicePush2, registrationId, tags);
+
+					GCMMessageManager.instance.clearPushMessages();
+					MobileServiceJsonTable table = client.getTable(tableName);
+					JsonObject item = new JsonObject();
+					item.addProperty("method", "send");
+					item.addProperty("tag", tag);
+					JsonObject sentPayload = new JsonObject();
+					sentPayload.add("data", payload);
+					item.add("payload", sentPayload);
+					item.addProperty("usingNH", true);
+
+					JsonObject jsonObject = table.insert(item).get();
+
+					this.log("OnCompleted: " + jsonObject.toString());
+					TestExecutionCallback nativeUnregisterTestExecutionCallback = getNativeUnregisterTestExecutionCallback(client, tag, payload, callback);
+					GCMMessageManager.instance.waitForPushMessage(5000, GCMMessageHelper.getPushCallback(this, payload, nativeUnregisterTestExecutionCallback));
+
+				} catch (Exception e) {
+					callback.onTestComplete(this, createResultFromException(e));
+					return;
+				}
+			}
+		};
+
+		result.setName(testName);
+
+		return result;
+	}
+
+	private void removeStorageVersion() {
+
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.getInstance());
+		
+		Editor editor = sharedPreferences.edit();
+		editor.remove("__NH_STORAGE_VERSION");
+		
+		editor.commit();
+	}
+	
 	public EnhancedPushTests() {
 		super("Enhanced Push tests");
 
@@ -1109,8 +1182,11 @@ public class EnhancedPushTests extends TestGroup {
 		this.addTest(createGCMRegisterTest());
 
 		String json = "'Notification Hub test notification'".replace('\'', '\"');
+		this.addTest(createNativePushTestWithRefresh("Native Notification Roundtrip - Simple payload - With Refresh", "tag1", json));
+		
+		json = "'Notification Hub test notification'".replace('\'', '\"');
 		this.addTest(createNativePushTest("Native Notification Roundtrip - Simple payload", "tag1", json));
-
+		
 		json = "{'name':'John Doe','age':'33'}".replace('\'', '\"');
 		this.addTest(createNativePushTest("Native Notification Roundtrip - Complex payload", "tag2", json));
 
