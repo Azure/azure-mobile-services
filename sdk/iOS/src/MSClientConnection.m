@@ -24,7 +24,7 @@ static NSString *const xZumoInstallId = @"X-ZUMO-INSTALLATION-ID";
 
 
 // The |MSConnectionDelegate| is a private class that implements the
-// |NSURLConnectionDataDelegate| and surfaces success and error blocks. It
+// |NSURLSessionDataDelegate| and surfaces success and error blocks. It
 // is used only by the |MSClientConnection|.
 @interface MSConnectionDelegate : NSObject <NSURLSessionDataDelegate>
 		
@@ -177,7 +177,7 @@ static NSOperationQueue *delegateQueue;
         } else {
             dispatch_async(dispatch_get_main_queue(), ^{
         
-                // No filters to invoke so use |NSURLConnection | to actually
+                // No filters to invoke so use |NSURLSessionDataTask | to actually
                 // send the request.
                 MSConnectionDelegate *delegate = [[MSConnectionDelegate alloc]
                                                   initWithClient:client
