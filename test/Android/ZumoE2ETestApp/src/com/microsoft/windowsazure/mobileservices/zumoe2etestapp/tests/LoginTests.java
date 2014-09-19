@@ -27,6 +27,7 @@ import java.util.Random;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.UserAuthenticationCallback;
 import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceAuthenticationProvider;
@@ -44,9 +45,9 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
 public class LoginTests extends TestGroup {
 
-	protected static final String APPLICATION_PERMISSION_TABLE_NAME = "droidApplication";
-	protected static final String USER_PERMISSION_TABLE_NAME = "droidAuthenticated";
-	protected static final String ADMIN_PERMISSION_TABLE_NAME = "droidAdmin";
+	protected static final String APPLICATION_PERMISSION_TABLE_NAME = "application";
+	protected static final String USER_PERMISSION_TABLE_NAME = "authenticated";
+	protected static final String ADMIN_PERMISSION_TABLE_NAME = "admin";
 
 	private static JsonObject lastUserIdentityObject;
 
@@ -131,7 +132,8 @@ public class LoginTests extends TestGroup {
 
 				JsonObject lastIdentity = lastUserIdentityObject;
 				lastUserIdentityObject = null;
-				JsonObject providerIdentity = lastIdentity.getAsJsonObject("Identities").getAsJsonObject(provider.toString().toLowerCase(Locale.US));
+				JsonObject providerIdentity = new JsonParser().parse(lastIdentity.get("Identities").getAsString()).getAsJsonObject()
+						.getAsJsonObject(provider.toString().toLowerCase(Locale.US));
 				if (providerIdentity == null) {
 					log("Cannot find identity for specified provider. Cannot run this test.");
 					TestResult testResult = new TestResult();
@@ -599,7 +601,7 @@ public class LoginTests extends TestGroup {
 										}
 
 										if (userIsAuthenticated && tableType == TablePermission.User) {
-											lastUserIdentityObject = jsonEntity.getAsJsonObject("Identities");
+											lastUserIdentityObject = new JsonParser().parse(jsonEntity.get("Identities").getAsString()).getAsJsonObject();
 										}
 
 										log("delete item");
