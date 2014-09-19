@@ -26,11 +26,10 @@ static NSString *const xZumoInstallId = @"X-ZUMO-INSTALLATION-ID";
 // The |MSConnectionDelegate| is a private class that implements the
 // |NSURLConnectionDataDelegate| and surfaces success and error blocks. It
 // is used only by the |MSClientConnection|.
-@interface MSConnectionDelegate : NSObject <NSURLConnectionDataDelegate>
+@interface MSConnectionDelegate : NSObject <NSURLSessionDataDelegate>
 		
 @property (nonatomic, strong)               MSClient *client;
 @property (nonatomic, strong)               NSData *data;
-@property (nonatomic, strong)               NSHTTPURLResponse *response;
 @property (nonatomic, copy)                 MSResponseBlock completion;
 
 -(id) initWithClient:(MSClient *)client
@@ -50,6 +49,15 @@ static NSOperationQueue *delegateQueue;
 @synthesize request = request_;
 @synthesize completion = completion_;
 
++(NSURLSession *)sessionWithDelegate:(id<NSURLSessionDelegate>)delegate delegateQueue:(NSOperationQueue *)queue
+{
+	NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
+	
+	NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration
+											 delegate:delegate
+										delegateQueue:queue];
+	return session;
+}
 
 # pragma mark * Public Initializer Methods
 
@@ -162,9 +170,10 @@ static NSOperationQueue *delegateQueue;
             MSConnectionDelegate *delegate = [[MSConnectionDelegate alloc]
                                               initWithClient:client
                                               completion:completion];
-            NSURLConnection *connection = [[NSURLConnection alloc] initWithRequest:request delegate:delegate startImmediately:NO];
-            [connection setDelegateQueue:client.connectionDelegateQueue];
-            [connection start];
+			
+			NSURLSession *session = [self sessionWithDelegate:delegate delegateQueue:client.connectionDelegateQueue];
+			NSURLSessionDataTask *task = [session dataTaskWithRequest:request];
+			[task resume];
         } else {
             dispatch_async(dispatch_get_main_queue(), ^{
         
@@ -173,8 +182,10 @@ static NSOperationQueue *delegateQueue;
                 MSConnectionDelegate *delegate = [[MSConnectionDelegate alloc]
                                                   initWithClient:client
                                                       completion:completion];
-        
-                [NSURLConnection connectionWithRequest:request delegate:delegate];
+				
+				NSURLSession *session = [self sessionWithDelegate:delegate delegateQueue:[NSOperationQueue mainQueue]];
+				NSURLSessionDataTask *task = [session dataTaskWithRequest:request];
+				[task resume];
             });
         }
     }
@@ -263,7 +274,6 @@ static NSOperationQueue *delegateQueue;
 @synthesize client = client_;
 @synthesize completion = completion_;
 @synthesize data = data_;
-@synthesize response = response_;
 
 
 # pragma mark * Public Initializer Methods
@@ -281,85 +291,58 @@ static NSOperationQueue *delegateQueue;
     return self;
 }
 
+# pragma mark * NSURLSessionDataDelegate Methods
 
-# pragma mark * NSURLConnectionDelegate Methods
-
-
--(void) connection:(NSURLConnection *)connection
-  didFailWithError:(NSError *)error
+-(void)URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask willCacheResponse:(NSCachedURLResponse *)proposedResponse completionHandler:(void (^)(NSCachedURLResponse *cachedResponse))completionHandler
 {
-    if (self.completion) {
-        self.completion(nil, nil, error);
-        [self cleanup];
-    }
+	// We don't want to cache anything
+	completionHandler(nil);
 }
 
-
-# pragma mark * NSURLConnectionDataDelegate Methods
-
-
--(void) connection:(NSURLConnection *)connection
-didReceiveResponse:(NSURLResponse *)response
+-(void)URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask didReceiveData:(NSData *)data
 {
-    // We should only be making HTTP requests
-    self.response = (NSHTTPURLResponse *)response;
+	// If we haven't received any data before, just take this data instance
+	if (!self.data) {
+		self.data = data;
+	}
+	else {
+		
+		// Otherwise, append this data to what we have
+		NSMutableData *newData = [NSMutableData dataWithData:self.data];
+		[newData appendData:data];
+		self.data = newData;
+	}
 }
 
--(void)connection: (NSURLConnection *)connection
-    didReceiveData:(NSData *)data
+-(void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task willPerformHTTPRedirection:(NSHTTPURLResponse *)response newRequest:(NSURLRequest *)request completionHandler:(void (^)(NSURLRequest *))completionHandler
 {
-    // If we haven't received any data before, just take this data instance
-    if (!self.data) {
-        self.data = data;
-    }
-    else {
-        
-        // Otherwise, append this data to what we have
-        NSMutableData *newData = [NSMutableData dataWithData:self.data];
-        [newData appendData:data];
-        self.data = newData;
-    }
+	NSURLRequest *newRequest = nil;
+	
+	// Only follow redirects to the Microsoft Azure Mobile Service and not
+	// to other hosts
+	NSString *requestHost = request.URL.host;
+	NSString *applicationHost = self.client.applicationURL.host;
+	if ([applicationHost isEqualToString:requestHost])
+	{
+		newRequest = request;
+	}
+	
+	completionHandler(newRequest);
 }
 
--(NSCachedURLResponse *) connection:(NSURLConnection *)connection
-                  willCacheResponse:(NSCachedURLResponse *)cachedResponse
+-(void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error
 {
-    // We don't want to cache anything
-    return nil;
-}
-
--(NSURLRequest *) connection:(NSURLConnection *)connection
-             willSendRequest:(NSURLRequest *)request
-            redirectResponse:(NSURLResponse *)response
-{
-    NSURLRequest *newRequest = nil;
-    
-    // Only follow redirects to the Microsoft Azure Mobile Service and not
-    // to other hosts
-    NSString *requestHost = request.URL.host;
-    NSString *applicationHost = self.client.applicationURL.host;
-    if ([applicationHost isEqualToString:requestHost])
-    {
-        newRequest = request;
-    }
-    
-    return newRequest;
-}
-
--(void) connectionDidFinishLoading:(NSURLConnection *)connection
-{
-    if (self.completion) {
-        self.completion(self.response, self.data, nil);
-        [self cleanup];
-    }
+	if (self.completion) {
+		self.completion((NSHTTPURLResponse *)task.response, self.data, error);
+		[self cleanup];
+	}
 }
 
 -(void) cleanup
 {
-    self.client = nil;
-    self.data = nil;
-    self.response = nil;
-    self.completion = nil;
+	self.client = nil;
+	self.data = nil;
+	self.completion = nil;
 }
 
 @end
