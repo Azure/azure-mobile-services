@@ -22,7 +22,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		7929542819B7C793006A3829 /* MSQueryResult.h in Headers */ = {isa = PBXBuildFile; fileRef = 7929542619B7C793006A3829 /* MSQueryResult.h */; };
+		7929542819B7C793006A3829 /* MSQueryResult.h in Headers */ = {isa = PBXBuildFile; fileRef = 7929542619B7C793006A3829 /* MSQueryResult.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		7929542919B7C793006A3829 /* MSQueryResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 7929542719B7C793006A3829 /* MSQueryResult.m */; };
 		7929542A19B7C793006A3829 /* MSQueryResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 7929542719B7C793006A3829 /* MSQueryResult.m */; };
 		870C0C9C199C246700A134DD /* MSSDKFeatures.h in Headers */ = {isa = PBXBuildFile; fileRef = 870C0C9A199C246700A134DD /* MSSDKFeatures.h */; };
@@ -612,6 +612,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7929542819B7C793006A3829 /* MSQueryResult.h in Headers */,
 				E8E3790D161F769D00C13F00 /* WindowsAzureMobileServices.h in Headers */,
 				E84CA4E116272C15009B2588 /* MSLoginController.h in Headers */,
 				E8E3790E161F769D00C13F00 /* MSClient.h in Headers */,
@@ -622,7 +623,6 @@
 				A258890F18A19D0B00962F9A /* MSTableOperation.h in Headers */,
 				A258891618A19D0B00962F9A /* MSSyncTable.h in Headers */,
 				E8E37912161F769D00C13F00 /* MSUser.h in Headers */,
-				7929542819B7C793006A3829 /* MSQueryResult.h in Headers */,
 				A258891418A19D0B00962F9A /* MSSyncContext.h in Headers */,
 				A281900418BB2FF5001B14E7 /* MSTableOperationError.h in Headers */,
 				E8E37913161F769D00C13F00 /* MSFilter.h in Headers */,

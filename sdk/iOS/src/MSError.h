@@ -5,6 +5,7 @@
 #ifndef WindowsAzureMobileServices_MSError_h
 #define WindowsAzureMobileServices_MSError_h
 
+#import <Foundation/Foundation.h>
 
 #pragma mark * MSErrorDomain
 
