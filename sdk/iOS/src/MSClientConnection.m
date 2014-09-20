@@ -166,28 +166,23 @@ static NSOperationQueue *delegateQueue;
                completion:(MSFilterResponseBlock)completion
 {
     if (!filters || filters.count == 0) {
+		// No filters to invoke so use |NSURLSessionDataTask | to actually
+		// send the request.
+		
+		NSOperationQueue *taskQueue = nil;
         if (client.connectionDelegateQueue) {
-            MSConnectionDelegate *delegate = [[MSConnectionDelegate alloc]
-                                              initWithClient:client
-                                              completion:completion];
-			
-			NSURLSession *session = [self sessionWithDelegate:delegate delegateQueue:client.connectionDelegateQueue];
-			NSURLSessionDataTask *task = [session dataTaskWithRequest:request];
-			[task resume];
+			taskQueue = client.connectionDelegateQueue;
         } else {
-            dispatch_async(dispatch_get_main_queue(), ^{
-        
-                // No filters to invoke so use |NSURLSessionDataTask | to actually
-                // send the request.
-                MSConnectionDelegate *delegate = [[MSConnectionDelegate alloc]
-                                                  initWithClient:client
-                                                      completion:completion];
-				
-				NSURLSession *session = [self sessionWithDelegate:delegate delegateQueue:[NSOperationQueue mainQueue]];
-				NSURLSessionDataTask *task = [session dataTaskWithRequest:request];
-				[task resume];
-            });
-        }
+			taskQueue = [NSOperationQueue mainQueue];
+		}
+		
+		MSConnectionDelegate *delegate = [[MSConnectionDelegate alloc]
+										  initWithClient:client
+										  completion:completion];
+		
+		NSURLSession *session = [self sessionWithDelegate:delegate delegateQueue:taskQueue];
+		NSURLSessionDataTask *task = [session dataTaskWithRequest:request];
+		[task resume];
     }
     else {
         
