@@ -167,6 +167,30 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         }
 
         [AsyncTestMethod]
+        public async Task ReadAsync_StringCompare_WithSpecialChars()
+        {
+            ResetDatabase("stringId_test_table");
+
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable<ToDoWithSystemPropertiesType>();
+
+            IMobileServiceClient service = await CreateClient(new TestHttpHandler(), store);
+            var table = service.GetSyncTable<ToDoWithSystemPropertiesType>();
+
+            var inserted = new ToDoWithSystemPropertiesType()
+            {
+                Id = "123",
+                Version = "abc",
+                String = "test@contoso.com"
+            };
+            await table.InsertAsync(inserted);
+
+            ToDoWithSystemPropertiesType rehydrated = (await table.Where(t => t.String == "test@contoso.com").ToListAsync()).FirstOrDefault();
+
+            Assert.AreEqual(rehydrated.String, "test@contoso.com");
+        }
+
+        [AsyncTestMethod]
         public async Task DefineTable_IgnoresColumn_IfCaseIsDifferentButNameIsSame()
         {
             string tableName = "itemWithDate";
