@@ -60,16 +60,16 @@
     
     // initialize MSLocalStorage to test loading and saving to local storage
     MSLocalStorage *storage2 = [[MSLocalStorage alloc] initWithMobileServiceHost:@"foo.mobileservices.net"];
-    XCTAssertEqual(storage2.deviceToken, @"token4", @"Token is expected to be set correctly loaded from storage.");
+    XCTAssertEqualObjects(storage2.deviceToken, @"token4", @"Token is expected to be set correctly loaded from storage.");
     XCTAssertEqual(storage2.isRefreshNeeded, NO, @"isRefreshNeeded should be NO when MSLocalStorage is initialized with empty defaults.");
 
     // Get the original item and ensure it is accurate
     reg2New = [storage2 getRegistrationIdWithName:@"regName2"];
-    XCTAssertEqual(reg2New, @"regId2", @"Expected registrationId to be regId2");
+    XCTAssertEqualObjects(reg2New, @"regId2", @"Expected registrationId to be regId2");
     
     // Get that item and ensure it is accurate
     reg2New = [storage2 getRegistrationIdWithName:@"regName"];
-    XCTAssertEqual(reg2New, @"regId4", @"Expected registrationId to be regId4");
+    XCTAssertEqualObjects(reg2New, @"regId4", @"Expected registrationId to be regId4");
 }
 
 -(void)testBasicState

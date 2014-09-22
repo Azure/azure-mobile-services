@@ -27,7 +27,7 @@
     // application key for the Windows Mobile Azure Service below.
     
     MSClient *client = [MSClient
-              clientWithApplicationURLString:@"<Microsoft Azure Mobile Service App URL>"
+              clientWithApplicationURLString:@"<Microsoft Azure Mobile Service App URL>
               applicationKey:@"<Application Key>"];
     
     XCTAssertTrue([client.applicationURL.description hasPrefix:@"https://"], @"The functional tests are currently disabled.");
@@ -698,71 +698,6 @@
         }];
         [self waitForTest:30.0];
     }
-}
-
--(void) testAsyncTableOperationsWithInvalidSystemParameterQueryString
-{
-    NSDictionary *item = @{@"id":@"an id", @"string":@"a value"};
-
-    __block NSDictionary *savedItem;
-    [self.table insert:item completion:^(NSDictionary *item, NSError *error) {
-        savedItem = item;
-        self.done = YES;
-    }];
-    [self waitForTest:30];
-    
-    NSCharacterSet *equals = [NSCharacterSet characterSetWithCharactersInString:@"="];
-    NSArray *systemPropertiesKeyValue = [[MSTable testInvalidSystemParameterQueryString] componentsSeparatedByCharactersInSet:equals];
-    NSDictionary *userParams = @{systemPropertiesKeyValue[0]: systemPropertiesKeyValue[1]};
-    
-    self.done = NO;
-    [self.table insert:item parameters:userParams completion:^(NSDictionary *item, NSError *error) {
-        XCTAssertNotNil(error, @"An error should have occurred");
-        XCTAssertEqual([@MSErrorMessageErrorCode integerValue], error.code, @"Unexpected error code: %ld: %@", (long)error.code, error.localizedDescription);
-        XCTAssertTrue([error.localizedDescription rangeOfString:@"Custom query parameter names must start with a letter."].location != NSNotFound, @"Incorrect error: %@", error.localizedDescription);
-        self.done = YES;
-    }];
-    [self waitForTest:30.0];
-    
-    // Read
-    self.done = NO;
-    MSQuery *query = [[MSQuery alloc] initWithTable:self.table];
-    query.parameters = userParams;
-    [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
-        XCTAssertNotNil(error, @"An error should have occurred");
-        XCTAssertEqual([@MSErrorMessageErrorCode integerValue], error.code, @"Unexpected error code: %ld: %@", (long)error.code, error.localizedDescription);
-        XCTAssertTrue([error.localizedDescription rangeOfString:@"Custom query parameter names must start with a letter."].location != NSNotFound, @"Incorrect error: %@", error.localizedDescription);
-        self.done = YES;
-    }];
-    
-    // Filter
-    self.done = NO;
-    query.predicate = [NSPredicate predicateWithFormat:@"__version == %@", savedItem[MSSystemColumnVersion]];
-    [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
-        XCTAssertNotNil(error, @"An error should have occurred");
-        XCTAssertEqual([@MSErrorMessageErrorCode integerValue], error.code, @"Unexpected error code: %ld: %@", (long)error.code, error.localizedDescription);
-        XCTAssertTrue([error.localizedDescription rangeOfString:@"Custom query parameter names must start with a letter."].location != NSNotFound, @"Incorrect error: %@", error.localizedDescription);
-        self.done = YES;
-    }];
-    
-    self.done = NO;
-    [self.table readWithId:@"an id" parameters:userParams completion:^(NSDictionary *item, NSError *error) {
-        XCTAssertNotNil(error, @"An error should have occurred");
-        XCTAssertEqual([@MSErrorMessageErrorCode integerValue], error.code, @"Unexpected error code: %ld: %@", (long)error.code, error.localizedDescription);
-        XCTAssertTrue([error.localizedDescription rangeOfString:@"Custom query parameter names must start with a letter."].location != NSNotFound, @"Incorrect error: %@", error.localizedDescription);
-        self.done = YES;
-    }];
-    [self waitForTest:30.0];
-    
-    self.done = NO;
-    [savedItem setValue:@"Hello!" forKey:@"string"];
-    [self.table update:savedItem parameters:userParams completion:^(NSDictionary *item, NSError *error) {
-        XCTAssertNotNil(error, @"An error should have occurred");
-        XCTAssertEqual([@MSErrorMessageErrorCode integerValue], error.code, @"Unexpected error code: %ld: %@", (long)error.code, error.localizedDescription);
-        XCTAssertTrue([error.localizedDescription rangeOfString:@"Custom query parameter names must start with a letter."].location != NSNotFound, @"Incorrect error: %@", error.localizedDescription);
-        self.done = YES;
-    }];
-    [self waitForTest:30.0];
 }
 
 -(void) testAsyncFilterSelectOrderingOperationsNotImpactedBySystemProperties
