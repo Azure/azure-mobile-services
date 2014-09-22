@@ -700,71 +700,6 @@
     }
 }
 
--(void) testAsyncTableOperationsWithInvalidSystemParameterQueryString
-{
-    NSDictionary *item = @{@"id":@"an id", @"string":@"a value"};
-
-    __block NSDictionary *savedItem;
-    [self.table insert:item completion:^(NSDictionary *item, NSError *error) {
-        savedItem = item;
-        self.done = YES;
-    }];
-    [self waitForTest:30];
-    
-    NSCharacterSet *equals = [NSCharacterSet characterSetWithCharactersInString:@"="];
-    NSArray *systemPropertiesKeyValue = [[MSTable testInvalidSystemParameterQueryString] componentsSeparatedByCharactersInSet:equals];
-    NSDictionary *userParams = @{systemPropertiesKeyValue[0]: systemPropertiesKeyValue[1]};
-    
-    self.done = NO;
-    [self.table insert:item parameters:userParams completion:^(NSDictionary *item, NSError *error) {
-        XCTAssertNotNil(error, @"An error should have occurred");
-        XCTAssertEqual([@MSErrorMessageErrorCode integerValue], error.code, @"Unexpected error code: %ld: %@", (long)error.code, error.localizedDescription);
-        XCTAssertTrue([error.localizedDescription rangeOfString:@"Custom query parameter names must start with a letter."].location != NSNotFound, @"Incorrect error: %@", error.localizedDescription);
-        self.done = YES;
-    }];
-    [self waitForTest:30.0];
-    
-    // Read
-    self.done = NO;
-    MSQuery *query = [[MSQuery alloc] initWithTable:self.table];
-    query.parameters = userParams;
-    [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
-        XCTAssertNotNil(error, @"An error should have occurred");
-        XCTAssertEqual([@MSErrorMessageErrorCode integerValue], error.code, @"Unexpected error code: %ld: %@", (long)error.code, error.localizedDescription);
-        XCTAssertTrue([error.localizedDescription rangeOfString:@"Custom query parameter names must start with a letter."].location != NSNotFound, @"Incorrect error: %@", error.localizedDescription);
-        self.done = YES;
-    }];
-    
-    // Filter
-    self.done = NO;
-    query.predicate = [NSPredicate predicateWithFormat:@"__version == %@", savedItem[MSSystemColumnVersion]];
-    [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
-        XCTAssertNotNil(error, @"An error should have occurred");
-        XCTAssertEqual([@MSErrorMessageErrorCode integerValue], error.code, @"Unexpected error code: %ld: %@", (long)error.code, error.localizedDescription);
-        XCTAssertTrue([error.localizedDescription rangeOfString:@"Custom query parameter names must start with a letter."].location != NSNotFound, @"Incorrect error: %@", error.localizedDescription);
-        self.done = YES;
-    }];
-    
-    self.done = NO;
-    [self.table readWithId:@"an id" parameters:userParams completion:^(NSDictionary *item, NSError *error) {
-        XCTAssertNotNil(error, @"An error should have occurred");
-        XCTAssertEqual([@MSErrorMessageErrorCode integerValue], error.code, @"Unexpected error code: %ld: %@", (long)error.code, error.localizedDescription);
-        XCTAssertTrue([error.localizedDescription rangeOfString:@"Custom query parameter names must start with a letter."].location != NSNotFound, @"Incorrect error: %@", error.localizedDescription);
-        self.done = YES;
-    }];
-    [self waitForTest:30.0];
-    
-    self.done = NO;
-    [savedItem setValue:@"Hello!" forKey:@"string"];
-    [self.table update:savedItem parameters:userParams completion:^(NSDictionary *item, NSError *error) {
-        XCTAssertNotNil(error, @"An error should have occurred");
-        XCTAssertEqual([@MSErrorMessageErrorCode integerValue], error.code, @"Unexpected error code: %ld: %@", (long)error.code, error.localizedDescription);
-        XCTAssertTrue([error.localizedDescription rangeOfString:@"Custom query parameter names must start with a letter."].location != NSNotFound, @"Incorrect error: %@", error.localizedDescription);
-        self.done = YES;
-    }];
-    [self waitForTest:30.0];
-}
-
 -(void) testAsyncFilterSelectOrderingOperationsNotImpactedBySystemProperties
 {
     self.table.systemProperties = MSSystemPropertyAll;
@@ -775,7 +710,12 @@
         NSDictionary *item = @{@"id": [NSString stringWithFormat:@"%lu", (unsigned long)i], @"string": @"a value"};
         self.done = NO;
         [self.table insert:item completion:^(NSDictionary *item, NSError *error) {
-            [savedItems addObject:item];
+            if (error) {
+                XCTAssertNotNil(error);
+            } else {
+                [savedItems addObject:item];
+            }
+            
             self.done = YES;
         }];
         [self waitForTest:30.0];
