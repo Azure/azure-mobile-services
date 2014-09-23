@@ -15,6 +15,5 @@ exports.TableHelper = function TableHelper(isDotNet) {
             }
             return this.newItems;
         }
-    }
-}
-
+    };
+};

@@ -311,7 +311,7 @@ $testGroup('MobileServiceTables.js',
 
         var table = client.getTable('books');
         return table.read().then(function (results) {
-            $assert.areEqual(results.nextLink, 'https://test.com/tables/books?skip=10&top=40')
+            $assert.areEqual(results.nextLink, 'https://test.com/tables/books?skip=10&top=40');
             $assert.areEqual(results[0].title, 'test');
         });
     }),
@@ -362,7 +362,7 @@ $testGroup('MobileServiceTables.js',
 
         var table = client.getTable('books');
         return table.take(50).read().then(function (results) {
-            $assert.areEqual(results.nextLink, 'https://test.com/tables/books?skip=10&top=40')
+            $assert.areEqual(results.nextLink, 'https://test.com/tables/books?skip=10&top=40');
             $assert.areEqual(results[0].title, 'test');
         });
     }),
@@ -1060,7 +1060,6 @@ $testGroup('MobileServiceTables.js',
     .description('Verify that serverItem is set if delete fails with pre-condition failed error.')
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
-
         client = client.withFilter(function (req, next, callback) {
             $assert.areEqual(req.headers['If-Match'], '"test\\"qu\\"oteAnd\\\\""');
             callback(null, {
@@ -1085,7 +1084,6 @@ $testGroup('MobileServiceTables.js',
     .description('Verify that serverItem is not set if delete fails with pre-condition failed error but without repsonse body.')
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
-
         client = client.withFilter(function (req, next, callback) {
             $assert.areEqual(req.headers['If-Match'], '"test\\"qu\\"oteAnd\\\\""');
             callback(null, {

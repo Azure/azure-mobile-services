@@ -118,7 +118,7 @@ $testGroup('PushHttpClient',
             $assert.fail('Success should not have been called');
         }, function (error) {
             $assert.areEqual(error.request.status, 410);
-        })
+        });
     }),
 
     $test('UnregisterReturnsSuccess')

@@ -26,14 +26,16 @@ exports.login = function (startUri, endUri, callback) {
 
     // Ensure it's a sufficiently new version of Cordova, and if not fail synchronously so that
     // the error message will show up in the browser console.
-    var foundCordovaVersion = currentCordovaVersion();
+    var foundCordovaVersion = currentCordovaVersion(),
+        message;
+
     if (!isSupportedCordovaVersion(foundCordovaVersion)) {
-        var message = "Not a supported version of Cordova. Detected: " + foundCordovaVersion +
+        message = "Not a supported version of Cordova. Detected: " + foundCordovaVersion +
                     ". Required: " + requiredCordovaVersion.major + "." + requiredCordovaVersion.minor;
         throw new Error(message);
     }
     if (!hasInAppBrowser) {
-        var message = 'A required plugin: "org.apache.cordova.inappbrowser" was not detected.';
+        message = 'A required plugin: "org.apache.cordova.inappbrowser" was not detected.';
         throw new Error(message);
     }
 
