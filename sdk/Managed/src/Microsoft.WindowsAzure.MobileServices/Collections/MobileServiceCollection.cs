@@ -253,19 +253,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// Occurs when <see cref="LoadMoreItemsAsync"/> 
-        /// starting to load items. 
-        /// </summary>
-        public event EventHandler LoadingItems;
-
-        /// <summary>
-        /// Occurs when finished loading items. Provides 
-        /// <see cref="LoadingCompleteEventArgs"/> with 
-        /// how many items were loaded.  
-        /// </summary>
-        public event EventHandler<LoadingCompleteEventArgs> LoadingComplete;
-
-        /// <summary>
         /// Load more items asynchronously.
         /// Controls which support incremental loading on such as GridView on Windows 8 
         /// call this method automatically.
@@ -273,7 +260,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         /// <param name="count">
         /// The number of items to load.
-        /// This parameter overrides the pageSize specified in the constructor.
+        /// This parameter overrides the pageSize specified in the constructore.
         /// </param>
         /// <returns>The result of loading the items.</returns>
         public Task<int> LoadMoreItemsAsync(int count = 0)
@@ -292,7 +279,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </param>
         /// <param name="count">
         /// The number of items to load.
-        /// This parameter overrides the pageSize specified in the constructor.
+        /// This parameter overrides the pageSize specified in the constructore.
         /// </param>
         /// <returns>The result of loading the items.</returns>
         public async Task<int> LoadMoreItemsAsync(CancellationToken token, int count = 0)
@@ -301,13 +288,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 throw new InvalidOperationException(Resources.MobileServiceCollection_LoadInProcess);
             }
-
             busy = true;
-
-            EventHandler loadingItems = LoadingItems;
-            if (loadingItems != null) { loadingItems(this, new EventArgs()); }
-
-            int results = 0;
 
             try
             {
@@ -333,7 +314,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                     this.HasMoreItems = false;
                 }
 
-                results = await this.ProcessQueryAsync(token, query);
+                int results = await this.ProcessQueryAsync(token, query);
 
                 if (results == 0)
                 {
@@ -355,9 +336,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             finally
             {
                 busy = false;
-
-                EventHandler<LoadingCompleteEventArgs> loadingComplete = LoadingComplete;
-                if (loadingComplete != null) { loadingComplete(this, new LoadingCompleteEventArgs() { TotalItemsLoaded = results }); }
             }
         }
 
