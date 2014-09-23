@@ -451,7 +451,7 @@ static NSArray *allIdKeys;
         
         if(removeSystemProperties) {
             NSSet *systemProperties = [preSerializedItem keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
-                return [[key substringToIndex:2] isEqualToString:@"__"];
+                return [key length] > 1 && [[key substringToIndex:2] isEqualToString:@"__"];
             }];
             [preSerializedItem removeObjectsForKeys:[systemProperties allObjects]];
         }
