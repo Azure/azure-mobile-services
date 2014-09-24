@@ -12,7 +12,7 @@ var Resources = require('Resources');
 var inMemorySettingStore = {};
 
 try {
-    var key = '___z'
+    var key = '___z';
     localStorage.setItem(key, key);
     localStorage.removeItem(key);
     inMemorySettingStore = localStorage;

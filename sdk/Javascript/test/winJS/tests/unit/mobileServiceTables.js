@@ -434,7 +434,7 @@ $testGroup('MobileServiceTables.js',
                     $assert.fail('Should have failed');
                 }, function (error) {
                     $assert.isTrue(error.message.indexOf('member is already set') !== -1 ||
-                                   error.message.indexOf('is not valid') !== -1)
+                                   error.message.indexOf('is not valid') !== -1);
                 });
             });
         });
@@ -893,7 +893,7 @@ $testGroup('MobileServiceTables.js',
                     callback(null, { status: 200, responseText: null });
                 });
 
-                return table = client.getTable('books').del({ id: testId });
+                return client.getTable('books').del({ id: testId });
             });
         });
         return $chain.apply(null, testCases);
@@ -976,7 +976,7 @@ $testGroup('MobileServiceTables.js',
     .tag('SystemProperties')
     .description('Verify that serverItem is set if delete fails with pre-condition failed error.')
     .checkAsync(function () {
-        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
 
         client = client.withFilter(function (req, next, callback) {
             $assert.areEqual(req.headers['If-Match'], '"test\\"qu\\"oteAnd\\\\""');
@@ -1001,7 +1001,7 @@ $testGroup('MobileServiceTables.js',
     .tag('SystemProperties')
     .description('Verify that serverItem is not set if delete fails with pre-condition failed error but without repsonse body.')
     .checkAsync(function () {
-        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
 
         client = client.withFilter(function (req, next, callback) {
             $assert.areEqual(req.headers['If-Match'], '"test\\"qu\\"oteAnd\\\\""');
@@ -1735,7 +1735,7 @@ $testGroup('MobileServiceTables.js',
             });
 
             testCases.push(function () {
-                return table.where(function() { return this.id == 5 }).read().then(function (result) {
+                return table.where(function() { return this.id == 5; }).read().then(function (result) {
                 }, function (error) {
                     $assert.fail('should not have failed');
                 });
@@ -1854,7 +1854,7 @@ $testGroup('MobileServiceTables.js',
             });
 
             testCases.push(function () {
-                return table.where(function () { return this.id == 20 }).read({ __systemProperties: 'Version' }).then(function (result) {
+                return table.where(function () { return this.id == 20; }).read({ __systemProperties: 'Version' }).then(function (result) {
                     $assert.areEqual(result.value, 'Version');
                 }, function (error) {
                     $assert.fail('should not have failed');
