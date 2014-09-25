@@ -1788,7 +1788,7 @@
                         if (!this._gcm) {
                             var name = _.format('MS-PushContainer-gcm-{0}', mobileServicesClient.applicationUrl);
                             this._registrationManager = new RegistrationManager(mobileServicesClient, 'apns', name);
-                            this._gcm = new apns(this);
+                            this._gcm = new gcm(this);
                         }
                         return this._gcm;
                     }
@@ -1798,7 +1798,7 @@
         
         exports.Push = Push;
         
-        Push.prototype._register = function (platform, pushHandle, tags, callback) {
+        Push.prototype._register = function (platform, pushHandle, tags) {
             /// <summary>
             /// Register for native notification
             /// </summary>
@@ -1813,7 +1813,7 @@
             /// </returns>
         
             var registration = makeCoreRegistration(pushHandle, platform, tags);
-            return this._registrationManager.upsertRegistration(registration, callback);
+            return this._registrationManager.upsertRegistration(registration);
         };
         
         Push.prototype._registerTemplate = function (platform, deviceToken, name, bodyTemplate, expiryTemplate, tags) {
@@ -1862,7 +1862,7 @@
         
             Validate.notNullOrEmpty(templateName, 'templateName');
         
-            return this._registrationManager.deleteRegistrationWithName(templateName, callback);
+            return this._registrationManager.deleteRegistrationWithName(templateName);
         };
         
         Push.prototype._unregisterAll = function (pushHandle) {
@@ -1878,7 +1878,7 @@
         
             Validate.notNullOrEmpty(pushHandle, 'pushHandle');
         
-            return this._registrationManager.deleteAllRegistrations(pushHandle, callback);
+            return this._registrationManager.deleteAllRegistrations(pushHandle);
         };
         
         
@@ -1906,10 +1906,10 @@
             /// <param name="deviceToken">The deviceToken to register</param>
             /// <param name="name">The name of the template</param>
             /// <param name="bodyTemplate">
-            /// String defining the body to register
+            /// String or json object defining the body of the template register
             /// </param>
             /// <param name="expiryTemplate">
-            /// String defining the expiry template
+            /// String defining the expiry
             /// </param>
             /// <param name="tags">
             /// Array containing the tags for this registeration
@@ -1923,9 +1923,12 @@
                 expiryTemplate = null;
             }
         
-            // TODO: Potentially JSON.stringigy bodyTemplate
+            var templateAsString = bodyTemplate;
+            if (!_.isNull(templateAsString) && !_.isString(templateAsString)) {
+                templateAsString = JSON.stringify(templateAsString);
+            }
         
-            return this._push._registerTemplate('apns', deviceToken, name, bodyTemplate, expiryTemplate, tags);
+            return this._push._registerTemplate('apns', deviceToken, name, templateAsString, expiryTemplate, tags);
         };
         
         apns.prototype.unregisterNative = function () {
@@ -2683,8 +2686,6 @@
             };
         };
         
-        exports.Promise = Promises;
-        
         exports.addToMobileServicesClientNamespace = function (declarations) {
             /// <summary>
             /// Define a collection of declarations in the Mobile Services Client namespace.
@@ -3194,29 +3195,35 @@
         
             // Initially we show a page with a spinner. This stays on screen until the login form has loaded.
             var redirectionScript = "<script>location.href = unescape('" + window.escape(startUri) + "')</script>",
-                startPage = "data:text/html," + encodeURIComponent(getSpinnerMarkup() + redirectionScript),
-                loginWindow = window.open(startPage, "_blank", "location=no"),
-                flowHasFinished = false,
-                loadEventHandler = function (evt) {
-                    if (!flowHasFinished && evt.url.indexOf(endUri) === 0) {
+                startPage = "data:text/html," + encodeURIComponent(getSpinnerMarkup() + redirectionScript);
+        
+            // iOS inAppBrowser issue requires this wrapping
+            setTimeout(function () {
+                var loginWindow = window.open(startPage, "_blank", "location=no"),
+                    flowHasFinished = false,
+                    loadEventHandler = function (evt) {
+                        if (!flowHasFinished && evt.url.indexOf(endUri) === 0) {
+                            flowHasFinished = true;
+                            setTimeout(function () {
+                                loginWindow.close();
+                            }, 500);
+                            var result = parseOAuthResultFromDoneUrl(evt.url);
+                            callback(result.error, result.oAuthToken);
+                        }
+                    };
+        
+                // Ideally we'd just use loadstart because it happens earlier, but it randomly skips
+                // requests on iOS, so we have to listen for loadstop as well (which is reliable).
+                loginWindow.addEventListener('loadstart', loadEventHandler);
+                loginWindow.addEventListener('loadstop', loadEventHandler);
+        
+                loginWindow.addEventListener('exit', function (evt) {
+                    if (!flowHasFinished) {
                         flowHasFinished = true;
-                        loginWindow.close();
-                        var result = parseOAuthResultFromDoneUrl(evt.url);
-                        callback(result.error, result.oAuthToken);
+                        callback("UserCancelled", null);
                     }
-                };
-        
-            // Ideally we'd just use loadstart because it happens earlier, but it randomly skips
-            // requests on iOS, so we have to listen for loadstop as well (which is reliable).
-            loginWindow.addEventListener('loadstart', loadEventHandler);
-            loginWindow.addEventListener('loadstop', loadEventHandler);
-        
-            loginWindow.addEventListener('exit', function (evt) {
-                if (!flowHasFinished) {
-                    flowHasFinished = true;
-                    callback("UserCancelled", null);
-                }
-            });
+                });
+            }, 500);
         };
         
         function currentCordovaVersion() {

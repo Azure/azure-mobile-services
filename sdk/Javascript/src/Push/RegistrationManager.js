@@ -28,9 +28,9 @@ exports.RegistrationManager = RegistrationManager;
 RegistrationManager.NativeRegistrationName = LocalStorageManager.NativeRegistrationName;
 
 RegistrationManager.prototype.upsertRegistration = Platform.async(
-    function (registration, callback) {
+    function (registration, finalCallback) {
         Validate.notNull(registration, 'registration');
-        Validate.notNull(callback, 'callback');
+        Validate.notNull(finalCallback, 'callback');
 
         var self = this,
             expiredRegistration = function (callback) {
@@ -97,14 +97,14 @@ RegistrationManager.prototype.upsertRegistration = Platform.async(
             // So use cached value over the passed in value
             this._refreshRegistrations(this._storageManager.pushHandle || registration.deviceId, function (error) {
                 if (error) {
-                    callback(error);
+                    finalCallback(error);
                     return;
                 }
 
-                firstRegistration(callback);
+                firstRegistration(finalCallback);
             });        
         } else {
-            firstRegistration(callback);
+            firstRegistration(finalCallback);
         }
     });
 
