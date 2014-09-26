@@ -365,7 +365,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             hijack.OnSendingRequest = async req =>
             {
                 // we request all the system properties present on DefineTable<> object
-                Assert.AreEqual(req.RequestUri.Query, "?__systemproperties=__createdAt%2C__updatedAt%2C__version");
+                Assert.AreEqual(req.RequestUri.Query, "?__systemproperties=__createdAt%2C__updatedAt%2C__version%2C__deleted");
 
                 string content = await req.Content.ReadAsStringAsync();
                 Assert.AreEqual(content, @"{""id"":""b"",""String"":""Hey""}"); // the system properties are not sent to server

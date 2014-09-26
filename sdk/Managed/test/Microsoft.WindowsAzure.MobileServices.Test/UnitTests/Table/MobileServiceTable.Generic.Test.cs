@@ -2529,7 +2529,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.OnSendingRequest = req =>
             {
                 Assert.AreEqual(req.Method, HttpMethod.Post);
-                Assert.AreEqual(req.RequestUri.Query, "?__systemproperties=__createdAt%2C__updatedAt%2C__version");
+                Assert.AreEqual(req.RequestUri.Query, "?__systemproperties=__createdAt%2C__updatedAt%2C__version%2C__deleted");
                 // only id and version should be sent
                 Assert.IsNull(req.Content);
                 Assert.AreEqual(req.Headers.IfMatch.First().Tag, "\"abc\"");
