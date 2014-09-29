@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.WindowsAzure.MobileServices.Test;
 using Moq;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
@@ -22,9 +21,9 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
         {
             var columns = new[]
             {
-                new JProperty("id", 0),
-                new JProperty("PublicField", String.Empty),
-                new JProperty("PublicProperty", String.Empty)
+                new ColumnDefinition("id", JTokenType.Integer, SqlColumnType.Integer),
+                new ColumnDefinition("PublicField", JTokenType.String, SqlColumnType.Text),
+                new ColumnDefinition("PublicProperty", JTokenType.String, SqlColumnType.Text)
             };
             await TestDefineTable<PocoType>("PocoType", columns);
         }
@@ -34,11 +33,12 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
         {
             var columns = new[]
             {
-                new JProperty("id", String.Empty),
-                new JProperty("String", String.Empty),
-                new JProperty("__createdAt", default(DateTime).ToUniversalTime()),
-                new JProperty("__updatedAt", default(DateTime).ToUniversalTime()),
-                new JProperty("__version", String.Empty)
+                new ColumnDefinition("id", JTokenType.String, SqlColumnType.Text),
+                new ColumnDefinition("String", JTokenType.String, SqlColumnType.Text),
+                new ColumnDefinition("__createdAt", JTokenType.Date, SqlColumnType.Real),
+                new ColumnDefinition("__updatedAt", JTokenType.Date, SqlColumnType.Real),
+                new ColumnDefinition("__version", JTokenType.String, SqlColumnType.Text),
+                new ColumnDefinition("__deleted", JTokenType.Boolean, SqlColumnType.Integer)
             };
 
             await TestDefineTable<ToDoWithSystemPropertiesType>("stringId_test_table", columns);
@@ -57,9 +57,9 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
         {
             var columns = new[]
             {
-                new JProperty("id", 0),
-                new JProperty("Name", String.Empty),
-                new JProperty("Child", new JObject())
+                new ColumnDefinition("id", JTokenType.Integer, SqlColumnType.Integer),
+                new ColumnDefinition("Name", JTokenType.String, SqlColumnType.Text),
+                new ColumnDefinition("Child", JTokenType.Object, SqlColumnType.Text)
             };
 
             await TestDefineTable<ComplexType>("ComplexType", columns);
@@ -70,17 +70,17 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
         {
             var columns = new[]
             {
-                new JProperty("id", 0),
-                new JProperty("DerivedPublicField", String.Empty),
-                new JProperty("PublicField", String.Empty),
-                new JProperty("DerivedPublicProperty", String.Empty),
-                new JProperty("PublicProperty", String.Empty),
+                new ColumnDefinition("id", JTokenType.Integer, SqlColumnType.Integer),
+                new ColumnDefinition("DerivedPublicField", JTokenType.String, SqlColumnType.Text),
+                new ColumnDefinition("PublicField", JTokenType.String, SqlColumnType.Text),
+                new ColumnDefinition("DerivedPublicProperty", JTokenType.String, SqlColumnType.Text),
+                new ColumnDefinition("PublicProperty", JTokenType.String, SqlColumnType.Text),
             };
 
             await TestDefineTable<PocoDerivedPocoType>("PocoDerivedPocoType", columns);
         }
 
-        private static async Task TestDefineTable<T>(string testTableName, JProperty[] columns)
+        private static async Task TestDefineTable<T>(string testTableName, ColumnDefinition[] columns)
         {
             bool defined = false;
 
@@ -88,15 +88,14 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
 
             storeMock.Setup(store => store.CreateTableFromObject(It.IsAny<string>(), It.IsAny<IEnumerable<ColumnDefinition>>()))
                      .Callback<string, IEnumerable<ColumnDefinition>>((tableName, properties) =>
-                    {
-                        if (tableName == testTableName)
-                        {
-                            var expectedProperties = columns.Select(c => c.ToString(Formatting.None)).ToList();
-                            var actualProperties = properties.Select(p => p.Property.ToString(Formatting.None)).ToList();
-                            defined = true;
-                            CollectionAssert.AreEquivalent(expectedProperties, actualProperties);
-                        }
-                    });
+                     {
+                         if (tableName == testTableName)
+                         {
+                             defined = true;
+
+                             CollectionAssert.AreEquivalent(columns, properties.ToList());
+                         }
+                     });
 
             storeMock.Setup(store => store.SaveSetting(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(0));
 

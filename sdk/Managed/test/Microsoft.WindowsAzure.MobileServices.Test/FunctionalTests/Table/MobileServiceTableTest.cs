@@ -54,6 +54,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [Version]
         public String Version { get; set; }
 
+        [Deleted]
+        public bool Deleted { get; set; }
+
         public ToDoWithSystemPropertiesType()
         {
         }
