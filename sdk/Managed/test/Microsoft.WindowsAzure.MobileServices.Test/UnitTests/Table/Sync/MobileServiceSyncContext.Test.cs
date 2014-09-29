@@ -190,7 +190,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             string itemId = "def";
             string tableName = "test";
 
-            store.Tables[MobileServiceLocalSystemTables.OperationQueue].Add(operationId, new JObject());
+            store.TableMap[MobileServiceLocalSystemTables.OperationQueue].Add(operationId, new JObject());
 
             // operation exists before cancel
             Assert.IsNotNull(await store.LookupAsync(MobileServiceLocalSystemTables.OperationQueue, operationId));
@@ -230,8 +230,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             string itemId = "def";
             string tableName = "test";
 
-            store.Tables[MobileServiceLocalSystemTables.OperationQueue].Add(operationId, new JObject());
-            store.Tables.Add(tableName, new Dictionary<string, JObject>() { { itemId, new JObject() } });
+            store.TableMap[MobileServiceLocalSystemTables.OperationQueue].Add(operationId, new JObject());
+            store.TableMap.Add(tableName, new Dictionary<string, JObject>() { { itemId, new JObject() } });
 
             // operation exists before cancel
             Assert.IsNotNull(await store.LookupAsync(MobileServiceLocalSystemTables.OperationQueue, operationId));
@@ -294,7 +294,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             if (operationExists)
             {
-                store.Tables[MobileServiceLocalSystemTables.OperationQueue].Add(operationId, new JObject() { { "version", 3 } });
+                store.TableMap[MobileServiceLocalSystemTables.OperationQueue].Add(operationId, new JObject() { { "version", 3 } });
             }
             else
             {

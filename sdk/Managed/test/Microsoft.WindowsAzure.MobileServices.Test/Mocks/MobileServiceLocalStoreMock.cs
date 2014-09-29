@@ -12,7 +12,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 {
     class MobileServiceLocalStoreMock: IMobileServiceLocalStore
     {
-        public readonly Dictionary<string, MockTable> Tables = new Dictionary<string, MockTable>();
+        public readonly Dictionary<string, MockTable> TableMap = new Dictionary<string, MockTable>();
 
         public List<MobileServiceTableQueryDescription> ReadQueries { get; private set; }
         public List<MobileServiceTableQueryDescription> DeleteQueries { get; private set; }
@@ -88,7 +88,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public Task DeleteAsync(MobileServiceTableQueryDescription query)
         {
             this.DeleteQueries.Add(query);
-            this.Tables[query.TableName].Clear();
+            this.TableMap[query.TableName].Clear();
             return Task.FromResult(0);
         }
 
@@ -123,9 +123,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         private Dictionary<string, JObject> GetTable(string tableName)
         {
             MockTable table;
-            if (!this.Tables.TryGetValue(tableName, out table))
+            if (!this.TableMap.TryGetValue(tableName, out table))
             {
-                this.Tables[tableName] = table = new MockTable();
+                this.TableMap[tableName] = table = new MockTable();
             }
             return table;
         } 
