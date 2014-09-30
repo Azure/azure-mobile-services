@@ -30,11 +30,7 @@ REM Tables specific to E2E tests
 call azure mobile table create --integerId %1 admin
 call azure mobile table create --integerId %1 application
 call azure mobile table create --integerId %1 authenticated
-call azure mobile table create --integerId %1 intIdMovies
-call azure mobile table create --integerId %1 ParamsTestTable
 call azure mobile table create --integerId %1 public
-call azure mobile table create %1 stringIdRoundTripTable
-call azure mobile table create %1 stringIdMovies
 
 REM Tables specific to JS tests
 call azure mobile table create --integerId %1 w8jsRoundTripTable
