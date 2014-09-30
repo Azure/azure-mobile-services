@@ -38,7 +38,7 @@ function Push(mobileServicesClient) {
                 if (!this._gcm) {
                     var name = _.format('MS-PushContainer-gcm-{0}', mobileServicesClient.applicationUrl);
                     this._registrationManager = new RegistrationManager(mobileServicesClient, 'apns', name);
-                    this._gcm = new apns(this);
+                    this._gcm = new gcm(this);
                 }
                 return this._gcm;
             }
@@ -48,7 +48,7 @@ function Push(mobileServicesClient) {
 
 exports.Push = Push;
 
-Push.prototype._register = function (platform, pushHandle, tags, callback) {
+Push.prototype._register = function (platform, pushHandle, tags) {
     /// <summary>
     /// Register for native notification
     /// </summary>
@@ -63,7 +63,7 @@ Push.prototype._register = function (platform, pushHandle, tags, callback) {
     /// </returns>
 
     var registration = makeCoreRegistration(pushHandle, platform, tags);
-    return this._registrationManager.upsertRegistration(registration, callback);
+    return this._registrationManager.upsertRegistration(registration);
 };
 
 Push.prototype._registerTemplate = function (platform, deviceToken, name, bodyTemplate, expiryTemplate, tags) {
@@ -112,7 +112,7 @@ Push.prototype._unregister = function (templateName) {
 
     Validate.notNullOrEmpty(templateName, 'templateName');
 
-    return this._registrationManager.deleteRegistrationWithName(templateName, callback);
+    return this._registrationManager.deleteRegistrationWithName(templateName);
 };
 
 Push.prototype._unregisterAll = function (pushHandle) {
@@ -128,7 +128,7 @@ Push.prototype._unregisterAll = function (pushHandle) {
 
     Validate.notNullOrEmpty(pushHandle, 'pushHandle');
 
-    return this._registrationManager.deleteAllRegistrations(pushHandle, callback);
+    return this._registrationManager.deleteAllRegistrations(pushHandle);
 };
 
 
@@ -156,10 +156,10 @@ apns.prototype.registerTemplate = function (deviceToken, name, bodyTemplate, exp
     /// <param name="deviceToken">The deviceToken to register</param>
     /// <param name="name">The name of the template</param>
     /// <param name="bodyTemplate">
-    /// String defining the body to register
+    /// String or json object defining the body of the template register
     /// </param>
     /// <param name="expiryTemplate">
-    /// String defining the expiry template
+    /// String defining the expiry
     /// </param>
     /// <param name="tags">
     /// Array containing the tags for this registeration
@@ -173,9 +173,12 @@ apns.prototype.registerTemplate = function (deviceToken, name, bodyTemplate, exp
         expiryTemplate = null;
     }
 
-    // TODO: Potentially JSON.stringigy bodyTemplate
+    var templateAsString = bodyTemplate;
+    if (!_.isNull(templateAsString) && !_.isString(templateAsString)) {
+        templateAsString = JSON.stringify(templateAsString);
+    }
 
-    return this._push._registerTemplate('apns', deviceToken, name, bodyTemplate, expiryTemplate, tags);
+    return this._push._registerTemplate('apns', deviceToken, name, templateAsString, expiryTemplate, tags);
 };
 
 apns.prototype.unregisterNative = function () {
