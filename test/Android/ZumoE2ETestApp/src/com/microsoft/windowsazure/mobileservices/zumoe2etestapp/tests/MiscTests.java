@@ -66,7 +66,6 @@ public class MiscTests extends TestGroup {
 
 	protected static final String ROUND_TRIP_TABLE_NAME = "droidRoundTripTable";
 	protected static final String PARAM_TEST_TABLE_NAME = "ParamsTestTable";
-	protected static final String MOVIES_TABLE_NAME = "droidMovies";
 	private static final String APP_API_NAME = "application";
 
 	public MiscTests() {

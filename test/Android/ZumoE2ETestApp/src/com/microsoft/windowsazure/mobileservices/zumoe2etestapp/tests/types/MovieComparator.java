@@ -27,7 +27,6 @@ import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
 
 import android.util.Pair;
 
-
 public class MovieComparator implements Comparator<Movie> {
 	protected Pair<String, QueryOrder>[] mFields;
 
@@ -54,11 +53,8 @@ public class MovieComparator implements Comparator<Movie> {
 	public int compare(Movie m1, Movie m2) {
 		try {
 			for (Pair<String, QueryOrder> field : mFields) {
-
-				Object fieldM1 = Movie.class.getMethod(field.first, (Class<?>[]) null).invoke(m1, (Object[]) null);
-				;
-				Object fieldM2 = Movie.class.getMethod(field.first, (Class<?>[]) null).invoke(m2, (Object[]) null);
-				;
+				Object fieldM1 = m1.getClass().getMethod(field.first, (Class<?>[]) null).invoke(m1, (Object[]) null);
+				Object fieldM2 = m2.getClass().getMethod(field.first, (Class<?>[]) null).invoke(m2, (Object[]) null);
 
 				if (fieldM1 instanceof Comparable) {
 					int res = ((Comparable<Object>) fieldM1).compareTo((Comparable<Object>) fieldM2);
@@ -76,5 +72,4 @@ public class MovieComparator implements Comparator<Movie> {
 			return 0;
 		}
 	}
-
 }

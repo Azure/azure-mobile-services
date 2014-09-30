@@ -17,6 +17,7 @@ call azure mobile table create %1 offlineReadyNoVersionAuthenticated
 call azure mobile table update --deleteColumn __version --quiet %1 offlineReadyNoVersionAuthenticated
 call azure mobile table create --integerId %1 intIdMovies
 call azure mobile table create --integerId %1 ParamsTestTable
+
 REM Tables specific to functional tests
 call azure mobile table create --integerId %1 blog_posts
 call azure mobile table create --integerId %1 blog_comments
@@ -29,11 +30,7 @@ REM Tables specific to E2E tests
 call azure mobile table create --integerId %1 admin
 call azure mobile table create --integerId %1 application
 call azure mobile table create --integerId %1 authenticated
-call azure mobile table create --integerId %1 intIdMovies
-call azure mobile table create --integerId %1 ParamsTestTable
 call azure mobile table create --integerId %1 public
-call azure mobile table create %1 stringIdRoundTripTable
-call azure mobile table create %1 stringIdMovies
 
 REM Tables specific to JS tests
 call azure mobile table create --integerId %1 w8jsRoundTripTable
@@ -45,10 +42,14 @@ call azure mobile table create %1 --integerId w8RoundTripTable
 REM Tables specific to iOS tests
 call azure mobile table create --integerId %1 iosRoundTripTable
 
+REM Tables specific to Android tests
+call azure mobile table create --integerId %1 droidRoundTripTable
+
 REM Tables specific to push tests
 call azure mobile table create %1 iosPushTest
 call azure mobile table create %1 w8PushTest
 call azure mobile table create %1 wp8PushTest
+call azure mobile table create --integerId %1 droidPushTest
 
 REM Permissions
 REM Tables specific to unit tests
@@ -101,9 +102,15 @@ call azure mobile script upload %1 table/w8RoundTripTable.update -f w8RoundTripT
 REM Tables specific to iOS tests
 call azure mobile script upload %1 table/iosRoundTripTable.insert -f iosRoundTripTable.insert.js
 
+REM Tables specific to Android tests
+call azure mobile script upload %1 table/droidRoundTripTable.insert -f droidRoundTripTable.insert.js
+call azure mobile script upload %1 table/droidRoundTripTable.read -f droidRoundTripTable.read.js
+call azure mobile script upload %1 table/droidRoundTripTable.update -f droidRoundTripTable.update.js
+
 REM Tables specific to push tests
 call azure mobile script upload %1 table/iosPushTest.insert -f iosPushTest.insert.js
 call azure mobile script upload %1 table/w8PushTest.insert -f w8PushTest.insert.js
 call azure mobile script upload %1 table/wp8PushTest.insert -f wp8PushTest.insert.js
+call azure mobile script upload %1 table/droidPushTest.insert -f droidPushTest.insert.js
 
 :TheEnd

@@ -23,25 +23,26 @@ import java.util.List;
 
 import com.google.gson.annotations.SerializedName;
 
-public class AllMovies {
-	private int id;
+public class AllStringIdMovies {
+	@SerializedName("id")
+	private String mId;
 
 	@SerializedName("status")
 	private String mStatus;
 
 	@SerializedName("movies")
-	private Movie[] mMovies;
+	private StringIdMovie[] mMovies;
 
-	public AllMovies() {
-		mMovies = new Movie[0];
+	public AllStringIdMovies() {
+		mMovies = new StringIdMovie[0];
 	}
 
-	public int getId() {
-		return id;
+	public String getId() {
+		return mId;
 	}
 
-	public void setId(int id) {
-		this.id = id;
+	public void setId(String id) {
+		mId = id;
 	}
 
 	public String getStatus() {
@@ -52,15 +53,15 @@ public class AllMovies {
 		mStatus = status;
 	}
 
-	public Movie[] getMovies() {
+	public StringIdMovie[] getMovies() {
 		return mMovies;
 	}
 
-	public void setMovies(Movie[] movies) {
+	public void setMovies(StringIdMovie[] movies) {
 		mMovies = movies;
 	}
 
-	public void setMovies(List<Movie> movies) {
+	public void setMovies(List<StringIdMovie> movies) {
 		mMovies = movies.toArray(mMovies);
 	}
 }

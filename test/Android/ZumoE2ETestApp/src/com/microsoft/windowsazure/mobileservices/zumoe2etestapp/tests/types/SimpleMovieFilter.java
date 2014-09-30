@@ -25,13 +25,13 @@ import java.util.List;
 public abstract class SimpleMovieFilter implements ListFilter<Movie> {
 
 	@Override
-	public FilterResult<Movie> filter(List<Movie> list) {
+	public FilterResult<Movie> filter(List<? extends Movie> list) {
 		return getElements(list);
 	}
 
 	abstract protected boolean criteria(Movie movie);
 
-	protected FilterResult<Movie> getElements(List<Movie> list) {
+	protected FilterResult<Movie> getElements(List<? extends Movie> list) {
 		List<Movie> newList = new ArrayList<Movie>();
 		FilterResult<Movie> result = new FilterResult<Movie>();
 
@@ -46,8 +46,8 @@ public abstract class SimpleMovieFilter implements ListFilter<Movie> {
 		return result;
 	}
 
-	protected List<Movie> applyOrder(List<Movie> movies) {
-		return movies;
+	protected List<Movie> applyOrder(List<? extends Movie> movies) {
+		return new ArrayList<Movie>(movies);
 	}
 
 	protected FilterResult<Movie> applyTopSkip(FilterResult<Movie> result, int top, int skip) {

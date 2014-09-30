@@ -120,7 +120,7 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
 
 	/**
 	 * Constructor
-	 *
+	 * 
 	 * @param name
 	 *            The name of the represented table
 	 * @param client
@@ -142,7 +142,7 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
 	/**
 	 * Adds a feature which will be sent in telemetry headers for all requests
 	 * made by this table
-	 *
+	 * 
 	 * @param feature
 	 *            The feature that will be sent in requests by this table
 	 */
@@ -322,10 +322,10 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
 	protected Object getObjectId(Object elementOrId) {
 		if (elementOrId == null || (elementOrId instanceof JsonNull)) {
 			throw new IllegalArgumentException("Element cannot be null");
-		} else if (elementOrId instanceof Integer) {
-			return ((Integer) elementOrId).intValue();
-		} else if (elementOrId instanceof String) {
-			return elementOrId;
+		} else if (isNumericType(elementOrId)) {
+			return getNumericValue(elementOrId);
+		} else if (isStringType(elementOrId)) {
+			return getStringValue(elementOrId);
 		} else {
 			JsonObject jsonObject;
 
@@ -343,14 +343,10 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
 				throw new IllegalArgumentException("Element must contain id property");
 			}
 
-			if (idProperty.isJsonPrimitive()) {
-				if (idProperty.getAsJsonPrimitive().isNumber()) {
-					return idProperty.getAsJsonPrimitive().getAsLong();
-				} else if (idProperty.getAsJsonPrimitive().isString()) {
-					return idProperty.getAsJsonPrimitive().getAsString();
-				} else {
-					throw new IllegalArgumentException("Invalid id type");
-				}
+			if (isNumericType(idProperty)) {
+				return getNumericValue(idProperty);
+			} else if (isStringType(idProperty)) {
+				return getStringValue(idProperty);
 			} else {
 				throw new IllegalArgumentException("Invalid id type");
 			}
