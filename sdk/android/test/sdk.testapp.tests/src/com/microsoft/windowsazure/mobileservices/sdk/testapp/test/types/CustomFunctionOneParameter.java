@@ -1,4 +1,4 @@
-package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
+package com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types;
 
 public interface CustomFunctionOneParameter<T, U> {
 

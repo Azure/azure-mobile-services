@@ -17,13 +17,15 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
+package com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gson.JsonElement;
 import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceUser;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.IdPropertyTestClasses.IdPropertyWithDifferentIdPropertyCasing;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.IdPropertyTestClasses.IdPropertyWithGsonAnnotation;
 
 /**
  * 
@@ -31,11 +33,11 @@ import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceUse
  * have them available in the asserts' section
  * 
  */
-public class ResultsContainer {	
+public class ResultsContainer {
 	private PersonTestObject person;
-	
+
 	private PersonTestObjectWithoutId personWithoutId;
-	
+
 	private PersonTestObjectWithStringId personWithStringId;
 
 	private ComplexPersonTestObject complexPerson;
@@ -57,19 +59,19 @@ public class ResultsContainer {
 	private String requestContent;
 
 	private DateTestObject dateTestObject;
-	
+
 	private IdPropertyWithGsonAnnotation idPropertyWithGsonAnnotation;
-	
+
 	private IdPropertyWithDifferentIdPropertyCasing idPropertyWithDifferentIdPropertyCasing;
-	
+
 	private Exception exception;
-	
+
 	private JsonElement jsonResult;
-	
+
 	private byte[] rawResponseContent;
 
 	private Object customResult;
-	
+
 	public PersonTestObject getPerson() {
 		return person;
 	}
@@ -96,7 +98,7 @@ public class ResultsContainer {
 			this.peopleResult.add(person);
 		}
 	}
-	
+
 	public void setPeopleResult(List<PersonTestObject> peopleResult) {
 		this.peopleResult = peopleResult;
 	}
@@ -185,8 +187,7 @@ public class ResultsContainer {
 		return idPropertyWithGsonAnnotation;
 	}
 
-	public void setIdPropertyWithGsonAnnotation(
-			IdPropertyWithGsonAnnotation idPropertyWithGsonAnnotation) {
+	public void setIdPropertyWithGsonAnnotation(IdPropertyWithGsonAnnotation idPropertyWithGsonAnnotation) {
 		this.idPropertyWithGsonAnnotation = idPropertyWithGsonAnnotation;
 	}
 
@@ -194,17 +195,14 @@ public class ResultsContainer {
 		return idPropertyWithDifferentIdPropertyCasing;
 	}
 
-	public void setIdPropertyWithDifferentIdPropertyCasing(
-			IdPropertyWithDifferentIdPropertyCasing idPropertyWithDifferentIdPropertyCasing) {
+	public void setIdPropertyWithDifferentIdPropertyCasing(IdPropertyWithDifferentIdPropertyCasing idPropertyWithDifferentIdPropertyCasing) {
 		this.idPropertyWithDifferentIdPropertyCasing = idPropertyWithDifferentIdPropertyCasing;
 	}
-
 
 	public Exception getException() {
 		return exception;
 	}
 
-	
 	public void setException(Exception exception) {
 		this.exception = exception;
 	}
@@ -212,7 +210,7 @@ public class ResultsContainer {
 	public void setException(Throwable exception) {
 		this.exception = (Exception) exception;
 	}
-	
+
 	public JsonElement getJsonResult() {
 		return jsonResult;
 	}

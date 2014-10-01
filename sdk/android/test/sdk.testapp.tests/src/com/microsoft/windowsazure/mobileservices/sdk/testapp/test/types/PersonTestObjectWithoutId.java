@@ -17,31 +17,40 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
+package com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types;
 
-import org.apache.http.ProtocolVersion;
-import org.apache.http.StatusLine;
+public class PersonTestObjectWithoutId {
+	private String firstName;
+	private String lastName;
+	private int age;
 
-class StatusLineMock implements StatusLine {
-	private int statusCode;
-
-	public StatusLineMock(int statusCode) {
-		this.statusCode = statusCode;
+	public PersonTestObjectWithoutId(String firstName, String lastName, int age) {
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.age = age;
 	}
 
-	@Override
-	public ProtocolVersion getProtocolVersion() {
-		return null;
+	public String getFirstName() {
+		return firstName;
 	}
 
-	@Override
-	public String getReasonPhrase() {
-		return null;
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
 	}
 
-	@Override
-	public int getStatusCode() {
-		return this.statusCode;
+	public String getLastName() {
+		return lastName;
 	}
 
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public int getAge() {
+		return age;
+	}
+
+	public void setAge(int age) {
+		this.age = age;
+	}
 }

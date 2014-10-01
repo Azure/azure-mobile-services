@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.http.Header;
+
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.gson.JsonObject;
@@ -39,6 +40,11 @@ import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterResponseMock;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.mocks.MobileServiceLocalStoreMock;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.Address;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.PersonTestObjectWithStringId;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.SystemPropertyTestClasses.VersionType;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProperty;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
@@ -53,7 +59,7 @@ import android.net.Uri;
 import android.test.InstrumentationTestCase;
 import android.util.Pair;
 
-public class MobileServiceFeaturesTest extends InstrumentationTestCase {
+public class MobileServiceFeaturesTests extends InstrumentationTestCase {
 	String appUrl;
 	String appKey;
 
@@ -363,8 +369,7 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 	private void testTableFeatureHeader(TableTestOperation operation, final boolean responseIsArray, final String expectedFeaturesHeader) {
 		MobileServiceClient client = null;
 		try {
-			client = new MobileServiceClient(appUrl, appKey,
-					getInstrumentation().getTargetContext());
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
@@ -373,14 +378,11 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public ListenableFuture<ServiceFilterResponse> handleRequest(
-					ServiceFilterRequest request,
-					NextServiceFilterCallback nextServiceFilterCallback) {
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture
-						.create();
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 				String featuresHeaderName = "X-ZUMO-FEATURES";
-				
+
 				Header[] headers = request.getHeaders();
 				String features = null;
 				for (int i = 0; i < headers.length; i++) {
@@ -392,8 +394,7 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 				if (features == null) {
 					resultFuture.setException(new Exception("No " + featuresHeaderName + " header on API call"));
 				} else if (!features.equals(expectedFeaturesHeader)) {
-					resultFuture.setException(new Exception("Incorrect features header; expected " + 
-						expectedFeaturesHeader + ", actual " + features));
+					resultFuture.setException(new Exception("Incorrect features header; expected " + expectedFeaturesHeader + ", actual " + features));
 				} else {
 					ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 					String content = "{\"id\":\"the-id\",\"firstName\":\"John\",\"lastName\":\"Doe\",\"age\":33}";
@@ -434,7 +435,7 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 			public void executeOperation(MobileServiceClient client) throws Exception {
 				client.invokeApi("foo").get();
 			}
-			
+
 		}, "AJ");
 	}
 
@@ -447,7 +448,7 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 				queryParams.add(new Pair<String, String>("a", "b"));
 				client.invokeApi("apiName", "DELETE", queryParams).get();
 			}
-			
+
 		}, "AJ,QS");
 	}
 
@@ -458,7 +459,7 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 			public void executeOperation(MobileServiceClient client) throws Exception {
 				client.invokeApi("apiName", Address.class).get();
 			}
-			
+
 		}, "AT");
 	}
 
@@ -471,7 +472,7 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 				queryParams.add(new Pair<String, String>("a", "b"));
 				client.invokeApi("apiName", "GET", queryParams, Address.class).get();
 			}
-			
+
 		}, "AT,QS");
 	}
 
@@ -485,9 +486,9 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 				List<Pair<String, String>> requestHeaders = new ArrayList<Pair<String, String>>();
 				requestHeaders.add(new Pair<String, String>("Content-Type", "text/plain"));
 				byte[] content = "hello world".getBytes();
-				client.invokeApi("apiName", content, "POST", requestHeaders , queryParams).get();
+				client.invokeApi("apiName", content, "POST", requestHeaders, queryParams).get();
 			}
-			
+
 		}, "AG");
 	}
 
@@ -504,15 +505,14 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 				byte[] content = "hello world".getBytes();
 				client.invokeApi("apiName", content, "POST", requestHeaders, queryParams).get();
 			}
-			
+
 		}, "something");
 	}
 
 	private void testInvokeApiFeatureHeader(ClientTestOperation operation, final String expectedFeaturesHeader) {
 		MobileServiceClient client = null;
 		try {
-			client = new MobileServiceClient(appUrl, appKey,
-					getInstrumentation().getTargetContext());
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
@@ -521,14 +521,11 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public ListenableFuture<ServiceFilterResponse> handleRequest(
-					ServiceFilterRequest request,
-					NextServiceFilterCallback nextServiceFilterCallback) {
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture
-						.create();
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 				String featuresHeaderName = "X-ZUMO-FEATURES";
-				
+
 				Header[] headers = request.getHeaders();
 				String features = null;
 				for (int i = 0; i < headers.length; i++) {
@@ -540,8 +537,7 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 				if (features == null) {
 					resultFuture.setException(new Exception("No " + featuresHeaderName + " header on API call"));
 				} else if (!features.equals(expectedFeaturesHeader)) {
-					resultFuture.setException(new Exception("Incorrect features header; expected " + 
-						expectedFeaturesHeader + ", actual " + features));
+					resultFuture.setException(new Exception("Incorrect features header; expected " + expectedFeaturesHeader + ", actual " + features));
 				} else {
 					ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 					response.setContent("{}");
@@ -565,18 +561,17 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 
 	// Tests for offline push / pull
 	interface OfflineTableTestOperation {
-		void executeOperation(MobileServiceClient client, MobileServiceSyncTable<PersonTestObjectWithStringId> typedTable, MobileServiceJsonSyncTable jsonTable) throws Exception;
+		void executeOperation(MobileServiceClient client, MobileServiceSyncTable<PersonTestObjectWithStringId> typedTable, MobileServiceJsonSyncTable jsonTable)
+				throws Exception;
 	}
-	
+
 	public void testTypedSyncTablePullFeatureHeader() {
 		// Both typed and untyped sync tables are treated as untyped
 		// in the offline implementation
 		testSyncTableOperationsFeatureHeader(new OfflineTableTestOperation() {
 
 			@Override
-			public void executeOperation(
-					MobileServiceClient client,
-					MobileServiceSyncTable<PersonTestObjectWithStringId> typedTable,
+			public void executeOperation(MobileServiceClient client, MobileServiceSyncTable<PersonTestObjectWithStringId> typedTable,
 					MobileServiceJsonSyncTable jsonTable) throws Exception {
 				ExecutableQuery<PersonTestObjectWithStringId> query = client.getTable(PersonTestObjectWithStringId.class).where();
 				typedTable.pull(query).get();
@@ -590,9 +585,7 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 		testSyncTableOperationsFeatureHeader(new OfflineTableTestOperation() {
 
 			@Override
-			public void executeOperation(
-					MobileServiceClient client,
-					MobileServiceSyncTable<PersonTestObjectWithStringId> typedTable,
+			public void executeOperation(MobileServiceClient client, MobileServiceSyncTable<PersonTestObjectWithStringId> typedTable,
 					MobileServiceJsonSyncTable jsonTable) throws Exception {
 				ExecutableJsonQuery query = client.getTable("Person").where();
 				jsonTable.pull(query).get();
@@ -606,9 +599,7 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 		testSyncTableOperationsFeatureHeader(new OfflineTableTestOperation() {
 
 			@Override
-			public void executeOperation(
-					MobileServiceClient client,
-					MobileServiceSyncTable<PersonTestObjectWithStringId> typedTable,
+			public void executeOperation(MobileServiceClient client, MobileServiceSyncTable<PersonTestObjectWithStringId> typedTable,
 					MobileServiceJsonSyncTable jsonTable) throws Exception {
 				PersonTestObjectWithStringId pto = new PersonTestObjectWithStringId("John", "Doe", 33);
 				typedTable.insert(pto).get();
@@ -623,9 +614,7 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 		testSyncTableOperationsFeatureHeader(new OfflineTableTestOperation() {
 
 			@Override
-			public void executeOperation(
-					MobileServiceClient client,
-					MobileServiceSyncTable<PersonTestObjectWithStringId> typedTable,
+			public void executeOperation(MobileServiceClient client, MobileServiceSyncTable<PersonTestObjectWithStringId> typedTable,
 					MobileServiceJsonSyncTable jsonTable) throws Exception {
 				JsonObject obj = createJsonObject();
 				jsonTable.insert(obj).get();
@@ -640,9 +629,7 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 		testSyncTableOperationsFeatureHeader(new OfflineTableTestOperation() {
 
 			@Override
-			public void executeOperation(
-					MobileServiceClient client,
-					MobileServiceSyncTable<PersonTestObjectWithStringId> typedTable,
+			public void executeOperation(MobileServiceClient client, MobileServiceSyncTable<PersonTestObjectWithStringId> typedTable,
 					MobileServiceJsonSyncTable jsonTable) throws Exception {
 				PersonTestObjectWithStringId pto = new PersonTestObjectWithStringId("John", "Doe", 33);
 				typedTable.insert(pto).get();
@@ -659,9 +646,7 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 		testSyncTableOperationsFeatureHeader(new OfflineTableTestOperation() {
 
 			@Override
-			public void executeOperation(
-					MobileServiceClient client,
-					MobileServiceSyncTable<PersonTestObjectWithStringId> typedTable,
+			public void executeOperation(MobileServiceClient client, MobileServiceSyncTable<PersonTestObjectWithStringId> typedTable,
 					MobileServiceJsonSyncTable jsonTable) throws Exception {
 				JsonObject obj = createJsonObject();
 				jsonTable.insert(obj).get();
@@ -677,8 +662,7 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 	private void testSyncTableOperationsFeatureHeader(OfflineTableTestOperation operation, final String expectedFeaturesHeader) {
 		MobileServiceClient client = null;
 		try {
-			client = new MobileServiceClient(appUrl, appKey,
-					getInstrumentation().getTargetContext());
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
@@ -688,14 +672,11 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public ListenableFuture<ServiceFilterResponse> handleRequest(
-					ServiceFilterRequest request,
-					NextServiceFilterCallback nextServiceFilterCallback) {
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture
-						.create();
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 				String featuresHeaderName = "X-ZUMO-FEATURES";
-				
+
 				Header[] headers = request.getHeaders();
 				String features = null;
 				for (int i = 0; i < headers.length; i++) {
@@ -707,8 +688,7 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 				if (features == null) {
 					resultFuture.setException(new Exception("No " + featuresHeaderName + " header on API call"));
 				} else if (!features.equals(expectedFeaturesHeader)) {
-					resultFuture.setException(new Exception("Incorrect features header; expected " + 
-						expectedFeaturesHeader + ", actual " + features));
+					resultFuture.setException(new Exception("Incorrect features header; expected " + expectedFeaturesHeader + ", actual " + features));
 				} else {
 					ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 					Uri requestUri = Uri.parse(request.getUrl());
@@ -800,8 +780,7 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 	private void testOpportunisticConcurrencyOperationsFeatureHeader(OpportunisticConcurrencyTestOperation operation, final String expectedFeaturesHeader) {
 		MobileServiceClient client = null;
 		try {
-			client = new MobileServiceClient(appUrl, appKey,
-					getInstrumentation().getTargetContext());
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
@@ -811,14 +790,11 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public ListenableFuture<ServiceFilterResponse> handleRequest(
-					ServiceFilterRequest request,
-					NextServiceFilterCallback nextServiceFilterCallback) {
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture
-						.create();
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 				String featuresHeaderName = "X-ZUMO-FEATURES";
-				
+
 				Header[] headers = request.getHeaders();
 				String features = null;
 				for (int i = 0; i < headers.length; i++) {
@@ -830,8 +806,7 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 				if (features == null) {
 					resultFuture.setException(new Exception("No " + featuresHeaderName + " header on API call"));
 				} else if (!features.equals(expectedFeaturesHeader)) {
-					resultFuture.setException(new Exception("Incorrect features header; expected " + 
-						expectedFeaturesHeader + ", actual " + features));
+					resultFuture.setException(new Exception("Incorrect features header; expected " + expectedFeaturesHeader + ", actual " + features));
 				} else {
 					ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 					Uri requestUri = Uri.parse(request.getUrl());
