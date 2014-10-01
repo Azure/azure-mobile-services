@@ -59,7 +59,7 @@ import android.net.Uri;
 import android.test.InstrumentationTestCase;
 import android.util.Pair;
 
-public class MobileServiceFeaturesTest extends InstrumentationTestCase {
+public class MobileServiceFeaturesTests extends InstrumentationTestCase {
 	String appUrl;
 	String appKey;
 
