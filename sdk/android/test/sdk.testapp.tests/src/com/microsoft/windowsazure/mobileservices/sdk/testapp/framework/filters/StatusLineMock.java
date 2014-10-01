@@ -17,12 +17,12 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
+package com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters;
 
 import org.apache.http.ProtocolVersion;
 import org.apache.http.StatusLine;
 
-class StatusLineMock implements StatusLine {
+public class StatusLineMock implements StatusLine {
 	private int statusCode;
 
 	public StatusLineMock(int statusCode) {

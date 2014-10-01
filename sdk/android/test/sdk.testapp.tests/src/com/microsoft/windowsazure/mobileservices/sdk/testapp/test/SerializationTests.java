@@ -44,6 +44,8 @@ import com.google.gson.JsonSerializer;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterResponseMock;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.StatusLineMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.Address;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.ComplexPersonTestObject;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.DateTestObject;

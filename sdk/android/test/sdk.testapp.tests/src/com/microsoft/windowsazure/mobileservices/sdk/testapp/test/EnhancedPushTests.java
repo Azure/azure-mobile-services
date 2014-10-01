@@ -48,6 +48,9 @@ import com.microsoft.windowsazure.mobileservices.notifications.RegistrationGoneE
 import com.microsoft.windowsazure.mobileservices.notifications.TemplateRegistration;
 import com.microsoft.windowsazure.mobileservices.notifications.TemplateRegistrationCallback;
 import com.microsoft.windowsazure.mobileservices.notifications.UnregisterCallback;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterRequestMock;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterResponseMock;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.StatusLineMock;
 
 public class EnhancedPushTests extends InstrumentationTestCase {
 
