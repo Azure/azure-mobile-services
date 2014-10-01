@@ -405,13 +405,19 @@ MobileServiceClient.prototype.invokeApi = Platform.async(
                 if (!_.isNull(error)) {
                     callback(error, null);
                 } else {
-                    if (typeof response.getResponseHeader === 'undefined') { // (when using IframeTransport, IE9)
+                    var contentType;
+                    if (typeof response.getResponseHeader !== 'undefined') { // (when not using IframeTransport, IE9)
+                        contentType = response.getResponseHeader('Content-Type');
+                    }
+
+                    // If there was no header / can't get one, try json
+                    if (!contentType) {
                         try {
                             response.result = _.fromJson(response.responseText);
                         } catch(e) {
                             // Do nothing, since we don't know the content-type, failing may be ok
                         }
-                    } else if (response.getResponseHeader('Content-Type').toLowerCase().indexOf('json') !== -1) {
+                    } else if (contentType.toLowerCase().indexOf('json') !== -1) {
                         response.result = _.fromJson(response.responseText);
                     }
 

@@ -293,7 +293,6 @@ $testGroup('RegistrationManager',
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
             testRegistration = {
                 deviceId: 'testhandle',
-                templateName: 'Test',
                 platform: 'platform',
                 registrationId: '6989338662585603267-4084702197021366041-7',
             };
@@ -323,7 +322,53 @@ $testGroup('RegistrationManager',
         // We want to test no local storage in this case
         // Refresh (id not present), Create (OK), Upsert (OK)
         var registrationManager = new RegistrationManager.RegistrationManager(client, 'platform', StorageKey);
-        return registrationManager.upsertRegistration({ deviceId: 'testhandle', templateName: 'Test', platform: 'platform'}).then(function () {
+        return registrationManager.upsertRegistration({ deviceId: 'testhandle', platform: 'platform'}).then(function () {
+            // Now check storage is populated
+            var testStore = new LocalStorageManager.LocalStorageManager(StorageKey);
+            $assert.areEqual(testStore.pushHandle, 'testhandle');
+            $assert.areEqual(testStore.getRegistrationIdWithName('$Default'), '6989338662585603267-4084702197021366041-7');
+            DeleteStorage(testStore);
+        });
+    }),
+
+    $test('UpsertRegistrationWithTemplateRefreshInsertSuccess')
+    .description('Verify upsertRegistration updates new record when refresh is needed')
+    .tag('upsertRegistration')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+            testRegistration = {
+                deviceId: 'testhandle',
+                templateName: 'Test',
+                templateBody: '{something:$(somethingelse)}',
+                platform: 'platform',
+                registrationId: '6989338662585603267-4084702197021366041-7',
+            };
+
+        client = client.withFilter(function (req, next, callback) {
+            if (req.type === 'GET' && req.url === 'http://www.test.com/push/registrations?platform=platform&deviceId=testhandle') {
+                callback(null, { status: 200, responseText: '[]' });
+            } else if (req.type === 'POST' && req.url === 'http://www.test.com/push/registrationIds') {
+                callback(null, 
+                    { 
+                        status: 200, 
+                        getResponseHeader: function (header) { 
+                            return header == 'Location' ? 
+                                'http://philtotesting.azure-mobile.net/push/registrations/6989338662585603267-4084702197021366041-7' : 
+                                null; 
+                    }, 
+                    responseText: '' });
+            } else if (req.type === 'PUT' && req.url === 'http://www.test.com/push/registrations/6989338662585603267-4084702197021366041-7') {
+                $assert.areEqual(req.data, JSON.stringify(testRegistration));
+                callback(null, { status: 200, responseText: '' });
+            } else {
+                callback(null, { status: 500, responseText: 'Oops, bad test case!' });                
+            }            
+        });
+
+        // We want to test no local storage in this case
+        // Refresh (id not present), Create (OK), Upsert (OK)
+        var registrationManager = new RegistrationManager.RegistrationManager(client, 'platform', StorageKey);
+        return registrationManager.upsertRegistration({ deviceId: 'testhandle', templateName: 'Test', templateBody: '{something:$(somethingelse)}', platform: 'platform'}).then(function () {
             // Now check storage is populated
             var testStore = new LocalStorageManager.LocalStorageManager(StorageKey);
             $assert.areEqual(testStore.pushHandle, 'testhandle');            
@@ -385,7 +430,6 @@ $testGroup('RegistrationManager',
                     }, 
                     responseText: '' });
             } else if (req.type === 'PUT' && req.url === 'http://www.test.com/push/registrations/6989338662585603267-4084702197021366041-7') {
-                // Check the body?
                 $assert.areEqual(req.data, JSON.stringify(testRegistration));
                 callback(null, { status: 200, responseText: '' });
             } else {

@@ -88,10 +88,15 @@ Push.prototype._registerTemplate = function (platform, deviceToken, name, bodyTe
     Validate.notNullOrEmpty(name, 'name');
     Validate.notNullOrEmpty(bodyTemplate, 'bodyTemplate');
 
-    var registration = makeCoreRegistration(deviceToken, platform, tags);
+    var templateAsString = bodyTemplate,
+        registration = makeCoreRegistration(deviceToken, platform, tags);
+    
+    if (!_.isString(templateAsString)) {
+        templateAsString = JSON.stringify(templateAsString);
+    }
 
     registration.templateName = name;
-    registration.templateBody = bodyTemplate;
+    registration.templateBody = templateAsString;
     if (expiryTemplate) {
         registration.expiry = expiryTemplate;
     }
@@ -159,7 +164,8 @@ apns.prototype.registerTemplate = function (deviceToken, name, bodyTemplate, exp
     /// String or json object defining the body of the template register
     /// </param>
     /// <param name="expiryTemplate">
-    /// String defining the expiry
+    /// String defining the datatime or template expresession that evaluates to a date time
+    /// string to use for the expiry of the message
     /// </param>
     /// <param name="tags">
     /// Array containing the tags for this registeration
@@ -173,12 +179,7 @@ apns.prototype.registerTemplate = function (deviceToken, name, bodyTemplate, exp
         expiryTemplate = null;
     }
 
-    var templateAsString = bodyTemplate;
-    if (!_.isNull(templateAsString) && !_.isString(templateAsString)) {
-        templateAsString = JSON.stringify(templateAsString);
-    }
-
-    return this._push._registerTemplate('apns', deviceToken, name, templateAsString, expiryTemplate, tags);
+    return this._push._registerTemplate('apns', deviceToken, name, bodyTemplate, expiryTemplate, tags);
 };
 
 apns.prototype.unregisterNative = function () {
@@ -248,7 +249,7 @@ gcm.prototype.registerTemplate = function (deviceId, name, bodyTemplate, tags) {
     /// The name of the template
     /// </param>
     /// <param name="bodyTemplate">
-    /// String defining the body to register
+    /// String or json object defining the body to register
     /// </param>
     /// <param name="tags">
     /// Array containing the tags for this registeration

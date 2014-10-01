@@ -65,7 +65,7 @@ RegistrationManager.prototype.upsertRegistration = Platform.async(
                     registration.registrationId = registrationId;
 
                     self._storageManager.updateRegistrationWithName(
-                        registration.templateName,
+                        registration.templateName || LocalStorageManager.NativeRegistrationName,
                         registration.registrationId,
                         registration.deviceId);
 
@@ -75,8 +75,6 @@ RegistrationManager.prototype.upsertRegistration = Platform.async(
             firstRegistration = function (callback) {
                 var name = registration.templateName || LocalStorageManager.NativeRegistrationName,
                     cachedRegistrationId = self._storageManager.getRegistrationIdWithName(name);
-
-                registration.templateName = name;
 
                 if (!_.isNullOrEmpty(cachedRegistrationId)) {
                     registration.registrationId = cachedRegistrationId;
