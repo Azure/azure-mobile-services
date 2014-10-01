@@ -1,4 +1,4 @@
-package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
+package com.microsoft.windowsazure.mobileservices.sdk.testapp.test.helpers;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
