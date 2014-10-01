@@ -17,40 +17,49 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
+package com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types;
 
-public class Address {
-	private String streetAddress;
-	private int zipCode;
-	private String country;
+public class PersonTestObject {
+	private int id;
+	private String firstName;
+	private String lastName;
+	private int age;
 
-	public Address(String streetAddress, int zipCode, String country) {
-		this.streetAddress = streetAddress;
-		this.zipCode = zipCode;
-		this.country = country;
+	public PersonTestObject(String firstName, String lastName, int age) {
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.age = age;
 	}
 
-	public String getStreetAddress() {
-		return streetAddress;
+	public int getId() {
+		return id;
 	}
 
-	public void setStreetAddress(String streetAddress) {
-		this.streetAddress = streetAddress;
+	public void setId(int id) {
+		this.id = id;
 	}
 
-	public int getZipCode() {
-		return zipCode;
+	public String getFirstName() {
+		return firstName;
 	}
 
-	public void setZipCode(int zipCode) {
-		this.zipCode = zipCode;
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
 	}
 
-	public String getCountry() {
-		return country;
+	public String getLastName() {
+		return lastName;
 	}
 
-	public void setCountry(String country) {
-		this.country = country;
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public int getAge() {
+		return age;
+	}
+
+	public void setAge(int age) {
+		this.age = age;
 	}
 }

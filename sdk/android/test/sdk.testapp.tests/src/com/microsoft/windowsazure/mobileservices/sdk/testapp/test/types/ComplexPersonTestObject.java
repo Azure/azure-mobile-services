@@ -17,17 +17,27 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
+package com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types;
 
-public class PersonTestObjectWithoutId {
+
+public class ComplexPersonTestObject {
+	private int id;
 	private String firstName;
 	private String lastName;
-	private int age;
+	private Address address;
 
-	public PersonTestObjectWithoutId(String firstName, String lastName, int age) {
+	public ComplexPersonTestObject(String firstName, String lastName, Address address) {
 		this.firstName = firstName;
 		this.lastName = lastName;
-		this.age = age;
+		this.address = address;
+	}
+
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 
 	public String getFirstName() {
@@ -46,11 +56,11 @@ public class PersonTestObjectWithoutId {
 		this.lastName = lastName;
 	}
 
-	public int getAge() {
-		return age;
+	public Address getAddress() {
+		return address;
 	}
 
-	public void setAge(int age) {
-		this.age = age;
+	public void setAddress(Address address) {
+		this.address = address;
 	}
 }
