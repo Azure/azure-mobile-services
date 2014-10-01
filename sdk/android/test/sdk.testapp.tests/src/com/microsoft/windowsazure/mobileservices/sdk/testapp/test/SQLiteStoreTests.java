@@ -30,6 +30,7 @@ import android.test.InstrumentationTestCase;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.CustomFunctionOneParameter;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
 import com.microsoft.windowsazure.mobileservices.table.sync.localstore.ColumnDataType;

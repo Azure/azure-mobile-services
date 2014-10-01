@@ -1,4 +1,4 @@
-package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
+package com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.mocks;
 
 import java.util.ArrayList;
 import java.util.HashMap;
