@@ -205,7 +205,11 @@ MobileServiceClient.prototype._request = function (method, uriFragment, content,
 
     // Create the absolute URI
     var options = { type: method.toUpperCase() };
-    options.url = _.url.combinePathSegments(this.applicationUrl, uriFragment);
+    if (_.url.isAbsoluteUrl(uriFragment)) {
+        options.url = uriFragment;
+    } else {
+        options.url = _.url.combinePathSegments(this.applicationUrl, uriFragment);
+    }
 
     // Set MobileServices authentication, application, User-Agent and telemetry headers
     options.headers = {};
