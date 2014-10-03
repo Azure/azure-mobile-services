@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -39,7 +40,28 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             txtRuntimeKey.Text = mobileServiceRuntimeKey ?? "";
             txtTags.Text = tags ?? "";
 
-            Loaded += (s, e) => btnUnitTests.Focus();
+            Loaded += (s, e) =>
+            {
+                btnUnitTests.Focus();
+                string[] args = Environment.GetCommandLineArgs();
+                if (args.Length >= 2 && args[1] == "/auto")
+                {
+                    if (args.Length > 2)
+                    {
+                        mobileServiceRuntimeURL = args[2];
+                    }
+                    if (args.Length > 3)
+                    {
+                        mobileServiceRuntimeKey = args[3];
+                    }
+                    if (args.Length > 4)
+                    {
+                        tags = args[4];
+                    }
+                    ExecuteUnitTests(mobileServiceRuntimeURL, mobileServiceRuntimeKey, tags, auto: true);
+                }
+
+            };
         }
 
         /// <summary>
@@ -49,14 +71,20 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         /// <param name="e">Event arguments.</param>
         private void ExecuteUnitTests(object sender, RoutedEventArgs e)
         {
-            // Get the test settings from the UI
-            App.Harness.Settings.Custom["MobileServiceRuntimeUrl"] = txtRuntimeUri.Text;
-            App.Harness.Settings.Custom["MobileServiceRuntimeKey"] = txtRuntimeKey.Text;
-            App.Harness.Settings.TagExpression = txtTags.Text;
-
             Settings.Default.MobileServiceRuntimeUrl = txtRuntimeUri.Text;
             Settings.Default.MobileServiceRuntimeKey = txtRuntimeKey.Text;
             Settings.Default.MobileServiceTags = txtTags.Text;
+
+            ExecuteUnitTests(txtRuntimeUri.Text, txtRuntimeKey.Text, txtTags.Text, auto: false);
+        }
+
+        private void ExecuteUnitTests(string runtimeUri, string runtimeKey, string tags, bool auto)
+        {
+            // Get the test settings from the UI
+            App.Harness.Settings.Custom["MobileServiceRuntimeUrl"] = runtimeUri;
+            App.Harness.Settings.Custom["MobileServiceRuntimeKey"] = runtimeKey;
+            App.Harness.Settings.TagExpression = tags;
+            App.Harness.Settings.Custom["Auto"] = auto ? "True": "False";
 
             if (!string.IsNullOrEmpty(App.Harness.Settings.TagExpression))
             {

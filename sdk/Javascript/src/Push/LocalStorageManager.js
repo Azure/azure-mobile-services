@@ -9,178 +9,219 @@
 // Declare JSHint globals
 /*global WinJS:false, Windows:false */
 
-var _ = require('Extensions');
-var Platform = require('Platform');
+var _ = require('Extensions'),
+    Validate = require('Validate'),
+    Platform = require('Platform'),
+    Constants = {
+        Version: 'v1.1.0',
+        Keys: {
+            Version: 'Version',
+            PushHandle: 'ChannelUri',
+            Registrations: 'Registrations',
+            NativeRegistration: '$Default'
+        },
+    };
 
-function LocalStorageManager(applicationUri, tileId) {
-    this.storageVersion = 'v1.0.0';
-    this.primaryChannelId = '$Primary';
-    this.keyNameVersion = 'Version';
-    this.keyNameChannelUri = 'ChannelUri';
-    this.keyNameRegistrations = 'Registrations';
-    
-    if (!tileId) {
-        tileId = this.primaryChannelId;
-    }
+function LocalStorageManager(storageKey) {    
+    this._registrations = {};
+    this._storageKey = 'MobileServices.Push.' + storageKey;
 
-    var name = _.format('{0}-PushContainer-{1}-{2}', Windows.ApplicationModel.Package.current.id.name, applicationUri, tileId);
-    this.settings = Windows.Storage.ApplicationData.current.localSettings.createContainer(name, Windows.Storage.ApplicationDataCreateDisposition.always).values;
-    this.isRefreshNeeded = false;
-    this.channelUri = null;    
+    this._isRefreshNeeded = false;
+    Object.defineProperty(this, 'isRefreshNeeded', {
+        get: function () {
+            /// <summary>
+            /// Gets a value indicating whether local storage data needs to be refreshed.
+            /// </summary>
+            return this._isRefreshNeeded;
+        }
+    });
 
-    this.initializeRegistrationInfoFromStorage();
+    this._pushHandle = null;
+    Object.defineProperty(this, 'pushHandle', {
+        get: function () {
+            /// <summary>
+            /// Gets the DeviceId of all registrations in the LocalStorageManager
+            /// </summary>  
+            return _.isNull(this._pushHandle) ? '' : this._pushHandle;
+        },
+        set: function (value) {
+            Validate.notNullOrEmpty(value, 'pushHandle');
+
+            if (this._pushHandle !== value) {
+                this._pushHandle = value;
+                this._flushToSettings();
+            }
+        }
+    });
+
+    // Initialize our state
+    this._initializeRegistrationInfoFromStorage();
 }
 
 exports.LocalStorageManager = LocalStorageManager;
 
-LocalStorageManager.prototype.getChannelUri = function () {
-    return this.channelUri;
-};
+LocalStorageManager.NativeRegistrationName = Constants.Keys.NativeRegistration;
 
-LocalStorageManager.prototype.setChannelUri = function (channelUri) {
-    this.channelUri = channelUri;
-    this.flushToSettings();
-};
-
-LocalStorageManager.prototype.getRegistration = function (registrationName) {
-    return this.readRegistration(registrationName);
-};
-
-LocalStorageManager.prototype.deleteRegistrationByName = function (registrationName) {
-    if (tryRemoveSetting(registrationName, this.registrations)) {
-        this.flushToSettings();
-        return true;
-    }
-
-    return false;
-};
-
-LocalStorageManager.prototype.deleteRegistrationByRegistrationId = function (registrationId) {
-    var registration = this.getFirstRegistrationByRegistrationId(registrationId);
-
-    if (registration) {
-        this.deleteRegistrationByName(registration.registrationName);
-        return true;
-    }
-
-    return false;
-};
-
-LocalStorageManager.prototype.getFirstRegistrationByRegistrationId = function (registrationId) {
-    var returnValue = null;
-    for (var regName in this.registrations) {
-        if (this.registrations.hasOwnProperty(regName)) {
-            // Update only the first registration with matching registrationId
-            var registration = this.readRegistration(regName);
-            if (!returnValue && registration && (registration.registrationId === registrationId)) {
-                returnValue = registration;
-            }
+LocalStorageManager.prototype.getRegistrationIds = function () {
+    /// <summary>
+    /// Gets an array of all registration Ids
+    /// </summary>
+    /// <returns>
+    /// An array of registration Ids in form of ['1','2','3']
+    /// </returns>
+    var result = [];
+    for (var name in this._registrations) {
+        if (this._registrations.hasOwnProperty(name)) {
+            result.push(this._registrations[name]);
         }
     }
-
-    return returnValue;
+    return result;
 };
 
-LocalStorageManager.prototype.updateRegistrationByRegistrationName = function (registrationName, registrationId, channelUri) {
-    var cacheReg = {};
-    cacheReg.registrationName = registrationName;
-    cacheReg.registrationId = registrationId;
-    this.writeRegistration(registrationName, cacheReg);
-    this.channelUri = channelUri;
-    this.flushToSettings();
+LocalStorageManager.prototype.getRegistrationIdWithName = function (registrationName) {
+    /// <summary>
+    /// Get the registration Id from local storage
+    /// </summary>
+    /// <param name="registrationName">
+    /// The name of the registration mapping to search for
+    /// </param>
+    /// <returns>
+    /// The registration Id if it exists or null if it does not.
+    /// </returns>
+
+    Validate.notNullOrEmpty(registrationName, 'registrationName');
+
+    return this._registrations[registrationName];
 };
 
-LocalStorageManager.prototype.writeRegistration = function (registrationName, cacheReg) {
-    var cachedRegForPropertySet = JSON.stringify(cacheReg);
-    this.registrations.insert(registrationName, cachedRegForPropertySet);
+LocalStorageManager.prototype.updateAllRegistrations = function (registrations, pushHandle) {
+    /// <summary>
+    /// Replace all registrations and the pushHandle with those passed in.
+    /// </summary>
+    /// <param name="registrations">
+    /// An array of registrations to update.
+    /// </param>
+    /// <param name="pushHandle">
+    /// The pushHandle to update.
+    /// </param>
+
+    Validate.notNull(pushHandle, 'pushHandle');
+    if (!registrations) {
+        registrations = [];
+    }
+    this._registrations = {};
+
+    for (var i = 0; i < registrations.length; i++) {
+        var name = registrations[i].templateName;
+        if (_.isNullOrEmpty(name)) {
+            name = Constants.Keys.NativeRegistration;
+        }
+        
+        /// All registrations passed to this method will have registrationId as they
+        /// come directly from notification hub where registrationId is the key field.
+        this._registrations[name] = registrations[i].registrationId;
+    }
+
+    // Need to flush explictly as handle may not have changed
+    this._pushHandle = pushHandle;
+    this._flushToSettings();
+    this._isRefreshNeeded = false;
 };
 
-LocalStorageManager.prototype.readRegistration = function (registrationName) {
-    if (this.registrations.hasKey(registrationName)) {
-        var cachedRegFromPropertySet = this.registrations[registrationName];
-        return JSON.parse(cachedRegFromPropertySet);
-    } else {
-        return null;
+LocalStorageManager.prototype.updateRegistrationWithName = function (registrationName, registrationId, pushHandle) {
+    /// <summary>
+    /// Update a registration mapping and the deviceId in local storage by registrationName
+    /// </summary>
+    /// <param name="registrationName">
+    /// The name of the registration mapping to update.
+    /// </param>
+    /// <param name="registrationId">
+    /// The registrationId to update.
+    /// </param>
+    /// <param name="registrationDeviceId">
+    /// The device Id to update the ILocalStorageManager to.
+    /// </param>
+
+    Validate.notNullOrEmpty(registrationName, 'registrationName');
+    Validate.notNullOrEmpty(registrationId, 'registrationId');
+    Validate.notNullOrEmpty(pushHandle, 'pushHandle');
+
+    // TODO: We could check if the Id or Name has actually changed
+    this._registrations[registrationName] = registrationId;
+
+    this._pushHandle = pushHandle;
+    this._flushToSettings();
+};
+
+LocalStorageManager.prototype.deleteRegistrationWithName = function (registrationName) {
+    /// <summary>
+    /// Delete a registration from local storage by name
+    /// </summary>
+    /// <param name="registrationName">
+    /// The name of the registration mapping to delete.
+    /// </param>
+
+    Validate.notNullOrEmpty(registrationName, 'registrationName');
+
+    if (this._registrations.hasOwnProperty(registrationName)) {
+        delete this._registrations[registrationName];
+        this._flushToSettings();
     }
 };
 
-LocalStorageManager.prototype.updateRegistrationByRegistrationId = function (registrationId, registrationName, channelUri) {
-    var registration = this.getFirstRegistrationByRegistrationId(registrationId);
-
-    if (registration) {
-        this.updateRegistrationByRegistrationName(registration.registrationName, registration.registrationId, channelUri);
-    } else {
-        this.updateRegistrationByRegistrationName(registrationName, registrationId, channelUri);
-    }
+LocalStorageManager.prototype.deleteAllRegistrations = function () {
+    /// <summary>
+    /// Clear all registrations from local storage.
+    /// </summary>
+    this._registrations = {};
+    this._flushToSettings();
 };
 
-LocalStorageManager.prototype.clearRegistrations = function () {
-    this.registrations.clear();
-    this.flushToSettings();
+// Private methods
+
+LocalStorageManager.prototype._flushToSettings = function () {
+    /// <summary>
+    /// Writes all registrations to storage
+    /// </summary>
+
+    var forStorage = {};
+    forStorage[Constants.Keys.Version] = Constants.Version;
+    forStorage[Constants.Keys.PushHandle] = this._pushHandle;
+    forStorage[Constants.Keys.Registrations] = this._registrations;
+
+    Platform.writeSetting(this._storageKey, JSON.stringify(forStorage));
 };
 
-LocalStorageManager.prototype.refreshFinished = function (refreshedChannelUri) {
-    this.setChannelUri(refreshedChannelUri);
-    this.isRefreshNeeded = false;
-};
+LocalStorageManager.prototype._initializeRegistrationInfoFromStorage = function () {
+    /// <summary>
+    /// Populates registration information from storage
+    /// </summary>
 
-LocalStorageManager.prototype.flushToSettings = function () {
-    this.settings.insert(this.keyNameVersion, this.storageVersion);
-    this.settings.insert(this.keyNameChannelUri, this.channelUri);
-
-    var str = '';
-    if (this.registrations !== null) {
-        str = JSON.stringify(this.registrations);
-    }
-
-    this.settings.insert(this.keyNameRegistrations, str);
-};
-
-LocalStorageManager.prototype.initializeRegistrationInfoFromStorage = function () {
-    this.registrations = new Windows.Foundation.Collections.PropertySet();
+    this._registrations = {};
 
     try {
-        // Read channelUri
-        this.channelUri = readContent(this.settings, this.keyNameChannelUri);
+        // Read push handle
+        var data = JSON.parse(Platform.readSetting(this._storageKey));
 
-        // Verify this.storage version
-        var version = readContent(this.settings, this.keyNameVersion);
-        if (this.storageVersion !== version.toLowerCase()) {
-            this.isRefreshNeeded = true;
+        this._pushHandle = data[Constants.Keys.PushHandle];
+        if (!this._pushHandle) {
+            this._isRefreshNeeded = true;
             return;
         }
 
-        this.isRefreshNeeded = false;
+        // Verify this.storage version
+        var version = data[Constants.Keys.Version] || '';
+        this._isRefreshNeeded = (Constants.Version !== version.toLowerCase());
+        if (this._isRefreshNeeded) {
+            return;
+        }
 
         // read registrations
-        var regsStr = readContent(this.settings, this.keyNameRegistrations);
-        if (regsStr) {
-            var entries = JSON.parse(regsStr);
-
-            for (var reg in entries) {
-                if (entries.hasOwnProperty(reg)) {
-                    this.registrations.insert(reg, entries[reg]);
-                }
-            }
-        }
+        this._registrations = data[Constants.Keys.Registrations];
+        
     } catch (err) {
         // It is possible that local storage is corrupted by users, bugs or other issues.
         // If this occurs, force a full refresh.
-        this.isRefreshNeeded = true;
+        this._isRefreshNeeded = true;
     }
 };
-
-function readContent(propertySet, key) {
-    if (propertySet.hasKey(key)) {
-        return propertySet[key];
-    }
-    return '';
-}
-
-function tryRemoveSetting(name, values) {
-    if (values[name]) {
-        values.remove(name);
-        return true;
-    }
-    return false;
-}

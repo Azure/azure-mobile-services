@@ -283,9 +283,4 @@
              ];
 }
 
-+(NSString *) testInvalidSystemParameterQueryString
-{
-    return @"_systemProperties=__createdAt,__version";
-}
-
 @end

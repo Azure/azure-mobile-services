@@ -70,6 +70,53 @@ exports.MobileServiceLogin = MobileServiceLogin;
 // good enough).
 Platform.addToMobileServicesClientNamespace({ MobileServiceLogin: MobileServiceLogin });
 
+MobileServiceLogin.prototype.loginWithOptions = function (provider, options, callback) {
+    /// <summary>
+    /// Log a user into a Mobile Services application given a provider name with
+    /// given options.
+    /// </summary>
+    /// <param name="provider" type="String" mayBeNull="false">
+    /// Name of the authentication provider to use; one of 'facebook', 'twitter', 'google', 
+    /// 'windowsazureactivedirectory' (can also use 'aad')
+    /// or 'microsoftaccount'.
+    /// </param>
+    /// <param name="options" type="Object" mayBeNull="true">
+    /// Contains additional parameter information, valid values are:
+    ///    token: provider specific object with existing OAuth token to log in with
+    ///    useSingleSignOn: Only applies to Windows 8 clients.  Will be ignored on other platforms.
+    /// Indicates if single sign-on should be used. Single sign-on requires that the 
+    /// application's Package SID be registered with the Microsoft Azure Mobile Service, 
+    /// but it provides a better experience as HTTP cookies are supported so that users 
+    /// do not have to login in everytime the application is launched.
+    ///    parameters: Any additional provider specific query string parameters.
+    /// </param>
+    /// <param name="callback" type="Function" mayBeNull="true">
+    /// Optional callback accepting (error, user) parameters.
+    /// </param>
+
+    Validate.isString(provider, 'provider');
+    Validate.notNull(provider, 'provider');
+
+    if (_.isNull(callback)) {
+        if (!_.isNull(options) && typeof options === 'function') {
+            callback = options;
+            options = null;
+        } else {
+            Validate.notNull(null, 'callback');
+        }
+    }    
+
+    // loginWithOptions('a.b.c')
+    if (!options && this._isAuthToken(provider)) {
+        this.loginWithMobileServiceToken(provider, callback);
+    } else {
+        // loginWithOptions('facebook', {});
+        // loginWithOptions('facebook');
+        options = options || {};
+        this.loginWithProvider(provider, options.token, options.useSingleSignOn, options.parameters, callback);
+    }
+};
+
 MobileServiceLogin.prototype.login = function (provider, token, useSingleSignOn, callback) {
     /// <summary>
     /// Log a user into a Mobile Services application given a provider name and optional token object
@@ -115,9 +162,9 @@ MobileServiceLogin.prototype.login = function (provider, token, useSingleSignOn,
             useSingleSignOn = false;
         }
     }
-    
+
     // Determine if the provider is actually a Mobile Services authentication token
-    if (_.isNull(token) && _.isString(provider) && provider.split('.').length === 3) {
+    if (_.isNull(token) && this._isAuthToken(provider)) {
         token = provider;
         provider = null;
     }
@@ -138,11 +185,15 @@ MobileServiceLogin.prototype.login = function (provider, token, useSingleSignOn,
             // The mobile service REST API uses '/login/aad' for Microsoft Azure Active Directory
             provider = 'aad';
         }
-        this.loginWithProvider(provider, token, useSingleSignOn, callback);
+        this.loginWithProvider(provider, token, useSingleSignOn, {}, callback);
     }
     else {
         this.loginWithMobileServiceToken(token, callback);
     }
+};
+
+MobileServiceLogin.prototype._isAuthToken = function (value) {
+    return value && _.isString(value) && value.split('.').length === 3
 };
 
 MobileServiceLogin.prototype.loginWithMobileServiceToken = function(authenticationToken, callback) {
@@ -172,7 +223,7 @@ MobileServiceLogin.prototype.loginWithMobileServiceToken = function(authenticati
         });
 };
 
-MobileServiceLogin.prototype.loginWithProvider = function(provider, token, useSingleSignOn, callback) {
+MobileServiceLogin.prototype.loginWithProvider = function(provider, token, useSingleSignOn, parameters, callback) {
     /// <summary>
     /// Log a user into a Mobile Services application given a provider name and optional token object.
     /// </summary>
@@ -180,35 +231,21 @@ MobileServiceLogin.prototype.loginWithProvider = function(provider, token, useSi
     /// Name of the authentication provider to use; one of 'facebook', 'twitter', 'google',
     /// 'windowsazureactivedirectory' (can also use 'aad'), or 'microsoftaccount'.
     /// </param>
-    /// <param name="token" type="Object" mayBeNull="true">
+    /// <param name="token" type="Object">
     /// Optional, provider specific object with existing OAuth token to log in with.
     /// </param>
-    /// <param name="useSingleSignOn" type="Boolean" mayBeNull="true">
+    /// <param name="useSingleSignOn" type="Boolean">
     /// Optional, indicates if single sign-on should be used.  Single sign-on requires that the
     /// application's Package SID be registered with the Microsoft Azure Mobile Service, but it
     /// provides a better experience as HTTP cookies are supported so that users do not have to
     /// login in everytime the application is launched. Is false be default.
     /// </param>
-    /// <param name="callback" type="Function" mayBeNull="true">
+    /// <param name="parameters" type="Object">
+    /// Any additional provider specific query string parameters. 
+    /// </param>
+    /// <param name="callback" type="Function">
     /// The callback to execute when the login completes: callback(error, user).
     /// </param>
-
-    // Account for absent optional arguments
-    if (_.isNull(callback))
-    {
-        if (_.isNull(useSingleSignOn) && (typeof token === 'function')) {
-            callback = token;
-            token = null;
-            useSingleSignOn = false;
-        } else if (typeof useSingleSignOn === 'function') {
-            callback = useSingleSignOn;
-            useSingleSignOn = false;
-            if (!_.isNull(token) && _.isBool(token)) {
-                useSingleSignOn = token;
-                token = null;
-            }
-        }
-    }
 
     // Validate arguments
     Validate.isString(provider, 'provider');
@@ -228,10 +265,10 @@ MobileServiceLogin.prototype.loginWithProvider = function(provider, token, useSi
     
     // Either login with the token or the platform specific login control.
     if (!_.isNull(token)) {
-        loginWithProviderAndToken(this, provider, token, callback);
+        loginWithProviderAndToken(this, provider, token, parameters, callback);
     }
     else {
-        loginWithLoginControl(this, provider, useSingleSignOn, callback);
+        loginWithLoginControl(this, provider, useSingleSignOn, parameters, callback);
     }
 };
 
@@ -311,7 +348,7 @@ function onLoginResponse(error, response, client, callback) {
     onLoginComplete(error, mobileServiceToken, client, callback);
 }
 
-function loginWithProviderAndToken(login, provider, token, callback) {
+function loginWithProviderAndToken(login, provider, token, parameters, callback) {
     /// <summary>
     /// Log a user into a Mobile Services application given a provider name and token object.
     /// </summary>
@@ -325,6 +362,9 @@ function loginWithProviderAndToken(login, provider, token, callback) {
     /// <param name="token" type="Object">
     /// Provider specific object with existing OAuth token to log in with.
     /// </param>
+    /// <param name="parameters" type="Object">
+    /// Any additional provider specific query string parameters.
+    /// </param>
     /// <param name="callback" type="Function" mayBeNull="true">
     /// The callback to execute when the login completes: callback(error, user).
     /// </param>
@@ -336,11 +376,17 @@ function loginWithProviderAndToken(login, provider, token, callback) {
     // one-at-a-time restriction.
     login._loginState = { inProcess: true, cancelCallback: null };
 
+    var url = loginUrl + '/' + provider;
+    if (!_.isNull(parameters)) {
+        var queryString = _.url.getQueryString(parameters);
+        url = _.url.combinePathAndQuery(url, queryString);
+    }
+
     // Invoke the POST endpoint to exchange provider-specific token for a 
     // Microsoft Azure Mobile Services token
     client._request(
         'POST',
-        loginUrl + '/' + provider,
+        url,
         token,
         login.ignoreFilters,
         function (error, response) {
@@ -349,7 +395,7 @@ function loginWithProviderAndToken(login, provider, token, callback) {
         });
 }
 
-function loginWithLoginControl(login, provider, useSingleSignOn, callback) {
+function loginWithLoginControl(login, provider, useSingleSignOn, parameters, callback) {
     /// <summary>
     /// Log a user into a Mobile Services application using a platform specific
     /// login control that will present the user with the given provider's login web page.
@@ -366,6 +412,9 @@ function loginWithLoginControl(login, provider, useSingleSignOn, callback) {
     /// provides a better experience as HTTP cookies are supported so that users do not have to
     /// login in everytime the application is launched. Is false be default.
     /// </param>
+    /// <param name="parameters" type="Object">
+    /// Any additional provider specific query string parameters.
+    /// </param>
     /// <param name="callback" type="Function"  mayBeNull="true">
     /// The callback to execute when the login completes: callback(error, user).
     /// </param>
@@ -376,6 +425,11 @@ function loginWithLoginControl(login, provider, useSingleSignOn, callback) {
         loginUrl,
         provider);
     var endUri = null;
+
+    if (!_.isNull(parameters)) {
+        var queryString = _.url.getQueryString(parameters);
+        startUri = _.url.combinePathAndQuery(startUri, queryString);
+    }
 
     // If not single sign-on, then we need to construct a non-null end uri.
     if (!useSingleSignOn) {
