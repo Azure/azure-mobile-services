@@ -315,7 +315,7 @@ $testGroup('Extensions.js',
     .check(function () {
         $assert.areEqual(Extensions.url.isAbsoluteUrl('ms-appx://www.test.com/'), false);
         $assert.areEqual(Extensions.url.isAbsoluteUrl('www.test.com/'), false);
-        $assert.areEqual(Extensions.url.isAbsoluteUrl('filter=(id eq 6)'), false);
+        $assert.areEqual(Extensions.url.isAbsoluteUrl('$filter=(id eq 6)'), false);
 
         $assert.areEqual(Extensions.url.isAbsoluteUrl('https://www.test.com/'), true);
         $assert.areEqual(Extensions.url.isAbsoluteUrl('http://www.test.com/'), true);
