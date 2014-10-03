@@ -2,8 +2,13 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Threading.Tasks;
+#if __UNIFIED__
+using Foundation;
+using UIKit;
+#else
 using MonoTouch.Foundation;
 using MonoTouch.UIKit;
+#endif
 using Xamarin.Auth;
 
 namespace Microsoft.WindowsAzure.MobileServices
@@ -34,7 +39,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             auth.Error += (o, e) =>
             {
-                NSAction completed = () =>
+                Action completed = () =>
                 {
                     Exception ex = e.Exception ?? new Exception(e.Message);
                     tcs.TrySetException(ex);
@@ -51,7 +56,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             auth.Completed += (o, e) =>
             {
-                NSAction completed = () =>
+                Action completed = () =>
                 {
                     if (!e.IsAuthenticated)
                         tcs.TrySetException(new InvalidOperationException(Resources.IAuthenticationBroker_AuthenticationCanceled));
