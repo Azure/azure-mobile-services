@@ -21,7 +21,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.Ext.WP81", "src\Microsoft.WindowsAzure.MobileServices.WindowsPhone81\Microsoft.WindowsAzure.Mobile.Ext.WP81.csproj", "{02EEF75A-D824-4203-B243-C1B97B0D35A9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.Ext.iOS-Classic", "src\Microsoft.WindowsAzure.MobileServices.iOS-Classic\Microsoft.WindowsAzure.Mobile.Ext.iOS-Classic.csproj", "{A871B137-83A8-4E9B-913D-30EE0288E161}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.Ext.iOS-Classic", "src\Microsoft.WindowsAzure.MobileServices.iOS\Microsoft.WindowsAzure.Mobile.Ext.iOS-Classic.csproj", "{A871B137-83A8-4E9B-913D-30EE0288E161}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{45E57CDC-7178-4915-8D0B-CF80F5E44AF6}"
 EndProject
