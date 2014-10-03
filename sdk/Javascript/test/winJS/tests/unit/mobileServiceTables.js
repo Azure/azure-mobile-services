@@ -299,6 +299,89 @@ $testGroup('MobileServiceTables.js',
         });
     }),
 
+    $test('tableReadAgainstTableStorage')
+    .tag('LinkHeader')
+    .description('Verify MobileServiceTable.read sends a link header and is parsed for table storage')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.url, 'http://www.test.com/tables/books');
+            callback(null, { status: 200, responseText: '[{"title":"test"}]', getResponseHeader: function (header) { return header == 'Link' ? 'https://test.com/tables/books?skip=10&top=40; rel=next' : null; } });
+        });
+
+        var table = client.getTable('books');
+        return table.read().then(function (results) {
+            $assert.areEqual(results.nextLink, 'https://test.com/tables/books?skip=10&top=40')
+            $assert.areEqual(results[0].title, 'test');
+        });
+    }),
+
+    $test('tableReadAgainstTableStorageWithPrevLink')
+    .tag('LinkHeader')
+    .description('Verify MobileServiceTable.read sends a link header but if it is a prev link, it is not parsed')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.url, 'http://www.test.com/tables/books');
+            callback(null, { status: 200, responseText: '[{"title":"test"}]', getResponseHeader: function (header) { return header == 'Link' ? 'https://test.com/tables/books?skip=10&top=40; rel=prev' : null; } });
+        });
+
+        var table = client.getTable('books');
+        return table.read().then(function (results) {
+            $assert.isNull(results.nextLink);
+            $assert.areEqual(results[0].title, 'test');
+        });
+    }),
+
+    $test('tableReadAgainstTableStorageReturnsObject')
+    .tag('LinkHeader')
+    .description('Verify MobileServiceTable.read sends a link header but it is not parsed if an object is sent back')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.url, 'http://www.test.com/tables/books');
+            callback(null, { status: 200, responseText: '{"title":"test"}', getResponseHeader: function (header) { return header == 'Link' ? 'https://test.com/tables/books?skip=10&top=40; rel=next' : null; } });
+        });
+
+        var table = client.getTable('books');
+        return table.read().then(function (results) {
+            $assert.isNull(results.nextLink);
+            $assert.areEqual(results.title, 'test');
+        });
+    }),
+
+    $test('queryReadAgainstTableStorage')
+    .tag('LinkHeader')
+    .description('Verify MobileServiceQuery.read sends a link header and is parsed for table storage')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.url, 'http://www.test.com/tables/books?$top=50');
+            callback(null, { status: 200, responseText: '[{"title":"test"}]', getResponseHeader: function (header) { return header == 'Link' ? 'https://test.com/tables/books?skip=10&top=40; rel=next' : null; } });
+        });
+
+        var table = client.getTable('books');
+        return table.take(50).read().then(function (results) {
+            $assert.areEqual(results.nextLink, 'https://test.com/tables/books?skip=10&top=40')
+            $assert.areEqual(results[0].title, 'test');
+        });
+    }),
+
+    $test('tableReadWithUrl')
+    .description('Verify MobileServiceTable.read with full url works')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient('https://wwww.test.com/', '123456abcdefg');
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.url, 'https://test.com/tables/books?skip=10&top=40');
+            callback(null, { status: 200, responseText: '{"title":"test"}' });
+        });
+
+        var table = client.getTable('books');
+        return table.read('https://test.com/tables/books?skip=10&top=40').then(function (results) {
+            $assert.areEqual(results.title, 'test');
+        });
+    }),
+
     $test('query matches table')
     .description('Verify that a query created from one table is not used with another table')
     .check(function () {
@@ -1441,7 +1524,7 @@ $testGroup('MobileServiceTables.js',
         return $chain.apply(null, testCases);
     }),
 
-    $test('Features - read')
+    $test('FeaturesRead')
     .description('Verify the features headers for MobileTableService.read calls')
     .checkAsync(function () {
         var lastFeaturesHeader = '';

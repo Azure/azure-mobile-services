@@ -18,6 +18,7 @@ var idPropertyName = "id";
 // .../{app}/collections/{coll}.
 var tableRouteSeperatorName = "tables";
 var idNames = ["ID", "Id", "id", "iD"];
+var nextLinkRegex = /^(.*?);\s*rel\s*=\s*(\w+)\s*$/;
 
 var MobileServiceSystemProperties = {
     None: 0,
@@ -172,9 +173,12 @@ MobileServiceTable.prototype._read = function (query, parameters, callback) {
     }
     
     // Construct the URL
-    var urlFragment = _.url.combinePathSegments(tableRouteSeperatorName, tableName);
-    if (!_.isNull(queryString)) {
-        urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
+    var urlFragment = queryString;
+    if (!_.url.isAbsoluteUrl(urlFragment)) {
+        urlFragment = _.url.combinePathSegments(tableRouteSeperatorName, tableName);
+        if (!_.isNull(queryString)) {
+            urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
+        }
     }
 
     // Make the request
@@ -208,6 +212,19 @@ MobileServiceTable.prototype._read = function (query, parameters, callback) {
                     var i = 0;
                     for (i = 0; i < values.length; i++) {
                         values[i] = projection.call(values[i]);
+                    }
+                }
+
+                // Grab link header when possible
+                if (Array.isArray(values) && response.getResponseHeader && _.isNull(values.nextLink)) {
+                    var link = response.getResponseHeader('Link');
+                    if (!_.isNullOrEmpty(link)) {
+                        var result = nextLinkRegex.exec(link);
+
+                        // Only add nextLink when relation is next
+                        if (result && result.length === 3 && result[2] == 'next') {
+                            values.nextLink = result[1];
+                        }
                     }
                 }
             }
