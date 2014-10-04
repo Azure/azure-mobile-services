@@ -43,6 +43,7 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
     <None Include="packages.config" />
     <Compile Include="SerializationTypes\TypeWithConstructor.cs" />
+    <Compile Include="UnitTests\Http\HttpUtilityTests.cs" />
     <Compile Include="UnitTests\OData\ODataExpressionParser.Test.cs" />
     <Compile Include="UnitTests\Table\Sync\MobileServiceSyncContext.Test.cs" />
   </ItemGroup>

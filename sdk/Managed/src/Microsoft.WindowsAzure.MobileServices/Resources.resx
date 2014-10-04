@@ -426,4 +426,7 @@
   <data name="MobileServiceSyncTable_OrderByNotAllowed" xml:space="preserve">
     <value>The supported table options does not include orderby.</value>
   </data>
+  <data name="MobileServiceTable_QueryUriHostIsDifferent" xml:space="preserve">
+    <value>The query uri must be on the same host as the Mobile Service.</value>
+  </data>
 </root>

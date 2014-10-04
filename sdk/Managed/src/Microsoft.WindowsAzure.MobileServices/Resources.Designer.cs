@@ -503,6 +503,15 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The query uri must be on the same host as the Mobile Service..
+        /// </summary>
+        internal static string MobileServiceTable_QueryUriHostIsDifferent {
+            get {
+                return ResourceManager.GetString("MobileServiceTable_QueryUriHostIsDifferent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot update if the {0} member is set to a default value..
         /// </summary>
         internal static string MobileServiceTable_UpdateWithoutId {

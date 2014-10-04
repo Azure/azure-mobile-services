@@ -40,6 +40,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         }
 
         /// <summary>
+        /// Gets the uri path if the query was an absolute or relative uri
+        /// </summary>
+        internal string UriPath { get; private set; }
+
+        /// <summary>
         /// Gets or sets the name of the table being queried.
         /// </summary>
         public string TableName { get; private set; }
@@ -188,6 +193,27 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         public static MobileServiceTableQueryDescription Parse(string tableName, string query)
         {
             query = query ?? String.Empty;
+
+            return Parse(tableName, query, null);
+        }
+
+        internal static MobileServiceTableQueryDescription Parse(Uri applicationUri, string tableName, string query)
+        {
+            query = query ?? String.Empty;
+            string uriPath = null;
+            Uri uri;
+            bool absolute;
+            if (HttpUtility.TryParseQueryUri(applicationUri, query, out uri, out absolute))
+            {
+                query = uri.Query.Length > 0 ? uri.Query.Substring(1) : String.Empty;
+                uriPath = uri.AbsolutePath;
+            }
+
+            return Parse(tableName, query, uriPath);
+        }
+
+        private static MobileServiceTableQueryDescription Parse(string tableName, string query, string uriPath)
+        {
             bool includeTotalCount = false;
             int? top = null;
             int? skip = null;
@@ -231,23 +257,24 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                 }
             }
 
-            var queryDescription = new MobileServiceTableQueryDescription(tableName)
+            var description = new MobileServiceTableQueryDescription(tableName)
             {
                 IncludeTotalCount = includeTotalCount,
                 Skip = skip,
                 Top = top
             };
+            description.UriPath = uriPath;
             if (selection != null)
             {
-                ((List<string>)queryDescription.Selection).AddRange(selection);
+                ((List<string>)description.Selection).AddRange(selection);
             }
             if (orderings != null)
             {
-                ((List<OrderByNode>)queryDescription.Ordering).AddRange(orderings);
+                ((List<OrderByNode>)description.Ordering).AddRange(orderings);
             }
-            queryDescription.Filter = filter;
+            description.Filter = filter;
 
-            return queryDescription;
+            return description;
         }
     }
 }

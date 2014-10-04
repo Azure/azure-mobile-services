@@ -230,10 +230,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             IMobileServiceTable table = service.GetTable("someTable");
 
-            await table.ReadAsync("http://wwww.contoso.com/about/?$filter=a eq b&$orderby=c");
+            await table.ReadAsync("http://www.test.com/about/?$filter=a eq b&$orderby=c");
 
             Assert.AreEqual("TU,LH", hijack.Request.Headers.GetValues("X-ZUMO-FEATURES").First());
-            Assert.AreEqual("http://wwww.contoso.com/about/?$filter=a eq b&$orderby=c", hijack.Request.RequestUri.ToString());
+            Assert.AreEqual("http://www.test.com/about/?$filter=a eq b&$orderby=c", hijack.Request.RequestUri.ToString());
         }
 
         [AsyncTestMethod]
