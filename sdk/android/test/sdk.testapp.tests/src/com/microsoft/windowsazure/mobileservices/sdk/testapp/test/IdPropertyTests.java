@@ -39,6 +39,13 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterRequestMock;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterResponseMock;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.StatusLineMock;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.data.IdTestData;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.IdPropertyTestClasses.LongIdType;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.ResultsContainer;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.IdPropertyTestClasses.StringIdType;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
 

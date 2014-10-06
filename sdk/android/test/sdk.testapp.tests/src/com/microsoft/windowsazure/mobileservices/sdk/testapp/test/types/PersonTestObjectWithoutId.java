@@ -17,10 +17,40 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types;
+package com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types;
 
-import java.util.List;
+public class PersonTestObjectWithoutId {
+	private String firstName;
+	private String lastName;
+	private int age;
 
-public interface ListFilter<E> {
-	public FilterResult<E> filter(List<? extends E> list);
+	public PersonTestObjectWithoutId(String firstName, String lastName, int age) {
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.age = age;
+	}
+
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public int getAge() {
+		return age;
+	}
+
+	public void setAge(int age) {
+		this.age = age;
+	}
 }

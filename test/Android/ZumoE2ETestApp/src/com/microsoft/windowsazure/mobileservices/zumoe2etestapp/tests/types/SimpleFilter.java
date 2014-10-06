@@ -25,13 +25,13 @@ import java.util.List;
 public abstract class SimpleFilter<E> implements ListFilter<E> {
 
 	@Override
-	public FilterResult<E> filter(List<E> list) {
+	public FilterResult<E> filter(List<? extends E> list) {
 		return getElements(list);
 	}
 
 	abstract protected boolean criteria(E element);
 
-	protected FilterResult<E> getElements(List<E> list) {
+	protected FilterResult<E> getElements(List<? extends E> list) {
 		List<E> newList = new ArrayList<E>();
 		FilterResult<E> result = new FilterResult<E>();
 

@@ -61,10 +61,11 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestGr
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestResult;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestStatus;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.Util;
-import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.AllMovies;
+import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.AllStringIdMovies;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.Movie;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.MovieComparator;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.SimpleMovieFilter;
+import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.StringIdMovie;
 
 public class CustomApiTests extends TestGroup {
 
@@ -116,6 +117,8 @@ public class CustomApiTests extends TestGroup {
 		this.addTest(apiAuthenticatedTest);
 		this.addTest(LoginTests.createLogoutTest());
 
+		this.addTest(QueryTests.createPopulateStringIdTest());
+
 		for (TypedTestType testType : TypedTestType.values()) {
 			this.addTest(createTypedApiTest(rndGen, testType));
 		}
@@ -153,7 +156,7 @@ public class CustomApiTests extends TestGroup {
 		this.addTest(invokeHttpContentApiOverload1WithCallbackTest());
 		this.addTest(invokeHttpContentApiOverload1WithCallbackFailTest());
 	}
-	
+
 	private TestCase createHttpContentApiTest(final DataFormat inputFormat, final DataFormat outputFormat, final Random rndGen) {
 		String name = String.format("HttpContent Overload - Input: %s - Output: %s", inputFormat, outputFormat);
 
@@ -440,7 +443,7 @@ public class CustomApiTests extends TestGroup {
 				mClient = client;
 				mCallback = callback;
 
-				final Movie ramdomMovie = QueryTestData.getRandomMovie(rndGen);
+				final StringIdMovie ramdomMovie = QueryTestData.getRandomStringIdMovie(rndGen);
 				log("Using movie: " + ramdomMovie.getTitle());
 
 				String apiName = MOVIEFINDER_API_NAME;
@@ -449,10 +452,10 @@ public class CustomApiTests extends TestGroup {
 				case GetByTitle:
 					apiUrl = apiName + "/title/" + ramdomMovie.getTitle();
 					log("API: " + apiUrl);
-					mExpectedResult = new Movie[] { ramdomMovie };
+					mExpectedResult = new StringIdMovie[] { ramdomMovie };
 
 					try {
-						AllMovies result = mClient.invokeApi(apiUrl, HttpGet.METHOD_NAME, null, AllMovies.class).get();
+						AllStringIdMovies result = mClient.invokeApi(apiUrl, HttpGet.METHOD_NAME, null, AllStringIdMovies.class).get();
 
 						if (!Util.compareArrays(mExpectedResult, result.getMovies())) {
 							createResultFromException(mResult,
@@ -474,17 +477,16 @@ public class CustomApiTests extends TestGroup {
 					apiUrl = apiName + "/date/" + c.get(Calendar.YEAR) + "/" + (c.get(Calendar.MONTH) + 1) + "/" + c.get(Calendar.DATE);
 					log("API: " + apiUrl);
 					SimpleMovieFilter dateFilter = new SimpleMovieFilter() {
-
 						@Override
 						protected boolean criteria(Movie movie) {
 							return movie.getReleaseDate().equals(releaseDate);
 						}
 					};
 
-					mExpectedResult = dateFilter.filter(QueryTestData.getAllMovies()).elements.toArray(new Movie[0]);
+					mExpectedResult = dateFilter.filter(QueryTestData.getAllStringIdMovies()).elements.toArray(new Movie[0]);
 
 					try {
-						AllMovies result = mClient.invokeApi(apiUrl, HttpGet.METHOD_NAME, null, AllMovies.class).get();
+						AllStringIdMovies result = mClient.invokeApi(apiUrl, HttpGet.METHOD_NAME, null, AllStringIdMovies.class).get();
 
 						if (!Util.compareArrays(mExpectedResult, result.getMovies())) {
 							createResultFromException(mResult,
@@ -543,21 +545,23 @@ public class CustomApiTests extends TestGroup {
 						}
 
 						@Override
-						protected List<Movie> applyOrder(List<Movie> movies) {
+						protected List<Movie> applyOrder(List<? extends Movie> movies) {
 							if (orderByCopy == null || orderByCopy.equals("title")) {
 								Collections.sort(movies, new MovieComparator("getTitle"));
+							} else if (orderByCopy.equals("duration")) {
+								Collections.sort(movies, new MovieComparator("getDuration"));
 							}
 
-							return movies;
+							return new ArrayList<Movie>(movies);
 						}
 					};
 
-					mExpectedResult = movieFilter.filter(QueryTestData.getAllMovies()).elements.toArray(new Movie[0]);
+					mExpectedResult = movieFilter.filter(QueryTestData.getAllStringIdMovies()).elements.toArray(new Movie[0]);
 
 					if (mQuery == null) {
 
 						try {
-							AllMovies result = mClient.invokeApi(apiUrl, ramdomMovie, HttpPost.METHOD_NAME, null, AllMovies.class).get();
+							AllStringIdMovies result = mClient.invokeApi(apiUrl, ramdomMovie, HttpPost.METHOD_NAME, null, AllStringIdMovies.class).get();
 
 							if (!Util.compareArrays(mExpectedResult, result.getMovies())) {
 								createResultFromException(mResult,
@@ -572,7 +576,7 @@ public class CustomApiTests extends TestGroup {
 					} else {
 
 						try {
-							AllMovies result = mClient.invokeApi(apiUrl, ramdomMovie, HttpPost.METHOD_NAME, null, AllMovies.class).get();
+							AllStringIdMovies result = mClient.invokeApi(apiUrl, ramdomMovie, HttpPost.METHOD_NAME, mQuery, AllStringIdMovies.class).get();
 
 							if (!Util.compareArrays(mExpectedResult, result.getMovies())) {
 								createResultFromException(mResult,
@@ -918,17 +922,17 @@ public class CustomApiTests extends TestGroup {
 				apiUrl = apiName + "/moviesWithSameDuration";
 
 				try {
-					client.invokeApi(apiUrl, AllMovies.class, typedTestCallback());
+					client.invokeApi(apiUrl, AllStringIdMovies.class, typedTestCallback());
 				} catch (Exception exception) {
 					createResultFromException(mResult, exception);
 				}
 			}
 
-			private ApiOperationCallback<AllMovies> typedTestCallback() {
-				return new ApiOperationCallback<AllMovies>() {
+			private ApiOperationCallback<AllStringIdMovies> typedTestCallback() {
+				return new ApiOperationCallback<AllStringIdMovies>() {
 
 					@Override
-					public void onCompleted(AllMovies result, Exception exception, ServiceFilterResponse response) {
+					public void onCompleted(AllStringIdMovies result, Exception exception, ServiceFilterResponse response) {
 
 						if (exception != null) {
 							createResultFromException(mResult, exception);
@@ -966,17 +970,17 @@ public class CustomApiTests extends TestGroup {
 				apiUrl = apiName + "/moviesWithSameDuration";
 
 				try {
-					client.invokeApi(apiUrl, AllMovies.class, typedTestCallback());
+					client.invokeApi(apiUrl, AllStringIdMovies.class, typedTestCallback());
 				} catch (Exception exception) {
 					createResultFromException(mResult, exception);
 				}
 			}
 
-			private ApiOperationCallback<AllMovies> typedTestCallback() {
-				return new ApiOperationCallback<AllMovies>() {
+			private ApiOperationCallback<AllStringIdMovies> typedTestCallback() {
+				return new ApiOperationCallback<AllStringIdMovies>() {
 
 					@Override
-					public void onCompleted(AllMovies result, Exception exception, ServiceFilterResponse response) {
+					public void onCompleted(AllStringIdMovies result, Exception exception, ServiceFilterResponse response) {
 
 						if (exception == null) {
 							mResult.setStatus(TestStatus.Failed);
@@ -1007,7 +1011,7 @@ public class CustomApiTests extends TestGroup {
 				mResult.setStatus(TestStatus.Passed);
 				mCallback = callback;
 
-				final Movie ramdomMovie = QueryTestData.getRandomMovie(rndGen);
+				final StringIdMovie ramdomMovie = QueryTestData.getRandomStringIdMovie(rndGen);
 
 				String apiName = MOVIEFINDER_API_NAME;
 				String apiUrl;
@@ -1015,17 +1019,17 @@ public class CustomApiTests extends TestGroup {
 				apiUrl = apiName + "/moviesWithSameDuration";
 
 				try {
-					client.invokeApi(apiUrl, ramdomMovie, AllMovies.class, typedTestCallback());
+					client.invokeApi(apiUrl, ramdomMovie, AllStringIdMovies.class, typedTestCallback());
 				} catch (Exception exception) {
 					createResultFromException(mResult, exception);
 				}
 			}
 
-			private ApiOperationCallback<AllMovies> typedTestCallback() {
-				return new ApiOperationCallback<AllMovies>() {
+			private ApiOperationCallback<AllStringIdMovies> typedTestCallback() {
+				return new ApiOperationCallback<AllStringIdMovies>() {
 
 					@Override
-					public void onCompleted(AllMovies result, Exception exception, ServiceFilterResponse response) {
+					public void onCompleted(AllStringIdMovies result, Exception exception, ServiceFilterResponse response) {
 
 						if (exception != null) {
 							createResultFromException(mResult, exception);
@@ -1057,7 +1061,7 @@ public class CustomApiTests extends TestGroup {
 				mResult.setStatus(TestStatus.Passed);
 				mCallback = callback;
 
-				final Movie ramdomMovie = QueryTestData.getRandomMovie(rndGen);
+				final StringIdMovie ramdomMovie = QueryTestData.getRandomStringIdMovie(rndGen);
 
 				String apiName = MOVIEFINDER_API_NAME + "wronguri";
 				String apiUrl;
@@ -1065,17 +1069,17 @@ public class CustomApiTests extends TestGroup {
 				apiUrl = apiName + "/moviesWithSameDuration";
 
 				try {
-					client.invokeApi(apiUrl, ramdomMovie, AllMovies.class, typedTestCallback());
+					client.invokeApi(apiUrl, ramdomMovie, AllStringIdMovies.class, typedTestCallback());
 				} catch (Exception exception) {
 					createResultFromException(mResult, exception);
 				}
 			}
 
-			private ApiOperationCallback<AllMovies> typedTestCallback() {
-				return new ApiOperationCallback<AllMovies>() {
+			private ApiOperationCallback<AllStringIdMovies> typedTestCallback() {
+				return new ApiOperationCallback<AllStringIdMovies>() {
 
 					@Override
-					public void onCompleted(AllMovies result, Exception exception, ServiceFilterResponse response) {
+					public void onCompleted(AllStringIdMovies result, Exception exception, ServiceFilterResponse response) {
 
 						if (exception == null) {
 							mResult.setStatus(TestStatus.Failed);
@@ -1106,7 +1110,7 @@ public class CustomApiTests extends TestGroup {
 				mResult.setStatus(TestStatus.Passed);
 				mCallback = callback;
 
-				final Movie ramdomMovie = QueryTestData.getRandomMovie(rndGen);
+				final StringIdMovie ramdomMovie = QueryTestData.getRandomStringIdMovie(rndGen);
 
 				String apiName = MOVIEFINDER_API_NAME;
 				String apiUrl;
@@ -1116,17 +1120,17 @@ public class CustomApiTests extends TestGroup {
 				List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
 
 				try {
-					client.invokeApi(apiUrl, HttpGet.METHOD_NAME, parameters, AllMovies.class, typedTestCallback());
+					client.invokeApi(apiUrl, HttpGet.METHOD_NAME, parameters, AllStringIdMovies.class, typedTestCallback());
 				} catch (Exception exception) {
 					createResultFromException(mResult, exception);
 				}
 			}
 
-			private ApiOperationCallback<AllMovies> typedTestCallback() {
-				return new ApiOperationCallback<AllMovies>() {
+			private ApiOperationCallback<AllStringIdMovies> typedTestCallback() {
+				return new ApiOperationCallback<AllStringIdMovies>() {
 
 					@Override
-					public void onCompleted(AllMovies result, Exception exception, ServiceFilterResponse response) {
+					public void onCompleted(AllStringIdMovies result, Exception exception, ServiceFilterResponse response) {
 
 						if (exception != null) {
 							createResultFromException(mResult, exception);
@@ -1158,7 +1162,7 @@ public class CustomApiTests extends TestGroup {
 				mResult.setStatus(TestStatus.Passed);
 				mCallback = callback;
 
-				final Movie ramdomMovie = QueryTestData.getRandomMovie(rndGen);
+				final StringIdMovie ramdomMovie = QueryTestData.getRandomStringIdMovie(rndGen);
 
 				String apiName = MOVIEFINDER_API_NAME + "wronguri";
 				String apiUrl;
@@ -1168,17 +1172,17 @@ public class CustomApiTests extends TestGroup {
 				List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
 
 				try {
-					client.invokeApi(apiUrl, HttpGet.METHOD_NAME, parameters, AllMovies.class, typedTestCallback());
+					client.invokeApi(apiUrl, HttpGet.METHOD_NAME, parameters, AllStringIdMovies.class, typedTestCallback());
 				} catch (Exception exception) {
 					createResultFromException(mResult, exception);
 				}
 			}
 
-			private ApiOperationCallback<AllMovies> typedTestCallback() {
-				return new ApiOperationCallback<AllMovies>() {
+			private ApiOperationCallback<AllStringIdMovies> typedTestCallback() {
+				return new ApiOperationCallback<AllStringIdMovies>() {
 
 					@Override
-					public void onCompleted(AllMovies result, Exception exception, ServiceFilterResponse response) {
+					public void onCompleted(AllStringIdMovies result, Exception exception, ServiceFilterResponse response) {
 
 						if (exception == null) {
 							mResult.setStatus(TestStatus.Failed);
@@ -1209,7 +1213,7 @@ public class CustomApiTests extends TestGroup {
 				mResult.setStatus(TestStatus.Passed);
 				mCallback = callback;
 
-				final Movie ramdomMovie = QueryTestData.getRandomMovie(rndGen);
+				final StringIdMovie ramdomMovie = QueryTestData.getRandomStringIdMovie(rndGen);
 
 				String apiName = MOVIEFINDER_API_NAME;
 				String apiUrl;
@@ -1219,17 +1223,17 @@ public class CustomApiTests extends TestGroup {
 				List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
 
 				try {
-					client.invokeApi(apiUrl, ramdomMovie, HttpPost.METHOD_NAME, parameters, AllMovies.class, typedTestCallback());
+					client.invokeApi(apiUrl, ramdomMovie, HttpPost.METHOD_NAME, parameters, AllStringIdMovies.class, typedTestCallback());
 				} catch (Exception exception) {
 					createResultFromException(mResult, exception);
 				}
 			}
 
-			private ApiOperationCallback<AllMovies> typedTestCallback() {
-				return new ApiOperationCallback<AllMovies>() {
+			private ApiOperationCallback<AllStringIdMovies> typedTestCallback() {
+				return new ApiOperationCallback<AllStringIdMovies>() {
 
 					@Override
-					public void onCompleted(AllMovies result, Exception exception, ServiceFilterResponse response) {
+					public void onCompleted(AllStringIdMovies result, Exception exception, ServiceFilterResponse response) {
 
 						if (exception != null) {
 							createResultFromException(mResult, exception);
@@ -1261,7 +1265,7 @@ public class CustomApiTests extends TestGroup {
 				mResult.setStatus(TestStatus.Passed);
 				mCallback = callback;
 
-				final Movie ramdomMovie = QueryTestData.getRandomMovie(rndGen);
+				final StringIdMovie ramdomMovie = QueryTestData.getRandomStringIdMovie(rndGen);
 
 				String apiName = MOVIEFINDER_API_NAME + "wronguri";
 				String apiUrl;
@@ -1271,17 +1275,17 @@ public class CustomApiTests extends TestGroup {
 				List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
 
 				try {
-					client.invokeApi(apiUrl, ramdomMovie, HttpPost.METHOD_NAME, parameters, AllMovies.class, typedTestCallback());
+					client.invokeApi(apiUrl, ramdomMovie, HttpPost.METHOD_NAME, parameters, AllStringIdMovies.class, typedTestCallback());
 				} catch (Exception exception) {
 					createResultFromException(mResult, exception);
 				}
 			}
 
-			private ApiOperationCallback<AllMovies> typedTestCallback() {
-				return new ApiOperationCallback<AllMovies>() {
+			private ApiOperationCallback<AllStringIdMovies> typedTestCallback() {
+				return new ApiOperationCallback<AllStringIdMovies>() {
 
 					@Override
-					public void onCompleted(AllMovies result, Exception exception, ServiceFilterResponse response) {
+					public void onCompleted(AllStringIdMovies result, Exception exception, ServiceFilterResponse response) {
 
 						if (exception == null) {
 							mResult.setStatus(TestStatus.Failed);
@@ -1398,7 +1402,7 @@ public class CustomApiTests extends TestGroup {
 				mCallback = callback;
 
 				JsonElement json = createJson(new Random(), 0, false);
-				
+
 				try {
 					client.invokeApi("public", json, jsonTestCallback());
 				} catch (Exception exception) {
@@ -1443,7 +1447,7 @@ public class CustomApiTests extends TestGroup {
 				mCallback = callback;
 
 				JsonElement json = createJson(new Random(), 0, false);
-				
+
 				try {
 					client.invokeApi("inexistent", json, jsonTestCallback());
 				} catch (Exception exception) {
@@ -1578,7 +1582,7 @@ public class CustomApiTests extends TestGroup {
 				List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
 
 				JsonElement json = createJson(new Random(), 0, false);
-				
+
 				try {
 					client.invokeApi("public", json, HttpPost.METHOD_NAME, parameters, jsonTestCallback());
 				} catch (Exception exception) {
@@ -1625,7 +1629,7 @@ public class CustomApiTests extends TestGroup {
 				List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
 
 				JsonElement json = createJson(new Random(), 0, false);
-				
+
 				try {
 					client.invokeApi("inexistent", json, HttpPost.METHOD_NAME, parameters, jsonTestCallback());
 				} catch (Exception exception) {

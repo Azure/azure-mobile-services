@@ -17,10 +17,31 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types;
+package com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types;
 
-import java.util.List;
+import java.util.Date;
 
-public interface ListFilter<E> {
-	public FilterResult<E> filter(List<? extends E> list);
+public class DateTestObject {
+	private int id;
+	private Date date;
+
+	public DateTestObject(Date date) {
+		this.date = date;
+	}
+
+	public Date getDate() {
+		return date;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
 }

@@ -46,17 +46,37 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterRequestMock;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterResponseMock;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.StatusLineMock;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.SystemPropertyTestClasses.AllSystemPropertiesType;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.SystemPropertyTestClasses.CreatedAtType;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.SystemPropertyTestClasses.DoubleNamedSystemPropertiesType;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.SystemPropertyTestClasses.IntegerIdNotSystemPropertyCreatedAtType;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.SystemPropertyTestClasses.IntegerIdWithNamedSystemPropertiesType;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.SystemPropertyTestClasses.LongIdWithNamedSystemPropertiesType;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.SystemPropertyTestClasses.NamedDifferentCasingSystemPropertiesType;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.SystemPropertyTestClasses.NamedSystemPropertiesType;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.SystemPropertyTestClasses.NotSystemPropertyCreatedAtType;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.SystemPropertyTestClasses.NotSystemPropertyUpdatedAtType;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.SystemPropertyTestClasses.NotSystemPropertyVersionType;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.SystemPropertyTestClasses.StringCreatedAtType;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.IdPropertyTestClasses.StringIdType;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.SystemPropertyTestClasses.StringType;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.SystemPropertyTestClasses.StringUpdatedAtType;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.SystemPropertyTestClasses.UpdatedAtType;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.SystemPropertyTestClasses.VersionType;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.data.SystemPropertiesTestData;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProperty;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
-
 
 public class SystemPropertiesTests extends InstrumentationTestCase {
 	String appUrl = "";
 	String appKey = "";
 	GsonBuilder gsonBuilder;
 
-	protected void setUp() throws Exception {		
+	protected void setUp() throws Exception {
 		appUrl = "http://myapp.com/";
 		appKey = "qwerty";
 		gsonBuilder = new GsonBuilder();

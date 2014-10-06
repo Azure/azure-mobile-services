@@ -34,6 +34,9 @@ import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterResponseMock;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.PersonTestObject;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.ResultsContainer;
 
 import android.annotation.TargetApi;
 import android.os.Build;

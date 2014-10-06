@@ -17,10 +17,31 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types;
+package com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters;
 
-import java.util.List;
+import org.apache.http.ProtocolVersion;
+import org.apache.http.StatusLine;
 
-public interface ListFilter<E> {
-	public FilterResult<E> filter(List<? extends E> list);
+public class StatusLineMock implements StatusLine {
+	private int statusCode;
+
+	public StatusLineMock(int statusCode) {
+		this.statusCode = statusCode;
+	}
+
+	@Override
+	public ProtocolVersion getProtocolVersion() {
+		return null;
+	}
+
+	@Override
+	public String getReasonPhrase() {
+		return null;
+	}
+
+	@Override
+	public int getStatusCode() {
+		return this.statusCode;
+	}
+
 }

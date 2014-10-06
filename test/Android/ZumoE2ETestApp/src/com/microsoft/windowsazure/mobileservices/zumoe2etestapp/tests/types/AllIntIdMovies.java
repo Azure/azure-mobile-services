@@ -21,6 +21,46 @@ package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types;
 
 import java.util.List;
 
-public interface ListFilter<E> {
-	public FilterResult<E> filter(List<? extends E> list);
+import com.google.gson.annotations.SerializedName;
+
+public class AllIntIdMovies {
+	private int id;
+
+	@SerializedName("status")
+	private String mStatus;
+
+	@SerializedName("movies")
+	private IntIdMovie[] mMovies;
+
+	public AllIntIdMovies() {
+		mMovies = new IntIdMovie[0];
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public String getStatus() {
+		return mStatus;
+	}
+
+	public void setStatus(String status) {
+		mStatus = status;
+	}
+
+	public IntIdMovie[] getMovies() {
+		return mMovies;
+	}
+
+	public void setMovies(IntIdMovie[] movies) {
+		mMovies = movies;
+	}
+
+	public void setMovies(List<IntIdMovie> movies) {
+		mMovies = movies.toArray(mMovies);
+	}
 }
