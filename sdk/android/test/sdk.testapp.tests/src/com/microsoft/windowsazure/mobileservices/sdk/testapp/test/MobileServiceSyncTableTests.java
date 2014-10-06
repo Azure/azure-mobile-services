@@ -373,7 +373,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 		// Assert.AreEqual(hijack.Requests.Count, 1);
 	}
 
-	public void testPurgeDoesNotTriggerPushWhenThereIsNoOperationInTable() throws MalformedURLException, InterruptedException, ExecutionException {
+	public void testPurgeDoesNotThrowExceptionWhenThereIsNoOperationInTable() throws MalformedURLException, InterruptedException, ExecutionException {
 		MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
 		ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
 
@@ -430,7 +430,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 		// touched
 	}
 
-	public void testPurgeTriggersPushWhenThereIsOperationInTable() throws InterruptedException, ExecutionException, MalformedURLException {
+	public void testPurgeThrowsExceptionWhenThereIsOperationInTable() throws InterruptedException, ExecutionException, MalformedURLException {
 		MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
 		ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
 
@@ -451,19 +451,19 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 																										// is
 																										// inserted
 
-		// this should trigger a push
-		table1.purge(null).get();
-
-		assertEquals(serviceFilterContainer.Requests.size(), 1); // push
-																	// triggered
-		assertEquals(store.DeleteQueries.size(), 2);
-		assertEquals(store.DeleteQueries.get(0).getTableName().toLowerCase(Locale.getDefault()), SyncErrors); // push
-																												// deletes
-																												// all
-																												// sync
-																												// erros
-		assertEquals(store.DeleteQueries.get(1).getTableName().toLowerCase(Locale.getDefault()), table1.getName().toLowerCase(Locale.getDefault())); // purged
-																																						// table
+		// this should throw an exception
+		
+		try {
+			table1.purge(null).get();
+		} catch (Throwable throwable) {
+			if (throwable.getCause() instanceof MobileServiceException) {
+				assertEquals(store.DeleteQueries.size(), 0);
+				return;// no purge queries
+			}
+		}
+		
+		fail("MobileServiceException expected");
+		
 	}
 
 	public void testPushExecutesThePendingOperations() throws InterruptedException, ExecutionException, MalformedURLException {
