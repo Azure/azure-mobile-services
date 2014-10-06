@@ -421,41 +421,28 @@ public class MobileServiceSyncContext {
 			ensureCorrectlyInitialized();
 
 			String invTableName = tableName != null ? tableName.trim().toLowerCase(Locale.getDefault()) : null;
+			// prevent Coffman Circular wait condition: lock resources in
+			// same order, independent of unlock order. Op then Table then
+			// Id.
 
-			boolean busyPurgeDone = false;
+			this.mOpLock.readLock().lock();
 
-			while (!busyPurgeDone) {
-				ListenableFuture<Void> pushFuture = null;
-
-				// prevent Coffman Circular wait condition: lock resources in
-				// same order, independent of unlock order. Op then Table then
-				// Id.
-
-				this.mOpLock.readLock().lock();
+			try {
+				MultiReadWriteLock<String> multiRWLock = this.mTableLockMap.lockWrite(invTableName);
 
 				try {
-					MultiReadWriteLock<String> multiRWLock = this.mTableLockMap.lockWrite(invTableName);
+					int pendingTable = this.mOpQueue.countPending(invTableName);
 
-					try {
-						int pendingTable = this.mOpQueue.countPending(invTableName);
-
-						if (pendingTable > 0) {
-							pushFuture = push();
-						} else {
-							processPurge(invTableName, query);
-						}
-					} finally {
-						this.mTableLockMap.unLockWrite(multiRWLock);
+					if (pendingTable > 0) {
+						throw new MobileServiceException("The table cannot be purged because it has pending operations");
+					} else {
+						processPurge(invTableName, query);
 					}
 				} finally {
-					this.mOpLock.readLock().unlock();
+					this.mTableLockMap.unLockWrite(multiRWLock);
 				}
-
-				if (pushFuture != null) {
-					pushFuture.get();
-				} else {
-					busyPurgeDone = true;
-				}
+			} finally {
+				this.mOpLock.readLock().unlock();
 			}
 		} finally {
 			this.mInitLock.readLock().unlock();
