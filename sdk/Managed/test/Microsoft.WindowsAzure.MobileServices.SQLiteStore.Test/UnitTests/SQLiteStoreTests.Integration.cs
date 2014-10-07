@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Sync;
 using Microsoft.WindowsAzure.MobileServices.Test;
@@ -327,6 +328,208 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
             // we request all the system properties present on DefineTable<> object
             AssertEx.QueryEquals(hijack.Requests[0].RequestUri.Query, "?$skip=0&$top=50&__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt%2C__version%2C__deleted");
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_DoesNotTriggerPush_OnUnrelatedTables_WhenThereIsOperationTable()
+        {
+            ResetDatabase(TestTable);
+
+            var hijack = new TestHttpHandler();
+            hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
+            hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for pull
+            hijack.AddResponseContent("[]"); // last page
+
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable("unrelatedTable", new JObject() { { "id", String.Empty } });
+            store.DefineTable<StringIdType>();
+
+            IMobileServiceClient client = await CreateClient(hijack, store);
+
+            // insert item in pull table
+            IMobileServiceSyncTable unrelatedTable = client.GetSyncTable("unrelatedTable");
+            await unrelatedTable.InsertAsync(new JObject() { { "id", "abc" } });
+
+            // then insert item in other table
+            MobileServiceSyncTable<StringIdType> mainTable = client.GetSyncTable<StringIdType>() as MobileServiceSyncTable<StringIdType>;
+            var item = new StringIdType() { Id = "an id", String = "what?" };
+            await mainTable.InsertAsync(item);
+
+            await mainTable.PullAsync(null, null, null, CancellationToken.None, "relatedTable");
+
+            Assert.AreEqual(hijack.Requests.Count, 3); // 1 for push and 2 for pull
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.AbsolutePath, "/tables/StringIdType");
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.AbsolutePath, "/tables/StringIdType");
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.AbsolutePath, "/tables/StringIdType");
+            Assert.AreEqual(1L, client.SyncContext.PendingOperations);
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_DoesNotTriggerPush_WhenPushOtherTablesIsFalse()
+        {
+            ResetDatabase(TestTable);
+
+            var hijack = new TestHttpHandler();
+            hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
+            hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for pull
+            hijack.AddResponseContent("[]"); // last page
+
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable("unrelatedTable", new JObject() { { "id", String.Empty } });
+            store.DefineTable<StringIdType>();
+
+            IMobileServiceClient client = await CreateClient(hijack, store);
+
+            // insert item in pull table
+            IMobileServiceSyncTable unrelatedTable = client.GetSyncTable("unrelatedTable");
+            await unrelatedTable.InsertAsync(new JObject() { { "id", "abc" } });
+
+            // then insert item in other table
+            MobileServiceSyncTable<StringIdType> mainTable = client.GetSyncTable<StringIdType>() as MobileServiceSyncTable<StringIdType>;
+            var item = new StringIdType() { Id = "an id", String = "what?" };
+            await mainTable.InsertAsync(item);
+
+            await mainTable.PullAsync(null, null, null, false, CancellationToken.None);
+
+            Assert.AreEqual(hijack.Requests.Count, 3); // 1 for push and 2 for pull
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.AbsolutePath, "/tables/StringIdType");
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.AbsolutePath, "/tables/StringIdType");
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.AbsolutePath, "/tables/StringIdType");
+            Assert.AreEqual(1L, client.SyncContext.PendingOperations);
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_TriggersPush_OnRelatedTables_WhenThereIsOperationTable()
+        {
+            ResetDatabase(TestTable);
+
+            var hijack = new TestHttpHandler();
+            hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
+            hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hi\"}");
+            hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for pull
+            hijack.AddResponseContent("[]"); // last page
+
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable("relatedTable", new JObject() { { "id", String.Empty } });
+            store.DefineTable<StringIdType>();
+
+            IMobileServiceClient client = await CreateClient(hijack, store);
+
+            // insert item in pull table
+            IMobileServiceSyncTable unrelatedTable = client.GetSyncTable("relatedTable");
+            await unrelatedTable.InsertAsync(new JObject() { { "id", "abc" } });
+
+            // then insert item in other table
+            MobileServiceSyncTable<StringIdType> mainTable = client.GetSyncTable<StringIdType>() as MobileServiceSyncTable<StringIdType>;
+            var item = new StringIdType() { Id = "abc", String = "what?" };
+            await mainTable.InsertAsync(item);
+
+            await mainTable.PullAsync(null, null, null, CancellationToken.None, "relatedTable");
+
+            Assert.AreEqual(hijack.Requests.Count, 4); // 2 for push and 2 for pull
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.AbsolutePath, "/tables/relatedTable");
+            AssertEx.QueryEquals(hijack.Requests[1].RequestUri.AbsolutePath, "/tables/StringIdType");
+            AssertEx.QueryEquals(hijack.Requests[1].RequestUri.AbsolutePath, "/tables/StringIdType");
+            AssertEx.QueryEquals(hijack.Requests[1].RequestUri.AbsolutePath, "/tables/StringIdType");
+            Assert.AreEqual(0L, client.SyncContext.PendingOperations);
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_TriggersPush_WhenPushOtherTablesIsTrue_AndThereIsOperationTable()
+        {
+            ResetDatabase(TestTable);
+
+            var hijack = new TestHttpHandler();
+            hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
+            hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hi\"}");
+            hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for pull
+            hijack.AddResponseContent("[]"); // last page
+
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable("relatedTable", new JObject() { { "id", String.Empty } });
+            store.DefineTable<StringIdType>();
+
+            IMobileServiceClient client = await CreateClient(hijack, store);
+
+            // insert item in pull table
+            IMobileServiceSyncTable unrelatedTable = client.GetSyncTable("relatedTable");
+            await unrelatedTable.InsertAsync(new JObject() { { "id", "abc" } });
+
+            // then insert item in other table
+            MobileServiceSyncTable<StringIdType> mainTable = client.GetSyncTable<StringIdType>() as MobileServiceSyncTable<StringIdType>;
+            var item = new StringIdType() { Id = "abc", String = "what?" };
+            await mainTable.InsertAsync(item);
+
+            await mainTable.PullAsync(null, null, null, true, CancellationToken.None);
+
+            Assert.AreEqual(hijack.Requests.Count, 4); // 2 for push and 2 for pull
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.AbsolutePath, "/tables/relatedTable");
+            AssertEx.QueryEquals(hijack.Requests[1].RequestUri.AbsolutePath, "/tables/StringIdType");
+            AssertEx.QueryEquals(hijack.Requests[1].RequestUri.AbsolutePath, "/tables/StringIdType");
+            AssertEx.QueryEquals(hijack.Requests[1].RequestUri.AbsolutePath, "/tables/StringIdType");
+            Assert.AreEqual(0L, client.SyncContext.PendingOperations);
+        }
+
+        [AsyncTestMethod]
+        public async Task PushAsync_PushesOnlySelectedTables_WhenSpecified()
+        {
+            ResetDatabase(TestTable);
+
+            var hijack = new TestHttpHandler();
+            hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
+
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable("someTable", new JObject() { { "id", String.Empty } });
+            store.DefineTable<StringIdType>();
+
+            IMobileServiceClient client = await CreateClient(hijack, store);
+
+            // insert item in pull table
+            IMobileServiceSyncTable unrelatedTable = client.GetSyncTable("someTable");
+            await unrelatedTable.InsertAsync(new JObject() { { "id", "abc" } });
+
+            // then insert item in other table
+            MobileServiceSyncTable<StringIdType> mainTable = client.GetSyncTable<StringIdType>() as MobileServiceSyncTable<StringIdType>;
+            var item = new StringIdType() { Id = "abc", String = "what?" };
+            await mainTable.InsertAsync(item);
+
+            await (client.SyncContext as MobileServiceSyncContext).PushAsync(CancellationToken.None, "someTable");
+
+            Assert.AreEqual(hijack.Requests.Count, 1);
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.AbsolutePath, "/tables/someTable");
+            Assert.AreEqual(1L, client.SyncContext.PendingOperations);
+        }
+
+        [AsyncTestMethod]
+        public async Task PushAsync_PushesAllTables_WhenEmptyListIsGiven()
+        {
+            ResetDatabase(TestTable);
+
+            var hijack = new TestHttpHandler();
+            hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
+            hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
+
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable("someTable", new JObject() { { "id", String.Empty } });
+            store.DefineTable<StringIdType>();
+
+            IMobileServiceClient client = await CreateClient(hijack, store);
+
+            // insert item in pull table
+            IMobileServiceSyncTable unrelatedTable = client.GetSyncTable("someTable");
+            await unrelatedTable.InsertAsync(new JObject() { { "id", "abc" } });
+
+            // then insert item in other table
+            MobileServiceSyncTable<StringIdType> mainTable = client.GetSyncTable<StringIdType>() as MobileServiceSyncTable<StringIdType>;
+            var item = new StringIdType() { Id = "abc", String = "what?" };
+            await mainTable.InsertAsync(item);
+
+            await (client.SyncContext as MobileServiceSyncContext).PushAsync(CancellationToken.None);
+
+            Assert.AreEqual(hijack.Requests.Count, 2);
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.AbsolutePath, "/tables/someTable");
+            AssertEx.QueryEquals(hijack.Requests[1].RequestUri.AbsolutePath, "/tables/StringIdType");
+            Assert.AreEqual(0L, client.SyncContext.PendingOperations);
         }
 
         [AsyncTestMethod]

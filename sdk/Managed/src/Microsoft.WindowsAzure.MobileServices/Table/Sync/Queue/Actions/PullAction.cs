@@ -26,12 +26,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                           string queryKey,
                           MobileServiceTableQueryDescription query,
                           IDictionary<string, string> parameters,
+                          IEnumerable<string> relatedTables,
                           OperationQueue operationQueue,
                           MobileServiceSyncSettingsManager settings,
                           IMobileServiceLocalStore store,
                           MobileServiceRemoteTableOptions options,
                           CancellationToken cancellationToken)
-            : base(table, queryKey, query, context, operationQueue, settings, store, cancellationToken)
+            : base(table, queryKey, query, relatedTables, context, operationQueue, settings, store, cancellationToken)
         {
             this.options = options;
             this.parameters = parameters;

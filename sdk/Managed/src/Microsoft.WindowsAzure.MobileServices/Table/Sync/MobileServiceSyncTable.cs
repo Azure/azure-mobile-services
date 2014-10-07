@@ -42,8 +42,19 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         public Task PullAsync(string queryKey, string query, IDictionary<string, string> parameters, CancellationToken cancellationToken)
         {
+            return PullAsync(queryKey, query, parameters, cancellationToken, new string[0]);
+        }
+
+        public Task PullAsync(string queryKey, string query, IDictionary<string, string> parameters, CancellationToken cancellationToken, params string[] tableNames)
+        {
             ValidateQueryKey(queryKey);
-            return this.syncContext.PullAsync(this.TableName, queryKey, query, this.SupportedOptions, parameters, cancellationToken);
+            return this.syncContext.PullAsync(this.TableName, queryKey, query, this.SupportedOptions, parameters, tableNames ?? new string[0], cancellationToken);
+        }
+
+        public Task PullAsync(string queryKey, string query, IDictionary<string, string> parameters, bool pushOtherTables, CancellationToken cancellationToken)
+        {
+            ValidateQueryKey(queryKey);
+            return this.syncContext.PullAsync(this.TableName, queryKey, query, this.SupportedOptions, parameters, pushOtherTables ? new string[0] : null, cancellationToken);
         }
 
         public Task PurgeAsync(string queryKey, string query, CancellationToken cancellationToken)

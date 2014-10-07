@@ -19,7 +19,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                            MobileServiceSyncSettingsManager settings,
                            IMobileServiceLocalStore store,
                            CancellationToken cancellationToken)
-            : base(table, queryKey, query, context, operationQueue, settings, store, cancellationToken)
+            : base(table, queryKey, query, null, context, operationQueue, settings, store, cancellationToken)
         {
         }
 
