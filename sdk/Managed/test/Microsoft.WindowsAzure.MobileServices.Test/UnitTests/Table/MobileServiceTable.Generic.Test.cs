@@ -36,6 +36,40 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
+        public async Task ReadAsync_WithRelativeUri_Generic()
+        {
+            var data = new[]
+            {
+                new 
+                {
+                    ServiceUri = "http://www.test.com", 
+                    QueryUri = "/about?$filter=a eq b&$orderby=c", 
+                    RequestUri = "http://www.test.com/about?$filter=a eq b&$orderby=c"
+                },
+                new 
+                {
+                    ServiceUri = "http://www.test.com/", 
+                    QueryUri = "/about?$filter=a eq b&$orderby=c", 
+                    RequestUri = "http://www.test.com/about?$filter=a eq b&$orderby=c"
+                }
+            };
+
+            foreach (var item in data)
+            {
+                var hijack = new TestHttpHandler();
+                hijack.SetResponseContent("[{\"col1\":\"Hey\"}]");
+                IMobileServiceClient service = new MobileServiceClient(item.ServiceUri, "secret...", hijack);
+
+                IMobileServiceTable<ToDo> table = service.GetTable<ToDo>();
+
+                await table.ReadAsync<ToDo>(item.QueryUri);
+
+                Assert.AreEqual("TT", hijack.Request.Headers.GetValues("X-ZUMO-FEATURES").First());
+                Assert.AreEqual(item.RequestUri, hijack.Request.RequestUri.ToString());
+            }
+        }
+
+        [AsyncTestMethod]
         public async Task ReadAsync_Returns_IQueryResultEnumerable()
         {
             await TestIQueryResultEnumerable(table => table.ReadAsync<ToDo>("this is a query"));

@@ -426,6 +426,19 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
+        public async Task InvokeApiAsync_DoesNotAppendApiPath_IfApiStartsWithSlash()
+        {
+            TestHttpHandler hijack = new TestHttpHandler();
+            var service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            hijack.SetResponseContent("{\"id\":3}");
+
+            await service.InvokeApiAsync<IntType>("/calculator/add?a=1&b=2", HttpMethod.Get, null);
+
+            Assert.AreEqual(hijack.Request.RequestUri.LocalPath, "/calculator/add");
+            Assert.Contains(hijack.Request.RequestUri.Query, "a=1&b=2");
+        }
+
+        [AsyncTestMethod]
         public async Task InvokeCustomAPIGetJToken()
         {
             TestHttpHandler hijack = new TestHttpHandler();

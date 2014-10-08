@@ -237,6 +237,39 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
+        public async Task ReadAsync_WithRelativeUri()
+        {
+            var data = new[]
+            {
+                new 
+                {
+                    ServiceUri = "http://www.test.com", 
+                    QueryUri = "/about?$filter=a eq b&$orderby=c", 
+                    RequestUri = "http://www.test.com/about?$filter=a eq b&$orderby=c"
+                },
+                new 
+                {
+                    ServiceUri = "http://www.test.com/", 
+                    QueryUri = "/about?$filter=a eq b&$orderby=c", 
+                    RequestUri = "http://www.test.com/about?$filter=a eq b&$orderby=c"
+                }
+            };
+
+            foreach (var item in data)
+            {
+                var hijack = new TestHttpHandler();
+                hijack.SetResponseContent("[{\"String\":\"Hey\"}]");
+                IMobileServiceClient service = new MobileServiceClient(item.ServiceUri, "secret...", hijack);
+
+                IMobileServiceTable table = service.GetTable("someTable");
+
+                await table.ReadAsync(item.QueryUri);
+
+                Assert.AreEqual(item.RequestUri, hijack.Request.RequestUri.ToString());
+            }
+        }
+
+        [AsyncTestMethod]
         public async Task ReadAsyncWithStringIdFilter()
         {
             string[] testIdData = IdTestData.ValidStringIds.Concat(
