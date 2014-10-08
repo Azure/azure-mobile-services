@@ -217,14 +217,19 @@ MobileServiceTable.prototype._read = function (query, parameters, callback) {
 
                 // Grab link header when possible
                 if (Array.isArray(values) && response.getResponseHeader && _.isNull(values.nextLink)) {
-                    var link = response.getResponseHeader('Link');
-                    if (!_.isNullOrEmpty(link)) {
-                        var result = nextLinkRegex.exec(link);
+                    try {
+                        var link = response.getResponseHeader('Link');
+                        if (!_.isNullOrEmpty(link)) {
+                            var result = nextLinkRegex.exec(link);
 
-                        // Only add nextLink when relation is next
-                        if (result && result.length === 3 && result[2] == 'next') {
-                            values.nextLink = result[1];
+                            // Only add nextLink when relation is next
+                            if (result && result.length === 3 && result[2] == 'next') {
+                                values.nextLink = result[1];
+                            }
                         }
+                    } catch (ex) {
+                        // If cors doesn't allow us to access the Link header
+                        // Just continue on without it
                     }
                 }
             }
