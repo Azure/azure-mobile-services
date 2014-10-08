@@ -839,19 +839,47 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task PurgeAsync_ResetsDeltaToken_WhenQueryKeyIsSpecified()
         {
-            var store = new MobileServiceLocalStoreMock();
-            store.TableMap["stringId_test_table"] = new Dictionary<string, JObject>();
-            store.TableMap[MobileServiceLocalSystemTables.Config] = new Dictionary<string, JObject>();
-            store.TableMap[MobileServiceLocalSystemTables.Config]["stringId_test_table_latestNews_deltaToken"] = new JObject();
+            var hijack = new TestHttpHandler();
+            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""__updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""},
+                                         {""id"":""def"",""String"":""How"", ""__updatedAt"": ""2001-02-04T00:00:00.0000000+00:00""}]"); // first page
+            hijack.AddResponseContent("[]"); // last page of first pull
+            hijack.AddResponseContent("[]"); // second pull
 
-            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", new TestHttpHandler());
+            var store = new MobileServiceLocalStoreMock();
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
 
-            await table.PurgeAsync("latestNews", table.CreateQuery(), CancellationToken.None);
+            // ensure there is no delta token present already
+            Assert.IsFalse(store.TableMap.ContainsKey("stringId_test_table"));
 
-            Assert.IsFalse(store.TableMap[MobileServiceLocalSystemTables.Config].ContainsKey("stringId_test_table_latestNews_deltaToken"));
+            // now pull down data
+            await table.PullAsync("items", table.CreateQuery());
+
+            // ensure items were pulled down
+            Assert.AreEqual(store.TableMap["stringId_test_table"].Count, 2);
+            Assert.AreEqual(store.TableMap["stringId_test_table"]["abc"].Value<string>("String"), "Hey");
+            Assert.AreEqual(store.TableMap["stringId_test_table"]["def"].Value<string>("String"), "How");
+
+            // ensure delta token was updated
+            Assert.Equals(store.TableMap[MobileServiceLocalSystemTables.Config]["stringId_test_table_items_deltaToken"]["value"], "2001-02-04T00:00:00.0000000+00:00");
+
+            // now purge and forget the delta token
+            await table.PurgeAsync("items", null, CancellationToken.None);
+
+            // make sure data is purged
+            Assert.AreEqual(store.TableMap["stringId_test_table"].Count, 0);
+            // make sure delta token is removed
+            Assert.IsFalse(store.TableMap[MobileServiceLocalSystemTables.Config].ContainsKey("stringId_test_table_items_deltaToken"));
+
+            // pull again
+            await table.PullAsync("items", table.CreateQuery());
+
+            // verify request urls
+            AssertEx.MatchUris(hijack.Requests, "http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__version%2C__deleted",
+                                                "http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'2001-02-04T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__version%2C__deleted",
+                                                "http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__version%2C__deleted");
         }
 
         [AsyncTestMethod]
