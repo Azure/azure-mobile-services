@@ -102,6 +102,18 @@ public class MobileServiceLocalStoreMock implements MobileServiceLocalStore {
 	}
 
 	@Override
+	public void upsert(String tableName, JsonObject[] items) throws MobileServiceLocalStoreException {
+
+		Map<String, JsonObject> table = GetTable(tableName);
+
+		for (JsonObject item : items) {
+			table.put(item.get("id").getAsString(), item);
+        }
+
+		return;
+	}
+	
+	@Override
 	public void delete(String tableName, String itemId) throws MobileServiceLocalStoreException {
 
 		Map<String, JsonObject> table = GetTable(tableName);

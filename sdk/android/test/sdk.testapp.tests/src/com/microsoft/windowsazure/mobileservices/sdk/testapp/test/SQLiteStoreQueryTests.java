@@ -616,9 +616,7 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 	}
 
 	private void insertAll(SQLiteLocalStore store, String tableName, JsonObject[] items) throws MobileServiceLocalStoreException {
-		for (JsonObject item : items) {
-			store.upsert(tableName, item);
-		}
+			store.upsert(tableName, items);
 	}
 
 	private Context getContext() {

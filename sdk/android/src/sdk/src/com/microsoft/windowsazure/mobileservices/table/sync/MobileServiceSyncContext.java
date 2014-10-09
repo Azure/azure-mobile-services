@@ -696,10 +696,18 @@ public class MobileServiceSyncContext {
 					}
 
 					if (elements != null) {
+						
+						JsonObject[] jsonObjects = new JsonObject[elements.size()];
+						
+						int i = 0;
+						
 						for (JsonElement element : elements) {
-							this.mStore.upsert(tableName, element.getAsJsonObject());
+							jsonObjects[i] = element.getAsJsonObject();
+							i++;
 						}
 
+						this.mStore.upsert(tableName, jsonObjects);
+						
 						originalTop -= elements.size();
 						top = originalTop > 1000 ? 1000 : originalTop;
 						skip += elements.size();

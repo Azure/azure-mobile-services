@@ -266,8 +266,8 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
 			store.upsert(TestTable, item);
 		} catch (Exception ex) {
 			assertTrue(ex instanceof MobileServiceLocalStoreException);
-			assertEquals(ex.getCause().getMessage(),
-					"table todo has no column named notdefined (code 1): , while compiling: INSERT OR REPLACE INTO \"todo\" (\"notdefined\") VALUES (@p1);");
+			assertTrue(ex.getCause().getMessage().contains(
+					"table todo has no column named notdefined (code 1): , while compiling: INSERT OR REPLACE INTO \"todo\" (\"notdefined\") VALUES (@p0)"));
 
 		}
 	}

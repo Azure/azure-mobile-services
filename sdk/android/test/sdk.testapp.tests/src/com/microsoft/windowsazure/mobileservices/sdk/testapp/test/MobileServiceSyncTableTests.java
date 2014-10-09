@@ -451,14 +451,13 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 																										// is
 																										// inserted
 
-		// this should throw an exception
-		
 		try {
+			// this should throw an exception
 			table1.purge(null).get();
 		} catch (Throwable throwable) {
 			if (throwable.getCause() instanceof MobileServiceException) {
-				assertEquals(store.DeleteQueries.size(), 0);
-				return;// no purge queries
+				assertEquals(store.DeleteQueries.size(), 0); // no purge queries
+				return;
 			}
 		}
 		

@@ -249,9 +249,23 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 	@Override
 	public void upsert(String tableName, JsonObject item) throws MobileServiceLocalStoreException {
 		try {
+			
+			JsonObject[] items = new JsonObject[1];
+			items[0] = item;
+			
+			upsert(tableName, items);
+			
+		} catch (Throwable t) {
+			throw new MobileServiceLocalStoreException(t);
+		}
+	}
+
+	@Override
+	public void upsert(String tableName, JsonObject[] items) throws MobileServiceLocalStoreException {
+		try {
 			String invTableName = normalizeTableName(tableName);
 
-			Statement statement = generateUpsertStatement(invTableName, item);
+			Statement statement = generateUpsertStatement(invTableName, items);
 
 			SQLiteDatabase db = this.getWritableDatabase();
 
@@ -264,7 +278,7 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 			throw new MobileServiceLocalStoreException(t);
 		}
 	}
-
+	
 	@Override
 	public void delete(String tableName, String itemId) throws MobileServiceLocalStoreException {
 		try {
@@ -427,7 +441,7 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 		return result;
 	}
 
-	private Statement generateUpsertStatement(String tableName, JsonObject item) {
+	private Statement generateUpsertStatement(String tableName, JsonObject[] items) {
 		Statement result = new Statement();
 
 		String invTableName = normalizeTableName(tableName);
@@ -438,35 +452,20 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 		sql.append(invTableName);
 		sql.append("\" (");
 
-		List<Object> parameters = new ArrayList<Object>(item.entrySet().size());
-
 		String delimiter = "";
 
+		JsonObject firstItem = items[0];
+		
 		Map<String, ColumnDataType> tableDefinition = mTables.get(invTableName);
+		
+		List<Object> parameters = new ArrayList<Object>(firstItem.entrySet().size());
 
-		for (Entry<String, JsonElement> property : item.entrySet()) {
+		for (Entry<String, JsonElement> property : firstItem.entrySet()) {
 
 			if (isSystemProperty(property.getKey()) && !tableDefinition.containsKey(property.getKey())) {
 				continue;
 			}
-
-			JsonElement value = property.getValue();
-
-			if (value.isJsonNull()) {
-				parameters.add(null);
-			} else if (value.isJsonPrimitive()) {
-				if (value.getAsJsonPrimitive().isBoolean()) {
-					long longVal = value.getAsJsonPrimitive().getAsBoolean() ? 1L : 0L;
-					parameters.add(longVal);
-				} else if (value.getAsJsonPrimitive().isNumber()) {
-					parameters.add(value.getAsJsonPrimitive().getAsDouble());
-				} else {
-					parameters.add(value.getAsJsonPrimitive().getAsString());
-				}
-			} else {
-				parameters.add(value.toString());
-			}
-
+			
 			String invColumnName = normalizeColumnName(property.getKey());
 			sql.append(delimiter);
 			sql.append("\"");
@@ -475,24 +474,64 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 			delimiter = ",";
 		}
 
-		sql.append(") VALUES (");
+		sql.append(") VALUES ");
 
-		delimiter = "";
-		for (int parameter = 1; parameter <= parameters.size(); parameter++) {
-			sql.append(delimiter);
-			sql.append("@p");
-			sql.append(String.valueOf(parameter));
-			delimiter = ",";
-		}
+		String prefix = "";
 
-		sql.append(");");
-
+		for (JsonObject item : items) {
+			sql.append(prefix);
+        	appendInsertValuesSql(sql, parameters, tableDefinition, item);
+        	prefix = ",";
+        }
+        
 		result.sql = sql.toString();
 		result.parameters = parameters;
 
 		return result;
 	}
 
+	 private void appendInsertValuesSql(StringBuilder sql, List<Object> parameters, 
+			 Map<String, ColumnDataType> tableDefinition, JsonObject item)
+     {
+         sql.append("(");
+         int colCount = 0;
+         
+         for (Entry<String, JsonElement> property : item.entrySet()) {
+
+ 			if (isSystemProperty(property.getKey()) && !tableDefinition.containsKey(property.getKey())) {
+ 				continue;
+ 			}
+
+        	if (colCount > 0)
+        		sql.append(",");
+        	
+        	String paramName = "@p" + parameters.size();  
+        	 
+        	JsonElement value = property.getValue();
+        	
+ 			if (value.isJsonNull()) {
+ 				parameters.add(null);
+ 			} else if (value.isJsonPrimitive()) {
+ 				if (value.getAsJsonPrimitive().isBoolean()) {
+ 					long longVal = value.getAsJsonPrimitive().getAsBoolean() ? 1L : 0L;
+ 					parameters.add(longVal);
+ 				} else if (value.getAsJsonPrimitive().isNumber()) {
+ 					parameters.add(value.getAsJsonPrimitive().getAsDouble());
+ 				} else {
+ 					parameters.add(value.getAsJsonPrimitive().getAsString());
+ 				}
+ 			} else {
+ 				parameters.add(value.toString());
+ 			}
+
+ 			sql.append(paramName);
+ 			colCount++;
+         }
+         
+         sql.append(")");
+     }
+	
+         
 	private String[] getColumns(Query query, Map<String, ColumnDataType> table) {
 		String[] columns = table.keySet().toArray(new String[0]);
 

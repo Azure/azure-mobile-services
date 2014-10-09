@@ -70,6 +70,7 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.Stri
 public class CustomApiTests extends TestGroup {
 
 	private static final String PUBLIC_API_NAME = "public";
+	private static final String INEXISTENT_API_NAME = "InexistenApi";
 	private static final String APP_API_NAME = "application";
 	private static final String USER_API_NAME = "user";
 	private static final String ADMIN_API_NAME = "admin";
@@ -1317,7 +1318,7 @@ public class CustomApiTests extends TestGroup {
 				mCallback = callback;
 
 				try {
-					client.invokeApi("public", jsonTestCallback());
+					client.invokeApi(PUBLIC_API_NAME, jsonTestCallback());
 				} catch (Exception exception) {
 					createResultFromException(mResult, exception);
 				}
@@ -1360,7 +1361,7 @@ public class CustomApiTests extends TestGroup {
 				mCallback = callback;
 
 				try {
-					client.invokeApi("inexistent", jsonTestCallback());
+					client.invokeApi(INEXISTENT_API_NAME, jsonTestCallback());
 				} catch (Exception exception) {
 					createResultFromException(mResult, exception);
 				}
@@ -1404,7 +1405,7 @@ public class CustomApiTests extends TestGroup {
 				JsonElement json = createJson(new Random(), 0, false);
 
 				try {
-					client.invokeApi("public", json, jsonTestCallback());
+					client.invokeApi(PUBLIC_API_NAME, json, jsonTestCallback());
 				} catch (Exception exception) {
 					createResultFromException(mResult, exception);
 				}
@@ -1449,7 +1450,7 @@ public class CustomApiTests extends TestGroup {
 				JsonElement json = createJson(new Random(), 0, false);
 
 				try {
-					client.invokeApi("inexistent", json, jsonTestCallback());
+					client.invokeApi(INEXISTENT_API_NAME, json, jsonTestCallback());
 				} catch (Exception exception) {
 					createResultFromException(mResult, exception);
 				}
@@ -1493,7 +1494,7 @@ public class CustomApiTests extends TestGroup {
 				List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
 
 				try {
-					client.invokeApi("public", HttpGet.METHOD_NAME, parameters, jsonTestCallback());
+					client.invokeApi(PUBLIC_API_NAME, HttpGet.METHOD_NAME, parameters, jsonTestCallback());
 				} catch (Exception exception) {
 					createResultFromException(mResult, exception);
 				}
@@ -1538,7 +1539,7 @@ public class CustomApiTests extends TestGroup {
 				List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
 
 				try {
-					client.invokeApi("inexistent", HttpGet.METHOD_NAME, parameters, jsonTestCallback());
+					client.invokeApi(INEXISTENT_API_NAME, HttpGet.METHOD_NAME, parameters, jsonTestCallback());
 				} catch (Exception exception) {
 					createResultFromException(mResult, exception);
 				}
@@ -1584,7 +1585,7 @@ public class CustomApiTests extends TestGroup {
 				JsonElement json = createJson(new Random(), 0, false);
 
 				try {
-					client.invokeApi("public", json, HttpPost.METHOD_NAME, parameters, jsonTestCallback());
+					client.invokeApi(PUBLIC_API_NAME, json, HttpPost.METHOD_NAME, parameters, jsonTestCallback());
 				} catch (Exception exception) {
 					createResultFromException(mResult, exception);
 				}
@@ -1631,7 +1632,7 @@ public class CustomApiTests extends TestGroup {
 				JsonElement json = createJson(new Random(), 0, false);
 
 				try {
-					client.invokeApi("inexistent", json, HttpPost.METHOD_NAME, parameters, jsonTestCallback());
+					client.invokeApi(INEXISTENT_API_NAME, json, HttpPost.METHOD_NAME, parameters, jsonTestCallback());
 				} catch (Exception exception) {
 					createResultFromException(mResult, exception);
 				}
@@ -1716,7 +1717,7 @@ public class CustomApiTests extends TestGroup {
 				mResult.setStatus(TestStatus.Passed);
 				mCallback = callback;
 
-				String apiUrl = APP_API_NAME + "inexistent";
+				String apiUrl = APP_API_NAME + INEXISTENT_API_NAME;
 
 				try {
 
