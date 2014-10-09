@@ -149,7 +149,12 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             string uriPath;
             Uri uri;
-            if (Uri.TryCreate(query, UriKind.Absolute, out uri))
+            if (query.StartsWith("/") && Uri.TryCreate(this.MobileServiceClient.ApplicationUri, query, out uri))
+            {
+                uriPath = uri.GetComponents(UriComponents.Scheme | UriComponents.UserInfo | UriComponents.Host | UriComponents.Port | UriComponents.Path, UriFormat.UriEscaped);
+                query = uri.Query;
+            }
+            else if (Uri.TryCreate(query, UriKind.Absolute, out uri))
             {
                 features |= MobileServiceFeatures.ReadWithLinkHeader;
                 uriPath = uri.GetComponents(UriComponents.Scheme | UriComponents.UserInfo | UriComponents.Host | UriComponents.Port | UriComponents.Path, UriFormat.UriEscaped);

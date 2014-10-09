@@ -95,7 +95,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Generic are not nested when used via async.")]
         public async Task<IEnumerable<U>> ReadAsync<U>(string query)
         {
-            QueryResult result = await base.ReadAsync(query, null, MobileServiceFeatures.TypedTable | MobileServiceFeatures.ReadWithLinkHeader);
+            QueryResult result = await base.ReadAsync(query, null, MobileServiceFeatures.TypedTable);
 
             return new QueryResultEnumerable<U>(
                 result.TotalCount,
