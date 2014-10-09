@@ -54,8 +54,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             {
                 this.CancellationToken.ThrowIfCancellationRequested();
 
-                string odata = this.Query.ToODataString();
-                result = await this.Table.ReadAsync(odata, MobileServiceTable.IncludeDeleted(parameters), this.Table.Features);
+                string query = this.Query.ToODataString();
+                if (this.Query.UriPath != null)
+                {
+                    query = MobileServiceUrlBuilder.CombinePathAndQuery(this.Query.UriPath, query);
+                }
+                result = await this.Table.ReadAsync(query, MobileServiceTable.IncludeDeleted(parameters), this.Table.Features);
                 await this.ProcessAll(result.Values); // process the first batch
 
                 result = await FollowNextLinks(result);

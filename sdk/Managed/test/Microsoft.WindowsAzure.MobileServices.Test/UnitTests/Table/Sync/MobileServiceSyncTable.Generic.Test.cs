@@ -3,7 +3,6 @@
 // ----------------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -328,6 +327,51 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                                         "http://www.test.com/tables/stringId_test_table?$skip=5&$top=49&__includeDeleted=true&__systemproperties=__version%2C__deleted",
                                         "http://localhost:31475/tables/Green?$top=1&$select=Text%2CDone%2CId&$skip=2",
                                         "http://www.test.com/tables/stringId_test_table?$skip=9&$top=45&__includeDeleted=true&__systemproperties=__version%2C__deleted");
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_Supports_AbsoluteAndRelativeUri()
+        {
+            var data = new string[] 
+            {
+                "http://www.test.com/api/todoitem",
+                "/api/todoitem"
+            };
+
+            foreach (string uri in data)
+            {
+                var hijack = new TestHttpHandler();
+                hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"How\"}]"); // first page
+                hijack.AddResponseContent("[]");
+
+                var store = new MobileServiceLocalStoreMock();
+                IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+                await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
+
+                IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
+
+                Assert.IsFalse(store.TableMap.ContainsKey("stringId_test_table"));
+
+                await table.PullAsync(uri);
+
+                Assert.AreEqual(store.TableMap["stringId_test_table"].Count, 2);
+
+                AssertEx.MatchUris(hijack.Requests, "http://www.test.com/api/todoitem?$skip=0&$top=50&__includeDeleted=true&__systemproperties=__version%2C__deleted",
+                                                    "http://www.test.com/api/todoitem?$skip=2&$top=50&__includeDeleted=true&__systemproperties=__version%2C__deleted");
+
+                Assert.AreEqual("QS,OL", hijack.Requests[0].Headers.GetValues("X-ZUMO-FEATURES").First());
+                Assert.AreEqual("QS,OL", hijack.Requests[1].Headers.GetValues("X-ZUMO-FEATURES").First());
+            }
+        }
+
+        public async Task PullASync_Throws_IfAbsoluteUriHostNameDoesNotMatch()
+        {
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", new TestHttpHandler());
+            IMobileServiceSyncTable<ToDo> table = service.GetSyncTable<ToDo>();
+
+            var ex = await AssertEx.Throws<ArgumentException>(async () => await table.PullAsync("http://www.contoso.com/about?$filter=a eq b&$orderby=c"));
+
+            Assert.AreEqual(ex.Message, "The query uri must be on the same host as the Mobile Service.");
         }
 
         [AsyncTestMethod]
