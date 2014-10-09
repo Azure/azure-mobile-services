@@ -3,6 +3,7 @@
 // ----------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,11 +29,18 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             this.store = store;
         }
 
-        public async virtual Task<MobileServiceTableOperation> PeekAsync(long prevSequenceId)
+        public async virtual Task<MobileServiceTableOperation> PeekAsync(long prevSequenceId, IEnumerable<string> tableNames)
         {
             MobileServiceTableQueryDescription query = CreateQuery();
 
             query.Filter = Compare(BinaryOperatorKind.GreaterThan, "sequence", prevSequenceId);
+            if (tableNames != null && tableNames.Any())
+            {
+                BinaryOperatorNode nameInList = tableNames.Select(t => Compare(BinaryOperatorKind.Equal, "tableName", t))
+                                                          .Aggregate((first, second) => new BinaryOperatorNode(BinaryOperatorKind.Or, first, second));
+                query.Filter = new BinaryOperatorNode(BinaryOperatorKind.And, query.Filter, nameInList);
+            }
+
             query.Ordering.Add(new OrderByNode(new MemberAccessNode(null, "sequence"), OrderByDirection.Ascending));
             query.Top = 1;
 
@@ -67,10 +75,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return this.itemLocks.Acquire(id, cancellationToken);
         }
 
-        public async Task<MobileServiceTableOperation> GetOperationByItemIdAsync(string itemId)
+        public async Task<MobileServiceTableOperation> GetOperationByItemIdAsync(string tableName, string itemId)
         {
             MobileServiceTableQueryDescription query = CreateQuery();
-            query.Filter = new BinaryOperatorNode(BinaryOperatorKind.Equal, new MemberAccessNode(null, "itemId"), new ConstantNode(itemId));
+            query.Filter = new BinaryOperatorNode(BinaryOperatorKind.And,
+                                Compare(BinaryOperatorKind.Equal, "tableName", tableName),
+                                Compare(BinaryOperatorKind.Equal, "itemId", itemId));
             JObject op = await this.store.FirstOrDefault(query);
             return MobileServiceTableOperation.Deserialize(op);
         }

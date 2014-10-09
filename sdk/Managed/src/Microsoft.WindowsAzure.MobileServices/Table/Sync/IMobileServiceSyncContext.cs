@@ -2,7 +2,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,7 +11,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     /// Provides a way to synchronize local database with remote database.
     /// </summary>
     public interface IMobileServiceSyncContext
-    {       
+    {
         /// <summary>
         /// An instance of <see cref="IMobileServiceLocalStore"/>
         /// </summary>
@@ -39,14 +38,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <summary>
         /// Returns the number of pending operations that are not yet pushed to remote table.
         /// </summary>
-        /// <returns>A task that returns the number of pending operations against the remote table.</returns>
+        /// <returns>Returns the number of pending operations against the remote table.</returns>
         long PendingOperations { get; }
 
         /// <summary>
         /// Pushes all pending operations up to the remote table.
         /// </summary>
         /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
-        /// <returns></returns>
+        /// <returns>A task that completes when pull operation has finished.</returns>
         Task PushAsync(CancellationToken cancellationToken);
     }
 }

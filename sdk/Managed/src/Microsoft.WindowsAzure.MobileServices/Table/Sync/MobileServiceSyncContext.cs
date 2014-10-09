@@ -157,7 +157,26 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return await this.Store.LookupAsync(tableName, id);
         }
 
-        public async Task PullAsync(string tableName, string queryKey, string query, MobileServiceRemoteTableOptions options, IDictionary<string, string> parameters, CancellationToken cancellationToken)
+        /// <summary>
+        /// Pulls all items that match the given query from the associated remote table.
+        /// </summary>
+        /// <param name="tableName">The name of table to pull</param>
+        /// <param name="queryKey">A string that uniquely identifies this query and is used to keep track of its sync state.</param>
+        /// <param name="query">An OData query that determines which items to 
+        /// pull from the remote table.</param>
+        /// <param name="options">An instance of <see cref="MobileServiceRemoteTableOptions"/></param>
+        /// <param name="parameters">A dictionary of user-defined parameters and values to include in 
+        /// the request URI query string.</param>
+        /// <param name="relatedTables">
+        /// List of tables that may have related records that need to be push before this table is pulled down.
+        /// When no table is specified, all tables are considered related.
+        /// </param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe
+        /// </param>
+        /// <returns>
+        /// A task that completes when pull operation has finished.
+        /// </returns>
+        public async Task PullAsync(string tableName, string queryKey, string query, MobileServiceRemoteTableOptions options, IDictionary<string, string> parameters, IEnumerable<string> relatedTables, CancellationToken cancellationToken)
         {
             await this.EnsureInitializedAsync();
 
@@ -202,7 +221,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             // let us not burden the server to calculate the count when we don't need it for pull
             queryDescription.IncludeTotalCount = false;
 
-            var pull = new PullAction(table, this, queryKey, queryDescription, parameters, this.opQueue, this.settings, this.Store, options, cancellationToken);
+            var pull = new PullAction(table, this, queryKey, queryDescription, parameters, relatedTables, this.opQueue, this.settings, this.Store, options, cancellationToken);
             Task discard = this.syncQueue.Post(pull.ExecuteAsync, cancellationToken);
 
             await pull.CompletionTask;
@@ -220,12 +239,18 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             await purge.CompletionTask;
         }
 
-        public async Task PushAsync(CancellationToken cancellationToken)
+        public Task PushAsync(CancellationToken cancellationToken)
+        {
+            return PushAsync(cancellationToken, new string[0]);
+        }
+
+        public async Task PushAsync(CancellationToken cancellationToken, params string[] tableNames)
         {
             await this.EnsureInitializedAsync();
 
             var push = new PushAction(this.opQueue,
                                       this.Store,
+                                      tableNames,
                                       this.Handler,
                                       this.client,
                                       this,
@@ -269,9 +294,23 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         public async Task DeferTableActionAsync(TableAction action)
         {
+            IEnumerable<string> tableNames;
+            if (action.RelatedTables == null) // no related table
+            {
+                tableNames = new[] { action.Table.TableName };
+            }
+            else if (action.RelatedTables.Any()) // some related tables
+            {
+                tableNames = new[] { action.Table.TableName }.Concat(action.RelatedTables);
+            }
+            else // all tables are related
+            {
+                tableNames = Enumerable.Empty<string>();
+            }
+
             try
             {
-                await this.PushAsync(action.CancellationToken);
+                await this.PushAsync(action.CancellationToken, tableNames.ToArray());
             }
             finally
             {
@@ -304,7 +343,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         {
             return this.ExecuteOperationSafeAsync(operation.ItemId, operation.TableName, async () =>
             {
-                MobileServiceTableOperation existing = await this.opQueue.GetOperationByItemIdAsync(operation.ItemId);
+                MobileServiceTableOperation existing = await this.opQueue.GetOperationByItemIdAsync(operation.TableName, operation.ItemId);
                 if (existing != null)
                 {
                     existing.Validate(operation); // make sure this operation is legal and collapses after any previous operation on same item already in the queue

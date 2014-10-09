@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Query;
 using Microsoft.WindowsAzure.MobileServices.Sync;
@@ -10,7 +9,7 @@ using MockTable = System.Collections.Generic.Dictionary<string, Newtonsoft.Json.
 
 namespace Microsoft.WindowsAzure.MobileServices.Test
 {
-    class MobileServiceLocalStoreMock: IMobileServiceLocalStore
+    class MobileServiceLocalStoreMock : IMobileServiceLocalStore
     {
         public readonly Dictionary<string, MockTable> TableMap = new Dictionary<string, MockTable>();
 
@@ -43,18 +42,20 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 if (query.TableName == MobileServiceLocalSystemTables.OperationQueue)
                 {
                     string odata = query.ToODataString();
-                    if ( odata.Contains("$orderby=sequence desc")) // the query to take total count and max sequence
+                    if (odata.Contains("$orderby=sequence desc")) // the query to take total count and max sequence
                     {
                         items = items.OrderBy(o => o.Value<long>("sequence"));
                     }
-                    else if (odata.Contains("$filter=(sequence gt ")) // the query to get next operation
+                    else if (odata.Contains("(sequence gt ")) // the query to get next operation
                     {
                         items = items.Where(o => o.Value<long>("sequence") > (long)((ConstantNode)((BinaryOperatorNode)query.Filter).RightOperand).Value);
                         items = items.OrderBy(o => o.Value<long>("sequence"));
                     }
-                    else if (odata.Contains("$filter=(itemId eq '"))
+                    else if (odata.Contains(") and (itemId eq '")) // the query to retrive operation by item id
                     {
-                        items = items.Where(o => o.Value<string>("itemId") == ((ConstantNode)((BinaryOperatorNode)query.Filter).RightOperand).Value.ToString());
+                        string targetTable = ((ConstantNode)((BinaryOperatorNode)((BinaryOperatorNode)query.Filter).LeftOperand).RightOperand).Value.ToString();
+                        string targetId = ((ConstantNode)((BinaryOperatorNode)((BinaryOperatorNode)query.Filter).RightOperand).RightOperand).Value.ToString();
+                        items = items.Where(o => o.Value<string>("itemId") == targetId && o.Value<string>("tableName") == targetTable);
                     }
                     else if (odata.Contains("$filter=(tableName eq '"))
                     {
@@ -128,10 +129,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 this.TableMap[tableName] = table = new MockTable();
             }
             return table;
-        } 
+        }
 
         public void Dispose()
-        {            
+        {
         }
     }
 }
