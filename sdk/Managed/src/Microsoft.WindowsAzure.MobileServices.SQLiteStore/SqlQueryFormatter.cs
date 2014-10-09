@@ -6,17 +6,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Query;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 {
-    internal class SqlQueryFormatter: QueryNodeVisitor<QueryNode>
+    internal class SqlQueryFormatter : QueryNodeVisitor<QueryNode>
     {
         private MobileServiceTableQueryDescription query;
         private StringBuilder sql;
-        
+
         public IDictionary<string, object> Parameters { get; private set; }
 
         public SqlQueryFormatter(MobileServiceTableQueryDescription query)
@@ -47,7 +46,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
             if (this.query.IncludeTotalCount)
             {
-                this.FormatCountQuery();                
+                this.FormatCountQuery();
             }
 
             return GetSql();
@@ -60,7 +59,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             delQuery.Selection.Clear();
             delQuery.Selection.Add(MobileServiceSystemColumns.Id);
             delQuery.IncludeTotalCount = false;
-            
+
             var formatter = new SqlQueryFormatter(delQuery);
             string selectIdQuery = formatter.FormatSelect();
             string idMemberName = SqlHelpers.FormatMember(MobileServiceSystemColumns.Id);
@@ -74,7 +73,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         private string FormatQuery(string command)
         {
             Reset();
-            
+
             this.sql.Append(command);
 
             string tableName = SqlHelpers.FormatTableName(this.query.TableName);
@@ -158,9 +157,9 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             this.sql.Append("(");
 
             QueryNode left = nodeIn.LeftOperand;
-            QueryNode right = nodeIn.RightOperand;            
-            
-            if (left != null) 
+            QueryNode right = nodeIn.RightOperand;
+
+            if (left != null)
             {
                 // modulo requires the dividend to be an integer, monetary or numeric
                 // rewrite the expression to convert to numeric, allowing the DB to apply
@@ -175,22 +174,22 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             }
 
             var rightConstant = right as ConstantNode;
-            if (rightConstant != null && rightConstant.Value == null) 
+            if (rightConstant != null && rightConstant.Value == null)
             {
                 // inequality expressions against a null literal have a special
                 // translation in SQL
-                if (nodeIn.OperatorKind == BinaryOperatorKind.Equal) 
+                if (nodeIn.OperatorKind == BinaryOperatorKind.Equal)
                 {
                     this.sql.Append(" IS NULL");
                 }
-                else if (nodeIn.OperatorKind == BinaryOperatorKind.NotEqual) 
+                else if (nodeIn.OperatorKind == BinaryOperatorKind.NotEqual)
                 {
                     this.sql.Append(" IS NOT NULL");
                 }
             }
-            else 
+            else
             {
-                switch (nodeIn.OperatorKind) 
+                switch (nodeIn.OperatorKind)
                 {
                     case BinaryOperatorKind.Equal:
                         this.sql.Append(" = ");
@@ -232,7 +231,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                         this.sql.Append(" % ");
                         break;
                 }
-                
+
                 if (right != null)
                 {
                     right = right.Accept(this);
@@ -259,10 +258,10 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             {
                 this.sql.Append(this.CreateParameter(nodeIn.Value));
             }
-            
+
 
             return nodeIn;
-        }        
+        }
 
         public override QueryNode Visit(MemberAccessNode nodeIn)
         {
@@ -303,11 +302,11 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 case "trim":
                     return this.FormatStringFunction("TRIM", nodeIn);
                 case "substringof":
-                    return this.FormatLikeFunction(true, nodeIn, true);
+                    return this.FormatLikeFunction(true, nodeIn, 0, 1, true);
                 case "startswith":
-                    return this.FormatLikeFunction(false, nodeIn, true);
+                    return this.FormatLikeFunction(false, nodeIn, 1, 0, true);
                 case "endswith":
-                    return this.FormatLikeFunction(true, nodeIn, false);
+                    return this.FormatLikeFunction(true, nodeIn, 1, 0, false);
                 case "concat":
                     return this.FormatConcatFunction(nodeIn);
                 case "indexof":
@@ -321,21 +320,21 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             throw new NotImplementedException();
         }
 
-        private QueryNode FormatLikeFunction(bool startAny, FunctionCallNode nodeIn, bool endAny)
+        private QueryNode FormatLikeFunction(bool startAny, FunctionCallNode nodeIn, int patternIndex, int valueIndex, bool endAny)
         {
-            // like('%pattern%', column)
+            // like('%pattern%', value)
             this.sql.Append("LIKE(");
             if (startAny)
             {
                 this.sql.Append("'%' || ");
             }
-            nodeIn.Arguments[1].Accept(this);
+            nodeIn.Arguments[patternIndex].Accept(this);
             if (endAny)
             {
                 this.sql.Append(" || '%'");
             }
             this.sql.Append(", ");
-            nodeIn.Arguments[0].Accept(this);
+            nodeIn.Arguments[valueIndex].Accept(this);
             this.sql.Append(")");
 
             return nodeIn;
@@ -391,7 +390,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 separator = ", ";
             }
             this.sql.Append(")");
-            
+
             return nodeIn;
         }
 
@@ -474,7 +473,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 return new UnaryOperatorNode(nodeIn.OperatorKind, operand);
             }
 
-            return nodeIn;  
+            return nodeIn;
         }
 
         public override QueryNode Visit(ConvertNode nodeIn)
@@ -482,7 +481,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             this.sql.Append("CAST(");
 
             QueryNode source = nodeIn.Source.Accept(this);
-            
+
             this.sql.Append(" AS ");
 
             string sqlType = SqlHelpers.GetColumnType(nodeIn.TargetType);
@@ -504,6 +503,6 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             string paramName = "@p" + paramNumber;
             this.Parameters.Add(paramName, SqlHelpers.SerializeValue(new JValue(value), allowNull: true));
             return paramName;
-        }        
+        }
     }
 }

@@ -146,7 +146,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
         [TestMethod]
         public void FormatSelect_String_SubstringOf()
         {
-            TestSelectStringFunction("substringof(name, 'khan')", "LIKE('%' || @p1 || '%', [name])", "khan");
+            TestSelectStringFunction("substringof('khan', name)", "LIKE('%' || @p1 || '%', [name])", "khan");
         }
 
         [TestMethod]

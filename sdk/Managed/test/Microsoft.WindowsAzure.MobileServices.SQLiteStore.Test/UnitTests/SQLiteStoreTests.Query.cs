@@ -3,17 +3,12 @@
 // ----------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Query;
-using Microsoft.WindowsAzure.MobileServices.SQLiteStore;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Schema;
-using SQLitePCL;
 
 namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 {
@@ -145,8 +140,22 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         [AsyncTestMethod]
         public async Task Query_OnString_SubstringOf()
         {
-            await TestQuery("$filter=substringof(col1, 'ump')", 1);
-            await TestQuery("$filter=substringof(col1, 'umx')", 0);
+            await TestQuery("$filter=substringof('ump', col1)", 1);
+            await TestQuery("$filter=substringof('umx', col1)", 0);
+        }
+
+        [AsyncTestMethod]
+        public async Task Query_OnString_StartsWith()
+        {
+            await TestQuery("$filter=startswith(col1, 'jum')", 1);
+            await TestQuery("$filter=startswith(col1, 'pum')", 0);
+        }
+
+        [AsyncTestMethod]
+        public async Task Query_OnString_EndsWith()
+        {
+            await TestQuery("$filter=endswith(col1, 'umped')", 1);
+            await TestQuery("$filter=endswith(col1, 'umxed')", 0);
         }
 
         [AsyncTestMethod]
