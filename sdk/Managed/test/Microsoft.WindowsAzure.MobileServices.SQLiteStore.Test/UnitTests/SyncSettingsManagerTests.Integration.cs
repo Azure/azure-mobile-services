@@ -13,6 +13,22 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
 
         [AsyncTestMethod]
+        public async Task ResetDeltaTokenAsync_ResetsTheToken()
+        {
+            MobileServiceSyncSettingsManager settings = await GetSettingManager();
+
+            DateTimeOffset saved = new DateTime(2014, 7, 24, 3, 4, 5, DateTimeKind.Local);
+            await settings.SetDeltaTokenAsync(TestTable, TestQueryKey, saved);
+
+            DateTimeOffset read = await settings.GetDeltaTokenAsync(TestTable, TestQueryKey);
+            Assert.AreEqual(read, saved.ToUniversalTime());
+
+            await settings.ResetDeltaTokenAsync(TestTable, TestQueryKey);
+            read = await settings.GetDeltaTokenAsync(TestTable, TestQueryKey);
+            Assert.AreEqual(read, new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero).ToUniversalTime());
+        }
+
+        [AsyncTestMethod]
         public async Task GetDeltaTokenAsync_ReturnsMinValue_WhenTokenDoesNotExist()
         {
             MobileServiceSyncSettingsManager settings = await GetSettingManager();

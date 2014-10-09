@@ -37,9 +37,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return (MobileServiceSystemProperties)Int32.Parse(value);
         }
 
-        public virtual Task ResetDeltaTokenAsync(string tableName, string queryKey)
+        public virtual async Task ResetDeltaTokenAsync(string tableName, string queryKey)
         {
-            return this.store.DeleteAsync(MobileServiceLocalSystemTables.Config, GetDeltaTokenKey(tableName, queryKey));
+            string key = GetDeltaTokenKey(tableName, queryKey);
+
+            using (await this.cacheLock.Acquire(key, CancellationToken.None))
+            {
+                this.cache.Remove(key);
+                await this.store.DeleteAsync(MobileServiceLocalSystemTables.Config, key);
+            }
         }
 
         public async virtual Task<DateTimeOffset> GetDeltaTokenAsync(string tableName, string queryKey)
