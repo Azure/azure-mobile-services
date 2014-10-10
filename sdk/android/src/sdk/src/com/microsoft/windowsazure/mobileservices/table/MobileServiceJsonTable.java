@@ -601,27 +601,9 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 		Futures.addCallback(internalFuture, new FutureCallback<Pair<JsonObject, ServiceFilterResponse>>() {
 			@Override
 			public void onFailure(Throwable exc) {
-				if (exc instanceof MobileServiceException) {
-					MobileServiceException msExcep = (MobileServiceException) exc;
-
-					if (msExcep.getResponse().getStatus() != null && msExcep.getResponse().getStatus().getStatusCode() == 412) {
-						String content = msExcep.getResponse().getContent();
-
-						JsonObject serverEntity = null;
-
-						if (content != null) {
-							serverEntity = new JsonParser().parse(content).getAsJsonObject();
-						}
-
-						future.setException(new MobileServicePreconditionFailedExceptionBase(msExcep, serverEntity));
-					} else {
-						future.setException(exc);
-					}
-				} else {
-					future.setException(exc);
-				}
+				future.setException(exc);
 			}
-
+			
 			@Override
 			public void onSuccess(Pair<JsonObject, ServiceFilterResponse> result) {
 				JsonObject patchedJson = patchOriginalEntityWithResponseEntity(element, result.first);
@@ -700,7 +682,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 		Futures.addCallback(internalFuture, new FutureCallback<ServiceFilterResponse>() {
 			@Override
 			public void onFailure(Throwable exc) {
-				future.setException(exc);
+				future.setException(transformHttpException(exc));
 			}
 
 			@Override
@@ -820,4 +802,6 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 			}
 		}
 	}
+	
 }
+		

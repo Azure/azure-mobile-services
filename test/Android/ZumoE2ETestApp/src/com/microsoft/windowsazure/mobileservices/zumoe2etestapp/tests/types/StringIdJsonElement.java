@@ -46,6 +46,11 @@ public class StringIdJsonElement {
 		this(false);
 	}
 
+	public StringIdJsonElement(String id) {
+		this(true);
+		this.id = id;
+	}
+	
 	public StringIdJsonElement(boolean initialized) {
 		if (initialized) {
 			name = "Sample Data";

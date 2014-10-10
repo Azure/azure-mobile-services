@@ -19,31 +19,42 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 
 /**
- * MobileServicePreconditionFailedExceptionBase.java
+ * MobileServicePreconditionFailedException.java
  */
 package com.microsoft.windowsazure.mobileservices.table;
 
-import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 
-public class MobileServicePreconditionFailedExceptionBase extends MobileServiceExceptionBase {
+public class MobileServiceConflictException extends MobileServiceException {
 
 	/**
 	 * UID used for serialization
 	 */
-	private static final long serialVersionUID = 4489352410883725274L;
+	private static final long serialVersionUID = 5188346485829981214L;
+
+	private Object mItem;
+
 
 	/**
 	 * Initializes a new instance of the
-	 * MobileServicePreconditionFailedExceptionBase class.
+	 * MobileServiceConflictExceptionBase class.
 	 * 
 	 * @param throwable
 	 *            The inner exception.
 	 * @param value
-	 *            The current instance from the server that the precondition
-	 *            failed for.
+	 *            The current instance from server that the conflict occurred for.
 	 */
-	public MobileServicePreconditionFailedExceptionBase(MobileServiceException msException, JsonObject value) {
-		super(msException, value);
+	
+	public MobileServiceConflictException(MobileServiceException msException, Object item) {
+		super(msException.getMessage(), msException.getCause(), msException.getResponse());
+		this.mItem = item;
+	}
+
+	public Object getItem() {
+		return mItem;
+	}
+
+	public void setItem(Object item) {
+		this.mItem = item;
 	}
 }

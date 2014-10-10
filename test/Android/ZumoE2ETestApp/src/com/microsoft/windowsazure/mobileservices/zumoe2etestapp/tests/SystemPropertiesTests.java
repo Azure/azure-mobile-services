@@ -37,6 +37,8 @@ import android.util.Pair;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceConflictException;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceConflictExceptionBase;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServicePreconditionFailedException;
 import com.microsoft.windowsazure.mobileservices.table.MobileServicePreconditionFailedExceptionBase;
@@ -103,6 +105,10 @@ public class SystemPropertiesTests extends TestGroup {
 		}
 		this.addTest(createMergeConflictTest("Merge Conflict"));
 		this.addTest(createMergeConflictGenericTest("Merge Conflict Generic"));
+		
+		this.addTest(createDuplicateConflictTest("Duplicate Conflict"));
+		this.addTest(createDuplicateConflictGenericTest("Duplicate Conflict Generic"));
+		
 	}
 
 	private TestCase createTypeSystemPropertiesTest(String name) {
@@ -528,7 +534,7 @@ public class SystemPropertiesTests extends TestGroup {
 		roundtripTest.setName(name);
 		return roundtripTest;
 	}
-
+	
 	private TestCase createMergeConflictTest(String name) {
 		TestCase roundtripTest = new TestCase() {
 
@@ -572,8 +578,8 @@ public class SystemPropertiesTests extends TestGroup {
 								callback.onTestComplete(test, result);
 							}
 						} catch (Exception ex) {
-							if (ex instanceof MobileServicePreconditionFailedExceptionBase) {
-								MobileServicePreconditionFailedExceptionBase preconditionFailed = (MobileServicePreconditionFailedExceptionBase) ex;
+							if (ex.getCause() instanceof MobileServicePreconditionFailedExceptionBase) {
+								MobileServicePreconditionFailedExceptionBase preconditionFailed = (MobileServicePreconditionFailedExceptionBase) ex.getCause();
 								JsonObject serverValue = preconditionFailed.getValue();
 
 								String serverVersion = serverValue.get("__version").getAsString();
@@ -597,7 +603,6 @@ public class SystemPropertiesTests extends TestGroup {
 			}
 		};
 
-		roundtripTest.setExpectedExceptionClass(MobileServicePreconditionFailedExceptionBase.class);
 		roundtripTest.setName(name);
 		return roundtripTest;
 	}
@@ -622,7 +627,7 @@ public class SystemPropertiesTests extends TestGroup {
 									.getTable(STRING_ID_TABLE_NAME, StringIdRoundTripTableElement.class);
 
 							StringIdRoundTripTableElement element1 = new StringIdRoundTripTableElement(true);
-
+							
 							log("Insert element 1 - " + element1.toString());
 							responseElement1 = insert(table, element1);
 
@@ -638,8 +643,8 @@ public class SystemPropertiesTests extends TestGroup {
 								callback.onTestComplete(test, result);
 							}
 						} catch (Exception ex) {
-							if (ex instanceof MobileServicePreconditionFailedException) {
-								MobileServicePreconditionFailedException preconditionFailed = (MobileServicePreconditionFailedException) ex;
+							if (ex.getCause() instanceof MobileServicePreconditionFailedException) {
+								MobileServicePreconditionFailedException preconditionFailed = (MobileServicePreconditionFailedException) ex.getCause();
 								StringIdRoundTripTableElement serverValue = (StringIdRoundTripTableElement) preconditionFailed.getItem();
 
 								String serverVersion = serverValue.Version;
@@ -663,7 +668,127 @@ public class SystemPropertiesTests extends TestGroup {
 			}
 		};
 
-		roundtripTest.setExpectedExceptionClass(MobileServicePreconditionFailedException.class);
+		roundtripTest.setName(name);
+		return roundtripTest;
+	}
+
+	private TestCase createDuplicateConflictTest(String name) {
+		TestCase roundtripTest = new TestCase() {
+
+			@Override
+			protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
+				final TestCase test = this;
+
+				executeTask(new AsyncTask<Void, Void, Void>() {
+					@Override
+					protected Void doInBackground(Void... params) {
+						TestResult result = new TestResult();
+						result.setTestCase(test);
+
+
+						UUID uuId = UUID.randomUUID();
+						
+						StringIdJsonElement element1 = new StringIdJsonElement(uuId.toString());
+
+						try {
+							MobileServiceJsonTable jsonTable = client.getTable(STRING_ID_TABLE_NAME);
+
+							EnumSet<MobileServiceSystemProperty> systemProperties = EnumSet.noneOf(MobileServiceSystemProperty.class);
+							systemProperties.add(MobileServiceSystemProperty.Version);
+
+							jsonTable.setSystemProperties(systemProperties);
+							
+							JsonObject jsonElement1 = client.getGsonBuilder().create().toJsonTree(element1).getAsJsonObject();
+
+							log("Insert Json element 1 - " + jsonElement1.toString());
+							insert(jsonTable, jsonElement1);
+
+							log("Insert Json element 1 Again - " + jsonElement1.toString());
+							insert(jsonTable, jsonElement1);
+
+							result.setStatus(TestStatus.Failed);
+							if (callback != null) {
+								callback.onTestComplete(test, result);
+							}
+						} catch (Exception ex) {
+							if (ex.getCause() instanceof MobileServiceConflictExceptionBase) {
+								MobileServiceConflictExceptionBase preconditionFailed = (MobileServiceConflictExceptionBase) ex.getCause();
+								JsonObject serverValue = preconditionFailed.getValue();
+
+								if (!serverValue.equals(element1)) {
+									ex = new ExpectedValueException(serverValue, element1);
+								}
+							}
+
+							result = createResultFromException(result, ex);
+
+							if (callback != null) {
+								callback.onTestComplete(test, result);
+							}
+						}
+
+						return null;
+					};
+				});
+			}
+		};
+
+		roundtripTest.setName(name);
+		return roundtripTest;
+	}
+
+	private TestCase createDuplicateConflictGenericTest(String name) {
+		TestCase roundtripTest = new TestCase() {
+
+			@Override
+			protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
+				final TestCase test = this;
+
+				executeTask(new AsyncTask<Void, Void, Void>() {
+					@Override
+					protected Void doInBackground(Void... params) {
+						TestResult result = new TestResult();
+						result.setTestCase(test);
+
+						StringIdRoundTripTableElement element1 = new StringIdRoundTripTableElement("1");
+
+						try {
+							MobileServiceTable<StringIdRoundTripTableElement> table = client
+									.getTable(STRING_ID_TABLE_NAME, StringIdRoundTripTableElement.class);
+
+							log("Insert element 1 - " + element1.toString());
+							insert(table, element1);
+							
+							log("Insert element 1 Again - " + element1.toString());
+							insert(table, element1);
+							
+							result.setStatus(TestStatus.Failed);
+							if (callback != null) {
+								callback.onTestComplete(test, result);
+							}
+						} catch (Exception ex) {
+							if (ex.getCause() instanceof MobileServiceConflictException) {
+								MobileServiceConflictException preconditionFailed = (MobileServiceConflictException) ex.getCause();
+								StringIdRoundTripTableElement serverValue = (StringIdRoundTripTableElement) preconditionFailed.getItem();
+
+								if (!serverValue.equals(element1)) {
+									ex = new ExpectedValueException(serverValue, element1);
+								}
+							}
+
+							result = createResultFromException(result, ex);
+
+							if (callback != null) {
+								callback.onTestComplete(test, result);
+							}
+						}
+
+						return null;
+					}
+				});
+			}
+		};
+
 		roundtripTest.setName(name);
 		return roundtripTest;
 	}

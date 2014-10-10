@@ -249,7 +249,7 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
 				if (mTaskException == null) {
 					future.set(null);
 				} else {
-					future.setException(mTaskException);
+					future.setException(transformHttpException(mTaskException));
 				}
 			}
 		}.executeTask();
@@ -933,5 +933,42 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
 	 */
 	protected static <F> boolean isIntegerClass(Class<F> clazz) {
 		return clazz.equals(Integer.class) || clazz.equals(Long.class) || clazz.equals(int.class) || clazz.equals(long.class);
+	}
+	
+	/**
+	 * Transforms a 412 and 409 response to respective exception type.
+	 * 
+	 * @param exc
+	 *            the Throwable from the request
+	 */
+	protected static Throwable transformHttpException(Throwable exc) {
+		
+		if (exc instanceof MobileServiceException) {
+			MobileServiceException msExcep = (MobileServiceException) exc;
+
+			if (msExcep.getResponse() != null &&
+					msExcep.getResponse().getStatus() != null && 
+					(msExcep.getResponse().getStatus().getStatusCode() == 412 ||
+					msExcep.getResponse().getStatus().getStatusCode() == 409)) {
+				
+				String content = msExcep.getResponse().getContent();
+
+				JsonObject serverEntity = null;
+
+				if (content != null) {
+					serverEntity = new JsonParser().parse(content).getAsJsonObject();
+				}
+
+				if (msExcep.getResponse().getStatus().getStatusCode() == 412) {
+					return new MobileServicePreconditionFailedExceptionBase(msExcep, serverEntity);
+				}
+				
+				if (msExcep.getResponse().getStatus().getStatusCode() == 409) {
+					return new MobileServiceConflictExceptionBase(msExcep, serverEntity);
+				}
+			}
+		}
+		
+		return exc;
 	}
 }

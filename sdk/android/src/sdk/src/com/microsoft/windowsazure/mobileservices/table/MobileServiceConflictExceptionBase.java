@@ -26,7 +26,7 @@ package com.microsoft.windowsazure.mobileservices.table;
 import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 
-public class MobileServicePreconditionFailedExceptionBase extends MobileServiceExceptionBase {
+public class MobileServiceConflictExceptionBase extends MobileServiceExceptionBase {
 
 	/**
 	 * UID used for serialization
@@ -35,15 +35,14 @@ public class MobileServicePreconditionFailedExceptionBase extends MobileServiceE
 
 	/**
 	 * Initializes a new instance of the
-	 * MobileServicePreconditionFailedExceptionBase class.
+	 * MobileServiceConflictExceptionBase class.
 	 * 
 	 * @param throwable
 	 *            The inner exception.
 	 * @param value
-	 *            The current instance from the server that the precondition
-	 *            failed for.
+	 *            The current instance from server that the conflict occurred for.
 	 */
-	public MobileServicePreconditionFailedExceptionBase(MobileServiceException msException, JsonObject value) {
+	public MobileServiceConflictExceptionBase(MobileServiceException msException, JsonObject value) {
 		super(msException, value);
 	}
 }

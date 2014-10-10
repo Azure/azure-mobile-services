@@ -56,6 +56,10 @@ public class StringIdRoundTripTableElement {
 		this(false);
 	}
 
+	public StringIdRoundTripTableElement(String id) {
+		this(true);
+		this.id = id;
+	}
 	public StringIdRoundTripTableElement(boolean initialized) {
 		if (initialized) {
 			name = "Sample Data";

@@ -375,20 +375,7 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 		Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
 			@Override
 			public void onFailure(Throwable exc) {
-				if (exc instanceof MobileServicePreconditionFailedExceptionBase) {
-					MobileServicePreconditionFailedExceptionBase ex = (MobileServicePreconditionFailedExceptionBase) exc;
-
-					E entity = null;
-
-					try {
-						entity = parseResults(ex.getValue()).get(0);
-					} catch (Exception e) {
-					}
-
-					future.setException(new MobileServicePreconditionFailedException(ex, entity));
-				} else {
-					future.setException(exc);
-				}
+				future.setException(transformToTypedException(exc));
 			}
 
 			@Override
@@ -494,26 +481,7 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 		Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
 			@Override
 			public void onFailure(Throwable exc) {
-				if (exc instanceof MobileServicePreconditionFailedExceptionBase) {
-					MobileServicePreconditionFailedExceptionBase ex = (MobileServicePreconditionFailedExceptionBase) exc;
-
-					E entity = null;
-
-					try {
-						entity = parseResults(ex.getValue()).get(0);
-
-						if (entity != null && element != null) {
-							copyFields(entity, element);
-							entity = element;
-						}
-					} catch (Exception e) {
-					}
-
-					future.setException(new MobileServicePreconditionFailedException(ex, entity));
-
-				} else {
-					future.setException(exc);
-				}
+				future.setException(transformToTypedException(exc));
 			}
 
 			@Override
@@ -621,26 +589,7 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 		Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
 			@Override
 			public void onFailure(Throwable exc) {
-				if (exc instanceof MobileServicePreconditionFailedExceptionBase) {
-					MobileServicePreconditionFailedExceptionBase ex = (MobileServicePreconditionFailedExceptionBase) exc;
-
-					E entity = null;
-
-					try {
-						entity = parseResults(ex.getValue()).get(0);
-
-						if (entity != null && element != null) {
-							copyFields(entity, element);
-							entity = element;
-						}
-					} catch (Exception e) {
-					}
-
-					future.setException(new MobileServicePreconditionFailedException(ex, entity));
-
-				} else {
-					future.setException(exc);
-				}
+				future.setException(transformToTypedException(exc));
 			}
 
 			@Override
@@ -726,5 +675,36 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 				field.set(target, field.get(source));
 			}
 		}
+	}
+	
+	private Throwable transformToTypedException(Throwable exc) {
+		
+		if (exc instanceof MobileServicePreconditionFailedExceptionBase) {
+			MobileServicePreconditionFailedExceptionBase ex = (MobileServicePreconditionFailedExceptionBase) exc;
+	
+			E entity = parseResultsForTypedException(ex);
+			
+			return new MobileServicePreconditionFailedException(ex, entity);
+		
+		} else if (exc instanceof MobileServiceConflictExceptionBase) {
+			MobileServiceConflictExceptionBase ex = (MobileServiceConflictExceptionBase) exc;
+	
+			E entity = parseResultsForTypedException(ex);
+			
+			return new MobileServiceConflictException(ex, entity);
+		} 
+		
+		return exc;
+	}
+	
+	private E parseResultsForTypedException(MobileServiceExceptionBase ex) {
+		E entity = null;
+		
+		try {
+			entity = parseResults(ex.getValue()).get(0);
+		} catch (Exception e) {
+		}
+		
+		return entity;
 	}
 }
