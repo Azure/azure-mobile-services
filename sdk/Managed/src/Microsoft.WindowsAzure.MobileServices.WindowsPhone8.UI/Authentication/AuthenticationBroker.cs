@@ -100,8 +100,8 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.EndUri = endUrl;
             this.AuthenticationInProgress = true;
 
-            //hook up the broker to the page on the event.
-            rootFrame.Navigated += rootFrame_Navigated;
+            //hook up the broker to the page.
+            LoginPage.Broker = this;
 
             // Navigate to the login page.
             rootFrame.Navigate(this.LoginPageUri);
@@ -131,20 +131,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             });
 
             return task;
-        }
-
-        /// <summary>
-        /// Hooks up the broker to the page.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void rootFrame_Navigated(object sender, NavigationEventArgs e)
-        {
-            PhoneApplicationFrame rootFrame = Application.Current.RootVisual as PhoneApplicationFrame;
-            rootFrame.Navigated -= rootFrame_Navigated;
-
-            LoginPage page = e.Content as LoginPage;
-            page.Broker = this;
         }
 
         internal void OnAuthenticationFinished(string data, PhoneAuthenticationStatus status, uint error)
