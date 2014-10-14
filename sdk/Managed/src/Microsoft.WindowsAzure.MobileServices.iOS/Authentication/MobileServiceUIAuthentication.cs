@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 #if __UNIFIED__
 using Foundation;
 using UIKit;
+using NSAction = System.Action;
 #else
 using MonoTouch.Foundation;
 using MonoTouch.UIKit;
@@ -39,7 +40,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             auth.Error += (o, e) =>
             {
-                Action completed = () =>
+                NSAction completed = () =>
                 {
                     Exception ex = e.Exception ?? new Exception(e.Message);
                     tcs.TrySetException(ex);
@@ -56,7 +57,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             auth.Completed += (o, e) =>
             {
-                Action completed = () =>
+                NSAction completed = () =>
                 {
                     if (!e.IsAuthenticated)
                         tcs.TrySetException(new InvalidOperationException(Resources.IAuthenticationBroker_AuthenticationCanceled));
