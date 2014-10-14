@@ -16,7 +16,7 @@ $(function() {
     //    "ZUMOAPPKEY"
     //);
 <# } else { #>
-    var client = new WindowsAzure.MobileServiceClient('ZUMOAPPURL', 'ZUMOAPPKEY');        
+    var client = new WindowsAzure.MobileServiceClient('ZUMOAPPURL', 'ZUMOAPPKEY');
 <# } #>
     var todoItemTable = client.getTable('todoitem');
 
