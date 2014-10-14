@@ -587,7 +587,15 @@ public class SystemPropertiesTests extends TestGroup {
 
 								if (!serverVersion.equals(responseVersion)) {
 									ex = new ExpectedValueException(serverVersion, responseVersion);
-								}
+								}else {
+									result.setStatus(TestStatus.Passed);
+									
+									if (callback != null) {
+										callback.onTestComplete(test, result);
+									}
+									
+									return null;
+								}	
 							}
 
 							result = createResultFromException(result, ex);
@@ -653,13 +661,22 @@ public class SystemPropertiesTests extends TestGroup {
 								if (!serverVersion.equals(responseVersion)) {
 									ex = new ExpectedValueException(serverVersion, responseVersion);
 								}
+								else {
+									result.setStatus(TestStatus.Passed);
+									
+									if (callback != null) {
+										callback.onTestComplete(test, result);
+									}
+									
+									return null;
+								}	
 							}
 
 							result = createResultFromException(result, ex);
-
 							if (callback != null) {
 								callback.onTestComplete(test, result);
 							}
+
 						}
 
 						return null;
@@ -712,12 +729,23 @@ public class SystemPropertiesTests extends TestGroup {
 							}
 						} catch (Exception ex) {
 							if (ex.getCause() instanceof MobileServiceConflictExceptionBase) {
-								MobileServiceConflictExceptionBase preconditionFailed = (MobileServiceConflictExceptionBase) ex.getCause();
-								JsonObject serverValue = preconditionFailed.getValue();
-
-								if (!serverValue.equals(element1)) {
-									ex = new ExpectedValueException(serverValue, element1);
+								
+								MobileServiceConflictExceptionBase exc = (MobileServiceConflictExceptionBase) ex.getCause();
+								
+								JsonObject item = exc.getValue();
+							
+								if (item != null) {
+									result = createResultFromException(result, new ExpectedValueException(null, exc.getValue()));
 								}
+								else {
+									result.setStatus(TestStatus.Passed);
+								}
+								
+								if (callback != null) {
+									callback.onTestComplete(test, result);
+								}	
+								
+								return null;
 							}
 
 							result = createResultFromException(result, ex);
@@ -768,12 +796,23 @@ public class SystemPropertiesTests extends TestGroup {
 							}
 						} catch (Exception ex) {
 							if (ex.getCause() instanceof MobileServiceConflictException) {
-								MobileServiceConflictException preconditionFailed = (MobileServiceConflictException) ex.getCause();
-								StringIdRoundTripTableElement serverValue = (StringIdRoundTripTableElement) preconditionFailed.getItem();
-
-								if (!serverValue.equals(element1)) {
-									ex = new ExpectedValueException(serverValue, element1);
+								
+								MobileServiceConflictException exc = (MobileServiceConflictException) ex.getCause();
+								
+								Object item = exc.getItem();
+								
+								if (item != null) {
+									result = createResultFromException(result, new ExpectedValueException(null, exc.getItem()));
 								}
+								else {
+									result.setStatus(TestStatus.Passed);
+								}
+								
+								if (callback != null) {
+									callback.onTestComplete(test, result);
+								}
+								
+								return null;
 							}
 
 							result = createResultFromException(result, ex);
