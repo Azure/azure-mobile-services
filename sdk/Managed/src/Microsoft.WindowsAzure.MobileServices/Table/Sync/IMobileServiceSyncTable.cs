@@ -88,27 +88,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <summary>
         /// Pulls all items that match the given query from the associated remote table. Supports incremental sync. For more information, see http://go.microsoft.com/fwlink/?LinkId=506788.
         /// </summary>
-        /// <param name="queryKey">
-        /// A string that uniquely identifies this query and is used to keep track of its sync state. Supplying this parameter enables incremental sync whenever the same key is used again.
-        /// </param>
-        /// <param name="query">
-        /// An OData query that determines which items to 
-        /// pull from the remote table.
-        /// </param>
-        /// <param name="parameters">
-        /// A dictionary of user-defined parameters and values to include in 
-        /// the request URI query string.
-        /// </param>
-        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe
-        /// </param>
-        /// <returns>
-        /// A task that completes when pull operation has finished.
-        /// </returns>
-        Task PullAsync(string queryKey, string query, IDictionary<string, string> parameters, CancellationToken cancellationToken);
-
-        /// <summary>
-        /// Pulls all items that match the given query from the associated remote table. Supports incremental sync. For more information, see http://go.microsoft.com/fwlink/?LinkId=506788.
-        /// </summary>
         /// </summary>
         /// <param name="queryKey">
         /// A string that uniquely identifies this query and is used to keep track of its sync state. Supplying this parameter enables incremental sync whenever the same key is used again.

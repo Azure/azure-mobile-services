@@ -43,22 +43,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return this.queryProvider.Execute(query);
         }
 
-        public Task PullAsync<U>(string queryKey, IMobileServiceTableQuery<U> query, CancellationToken cancellationToken)
-        {
-            return PullAsync(queryKey, query, cancellationToken, new string[0]);
-        }
-
-        public Task PullAsync<U>(string queryKey, IMobileServiceTableQuery<U> query, CancellationToken cancellationToken, params string[] tableNames)
-        {
-            if (query == null)
-            {
-                throw new ArgumentNullException("query");
-            }
-            string queryString = this.queryProvider.ToODataString(query);
-
-            return this.PullAsync(queryKey, queryString, query.Parameters, cancellationToken, tableNames);
-        }
-
         public Task PullAsync<U>(string queryKey, IMobileServiceTableQuery<U> query, bool pushOtherTables, CancellationToken cancellationToken)
         {
             if (query == null)

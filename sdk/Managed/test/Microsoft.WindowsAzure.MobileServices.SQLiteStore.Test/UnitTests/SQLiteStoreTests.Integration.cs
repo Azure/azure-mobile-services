@@ -355,7 +355,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             var item = new StringIdType() { Id = "an id", String = "what?" };
             await mainTable.InsertAsync(item);
 
-            await mainTable.PullAsync(null, null, null, CancellationToken.None, "relatedTable");
+            await mainTable.PullAsync(null, null, null, null, CancellationToken.None, "relatedTable");
 
             Assert.AreEqual(hijack.Requests.Count, 3); // 1 for push and 2 for pull
             AssertEx.QueryEquals(hijack.Requests[0].RequestUri.AbsolutePath, "/tables/StringIdType");
@@ -424,7 +424,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             var item = new StringIdType() { Id = "abc", String = "what?" };
             await mainTable.InsertAsync(item);
 
-            await mainTable.PullAsync(null, null, null, CancellationToken.None, "relatedTable");
+            await mainTable.PullAsync(null, null, null, null, CancellationToken.None, "relatedTable");
 
             Assert.AreEqual(hijack.Requests.Count, 4); // 2 for push and 2 for pull
             AssertEx.QueryEquals(hijack.Requests[0].RequestUri.AbsolutePath, "/tables/relatedTable");
