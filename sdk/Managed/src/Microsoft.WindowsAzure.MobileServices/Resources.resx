@@ -147,9 +147,6 @@
   <data name="MobileServiceTable_InsertWithExistingId" xml:space="preserve">
     <value>Cannot insert if the {0} member is already set.</value>
   </data>
-  <data name="Platform_AssemblyDidNotHaveType" xml:space="preserve">
-    <value>The assembly {0} does not define a type that implements the {1} interface.</value>
-  </data>
   <data name="Platform_AssemblyNotFound" xml:space="preserve">
     <value>A Microsoft Azure Mobile Services assembly for the current platform was not found. Ensure that the current project references both {0} and the following platform-specific assembly: {1}.</value>
   </data>
@@ -218,9 +215,6 @@
   </data>
   <data name="MobileServiceJsonSerializerSettings_NullOrInvalidContractResolver" xml:space="preserve">
     <value>The member '{0}.ContractResolver' must be set to an instance of the '{1}' class or a class that inherits from the '{1}' class.</value>
-  </data>
-  <data name="Platform_AssemblyDoesNotSupportLogin" xml:space="preserve">
-    <value>Third-party provider authentication requires user interface components and is not supported with the platform-specific assembly {0}. To authenticate users with a third-party provider, ensure that the project references the platform-specific UI assembly {0}.UI.</value>
   </data>
   <data name="MobileServicePrecisionCheckConverter_ReadNotSupported" xml:space="preserve">
     <value>The {0} does not support reading JSON.</value>
@@ -293,5 +287,8 @@
   </data>
   <data name="IAuthenticationBroker_NoLoginInProgress" xml:space="preserve">
     <value>Authentication has not been started.</value>
+  </data>
+  <data name="WP8LoginPage_MustBeCalledFromAuthBroker" xml:space="preserve">
+    <value>This page must be called from the type '{0}'.</value>
   </data>
 </root>
