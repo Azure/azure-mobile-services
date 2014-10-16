@@ -31,13 +31,17 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                           MobileServiceSyncSettingsManager settings,
                           IMobileServiceLocalStore store,
                           MobileServiceRemoteTableOptions options,
+                          MobileServiceObjectReader reader,
                           CancellationToken cancellationToken)
             : base(table, queryKey, query, relatedTables, context, operationQueue, settings, store, cancellationToken)
         {
             this.options = options;
             this.parameters = parameters;
             this.cursor = new PullCursor(query);
+            this.Reader = reader ?? new MobileServiceObjectReader();
         }
+
+        public MobileServiceObjectReader Reader { get; private set; }
 
         protected override bool CanDeferIfDirty
         {
@@ -85,16 +89,16 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                     break;
                 }
 
-                string id = (string)item[MobileServiceSystemColumns.Id];
+                string id = this.Reader.GetId(item);
                 if (id == null)
                 {
                     continue;
                 }
 
-                DateTimeOffset updatedAt = GetUpdatedAt(item).ToUniversalTime();
+                DateTimeOffset updatedAt = this.Reader.GetUpdatedAt(item).GetValueOrDefault(Epoch).ToUniversalTime();
                 strategy.SetUpdateAt(updatedAt);
 
-                if (IsDeleted(item))
+                if (this.Reader.IsDeleted(item))
                 {
                     deletedIds.Add(id);
                 }
@@ -160,24 +164,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             // or there are no more results
             // then we're at the end
             return cursor.Complete || result.Values.Count == 0;
-        }
-
-        private static bool IsDeleted(JObject item)
-        {
-            JToken deletedToken = item[MobileServiceSystemColumns.Deleted];
-            bool isDeleted = deletedToken != null && deletedToken.Value<bool>();
-            return isDeleted;
-        }
-
-        private static DateTimeOffset GetUpdatedAt(JObject item)
-        {
-            DateTimeOffset updatedAt = Epoch;
-            JToken updatedAtToken = item[MobileServiceSystemColumns.UpdatedAt];
-            if (updatedAtToken != null)
-            {
-                updatedAt = updatedAtToken.ToObject<DateTimeOffset?>().GetValueOrDefault(Epoch);
-            }
-            return updatedAt;
         }
 
         private async Task CreatePullStrategy()

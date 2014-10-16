@@ -961,6 +961,29 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
+        public async Task PushAsync_ExecutesThePendingOperations_OnAllTables()
+        {
+            var hijack = new TestHttpHandler();
+            var store = new MobileServiceLocalStoreMock();
+            hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
+            hijack.AddResponseContent("{\"id\":\"def\",\"String\":\"Hey\"}");
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
+
+            IMobileServiceSyncTable<StringIdType> table = service.GetSyncTable<StringIdType>();
+            var item = new StringIdType() { Id = "abc", String = "what?" };
+            await table.InsertAsync(item);
+
+            IMobileServiceSyncTable table1 = service.GetSyncTable("someTable");
+            await table1.InsertAsync(new JObject() { { "id", "def" } });
+
+            Assert.AreEqual(store.TableMap[table.TableName].Count, 1);
+            Assert.AreEqual(store.TableMap[table1.TableName].Count, 1);
+
+            await service.SyncContext.PushAsync();
+        }
+
+        [AsyncTestMethod]
         public async Task PushAsync_ExecutesThePendingOperations()
         {
             var hijack = new TestHttpHandler();

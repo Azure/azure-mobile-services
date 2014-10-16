@@ -171,12 +171,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// List of tables that may have related records that need to be push before this table is pulled down.
         /// When no table is specified, all tables are considered related.
         /// </param>
+        /// <param name="reader">An instance of <see cref="MobileServiceObjectReader"/></param>
         /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe
         /// </param>
         /// <returns>
         /// A task that completes when pull operation has finished.
         /// </returns>
-        public async Task PullAsync(string tableName, string queryKey, string query, MobileServiceRemoteTableOptions options, IDictionary<string, string> parameters, IEnumerable<string> relatedTables, CancellationToken cancellationToken)
+        public async Task PullAsync(string tableName, string queryKey, string query, MobileServiceRemoteTableOptions options, IDictionary<string, string> parameters, IEnumerable<string> relatedTables, MobileServiceObjectReader reader, CancellationToken cancellationToken)
         {
             await this.EnsureInitializedAsync();
 
@@ -221,10 +222,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             // let us not burden the server to calculate the count when we don't need it for pull
             queryDescription.IncludeTotalCount = false;
 
-            var pull = new PullAction(table, this, queryKey, queryDescription, parameters, relatedTables, this.opQueue, this.settings, this.Store, options, cancellationToken);
-            Task discard = this.syncQueue.Post(pull.ExecuteAsync, cancellationToken);
-
-            await pull.CompletionTask;
+            var action = new PullAction(table, this, queryKey, queryDescription, parameters, relatedTables, this.opQueue, this.settings, this.Store, options, reader, cancellationToken);
+            await this.ExecuteSyncAction(action);
         }
 
         public async Task PurgeAsync(string tableName, string queryKey, string query, CancellationToken cancellationToken)
@@ -233,10 +232,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
             var table = await this.GetTable(tableName);
             var queryDescription = MobileServiceTableQueryDescription.Parse(tableName, query);
-            var purge = new PurgeAction(table, queryKey, queryDescription, this, this.opQueue, this.settings, this.Store, cancellationToken);
-            Task discard = this.syncQueue.Post(purge.ExecuteAsync, cancellationToken);
-
-            await purge.CompletionTask;
+            var action = new PurgeAction(table, queryKey, queryDescription, this, this.opQueue, this.settings, this.Store, cancellationToken);
+            await this.ExecuteSyncAction(action);
         }
 
         public Task PushAsync(CancellationToken cancellationToken)
@@ -248,7 +245,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         {
             await this.EnsureInitializedAsync();
 
-            var push = new PushAction(this.opQueue,
+            var action = new PushAction(this.opQueue,
                                       this.Store,
                                       tableNames,
                                       this.Handler,
@@ -256,9 +253,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                                       this,
                                       cancellationToken);
 
-            Task discard = this.syncQueue.Post(push.ExecuteAsync, cancellationToken);
+            await this.ExecuteSyncAction(action);
+        }
 
-            await push.CompletionTask;
+        public async Task ExecuteSyncAction(SyncAction action)
+        {
+            Task discard = this.syncQueue.Post(action.ExecuteAsync, action.CancellationToken);
+
+            await action.CompletionTask;
         }
 
         public virtual async Task<MobileServiceTable> GetTable(string tableName)

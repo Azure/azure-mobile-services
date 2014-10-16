@@ -3,6 +3,7 @@
 // ----------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Sync;
@@ -34,6 +35,52 @@ namespace Microsoft.WindowsAzure.MobileServices
         public static Task PullAsync(this IMobileServiceSyncTable table, string query)
         {
             return table.PullAsync(null, query, null, cancellationToken: CancellationToken.None);
+        }
+
+        /// <summary>
+        /// Pulls all items that match the given query from the associated remote table. Supports incremental sync. For more information, see http://go.microsoft.com/fwlink/?LinkId=506788.
+        /// </summary>
+        /// <param name="table">The instance of table to execute pull on.</param>
+        /// <param name="queryKey">
+        /// A string that uniquely identifies this query and is used to keep track of its sync state. Supplying this parameter enables incremental sync whenever the same key is used again.
+        /// </param>
+        /// <param name="query">
+        /// An OData query that determines which items to 
+        /// pull from the remote table.
+        /// </param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in 
+        /// the request URI query string.
+        /// </param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe
+        /// </param>
+        /// <returns>
+        /// A task that completes when pull operation has finished.
+        /// </returns>
+        public static Task PullAsync(this IMobileServiceSyncTable table, string queryKey, string query, IDictionary<string, string> parameters, CancellationToken cancellationToken)
+        {
+            return table.PullAsync(queryKey, query, parameters, true, cancellationToken: cancellationToken);
+        }
+
+        /// <summary>
+        /// Pulls all items that match the given query from the associated remote table. Supports incremental sync. For more information, see http://go.microsoft.com/fwlink/?LinkId=506788.
+        /// </summary>
+        /// <param name="table">The instance of table to execute pull on.</param>
+        /// <param name="queryKey">
+        /// A string that uniquely identifies this query and is used to keep track of its sync state. Supplying this parameter enables incremental sync whenever the same key is used again.
+        /// </param>
+        /// <param name="query">
+        /// An OData query that determines which items to 
+        /// pull from the remote table.
+        /// </param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe
+        /// </param>
+        /// <returns>
+        /// A task that completes when pull operation has finished.
+        /// </returns>
+        public static Task PullAsync<T, U>(this IMobileServiceSyncTable<T> table, string queryKey, IMobileServiceTableQuery<U> query, CancellationToken cancellationToken)
+        {
+            return table.PullAsync(queryKey, query, pushOtherTables: true, cancellationToken: cancellationToken);
         }
 
         /// <summary>
