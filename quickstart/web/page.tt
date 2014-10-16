@@ -16,9 +16,9 @@ $(function() {
     //    "ZUMOAPPKEY"
     //);
 <# } else { #>
-    var client = new WindowsAzure.MobileServiceClient('ZUMOAPPURL', 'ZUMOAPPKEY'),
-        todoItemTable = client.getTable('todoitem');
+    var client = new WindowsAzure.MobileServiceClient('ZUMOAPPURL', 'ZUMOAPPKEY');
 <# } #>
+    var todoItemTable = client.getTable('todoitem');
 
     // Read current data and rebuild UI.
     // If you plan to generate complex UIs like this, consider using a JavaScript templating library.
