@@ -22,6 +22,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         private PullStrategy strategy;
 
         public PullAction(MobileServiceTable table,
+                          MobileServiceTableKind tableKind,
                           MobileServiceSyncContext context,
                           string queryKey,
                           MobileServiceTableQueryDescription query,
@@ -33,7 +34,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                           MobileServiceRemoteTableOptions options,
                           MobileServiceObjectReader reader,
                           CancellationToken cancellationToken)
-            : base(table, queryKey, query, relatedTables, context, operationQueue, settings, store, cancellationToken)
+            : base(table, tableKind, queryKey, query, relatedTables, context, operationQueue, settings, store, cancellationToken)
         {
             this.options = options;
             this.parameters = parameters;

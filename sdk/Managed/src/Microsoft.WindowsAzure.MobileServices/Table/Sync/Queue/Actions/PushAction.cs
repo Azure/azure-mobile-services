@@ -21,9 +21,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         private MobileServiceClient client;
         private MobileServiceSyncContext context;
         private IEnumerable<string> tableNames;
+        private MobileServiceTableKind tableKind;
 
         public PushAction(OperationQueue operationQueue,
                           IMobileServiceLocalStore store,
+                          MobileServiceTableKind tableKind,
                           IEnumerable<string> tableNames,
                           IMobileServiceSyncHandler syncHandler,
                           MobileServiceClient client,
@@ -31,6 +33,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                           CancellationToken cancellationToken)
             : base(operationQueue, store, cancellationToken)
         {
+            this.tableKind = tableKind;
             this.tableNames = tableNames;
             this.client = client;
             this.syncHandler = syncHandler;
@@ -124,7 +127,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         private async Task ExecuteAllOperationsAsync(OperationBatch batch)
         {
-            MobileServiceTableOperation operation = await this.OperationQueue.PeekAsync(0, this.tableNames);
+            MobileServiceTableOperation operation = await this.OperationQueue.PeekAsync(0, this.tableKind, this.tableNames);
 
             // keep taking out operations and executing them until queue is empty or operation finds the bookmark or batch is aborted 
             while (operation != null)
@@ -143,7 +146,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 }
 
                 // get next operation
-                operation = await this.OperationQueue.PeekAsync(operation.Sequence, this.tableNames);
+                operation = await this.OperationQueue.PeekAsync(operation.Sequence, this.tableKind, this.tableNames);
             }
         }
 

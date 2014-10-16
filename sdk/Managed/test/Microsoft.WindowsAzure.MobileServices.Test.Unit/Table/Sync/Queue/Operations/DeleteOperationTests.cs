@@ -22,7 +22,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         [TestInitialize]
         public void Initialize()
         {
-            this.operation = new DeleteOperation("test", "abc");
+            this.operation = new DeleteOperation("test", MobileServiceTableKind.Table, "abc");
         }
 
         [TestMethod]
@@ -86,21 +86,21 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         [TestMethod]
         public void Validate_Throws_WithInsertOperation()
         {
-            var tableOperation = new InsertOperation("test", "abc");
+            var tableOperation = new InsertOperation("test", MobileServiceTableKind.Table, "abc");
             TestDeleteValidateThrows(tableOperation);
         }
 
         [TestMethod]
         public void Validate_Throws_WithUpdateOperation()
         {
-            var tableOperation = new UpdateOperation("test", "abc");
+            var tableOperation = new UpdateOperation("test", MobileServiceTableKind.Table, "abc");
             TestDeleteValidateThrows(tableOperation);
         }
 
         [TestMethod]
         public void Validate_Throws_WithDeleteOperation()
         {
-            var tableOperation = new DeleteOperation("test", "abc");
+            var tableOperation = new DeleteOperation("test", MobileServiceTableKind.Table, "abc");
             TestDeleteValidateThrows(tableOperation);
         }
 

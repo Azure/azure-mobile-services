@@ -21,12 +21,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         protected string QueryKey { get; private set; }
         protected MobileServiceTableQueryDescription Query { get; private set; }
         public MobileServiceTable Table { get; private set; }
+        public MobileServiceTableKind TableKind { get; private set; }
+
         protected MobileServiceSyncSettingsManager Settings { get; private set; }
 
         protected abstract bool CanDeferIfDirty { get; }
         public IEnumerable<string> RelatedTables { get; set; }
 
         public TableAction(MobileServiceTable table,
+                           MobileServiceTableKind tableKind,
                            string queryKey,
                            MobileServiceTableQueryDescription query,
                            IEnumerable<string> relatedTables,
@@ -38,6 +41,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             : base(operationQueue, store, cancellationToken)
         {
             this.Table = table;
+            this.TableKind = tableKind;
             this.QueryKey = queryKey;
             this.Query = query;
             this.RelatedTables = relatedTables;

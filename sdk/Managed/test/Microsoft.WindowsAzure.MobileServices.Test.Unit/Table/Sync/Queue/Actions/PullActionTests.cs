@@ -43,7 +43,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
         public async Task DoesNotUpsertAnObject_IfItDoesNotHaveAnId()
         {
             var query = new MobileServiceTableQueryDescription("test");
-            var action = new PullAction(this.table.Object, this.context.Object, null, query, null, null, this.opQueue.Object, this.settings.Object, this.store.Object, MobileServiceRemoteTableOptions.All, null, CancellationToken.None);
+            var action = new PullAction(this.table.Object, MobileServiceTableKind.Table, this.context.Object, null, query, null, null, this.opQueue.Object, this.settings.Object, this.store.Object, MobileServiceRemoteTableOptions.All, null, CancellationToken.None);
 
             var itemWithId = new JObject() { { "id", "abc" }, { "text", "has id" } };
             var itemWithoutId = new JObject() { { "text", "no id" } };
@@ -144,7 +144,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
 
         private async Task TestIncrementalSync(MobileServiceTableQueryDescription query, JArray result, DateTime maxUpdatedAt, bool savesMax, string firstQuery, string secondQuery)
         {
-            var action = new PullAction(this.table.Object, this.context.Object, "latestItems", query, null, null, this.opQueue.Object, this.settings.Object, this.store.Object, MobileServiceRemoteTableOptions.All, null, CancellationToken.None);
+            var action = new PullAction(this.table.Object, MobileServiceTableKind.Table, this.context.Object, "latestItems", query, null, null, this.opQueue.Object, this.settings.Object, this.store.Object, MobileServiceRemoteTableOptions.All, null, CancellationToken.None);
 
             this.opQueue.Setup(q => q.LockTableAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult<IDisposable>(null));
             this.opQueue.Setup(q => q.CountPending(It.IsAny<string>())).Returns(Task.FromResult(0L));

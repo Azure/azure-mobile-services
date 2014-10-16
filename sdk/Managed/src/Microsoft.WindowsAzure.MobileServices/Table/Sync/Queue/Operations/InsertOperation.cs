@@ -16,8 +16,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             get { return MobileServiceTableOperationKind.Insert; }
         }
 
-        public InsertOperation(string tableName, string itemId)
-            : base(tableName, itemId)
+        public InsertOperation(string tableName, MobileServiceTableKind tableKind, string itemId)
+            : base(tableName, tableKind, itemId)
         {
         }
 

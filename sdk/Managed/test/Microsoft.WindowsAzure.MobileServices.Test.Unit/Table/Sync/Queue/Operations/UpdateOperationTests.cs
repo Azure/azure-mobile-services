@@ -20,7 +20,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         [TestInitialize]
         public void Initialize()
         {
-            this.operation = new UpdateOperation("test", "abc");
+            this.operation = new UpdateOperation("test", MobileServiceTableKind.Table, "abc");
         }
 
         [TestMethod]
@@ -64,7 +64,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         [TestMethod]
         public void Validate_Throws_WithInsertOperation()
         {
-            var newOperation = new InsertOperation("test", "abc");
+            var newOperation = new InsertOperation("test", MobileServiceTableKind.Table, "abc");
             var ex = AssertEx.Throws<InvalidOperationException>(() => this.operation.Validate(newOperation));
             Assert.AreEqual("An update operation on the item is already in the queue.", ex.Message);
         }
@@ -72,21 +72,21 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         [TestMethod]
         public void Validate_Succeeds_WithUpdateOperation()
         {
-            var newOperation = new UpdateOperation("test", "abc");
+            var newOperation = new UpdateOperation("test", MobileServiceTableKind.Table, "abc");
             this.operation.Validate(newOperation);
         }
 
         [TestMethod]
         public void Validate_Succeeds_WithDeleteOperation()
         {
-            var newOperation = new DeleteOperation("test", "abc");
+            var newOperation = new DeleteOperation("test", MobileServiceTableKind.Table, "abc");
             this.operation.Validate(newOperation);
         }
 
         [TestMethod]
         public void Collapse_CancelsNewOperation_WithUpdateOperation()
         {
-            var newOperation = new UpdateOperation("test", "abc");
+            var newOperation = new UpdateOperation("test", MobileServiceTableKind.Table, "abc");
             this.operation.Collapse(newOperation);
 
             // new operation should be cancelled
@@ -101,7 +101,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         [TestMethod]
         public void Collapse_CancelsExistingOperation_WithDeleteOperation()
         {
-            var newOperation = new DeleteOperation("test", "abc");
+            var newOperation = new DeleteOperation("test", MobileServiceTableKind.Table, "abc");
             this.operation.Collapse(newOperation);
 
             // new operation should not be cancelled but rather updated

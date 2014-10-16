@@ -37,15 +37,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
             this.client.Object.Serializer = new MobileServiceSerializer();
             this.context = new Mock<MobileServiceSyncContext>(this.client.Object);
             this.context.Setup(c => c.GetTable(It.IsAny<string>())).Returns(Task.FromResult(new MobileServiceTable("test", this.client.Object)));
-            this.action = new PushAction(this.opQueue.Object, this.store.Object, null, this.handler.Object, this.client.Object, this.context.Object, CancellationToken.None);
+            this.action = new PushAction(this.opQueue.Object, this.store.Object, MobileServiceTableKind.Table, null, this.handler.Object, this.client.Object, this.context.Object, CancellationToken.None);
         }
 
         [TestMethod]
         public async Task AbortPush_AbortsThePush()
         {
-            MobileServiceTableOperation op = new InsertOperation("abc", "abc") { Item = new JObject() }; // putting an item so it won't load it
+            MobileServiceTableOperation op = new InsertOperation("abc", MobileServiceTableKind.Table, "abc") { Item = new JObject() }; // putting an item so it won't load it
             // picks up the operation
-            this.opQueue.Setup(q => q.PeekAsync(0, It.IsAny<IEnumerable<string>>())).Returns(() => Task.FromResult(op));
+            this.opQueue.Setup(q => q.PeekAsync(0, MobileServiceTableKind.Table, It.IsAny<IEnumerable<string>>())).Returns(() => Task.FromResult(op));
             // executes the operation via handler
             this.handler.Setup(h => h.ExecuteTableOperationAsync(op))
                         .Callback<IMobileServiceTableOperation>(o =>
@@ -81,14 +81,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
         [TestMethod]
         public async Task ExecuteAsync_DeletesTheErrors()
         {
-            var op = new InsertOperation("table", "id") { Item = new JObject() }; // putting an item so it won't load it
+            var op = new InsertOperation("table", MobileServiceTableKind.Table, "id") { Item = new JObject() }; // putting an item so it won't load it
             await this.TestExecuteAsync(op, null, null);
         }
 
         [TestMethod]
         public async Task ExecuteAsync_LoadsTheItem_IfItIsNotPresent()
         {
-            var op = new InsertOperation("table", "id");
+            var op = new InsertOperation("table", MobileServiceTableKind.Table, "id");
             this.store.Setup(s => s.LookupAsync("table", "id")).Returns(Task.FromResult(new JObject()));
             await this.TestExecuteAsync(op, null, null);
         }
@@ -96,14 +96,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
         [TestMethod]
         public async Task ExecuteAsync_SavesTheResult_IfExecuteTableOperationDoesNotThrow()
         {
-            var op = new InsertOperation("table", "id") { Item = new JObject() };
+            var op = new InsertOperation("table", MobileServiceTableKind.Table, "id") { Item = new JObject() };
             await TestResultSave(op, status: null, resultId: "id", saved: true);
         }
 
         [TestMethod]
         public async Task ExecuteAsync_DoesNotSaveTheResult_IfOperationDoesNotWriteToStore()
         {
-            var op = new DeleteOperation("table", "id") { Item = new JObject() };
+            var op = new DeleteOperation("table", MobileServiceTableKind.Table, "id") { Item = new JObject() };
             Assert.IsFalse(op.CanWriteResultToStore);
             await TestResultSave(op, status: null, resultId: "id", saved: false);
         }
@@ -112,15 +112,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
         public async Task ExecuteAsync_DoesNotSaveTheResult_IfExecuteTableOperationThrows()
         {
             this.store.Setup(s => s.UpsertAsync(MobileServiceLocalSystemTables.SyncErrors, It.IsAny<JObject[]>(), false)).Returns(Task.FromResult(0));
-            var op = new InsertOperation("table", "id") { Item = new JObject() };
+            var op = new InsertOperation("table", MobileServiceTableKind.Table, "id") { Item = new JObject() };
             await TestResultSave(op, status: HttpStatusCode.PreconditionFailed, resultId: "id", saved: false);
         }
 
         [TestMethod]
         public async Task ExecuteAsync_DoesNotSaveTheResult_IfPresentButResultDoesNotHaveId()
         {
-            this.action = new PushAction(this.opQueue.Object, this.store.Object, null, this.handler.Object, this.client.Object, this.context.Object, CancellationToken.None);
-            var op = new InsertOperation("table", "id") { Item = new JObject() };
+            this.action = new PushAction(this.opQueue.Object, this.store.Object, MobileServiceTableKind.Table, null, this.handler.Object, this.client.Object, this.context.Object, CancellationToken.None);
+            var op = new InsertOperation("table", MobileServiceTableKind.Table, "id") { Item = new JObject() };
             await TestResultSave(op, status: null, resultId: null, saved: false);
         }
 
@@ -140,8 +140,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
             op.Sequence = 1;
 
             // picks up the operation
-            this.opQueue.Setup(q => q.PeekAsync(0, It.IsAny<IEnumerable<string>>())).Returns(() => Task.FromResult(op));
-            this.opQueue.Setup(q => q.PeekAsync(op.Sequence, It.IsAny<IEnumerable<string>>())).Returns(() => Task.FromResult<MobileServiceTableOperation>(null));
+            this.opQueue.Setup(q => q.PeekAsync(0, MobileServiceTableKind.Table, It.IsAny<IEnumerable<string>>())).Returns(() => Task.FromResult(op));
+            this.opQueue.Setup(q => q.PeekAsync(op.Sequence, MobileServiceTableKind.Table, It.IsAny<IEnumerable<string>>())).Returns(() => Task.FromResult<MobileServiceTableOperation>(null));
 
             // executes the operation via handler
             if (errorCode == null)
