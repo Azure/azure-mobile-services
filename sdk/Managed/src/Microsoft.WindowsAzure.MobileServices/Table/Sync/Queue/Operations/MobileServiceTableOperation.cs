@@ -17,7 +17,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         public string TableName { get; private set; }
         public string ItemId { get; private set; }
         public JObject Item { get; set; }
-        public DateTime CreatedAt { get; private set; }
 
         public MobileServiceTableOperationState State { get; internal set; }
         public long Sequence { get; set; }
@@ -48,7 +47,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         {
             this.Id = Guid.NewGuid().ToString();
             this.State = MobileServiceTableOperationState.Pending;
-            this.CreatedAt = DateTime.UtcNow;
             this.TableName = tableName;
             this.ItemId = itemId;
             this.Version = 1;
@@ -142,7 +140,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 { "tableName", this.TableName },
                 { "itemId", this.ItemId },
                 { "item", this.Item != null && this.SerializeItemToQueue ? this.Item.ToString(Formatting.None) : null },
-                { MobileServiceSystemColumns.CreatedAt, this.CreatedAt },
                 { "sequence", this.Sequence },
                 { "version", this.Version }
             };
@@ -177,7 +174,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             {
                 operation.Id = obj.Value<string>(MobileServiceSystemColumns.Id);
                 operation.Sequence = obj.Value<long?>("sequence").GetValueOrDefault();
-                operation.CreatedAt = obj.Value<DateTime>(MobileServiceSystemColumns.CreatedAt);
                 operation.Version = obj.Value<long?>("version").GetValueOrDefault();
                 string itemJson = obj.Value<string>("item");
                 operation.Item = !String.IsNullOrEmpty(itemJson) ? JObject.Parse(itemJson) : null;
