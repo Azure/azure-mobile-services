@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZUMOAPPNAME", "ZUMOAPPNAME\ZUMOAPPNAME.csproj", "{F497D934-2FB3-44DD-87CB-592C0AE567FB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{209FA716-A7AD-4095-BD70-C8710FC66FA7} = {209FA716-A7AD-4095-BD70-C8710FC66FA7}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZUMOAPPNAMEService", "ZUMOAPPNAMEService\ZUMOAPPNAMEService.csproj", "{209FA716-A7AD-4095-BD70-C8710FC66FA7}"
 EndProject
