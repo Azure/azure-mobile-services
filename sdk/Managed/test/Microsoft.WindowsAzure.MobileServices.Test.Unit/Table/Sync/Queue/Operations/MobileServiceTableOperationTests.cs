@@ -79,7 +79,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
             Assert.AreEqual(serializedOperation["tableName"], "test");
             Assert.AreEqual(serializedOperation["kind"], 0);
             Assert.AreEqual(serializedOperation["item"], JValue.CreateString(null));
-            Assert.IsNotNull(serializedOperation["__createdAt"]);
             Assert.IsNotNull(serializedOperation["sequence"]);
         }
 
@@ -95,7 +94,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
             Assert.AreEqual(serializedOperation["tableName"], operation.TableName);
             Assert.AreEqual(MobileServiceTableOperationKind.Insert, operation.Kind);
             Assert.IsNull(operation.Item);
-            Assert.AreEqual(serializedOperation["__createdAt"], operation.CreatedAt);
             Assert.AreEqual(serializedOperation["sequence"], operation.Sequence);
         }
 
@@ -121,7 +119,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
             Assert.AreEqual(serializedOperation["version"], operation.Version);
             Assert.AreEqual(serializedOperation["tableName"], operation.TableName);
             Assert.AreEqual(MobileServiceTableOperationKind.Delete, operation.Kind);
-            Assert.AreEqual(serializedOperation["__createdAt"], operation.CreatedAt);
             Assert.AreEqual(serializedOperation["sequence"], operation.Sequence);
             Assert.AreEqual("abc", operation.Item["id"]);
             Assert.AreEqual("example", operation.Item["text"]);
@@ -148,7 +145,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
             Assert.AreEqual(serializedOperation["itemId"], operation.ItemId);
             Assert.AreEqual(serializedOperation["tableName"], operation.TableName);
             Assert.AreEqual(MobileServiceTableOperationKind.Delete, operation.Kind);
-            Assert.AreEqual(serializedOperation["__createdAt"], operation.CreatedAt);
             Assert.AreEqual(serializedOperation["sequence"], operation.Sequence);
             Assert.AreEqual(0, operation.Version);
             Assert.AreEqual("abc", operation.Item["id"]);
