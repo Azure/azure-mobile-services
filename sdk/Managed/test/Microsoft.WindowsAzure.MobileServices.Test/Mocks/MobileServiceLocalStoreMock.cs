@@ -46,6 +46,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                     {
                         items = items.OrderBy(o => o.Value<long>("sequence"));
                     }
+                    else if (odata.StartsWith("$filter=((tableKind eq ") && odata.Contains("(sequence gt "))
+                    {
+                        var sequenceCompareNode = ((BinaryOperatorNode)query.Filter).RightOperand as BinaryOperatorNode;
+
+                        items = items.Where(o => o.Value<long>("sequence") > (long)((ConstantNode)sequenceCompareNode.RightOperand).Value);
+                        items = items.OrderBy(o => o.Value<long>("sequence"));
+                    }
                     else if (odata.Contains("(sequence gt ")) // the query to get next operation
                     {
                         items = items.Where(o => o.Value<long>("sequence") > (long)((ConstantNode)((BinaryOperatorNode)query.Filter).RightOperand).Value);

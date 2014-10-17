@@ -29,11 +29,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             this.store = store;
         }
 
-        public async virtual Task<MobileServiceTableOperation> PeekAsync(long prevSequenceId, IEnumerable<string> tableNames)
+        public async virtual Task<MobileServiceTableOperation> PeekAsync(long prevSequenceId, MobileServiceTableKind tableKind, IEnumerable<string> tableNames)
         {
             MobileServiceTableQueryDescription query = CreateQuery();
 
-            query.Filter = Compare(BinaryOperatorKind.GreaterThan, "sequence", prevSequenceId);
+            var tableKindNode = Compare(BinaryOperatorKind.Equal, "tableKind", (int)tableKind);
+            var sequenceNode = Compare(BinaryOperatorKind.GreaterThan, "sequence", prevSequenceId);
+
+            query.Filter = new BinaryOperatorNode(BinaryOperatorKind.And, tableKindNode, sequenceNode);
+
             if (tableNames != null && tableNames.Any())
             {
                 BinaryOperatorNode nameInList = tableNames.Select(t => Compare(BinaryOperatorKind.Equal, "tableName", t))

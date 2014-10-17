@@ -20,7 +20,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         [TestInitialize]
         public void Initialize()
         {
-            this.operation = new InsertOperation("test", "abc");
+            this.operation = new InsertOperation("test", MobileServiceTableKind.Table, "abc");
         }
 
         [TestMethod]
@@ -65,7 +65,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         [TestMethod]
         public void Validate_Throws_WithInsertOperation()
         {
-            var newOperation = new InsertOperation("test", "abc");
+            var newOperation = new InsertOperation("test", MobileServiceTableKind.Table, "abc");
             var ex = AssertEx.Throws<InvalidOperationException>(() => this.operation.Validate(newOperation));
             Assert.AreEqual("An insert operation on the item is already in the queue.", ex.Message);
         }
@@ -73,14 +73,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         [TestMethod]
         public void Validate_Succeeds_WithUpdateOperation()
         {
-            var newOperation = new UpdateOperation("test", "abc");
+            var newOperation = new UpdateOperation("test", MobileServiceTableKind.Table, "abc");
             this.operation.Validate(newOperation);
         }
 
         [TestMethod]
         public void Validate_Throws_WithDeleteOperation_WhenInsertIsAttempted()
         {
-            var newOperation = new DeleteOperation("test", "abc");
+            var newOperation = new DeleteOperation("test", MobileServiceTableKind.Table, "abc");
             this.operation.State = MobileServiceTableOperationState.Attempted;
             var ex = AssertEx.Throws<InvalidOperationException>(() => this.operation.Validate(newOperation));
             Assert.AreEqual("The item is in inconsistent state in the local store. Please complete the pending sync by calling PushAsync()before deleting the item.", ex.Message);
@@ -89,14 +89,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         [TestMethod]
         public void Validate_Succeeds_WithDeleteOperation()
         {
-            var newOperation = new DeleteOperation("test", "abc");
+            var newOperation = new DeleteOperation("test", MobileServiceTableKind.Table, "abc");
             this.operation.Validate(newOperation);
         }
 
         [TestMethod]
         public void Collapse_CancelsExistingOperation_WithUpdateOperation()
         {
-            var newOperation = new UpdateOperation("test", "abc");
+            var newOperation = new UpdateOperation("test", MobileServiceTableKind.Table, "abc");
             this.operation.Collapse(newOperation);
 
             // new operation should be cancelled
@@ -111,7 +111,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         [TestMethod]
         public void Collapse_CancelsBothOperations_WithDeleteOperation()
         {
-            var newOperation = new DeleteOperation("test", "abc");
+            var newOperation = new DeleteOperation("test", MobileServiceTableKind.Table, "abc");
             this.operation.Collapse(newOperation);
 
             // new operation should be cancelled

@@ -12,6 +12,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     internal class PurgeAction : TableAction
     {
         public PurgeAction(MobileServiceTable table,
+                           MobileServiceTableKind tableKind,
                            string queryKey,
                            MobileServiceTableQueryDescription query,
                            MobileServiceSyncContext context,
@@ -19,7 +20,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                            MobileServiceSyncSettingsManager settings,
                            IMobileServiceLocalStore store,
                            CancellationToken cancellationToken)
-            : base(table, queryKey, query, null, context, operationQueue, settings, store, cancellationToken)
+            : base(table, tableKind, queryKey, query, null, context, operationQueue, settings, store, cancellationToken)
         {
         }
 

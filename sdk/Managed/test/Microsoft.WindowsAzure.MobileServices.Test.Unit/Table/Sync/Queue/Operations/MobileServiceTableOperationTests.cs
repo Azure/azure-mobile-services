@@ -20,7 +20,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         [TestInitialize]
         public void Initialize()
         {
-            this.operation = new Mock<MobileServiceTableOperation>("test", "abc") { CallBase = true };
+            this.operation = new Mock<MobileServiceTableOperation>("test", MobileServiceTableKind.Table, "abc") { CallBase = true };
             var client = new Mock<MobileServiceClient>(MockBehavior.Strict);
             client.Object.Serializer = new MobileServiceSerializer();
             this.table = new Mock<MobileServiceTable>("test", client.Object);

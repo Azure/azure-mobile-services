@@ -235,9 +235,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>The table.</returns>
         public IMobileServiceSyncTable GetSyncTable(string tableName)
         {
+            return GetSyncTable(tableName, MobileServiceTableKind.Table);
+        }
+
+        internal MobileServiceSyncTable GetSyncTable(string tableName, MobileServiceTableKind kind)
+        {
             ValidateTableName(tableName);
 
-            return new MobileServiceSyncTable(tableName, this);
+            return new MobileServiceSyncTable(tableName, kind, this);
         }
 
         /// <summary>
@@ -270,7 +275,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         public IMobileServiceSyncTable<T> GetSyncTable<T>()
         {
             string tableName = this.SerializerSettings.ContractResolver.ResolveTableName(typeof(T));
-            return new MobileServiceSyncTable<T>(tableName, this);
+            return new MobileServiceSyncTable<T>(tableName, MobileServiceTableKind.Table, this);
         }
 
         /// <summary>

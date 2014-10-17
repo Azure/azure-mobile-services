@@ -20,8 +20,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         private MobileServiceTableQueryProvider queryProvider;
         private IMobileServiceTable<T> remoteTable;
 
-        public MobileServiceSyncTable(string tableName, MobileServiceClient client)
-            : base(tableName, client)
+        public MobileServiceSyncTable(string tableName, MobileServiceTableKind kind, MobileServiceClient client)
+            : base(tableName, kind, client)
         {
             this.remoteTable = client.GetTable<T>();
             this.queryProvider = new MobileServiceTableQueryProvider(this);

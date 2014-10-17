@@ -27,8 +27,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             get { return true; } // delete should save the item in queue since store copy is deleted right away with delete operation
         }
 
-        public DeleteOperation(string tableName, string itemId)
-            : base(tableName, itemId)
+        public DeleteOperation(string tableName, MobileServiceTableKind tableKind, string itemId)
+            : base(tableName, tableKind, itemId)
         {
         }
 

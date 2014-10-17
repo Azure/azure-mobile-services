@@ -88,10 +88,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             {
                 throw new ArgumentNullException("store");
             }
-            if (handler == null)
-            {
-                throw new ArgumentNullException("handler");
-            }
+            handler = handler ?? new MobileServiceSyncHandler();
 
             this.initializeTask = new TaskCompletionSource<object>();
 
@@ -119,9 +116,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
         }
 
-        public async Task InsertAsync(string tableName, string id, JObject item)
+        public async Task InsertAsync(string tableName, MobileServiceTableKind tableKind, string id, JObject item)
         {
-            var operation = new InsertOperation(tableName, id)
+            var operation = new InsertOperation(tableName, tableKind, id)
             {
                 Table = await this.GetTable(tableName)
             };
@@ -129,9 +126,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             await this.ExecuteOperationAsync(operation, item);
         }
 
-        public async Task UpdateAsync(string tableName, string id, JObject item)
+        public async Task UpdateAsync(string tableName, MobileServiceTableKind tableKind, string id, JObject item)
         {
-            var operation = new UpdateOperation(tableName, id)
+            var operation = new UpdateOperation(tableName, tableKind, id)
             {
                 Table = await this.GetTable(tableName)
             };
@@ -139,9 +136,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             await this.ExecuteOperationAsync(operation, item);
         }
 
-        public async Task DeleteAsync(string tableName, string id, JObject item)
+        public async Task DeleteAsync(string tableName, MobileServiceTableKind tableKind, string id, JObject item)
         {
-            var operation = new DeleteOperation(tableName, id)
+            var operation = new DeleteOperation(tableName, tableKind, id)
             {
                 Table = await this.GetTable(tableName),
                 Item = item // item will be deleted from store, so we need to put it in the operation queue
@@ -161,6 +158,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// Pulls all items that match the given query from the associated remote table.
         /// </summary>
         /// <param name="tableName">The name of table to pull</param>
+        /// <param name="tableKind">The kind of table</param>
         /// <param name="queryKey">A string that uniquely identifies this query and is used to keep track of its sync state.</param>
         /// <param name="query">An OData query that determines which items to 
         /// pull from the remote table.</param>
@@ -177,7 +175,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <returns>
         /// A task that completes when pull operation has finished.
         /// </returns>
-        public async Task PullAsync(string tableName, string queryKey, string query, MobileServiceRemoteTableOptions options, IDictionary<string, string> parameters, IEnumerable<string> relatedTables, MobileServiceObjectReader reader, CancellationToken cancellationToken)
+        public async Task PullAsync(string tableName, MobileServiceTableKind tableKind, string queryKey, string query, MobileServiceRemoteTableOptions options, IDictionary<string, string> parameters, IEnumerable<string> relatedTables, MobileServiceObjectReader reader, CancellationToken cancellationToken)
         {
             await this.EnsureInitializedAsync();
 
@@ -222,33 +220,37 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             // let us not burden the server to calculate the count when we don't need it for pull
             queryDescription.IncludeTotalCount = false;
 
-            var action = new PullAction(table, this, queryKey, queryDescription, parameters, relatedTables, this.opQueue, this.settings, this.Store, options, reader, cancellationToken);
+            var action = new PullAction(table, tableKind, this, queryKey, queryDescription, parameters, relatedTables, this.opQueue, this.settings, this.Store, options, reader, cancellationToken);
             await this.ExecuteSyncAction(action);
         }
 
-        public async Task PurgeAsync(string tableName, string queryKey, string query, CancellationToken cancellationToken)
+        public async Task PurgeAsync(string tableName, MobileServiceTableKind tableKind, string queryKey, string query, CancellationToken cancellationToken)
         {
             await this.EnsureInitializedAsync();
 
             var table = await this.GetTable(tableName);
             var queryDescription = MobileServiceTableQueryDescription.Parse(tableName, query);
-            var action = new PurgeAction(table, queryKey, queryDescription, this, this.opQueue, this.settings, this.Store, cancellationToken);
+            var action = new PurgeAction(table, tableKind, queryKey, queryDescription, this, this.opQueue, this.settings, this.Store, cancellationToken);
             await this.ExecuteSyncAction(action);
         }
 
         public Task PushAsync(CancellationToken cancellationToken)
         {
-            return PushAsync(cancellationToken, new string[0]);
+            return PushAsync(cancellationToken, MobileServiceTableKind.Table, new string[0]);
         }
 
-        public async Task PushAsync(CancellationToken cancellationToken, params string[] tableNames)
+        public async Task PushAsync(CancellationToken cancellationToken, MobileServiceTableKind tableKind, params string[] tableNames)
         {
             await this.EnsureInitializedAsync();
 
+            // use empty handler if its not a standard table push
+            var handler = tableKind == MobileServiceTableKind.Table ? this.Handler : new MobileServiceSyncHandler();
+
             var action = new PushAction(this.opQueue,
                                       this.Store,
+                                      tableKind,
                                       tableNames,
-                                      this.Handler,
+                                      handler,
                                       this.client,
                                       this,
                                       cancellationToken);
@@ -312,7 +314,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
             try
             {
-                await this.PushAsync(action.CancellationToken, tableNames.ToArray());
+                await this.PushAsync(action.CancellationToken, action.TableKind, tableNames.ToArray());
             }
             finally
             {

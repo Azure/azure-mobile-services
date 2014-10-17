@@ -493,7 +493,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             var item = new StringIdType() { Id = "abc", String = "what?" };
             await mainTable.InsertAsync(item);
 
-            await (client.SyncContext as MobileServiceSyncContext).PushAsync(CancellationToken.None, "someTable");
+            await (client.SyncContext as MobileServiceSyncContext).PushAsync(CancellationToken.None, MobileServiceTableKind.Table, "someTable");
 
             Assert.AreEqual(hijack.Requests.Count, 1);
             AssertEx.QueryEquals(hijack.Requests[0].RequestUri.AbsolutePath, "/tables/someTable");

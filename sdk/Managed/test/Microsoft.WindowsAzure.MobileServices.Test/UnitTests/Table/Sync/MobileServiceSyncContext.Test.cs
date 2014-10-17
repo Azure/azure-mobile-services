@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Sync;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
@@ -20,6 +21,21 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     [Tag("synccontext")]
     public class MobileServiceSyncContextTests : TestBase
     {
+
+        [AsyncTestMethod]
+        public async Task InitializeAsync_Throws_WhenStoreIsNull()
+        {
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...");
+            await AssertEx.Throws<ArgumentException>(() => service.SyncContext.InitializeAsync(null));
+        }
+
+        [AsyncTestMethod]
+        public async Task InitializeAsync_DoesNotThrow_WhenSyncHandlerIsNull()
+        {
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...");
+            await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), null);
+        }
+
         [AsyncTestMethod]
         public async Task PushAsync_ExecutesThePendingOperations_InOrder()
         {
@@ -140,6 +156,58 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             await table.DeleteAsync(new JObject() { { "id", "abc" }, { "__version", "Wow" } });
 
             await service.SyncContext.PushAsync();
+        }
+
+        [AsyncTestMethod]
+        public async Task PushAsync_DoesNotRunHandler_WhenTableTypeIsNotTable()
+        {
+            var hijack = new TestHttpHandler();
+            hijack.AddResponseContent("{\"id\":\"abc\",\"__version\":\"Hey\"}");
+
+            bool invoked = false;
+            var handler = new MobileServiceSyncHandlerMock();
+            handler.TableOperationAction = op =>
+            {
+                invoked = true;
+                throw new InvalidOperationException();
+            };
+
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), handler);
+
+            IMobileServiceSyncTable table = service.GetSyncTable("someTable");
+
+            await table.InsertAsync(new JObject() { { "id", "abc" }, { "__version", "Wow" } });
+
+            await (service.SyncContext as MobileServiceSyncContext).PushAsync(CancellationToken.None, (MobileServiceTableKind)1);
+
+            Assert.IsFalse(invoked);
+        }
+
+        [AsyncTestMethod]
+        public async Task PushAsync_InvokesHandler_WhenTableTypeIsTable()
+        {
+            var hijack = new TestHttpHandler();
+            hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+
+            bool invoked = false;
+            var handler = new MobileServiceSyncHandlerMock();
+            handler.TableOperationAction = op =>
+            {
+                invoked = true;
+                return Task.FromResult(JObject.Parse("{\"id\":\"abc\",\"__version\":\"Hey\"}"));
+            };
+
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), handler);
+
+            IMobileServiceSyncTable table = service.GetSyncTable("someTable");
+
+            await table.InsertAsync(new JObject() { { "id", "abc" }, { "__version", "Wow" } });
+
+            await (service.SyncContext as MobileServiceSyncContext).PushAsync(CancellationToken.None, MobileServiceTableKind.Table);
+
+            Assert.IsTrue(invoked);
         }
 
         [AsyncTestMethod]
