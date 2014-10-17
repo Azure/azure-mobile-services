@@ -7,7 +7,7 @@
 // to install the plugin use the following command
 //   cordova plugin add org.apache.cordova.inappbrowser
 
-var requiredCordovaVersion = { major: 3, minor: 5 };
+var requiredCordovaVersion = { major: 3, minor: 0 };
 
 exports.supportsCurrentRuntime = function () {
     /// <summary>
@@ -30,32 +30,42 @@ exports.login = function (startUri, endUri, callback) {
                     ". Required: " + requiredCordovaVersion.major + "." + requiredCordovaVersion.minor;
         throw new Error(message);
     }
+    if (!hasInAppBrowser) {
+        var message = 'A required plugin: "org.apache.cordova.inappbrowser" was not detected.';
+        throw new Error(message);
+    }
 
     // Initially we show a page with a spinner. This stays on screen until the login form has loaded.
     var redirectionScript = "<script>location.href = unescape('" + window.escape(startUri) + "')</script>",
-        startPage = "data:text/html," + encodeURIComponent(getSpinnerMarkup() + redirectionScript),
-        loginWindow = window.open(startPage, "_blank", "location=no"),
-        flowHasFinished = false,
-        loadEventHandler = function (evt) {
-            if (!flowHasFinished && evt.url.indexOf(endUri) === 0) {
+        startPage = "data:text/html," + encodeURIComponent(getSpinnerMarkup() + redirectionScript);
+
+    // iOS inAppBrowser issue requires this wrapping
+    setTimeout(function () {
+        var loginWindow = window.open(startPage, "_blank", "location=no"),
+            flowHasFinished = false,
+            loadEventHandler = function (evt) {
+                if (!flowHasFinished && evt.url.indexOf(endUri) === 0) {
+                    flowHasFinished = true;
+                    setTimeout(function () {
+                        loginWindow.close();
+                    }, 500);
+                    var result = parseOAuthResultFromDoneUrl(evt.url);
+                    callback(result.error, result.oAuthToken);
+                }
+            };
+
+        // Ideally we'd just use loadstart because it happens earlier, but it randomly skips
+        // requests on iOS, so we have to listen for loadstop as well (which is reliable).
+        loginWindow.addEventListener('loadstart', loadEventHandler);
+        loginWindow.addEventListener('loadstop', loadEventHandler);
+
+        loginWindow.addEventListener('exit', function (evt) {
+            if (!flowHasFinished) {
                 flowHasFinished = true;
-                loginWindow.close();
-                var result = parseOAuthResultFromDoneUrl(evt.url);
-                callback(result.error, result.oAuthToken);
+                callback("UserCancelled", null);
             }
-        };
-
-    // Ideally we'd just use loadstart because it happens earlier, but it randomly skips
-    // requests on iOS, so we have to listen for loadstop as well (which is reliable).
-    loginWindow.addEventListener('loadstart', loadEventHandler);
-    loginWindow.addEventListener('loadstop', loadEventHandler);
-
-    loginWindow.addEventListener('exit', function (evt) {
-        if (!flowHasFinished) {
-            flowHasFinished = true;
-            callback("UserCancelled", null);
-        }
-    });
+        });
+    }, 500);
 };
 
 function currentCordovaVersion() {
@@ -74,6 +84,10 @@ function isSupportedCordovaVersion(version) {
                (major === required.major && minor >= required.minor);
     }
     return false;
+}
+
+function hasInAppBrowser() {
+    return !window.open;
 }
 
 function parseOAuthResultFromDoneUrl(url) {

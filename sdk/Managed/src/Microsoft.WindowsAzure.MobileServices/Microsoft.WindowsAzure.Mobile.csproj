@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="Authentication\MobileServiceTokenAuthentication.cs" />
     <Compile Include="Collections\MobileServiceCollection.cs" />
+    <Compile Include="Collections\MobileServiceCollectionEventArgs.cs" />
     <Compile Include="EnumValueAttribute.cs" />
     <Compile Include="Exceptions\MobileServiceConflictException.cs" />
     <Compile Include="Exceptions\MobileServiceInvalidOperationException.cs" />

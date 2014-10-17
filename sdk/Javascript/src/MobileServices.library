@@ -24,10 +24,11 @@ task for more details on the .library format and all of its options.
   <Module Path="MobileServiceClient.js" EntryPoint="true" />
   <Module Path="MobileServiceTable.js" />
   <Module Path="MobileServiceLogin.js" />
-  <Module Path="Push\Push.js" Condition="Default|Intellisense|Internals" />
-  <Module Path="Push\RegistrationManager.js" Condition="Default|Intellisense|Internals" />
-  <Module Path="Push\LocalStorageManager.js" Condition="Default|Intellisense|Internals" />
-  <Module Path="Push\PushHttpClient.js" Condition="Default|Intellisense|Internals" />
+  <Module Path="Push\Push.WinJS.js" Name="Push" Condition="Default|Intellisense|Internals" />
+  <Module Path="Push\Push.Web.js" Name="Push" Condition="Web|WebInternals" />
+  <Module Path="Push\RegistrationManager.js" />
+  <Module Path="Push\LocalStorageManager.js" />
+  <Module Path="Push\PushHttpClient.js" />
   <Module Path="Platforms\Platform.WinJS.js" Name="Platform" Condition="Default|Intellisense|Internals" />
   <Module Path="Platforms\Platform.Web.js" Name="Platform" Condition="Web|WebInternals" />
   <Module Path="Transports\DirectAjaxTransport.js" Condition="Web|WebInternals" />

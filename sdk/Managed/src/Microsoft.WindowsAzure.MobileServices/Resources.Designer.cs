@@ -996,5 +996,14 @@ namespace Microsoft.WindowsAzure.MobileServices {
                 return ResourceManager.GetString("SyncStore_OperationFailed", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This page must be called from the type &apos;{0}&apos;..
+        /// </summary>
+        internal static string WP8LoginPage_MustBeCalledFromAuthBroker {
+            get {
+                return ResourceManager.GetString("WP8LoginPage_MustBeCalledFromAuthBroker", resourceCulture);
+            }
+        }
     }
 }

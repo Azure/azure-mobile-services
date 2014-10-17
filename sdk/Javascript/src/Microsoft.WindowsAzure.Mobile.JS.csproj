@@ -190,9 +190,10 @@
     <Content Include="MobileServiceTable.js" />
     <Content Include="Platforms\Platform.Web.js" />
     <Content Include="Platforms\Platform.WinJS.js" />
+    <Content Include="Push\Push.Web.js" />
     <Content Include="Push\PushHttpClient.js" />
     <Content Include="Push\LocalStorageManager.js" />
-    <Content Include="Push\Push.js" />
+    <Content Include="Push\Push.WinJS.js" />
     <Content Include="Push\RegistrationManager.js" />
     <Content Include="Transports\IframeTransport.js" />
     <Content Include="Transports\DirectAjaxTransport.js" />
@@ -209,9 +210,9 @@
   <!-- Compile the single .JS files -->
   <Target Name="CreateZumoLibrary">
     <!-- get the submodule code -->
-    <Message Importance="high" Text="Getting Git Submodules" />
-    <Exec Command="git submodule init" WorkingDirectory="$(MSBuildProjectDirectory)\..\..\.." />
-    <Exec Command="git submodule update" WorkingDirectory="$(MSBuildProjectDirectory)\..\..\.." />
+    <!-- Message Importance="high" Text="Getting Git Submodules" /-->
+    <!-- Exec Command="git submodule init" WorkingDirectory="$(MSBuildProjectDirectory)\..\..\.." /-->
+    <!-- Exec Command="git submodule update" WorkingDirectory="$(MSBuildProjectDirectory)\..\..\.." /-->
     <!-- Merge the modules into a library -->
     <Message Importance="high" Text="Generating MobileServices Library" />
     <MergeJSModules LibraryDefinitions="MobileServices.library" />

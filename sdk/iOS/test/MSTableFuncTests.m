@@ -27,7 +27,7 @@
     // application key for the Windows Mobile Azure Service below.
     
     MSClient *client = [MSClient
-              clientWithApplicationURLString:@"<Microsoft Azure Mobile Service App URL>"
+              clientWithApplicationURLString:@"<Microsoft Azure Mobile Service App URL>
               applicationKey:@"<Application Key>"];
     
     XCTAssertTrue([client.applicationURL.description hasPrefix:@"https://"], @"The functional tests are currently disabled.");
