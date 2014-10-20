@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger version="2" >
+
+    <dataSet config="debug" >
+        <source path="/Users/marianosanchez/Desktop/MobileServices_SDK/sdk/android/src/notifications-handler/build/intermediates/bundles/debug/assets" />
+    </dataSet>
+    <dataSet config="main" >
+        <source path="/Users/marianosanchez/Desktop/MobileServices_SDK/sdk/android/src/notifications-handler/src/androidTest/assets" />
+    </dataSet>
+
+</merger>

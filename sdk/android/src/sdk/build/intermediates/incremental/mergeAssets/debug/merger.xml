@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger version="2" >
+
+    <dataSet config="main" >
+        <source path="/Users/marianosanchez/Desktop/MobileServices_SDK/sdk/android/src/sdk/src/main/assets" />
+    </dataSet>
+    <dataSet config="debug" >
+        <source path="/Users/marianosanchez/Desktop/MobileServices_SDK/sdk/android/src/sdk/src/debug/assets" />
+    </dataSet>
+
+</merger>
