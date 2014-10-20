@@ -70,7 +70,7 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.Stri
 public class CustomApiTests extends TestGroup {
 
 	private static final String PUBLIC_API_NAME = "public";
-	private static final String INEXISTENT_API_NAME = "InexistenApi";
+	private static final String INEXISTENT_API_NAME = "InexistentApi";
 	private static final String APP_API_NAME = "application";
 	private static final String USER_API_NAME = "user";
 	private static final String ADMIN_API_NAME = "admin";
