@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/android.iml" filepath="$PROJECT_DIR$/android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/src/notifications-handler/notifications-handler.iml" filepath="$PROJECT_DIR$/src/notifications-handler/notifications-handler.iml" />
+      <module fileurl="file://$PROJECT_DIR$/src/sdk/sdk.iml" filepath="$PROJECT_DIR$/src/sdk/sdk.iml" />
+      <module fileurl="file://$PROJECT_DIR$/test/sdk.testapp/sdk.testapp.iml" filepath="$PROJECT_DIR$/test/sdk.testapp/sdk.testapp.iml" />
+    </modules>
+  </component>
+</project>
+
