@@ -4,8 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Query;
 using Newtonsoft.Json.Linq;
@@ -15,13 +13,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     /// <summary>
     /// Allows saving and reading data in the local tables.
     /// </summary>
-    public interface IMobileServiceLocalStore: IDisposable
+    public interface IMobileServiceLocalStore : IDisposable
     {
         /// <summary>
         /// Initializes the store for use.
         /// </summary>
         /// <returns>A task that completes when store has initialized.</returns>
-        Task InitializeAsync();        
+        Task InitializeAsync();
 
         /// <summary>
         /// Reads data from local table by executing the query.
@@ -45,21 +43,5 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <param name="query">Instance of <see cref="MobileServiceTableQueryDescription"/></param>
         /// <returns>A task that completes when delete has been executed on local table.</returns>
         Task DeleteAsync(MobileServiceTableQueryDescription query);
-
-        /// <summary>
-        /// Deletes items from local table with the given list of ids
-        /// </summary>
-        /// <param name="tableName">Name of the local table.</param>
-        /// <param name="ids">A list of ids of the items to be deleted</param>
-        /// <returns>A task that completes when delete query has executed.</returns>
-        Task DeleteAsync(string tableName, IEnumerable<string> ids);
-
-        /// <summary>
-        /// Reads a single item from local table with specified id.
-        /// </summary>
-        /// <param name="tableName">Name of the local table.</param>
-        /// <param name="id">Id for the object to be read.</param>
-        /// <returns>A task that returns the item read from local table.</returns>
-        Task<JObject> LookupAsync(string tableName, string id);
     }
 }

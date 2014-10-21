@@ -34,14 +34,30 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
         public Task<JToken> ReadAsync(MobileServiceTableQueryDescription query)
         {
-            if (query.TableName == MobileServiceLocalSystemTables.OperationQueue || query.TableName == MobileServiceLocalSystemTables.SyncErrors)
-            {
-                MockTable table = GetTable(query.TableName);
+            string odata = query.ToODataString();
 
-                IEnumerable<JObject> items = table.Values;
+            MockTable table = GetTable(query.TableName);
+            IEnumerable<JObject> items = table.Values;
+
+            if (IsLookup(odata))
+            {
+                JObject result;
+                if (table.TryGetValue(GetLookupId(query), out result))
+                {
+                    items = new[] { result };
+                }
+                else
+                {
+                    items = new JObject[] { };
+                }
+                return GetMockResult(query, items);
+            }
+            else if (query.TableName == MobileServiceLocalSystemTables.OperationQueue ||
+                query.TableName == MobileServiceLocalSystemTables.SyncErrors)
+            {
+
                 if (query.TableName == MobileServiceLocalSystemTables.OperationQueue)
                 {
-                    string odata = query.ToODataString();
                     if (odata.Contains("$orderby=sequence desc")) // the query to take total count and max sequence
                     {
                         items = items.OrderBy(o => o.Value<long>("sequence"));
@@ -70,12 +86,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                     }
                 }
 
-                if (query.IncludeTotalCount)
-                {
-                    return Task.FromResult<JToken>(new JObject() { { "count", items.Count() }, { "results", new JArray(items) } });
-                }
-
-                return Task.FromResult<JToken>(new JArray(items));
+                return GetMockResult(query, items);
             }
 
             this.ReadQueries.Add(query);
@@ -93,10 +104,51 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             return Task.FromResult(response);
         }
 
+        private static string GetLookupId(MobileServiceTableQueryDescription query)
+        {
+            return (string)((query.Filter as BinaryOperatorNode).RightOperand as ConstantNode).Value;
+        }
+
+        private static bool IsLookup(string odata)
+        {
+            return odata.StartsWith("$filter=(id eq '") && odata.EndsWith("')");
+        }
+
+        private static Task<JToken> GetMockResult(MobileServiceTableQueryDescription query, IEnumerable<JObject> items)
+        {
+            if (query.IncludeTotalCount)
+            {
+                return Task.FromResult<JToken>(new JObject() { { "count", items.Count() }, { "results", new JArray(items) } });
+            }
+
+            return Task.FromResult<JToken>(new JArray(items));
+        }
+
         public Task DeleteAsync(MobileServiceTableQueryDescription query)
         {
             this.DeleteQueries.Add(query);
-            this.TableMap[query.TableName].Clear();
+            if (query.Filter == null)
+            {
+                this.TableMap[query.TableName].Clear();
+            }
+            else
+            {
+                string odata = query.ToODataString();
+
+                MockTable table = GetTable(query.TableName);
+                IEnumerable<JObject> items = table.Values.ToList();
+                if (IsLookup(odata))
+                {
+                    table.Remove(GetLookupId(query));
+                }
+                else
+                {
+                    foreach (JObject item in items)
+                    {
+                        table.Remove((string)item[MobileServiceSystemColumns.Id]);
+                    }
+                }
+            }
             return Task.FromResult(0);
         }
 
@@ -108,24 +160,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 table[item.Value<string>("id")] = item;
             }
             return Task.FromResult(0);
-        }
-
-        public Task DeleteAsync(string tableName, IEnumerable<string> ids)
-        {
-            foreach (string id in ids)
-            {
-                MockTable table = GetTable(tableName);
-                table.Remove(id);
-            }
-            return Task.FromResult(0);
-        }
-
-        public Task<JObject> LookupAsync(string tableName, string id)
-        {
-            MockTable table = GetTable(tableName);
-            JObject item;
-            table.TryGetValue(id, out item);
-            return Task.FromResult(item);
         }
 
         private Dictionary<string, JObject> GetTable(string tableName)

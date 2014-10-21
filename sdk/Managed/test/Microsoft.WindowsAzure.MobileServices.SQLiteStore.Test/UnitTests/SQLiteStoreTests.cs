@@ -6,6 +6,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Query;
+using Microsoft.WindowsAzure.MobileServices.Sync;
 using Microsoft.WindowsAzure.MobileServices.Test;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using Newtonsoft.Json.Linq;
@@ -52,10 +53,10 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             Assert.AreEqual(ex.Message, "Cannot define a table after the store has been initialized.");
         }
 
-        [TestMethod]
-        public void LookupAsync_Throws_WhenStoreIsNotInitialized()
+        [AsyncTestMethod]
+        public Task LookupAsync_Throws_WhenStoreIsNotInitialized()
         {
-            TestStoreThrowOnUninitialized(store => store.LookupAsync("asdf", "asdf"));
+            return TestStoreThrowOnUninitialized(store => store.LookupAsync("asdf", "asdf"));
         }
 
         [AsyncTestMethod]
@@ -82,10 +83,10 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             }
         }
 
-        [TestMethod]
-        public void ReadAsync_Throws_WhenStoreIsNotInitialized()
+        [AsyncTestMethod]
+        public Task ReadAsync_Throws_WhenStoreIsNotInitialized()
         {
-            TestStoreThrowOnUninitialized(store => store.ReadAsync(MobileServiceTableQueryDescription.Parse("abc", "")));
+            return TestStoreThrowOnUninitialized(store => store.ReadAsync(MobileServiceTableQueryDescription.Parse("abc", "")));
         }
 
         [AsyncTestMethod]
@@ -114,16 +115,16 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             }
         }
 
-        [TestMethod]
-        public void DeleteAsyncByQuery_Throws_WhenStoreIsNotInitialized()
+        [AsyncTestMethod]
+        public Task DeleteAsyncByQuery_Throws_WhenStoreIsNotInitialized()
         {
-            TestStoreThrowOnUninitialized(store => store.DeleteAsync(MobileServiceTableQueryDescription.Parse("abc", "")));
+            return TestStoreThrowOnUninitialized(store => store.DeleteAsync(MobileServiceTableQueryDescription.Parse("abc", "")));
         }
 
-        [TestMethod]
-        public void DeleteAsyncById_Throws_WhenStoreIsNotInitialized()
+        [AsyncTestMethod]
+        public Task DeleteAsyncById_Throws_WhenStoreIsNotInitialized()
         {
-            TestStoreThrowOnUninitialized(store => store.DeleteAsync("abc", new[] { "" }));
+            return TestStoreThrowOnUninitialized(store => store.DeleteAsync("abc", new[] { "" }));
         }
 
         [AsyncTestMethod]
@@ -173,10 +174,10 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             Assert.AreEqual(count, 0L);
         }
 
-        [TestMethod]
-        public void UpsertAsync_Throws_WhenStoreIsNotInitialized()
+        [AsyncTestMethod]
+        public Task UpsertAsync_Throws_WhenStoreIsNotInitialized()
         {
-            TestStoreThrowOnUninitialized(store => store.UpsertAsync("asdf", new[] { new JObject() }, fromServer: false));
+            return TestStoreThrowOnUninitialized(store => store.UpsertAsync("asdf", new[] { new JObject() }, fromServer: false));
         }
 
         [AsyncTestMethod]
@@ -469,10 +470,10 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             }
         }
 
-        private void TestStoreThrowOnUninitialized(Action<MobileServiceSQLiteStore> storeAction)
+        private async Task TestStoreThrowOnUninitialized(Func<MobileServiceSQLiteStore, Task> storeAction)
         {
             var store = new MobileServiceSQLiteStore(TestDbName);
-            var ex = Throws<InvalidOperationException>(() => storeAction(store));
+            var ex = await ThrowsAsync<InvalidOperationException>(() => storeAction(store));
             Assert.AreEqual(ex.Message, "The store must be initialized before it can be used.");
         }
 

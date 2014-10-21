@@ -2,15 +2,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
+using System;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.WindowsAzure.MobileServices.Query;
 using Microsoft.WindowsAzure.MobileServices.Sync;
 using Moq;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Net;
-using System.Net.Http;
 
 namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Operations
 {
@@ -69,7 +69,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         {
             var store = new Mock<IMobileServiceLocalStore>();
             await this.operation.ExecuteLocalAsync(store.Object, null);
-            store.Verify(s => s.DeleteAsync("test", It.Is<string[]>(i => i.Contains("abc"))), Times.Once());
+            store.Verify(s => s.DeleteAsync(It.Is<MobileServiceTableQueryDescription>(q => q.TableName == "test")), Times.Once());
         }
 
         [TestMethod]
@@ -77,7 +77,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         {
             var store = new Mock<IMobileServiceLocalStore>();
             var storeError = new InvalidOperationException();
-            store.Setup(s => s.DeleteAsync("test", It.Is<string[]>(i => i.Contains("abc")))).Throws(storeError);
+            store.Setup(s => s.DeleteAsync(It.Is<MobileServiceTableQueryDescription>(q => q.TableName == "test"))).Throws(storeError);
 
             var ex = await AssertEx.Throws<InvalidOperationException>(() => this.operation.ExecuteLocalAsync(store.Object, null));
             Assert.AreSame(storeError, ex);

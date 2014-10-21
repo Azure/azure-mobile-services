@@ -4,8 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Query;
 using Newtonsoft.Json.Linq;
@@ -15,7 +13,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     /// <summary>
     /// Base implementation for <see cref="IMobileServiceLocalStore"/>
     /// </summary>
-    public abstract class MobileServiceLocalStore: IMobileServiceLocalStore
+    public abstract class MobileServiceLocalStore : IMobileServiceLocalStore
     {
         /// <summary>
         /// Indicates whether store has been initialized or not.
@@ -80,22 +78,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <param name="query">Instance of <see cref="MobileServiceTableQueryDescription"/></param>
         /// <returns>A task that completes when delete has been executed on local table.</returns>
         public abstract Task DeleteAsync(MobileServiceTableQueryDescription query);
-
-        /// <summary>
-        /// Deletes items from local table with the given list of ids
-        /// </summary>
-        /// <param name="tableName">Name of the local table.</param>
-        /// <param name="ids">A list of ids of the items to be deleted</param>
-        /// <returns>A task that completes when delete query has executed.</returns>
-        public abstract Task DeleteAsync(string tableName, IEnumerable<string> ids);
-
-        /// <summary>
-        /// Reads a single item from local table with specified id.
-        /// </summary>
-        /// <param name="tableName">Name of the local table.</param>
-        /// <param name="id">Id for the object to be read.</param>
-        /// <returns>A task that returns the item read from local table.</returns>
-        public abstract Task<JObject> LookupAsync(string tableName, string id);
 
         /// <summary>
         /// Throws an exception if store is not initialized.
