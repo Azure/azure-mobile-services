@@ -26,6 +26,7 @@ var knownTransports = [ // In order of preference
     require('IframeTransport')
 ];
 var knownLoginUis = [ // In order of preference
+    require('WebAuthBroker'),
     require('CordovaPopup'),
     require('BrowserPopup')
 ];
