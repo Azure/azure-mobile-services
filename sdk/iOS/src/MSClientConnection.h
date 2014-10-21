@@ -18,7 +18,7 @@ typedef void (^MSResponseBlock)(NSHTTPURLResponse *response,
                                 NSError *error);
 
 
-#pragma mark * MSClientConnection Public Interface
+#pragma  mark * MSClient Public Interface
 
 
 // The |MSClientConnection| class sends an HTTP request asynchronously and

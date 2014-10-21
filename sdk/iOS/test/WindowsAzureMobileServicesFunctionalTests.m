@@ -389,11 +389,12 @@
         XCTAssertNil(error, @"error from insert should have been nil.");
         
         // Now try to query the item and make sure we don't error
-        [todoTable readWithPredicate:predicate completion:^(MSQueryResult *result,
+        [todoTable readWithPredicate:predicate completion:^(NSArray *items,
+                                                    NSInteger totalCount,
                                                     NSError *error) {
             
-            XCTAssertNotNil(result.items, @"items should not have been nil.");
-            XCTAssertTrue([result.items count] > 0, @"items should have matched something.");
+            XCTAssertNotNil(items, @"items should not have been nil.");
+            XCTAssertTrue([items count] > 0, @"items should have matched something.");
             XCTAssertNil(error, @"error from query should have been nil.");
             
             // Now delete the inserted item so as not to corrupt future tests
@@ -415,9 +416,9 @@
     
     MSQuery *query = [todoTable query];
     query.parameters = @{@"encodeMe$?": @"No really $#%& encode me!"};
-    [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
+    [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
         
-        XCTAssertNotNil(result.items, @"items should not have been nil.");
+        XCTAssertNotNil(items, @"items should not have been nil.");
         XCTAssertNil(error, @"error from query was: %@", error.localizedDescription);
         
         done = YES;

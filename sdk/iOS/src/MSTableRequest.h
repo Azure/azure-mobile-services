@@ -5,7 +5,6 @@
 #import <Foundation/Foundation.h>
 #import "MSTable.h"
 #import "MSSerializer.h"
-#import "MSSDKFeatures.h"
 
 @class MSTableItemRequest;
 @class MSTableDeleteRequest;
@@ -20,8 +19,7 @@ typedef enum MSTableRequestTypeEnum {
     MSTableUpdateRequestType,
     MSTableDeleteRequestType,
     MSTableReadRequestType,
-    MSTableReadQueryRequestType,
-    MSTableUndeleteRequestType
+    MSTableReadQueryRequestType
     
 } MSTableRequestType;
 
@@ -58,38 +56,27 @@ typedef enum MSTableRequestTypeEnum {
 +(MSTableItemRequest *) requestToInsertItem:(id)item
                                       table:(MSTable *)table
                                  parameters:(NSDictionary *)parameters
-                                   features:(MSFeatures)features
                                  completion:(MSItemBlock)completion;
 
 // Creates a request to update the item in the given table.
 +(MSTableItemRequest *) requestToUpdateItem:(id)item
                                       table:(MSTable *)table
                                  parameters:(NSDictionary *)parameters
-                                   features:(MSFeatures)features
                                  completion:(MSItemBlock)completion;
 
 // Creates a request to delete the item from the given table.
 +(MSTableDeleteRequest *) requestToDeleteItem:(id)item
                                         table:(MSTable *)table
                                    parameters:(NSDictionary *)parameters
-                                     features:(MSFeatures)features
                                    completion:(MSDeleteBlock)completion;
 
 // Creates a request to delete the item with the given id from the given table.
 +(MSTableDeleteRequest *) requestToDeleteItemWithId:(id)itemId
                                               table:(MSTable *)table
                                          parameters:(NSDictionary *)parameters
-                                           features:(MSFeatures)features
                                          completion:(MSDeleteBlock)completion;
 
-// Creates a request to undelete the item from the given table.
-+(MSTableItemRequest *) requestToUndeleteItem:(id)item
-                                        table:(MSTable *)table
-                                   parameters:(NSDictionary *)parameters
-                                     features:(MSFeatures)features
-                                   completion:(MSItemBlock)completion;
-
-// Creates a request to read the item with the given id from the given table.
+// Creates a request to read the item with the given ide from the given table.
 +(MSTableItemRequest *) requestToReadWithId:(id)itemId
                                       table:(MSTable *)table
                                  parameters:(NSDictionary *)parameters
@@ -98,7 +85,6 @@ typedef enum MSTableRequestTypeEnum {
 // Creates a request to the read the given table with the given query.
 +(MSTableReadQueryRequest *) requestToReadItemsWithQuery:(NSString *)queryString
                                                    table:(MSTable *)table
-                                                features:(MSFeatures)features
                                               completion:(MSReadQueryBlock)completion;
 
 @end
