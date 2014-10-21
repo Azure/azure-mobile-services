@@ -26,7 +26,7 @@ package com.microsoft.windowsazure.mobileservices.table;
 import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 
-public class MobileServiceConflictExceptionBase extends MobileServiceExceptionBase {
+public class MobileServiceConflictExceptionJson extends MobileServiceExceptionJson {
 
 	/**
 	 * UID used for serialization
@@ -42,7 +42,7 @@ public class MobileServiceConflictExceptionBase extends MobileServiceExceptionBa
 	 * @param value
 	 *            The current instance from server that the conflict occurred for.
 	 */
-	public MobileServiceConflictExceptionBase(MobileServiceException msException, JsonObject value) {
+	public MobileServiceConflictExceptionJson(MobileServiceException msException, JsonObject value) {
 		super(msException, value);
 	}
 }

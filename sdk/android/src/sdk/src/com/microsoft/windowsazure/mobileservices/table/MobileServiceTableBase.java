@@ -960,11 +960,11 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
 				}
 
 				if (msExcep.getResponse().getStatus().getStatusCode() == 412) {
-					return new MobileServicePreconditionFailedExceptionBase(msExcep, serverEntity);
+					return new MobileServicePreconditionFailedExceptionJson(msExcep, serverEntity);
 				}
 				
 				if (msExcep.getResponse().getStatus().getStatusCode() == 409) {
-					return new MobileServiceConflictExceptionBase(msExcep, null);
+					return new MobileServiceConflictExceptionJson(msExcep, null);
 				}
 			}
 		}

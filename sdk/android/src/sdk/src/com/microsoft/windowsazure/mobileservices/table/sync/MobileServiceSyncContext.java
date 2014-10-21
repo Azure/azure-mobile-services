@@ -45,10 +45,8 @@ import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.MobileServiceFeatures;
-import com.microsoft.windowsazure.mobileservices.table.MobileServiceConflictExceptionBase;
-import com.microsoft.windowsazure.mobileservices.table.MobileServiceExceptionBase;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceExceptionJson;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
-import com.microsoft.windowsazure.mobileservices.table.MobileServicePreconditionFailedExceptionBase;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProperty;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
@@ -955,8 +953,8 @@ public class MobileServiceSyncContext {
 			}
 		}
 
-		if (throwable instanceof MobileServiceExceptionBase) {
-			MobileServiceExceptionBase mspfEx = (MobileServiceExceptionBase) throwable;
+		if (throwable instanceof MobileServiceExceptionJson) {
+			MobileServiceExceptionJson mspfEx = (MobileServiceExceptionJson) throwable;
 			serverItem = mspfEx.getValue();
 		}
 		

@@ -679,15 +679,15 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 	
 	private Throwable transformToTypedException(Throwable exc) {
 		
-		if (exc instanceof MobileServicePreconditionFailedExceptionBase) {
-			MobileServicePreconditionFailedExceptionBase ex = (MobileServicePreconditionFailedExceptionBase) exc;
+		if (exc instanceof MobileServicePreconditionFailedExceptionJson) {
+			MobileServicePreconditionFailedExceptionJson ex = (MobileServicePreconditionFailedExceptionJson) exc;
 	
 			E entity = parseResultsForTypedException(ex);
 			
 			return new MobileServicePreconditionFailedException(ex, entity);
 		
-		} else if (exc instanceof MobileServiceConflictExceptionBase) {
-			MobileServiceConflictExceptionBase ex = (MobileServiceConflictExceptionBase) exc;
+		} else if (exc instanceof MobileServiceConflictExceptionJson) {
+			MobileServiceConflictExceptionJson ex = (MobileServiceConflictExceptionJson) exc;
 	
 			E entity = parseResultsForTypedException(ex);
 			
@@ -697,7 +697,7 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 		return exc;
 	}
 	
-	private E parseResultsForTypedException(MobileServiceExceptionBase ex) {
+	private E parseResultsForTypedException(MobileServiceExceptionJson ex) {
 		E entity = null;
 		
 		try {

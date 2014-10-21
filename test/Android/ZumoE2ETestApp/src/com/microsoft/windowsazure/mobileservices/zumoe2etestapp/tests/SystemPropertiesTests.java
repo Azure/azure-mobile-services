@@ -38,10 +38,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceConflictException;
-import com.microsoft.windowsazure.mobileservices.table.MobileServiceConflictExceptionBase;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceConflictExceptionJson;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServicePreconditionFailedException;
-import com.microsoft.windowsazure.mobileservices.table.MobileServicePreconditionFailedExceptionBase;
+import com.microsoft.windowsazure.mobileservices.table.MobileServicePreconditionFailedExceptionJson;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProperty;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.table.query.ExecutableQuery;
@@ -578,8 +578,8 @@ public class SystemPropertiesTests extends TestGroup {
 								callback.onTestComplete(test, result);
 							}
 						} catch (Exception ex) {
-							if (ex.getCause() instanceof MobileServicePreconditionFailedExceptionBase) {
-								MobileServicePreconditionFailedExceptionBase preconditionFailed = (MobileServicePreconditionFailedExceptionBase) ex.getCause();
+							if (ex.getCause() instanceof MobileServicePreconditionFailedExceptionJson) {
+								MobileServicePreconditionFailedExceptionJson preconditionFailed = (MobileServicePreconditionFailedExceptionJson) ex.getCause();
 								JsonObject serverValue = preconditionFailed.getValue();
 
 								String serverVersion = serverValue.get("__version").getAsString();
@@ -728,9 +728,9 @@ public class SystemPropertiesTests extends TestGroup {
 								callback.onTestComplete(test, result);
 							}
 						} catch (Exception ex) {
-							if (ex.getCause() instanceof MobileServiceConflictExceptionBase) {
+							if (ex.getCause() instanceof MobileServiceConflictExceptionJson) {
 								
-								MobileServiceConflictExceptionBase exc = (MobileServiceConflictExceptionBase) ex.getCause();
+								MobileServiceConflictExceptionJson exc = (MobileServiceConflictExceptionJson) ex.getCause();
 								
 								JsonObject item = exc.getValue();
 							

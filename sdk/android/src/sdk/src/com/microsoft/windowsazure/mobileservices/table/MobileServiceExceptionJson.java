@@ -26,7 +26,7 @@ package com.microsoft.windowsazure.mobileservices.table;
 import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 
-public class MobileServiceExceptionBase extends MobileServiceException {
+public class MobileServiceExceptionJson extends MobileServiceException {
 
 	/**
 	 * UID used for serialization
@@ -44,7 +44,7 @@ public class MobileServiceExceptionBase extends MobileServiceException {
 	 * @param value
 	 *            The current instance from the server for that the exception was created
 	 */
-	public MobileServiceExceptionBase(MobileServiceException msException, JsonObject value) {
+	public MobileServiceExceptionJson(MobileServiceException msException, JsonObject value) {
 		super(msException.getMessage(), msException.getCause(), msException.getResponse());
 		this.mValue = value;
 	}

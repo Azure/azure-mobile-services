@@ -38,7 +38,7 @@ import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
-import com.microsoft.windowsazure.mobileservices.table.MobileServicePreconditionFailedExceptionBase;
+import com.microsoft.windowsazure.mobileservices.table.MobileServicePreconditionFailedExceptionJson;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
@@ -700,17 +700,17 @@ class ConflictResolvingSyncHandler implements MobileServiceSyncHandler {
 	@Override
 	public JsonObject executeTableOperation(RemoteTableOperationProcessor processor, TableOperation operation) throws MobileServiceSyncHandlerException {
 
-		MobileServicePreconditionFailedExceptionBase ex = null;
+		MobileServicePreconditionFailedExceptionJson ex = null;
 		JsonObject result = null;
 		do {
 			ex = null;
 			try {
 				test.log("Attempting to execute the operation");
 				result = operation.accept(processor);
-			} catch (MobileServicePreconditionFailedExceptionBase e) {
+			} catch (MobileServicePreconditionFailedExceptionJson e) {
 				ex = e;
 			} catch (Throwable e) {
-				ex = (MobileServicePreconditionFailedExceptionBase) e.getCause();
+				ex = (MobileServicePreconditionFailedExceptionJson) e.getCause();
 			}
 
 			if (ex != null) {
