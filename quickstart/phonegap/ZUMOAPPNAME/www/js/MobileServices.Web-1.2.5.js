@@ -15,7 +15,7 @@
     /// will define the module's exports when invoked.
     /// </field>
     var $__modules__ = { };
-    var $__fileVersion__ = "1.0.20402.0";
+    var $__fileVersion__ = "1.2.21003.0";
     
     function require(name) {
         /// <summary>
@@ -281,7 +281,11 @@
         
             // Create the absolute URI
             var options = { type: method.toUpperCase() };
-            options.url = _.url.combinePathSegments(this.applicationUrl, uriFragment);
+            if (_.url.isAbsoluteUrl(uriFragment)) {
+                options.url = uriFragment;
+            } else {
+                options.url = _.url.combinePathSegments(this.applicationUrl, uriFragment);
+            }
         
             // Set MobileServices authentication, application, User-Agent and telemetry headers
             options.headers = {};
@@ -481,13 +485,19 @@
                         if (!_.isNull(error)) {
                             callback(error, null);
                         } else {
-                            if (typeof response.getResponseHeader === 'undefined') { // (when using IframeTransport, IE9)
+                            var contentType;
+                            if (typeof response.getResponseHeader !== 'undefined') { // (when not using IframeTransport, IE9)
+                                contentType = response.getResponseHeader('Content-Type');
+                            }
+        
+                            // If there was no header / can't get one, try json
+                            if (!contentType) {
                                 try {
                                     response.result = _.fromJson(response.responseText);
                                 } catch(e) {
                                     // Do nothing, since we don't know the content-type, failing may be ok
                                 }
-                            } else if (response.getResponseHeader('Content-Type').toLowerCase().indexOf('json') !== -1) {
+                            } else if (contentType.toLowerCase().indexOf('json') !== -1) {
                                 response.result = _.fromJson(response.responseText);
                             }
         
@@ -577,6 +587,7 @@
         // .../{app}/collections/{coll}.
         var tableRouteSeperatorName = "tables";
         var idNames = ["ID", "Id", "id", "iD"];
+        var nextLinkRegex = /^(.*?);\s*rel\s*=\s*(\w+)\s*$/;
         
         var MobileServiceSystemProperties = {
             None: 0,
@@ -731,9 +742,12 @@
             }
             
             // Construct the URL
-            var urlFragment = _.url.combinePathSegments(tableRouteSeperatorName, tableName);
-            if (!_.isNull(queryString)) {
-                urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
+            var urlFragment = queryString;
+            if (!_.url.isAbsoluteUrl(urlFragment)) {
+                urlFragment = _.url.combinePathSegments(tableRouteSeperatorName, tableName);
+                if (!_.isNull(queryString)) {
+                    urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
+                }
             }
         
             // Make the request
@@ -767,6 +781,19 @@
                             var i = 0;
                             for (i = 0; i < values.length; i++) {
                                 values[i] = projection.call(values[i]);
+                            }
+                        }
+        
+                        // Grab link header when possible
+                        if (Array.isArray(values) && response.getResponseHeader && _.isNull(values.nextLink)) {
+                            var link = response.getResponseHeader('Link');
+                            if (!_.isNullOrEmpty(link)) {
+                                var result = nextLinkRegex.exec(link);
+        
+                                // Only add nextLink when relation is next
+                                if (result && result.length === 3 && result[2] == 'next') {
+                                    values.nextLink = result[1];
+                                }
                             }
                         }
                     }
@@ -1838,10 +1865,15 @@
             Validate.notNullOrEmpty(name, 'name');
             Validate.notNullOrEmpty(bodyTemplate, 'bodyTemplate');
         
-            var registration = makeCoreRegistration(deviceToken, platform, tags);
+            var templateAsString = bodyTemplate,
+                registration = makeCoreRegistration(deviceToken, platform, tags);
+            
+            if (!_.isString(templateAsString)) {
+                templateAsString = JSON.stringify(templateAsString);
+            }
         
             registration.templateName = name;
-            registration.templateBody = bodyTemplate;
+            registration.templateBody = templateAsString;
             if (expiryTemplate) {
                 registration.expiry = expiryTemplate;
             }
@@ -1909,7 +1941,8 @@
             /// String or json object defining the body of the template register
             /// </param>
             /// <param name="expiryTemplate">
-            /// String defining the expiry
+            /// String defining the datatime or template expresession that evaluates to a date time
+            /// string to use for the expiry of the message
             /// </param>
             /// <param name="tags">
             /// Array containing the tags for this registeration
@@ -1923,12 +1956,7 @@
                 expiryTemplate = null;
             }
         
-            var templateAsString = bodyTemplate;
-            if (!_.isNull(templateAsString) && !_.isString(templateAsString)) {
-                templateAsString = JSON.stringify(templateAsString);
-            }
-        
-            return this._push._registerTemplate('apns', deviceToken, name, templateAsString, expiryTemplate, tags);
+            return this._push._registerTemplate('apns', deviceToken, name, bodyTemplate, expiryTemplate, tags);
         };
         
         apns.prototype.unregisterNative = function () {
@@ -1998,7 +2026,7 @@
             /// The name of the template
             /// </param>
             /// <param name="bodyTemplate">
-            /// String defining the body to register
+            /// String or json object defining the body to register
             /// </param>
             /// <param name="tags">
             /// Array containing the tags for this registeration
@@ -2102,9 +2130,9 @@
         RegistrationManager.NativeRegistrationName = LocalStorageManager.NativeRegistrationName;
         
         RegistrationManager.prototype.upsertRegistration = Platform.async(
-            function (registration, callback) {
+            function (registration, finalCallback) {
                 Validate.notNull(registration, 'registration');
-                Validate.notNull(callback, 'callback');
+                Validate.notNull(finalCallback, 'callback');
         
                 var self = this,
                     expiredRegistration = function (callback) {
@@ -2139,7 +2167,7 @@
                             registration.registrationId = registrationId;
         
                             self._storageManager.updateRegistrationWithName(
-                                registration.templateName,
+                                registration.templateName || LocalStorageManager.NativeRegistrationName,
                                 registration.registrationId,
                                 registration.deviceId);
         
@@ -2149,8 +2177,6 @@
                     firstRegistration = function (callback) {
                         var name = registration.templateName || LocalStorageManager.NativeRegistrationName,
                             cachedRegistrationId = self._storageManager.getRegistrationIdWithName(name);
-        
-                        registration.templateName = name;
         
                         if (!_.isNullOrEmpty(cachedRegistrationId)) {
                             registration.registrationId = cachedRegistrationId;
@@ -2171,14 +2197,14 @@
                     // So use cached value over the passed in value
                     this._refreshRegistrations(this._storageManager.pushHandle || registration.deviceId, function (error) {
                         if (error) {
-                            callback(error);
+                            finalCallback(error);
                             return;
                         }
         
-                        firstRegistration(callback);
+                        firstRegistration(finalCallback);
                     });        
                 } else {
-                    firstRegistration(callback);
+                    firstRegistration(finalCallback);
                 }
             });
         
@@ -3794,6 +3820,18 @@
                 } else {
                     return path + '?' + exports.trimStart(queryString, '?');
                 }
+            },
+        
+            isAbsoluteUrl: function (url) {
+                /// <summary>
+                /// Currently just a simple check if the url begins with http:// or https:/
+                /// </summary>
+                if (_.isNullOrEmpty(url)) {
+                    return false;
+                }
+        
+                var start = url.substring(0, 7).toLowerCase();
+                return (start  == "http://" || start == "https:/");
             }
         };
         
