@@ -9,13 +9,14 @@ namespace Microsoft.WindowsAzure.MobileServices
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using MonoTouch.Foundation;
 
     /// <summary>
     /// Define a class help to create/update/delete notification registrations
     /// </summary>
     public sealed class Push
     {
-        internal readonly RegistrationManager RegistrationManager;
+        internal readonly IRegistrationManager RegistrationManager;
 
         internal Push(MobileServiceClient client)
         {
@@ -23,18 +24,24 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 throw new ArgumentNullException("client");
             }
-
-            this.Client = client;
             
             var storageManager = new LocalStorageManager(client.ApplicationUri.Host);
             var pushHttpClient = new PushHttpClient(client);
             this.RegistrationManager = new RegistrationManager(pushHttpClient, storageManager);
         }
 
-        private MobileServiceClient Client { get; set; }
+        internal Push(IRegistrationManager registrationManager)
+        {
+            if (registrationManager == null)
+            {
+                throw new ArgumentNullException("registrationManager");
+            }
+
+            this.RegistrationManager = registrationManager;
+        }
 
         /// <summary>
-        /// Register a particular deviceToken
+        /// PLEASE USE NSData overload of this method!! Register a particular deviceToken
         /// </summary>
         /// <param name="deviceToken">The deviceToken to register</param>
         /// <returns>Task that completes when registration is complete</returns>
@@ -45,6 +52,16 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         /// <summary>
         /// Register a particular deviceToken
+        /// </summary>
+        /// <param name="deviceToken">The deviceToken to register</param>
+        /// <returns>Task that completes when registration is complete</returns>
+        public Task RegisterNativeAsync(NSData deviceToken)
+        {
+            return this.RegisterNativeAsync(deviceToken, null);
+        }
+
+        /// <summary>
+        /// PLEASE USE NSData overload of this method!! Register a particular deviceToken
         /// </summary>
         /// <param name="deviceToken">The deviceToken to register</param>
         /// <param name="tags">The tags to register to receive notifications from</param>
@@ -58,10 +75,27 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             var registration = new ApnsRegistration(deviceToken, tags);
             return this.RegistrationManager.RegisterAsync(registration);
+        }
+
+        /// <summary>
+        /// Register a particular deviceToken
+        /// </summary>
+        /// <param name="deviceToken">The deviceToken to register</param>
+        /// <param name="tags">The tags to register to receive notifications from</param>
+        /// <returns>Task that completes when registration is complete</returns>
+        public Task RegisterNativeAsync(NSData deviceToken, IEnumerable<string> tags)
+        {
+            if (deviceToken == null)
+            {
+                throw new ArgumentNullException("deviceToken");
+            }
+
+            var registration = new ApnsRegistration(deviceToken, tags);
+            return this.RegistrationManager.RegisterAsync(registration);
         } 
 
         /// <summary>
-        /// Register a particular deviceToken with a template
+        /// PLEASE USE NSData overload of this method!! Register a particular deviceToken with a template
         /// </summary>
         /// <param name="deviceToken">The deviceToken to register</param>
         /// <param name="jsonTemplate">The string defining the template</param>
@@ -77,6 +111,19 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Register a particular deviceToken with a template
         /// </summary>
         /// <param name="deviceToken">The deviceToken to register</param>
+        /// <param name="jsonTemplate">The string defining the template</param>
+        /// <param name="expiry">The string defining the expiry template</param>
+        /// <param name="templateName">The template name</param>
+        /// <returns>Task that completes when registration is complete</returns>
+        public Task RegisterTemplateAsync(NSData deviceToken, string jsonTemplate, string expiry, string templateName)
+        {
+            return this.RegisterTemplateAsync(deviceToken, jsonTemplate, expiry, templateName, null);
+        }
+
+        /// <summary>
+        /// PLEASE USE NSData overload of this method!! Register a particular deviceToken with a template
+        /// </summary>
+        /// <param name="deviceToken">The deviceToken to register</param>
         /// <param name="jsonTemplate">The string defining the json template</param>
         /// <param name="expiry">The string defining the expiry template</param>
         /// <param name="templateName">The template name</param>
@@ -85,6 +132,36 @@ namespace Microsoft.WindowsAzure.MobileServices
         public Task RegisterTemplateAsync(string deviceToken, string jsonTemplate, string expiry, string templateName, IEnumerable<string> tags)
         {
             if (string.IsNullOrWhiteSpace(deviceToken))
+            {
+                throw new ArgumentNullException("deviceToken");
+            }
+
+            if (string.IsNullOrWhiteSpace(jsonTemplate))
+            {
+                throw new ArgumentNullException("jsonTemplate");
+            }
+
+            if (string.IsNullOrWhiteSpace(templateName))
+            {
+                throw new ArgumentNullException("templateName");
+            }
+
+            var registration = new ApnsTemplateRegistration(deviceToken, jsonTemplate, expiry, templateName, tags);
+            return this.RegistrationManager.RegisterAsync(registration);
+        }
+
+        /// <summary>
+        /// Register a particular deviceToken with a template
+        /// </summary>
+        /// <param name="deviceToken">The deviceToken to register</param>
+        /// <param name="jsonTemplate">The string defining the json template</param>
+        /// <param name="expiry">The string defining the expiry template</param>
+        /// <param name="templateName">The template name</param>
+        /// <param name="tags">The tags to register to receive notifications from</param>
+        /// <returns>Task that completes when registration is complete</returns>
+        public Task RegisterTemplateAsync(NSData deviceToken, string jsonTemplate, string expiry, string templateName, IEnumerable<string> tags)
+        {
+            if (deviceToken == null)
             {
                 throw new ArgumentNullException("deviceToken");
             }
@@ -123,7 +200,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// DEBUG-ONLY: Unregister any registrations with given deviceToken
+        /// DEBUG-ONLY: PLEASE USE NSData overload of this method!! Unregister any registrations with given deviceToken
         /// </summary>
         /// <param name="deviceToken">The device token</param>
         /// <returns>Task that completes when unregister is complete</returns>
@@ -134,8 +211,22 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("deviceToken");
             }
 
-            deviceToken = deviceToken.ToUpperInvariant();
-            return this.RegistrationManager.DeleteRegistrationsForChannelAsync(deviceToken);
+            return this.RegistrationManager.DeleteRegistrationsForChannelAsync(ApnsRegistration.TrimDeviceToken(deviceToken));
+        }
+
+        /// <summary>
+        /// DEBUG-ONLY: Unregister any registrations with given deviceToken
+        /// </summary>
+        /// <param name="deviceToken">The device token</param>
+        /// <returns>Task that completes when unregister is complete</returns>
+        public Task UnregisterAllAsync(NSData deviceToken)
+        {
+            if (deviceToken == null)
+            {
+                throw new ArgumentNullException("deviceToken");
+            }
+
+            return this.RegistrationManager.DeleteRegistrationsForChannelAsync(ApnsRegistration.ParseDeviceToken(deviceToken));
         }
 
         /// <summary>
@@ -152,11 +243,21 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             if (string.IsNullOrWhiteSpace(registration.PushHandle))
             {
-                throw new ArgumentNullException("registration.deviceToken");
+                throw new ArgumentNullException("registration.PushHandle");
             }
 
-            registration.PushHandle = registration.PushHandle.ToUpperInvariant();
+            registration.PushHandle = ApnsRegistration.TrimDeviceToken(registration.PushHandle);
             return this.RegistrationManager.RegisterAsync(registration);
+        }
+
+        /// <summary>
+        /// DEBUG-ONLY: PLEASE USE NSData overload of this method!! List the registrations made with the service for a deviceToken
+        /// </summary>
+        /// <param name="deviceToken">The deviceToken to check for</param>
+        /// <returns>List of registrations</returns>
+        public Task<List<Registration>> ListRegistrationsAsync(string deviceToken)
+        {
+            return this.RegistrationManager.ListRegistrationsAsync(ApnsRegistration.TrimDeviceToken(deviceToken));
         }
 
         /// <summary>
@@ -164,10 +265,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         /// <param name="deviceToken">The deviceToken to check for</param>
         /// <returns>List of registrations</returns>
-        public Task<List<Registration>> ListRegistrationsAsync(string deviceToken)
+        public Task<List<Registration>> ListRegistrationsAsync(NSData deviceToken)
         {
-            deviceToken = deviceToken.ToUpperInvariant();
-            return this.RegistrationManager.ListRegistrationsAsync(deviceToken);
+            return this.RegistrationManager.ListRegistrationsAsync(ApnsRegistration.ParseDeviceToken(deviceToken));
         }
     }
 }
