@@ -1,3 +1,0 @@
-This directory should contain the following JARs:
-	- gson-2.2.2.jar
-	- guava-17.0.jar
