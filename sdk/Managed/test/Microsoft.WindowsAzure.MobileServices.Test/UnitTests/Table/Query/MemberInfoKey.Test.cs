@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using Microsoft.WindowsAzure.MobileServices.Query;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 
 namespace Microsoft.WindowsAzure.MobileServices.Test

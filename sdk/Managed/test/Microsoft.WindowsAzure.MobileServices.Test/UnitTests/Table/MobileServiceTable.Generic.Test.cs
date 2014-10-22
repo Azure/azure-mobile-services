@@ -29,10 +29,55 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             IMobileServiceTable<ToDo> table = service.GetTable<ToDo>();
 
-            await table.ReadAsync<ToDo>("http://wwww.contoso.com/about?$filter=a eq b&$orderby=c");
+            await table.ReadAsync<ToDo>("http://www.test.com/about?$filter=a eq b&$orderby=c");
 
             Assert.AreEqual("TT,LH", hijack.Request.Headers.GetValues("X-ZUMO-FEATURES").First());
-            Assert.AreEqual("http://wwww.contoso.com/about?$filter=a eq b&$orderby=c", hijack.Request.RequestUri.ToString());
+            Assert.AreEqual("http://www.test.com/about?$filter=a eq b&$orderby=c", hijack.Request.RequestUri.ToString());
+        }
+
+        [AsyncTestMethod]
+        public async Task ReadAsync_Throws_IfAbsoluteUriHostNameDoesNotMatch()
+        {
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", new TestHttpHandler());
+            IMobileServiceTable<ToDo> table = service.GetTable<ToDo>();
+
+            var ex = await AssertEx.Throws<ArgumentException>(async () => await table.ReadAsync<ToDo>("http://www.contoso.com/about?$filter=a eq b&$orderby=c"));
+
+            Assert.AreEqual(ex.Message, "The query uri must be on the same host as the Mobile Service.");
+        }
+
+        [AsyncTestMethod]
+        public async Task ReadAsync_WithRelativeUri_Generic()
+        {
+            var data = new[]
+            {
+                new 
+                {
+                    ServiceUri = "http://www.test.com", 
+                    QueryUri = "/about?$filter=a eq b&$orderby=c", 
+                    RequestUri = "http://www.test.com/about?$filter=a eq b&$orderby=c"
+                },
+                new 
+                {
+                    ServiceUri = "http://www.test.com/", 
+                    QueryUri = "/about?$filter=a eq b&$orderby=c", 
+                    RequestUri = "http://www.test.com/about?$filter=a eq b&$orderby=c"
+                }
+            };
+
+            foreach (var item in data)
+            {
+                var hijack = new TestHttpHandler();
+                hijack.SetResponseContent("[{\"col1\":\"Hey\"}]");
+                IMobileServiceClient service = new MobileServiceClient(item.ServiceUri, "secret...", hijack);
+
+                IMobileServiceTable<ToDo> table = service.GetTable<ToDo>();
+
+                await table.ReadAsync<ToDo>(item.QueryUri);
+
+                Assert.AreEqual("TT", hijack.Request.Headers.GetValues("X-ZUMO-FEATURES").First());
+                Assert.AreEqual(item.RequestUri, hijack.Request.RequestUri.ToString());
+            }
         }
 
         [AsyncTestMethod]
@@ -88,7 +133,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.SetResponseContent(response);
             if (!String.IsNullOrEmpty(link))
             {
-                hijack.Response.Headers.Add("Link", link);
+                hijack.Responses[0].Headers.Add("Link", link);
             }
             IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             IMobileServiceTable<ToDo> table = service.GetTable<ToDo>();
@@ -1466,7 +1511,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             IMobileServiceTable<StringType> table = service.GetTable<StringType>();
 
-            hijack.Response.StatusCode = HttpStatusCode.NotFound;
+            hijack.Response = TestHttpHandler.CreateResponse(String.Empty, HttpStatusCode.NotFound);
             InvalidOperationException expected = null;
 
             try
@@ -2520,6 +2565,36 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.Contains(hijack.Request.RequestUri.Query, "state=WY");
         }
 
+        [AsyncTestMethod]
+        public async Task UndeleteAsync()
+        {
+            TestHttpHandler hijack = new TestHttpHandler();
+
+            hijack.SetResponseContent("{\"id\":\"an id\",\"String\":\"Hey\"}");
+            hijack.OnSendingRequest = req =>
+            {
+                Assert.AreEqual(req.Method, HttpMethod.Post);
+                Assert.AreEqual(req.RequestUri.Query, "?__systemproperties=__createdAt%2C__updatedAt%2C__version%2C__deleted");
+                // only id and version should be sent
+                Assert.IsNull(req.Content);
+                Assert.AreEqual(req.Headers.IfMatch.First().Tag, "\"abc\"");
+                return Task.FromResult(req);
+            };
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+
+            IMobileServiceTable<ToDoWithSystemPropertiesType> table = service.GetTable<ToDoWithSystemPropertiesType>();
+
+            var obj = new ToDoWithSystemPropertiesType();
+            obj.Id = "an id";
+            obj.String = "new";
+            obj.Version = "abc";
+
+            await table.UndeleteAsync(obj, null);
+
+            Assert.AreEqual("an id", obj.Id);
+            Assert.AreEqual("Hey", obj.String);
+        }
+
         [TestMethod]
         public void CreateQueryGeneric()
         {
@@ -2529,6 +2604,24 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             IMobileServiceTableQuery<StringType> query = table.CreateQuery();
 
             Assert.IsNotNull(query);
+        }
+
+        [AsyncTestMethod]
+        public async Task IncludeDeleted()
+        {
+            TestHttpHandler hijack = new TestHttpHandler();
+            hijack.SetResponseContent("[{\"id\":12,\"String\":\"Hey\"}]");
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+
+            IMobileServiceTable<StringType> table = service.GetTable<StringType>();
+
+            List<StringType> people = await table.IncludeDeleted().ToListAsync();
+
+            Assert.Contains(hijack.Request.RequestUri.ToString(), "StringType");
+            Assert.Contains(hijack.Request.RequestUri.ToString(), "__includeDeleted=true");
+
+            Assert.AreEqual(12, people[0].Id);
+            Assert.AreEqual("Hey", people[0].String);
         }
 
         [AsyncTestMethod]

@@ -3,6 +3,7 @@
 // ----------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -17,46 +18,84 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     /// </summary>
     public class TestHttpHandler : DelegatingHandler
     {
+        HttpResponseMessage nullResponse;
+        int responseIndex = 0;
+
         public TestHttpHandler()
-        {
-            Response = new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent("", Encoding.UTF8, "application/json")
-            };
+        {            
+            this.Requests = new List<HttpRequestMessage>();
+            this.Responses = new List<HttpResponseMessage>();
+            this.RequestContents = new List<string>();
+
+            this.nullResponse = CreateResponse(String.Empty);
         }
 
-        public HttpRequestMessage Request { get; set; }
-        public HttpResponseMessage Response { get; set; }
+        public HttpRequestMessage Request
+        {
+            get { return this.Requests.Count == 0 ? null : this.Requests[this.Requests.Count - 1]; }
+            set
+            {
+                this.Requests.Clear();
+                this.Requests.Add(value);
+            }
+        }
+
+        public List<HttpRequestMessage> Requests { get; set; }
+        public List<string> RequestContents { get; set; }
+
+        public HttpResponseMessage Response
+        {
+            get { return this.Responses.Count == 0 ? null : this.Responses[this.Responses.Count - 1]; }
+            set
+            {
+                this.responseIndex = 0;
+                this.Responses.Clear();
+                this.Responses.Add(value);
+            }
+        }
+
+        public List<HttpResponseMessage> Responses { get; set; }        
 
         public Func<HttpRequestMessage, Task<HttpRequestMessage>> OnSendingRequest { get; set; }
 
         public void SetResponseContent(string content)
         {
-            this.Response = new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent(content, Encoding.UTF8, "application/json")
-            }; 
+            this.Response = CreateResponse(content); 
         }
 
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        public void AddResponseContent(string content)
         {
-            TaskCompletionSource<HttpResponseMessage> tcs = new TaskCompletionSource<HttpResponseMessage>();
+            this.Responses.Add(CreateResponse(content));
+        }
+
+        protected async override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            string content = request.Content == null ? null : await request.Content.ReadAsStringAsync();
+            this.RequestContents.Add(content);
 
             if (this.OnSendingRequest != null)
             {
-                this.OnSendingRequest(request).ContinueWith(t =>
-                {
-                    this.Request = t.Result;
-                    tcs.SetResult(this.Response);
-                });
+                this.Requests.Add(await this.OnSendingRequest(request));                
             }
             else
             {
-                this.Request = request;
-                tcs.SetResult(this.Response);
+                this.Requests.Add(request);                
             }
             
-            return tcs.Task;
+            if (responseIndex < this.Responses.Count)
+            {
+                return Responses[responseIndex++];
+            }
+
+            return nullResponse;
+        }
+
+        public static HttpResponseMessage CreateResponse(string content, HttpStatusCode code = HttpStatusCode.OK)
+        {
+            return new HttpResponseMessage(code)
+            {
+                Content = new StringContent(content, Encoding.UTF8, "application/json")
+            };
         }
 
     }

@@ -1,4 +1,44 @@
-# Microsoft Azure Mobile Services Change Log
+# Azure Mobile Services Change Log
+
+### Version 2.0
+**iOS SDK**
+- Added support for following link headers returned from the .NET backend
+- **[Breaking]** Changed MSReadQueryBlock to return MSQueryResult instead of items and totalCount
+
+### Version 1.3 beta2
+**Managed SDK**
+- Updated Nuget references
+- Request __deleted system property for sync
+- Default delta token set to 1970-01-01 for compatibility with Table Storage 
+- Expose protected methods from the MobileServiceSQLiteStore for intercepting sql
+- **[Breaking]** Expose a ReadOnlyCollection instead of IEnumerable from MobileServiceTableOperationError
+
+### Version 1.3 beta
+**Managed SDK**
+- Added support for incremental sync for .NET backend
+- Added support for byte[] properties in offline
+- Fixed issue with timezone roundtripping in incremental sync
+- Improved exception handling for 409 conflicts
+- Improved error handling for timeout errors during sync
+- Follow link headers returned from .NET backend and use skip and top for PullAsync()
+- Introduced the SupportedOptions enum on IMobileServiceSyncTable to configure the pull strategy
+- **[Breaking]** Do not Push changes on PurgeAsync() instead throw an exception
+- **[Breaking]** Renamed ToQueryString method to ToODataString on MobileServiceTableQueryDescription class
+
+### Version 1.3 alpha4
+**Managed SDK**
+- Added support for incremental sync (currently, for Mobile Services JavaScript backend only)
+- Added client support for soft delete
+- Added support for offline pull with query string
+
+### Version 1.3 alpha1
+**iOS SDK**
+- Added support for offline and sync
+
+**Managed SDK** 
+- Added support for offline and sync
+- Added support for soft delete
+
 ### Version 1.2.5
 **Managed SDK**
 - Updated to use a modified build of Xamarin.Auth that will not conflict with any user-included version of Xamarin.Auth

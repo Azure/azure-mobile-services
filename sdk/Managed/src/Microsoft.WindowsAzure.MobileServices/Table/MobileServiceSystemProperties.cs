@@ -17,7 +17,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// No system properties
         /// </summary>
         None = 0x0,
-
+        
         /// <summary>
         /// The __createdAt system property
         /// </summary>
@@ -32,6 +32,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// The __version system property
         /// </summary>
         Version = 0x4,
+
+        /// <summary>
+        /// The __deleted system property
+        /// </summary>
+        Deleted = 0x8,
 
         /// <summary>
         /// All of the system properties.

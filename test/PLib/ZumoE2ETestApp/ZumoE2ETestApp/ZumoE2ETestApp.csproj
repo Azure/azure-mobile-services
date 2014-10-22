@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\SQLitePCL.3.8.5.1\build\netcore45\SQLitePCL.props" Condition="Exists('..\packages\SQLitePCL.3.8.5.1\build\netcore45\SQLitePCL.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -16,6 +17,7 @@
     <PackageCertificateThumbprint>95C222AB50077111C7A45BF84761B4714ADF5B01</PackageCertificateThumbprint>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <NuGetPackageImportStamp>5d576a09</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -121,6 +123,8 @@
     <Compile Include="Tests\ExceptionTypeWhichWillNeverBeThrown.cs" />
     <Compile Include="Tests\TestStore.cs" />
     <Compile Include="Tests\Types\ICloneableItem.cs" />
+    <Compile Include="Tests\Types\OfflineReadyItem.cs" />
+    <Compile Include="Tests\Types\OfflineReadyItemNoVersion.cs" />
     <Compile Include="Tests\Types\StringIdRoundTripTableItem.cs" />
     <Compile Include="Tests\Types\Movie.cs" />
     <Compile Include="Tests\Types\RoundTripTableItem.cs" />
@@ -131,6 +135,7 @@
     </Compile>
     <Compile Include="Tests\ZumoLoginTests.cs" />
     <Compile Include="Tests\ZumoMiscTests.cs" />
+    <Compile Include="Tests\ZumoOfflineTests.cs" />
     <Compile Include="Tests\ZumoPushTests.cs" />
     <Compile Include="Tests\ZumoQueryTestData.cs" />
     <Compile Include="Tests\ZumoQueryTests.cs" />
@@ -158,9 +163,7 @@
       <SubType>Designer</SubType>
     </AppxManifest>
     <Content Include="Fonts\LiveSymbol.ttf" />
-    <None Include="packages.config">
-      <SubType>Designer</SubType>
-    </None>
+    <None Include="packages.config" />
     <None Include="ZumoE2ETestApp_StoreKey.pfx" />
     <None Include="ZumoE2ETestApp_TemporaryKey.pfx" />
   </ItemGroup>
@@ -207,35 +210,43 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\LiveSDK.5.6\WindowsXAML\Microsoft.Live.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.WindowsAzure.Mobile">
-      <HintPath>..\packages\WindowsAzure.MobileServices.1.2.3\lib\netcore45\Microsoft.WindowsAzure.Mobile.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAzure.Mobile, Version=1.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="Microsoft.WindowsAzure.Mobile, Version=1.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\WindowsAzure.MobileServices.1.2.3\lib\netcore45\Microsoft.WindowsAzure.Mobile.dll</HintPath>
+      <HintPath>..\packages\WindowsAzure.MobileServices.1.3.0-beta\lib\netcore45\Microsoft.WindowsAzure.Mobile.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.WindowsAzure.Mobile.Ext">
-      <HintPath>..\packages\WindowsAzure.MobileServices.1.2.3\lib\netcore45\Microsoft.WindowsAzure.Mobile.Ext.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAzure.Mobile.Ext, Version=1.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="Microsoft.WindowsAzure.Mobile.Ext, Version=1.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\WindowsAzure.MobileServices.1.2.3\lib\netcore45\Microsoft.WindowsAzure.Mobile.Ext.dll</HintPath>
+      <HintPath>..\packages\WindowsAzure.MobileServices.1.3.0-beta\lib\netcore45\Microsoft.WindowsAzure.Mobile.Ext.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAzure.Mobile.SQLiteStore, Version=1.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\WindowsAzure.MobileServices.SQLiteStore.1.0.0-beta\lib\portable-win+net45+wp8+wpa81+monotouch+monoandroid\Microsoft.WindowsAzure.Mobile.SQLiteStore.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.6.0.2\lib\netcore45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="System.Net.Http.Extensions">
-      <HintPath>..\packages\Microsoft.Net.Http.2.2.19\lib\win8\System.Net.Http.Extensions.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Net.Http.Extensions, Version=2.2.27.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.2\lib\netcore45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="SQLitePCL, Version=3.8.5.0, Culture=neutral, PublicKeyToken=bddade01e9c850c5, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\SQLitePCL.3.8.5.1\lib\netcore45\SQLitePCL.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.Extensions">
       <HintPath>..\packages\Microsoft.Net.Http.2.2.19\lib\win8\System.Net.Http.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http.Primitives">
       <HintPath>..\packages\Microsoft.Net.Http.2.2.19\lib\win8\System.Net.Http.Primitives.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <SDKReference Include="Microsoft.VCLibs, version=11.0">
+      <Name>Microsoft Visual C++ Runtime Package</Name>
+    </SDKReference>
+    <SDKReference Include="SQLite.WinRT, version=3.8.5">
+      <Name>SQLite for Windows Runtime</Name>
+    </SDKReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '11.0' ">
     <VisualStudioVersion>11.0</VisualStudioVersion>
@@ -247,6 +258,14 @@
     <Error Condition="!Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=317567." HelpKeyword="BCLBUILD2001" />
     <Error Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="The build restored NuGet packages. Build the project again to include these packages in the build. For more information, see http://go.microsoft.com/fwlink/?LinkID=317568." HelpKeyword="BCLBUILD2002" />
   </Target>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\SQLitePCL.3.8.5.1\build\netcore45\SQLitePCL.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SQLitePCL.3.8.5.1\build\netcore45\SQLitePCL.props'))" />
+    <Error Condition="!Exists('..\packages\SQLitePCL.3.8.5.1\build\netcore45\SQLitePCL.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SQLitePCL.3.8.5.1\build\netcore45\SQLitePCL.targets'))" />
+  </Target>
+  <Import Project="..\packages\SQLitePCL.3.8.5.1\build\netcore45\SQLitePCL.targets" Condition="Exists('..\packages\SQLitePCL.3.8.5.1\build\netcore45\SQLitePCL.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

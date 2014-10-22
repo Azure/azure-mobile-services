@@ -51,6 +51,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         IMobileServiceTableQuery<T> IncludeTotalCount();
 
         /// <summary>
+        /// Ensure the query will get the deleted records.
+        /// </summary>
+        /// <returns>
+        /// The query object.
+        /// </returns>
+        IMobileServiceTableQuery<T> IncludeDeleted();
+
+        /// <summary>
         /// Applies the specified ascending order clause to the source query.
         /// </summary>
         /// <typeparam name="TKey">

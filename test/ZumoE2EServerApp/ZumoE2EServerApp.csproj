@@ -41,13 +41,16 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Autofac">
+    <Reference Include="Autofac, Version=3.5.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\PLib\ZumoE2ETestApp\packages\Autofac.3.5.0\lib\net40\Autofac.dll</HintPath>
     </Reference>
-    <Reference Include="AutoMapper">
+    <Reference Include="AutoMapper, Version=3.2.1.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\PLib\ZumoE2ETestApp\packages\AutoMapper.3.2.1\lib\net40\AutoMapper.dll</HintPath>
     </Reference>
-    <Reference Include="AutoMapper.Net4">
+    <Reference Include="AutoMapper.Net4, Version=3.2.1.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\PLib\ZumoE2ETestApp\packages\AutoMapper.3.2.1\lib\net40\AutoMapper.Net4.dll</HintPath>
     </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
@@ -76,17 +79,16 @@
       <Private>True</Private>
       <HintPath>..\PLib\ZumoE2ETestApp\packages\Microsoft.Data.OData.5.6.0\lib\net40\Microsoft.Data.OData.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Owin">
+    <Reference Include="Microsoft.Owin, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\PLib\ZumoE2ETestApp\packages\Microsoft.Owin.2.1.0\lib\net45\Microsoft.Owin.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Owin.Host.SystemWeb">
-      <HintPath>..\PLib\ZumoE2ETestApp\packages\Microsoft.Owin.Host.SystemWeb.2.1.0\lib\net45\Microsoft.Owin.Host.SystemWeb.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Owin.Security, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\PLib\ZumoE2ETestApp\packages\Microsoft.Owin.Security.2.1.0\lib\net45\Microsoft.Owin.Security.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Owin.Security.ActiveDirectory">
+    <Reference Include="Microsoft.Owin.Security.ActiveDirectory, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\PLib\ZumoE2ETestApp\packages\Microsoft.Owin.Security.ActiveDirectory.2.1.0\lib\net45\Microsoft.Owin.Security.ActiveDirectory.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Owin.Security.Cookies, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -101,7 +103,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\PLib\ZumoE2ETestApp\packages\Microsoft.Owin.Security.Google.2.1.0\lib\net45\Microsoft.Owin.Security.Google.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Owin.Security.Jwt">
+    <Reference Include="Microsoft.Owin.Security.Jwt, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\PLib\ZumoE2ETestApp\packages\Microsoft.Owin.Security.Jwt.2.1.0\lib\net45\Microsoft.Owin.Security.Jwt.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Owin.Security.MicrosoftAccount, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -119,23 +122,33 @@
     <Reference Include="Microsoft.ServiceBus, Version=2.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\PLib\ZumoE2ETestApp\packages\WindowsAzure.ServiceBus.2.3.4.0\lib\net40-full\Microsoft.ServiceBus.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Threading.Tasks">
+      <HintPath>..\PLib\ZumoE2ETestApp\packages\Microsoft.Bcl.Async.1.0.16\lib\net45\Microsoft.Threading.Tasks.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Threading.Tasks.Extensions">
+      <HintPath>..\PLib\ZumoE2ETestApp\packages\Microsoft.Bcl.Async.1.0.16\lib\net45\Microsoft.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.WindowsAzure.Configuration, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\PLib\ZumoE2ETestApp\packages\Microsoft.WindowsAzure.ConfigurationManager.2.0.3\lib\net40\Microsoft.WindowsAzure.Configuration.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.WindowsAzure.Mobile.Service">
-      <HintPath>..\PLib\ZumoE2ETestApp\packages\WindowsAzure.MobileServices.Backend.1.0.342\lib\net45\Microsoft.WindowsAzure.Mobile.Service.dll</HintPath>
+    <Reference Include="Microsoft.WindowsAzure.Mobile.Service, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\PLib\ZumoE2ETestApp\packages\WindowsAzure.MobileServices.Backend.1.0.348\lib\net45\Microsoft.WindowsAzure.Mobile.Service.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.WindowsAzure.Mobile.Service.Entity">
-      <HintPath>..\PLib\ZumoE2ETestApp\packages\WindowsAzure.MobileServices.Backend.Entity.1.0.342\lib\net45\Microsoft.WindowsAzure.Mobile.Service.Entity.dll</HintPath>
+    <Reference Include="Microsoft.WindowsAzure.Mobile.Service.Entity, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\PLib\ZumoE2ETestApp\packages\WindowsAzure.MobileServices.Backend.Entity.1.0.348\lib\net45\Microsoft.WindowsAzure.Mobile.Service.Entity.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.WindowsAzure.Mobile.Service.Tables">
-      <HintPath>..\PLib\ZumoE2ETestApp\packages\WindowsAzure.MobileServices.Backend.Tables.1.0.342\lib\net45\Microsoft.WindowsAzure.Mobile.Service.Tables.dll</HintPath>
+    <Reference Include="Microsoft.WindowsAzure.Mobile.Service.Tables, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\PLib\ZumoE2ETestApp\packages\WindowsAzure.MobileServices.Backend.Tables.1.0.348\lib\net45\Microsoft.WindowsAzure.Mobile.Service.Tables.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\PLib\ZumoE2ETestApp\packages\Newtonsoft.Json.6.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="Owin">
+    <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\PLib\ZumoE2ETestApp\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
     </Reference>
     <Reference Include="RazorEngine, Version=3.4.1.0, Culture=neutral, PublicKeyToken=9ee697374c7e744a, processorArchitecture=MSIL">
@@ -151,6 +164,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\PLib\ZumoE2ETestApp\packages\System.IdentityModel.Tokens.Jwt.1.0.0\lib\net45\System.IdentityModel.Tokens.Jwt.dll</HintPath>
     </Reference>
+    <Reference Include="System.Net" />
     <Reference Include="System.Net.Http.Formatting, Version=5.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\PLib\ZumoE2ETestApp\packages\Microsoft.AspNet.WebApi.Client.5.1.2\lib\net45\System.Net.Http.Formatting.dll</HintPath>
@@ -162,7 +176,8 @@
       <Private>True</Private>
       <HintPath>..\PLib\ZumoE2ETestApp\packages\System.Spatial.5.6.0\lib\net40\System.Spatial.dll</HintPath>
     </Reference>
-    <Reference Include="System.Web.Cors">
+    <Reference Include="System.Web.Cors, Version=5.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\PLib\ZumoE2ETestApp\packages\Microsoft.AspNet.Cors.5.1.2\lib\net45\System.Web.Cors.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.DynamicData" />
@@ -175,7 +190,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\PLib\ZumoE2ETestApp\packages\Microsoft.AspNet.WebApi.Core.5.1.2\lib\net45\System.Web.Http.dll</HintPath>
     </Reference>
-    <Reference Include="System.Web.Http.Cors">
+    <Reference Include="System.Web.Http.Cors, Version=5.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\PLib\ZumoE2ETestApp\packages\Microsoft.AspNet.WebApi.Cors.5.1.2\lib\net45\System.Web.Http.Cors.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Http.OData, Version=5.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -211,7 +227,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Controllers\RuntimeInfoController.cs" />
+    <Compile Include="Controllers\OfflineReadyController.cs" />
     <Compile Include="Controllers\W8JSRoundTripTableController.cs" />
+    <Compile Include="DataObjects\OfflineReady.cs" />
     <Compile Include="DataObjects\ParamsTestTableEntity.cs" />
     <Compile Include="DataObjects\W8JSRoundTripTableItem.cs" />
     <Compile Include="DataObjects\W8PushTestEntity.cs" />
@@ -272,6 +290,9 @@
       <SubType>Designer</SubType>
     </Content>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Performance\Microsoft.ServiceBus.MessagingPerformanceCounters.man" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
@@ -301,8 +322,12 @@
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Import Project="packages\AutoMapper.3.2.0\tools\AutoMapper.targets" Condition="Exists('packages\AutoMapper.3.2.0\tools\AutoMapper.targets')" />
   <Import Project="..\PLib\ZumoE2ETestApp\packages\AutoMapper.3.2.1\tools\AutoMapper.targets" Condition="Exists('..\PLib\ZumoE2ETestApp\packages\AutoMapper.3.2.1\tools\AutoMapper.targets')" />
+  <Import Project="..\PLib\ZumoE2ETestApp\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\PLib\ZumoE2ETestApp\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />
+  <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">
+    <Error Condition="!Exists('..\PLib\ZumoE2ETestApp\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=317567." HelpKeyword="BCLBUILD2001" />
+    <Error Condition="Exists('..\PLib\ZumoE2ETestApp\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="The build restored NuGet packages. Build the project again to include these packages in the build. For more information, see http://go.microsoft.com/fwlink/?LinkID=317568." HelpKeyword="BCLBUILD2002" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

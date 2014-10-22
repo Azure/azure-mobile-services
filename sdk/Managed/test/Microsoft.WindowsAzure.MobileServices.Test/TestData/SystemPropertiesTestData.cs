@@ -14,19 +14,22 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public static MobileServiceSystemProperties[] SystemProperties = new MobileServiceSystemProperties[] {
             MobileServiceSystemProperties.None,
             MobileServiceSystemProperties.All,
+            MobileServiceSystemProperties.CreatedAt | MobileServiceSystemProperties.UpdatedAt | MobileServiceSystemProperties.Version, MobileServiceSystemProperties.Deleted,
             MobileServiceSystemProperties.CreatedAt | MobileServiceSystemProperties.UpdatedAt | MobileServiceSystemProperties.Version,
             MobileServiceSystemProperties.CreatedAt | MobileServiceSystemProperties.UpdatedAt,
             MobileServiceSystemProperties.UpdatedAt | MobileServiceSystemProperties.Version,
             MobileServiceSystemProperties.Version | MobileServiceSystemProperties.CreatedAt,
             MobileServiceSystemProperties.CreatedAt,
             MobileServiceSystemProperties.UpdatedAt,
-            MobileServiceSystemProperties.Version
+            MobileServiceSystemProperties.Version,
+            MobileServiceSystemProperties.Deleted
         };
 
         public static string[] ValidSystemProperties = new string[] {
             "__createdAt",
             "__updatedAt",
             "__version",
+            "__deleted",
             "__CreatedAt",
             "__futureSystemProperty"
         };
@@ -36,6 +39,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             "createdAt",
             "updatedAt",
             "version",
+            "deleted",
             "_createdAt",
             "_updatedAt",
             "_version",
@@ -50,6 +54,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             "__systemProperties=__createdAt,__version",
             "__systemProperties=__createdAt,__updatedAt,__version",
             "__systemProperties=__createdAt,__version,__updatedAt",
+            "__systemProperties=__createdAt,__version,__updatedAt,__deleted",
             "__systemProperties=__updatedAt",
             "__systemProperties=__updatedAt,__createdAt",
             "__systemProperties=__updatedAt,__createdAt,__version",

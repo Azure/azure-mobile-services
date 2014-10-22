@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZumoE2ETestApp", "ZumoE2ETestApp\ZumoE2ETestApp.csproj", "{B39A075E-B376-4413-9ABE-FF948F0D1F05}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{F1DF3205-49D4-412A-892C-9A8A41F387DA}"
@@ -27,9 +29,9 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B39A075E-B376-4413-9ABE-FF948F0D1F05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B39A075E-B376-4413-9ABE-FF948F0D1F05}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B39A075E-B376-4413-9ABE-FF948F0D1F05}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{B39A075E-B376-4413-9ABE-FF948F0D1F05}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{B39A075E-B376-4413-9ABE-FF948F0D1F05}.Debug|Any CPU.Build.0 = Debug|x86
+		{B39A075E-B376-4413-9ABE-FF948F0D1F05}.Debug|Any CPU.Deploy.0 = Debug|x86
 		{B39A075E-B376-4413-9ABE-FF948F0D1F05}.Debug|ARM.ActiveCfg = Debug|ARM
 		{B39A075E-B376-4413-9ABE-FF948F0D1F05}.Debug|ARM.Build.0 = Debug|ARM
 		{B39A075E-B376-4413-9ABE-FF948F0D1F05}.Debug|ARM.Deploy.0 = Debug|ARM

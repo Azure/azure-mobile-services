@@ -95,7 +95,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Generic are not nested when used via async.")]
         public async Task<IEnumerable<U>> ReadAsync<U>(string query)
         {
-            QueryResult result = await base.ReadAsync(query, null, MobileServiceFeatures.TypedTable | MobileServiceFeatures.ReadWithLinkHeader);
+            QueryResult result = await base.ReadAsync(query, null, MobileServiceFeatures.TypedTable);
 
             return new QueryResultEnumerable<U>(
                 result.TotalCount,
@@ -191,6 +191,40 @@ namespace Microsoft.WindowsAzure.MobileServices
 
 
             serializer.Deserialize<T>(updatedValue, instance);
+        }
+
+        /// <summary>
+        /// Undeletes an <paramref name="instance"/> from the table.
+        /// </summary>
+        /// <param name="instance">The instance to undelete from the table.</param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in 
+        /// the request URI query string.
+        /// </param>
+        /// <returns>A task that will complete when the undelete finishes.</returns>
+        public async Task UndeleteAsync(T instance, IDictionary<string, string> parameters)
+        {
+            if (instance == null)
+            {
+                throw new ArgumentNullException("instance");
+            }
+
+            MobileServiceSerializer serializer = this.MobileServiceClient.Serializer;
+            JObject value = serializer.Serialize(instance) as JObject;
+
+            JToken updatedValue = await TransformHttpException(serializer, () => this.UndeleteAsync(value, parameters, MobileServiceFeatures.TypedTable));
+
+            serializer.Deserialize<T>(updatedValue, instance);
+        }
+
+        /// <summary>
+        /// Undeletes an <paramref name="instance"/> from the table.
+        /// </summary>
+        /// <param name="instance">The instance to undelete from the table.</param>
+        /// <returns>A task that will complete when the undelete finishes.</returns>
+        public Task UndeleteAsync(T instance)
+        {
+            return this.UndeleteAsync(instance, null);
         }
 
         /// <summary>
@@ -336,7 +370,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public IMobileServiceTableQuery<T> CreateQuery()
         {
-            return this.queryProvider.Create(this, new T[0].AsQueryable(), new Dictionary<string, string>(), false);
+            return this.queryProvider.Create(this, new T[0].AsQueryable(), new Dictionary<string, string>(), includeTotalCount: false);
         }
 
         /// <summary>
@@ -487,6 +521,17 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
+        /// Creates a query that will ensure it gets the deleted records.
+        /// </summary>
+        /// <returns>
+        /// A query against the table.
+        /// </returns>
+        public IMobileServiceTableQuery<T> IncludeDeleted()
+        {
+            return this.CreateQuery().IncludeDeleted();
+        }
+
+        /// <summary>
         /// Applies to the source query the specified string key-value 
         /// pairs to be used as user-defined parameters with the request URI 
         /// query string.
@@ -585,7 +630,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 CultureInfo.InvariantCulture,
                 "$filter=({0} eq {1})",
                 MobileServiceSystemColumns.Id,
-                FilterBuildingExpressionVisitor.ToODataConstant(id));
+                ODataExpressionVisitor.ToODataConstant(id));
 
             // Send the query
             QueryResult response = await this.ReadAsync(query, parameters, MobileServiceFeatures.TypedTable);

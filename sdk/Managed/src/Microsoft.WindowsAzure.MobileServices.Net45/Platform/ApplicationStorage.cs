@@ -113,9 +113,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                     using (IsolatedStorageFileStream fileStream = isoStore.OpenFile(string.Concat(this.StoragePrefix, name), FileMode.OpenOrCreate, FileAccess.Write))
                     {
                         using (var writer = new StreamWriter(fileStream))
-                        {
-                            writer.WriteLine(value.ToString());
-                        }
+                        writer.WriteLine(value.ToString());
                     }
                 }
             }

@@ -24,15 +24,15 @@ Imports Newtonsoft.Json
                                                      Select p)
         Assert.AreEqual("Product", query.TableName)
         Assert.AreEqual(1, query.Ordering.Count)
-        Assert.AreEqual("Price", query.Ordering(0).Key)
-        Assert.IsTrue(query.Ordering(0).Value)
+        Assert.AreEqual("Price", DirectCast(query.Ordering(0).Expression, MemberAccessNode).MemberName)
+        Assert.AreEqual(OrderByDirection.Ascending, query.Ordering(0).Direction)
 
         ' Chaining
         query = Compile(Of Product, Product)(Function(table) _
                                                      table.OrderBy(Function(p) p.Price))
         Assert.AreEqual(1, query.Ordering.Count)
-        Assert.AreEqual("Price", query.Ordering(0).Key)
-        Assert.IsTrue(query.Ordering(0).Value)
+        Assert.AreEqual("Price", DirectCast(query.Ordering(0).Expression, MemberAccessNode).MemberName)
+        Assert.AreEqual(OrderByDirection.Ascending, query.Ordering(0).Direction)
 
         ' Query syntax descending
         query = Compile(Of Product, Product)(Function(table) _
@@ -40,15 +40,15 @@ Imports Newtonsoft.Json
                                                      Order By p.Price Descending _
                                                      Select p)
         Assert.AreEqual(1, query.Ordering.Count)
-        Assert.AreEqual("Price", query.Ordering(0).Key)
-        Assert.IsFalse(query.Ordering(0).Value)
+        Assert.AreEqual("Price", DirectCast(query.Ordering(0).Expression, MemberAccessNode).MemberName)
+        Assert.AreEqual(OrderByDirection.Descending, query.Ordering(0).Direction)
 
         ' Chaining descending
         query = Compile(Of Product, Product)(Function(table) _
                                                      table.OrderByDescending(Function(p) p.Price))
         Assert.AreEqual(1, query.Ordering.Count)
-        Assert.AreEqual("Price", query.Ordering(0).Key)
-        Assert.IsFalse(query.Ordering(0).Value)
+        Assert.AreEqual("Price", DirectCast(query.Ordering(0).Expression, MemberAccessNode).MemberName)
+        Assert.AreEqual(OrderByDirection.Descending, query.Ordering(0).Direction)
 
         ' Query syntax with multiple
         query = Compile(Of Product, Product)(Function(table) _
@@ -56,19 +56,19 @@ Imports Newtonsoft.Json
                                                      Order By p.Price Ascending, p.Name Descending _
                                                      Select p)
         Assert.AreEqual(2, query.Ordering.Count)
-        Assert.AreEqual("Price", query.Ordering(0).Key)
-        Assert.IsTrue(query.Ordering(0).Value)
-        Assert.AreEqual("Name", query.Ordering(1).Key)
-        Assert.IsFalse(query.Ordering(1).Value)
+        Assert.AreEqual("Price", DirectCast(query.Ordering(0).Expression, MemberAccessNode).MemberName)
+        Assert.AreEqual(OrderByDirection.Ascending, query.Ordering(0).Direction)
+        Assert.AreEqual("Name", DirectCast(query.Ordering(1).Expression, MemberAccessNode).MemberName)
+        Assert.AreEqual(OrderByDirection.Descending, query.Ordering(1).Direction)
 
         ' Chaining with multiple
         query = Compile(Of Product, Product)(Function(table) _
                                                  table.OrderBy(Function(p) p.Price).ThenByDescending(Function(p) p.Name))
         Assert.AreEqual(2, query.Ordering.Count)
-        Assert.AreEqual("Price", query.Ordering(0).Key)
-        Assert.IsTrue(query.Ordering(0).Value)
-        Assert.AreEqual("Name", query.Ordering(1).Key)
-        Assert.IsFalse(query.Ordering(1).Value)
+        Assert.AreEqual("Price", DirectCast(query.Ordering(0).Expression, MemberAccessNode).MemberName)
+        Assert.AreEqual(OrderByDirection.Ascending, query.Ordering(0).Direction)
+        Assert.AreEqual("Name", DirectCast(query.Ordering(1).Expression, MemberAccessNode).MemberName)
+        Assert.AreEqual(OrderByDirection.Descending, query.Ordering(1).Direction)
     End Sub
 
     <TestMethod> Public Sub Projection()
@@ -154,78 +154,78 @@ Imports Newtonsoft.Json
                                                      From p In table _
                                                      Where p.Price > 50 _
                                                      Select p)
-        Assert.AreEqual("(Price gt 50M)", query.Filter)
+        Assert.AreEqual("(Price gt 50M)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                  table.Where(Function(p) p.Price > 50))
-        Assert.AreEqual("(Price gt 50M)", query.Filter)
+        Assert.AreEqual("(Price gt 50M)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         ' Less than, float value
         query = Compile(Of Product, Product)(Function(table) _
                                                      From p In table _
                                                      Where p.Weight < 10 _
                                                      Select p)
-        Assert.AreEqual("(Weight lt 10f)", query.Filter)
+        Assert.AreEqual("(Weight lt 10f)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                  table.Where(Function(p) p.Weight < 10))
-        Assert.AreEqual("(Weight lt 10f)", query.Filter)
+        Assert.AreEqual("(Weight lt 10f)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         ' Less than or equal, equal, And/AndAlso
         query = Compile(Of Product, Product)(Function(table) _
                                                      From p In table _
                                                      Where p.Weight <= 10 And p.InStock = True _
                                                      Select p)
-        Assert.AreEqual("((Weight le 10f) and (InStock eq true))", query.Filter)
+        Assert.AreEqual("((Weight le 10f) and (InStock eq true))", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                  table.Where(Function(p) p.Weight <= 10 AndAlso p.InStock = True))
-        Assert.AreEqual("((Weight le 10f) and (InStock eq true))", query.Filter)
+        Assert.AreEqual("((Weight le 10f) and (InStock eq true))", ODataExpressionVisitor.ToODataString(query.Filter))
 
         ' Less than or equal, equal, Or/OrElse
         query = Compile(Of Product, Product)(Function(table) _
                                                      From p In table _
                                                      Where p.Weight <= 10 Or p.InStock = True _
                                                      Select p)
-        Assert.AreEqual("((Weight le 10f) or (InStock eq true))", query.Filter)
+        Assert.AreEqual("((Weight le 10f) or (InStock eq true))", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                  table.Where(Function(p) p.Weight <= 10 OrElse p.InStock))
-        Assert.AreEqual("((Weight le 10f) or InStock)", query.Filter)
+        Assert.AreEqual("((Weight le 10f) or InStock)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         'boolean not
         query = Compile(Of Product, Product)(Function(table) _
                                                      From p In table _
                                                      Where Not p.InStock _
                                                      Select p)
-        Assert.AreEqual("not(InStock)", query.Filter)
+        Assert.AreEqual("not(InStock)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                  table.Where(Function(p) Not p.InStock))
-        Assert.AreEqual("not(InStock)", query.Filter)
+        Assert.AreEqual("not(InStock)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         ' Allow New operations
         Dim foo As Single = 10
         query = Compile(Of Product, Product)(Function(table) _
                                                  table.Where(Function(p) p.Weight <= New Product() With {.Weight = foo}.Weight Or p.InStock = True))
-        Assert.AreEqual("((Weight le 10f) or (InStock eq true))", query.Filter)
+        Assert.AreEqual("((Weight le 10f) or (InStock eq true))", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                          table.Where(Function(p) p.Weight <= New Product(15) With {.Weight = foo}.Weight Or p.InStock = True))
-        Assert.AreEqual("((Weight le 10f) or (InStock eq true))", query.Filter)
+        Assert.AreEqual("((Weight le 10f) or (InStock eq true))", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                          table.Where(Function(p) p.Weight <= New Product(15) With {.Weight = 10}.Weight Or p.InStock = True))
-        Assert.AreEqual("((Weight le 10f) or (InStock eq true))", query.Filter)
+        Assert.AreEqual("((Weight le 10f) or (InStock eq true))", ODataExpressionVisitor.ToODataString(query.Filter))
 
         Dim id As Long = 15
         query = Compile(Of Product, Product)(Function(table) _
                                          table.Where(Function(p) p.Weight <= New Product(id) With {.Weight = 10}.Weight Or p.InStock = True))
-        Assert.AreEqual("((Weight le 10f) or (InStock eq true))", query.Filter)
+        Assert.AreEqual("((Weight le 10f) or (InStock eq true))", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                  table.Where(Function(p) p.Created = New DateTime(1994, 10, 14, 0, 0, 0, DateTimeKind.Utc)))
-        Assert.AreEqual("(Created eq datetime'1994-10-14T00%3A00%3A00.000Z')", query.Filter)
+        Assert.AreEqual("(Created eq datetime'1994-10-14T00%3A00%3A00.000Z')", ODataExpressionVisitor.ToODataString(query.Filter))
     End Sub
 
     <TestMethod> Public Sub CombinedQuery()
@@ -246,7 +246,7 @@ Imports Newtonsoft.Json
                                                      .Skip(20) _
                                                      .Take(10))
         Assert.AreEqual( _
-            "$filter=((Price le 10M) and (Weight gt 10f)) and not(InStock)&$orderby=Price desc,Name&$skip=20&$top=10&$select=Name,Price,Weight,WeightInKG", _
+            "$filter=(((Price le 10M) and (Weight gt 10f)) and not(InStock))&$orderby=Price desc,Name&$skip=20&$top=10&$select=Name,Price,Weight,WeightInKG", _
             query.ToODataString())
     End Sub
 
@@ -255,43 +255,43 @@ Imports Newtonsoft.Json
                                                     From p In table _
                                                     Where p.Name + "x" = "mx" _
                                                     Select p)
-        Assert.AreEqual("(concat(Name,'x') eq 'mx')", query.Filter)
+        Assert.AreEqual("(concat(Name,'x') eq 'mx')", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                             From p In table _
                                                             Where p.Weight + 1.0 = 10 _
                                                             Select p)
-        Assert.AreEqual("((Weight add 1.0) eq 10.0)", query.Filter)
+        Assert.AreEqual("((Weight add 1.0) eq 10.0)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                             From p In table _
                                                             Where p.Weight - 1.0 = 10 _
                                                             Select p)
-        Assert.AreEqual("((Weight sub 1.0) eq 10.0)", query.Filter)
+        Assert.AreEqual("((Weight sub 1.0) eq 10.0)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                             From p In table _
                                                             Where p.Weight * 2.0 = 10 _
                                                             Select p)
-        Assert.AreEqual("((Weight mul 2.0) eq 10.0)", query.Filter)
+        Assert.AreEqual("((Weight mul 2.0) eq 10.0)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                             From p In table _
                                                             Where p.Weight / 2.0 = 10 _
                                                             Select p)
-        Assert.AreEqual("((Weight div 2.0) eq 10.0)", query.Filter)
+        Assert.AreEqual("((Weight div 2.0) eq 10.0)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                             From p In table _
                                                             Where p.Id Mod 2 = 1 _
                                                             Select p)
-        Assert.AreEqual("((id mod 2L) eq 1L)", query.Filter)
+        Assert.AreEqual("((id mod 2L) eq 1L)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                             From p In table _
                                                             Where (p.Weight * 2.0) / 3.0 + 1.0 = 10 _
                                                             Select p)
-        Assert.AreEqual("((((Weight mul 2.0) div 3.0) add 1.0) eq 10.0)", query.Filter)
+        Assert.AreEqual("((((Weight mul 2.0) div 3.0) add 1.0) eq 10.0)", ODataExpressionVisitor.ToODataString(query.Filter))
     End Sub
 
     <TestMethod> Public Sub FilterMethods()
@@ -300,191 +300,191 @@ Imports Newtonsoft.Json
                                                             From p In table _
                                                             Where p.Name.Length = 7 _
                                                             Select p)
-        Assert.AreEqual("(length(Name) eq 7)", query.Filter)
+        Assert.AreEqual("(length(Name) eq 7)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where p.Created.Day = 7
                                                     Select p)
-        Assert.AreEqual("(day(Created) eq 7)", query.Filter)
+        Assert.AreEqual("(day(Created) eq 7)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where p.Created.Month = 7
                                                     Select p)
-        Assert.AreEqual("(month(Created) eq 7)", query.Filter)
+        Assert.AreEqual("(month(Created) eq 7)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where p.Created.Year = 7
                                                     Select p)
-        Assert.AreEqual("(year(Created) eq 7)", query.Filter)
+        Assert.AreEqual("(year(Created) eq 7)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where p.Created.Hour = 7
                                                     Select p)
-        Assert.AreEqual("(hour(Created) eq 7)", query.Filter)
+        Assert.AreEqual("(hour(Created) eq 7)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where p.Created.Minute = 7
                                                     Select p)
-        Assert.AreEqual("(minute(Created) eq 7)", query.Filter)
+        Assert.AreEqual("(minute(Created) eq 7)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where p.Created.Second = 7
                                                     Select p)
-        Assert.AreEqual("(second(Created) eq 7)", query.Filter)
+        Assert.AreEqual("(second(Created) eq 7)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         ' Static methods
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where Math.Floor(p.Weight) = 10 _
                                                     Select p)
-        Assert.AreEqual("(floor(Weight) eq 10.0)", query.Filter)
+        Assert.AreEqual("(floor(Weight) eq 10.0)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where Decimal.Floor(p.Price) = 10 _
                                                     Select p)
-        Assert.AreEqual("(floor(Price) eq 10M)", query.Filter)
+        Assert.AreEqual("(floor(Price) eq 10M)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where Math.Ceiling(p.Weight) = 10 _
                                                     Select p)
-        Assert.AreEqual("(ceiling(Weight) eq 10.0)", query.Filter)
+        Assert.AreEqual("(ceiling(Weight) eq 10.0)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where Decimal.Ceiling(p.Price) = 10 _
                                                     Select p)
-        Assert.AreEqual("(ceiling(Price) eq 10M)", query.Filter)
+        Assert.AreEqual("(ceiling(Price) eq 10M)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where Math.Round(p.Weight) = 10 _
                                                     Select p)
-        Assert.AreEqual("(round(Weight) eq 10.0)", query.Filter)
+        Assert.AreEqual("(round(Weight) eq 10.0)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where Math.Round(p.Price) = 10 _
                                                     Select p)
-        Assert.AreEqual("(round(Price) eq 10M)", query.Filter)
+        Assert.AreEqual("(round(Price) eq 10M)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where String.Concat(p.Name, "x") = "mx" _
                                                     Select p)
-        Assert.AreEqual("(concat(Name,'x') eq 'mx')", query.Filter)
+        Assert.AreEqual("(concat(Name,'x') eq 'mx')", ODataExpressionVisitor.ToODataString(query.Filter))
 
         ' Instance methods
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where p.Name.ToLower() = "a" _
                                                     Select p)
-        Assert.AreEqual("(tolower(Name) eq 'a')", query.Filter)
+        Assert.AreEqual("(tolower(Name) eq 'a')", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where p.Name.ToLowerInvariant() = "a" _
                                                     Select p)
-        Assert.AreEqual("(tolower(Name) eq 'a')", query.Filter)
+        Assert.AreEqual("(tolower(Name) eq 'a')", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where p.Name.ToUpper() = "A" _
                                                     Select p)
-        Assert.AreEqual("(toupper(Name) eq 'A')", query.Filter)
+        Assert.AreEqual("(toupper(Name) eq 'A')", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where p.Name.ToUpperInvariant() = "A" _
                                                     Select p)
-        Assert.AreEqual("(toupper(Name) eq 'A')", query.Filter)
+        Assert.AreEqual("(toupper(Name) eq 'A')", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where p.Name.Trim() = "a" _
                                                     Select p)
-        Assert.AreEqual("(trim(Name) eq 'a')", query.Filter)
+        Assert.AreEqual("(trim(Name) eq 'a')", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where p.Name.StartsWith("x") _
                                                     Select p)
-        Assert.AreEqual("startswith(Name,'x')", query.Filter)
+        Assert.AreEqual("startswith(Name,'x')", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where p.Name.EndsWith("x") _
                                                     Select p)
-        Assert.AreEqual("endswith(Name,'x')", query.Filter)
+        Assert.AreEqual("endswith(Name,'x')", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where p.Name.IndexOf("foo") = 2 _
                                                     Select p)
-        Assert.AreEqual("(indexof(Name,'foo') eq 2)", query.Filter)
+        Assert.AreEqual("(indexof(Name,'foo') eq 2)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         Dim c As Char = "x"c
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where p.Name.IndexOf(c) = 2 _
                                                     Select p)
-        Assert.AreEqual("(indexof(Name,'x') eq 2)", query.Filter)
+        Assert.AreEqual("(indexof(Name,'x') eq 2)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where p.Name.Contains("bar") _
                                                     Select p)
-        Assert.AreEqual("substringof('bar',Name)", query.Filter)
+        Assert.AreEqual("substringof('bar',Name)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where p.Name.Replace("a"c, "A"c) = "ABBA" _
                                                     Select p)
-        Assert.AreEqual("(replace(Name,'a','A') eq 'ABBA')", query.Filter)
+        Assert.AreEqual("(replace(Name,'a','A') eq 'ABBA')", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where p.Name.Replace("a", "A") = "ABBA" _
                                                     Select p)
-        Assert.AreEqual("(replace(Name,'a','A') eq 'ABBA')", query.Filter)
+        Assert.AreEqual("(replace(Name,'a','A') eq 'ABBA')", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where p.Name.Substring(6) = "world" _
                                                     Select p)
-        Assert.AreEqual("(substring(Name,6) eq 'world')", query.Filter)
+        Assert.AreEqual("(substring(Name,6) eq 'world')", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where p.Name.Substring(2, 3) = "llo" _
                                                     Select p)
-        Assert.AreEqual("(substring(Name,2,3) eq 'llo')", query.Filter)
+        Assert.AreEqual("(substring(Name,2,3) eq 'llo')", ODataExpressionVisitor.ToODataString(query.Filter))
 
         ' Verify each type works on nested expressions too
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where (p.Name + "x").Length = 7 _
                                                     Select p)
-        Assert.AreEqual("(length(concat(Name,'x')) eq 7)", query.Filter)
+        Assert.AreEqual("(length(concat(Name,'x')) eq 7)", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where String.Concat(p.Name + "x", "y") = "mxy" _
                                                     Select p)
-        Assert.AreEqual("(concat(concat(Name,'x'),'y') eq 'mxy')", query.Filter)
+        Assert.AreEqual("(concat(concat(Name,'x'),'y') eq 'mxy')", ODataExpressionVisitor.ToODataString(query.Filter))
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
                                                     Where (p.Name + "x").ToLower = "ax" _
                                                     Select p)
-        Assert.AreEqual("(tolower(concat(Name,'x')) eq 'ax')", query.Filter)
+        Assert.AreEqual("(tolower(concat(Name,'x')) eq 'ax')", ODataExpressionVisitor.ToODataString(query.Filter))
     End Sub
 End Class
 

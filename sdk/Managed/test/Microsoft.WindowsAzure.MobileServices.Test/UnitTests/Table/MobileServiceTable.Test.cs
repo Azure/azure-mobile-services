@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using Newtonsoft.Json.Linq;
@@ -99,7 +100,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.SetResponseContent(response);
             if (!String.IsNullOrEmpty(link))
             {
-                hijack.Response.Headers.Add("Link", link);
+                hijack.Responses[0].Headers.Add("Link", link);
             }
             IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             IMobileServiceTable table = service.GetTable("someTable");
@@ -229,10 +230,43 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             IMobileServiceTable table = service.GetTable("someTable");
 
-            await table.ReadAsync("http://wwww.contoso.com/about/?$filter=a eq b&$orderby=c");
+            await table.ReadAsync("http://www.test.com/about/?$filter=a eq b&$orderby=c");
 
             Assert.AreEqual("TU,LH", hijack.Request.Headers.GetValues("X-ZUMO-FEATURES").First());
-            Assert.AreEqual("http://wwww.contoso.com/about/?$filter=a eq b&$orderby=c", hijack.Request.RequestUri.ToString());
+            Assert.AreEqual("http://www.test.com/about/?$filter=a eq b&$orderby=c", hijack.Request.RequestUri.ToString());
+        }
+
+        [AsyncTestMethod]
+        public async Task ReadAsync_WithRelativeUri()
+        {
+            var data = new[]
+            {
+                new 
+                {
+                    ServiceUri = "http://www.test.com", 
+                    QueryUri = "/about?$filter=a eq b&$orderby=c", 
+                    RequestUri = "http://www.test.com/about?$filter=a eq b&$orderby=c"
+                },
+                new 
+                {
+                    ServiceUri = "http://www.test.com/", 
+                    QueryUri = "/about?$filter=a eq b&$orderby=c", 
+                    RequestUri = "http://www.test.com/about?$filter=a eq b&$orderby=c"
+                }
+            };
+
+            foreach (var item in data)
+            {
+                var hijack = new TestHttpHandler();
+                hijack.SetResponseContent("[{\"String\":\"Hey\"}]");
+                IMobileServiceClient service = new MobileServiceClient(item.ServiceUri, "secret...", hijack);
+
+                IMobileServiceTable table = service.GetTable("someTable");
+
+                await table.ReadAsync(item.QueryUri);
+
+                Assert.AreEqual(item.RequestUri, hijack.Request.RequestUri.ToString());
+            }
         }
 
         [AsyncTestMethod]
@@ -1809,6 +1843,44 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
+        public async Task UndeleteAsync()
+        {
+            await TestUndeleteAsync("", null);
+        }
+
+        [AsyncTestMethod]
+        public async Task UndeleteAsyncWithParameters()
+        {
+            await TestUndeleteAsync("?custom=value", new Dictionary<string, string>() { { "custom", "value" } });
+        }
+
+        private static async Task TestUndeleteAsync(string query, IDictionary<string, string> parameters)
+        {
+            TestHttpHandler hijack = new TestHttpHandler();
+
+            hijack.SetResponseContent("{\"id\":\"an id\",\"String\":\"Hey\"}");
+            hijack.OnSendingRequest = req =>
+            {
+                Assert.AreEqual(req.RequestUri.Query, query);
+                Assert.AreEqual(req.Method, HttpMethod.Post);
+
+                // only id and version should be sent
+                Assert.IsNull(req.Content);
+                Assert.AreEqual(req.Headers.IfMatch.First().Tag, "\"abc\"");
+                return Task.FromResult(req);
+            };
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+
+            IMobileServiceTable table = service.GetTable("someTable");
+
+            var obj = JToken.Parse("{\"id\":\"id\",\"value\":\"new\", \"blah\":\"doh\", \"__version\": \"abc\"}") as JObject;
+            JObject item = await table.UndeleteAsync(obj, parameters) as JObject;
+
+            Assert.AreEqual("an id", (string)item["id"]);
+            Assert.AreEqual("Hey", (string)item["String"]);
+        }
+
+        [AsyncTestMethod]
         public async Task DeleteAsyncWithStringId_StripsSystemProperties()
         {
             var userDefinedParameters = new Dictionary<string, string>() { { "state", "AL" } };
@@ -2144,6 +2216,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 else if ((testSystemProperty & MobileServiceSystemProperties.Version) == MobileServiceSystemProperties.Version)
                 {
                     Assert.IsTrue(requestUri.Contains("__version"));
+                }
+                else if ((testSystemProperty & MobileServiceSystemProperties.Deleted) == MobileServiceSystemProperties.Deleted)
+                {
+                    Assert.IsTrue(requestUri.Contains("__deleted"));
                 }
             };
 

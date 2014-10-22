@@ -3,36 +3,35 @@
 // ----------------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using System.IO;
+using Microsoft.WindowsAzure.MobileServices;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Microsoft.WindowsAzure.MobileServices
+namespace System
 {
     internal static class StringExtensions
     {
-        /// <summary>
-        /// Parses the response into a JToken.
-        /// If the response is null or empty, null will be returned.
-        /// </summary>
-        /// <param name="response">The response to parse.</param>
-        /// <param name="settings">The serializer settings used for parsing the response.</param>
-        /// <returns>A JToken containing the response or null.</returns>
-        public static JToken ParseToJToken(this string response, JsonSerializerSettings settings)
+        public static string FormatInvariant(this string format, params object[] args)
         {
-            if (String.IsNullOrEmpty(response))
+            return string.Format(CultureInfo.InvariantCulture, format, args);
+        }
+
+        /// <summary>
+        /// Parses the content into a JToken.
+        /// If the content is null or empty, null will be returned.
+        /// </summary>
+        /// <param name="content">The content to parse.</param>
+        /// <param name="settings">The serializer settings used for parsing the content.</param>
+        /// <returns>A JToken containing the content or null.</returns>
+        public static JToken ParseToJToken(this string content, JsonSerializerSettings settings)
+        {
+            if (String.IsNullOrEmpty(content))
             {
                 return null;
             }
-            using (var reader = new JsonTextReader(new StringReader(response)))
-            {
-                reader.DateParseHandling = settings.DateParseHandling;
-                reader.DateTimeZoneHandling = settings.DateTimeZoneHandling;
-                reader.FloatParseHandling = settings.FloatParseHandling;
-                reader.Culture = settings.Culture;
-
-                return JToken.Load(reader);
-            }
+            return JsonConvert.DeserializeObject<JToken>(content, settings);            
         }
     }
 }
