@@ -13,13 +13,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 {
     [Tag("unit")]
     [Tag("push")]
-    public class PushIosSpecific : TestBase
+    public class PushPlatformTest : TestBase
     {
         readonly string originalPushHandleDescription = "<f6e7cd2 80fc5b5 d488f8394baf216506bc1bba 864d5b483d>";
         readonly NSData originalNSData;
         readonly string originalNSDataTrimmed;
 
-        public PushIosSpecific()
+        public PushPlatformTest()
         {
             this.originalNSData = NSDataFromDescription(this.originalPushHandleDescription);
             this.originalNSDataTrimmed = TrimDeviceToken(this.originalPushHandleDescription);
