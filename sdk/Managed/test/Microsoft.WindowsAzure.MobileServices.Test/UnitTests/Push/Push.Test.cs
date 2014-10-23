@@ -111,11 +111,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         string GetExpectedListUri()
         {
             var channelUri = Uri.EscapeUriString(DefaultChannelUri);
-            if (this.platform == "gcm" || this.platform == "apns")
-            {
-                channelUri = DefaultChannelUri;
-            }
-
             return string.Format("{0}{1}?deviceId={2}&platform={3}", DefaultServiceUri, RegistrationsPath, channelUri, Uri.EscapeUriString(this.platform));
         }
 
