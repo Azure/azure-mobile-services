@@ -121,8 +121,17 @@
     }
     
     MSJSONSerializer *serializer = [MSJSONSerializer new];
-    NSData *data = [serializer dataFromItem:properties idAllowed:YES ensureDictionary:NO removeSystemProperties:NO orError:nil];
+    NSError *serializeError;
+    NSData *data = [serializer dataFromItem:properties idAllowed:YES ensureDictionary:NO removeSystemProperties:NO orError:&serializeError];
     
+    // Handle if something is wrong with one of our fields, try again without the possibly breaking fields
+    if (serializeError.code == MSInvalidItemWithRequest) {
+        [properties removeObjectForKey:@"item"];
+        [properties removeObjectForKey:@"serverItem"];
+        
+        data = [serializer dataFromItem:properties idAllowed:YES ensureDictionary:NO removeSystemProperties:NO orError:&serializeError];
+    }
+        
     return @{ @"id": self.guid, @"properties": data };
 }
 
