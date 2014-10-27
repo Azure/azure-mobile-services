@@ -1,6 +1,4 @@
 ﻿
-var PostMessageExchange = require('PostMessageExchange');
-
 exports.supportsCurrentRuntime = function () {
     /// <summary>
     /// Determines whether or not this login UI is usable in the current runtime.

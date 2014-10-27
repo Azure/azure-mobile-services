@@ -35,7 +35,7 @@ task for more details on the .library format and all of its options.
   <Module Path="Transports\IframeTransport.js" Condition="Web|WebInternals" />
   <Module Path="LoginUis\BrowserPopup.js" Condition="Web|WebInternals" />
   <Module Path="LoginUis\CordovaPopup.js" Condition="Web|WebInternals" />
-  <Module Path="LoginUis\WebAuthBroker.js" Condition="Web|WebInternals" />
+  <Module Path="LoginUis\WebAuthBroker.js" />
   <Module Path="Utilities\Extensions.js" />
   <Module Path="Utilities\PostMessageExchange.js" Condition="Web|WebInternals" />
   <Module Path="Utilities\Promises.js" Condition="Web|WebInternals" />

@@ -10,7 +10,8 @@
 /*global WinJS:false, Windows:false, $__fileVersion__:false, $__version__:false */
 
 var _ = require('Extensions'),
-    Validate = require('Validate');
+    Validate = require('Validate'),
+    WebAuthBroker = require('WebAuthBroker');
 
 exports.async = function async(func) {
     /// <summary>
@@ -155,72 +156,7 @@ exports.login = function (startUri, endUri, callback) {
     Validate.notNullOrEmpty(startUri, 'startUri');
     Validate.isString(startUri, 'startUri');
 
-    var windowsWebAuthBroker = Windows.Security.Authentication.Web.WebAuthenticationBroker;
-    var noneWebAuthOptions = Windows.Security.Authentication.Web.WebAuthenticationOptions.none;
-    var successWebAuthStatus = Windows.Security.Authentication.Web.WebAuthenticationStatus.success;
-
-    var webAuthBrokerSuccessCallback = null;
-    var webAuthBrokerErrorCallback = null;
-    if (!_.isNull(callback)) {
-        webAuthBrokerSuccessCallback = function (result) {
-            var error = null;
-            var token = null;
-
-            if (result.responseStatus !== successWebAuthStatus) {
-                error = result;
-            }
-            else {
-                var callbackEndUri = result.responseData;
-                var tokenAsJson = null;
-                if (_.isNull(error)) {
-                    var i = callbackEndUri.indexOf('#token=');
-                    if (i > 0) {
-                        tokenAsJson = decodeURIComponent(callbackEndUri.substring(i + 7));
-                    }
-                    else {
-                        i = callbackEndUri.indexOf('#error=');
-                        if (i > 0) {
-                            error = decodeURIComponent(callbackEndUri.substring(i + 7));
-                        }
-                    }
-                }
-
-                if (!_.isNull(tokenAsJson)) {
-                    try {
-                        token = _.fromJson(tokenAsJson);
-                    }
-                    catch (e) {
-                        error = e;
-                    }
-                }
-            }
-
-            callback(error, token);
-        };
-
-        webAuthBrokerErrorCallback = function (error) {
-            callback(error, null);
-        };
-    }
-
-    if (!_.isNull(endUri)) {
-        var windowsStartUri = new Windows.Foundation.Uri(startUri);
-        var windowsEndUri = new Windows.Foundation.Uri(endUri);
-        windowsWebAuthBroker.authenticateAsync(noneWebAuthOptions, windowsStartUri, windowsEndUri)
-                            .done(webAuthBrokerSuccessCallback, webAuthBrokerErrorCallback);
-    }
-    else {
-        // If no endURI was given, then we'll use the single sign-on overload of the 
-        // windowsWebAuthBroker. Single sign-on requires that the application's Package SID 
-        // be registered with the Microsoft Azure Mobile Service, but it provides a better 
-        // experience as HTTP cookies are supported so that users do not have to
-        // login in everytime the application is launched.
-        var redirectUri = windowsWebAuthBroker.getCurrentApplicationCallbackUri().absoluteUri;
-        var startUriWithRedirect = startUri + "?sso_end_uri=" + encodeURIComponent(redirectUri);
-        var windowsStartUriWithRedirect = new Windows.Foundation.Uri(startUriWithRedirect);
-        windowsWebAuthBroker.authenticateAsync(noneWebAuthOptions, windowsStartUriWithRedirect)
-                            .done(webAuthBrokerSuccessCallback, webAuthBrokerErrorCallback);
-    }
+    WebAuthBroker.login(startUri, endUri, callback);
 };
 
 exports.getOperatingSystemInfo = function () {
