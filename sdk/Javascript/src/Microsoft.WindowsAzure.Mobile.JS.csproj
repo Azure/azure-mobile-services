@@ -183,6 +183,7 @@
     <Content Include="Internals\NodeExports.js" />
     <Content Include="LoginUis\BrowserPopup.js" />
     <Content Include="LoginUis\CordovaPopup.js" />
+    <Content Include="LoginUis\WebAuthBroker.js" />
     <Content Include="MobileServiceClient.js" />
     <Content Include="MobileServiceLogin.js" />
     <Content Include="MobileServices.intellisense.js" />
