@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
-
+using MonoTouch.Foundation;
 using Newtonsoft.Json;
 
 namespace Microsoft.WindowsAzure.MobileServices
@@ -23,7 +23,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// Create a <see cref="ApnsTemplateRegistration"/>
+        /// PLEASE USE NSData overload of this constructor!! Create a <see cref="ApnsTemplateRegistration"/>
         /// </summary>
         /// <param name="deviceToken">The device token</param>
         /// <param name="jsonTemplate">The template json in string format</param>
@@ -36,6 +36,18 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         /// <summary>
         /// Create a <see cref="ApnsTemplateRegistration"/>
+        /// </summary>
+        /// <param name="deviceToken">The device token</param>
+        /// <param name="jsonTemplate">The template json in string format</param>
+        /// <param name="expiry">The string defining the expiry template</param>
+        /// <param name="templateName">The template name</param>
+        public ApnsTemplateRegistration(NSData deviceToken, string jsonTemplate, string expiry, string templateName)
+            : this(deviceToken, jsonTemplate, expiry, templateName, null)
+        {
+        }
+
+        /// <summary>
+        /// PLEASE USE NSData overload of this constructor!! Create a <see cref="ApnsTemplateRegistration"/>
         /// </summary>
         /// <param name="deviceToken">The device token</param>
         /// <param name="jsonTemplate">The template json in string format</param>
@@ -68,7 +80,44 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.TemplateName = templateName;            
             this.BodyTemplate = jsonTemplate;
             this.Expiry = expiry;
-        }        
+        }
+
+        /// <summary>
+        /// Create a <see cref="ApnsTemplateRegistration"/>
+        /// </summary>
+        /// <param name="deviceToken">The device token</param>
+        /// <param name="jsonTemplate">The template json in string format</param>
+        /// <param name="expiry">The string defining the expiry template</param>
+        /// <param name="templateName">The template name</param>
+        /// <param name="tags">The tags that restrict which notifications this registration will receive</param>
+        public ApnsTemplateRegistration(NSData deviceToken, string jsonTemplate, string expiry, string templateName, IEnumerable<string> tags)
+            : base(deviceToken, tags)
+        {
+            if (string.IsNullOrWhiteSpace(templateName))
+            {
+                throw new ArgumentNullException("templateName");
+            }
+
+            if (templateName.Equals(Registration.NativeRegistrationName))
+            {
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, Resources.Push_ConflictWithReservedName, Registration.NativeRegistrationName));
+            }
+
+            if (templateName.Contains(":") || templateName.Contains(";"))
+            {
+                throw new ArgumentException(Resources.Push_InvalidTemplateName);
+            }
+
+            if (string.IsNullOrWhiteSpace(jsonTemplate))
+            {
+                throw new ArgumentNullException("jsonTemplate");
+            }
+
+            this.TemplateName = templateName;
+            this.BodyTemplate = jsonTemplate;
+            this.Expiry = expiry;
+        }
+
 
         /// <summary>
         /// Get templateName

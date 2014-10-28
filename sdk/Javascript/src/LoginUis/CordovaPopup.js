@@ -14,7 +14,9 @@ exports.supportsCurrentRuntime = function () {
     /// Determines whether or not this login UI is usable in the current runtime.
     /// </summary>
 
-    return !!currentCordovaVersion();
+    // When running application inside of Ripple emulator, InAppBrowser functionality is not supported.
+    // We should use Browser popup login method instead.
+    return !!currentCordovaVersion() && !isRunUnderRippleEmulator();
 };
 
 exports.login = function (startUri, endUri, callback) {
@@ -67,6 +69,11 @@ exports.login = function (startUri, endUri, callback) {
         });
     }, 500);
 };
+
+function isRunUnderRippleEmulator () {
+    // Returns true when application runs under Ripple emulator 
+    return window.parent && !!window.parent.ripple;
+}
 
 function currentCordovaVersion() {
     // If running inside Cordova, returns a string similar to "3.5.0". Otherwise, returns a falsey value.

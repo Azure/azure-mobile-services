@@ -41,7 +41,7 @@ $testGroup('Push',
             callback(null, { status: 500, responseText: 'Stop the chain' });
         });
 
-        return client.push.apns.registerNative('abcdefg1234').then(null, function (error) {
+        return client.push.apns.registerNative('123456abcdefg').then(null, function (error) {
             $assert.areEqual(error.response.responseText, 'Stop the chain');
         });
     }),

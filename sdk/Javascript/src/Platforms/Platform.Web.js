@@ -26,6 +26,7 @@ var knownTransports = [ // In order of preference
     require('IframeTransport')
 ];
 var knownLoginUis = [ // In order of preference
+    require('WebAuthBroker'),
     require('CordovaPopup'),
     require('BrowserPopup')
 ];
@@ -158,8 +159,10 @@ exports.getOperatingSystemInfo = function () {
 };
 
 exports.getSdkInfo = function () {
+    var isCordovaEnvironment = window && window.cordova && window.cordova.version;
+
     return {
-        language: "Web",
+        language: isCordovaEnvironment ? "Cordova" : "Web",
         fileVersion: $__fileVersion__
     };
 };
