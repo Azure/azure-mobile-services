@@ -368,9 +368,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 		table.pull(query).get();
 
 		assertEquals(serviceFilterContainer.Url,
-				"http://myapp.com/tables/stringidtype?$filter=String+eq+%28%27world%27%29&$top=3&$skip=5&$orderby=Id+desc&__systemproperties=*&$select=String");
-		// "?$filter=(String%20eq%20'world')&$orderby=String%20desc,id&$skip=5&$top=3&__systemproperties=__version");
-		// Assert.AreEqual(hijack.Requests.Count, 1);
+				"http://myapp.com/tables/stringidtype?$filter=String+eq+%28%27world%27%29&$top=3&$skip=5&$orderby=Id+desc&__includeDeleted=true&__systemproperties=*&$select=String");
 	}
 
 	public void testPurgeDoesNotThrowExceptionWhenThereIsNoOperationInTable() throws MalformedURLException, InterruptedException, ExecutionException {

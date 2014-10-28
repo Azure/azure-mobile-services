@@ -134,6 +134,11 @@ public final class ExecutableQuery<E> implements Query {
 		return this.mQuery.hasInlineCount();
 	}
 
+    @Override
+    public boolean hasDeleted() {
+        return this.mQuery.hasDeleted();
+    }
+
 	@Override
 	public List<Pair<String, QueryOrder>> getOrderBy() {
 		return this.mQuery.getOrderBy();
@@ -208,7 +213,21 @@ public final class ExecutableQuery<E> implements Query {
 		return this;
 	}
 
-	@Override
+    @Override
+    public ExecutableQuery<E> includeDeleted() {
+        this.mQuery.includeDeleted();
+
+        return this;
+    }
+
+    @Override
+    public ExecutableQuery<E> removeDeleted() {
+        this.mQuery.removeDeleted();
+
+        return this;
+    }
+
+    @Override
 	public ExecutableQuery<E> select(String... fields) {
 		this.mQuery.select(fields);
 		return this;

@@ -52,6 +52,9 @@ public class StringIdRoundTripTableElement {
 	@SerializedName("__version")
 	public String Version;
 
+    @SerializedName("__deleted")
+    public Boolean Deleted;
+
 	public StringIdRoundTripTableElement() {
 		this(false);
 	}

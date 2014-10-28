@@ -123,6 +123,18 @@ public class MobileServiceLocalStoreMock implements MobileServiceLocalStore {
 		return;
 	}
 
+    @Override
+    public void delete(String tableName, String[] itemsIds) throws MobileServiceLocalStoreException {
+
+        Map<String, JsonObject> table = GetTable(tableName);
+
+        for(String itemId : itemsIds) {
+            table.remove(itemId);
+        }
+
+        return;
+    }
+
 	@Override
 	public void delete(Query query) throws MobileServiceLocalStoreException {
 		this.DeleteQueries.add(query);

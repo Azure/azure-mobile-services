@@ -288,6 +288,25 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
     }
 
     @Override
+    public void delete(String tableName, String[] itemsIds) throws MobileServiceLocalStoreException {
+        try {
+            String invTableName = normalizeTableName(tableName);
+
+            SQLiteDatabase db = this.getWritableDatabase();
+
+            try {
+                for(String itemId : itemsIds) {
+                    db.delete(invTableName, "id = '" + itemId + "'", null);
+                }
+            } finally {
+                db.close();
+            }
+        } catch (Throwable t) {
+            throw new MobileServiceLocalStoreException(t);
+        }
+    }
+
+    @Override
     public void delete(Query query) throws MobileServiceLocalStoreException {
         try {
             String invTableName = normalizeTableName(query.getTableName());

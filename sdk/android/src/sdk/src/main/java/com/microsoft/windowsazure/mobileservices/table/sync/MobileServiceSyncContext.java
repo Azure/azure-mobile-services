@@ -24,9 +24,11 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices.table.sync;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
@@ -47,6 +49,7 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.MobileServiceFeatures;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceExceptionBase;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemColumns;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProperty;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
@@ -200,7 +203,7 @@ public class MobileServiceSyncContext {
 
 	/**
 	 * Constructor for MobileServiceSyncContext
-	 * 
+	 *
 	 * @param client
 	 *            The MobileServiceClient used to invoke table operations
 	 */
@@ -213,7 +216,7 @@ public class MobileServiceSyncContext {
 
 	/**
 	 * Returns an instance of MobileServiceLocalStore.
-	 * 
+	 *
 	 * @return The MobileServiceLocalStore instance
 	 */
 	public MobileServiceLocalStore getStore() {
@@ -222,7 +225,7 @@ public class MobileServiceSyncContext {
 
 	/**
 	 * Returns an instance of MobileServiceSyncHandler.
-	 * 
+	 *
 	 * @return The MobileServiceSyncHandler instance
 	 */
 	public MobileServiceSyncHandler getHandler() {
@@ -231,7 +234,7 @@ public class MobileServiceSyncContext {
 
 	/**
 	 * Indicates whether sync context has been initialized or not.
-	 * 
+	 *
 	 * @return The initialization status
 	 */
 	public boolean isInitialized() {
@@ -257,7 +260,7 @@ public class MobileServiceSyncContext {
 	/**
 	 * Returns the number of pending operations that are not yet pushed to
 	 * remote tables.
-	 * 
+	 *
 	 * @return The number of pending operations
 	 * @throws Throwable
 	 */
@@ -288,12 +291,12 @@ public class MobileServiceSyncContext {
 
 	/**
 	 * Initializes the sync context.
-	 * 
+	 *
 	 * @param store
 	 *            An instance of MobileServiceLocalStore
 	 * @param handler
 	 *            An instance of MobileServiceSyncHandler
-	 * 
+	 *
 	 * @return A ListenableFuture that is done when sync context has
 	 *         initialized.
 	 */
@@ -320,7 +323,7 @@ public class MobileServiceSyncContext {
 
 	/**
 	 * Pushes all pending operations up to the remote store.
-	 * 
+	 *
 	 * @return A ListenableFuture that is done when operations have been pushed.
 	 */
 	public ListenableFuture<Void> push() {
@@ -346,7 +349,7 @@ public class MobileServiceSyncContext {
 
 	/**
 	 * Performs a query against the remote table and stores results.
-	 * 
+	 *
 	 * @param tableName
 	 *            the remote table name
 	 * @param query
@@ -408,7 +411,7 @@ public class MobileServiceSyncContext {
 
 	/**
 	 * Performs a query against the local table and deletes the results.
-	 * 
+	 *
 	 * @param tableName
 	 *            the local table name
 	 * @param query
@@ -451,12 +454,12 @@ public class MobileServiceSyncContext {
 
 	/**
 	 * Retrieve results from the local table.
-	 * 
+	 *
 	 * @param tableName
 	 *            the local table name
 	 * @param query
 	 *            an optional query to filter results
-	 * 
+	 *
 	 * @return a JsonElement with the results
 	 */
 	JsonElement read(String tableName, Query query) throws MobileServiceLocalStoreException {
@@ -473,12 +476,12 @@ public class MobileServiceSyncContext {
 
 	/**
 	 * Looks up an item from the local table.
-	 * 
+	 *
 	 * @param tableName
 	 *            the local table name
 	 * @param itemId
 	 *            the id of the item to look up
-	 * 
+	 *
 	 * @return the item found
 	 */
 	JsonObject lookUp(String tableName, String itemId) throws MobileServiceLocalStoreException {
@@ -490,7 +493,7 @@ public class MobileServiceSyncContext {
 	/**
 	 * Insert an item into the local table and enqueue the operation to be
 	 * synchronized on context push.
-	 * 
+	 *
 	 * @param tableName
 	 *            the local table name
 	 * @param item
@@ -506,7 +509,7 @@ public class MobileServiceSyncContext {
 	/**
 	 * Update an item in the local table and enqueue the operation to be
 	 * synchronized on context push.
-	 * 
+	 *
 	 * @param tableName
 	 *            the local table name
 	 * @param item
@@ -522,7 +525,7 @@ public class MobileServiceSyncContext {
 	/**
 	 * Delete an item from the local table and enqueue the operation to be
 	 * synchronized on context push.
-	 * 
+	 *
 	 * @param tableName
 	 *            the local table name
 	 * @param itemId
@@ -647,7 +650,8 @@ public class MobileServiceSyncContext {
 		try {
 			MobileServiceJsonTable table = this.mClient.getTable(tableName);
 			table.setSystemProperties(EnumSet.allOf(MobileServiceSystemProperty.class));
-			table.addFeature(MobileServiceFeatures.Offline);
+
+            table.addFeature(MobileServiceFeatures.Offline);
 
 			if (query == null) {
 				query = table.top(1000).orderBy("id", QueryOrder.Ascending);
@@ -666,6 +670,8 @@ public class MobileServiceSyncContext {
 			} else {
 				query = query.removeInlineCount();
 			}
+
+            query.includeDeleted();
 
 			boolean allProcessed = false;
 
@@ -696,18 +702,37 @@ public class MobileServiceSyncContext {
 					}
 
 					if (elements != null) {
-						
-						JsonObject[] jsonObjects = new JsonObject[elements.size()];
-						
-						int i = 0;
-						
+
+						List<JsonObject> updatedJsonObjects = new ArrayList<JsonObject>();
+                        List<String> deletedIds = new ArrayList<String>();
+
+
 						for (JsonElement element : elements) {
-							jsonObjects[i] = element.getAsJsonObject();
-							i++;
+
+                            JsonObject jsonObject = element.getAsJsonObject();
+                            JsonElement elementId = jsonObject.get(MobileServiceSystemColumns.Id);
+
+                            if (elementId == null) {
+                                continue;
+                            }
+
+                            if (isDeleted(jsonObject)) {
+                                deletedIds.add(elementId.getAsString());
+                            } else {
+                                updatedJsonObjects.add(jsonObject);
+                            }
 						}
 
-						this.mStore.upsert(tableName, jsonObjects);
-						
+                        if(deletedIds.size() > 0){
+                            this.mStore.delete(tableName,
+                                    deletedIds.toArray(new String[deletedIds.size()]));
+                        }
+
+                        if (updatedJsonObjects.size() > 0) {
+                            this.mStore.upsert(tableName,
+                                    updatedJsonObjects.toArray(new JsonObject[updatedJsonObjects.size()]));
+                        }
+
 						originalTop -= elements.size();
 						top = originalTop > 1000 ? 1000 : originalTop;
 						skip += elements.size();
@@ -723,6 +748,15 @@ public class MobileServiceSyncContext {
 			throw e.getCause();
 		}
 	}
+
+    private static boolean isDeleted(JsonObject item) {
+
+        JsonElement deletedToken = item.get(MobileServiceSystemColumns.Deleted);
+
+        boolean isDeleted = deletedToken != null && deletedToken.getAsBoolean();
+
+        return isDeleted;
+    }
 
 	private void processPurge(String tableName, Query query) throws MobileServiceLocalStoreException {
 		if (query == null) {
@@ -957,7 +991,7 @@ public class MobileServiceSyncContext {
 			MobileServiceExceptionBase mspfEx = (MobileServiceExceptionBase) throwable;
 			serverItem = mspfEx.getValue();
 		}
-		
+
 		return new TableOperationError(operation.getKind(), operation.getTableName(), operation.getItemId(), clientItem, throwable.getMessage(), statusCode,
 				serverResponse, serverItem);
 	}

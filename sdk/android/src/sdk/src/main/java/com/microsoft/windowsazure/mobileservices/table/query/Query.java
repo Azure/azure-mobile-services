@@ -57,6 +57,11 @@ public interface Query {
 	 */
 	boolean hasInlineCount();
 
+    /**
+     * Returns true if inline count is requested.
+     */
+    boolean hasDeleted();
+
 	/**
 	 * Returns a list of fields to order by the results, and their respective
 	 * ordering direction
@@ -149,6 +154,20 @@ public interface Query {
 	 * @return Query
 	 */
 	Query removeInlineCount();
+
+    /**
+     * Specifies to retrieve soft deleted rows
+     *
+     * @return Query
+     */
+    Query includeDeleted();
+
+    /**
+     * Set the hasDeleted property to false.
+     *
+     * @return Query
+     */
+    Query removeDeleted();
 
 	/**
 	 * Specifies the fields to retrieve

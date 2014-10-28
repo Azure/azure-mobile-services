@@ -27,5 +27,5 @@ package com.microsoft.windowsazure.mobileservices.table;
  * The available System Properties in Mobile Service
  */
 public enum MobileServiceSystemProperty {
-	CreatedAt, UpdatedAt, Version
+	CreatedAt, UpdatedAt, Version, Deleted
 }

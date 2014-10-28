@@ -87,6 +87,10 @@ public class QueryODataWriter {
 
 				}
 			}
+
+            if (query.hasDeleted()) {
+                sb.append("&__includeDeleted=true");
+            }
 		}
 
 		List<Pair<String, String>> parameters = table.addSystemProperties(table.getSystemProperties(), query != null ? query.getUserDefinedParameters() : null);

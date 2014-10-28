@@ -43,6 +43,11 @@ class QueryBase implements Query {
 	 */
 	private boolean mHasInlineCount = false;
 
+    /**
+     * Indicates if the query should include the soft deleted rows
+     */
+    private boolean mHasDeleted = false;
+
 	/**
 	 * Query ordering to use
 	 */
@@ -83,6 +88,7 @@ class QueryBase implements Query {
 
 		clone.mQueryNode = this.mQueryNode != null ? this.mQueryNode.deepClone() : null;
 		clone.mHasInlineCount = this.mHasInlineCount;
+        clone.mHasDeleted = this.mHasDeleted;
 
 		for (Pair<String, QueryOrder> orderBy : this.mOrderBy) {
 			clone.mOrderBy.add(new Pair<String, QueryOrder>(orderBy.first, orderBy.second));
@@ -123,6 +129,11 @@ class QueryBase implements Query {
 	public boolean hasInlineCount() {
 		return mHasInlineCount;
 	}
+
+    @Override
+    public boolean hasDeleted() {
+        return mHasDeleted;
+    }
 
 	@Override
 	public List<Pair<String, QueryOrder>> getOrderBy() {
@@ -205,6 +216,20 @@ class QueryBase implements Query {
 
 		return this;
 	}
+
+    @Override
+    public Query includeDeleted() {
+        this.mHasDeleted = true;
+
+        return this;
+    }
+
+    @Override
+    public Query removeDeleted() {
+        this.mHasDeleted = false;
+
+        return this;
+    }
 
 	@Override
 	public Query select(String... fields) {

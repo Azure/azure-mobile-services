@@ -360,14 +360,16 @@ public class SystemPropertiesTests extends TestGroup {
 							log("Insert element 2 with Custom System Properties - Version|CreatedAt - " + element2.toString());
 							StringIdRoundTripTableElement responseElement2 = insert(table, element2);
 
-							log("Verify Version|CreatedAt System Properties are not null, and UpdateAt is null or default");
-							verifySystemProperties("Insert response", true, false, true, responseElement2);
+							log("Verify Version|CreatedAt System Properties are not null, and UpdateAt and Delete is null or default");
+							verifySystemProperties("Insert response", true, false, true, false, responseElement2);
 
 							EnumSet<MobileServiceSystemProperty> systemProperties3 = EnumSet.noneOf(MobileServiceSystemProperty.class);
 							systemProperties3.add(MobileServiceSystemProperty.Version);
 							systemProperties3.add(MobileServiceSystemProperty.UpdatedAt);
+                            systemProperties3.add(MobileServiceSystemProperty.Deleted);
 
-							table.setSystemProperties(systemProperties3);
+
+                            table.setSystemProperties(systemProperties3);
 
 							log("Filter element2 id with Custom System Properties - Version|UpdatedAt");
 							List<StringIdRoundTripTableElement> responseElements3 = read(table, field("id").eq().val(element2.id));
@@ -379,8 +381,8 @@ public class SystemPropertiesTests extends TestGroup {
 
 							StringIdRoundTripTableElement responseElement3 = responseElements3.get(0);
 
-							log("Verify Version|UpdatedAt System Properties are not null, and CreatedAt is null or default");
-							verifySystemProperties("Read response", false, true, true, responseElement3);
+							log("Verify Version|UpdatedAt|Deleted System Properties are not null, and CreatedAt is null or default");
+							verifySystemProperties("Read response", false, true, true, true, responseElement3);
 
 							EnumSet<MobileServiceSystemProperty> systemProperties4 = EnumSet.noneOf(MobileServiceSystemProperty.class);
 
@@ -389,8 +391,8 @@ public class SystemPropertiesTests extends TestGroup {
 							log("Lookup element2 id with No System Properties");
 							StringIdRoundTripTableElement responseElement4 = lookUp(table, element2.id);
 
-							log("Verify Version|CreatedAt|UpdatedAt System Properties are null");
-							verifySystemProperties("Read response", false, false, false, responseElement4);
+							log("Verify Version|CreatedAt|UpdatedAt|Deleted System Properties are null");
+							verifySystemProperties("Read response", false, false, false, false, responseElement4);
 
 							log("Delete element");
 							delete(table, responseElement1);
@@ -443,9 +445,10 @@ public class SystemPropertiesTests extends TestGroup {
 							boolean shouldHaveCreatedAt = value.toLowerCase(Locale.getDefault()).contains("created");
 							boolean shouldHaveUpdatedAt = value.toLowerCase(Locale.getDefault()).contains("updated");
 							boolean shouldHaveVersion = value.toLowerCase(Locale.getDefault()).contains("version");
+                            boolean shouldHaveDeleted = value.toLowerCase(Locale.getDefault()).contains("deleted");
 
-							if (value.trim().equals("*")) {
-								shouldHaveVersion = shouldHaveUpdatedAt = shouldHaveCreatedAt = true;
+                            if (value.trim().equals("*")) {
+								shouldHaveVersion = shouldHaveUpdatedAt = shouldHaveCreatedAt = shouldHaveDeleted = true;
 							}
 
 							StringIdRoundTripTableElement element1 = new StringIdRoundTripTableElement(true);
@@ -455,7 +458,7 @@ public class SystemPropertiesTests extends TestGroup {
 							final StringIdRoundTripTableElement responseElement1 = insert(table, element1, userParameters);
 
 							log("Verify Query Parameter System Properties");
-							verifySystemProperties("Insert Response", shouldHaveCreatedAt, shouldHaveUpdatedAt, shouldHaveVersion, responseElement1);
+							verifySystemProperties("Insert Response", shouldHaveCreatedAt, shouldHaveUpdatedAt, shouldHaveVersion, shouldHaveDeleted, responseElement1);
 
 							Query query = QueryOperations.field("id");
 
@@ -480,7 +483,7 @@ public class SystemPropertiesTests extends TestGroup {
 							StringIdRoundTripTableElement responseElement2 = filteredResponseElements.get(0);
 
 							log("Verify Query Parameter System Properties");
-							verifySystemProperties("Read Response", shouldHaveCreatedAt, shouldHaveUpdatedAt, shouldHaveVersion, responseElement2);
+							verifySystemProperties("Read Response", shouldHaveCreatedAt, shouldHaveUpdatedAt, shouldHaveVersion, shouldHaveDeleted, responseElement2);
 
 							log("Filter element1 id with Query Parameter System Properties - " + systemProperties);
 							List<StringIdRoundTripTableElement> responseElements3 = read(table, field("id").eq().val(element1.id), userParameters);
@@ -493,13 +496,13 @@ public class SystemPropertiesTests extends TestGroup {
 							StringIdRoundTripTableElement responseElement3 = responseElements3.get(0);
 
 							log("Verify Query Parameter System Properties");
-							verifySystemProperties("Filter Response", shouldHaveCreatedAt, shouldHaveUpdatedAt, shouldHaveVersion, responseElement3);
+							verifySystemProperties("Filter Response", shouldHaveCreatedAt, shouldHaveUpdatedAt, shouldHaveVersion, shouldHaveDeleted ,responseElement3);
 
 							log("Lookup element1 id with Query Parameter System Properties - " + systemProperties);
 							StringIdRoundTripTableElement responseElement4 = lookUp(table, element1.id, userParameters);
 
 							log("Verify Query Parameter System Properties");
-							verifySystemProperties("Lookup Response", shouldHaveCreatedAt, shouldHaveUpdatedAt, shouldHaveVersion, responseElement4);
+							verifySystemProperties("Lookup Response", shouldHaveCreatedAt, shouldHaveUpdatedAt, shouldHaveVersion, shouldHaveDeleted, responseElement4);
 
 							StringIdRoundTripTableElement updateElement1 = new StringIdRoundTripTableElement(element1);
 							updateElement1.name = "Other Sample Data";
@@ -508,7 +511,7 @@ public class SystemPropertiesTests extends TestGroup {
 							StringIdRoundTripTableElement responseElement5 = update(table, updateElement1, userParameters);
 
 							log("Verify Query Parameter System Properties");
-							verifySystemProperties("Update Response", shouldHaveCreatedAt, shouldHaveUpdatedAt, shouldHaveVersion, responseElement5);
+							verifySystemProperties("Update Response", shouldHaveCreatedAt, shouldHaveUpdatedAt, shouldHaveVersion, shouldHaveDeleted, responseElement5);
 
 							log("Delete element");
 							delete(table, responseElement1);
@@ -953,15 +956,16 @@ public class SystemPropertiesTests extends TestGroup {
 	}
 
 	private void verifySystemProperties(String message, StringIdRoundTripTableElement element) throws Exception {
-		verifySystemProperties(message, true, true, true, element);
+		verifySystemProperties(message, true, true, true, true, element);
 	}
 
-	private void verifySystemProperties(String message, boolean shouldHaveCreatedAt, boolean shouldHaveUpdatedAt, boolean shouldHaveVersion,
+	private void verifySystemProperties(String message, boolean shouldHaveCreatedAt, boolean shouldHaveUpdatedAt, boolean shouldHaveVersion, boolean shouldHaveDeleted,
 			StringIdRoundTripTableElement element) throws Exception {
 		if ((shouldHaveCreatedAt && element.CreatedAt == null) || (!shouldHaveCreatedAt && element.CreatedAt != null)
 				|| (shouldHaveUpdatedAt && element.UpdatedAt == null) || (!shouldHaveUpdatedAt && element.UpdatedAt != null)
-				|| (shouldHaveVersion && element.Version == null) || (!shouldHaveVersion && element.Version != null)) {
-			StringBuilder builder = new StringBuilder();
+				|| (shouldHaveVersion && element.Version == null) || (!shouldHaveVersion && element.Version != null)
+                || (shouldHaveDeleted && element.Deleted == null) || (!shouldHaveDeleted && element.Deleted != null)) {
+            StringBuilder builder = new StringBuilder();
 			builder.append(message);
 			builder.append(" - System Properties");
 

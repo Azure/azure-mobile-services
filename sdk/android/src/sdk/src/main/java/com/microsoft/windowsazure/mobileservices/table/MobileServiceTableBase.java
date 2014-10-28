@@ -81,6 +81,7 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
 		SystemPropertyNameToEnum.put(getSystemPropertyString(MobileServiceSystemProperty.CreatedAt), MobileServiceSystemProperty.CreatedAt);
 		SystemPropertyNameToEnum.put(getSystemPropertyString(MobileServiceSystemProperty.UpdatedAt), MobileServiceSystemProperty.UpdatedAt);
 		SystemPropertyNameToEnum.put(getSystemPropertyString(MobileServiceSystemProperty.Version), MobileServiceSystemProperty.Version);
+        SystemPropertyNameToEnum.put(getSystemPropertyString(MobileServiceSystemProperty.Deleted), MobileServiceSystemProperty.Deleted);
 	}
 
 	/**

@@ -1328,57 +1328,6 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		}
 	}
 
-	public void testDeleteUsingEntityShouldReturnTheExpectedRequestUrl() throws Throwable {
-
-		// Container to store callback's results and do the asserts.
-		final ResultsContainer container = new ResultsContainer();
-
-		// Object to delete
-		final PersonTestObject person = new PersonTestObject("John", "Doe", 29);
-		person.setId(10);
-
-		final String tableName = "MyTableName";
-
-		MobileServiceClient client = null;
-
-		try {
-			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
-
-		// Add a filter to handle the request and store the request URL.
-		// Send a mock response
-		client = client.withFilter(new ServiceFilter() {
-
-			@Override
-			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
-
-				container.setRequestUrl(request.getUrl());
-				// call onResponse with the mocked response
-
-				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
-
-				resultFuture.set(new ServiceFilterResponseMock());
-
-				return resultFuture;
-
-			}
-		});
-
-		// Get the MobileService table
-		MobileServiceJsonTable msTable = client.getTable(tableName);
-
-		// Call the delete method sending the entity to delete
-		try {
-			msTable.delete(person).get();
-			Assert.assertTrue("Opperation should have succeded", true);
-		} catch (Exception exception) {
-			Assert.assertTrue("Opperation should have succeded", false);
-		}
-
-		assertEquals(this.appUrl + "tables/" + tableName + "/" + person.getId(), container.getRequestUrl());
-	}
 
 	@SuppressWarnings("deprecation")
 	public void testDeleteUsingEntityShouldReturnTheExpectedRequestUrlCallback() throws Throwable {
@@ -1607,7 +1556,287 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		assertEquals(this.appUrl + "tables/" + tableName + "/" + person.getId(), container.getRequestUrl());
 	}
 
-	public void testSimpleQueryShouldReturnResults() throws Throwable {
+    public void testDeleteUsingEntityShouldReturnTheExpectedRequestUrl() throws Throwable {
+
+        // Container to store callback's results and do the asserts.
+        final ResultsContainer container = new ResultsContainer();
+
+        // Object to delete
+        final PersonTestObject person = new PersonTestObject("John", "Doe", 29);
+        person.setId(10);
+
+        final String tableName = "MyTableName";
+
+        MobileServiceClient client = null;
+
+        try {
+            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        // Add a filter to handle the request and store the request URL.
+        // Send a mock response
+        client = client.withFilter(new ServiceFilter() {
+
+            @Override
+            public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+
+                container.setRequestUrl(request.getUrl());
+                // call onResponse with the mocked response
+
+                final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+
+                resultFuture.set(new ServiceFilterResponseMock());
+
+                return resultFuture;
+
+            }
+        });
+
+        // Get the MobileService table
+        MobileServiceJsonTable msTable = client.getTable(tableName);
+
+        // Call the delete method sending the entity to delete
+        try {
+            msTable.delete(person).get();
+            Assert.assertTrue("Opperation should have succeded", true);
+        } catch (Exception exception) {
+            Assert.assertTrue("Opperation should have succeded", false);
+        }
+
+        assertEquals(this.appUrl + "tables/" + tableName + "/" + person.getId(), container.getRequestUrl());
+    }
+
+    @SuppressWarnings("deprecation")
+    public void testUndeleteUsingEntityShouldReturnTheExpectedRequestUrlCallback() throws Throwable {
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        // Container to store callback's results and do the asserts.
+        final ResultsContainer container = new ResultsContainer();
+
+        // Object to delete
+        final PersonTestObject person = new PersonTestObject("John", "Doe", 29);
+        person.setId(10);
+
+        final String tableName = "PersonTestObject";
+
+        MobileServiceClient client = null;
+
+        try {
+            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        // Add a filter to handle the request and store the request URL.
+        // Send a mock response
+        client = client.withFilter(new ServiceFilter() {
+
+            @Override
+            public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+
+                container.setRequestUrl(request.getUrl());
+                // call onResponse with the mocked response
+
+                final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+
+                resultFuture.set(new ServiceFilterResponseMock());
+
+                return resultFuture;
+
+            }
+        });
+
+        // Get the MobileService table
+        MobileServiceTable<PersonTestObject> msTable = client.getTable(PersonTestObject.class);
+
+        // Call the delete method sending the entity to delete
+        msTable.undelete(person, new TableOperationCallback<PersonTestObject>() {
+
+            @Override
+            public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
+                container.setOperationSucceded(exception == null);
+                latch.countDown();
+            }
+        });
+
+        latch.await();
+
+        // Asserts
+        Assert.assertTrue("Opperation should have succeded", container.getOperationSucceded());
+        assertEquals(this.appUrl + "tables/" + tableName + "/" + person.getId(), container.getRequestUrl());
+    }
+
+    public void testUndeleteUsingJSONShouldReturnTheExpectedRequestUrl() throws Throwable {
+
+        // Container to store callback's results and do the asserts.
+        final ResultsContainer container = new ResultsContainer();
+
+        // Object to delete
+        final PersonTestObject person = new PersonTestObject("John", "Doe", 29);
+        person.setId(10);
+
+        final JsonObject jsonPerson = gsonBuilder.create().toJsonTree(person).getAsJsonObject();
+
+        final String tableName = "MyTableName";
+
+        MobileServiceClient client = null;
+
+        try {
+            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        // Add a filter to handle the request and store the request URL.
+        // Send a mock response
+        client = client.withFilter(new ServiceFilter() {
+
+            @Override
+            public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+
+                container.setRequestUrl(request.getUrl());
+                // call onResponse with the mocked response
+
+                final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+
+                resultFuture.set(new ServiceFilterResponseMock());
+
+                return resultFuture;
+
+            }
+        });
+
+        // Get the MobileService table
+        MobileServiceJsonTable msTable = client.getTable(tableName);
+
+        // Call the delete method sending the entity to delete
+        try {
+            msTable.undelete(jsonPerson).get();
+            Assert.assertTrue("Opperation should have succeded", true);
+        } catch (Exception exception) {
+            Assert.assertTrue("Opperation should have succeded", false);
+        }
+
+        assertEquals(this.appUrl + "tables/" + tableName + "/" + person.getId(), container.getRequestUrl());
+    }
+
+    @SuppressWarnings("deprecation")
+    public void testUneleteUsingJSONShouldReturnTheExpectedRequestUrlCallback() throws Throwable {
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        // Container to store callback's results and do the asserts.
+        final ResultsContainer container = new ResultsContainer();
+
+        // Object to delete
+        final PersonTestObject person = new PersonTestObject("John", "Doe", 29);
+        person.setId(10);
+
+        final JsonObject jsonPerson = gsonBuilder.create().toJsonTree(person).getAsJsonObject();
+
+        final String tableName = "MyTableName";
+
+        MobileServiceClient client = null;
+
+        try {
+            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        // Add a filter to handle the request and store the request URL.
+        // Send a mock response
+        client = client.withFilter(new ServiceFilter() {
+
+            @Override
+            public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+
+                container.setRequestUrl(request.getUrl());
+                // call onResponse with the mocked response
+
+                final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+
+                resultFuture.set(new ServiceFilterResponseMock());
+
+                return resultFuture;
+
+            }
+        });
+
+        // Get the MobileService table
+        MobileServiceJsonTable msTable = client.getTable(tableName);
+
+        // Call the delete method sending the entity to delete
+        msTable.undelete(jsonPerson, new TableJsonOperationCallback() {
+
+            @Override
+            public void onCompleted(JsonObject entity, Exception exception, ServiceFilterResponse response) {
+                container.setOperationSucceded(exception == null);
+                latch.countDown();
+            }
+        });
+
+        latch.await();
+
+        // Asserts
+        Assert.assertTrue("Opperation should have succeded", container.getOperationSucceded());
+        assertEquals(this.appUrl + "tables/" + tableName + "/" + person.getId(), container.getRequestUrl());
+    }
+
+    public void testUndeleteUsingEntityShouldReturnTheExpectedRequestUrl() throws Throwable {
+
+        // Container to store callback's results and do the asserts.
+        final ResultsContainer container = new ResultsContainer();
+
+        // Object to delete
+        final PersonTestObject person = new PersonTestObject("John", "Doe", 29);
+        person.setId(10);
+
+        final String tableName = "PersonTestObject";
+
+        MobileServiceClient client = null;
+
+        try {
+            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        // Add a filter to handle the request and store the request URL.
+        // Send a mock response
+        client = client.withFilter(new ServiceFilter() {
+
+            @Override
+            public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+
+                container.setRequestUrl(request.getUrl());
+                // call onResponse with the mocked response
+
+                final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+
+                resultFuture.set(new ServiceFilterResponseMock());
+
+                return resultFuture;
+
+            }
+        });
+
+        // Get the MobileService table
+        MobileServiceTable<PersonTestObject> msTable = client.getTable(PersonTestObject.class);
+
+        // Call the delete method sending the entity to delete
+        try {
+            msTable.undelete(person).get();
+            Assert.assertTrue("Opperation should have succeded", true);
+        } catch (Exception exception) {
+            Assert.assertTrue("Opperation should have succeded", false);
+        }
+
+        assertEquals(this.appUrl + "tables/" + tableName + "/" + person.getId(), container.getRequestUrl());
+    }
+
+    public void testSimpleQueryShouldReturnResults() throws Throwable {
 
 		final String tableName = "MyTableName";
 

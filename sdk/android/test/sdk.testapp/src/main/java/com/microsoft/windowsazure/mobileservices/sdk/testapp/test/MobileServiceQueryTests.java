@@ -101,6 +101,17 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
 		assertEquals("", QueryODataWriter.getRowFilter(query));
 	}
 
+    public void testIncludeDeleted() throws Throwable {
+
+        // Create query
+        Query query = table.includeDeleted();
+
+        // Assert
+        String expectedModifiers = "&__includeDeleted=true";
+        assertEquals(expectedModifiers, QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowFilter(query));
+    }
+
 	public void testOrderByDescending() throws Throwable {
 
 		// Create query

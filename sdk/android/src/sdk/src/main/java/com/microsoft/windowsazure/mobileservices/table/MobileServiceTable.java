@@ -319,6 +319,13 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 		return this.where().includeInlineCount();
 	}
 
+    /**
+     * Include a the soft deleted items on  records returned.
+     *
+     * @return ExecutableQuery
+     */
+    public ExecutableQuery<E> includeDeleted() {  return this.where().includeDeleted(); }
+
 	/**
 	 * Looks up a row in the table.
 	 * 
@@ -646,7 +653,115 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 		});
 	}
 
-	/**
+
+    /**
+     * Undelete an entity from a Mobile Service Table
+     *
+     * @param element
+     *            The entity to Undelete
+     */
+    public ListenableFuture<E> undelete(final E element) {
+        return this.undelete(element, (List<Pair<String, String>>) null);
+    }
+
+    /**
+     * Undelete an entity from a Mobile Service Table
+     *
+     * @deprecated use {@link undelete(final E element)} instead
+     *
+     * @param element
+     *            The entity to update
+     * @param callback
+     *            Callback to invoke when the operation is completed
+     */
+    public void undelete(final E element, final TableOperationCallback<E> callback) {
+        this.undelete(element, null, callback);
+    }
+
+    /**
+     * Undelete an entity from a Mobile Service Table
+     *
+     * @param element
+     *            The entity to Undelete
+     * @param parameters
+     *            A list of user-defined parameters and values to include in the
+     *            request URI query string
+     */
+    public ListenableFuture<E> undelete(final E element, final List<Pair<String, String>> parameters) {
+        final SettableFuture<E> future = SettableFuture.create();
+
+        JsonObject json = null;
+
+        try {
+            json = mClient.getGsonBuilder().create().toJsonTree(element).getAsJsonObject();
+        } catch (IllegalArgumentException e) {
+            future.setException(e);
+            return future;
+        }
+
+        ListenableFuture<JsonObject> internalFuture = mInternalTable.undelete(json, parameters);
+        Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
+            @Override
+            public void onFailure(Throwable exc) {
+                future.setException(transformToTypedException(exc));
+            }
+
+            @Override
+            public void onSuccess(JsonElement result) {
+                E entity = null;
+                try {
+                    entity = parseResults(result).get(0);
+                    if (entity != null && element != null) {
+                        copyFields(entity, element);
+                        entity = element;
+                    }
+                    future.set(entity);
+                } catch (Exception e) {
+                    future.setException(e);
+                }
+            }
+        });
+
+        return future;
+    }
+
+    /**
+     *
+     * Undelete an entity from a Mobile Service Table
+     *
+     * @deprecated use {@link undelete(final E element, final java.util.List< android.util.Pair<String,
+     *             String>> parameters)} instead
+     *
+     * @param element
+     *            The entity to Undelete
+     * @param parameters
+     *            A list of user-defined parameters and values to include in the
+     *            request URI query string
+     * @param callback
+     *            Callback to invoke when the operation is completed
+     */
+    public void undelete(final E element, final List<Pair<String, String>> parameters, final TableOperationCallback<E> callback) {
+        ListenableFuture<E> undeleteFuture = undelete(element, parameters);
+
+        Futures.addCallback(undeleteFuture, new FutureCallback<E>() {
+            @Override
+            public void onFailure(Throwable exception) {
+                if (exception instanceof Exception) {
+                    callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+                } else {
+                    callback.onCompleted(null, new Exception(exception), MobileServiceException.getServiceResponse(exception));
+                }
+            }
+
+            @Override
+            public void onSuccess(E result) {
+                callback.onCompleted(result, null, null);
+            }
+        });
+    }
+
+
+    /**
 	 * Parses the JSON object to a typed list
 	 * 
 	 * @param results

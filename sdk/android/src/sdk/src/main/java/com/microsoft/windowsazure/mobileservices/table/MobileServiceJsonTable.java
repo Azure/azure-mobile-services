@@ -277,7 +277,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 		return this.where().select(fields);
 	}
 
-	/**
+    /**
 	 * Include a property with the number of records returned.
 	 * 
 	 * @return ExecutableJsonQuery
@@ -286,7 +286,15 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 		return this.where().includeInlineCount();
 	}
 
-	/**
+    /**
+     * Include the soft deleted records on the query result.
+     *
+     * @return ExecutableJsonQuery
+     */
+    public ExecutableJsonQuery includeDeleted() { return this.where().includeDeleted(); }
+
+
+    /**
 	 * Looks up a row in the table and retrieves its JSON value.
 	 * 
 	 * @param id
@@ -650,6 +658,130 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 			}
 		});
 	}
+
+    /**
+     * Undelete an element from a Mobile Service Table
+     *
+     * @param element
+     *            The JsonObject to update
+     */
+    public ListenableFuture<JsonObject> undelete(final JsonObject element) {
+        return this.update(element, (List<Pair<String, String>>) null);
+    }
+
+    /**
+     * Undelete an element from a Mobile Service Table
+     *
+     * @deprecated use {@link update(final com.google.gson.JsonObject element)} instead
+     *
+     * @param element
+     *            The JsonObject to update
+     * @param callback
+     *            Callback to invoke when the operation is completed
+     */
+    public void undelete(final JsonObject element, final TableJsonOperationCallback callback) {
+        this.undelete(element, null, callback);
+    }
+
+    /**
+     * Undelete an element from a Mobile Service Table
+     *
+     * @param element
+     *            The JsonObject to undelete
+     * @param parameters
+     *            A list of user-defined parameters and values to include in the
+     *            request URI query string
+     */
+    public ListenableFuture<JsonObject> undelete(final JsonObject element, List<Pair<String, String>> parameters) {
+        final SettableFuture<JsonObject> future = SettableFuture.create();
+
+        Object id = null;
+        String version = null;
+        String content = null;
+
+        try {
+            id = validateId(element);
+        } catch (Exception e) {
+            future.setException(e);
+            return future;
+        }
+
+        if (!isNumericType(id)) {
+            version = getVersionSystemProperty(element);
+            content = removeSystemProperties(element).toString();
+        } else {
+            content = element.toString();
+        }
+
+        EnumSet<MobileServiceFeatures> features = mFeatures.clone();
+        if (parameters != null && parameters.size() > 0) {
+            features.add(MobileServiceFeatures.AdditionalQueryParameters);
+        }
+
+        parameters = addSystemProperties(mSystemProperties, parameters);
+        List<Pair<String, String>> requestHeaders = null;
+        if (version != null) {
+            requestHeaders = new ArrayList<Pair<String,String>>();
+            requestHeaders.add(new Pair<String, String>("If-Match", getEtagFromValue(version)));
+            features.add(MobileServiceFeatures.OpportunisticConcurrency);
+        }
+
+        ListenableFuture<Pair<JsonObject, ServiceFilterResponse>> internalFuture = this.executeTableOperation(TABLES_URL + mTableName + "/" + id.toString(), "null", "POST", requestHeaders, parameters, features);
+
+        Futures.addCallback(internalFuture, new FutureCallback<Pair<JsonObject, ServiceFilterResponse>>() {
+            @Override
+            public void onFailure(Throwable exc) {
+                future.setException(exc);
+            }
+
+            @Override
+            public void onSuccess(Pair<JsonObject, ServiceFilterResponse> result) {
+                JsonObject patchedJson = patchOriginalEntityWithResponseEntity(element, result.first);
+
+                updateVersionFromETag(result.second, patchedJson);
+
+                future.set(patchedJson);
+            }
+        });
+
+        return future;
+    }
+
+    /**
+     * Undeete an element from a Mobile Service Table
+     *
+     * @deprecated use {@link update(final com.google.gson.JsonObject element, java.util.List< android.util.Pair<String,
+     *             String>> parameters)} instead
+     *
+     * @param element
+     *            The JsonObject to undelete
+     * @param parameters
+     *            A list of user-defined parameters and values to include in the
+     *            request URI query string
+     * @param callback
+     *            Callback to invoke when the operation is completed
+     */
+    public void undelete(final JsonObject element, List<Pair<String, String>> parameters, final TableJsonOperationCallback callback) {
+        ListenableFuture<JsonObject> updateFuture = undelete(element, parameters);
+
+        Futures.addCallback(updateFuture, new FutureCallback<JsonObject>() {
+            @Override
+            public void onFailure(Throwable exception) {
+                if (exception instanceof Exception) {
+                    callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+                } else {
+                    callback.onCompleted(null, new Exception(exception), MobileServiceException.getServiceResponse(exception));
+                }
+            }
+
+            @Override
+            public void onSuccess(JsonObject result) {
+                callback.onCompleted(result, null, null);
+            }
+        });
+    }
+
+
 
 	/**
 	 * Executes the query against the table

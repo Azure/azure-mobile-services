@@ -134,6 +134,11 @@ public final class ExecutableJsonQuery implements Query {
 		return this.mQuery.hasInlineCount();
 	}
 
+    @Override
+    public boolean hasDeleted() {
+        return this.mQuery.hasDeleted();
+    }
+
 	@Override
 	public List<Pair<String, QueryOrder>> getOrderBy() {
 		return this.mQuery.getOrderBy();
@@ -207,6 +212,21 @@ public final class ExecutableJsonQuery implements Query {
 		this.mQuery.removeInlineCount();
 		return this;
 	}
+
+
+    @Override
+    public ExecutableJsonQuery includeDeleted() {
+        this.mQuery.includeDeleted();
+
+        return this;
+    }
+
+    @Override
+    public ExecutableJsonQuery removeDeleted() {
+        this.mQuery.removeDeleted();
+
+        return this;
+    }
 
 	@Override
 	public ExecutableJsonQuery select(String... fields) {

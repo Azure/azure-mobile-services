@@ -105,6 +105,17 @@ public interface MobileServiceLocalStore {
 	 */
 	void delete(String tableName, String itemId) throws MobileServiceLocalStoreException;
 
+    /**
+     * Delete an item from the local store.
+     *
+     * @param tableName
+     *            the local table name
+     * @param itemsIds
+     *            the list of ids of the items to be deleted
+     * @throws MobileServiceLocalStoreException
+     */
+    void delete(String tableName, String[] itemsIds) throws MobileServiceLocalStoreException;
+
 	/**
 	 * Delete items from the local store.
 	 * 

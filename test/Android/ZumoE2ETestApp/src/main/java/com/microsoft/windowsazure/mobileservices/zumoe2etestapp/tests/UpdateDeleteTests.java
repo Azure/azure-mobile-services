@@ -25,8 +25,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
+import com.microsoft.windowsazure.mobileservices.MobileServiceList;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
+import com.microsoft.windowsazure.mobileservices.table.query.ExecutableQuery;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.ExpectedValueException;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestCase;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestExecutionCallback;
@@ -39,10 +41,13 @@ import com.microsoft.windowsazure.mobileservices.table.TableDeleteCallback;
 import com.microsoft.windowsazure.mobileservices.table.TableOperationCallback;
 import com.microsoft.windowsazure.mobileservices.table.TableJsonOperationCallback;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.StringIdRoundTripTableElement;
 
 public class UpdateDeleteTests extends TestGroup {
 
 	protected static final String ROUNDTRIP_TABLE_NAME = "droidRoundTripTable";
+
+    protected static final String STRING_ID_ROUNDTRIP_TABLE_NAME = "stringIdRoundTripTable";
 
 	public UpdateDeleteTests() {
 		super("Insert/Update/Delete Tests");
@@ -107,7 +112,20 @@ public class UpdateDeleteTests extends TestGroup {
 		this.addTest(createDeleteTest("(Neg) Delete untyped item with non-existing id", false, true, true, MobileServiceException.class));
 		this.addTest(createDeleteTest("(Neg) Delete untyped item without id field", false, false, false, IllegalArgumentException.class));
 
-		// With Callbacks
+        // soft delete test
+        this.addTest(createSoftDeleteTest("Soft Delete typed item - Return on query", true, false, true, true, null));
+        this.addTest(createSoftDeleteTest("Soft Delete typed item - No return on query", true, false, true, false, null));
+        this.addTest(createSoftDeleteTest("(Neg)Soft Delete typed item with non-existing id", true, true, true, false, MobileServiceException.class));
+        this.addTest(createSoftDeleteTest("Soft Delete untyped item - Return on query", false, false, true, true, null));
+        this.addTest(createSoftDeleteTest("Soft Delete untyped item - No return on query", false, false, true, false, null));
+        this.addTest(createSoftDeleteTest("(Neg)Soft Delete untyped item with non-existing id", false, true, true, false, MobileServiceException.class));
+        this.addTest(createSoftDeleteTest("(Neg)Soft Delete untyped item without id field", false, false, false, false, IllegalArgumentException.class));
+
+        this.addTest(createSoftDeleteUndeleteTest("Soft Delete - Undelete typed item - Return on query", true, null));
+        this.addTest(createSoftDeleteUndeleteTest("Soft Delete - Undelete untyped item - No return on query", false,  null));
+
+
+        // With Callbacks
 		this.addTest(createTypedUpdateWithCallbackTest("With Callback - Update typed item", new RoundTripTableElement(rndGen),
 				new RoundTripTableElement(rndGen), true, null));
 		this.addTest(createUntypedUpdateWithCallbackTest("With Callback - Update untyped item, setting values to null", parser.parse(toInsertJsonString)
@@ -253,13 +271,15 @@ public class UpdateDeleteTests extends TestGroup {
 		return test;
 	}
 
-	private TestCase createDeleteTest(String name, final boolean typed, final boolean useFakeId, final boolean includeId, Class<?> expectedExceptionClass) {
+	private TestCase createSoftDeleteTest(String name, final boolean typed, final boolean useFakeId, final boolean includeId, final boolean includeSoftDeleteInQueries, Class<?> expectedExceptionClass) {
 		TestCase testCase = new TestCase() {
 
 			@Override
 			protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
-				RoundTripTableElement element = new RoundTripTableElement(new Random());
-				final MobileServiceTable<RoundTripTableElement> table = client.getTable(ROUNDTRIP_TABLE_NAME, RoundTripTableElement.class);
+
+				StringIdRoundTripTableElement element = new StringIdRoundTripTableElement(new Random());
+
+				final MobileServiceTable<StringIdRoundTripTableElement> table = client.getTable(STRING_ID_ROUNDTRIP_TABLE_NAME, StringIdRoundTripTableElement.class);
 
 				final TestResult result = new TestResult();
 				result.setStatus(TestStatus.Passed);
@@ -271,19 +291,19 @@ public class UpdateDeleteTests extends TestGroup {
 
 				try {
 
-					RoundTripTableElement entity = table.insert(element).get();
+                    StringIdRoundTripTableElement entity = table.insert(element).get();
 
 					Object deleteObject;
 
-					if (useFakeId) {
-						log("use fake id");
-						entity.id = 1000000000;
-					}
+                    if (useFakeId) {
+                        log("use fake id");
+                        entity.id = "1000000000";
+                    }
 
-					if (!includeId) {
-						log("include id");
-						entity.id = null;
-					}
+                    if (!includeId) {
+                        log("include id");
+                        entity.id = null;
+                    }
 
 					if (typed) {
 						deleteObject = entity;
@@ -291,10 +311,45 @@ public class UpdateDeleteTests extends TestGroup {
 						deleteObject = client.getGsonBuilder().create().toJsonTree(entity).getAsJsonObject();
 					}
 
-					log("delete");
+
+					log("soft delete");
 
 					table.delete(deleteObject).get();
 
+                    log("verifiying if was soft deleted");
+
+                    if (includeSoftDeleteInQueries) {
+
+                        ExecutableQuery<StringIdRoundTripTableElement> query =
+                                table.includeDeleted().field("id").eq(entity.id);
+
+                        MobileServiceList<StringIdRoundTripTableElement> results = table.execute(query).get();
+
+                        if (results.size() != 1) {
+                            createResultFromException(result, new ExpectedValueException(1, 0));
+                        }
+
+                        StringIdRoundTripTableElement deletedElement = results.get(0);
+
+                        if (!deletedElement.Deleted) {
+                            createResultFromException(result, new ExpectedValueException(true, false));
+                        }
+                    } else {
+
+                        try {
+                            StringIdRoundTripTableElement resultElement = table.lookUp(entity.id).get();
+                        }
+                        catch (Exception exception) {
+
+                            MobileServiceException ex = (MobileServiceException) exception.getCause();
+
+                            String message = "An item with id '" + entity.id + "' does not exist.";
+
+                            if (!ex.getMessage().contains(message)) {
+                                createResultFromException(result, new ExpectedValueException(message, ex.getMessage()));
+                            }
+                        }
+                    }
 				} catch (Exception exception) {
 					if (exception != null) {
 						createResultFromException(result, exception);
@@ -312,7 +367,149 @@ public class UpdateDeleteTests extends TestGroup {
 		return testCase;
 	}
 
-	@SuppressWarnings("deprecation")
+    private TestCase createSoftDeleteUndeleteTest(String name, final boolean typed, Class<?> expectedExceptionClass) {
+        TestCase testCase = new TestCase() {
+
+            @Override
+            protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
+
+                StringIdRoundTripTableElement element = new StringIdRoundTripTableElement(new Random());
+
+                final MobileServiceTable<StringIdRoundTripTableElement> table = client.getTable(STRING_ID_ROUNDTRIP_TABLE_NAME, StringIdRoundTripTableElement.class);
+
+                final TestResult result = new TestResult();
+                result.setStatus(TestStatus.Passed);
+
+                final TestCase testCase = this;
+                result.setTestCase(testCase);
+
+                log("insert item");
+
+                try {
+
+                    StringIdRoundTripTableElement entity = table.insert(element).get();
+
+                    Object deleteObject;
+
+                    if (typed) {
+                        deleteObject = entity;
+                    } else {
+                        deleteObject = client.getGsonBuilder().create().toJsonTree(entity).getAsJsonObject();
+                    }
+
+                    log("soft delete");
+
+                    table.delete(deleteObject).get();
+
+                    log("verifiying if was soft deleted");
+
+                    try {
+                        StringIdRoundTripTableElement resultElement = table.lookUp(entity.id).get();
+                    }
+                    catch (Exception exception) {
+
+                        MobileServiceException ex = (MobileServiceException) exception.getCause();
+
+                        String message = "An item with id '" + entity.id + "' does not exist.";
+
+                        if (!ex.getMessage().contains(message)) {
+                            createResultFromException(result, new ExpectedValueException(message, ex.getMessage()));
+                        }
+                    }
+
+                    log("undelete element");
+
+                    if (typed) {
+                        table.undelete(entity).get();
+                    } else {
+
+                        MobileServiceJsonTable jsonTable = client.getTable(STRING_ID_ROUNDTRIP_TABLE_NAME);
+
+                        jsonTable.undelete((JsonObject) deleteObject).get();
+                    }
+
+                    log("read undeleted element");
+                    StringIdRoundTripTableElement resultElement = table.lookUp(entity.id).get();
+
+
+                } catch (Exception exception) {
+                    if (exception != null) {
+                        createResultFromException(result, exception);
+                    }
+                } finally {
+                    if (callback != null)
+                        callback.onTestComplete(testCase, result);
+                }
+            }
+        };
+
+        testCase.setName(name);
+        testCase.setExpectedExceptionClass(expectedExceptionClass);
+
+        return testCase;
+    }
+
+
+    private TestCase createDeleteTest(String name, final boolean typed, final boolean useFakeId, final boolean includeId, Class<?> expectedExceptionClass) {
+        TestCase testCase = new TestCase() {
+
+            @Override
+            protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
+                RoundTripTableElement element = new RoundTripTableElement(new Random());
+                final MobileServiceTable<RoundTripTableElement> table = client.getTable(ROUNDTRIP_TABLE_NAME, RoundTripTableElement.class);
+
+                final TestResult result = new TestResult();
+                result.setStatus(TestStatus.Passed);
+
+                final TestCase testCase = this;
+                result.setTestCase(testCase);
+
+                log("insert item");
+
+                try {
+
+                    RoundTripTableElement entity = table.insert(element).get();
+
+                    Object deleteObject;
+
+                    if (useFakeId) {
+                        log("use fake id");
+                        entity.id = 1000000000;
+                    }
+
+                    if (!includeId) {
+                        log("include id");
+                        entity.id = null;
+                    }
+
+                    if (typed) {
+                        deleteObject = entity;
+                    } else {
+                        deleteObject = client.getGsonBuilder().create().toJsonTree(entity).getAsJsonObject();
+                    }
+
+                    log("delete");
+
+                    table.delete(deleteObject).get();
+
+                } catch (Exception exception) {
+                    if (exception != null) {
+                        createResultFromException(result, exception);
+                    }
+                } finally {
+                    if (callback != null)
+                        callback.onTestComplete(testCase, result);
+                }
+            }
+        };
+
+        testCase.setName(name);
+        testCase.setExpectedExceptionClass(expectedExceptionClass);
+
+        return testCase;
+    }
+
+    @SuppressWarnings("deprecation")
 	private TestCase createTypedUpdateWithCallbackTest(String name, final RoundTripTableElement itemToInsert, final RoundTripTableElement itemToUpdate,
 			final boolean setUpdatedId, final Class<?> expectedExceptionClass) {
 

@@ -108,7 +108,12 @@ public class MobileServiceHttpClient {
 			List<Pair<String, String>> requestHeaders, List<Pair<String, String>> parameters,
 			EnumSet<MobileServiceFeatures> features) {
 		try {
-			byte[] byteContent = content.getBytes(MobileServiceClient.UTF8_ENCODING);
+			byte[] byteContent = null;
+
+            if (content != null) {
+                byteContent = content.getBytes(MobileServiceClient.UTF8_ENCODING);
+            }
+
 			return this.request(path, byteContent, httpMethod, requestHeaders, parameters, features);
 		} catch (UnsupportedEncodingException e) {
 			SettableFuture<ServiceFilterResponse> future = SettableFuture.create();
