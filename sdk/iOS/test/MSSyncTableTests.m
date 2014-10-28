@@ -12,6 +12,7 @@
 #import "MSSDKFeatures.h"
 
 static NSString *const TodoTableNoVersion = @"TodoNoVersion";
+static NSString *const AllColumnTypesTable = @"ColumnTypes";
 
 @interface MSSyncTableTests : XCTestCase {
     MSClient *client;
@@ -168,6 +169,97 @@ static NSString *const TodoTableNoVersion = @"TodoNoVersion";
     [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(insertRanToServer, @"the insert call didn't go to the server");
+        done = YES;
+    }];
+    XCTAssertTrue([self waitForTest:2000.1], @"Test timed out.");
+}
+
+-(void) testInsertWithAllColumnTypes {
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200
+                                                                 data:@"{\"id\": \"test1\", \"text\":\"test name\"}"];
+    BOOL __block insertRanToServer = NO;
+    
+    testFilter.ignoreNextFilter = YES;
+    testFilter.onInspectRequest =  ^(NSURLRequest *request) {
+        XCTAssertEqualObjects(request.HTTPMethod, @"POST", @"Incorrect operation (%@) sent to server", request.HTTPMethod);
+        insertRanToServer = YES;
+        return request;
+    };
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:AllColumnTypesTable];
+    
+    // Create the item
+    NSDictionary *item = @{ @"id": @"simpleId",
+                            @"string":@"string value",
+                            @"int16": [NSNumber numberWithInt:16],
+                            @"int32": [NSNumber numberWithInt:32],
+                            @"int64": [NSNumber numberWithInt:64],
+                            @"float": [NSNumber numberWithFloat:3.14],
+                            @"decimal": [NSDecimalNumber decimalNumberWithMantissa:6 exponent:2 isNegative:NO],
+                            @"double": [NSNumber numberWithDouble:12.12],
+                            @"data": [NSDate dateWithTimeIntervalSinceNow:0],
+                        };
+    
+    // Insert the item
+    done = NO;
+    [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
+        XCTAssertNil(error, @"error should have been nil.");
+        done = YES;
+    }];
+    
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    
+    done = NO;
+    [client.syncContext pushWithCompletion:^(NSError *error) {
+        XCTAssertNil(error, @"error should have been nil.");
+        XCTAssertTrue(insertRanToServer, @"the insert call didn't go to the server");
+        done = YES;
+    }];
+    XCTAssertTrue([self waitForTest:2000.1], @"Test timed out.");
+}
+
+-(void) testInsertWithBinaryFail {
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:500];
+    
+    BOOL __block insertRanToServer = NO;
+    
+    testFilter.ignoreNextFilter = YES;
+    testFilter.onInspectRequest =  ^(NSURLRequest *request) {
+        insertRanToServer = YES;
+        return request;
+    };
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:AllColumnTypesTable];
+    
+    // Create the item
+    NSDictionary *item = @{ @"id": @"simpleId",
+                            @"binary": [@"my test data" dataUsingEncoding:NSUTF8StringEncoding]
+                            };
+    
+    // Insert the item
+    done = NO;
+    [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
+        XCTAssertNil(error, @"error should have been nil.");
+        done = YES;
+    }];
+    
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    
+    done = NO;
+    [client.syncContext pushWithCompletion:^(NSError *error) {
+        XCTAssertFalse(insertRanToServer);
+        XCTAssertNotNil(error);
+        XCTAssertEqual(error.code, MSPushCompleteWithErrors);
+        
+        NSArray *pushErrors = [error.userInfo objectForKey:MSErrorPushResultKey];
+        XCTAssertNotNil(pushErrors);
+        XCTAssertEqual(pushErrors.count, 1);
+        
+        MSTableOperationError *tableError = [pushErrors objectAtIndex:0];
+        XCTAssertEqual(tableError.code, MSInvalidItemWithRequest);
+        
         done = YES;
     }];
     XCTAssertTrue([self waitForTest:2000.1], @"Test timed out.");
