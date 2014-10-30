@@ -56,6 +56,7 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestSt
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.Util.IPredicate;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.StringIdJsonElement;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.StringIdRoundTripTableElement;
+import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.StringIdRoundTripTableSoftDeleteElement;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.SystemPropertiesTestData;
 
 import static com.microsoft.windowsazure.mobileservices.table.query.QueryOperations.*;
@@ -959,8 +960,43 @@ public class SystemPropertiesTests extends TestGroup {
 		verifySystemProperties(message, true, true, true, true, element);
 	}
 
+    private void verifySystemProperties(String message, StringIdRoundTripTableSoftDeleteElement element) throws Exception {
+        verifySystemProperties(message, true, true, true, true, element);
+    }
+
+    private void verifySystemProperties(String message, boolean shouldHaveCreatedAt, boolean shouldHaveUpdatedAt, boolean shouldHaveVersion, boolean shouldHaveDeleted,
+                                        StringIdRoundTripTableElement element) throws Exception {
+        if ((shouldHaveCreatedAt && element.CreatedAt == null) || (!shouldHaveCreatedAt && element.CreatedAt != null)
+                || (shouldHaveUpdatedAt && element.UpdatedAt == null) || (!shouldHaveUpdatedAt && element.UpdatedAt != null)
+                || (shouldHaveVersion && element.Version == null) || (!shouldHaveVersion && element.Version != null)) {
+            StringBuilder builder = new StringBuilder();
+            builder.append(message);
+            builder.append(" - System Properties");
+
+            if (shouldHaveCreatedAt && element.CreatedAt == null) {
+                builder.append(" - CreatedAt is null");
+            } else if (!shouldHaveCreatedAt && element.CreatedAt != null) {
+                builder.append(" - CreatedAt is not null");
+            }
+
+            if (shouldHaveUpdatedAt && element.UpdatedAt == null) {
+                builder.append(" - UpdatedAt is null");
+            } else if (!shouldHaveUpdatedAt && element.UpdatedAt != null) {
+                builder.append(" - UpdatedAt is not null");
+            }
+
+            if (shouldHaveVersion && element.Version == null) {
+                builder.append(" - Version is null");
+            } else if (!shouldHaveVersion && element.Version != null) {
+                builder.append(" - Version is not null");
+            }
+
+            throw new Exception(builder.toString());
+        }
+    }
+
 	private void verifySystemProperties(String message, boolean shouldHaveCreatedAt, boolean shouldHaveUpdatedAt, boolean shouldHaveVersion, boolean shouldHaveDeleted,
-			StringIdRoundTripTableElement element) throws Exception {
+                                        StringIdRoundTripTableSoftDeleteElement element) throws Exception {
 		if ((shouldHaveCreatedAt && element.CreatedAt == null) || (!shouldHaveCreatedAt && element.CreatedAt != null)
 				|| (shouldHaveUpdatedAt && element.UpdatedAt == null) || (!shouldHaveUpdatedAt && element.UpdatedAt != null)
 				|| (shouldHaveVersion && element.Version == null) || (!shouldHaveVersion && element.Version != null)

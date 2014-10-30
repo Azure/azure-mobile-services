@@ -42,12 +42,15 @@ import com.microsoft.windowsazure.mobileservices.table.TableOperationCallback;
 import com.microsoft.windowsazure.mobileservices.table.TableJsonOperationCallback;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.StringIdRoundTripTableElement;
+import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.StringIdRoundTripTableSoftDeleteElement;
 
 public class UpdateDeleteTests extends TestGroup {
 
 	protected static final String ROUNDTRIP_TABLE_NAME = "droidRoundTripTable";
 
     protected static final String STRING_ID_ROUNDTRIP_TABLE_NAME = "stringIdRoundTripTable";
+
+    protected static final String STRING_ID_ROUNDTRIP_SOFT_DELETE_TABLE_NAME = "stringIdRoundTripSoftDeleteTable";
 
 	public UpdateDeleteTests() {
 		super("Insert/Update/Delete Tests");
@@ -277,9 +280,10 @@ public class UpdateDeleteTests extends TestGroup {
 			@Override
 			protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
 
-				StringIdRoundTripTableElement element = new StringIdRoundTripTableElement(new Random());
+                StringIdRoundTripTableSoftDeleteElement element = new StringIdRoundTripTableSoftDeleteElement(new Random());
 
-				final MobileServiceTable<StringIdRoundTripTableElement> table = client.getTable(STRING_ID_ROUNDTRIP_TABLE_NAME, StringIdRoundTripTableElement.class);
+				final MobileServiceTable<StringIdRoundTripTableSoftDeleteElement> table =
+                        client.getTable(STRING_ID_ROUNDTRIP_SOFT_DELETE_TABLE_NAME, StringIdRoundTripTableSoftDeleteElement.class);
 
 				final TestResult result = new TestResult();
 				result.setStatus(TestStatus.Passed);
@@ -291,7 +295,7 @@ public class UpdateDeleteTests extends TestGroup {
 
 				try {
 
-                    StringIdRoundTripTableElement entity = table.insert(element).get();
+                    StringIdRoundTripTableSoftDeleteElement entity = table.insert(element).get();
 
 					Object deleteObject;
 
@@ -320,16 +324,16 @@ public class UpdateDeleteTests extends TestGroup {
 
                     if (includeSoftDeleteInQueries) {
 
-                        ExecutableQuery<StringIdRoundTripTableElement> query =
+                        ExecutableQuery<StringIdRoundTripTableSoftDeleteElement> query =
                                 table.includeDeleted().field("id").eq(entity.id);
 
-                        MobileServiceList<StringIdRoundTripTableElement> results = table.execute(query).get();
+                        MobileServiceList<StringIdRoundTripTableSoftDeleteElement> results = table.execute(query).get();
 
                         if (results.size() != 1) {
                             createResultFromException(result, new ExpectedValueException(1, 0));
                         }
 
-                        StringIdRoundTripTableElement deletedElement = results.get(0);
+                        StringIdRoundTripTableSoftDeleteElement deletedElement = results.get(0);
 
                         if (!deletedElement.Deleted) {
                             createResultFromException(result, new ExpectedValueException(true, false));
@@ -337,7 +341,7 @@ public class UpdateDeleteTests extends TestGroup {
                     } else {
 
                         try {
-                            StringIdRoundTripTableElement resultElement = table.lookUp(entity.id).get();
+                            StringIdRoundTripTableSoftDeleteElement resultElement = table.lookUp(entity.id).get();
                         }
                         catch (Exception exception) {
 
@@ -373,9 +377,9 @@ public class UpdateDeleteTests extends TestGroup {
             @Override
             protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
 
-                StringIdRoundTripTableElement element = new StringIdRoundTripTableElement(new Random());
+                StringIdRoundTripTableSoftDeleteElement element = new StringIdRoundTripTableSoftDeleteElement(new Random());
 
-                final MobileServiceTable<StringIdRoundTripTableElement> table = client.getTable(STRING_ID_ROUNDTRIP_TABLE_NAME, StringIdRoundTripTableElement.class);
+                final MobileServiceTable<StringIdRoundTripTableSoftDeleteElement> table = client.getTable(STRING_ID_ROUNDTRIP_SOFT_DELETE_TABLE_NAME, StringIdRoundTripTableSoftDeleteElement.class);
 
                 final TestResult result = new TestResult();
                 result.setStatus(TestStatus.Passed);
@@ -387,7 +391,7 @@ public class UpdateDeleteTests extends TestGroup {
 
                 try {
 
-                    StringIdRoundTripTableElement entity = table.insert(element).get();
+                    StringIdRoundTripTableSoftDeleteElement entity = table.insert(element).get();
 
                     Object deleteObject;
 
@@ -404,7 +408,7 @@ public class UpdateDeleteTests extends TestGroup {
                     log("verifiying if was soft deleted");
 
                     try {
-                        StringIdRoundTripTableElement resultElement = table.lookUp(entity.id).get();
+                        table.lookUp(entity.id).get();
                     }
                     catch (Exception exception) {
 
@@ -423,16 +427,17 @@ public class UpdateDeleteTests extends TestGroup {
                         table.undelete(entity).get();
                     } else {
 
-                        MobileServiceJsonTable jsonTable = client.getTable(STRING_ID_ROUNDTRIP_TABLE_NAME);
+                        MobileServiceJsonTable jsonTable = client.getTable(STRING_ID_ROUNDTRIP_SOFT_DELETE_TABLE_NAME);
 
                         jsonTable.undelete((JsonObject) deleteObject).get();
                     }
 
                     log("read undeleted element");
-                    StringIdRoundTripTableElement resultElement = table.lookUp(entity.id).get();
+                    StringIdRoundTripTableSoftDeleteElement resultElement = table.lookUp(entity.id).get();
 
 
                 } catch (Exception exception) {
+
                     if (exception != null) {
                         createResultFromException(result, exception);
                     }

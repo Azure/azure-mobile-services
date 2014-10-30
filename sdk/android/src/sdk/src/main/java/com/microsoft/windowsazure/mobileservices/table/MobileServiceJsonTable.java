@@ -697,7 +697,6 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 
         Object id = null;
         String version = null;
-        String content = null;
 
         try {
             id = validateId(element);
@@ -708,9 +707,6 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 
         if (!isNumericType(id)) {
             version = getVersionSystemProperty(element);
-            content = removeSystemProperties(element).toString();
-        } else {
-            content = element.toString();
         }
 
         EnumSet<MobileServiceFeatures> features = mFeatures.clone();
@@ -718,7 +714,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
             features.add(MobileServiceFeatures.AdditionalQueryParameters);
         }
 
-        parameters = addSystemProperties(mSystemProperties, parameters);
+        //parameters = addSystemProperties(mSystemProperties, parameters);
         List<Pair<String, String>> requestHeaders = null;
         if (version != null) {
             requestHeaders = new ArrayList<Pair<String,String>>();
@@ -726,7 +722,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
             features.add(MobileServiceFeatures.OpportunisticConcurrency);
         }
 
-        ListenableFuture<Pair<JsonObject, ServiceFilterResponse>> internalFuture = this.executeTableOperation(TABLES_URL + mTableName + "/" + id.toString(), "null", "POST", requestHeaders, parameters, features);
+        ListenableFuture<Pair<JsonObject, ServiceFilterResponse>> internalFuture = this.executeTableOperation(TABLES_URL + mTableName + "/" + id.toString(), null, "POST", requestHeaders, parameters, features);
 
         Futures.addCallback(internalFuture, new FutureCallback<Pair<JsonObject, ServiceFilterResponse>>() {
             @Override

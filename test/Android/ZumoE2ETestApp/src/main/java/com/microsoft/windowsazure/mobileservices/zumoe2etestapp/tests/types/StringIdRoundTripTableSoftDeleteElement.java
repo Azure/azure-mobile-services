@@ -19,17 +19,17 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types;
 
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Random;
-
 import android.annotation.SuppressLint;
 
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.Util;
 
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Random;
+
 @SuppressLint("DefaultLocale")
-public class StringIdRoundTripTableElement {
+public class StringIdRoundTripTableSoftDeleteElement {
 	public String id;
 
 	public String name;
@@ -40,9 +40,6 @@ public class StringIdRoundTripTableElement {
 
 	public Date date1;
 
-	// Complex type
-	public ComplexType complex;
-
 	@SerializedName("__createdAt")
 	public Date CreatedAt;
 
@@ -52,55 +49,54 @@ public class StringIdRoundTripTableElement {
 	@SerializedName("__version")
 	public String Version;
 
-	public StringIdRoundTripTableElement() {
+    @SerializedName("__deleted")
+    public Boolean Deleted;
+
+	public StringIdRoundTripTableSoftDeleteElement() {
 		this(false);
 	}
 
-	public StringIdRoundTripTableElement(String id) {
+	public StringIdRoundTripTableSoftDeleteElement(String id) {
 		this(true);
 		this.id = id;
 	}
-	public StringIdRoundTripTableElement(boolean initialized) {
+	public StringIdRoundTripTableSoftDeleteElement(boolean initialized) {
 		if (initialized) {
 			name = "Sample Data";
 			number = 10.5;
 			bool = true;
 			date1 = new GregorianCalendar().getTime();
 			Random rndGen = new Random();
-			complex = new ComplexType(rndGen);
 		} else {
 			name = null;
 			number = null;
 			bool = null;
 			date1 = null;
-			complex = null;
 		}
 	}
 
-	public StringIdRoundTripTableElement(Random rndGen) {
+	public StringIdRoundTripTableSoftDeleteElement(Random rndGen) {
 		name = Util.createSimpleRandomString(rndGen, 10);
 		number = rndGen.nextDouble();
 		bool = rndGen.nextBoolean();
 		date1 = new GregorianCalendar(rndGen.nextInt(20) + 1980, rndGen.nextInt(12), rndGen.nextInt(27) + 1, rndGen.nextInt(24), rndGen.nextInt(60),
 				rndGen.nextInt(60)).getTime();
-		complex = new ComplexType(rndGen);
 	}
 
-	public StringIdRoundTripTableElement(StringIdRoundTripTableElement other) {
+	public StringIdRoundTripTableSoftDeleteElement(StringIdRoundTripTableSoftDeleteElement other) {
 		id = String.valueOf(other.id);
 		name = String.valueOf(other.name);
 		number = Double.valueOf(other.number);
 		bool = Boolean.valueOf(other.bool);
 		date1 = new Date(other.date1.getTime());
-		complex = new ComplexType(other.complex);
 	}
 
 	@Override
 	public boolean equals(Object o) {
-		if (!(o instanceof StringIdRoundTripTableElement))
+		if (!(o instanceof StringIdRoundTripTableSoftDeleteElement))
 			return false;
 
-		StringIdRoundTripTableElement element = (StringIdRoundTripTableElement) o;
+		StringIdRoundTripTableSoftDeleteElement element = (StringIdRoundTripTableSoftDeleteElement) o;
 		if (!Util.compare(element.id, id))
 			return false;
 		if (!Util.compare(element.name, name))
@@ -111,15 +107,13 @@ public class StringIdRoundTripTableElement {
 			return false;
 		if (!Util.compare(element.date1, date1))
 			return false;
-		if (!Util.compare(element.complex, complex))
-			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return String.format("StringIdRoundTripTableItem[Bool=%B,ComplexType=%s,Date1=%s,Name=%s,Number=%s]", bool == null ? "<<NULL>>" : bool.toString(),
-				complex == null ? "<<NULL>>" : complex.toString(), date1 == null ? "<<NULL>>" : Util.dateToString(date1), name, number == null ? "<NULL>"
+		return String.format("StringIdRoundTripTableItem[Bool=%B,Date1=%s,Name=%s,Number=%s]", bool == null ? "<<NULL>>" : bool.toString(),
+				date1 == null ? "<<NULL>>" : Util.dateToString(date1), name, number == null ? "<NULL>"
 						: number.toString());
 
 	}
