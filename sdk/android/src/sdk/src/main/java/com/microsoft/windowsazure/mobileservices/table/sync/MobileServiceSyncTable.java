@@ -191,6 +191,11 @@ public class MobileServiceSyncTable<E> {
 			@Override
 			public void onSuccess(JsonObject result) {
 				try {
+
+                    if (result == null) {
+                        future.set(null);
+                    }
+
 					future.set(parseResults(result).get(0));
 				} catch (Exception e) {
 					future.setException(e);

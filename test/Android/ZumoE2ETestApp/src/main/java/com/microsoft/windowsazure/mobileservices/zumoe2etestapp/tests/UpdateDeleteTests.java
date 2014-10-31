@@ -19,7 +19,10 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -29,6 +32,14 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceList;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.table.query.ExecutableQuery;
+import com.microsoft.windowsazure.mobileservices.table.query.Query;
+import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
+import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncContext;
+import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncTable;
+import com.microsoft.windowsazure.mobileservices.table.sync.localstore.ColumnDataType;
+import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileServiceLocalStoreException;
+import com.microsoft.windowsazure.mobileservices.table.sync.localstore.SQLiteLocalStore;
+import com.microsoft.windowsazure.mobileservices.table.sync.synchandler.SimpleSyncHandler;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.ExpectedValueException;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestCase;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestExecutionCallback;
@@ -127,6 +138,8 @@ public class UpdateDeleteTests extends TestGroup {
         this.addTest(createSoftDeleteUndeleteTest("Soft Delete - Undelete typed item", true, null));
         this.addTest(createSoftDeleteUndeleteTest("Soft Delete - Undelete untyped item", false,  null));
 
+        this.addTest(createSoftDeletePullTest("Soft Delete - Pull typed item", true, null));
+        this.addTest(createSoftDeletePullTest("Soft Delete - Pull untyped item", false,  null));
 
         // With Callbacks
 		this.addTest(createTypedUpdateWithCallbackTest("With Callback - Update typed item", new RoundTripTableElement(rndGen),
@@ -442,6 +455,154 @@ public class UpdateDeleteTests extends TestGroup {
 
 
                 } catch (Exception exception) {
+
+                    if (exception != null) {
+                        createResultFromException(result, exception);
+                    }
+                } finally {
+                    if (callback != null)
+                        callback.onTestComplete(testCase, result);
+                }
+            }
+        };
+
+        testCase.setName(name);
+        testCase.setExpectedExceptionClass(expectedExceptionClass);
+
+        return testCase;
+    }
+
+    private TestCase createSoftDeletePullTest(String name, final boolean typed, Class<?> expectedExceptionClass) {
+        TestCase testCase = new TestCase() {
+
+            @Override
+            protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
+
+                final TestResult result = new TestResult();
+                result.setStatus(TestStatus.Passed);
+
+                final TestCase testCase = this;
+                result.setTestCase(testCase);
+
+                try {
+
+                SQLiteLocalStore localStore = new SQLiteLocalStore(client.getContext(), STRING_ID_ROUNDTRIP_SOFT_DELETE_TABLE_NAME, null, 1);
+
+                SimpleSyncHandler handler = new SimpleSyncHandler();
+                MobileServiceSyncContext syncContext = client.getSyncContext();
+
+                    syncContext.initialize(localStore, handler).get();
+
+
+                    log("Defined the table on the local store");
+
+                    Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
+                    tableDefinition.put("id", ColumnDataType.String);
+                    tableDefinition.put("name", ColumnDataType.String);
+                    tableDefinition.put("number", ColumnDataType.Number);
+                    tableDefinition.put("bool", ColumnDataType.Boolean);
+                    tableDefinition.put("date1", ColumnDataType.Date);
+                    tableDefinition.put("__createdAt", ColumnDataType.Date);
+                    tableDefinition.put("__updatedAt", ColumnDataType.Date);
+                    tableDefinition.put("__version", ColumnDataType.String);
+                    tableDefinition.put("__deleted", ColumnDataType.Boolean);
+
+                    log("Initialized the store and sync context");
+
+                    localStore.defineTable(STRING_ID_ROUNDTRIP_SOFT_DELETE_TABLE_NAME, tableDefinition);
+
+                    client.getSyncContext().initialize(localStore, new SimpleSyncHandler()).get();
+
+                    MobileServiceSyncTable<StringIdRoundTripTableSoftDeleteElement> localTable = client.getSyncTable(STRING_ID_ROUNDTRIP_SOFT_DELETE_TABLE_NAME, StringIdRoundTripTableSoftDeleteElement.class);
+
+                    MobileServiceTable<StringIdRoundTripTableSoftDeleteElement> remoteTable = client.getTable(STRING_ID_ROUNDTRIP_SOFT_DELETE_TABLE_NAME, StringIdRoundTripTableSoftDeleteElement.class);
+
+                    StringIdRoundTripTableSoftDeleteElement element = new StringIdRoundTripTableSoftDeleteElement(new Random());
+
+                    log("Inserted the item to the local store:" + element);
+
+                    element = localTable.insert(element).get();
+
+                    log("Validating that the item is not in the server table");
+
+                    try {
+                        remoteTable.lookUp(element.id).get();
+                        log("Error, item is present in the server");
+                        // return false;
+                    } catch (ExecutionException ex) {
+                        log("Ok, item is not in the server:" + ex.getMessage());
+                    }
+
+                    log("Pushing changes to the server");
+                    client.getSyncContext().push().get();
+
+                    log("Push done; now verifying that item is in the server");
+
+                    StringIdRoundTripTableSoftDeleteElement serverElement = remoteTable.lookUp(element.id).get();
+
+                    log("Retrieved item from server:" + serverElement);
+
+                    if (serverElement.equals(serverElement)) {
+                        log("Items are the same");
+                    } else {
+                        log("Items are different. Local: " + element + "; remote: " + serverElement);
+                        result.setStatus(TestStatus.Failed);
+                        callback.onTestComplete(this, result);
+                        return;
+                    }
+
+                    Object deleteObject;
+
+                    if (typed) {
+                        deleteObject = element;
+                    } else {
+                        deleteObject = client.getGsonBuilder().create().toJsonTree(element).getAsJsonObject();
+                    }
+
+                    log("Soft delete element on server");
+
+                    remoteTable.delete(deleteObject).get();
+
+
+                    log("Verifiying remote item was soft deleted");
+
+                    try {
+                        remoteTable.lookUp(element.id).get();
+                    } catch (Exception exception) {
+
+                        MobileServiceException ex = (MobileServiceException) exception.getCause();
+
+                        String message = "An item with id '" + element.id + "' does not exist.";
+
+                        if (!ex.getMessage().contains(message)) {
+                            createResultFromException(result, new ExpectedValueException(message, ex.getMessage()));
+                        }
+                    }
+
+                    log("Verifying item is in local storage");
+
+                    StringIdRoundTripTableSoftDeleteElement localElement = localTable.lookUp(element.id).get();
+
+                    log("Pull local table form server");
+                    Query pullQuery = QueryOperations.tableName(STRING_ID_ROUNDTRIP_SOFT_DELETE_TABLE_NAME)
+                            .field("id").eq(element.id);// "$filter=id eq '"
+
+                    localTable.pull(pullQuery).get();
+
+                    log("Verifying local item was deleted");
+
+                    StringIdRoundTripTableSoftDeleteElement localDeletedElement =  localTable.lookUp(element.id).get();
+
+                    if (localDeletedElement == null) {
+                        log("Item was deleted from local storage");
+                    } else {
+                        log("Item exist on local storage:" + element);
+                        result.setStatus(TestStatus.Failed);
+                        callback.onTestComplete(this, result);
+                        return;
+                    }
+                }
+                catch (Exception exception) {
 
                     if (exception != null) {
                         createResultFromException(result, exception);
