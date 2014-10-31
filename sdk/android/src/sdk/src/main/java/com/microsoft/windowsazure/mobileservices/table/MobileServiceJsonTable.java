@@ -714,7 +714,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
             features.add(MobileServiceFeatures.AdditionalQueryParameters);
         }
 
-        //parameters = addSystemProperties(mSystemProperties, parameters);
+        parameters = addSystemProperties(mSystemProperties, parameters);
         List<Pair<String, String>> requestHeaders = null;
         if (version != null) {
             requestHeaders = new ArrayList<Pair<String,String>>();
@@ -804,8 +804,12 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 		if (requestHeaders == null) {
 			requestHeaders = new ArrayList<Pair<String, String>>();
 		}
-		requestHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE));
-		ListenableFuture<ServiceFilterResponse> internalFuture = httpClient.request(path, content, httpMethod, requestHeaders, parameters, features);
+
+        if (content != null) {
+            requestHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE));
+        }
+
+        ListenableFuture<ServiceFilterResponse> internalFuture = httpClient.request(path, content, httpMethod, requestHeaders, parameters, features);
 
 		Futures.addCallback(internalFuture, new FutureCallback<ServiceFilterResponse>() {
 			@Override

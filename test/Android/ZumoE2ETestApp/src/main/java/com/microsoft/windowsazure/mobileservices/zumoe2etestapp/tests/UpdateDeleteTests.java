@@ -124,8 +124,8 @@ public class UpdateDeleteTests extends TestGroup {
         this.addTest(createSoftDeleteTest("(Neg)Soft Delete untyped item with non-existing id", false, true, true, false, MobileServiceException.class));
         this.addTest(createSoftDeleteTest("(Neg)Soft Delete untyped item without id field", false, false, false, false, IllegalArgumentException.class));
 
-        this.addTest(createSoftDeleteUndeleteTest("Soft Delete - Undelete typed item - Return on query", true, null));
-        this.addTest(createSoftDeleteUndeleteTest("Soft Delete - Undelete untyped item - No return on query", false,  null));
+        this.addTest(createSoftDeleteUndeleteTest("Soft Delete - Undelete typed item", true, null));
+        this.addTest(createSoftDeleteUndeleteTest("Soft Delete - Undelete untyped item", false,  null));
 
 
         // With Callbacks
@@ -423,13 +423,18 @@ public class UpdateDeleteTests extends TestGroup {
 
                     log("undelete element");
 
+                    ExecutableQuery<StringIdRoundTripTableSoftDeleteElement> deletedQuery = table.includeDeleted().field("id").eq(entity.id);
+
+                    StringIdRoundTripTableSoftDeleteElement deletedElement = table.execute(deletedQuery).get().get(0);
+
                     if (typed) {
-                        table.undelete(entity).get();
+                        table.undelete(deletedElement).get();
                     } else {
 
+                        JsonObject deletedJsonObject = client.getGsonBuilder().create().toJsonTree(entity).getAsJsonObject();
                         MobileServiceJsonTable jsonTable = client.getTable(STRING_ID_ROUNDTRIP_SOFT_DELETE_TABLE_NAME);
 
-                        jsonTable.undelete((JsonObject) deleteObject).get();
+                        jsonTable.undelete(deletedJsonObject).get();
                     }
 
                     log("read undeleted element");
