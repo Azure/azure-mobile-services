@@ -431,7 +431,7 @@ public class UpdateDeleteTests extends TestGroup {
                         table.undelete(deletedElement).get();
                     } else {
 
-                        JsonObject deletedJsonObject = client.getGsonBuilder().create().toJsonTree(entity).getAsJsonObject();
+                        JsonObject deletedJsonObject = client.getGsonBuilder().create().toJsonTree(deletedElement).getAsJsonObject();
                         MobileServiceJsonTable jsonTable = client.getTable(STRING_ID_ROUNDTRIP_SOFT_DELETE_TABLE_NAME);
 
                         jsonTable.undelete(deletedJsonObject).get();

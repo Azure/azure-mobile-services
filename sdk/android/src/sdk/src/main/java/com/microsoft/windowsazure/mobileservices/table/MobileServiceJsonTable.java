@@ -666,7 +666,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
      *            The JsonObject to update
      */
     public ListenableFuture<JsonObject> undelete(final JsonObject element) {
-        return this.update(element, (List<Pair<String, String>>) null);
+        return this.undelete(element, (List<Pair<String, String>>) null);
     }
 
     /**
