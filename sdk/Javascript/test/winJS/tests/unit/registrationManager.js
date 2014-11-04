@@ -241,7 +241,7 @@ $testGroup('RegistrationManager',
 
         CreateStorage();
         client = client.withFilter(function (req, next, callback) {
-            if (req.type === 'GET' && req.url === 'http://www.test.com/push/registrations?platform=platform&deviceId=testhandle' && listCalls == 0) {
+            if (req.type === 'GET' && req.url === 'http://www.test.com/push/registrations?platform=platform&deviceId=testhandle' && listCalls === 0) {
                 listCalls++;
                 callback(null, { status: 200, responseText: '[{"registrationId":"1","templateName":"A"},{"registrationId":"2","templateName":"B"}]' });
             } else if (req.type === 'GET' && req.url === 'http://www.test.com/push/registrations?platform=platform&deviceId=testhandle2' && listCalls == 1) {

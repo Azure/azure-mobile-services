@@ -193,7 +193,7 @@ MobileServiceLogin.prototype.login = function (provider, token, useSingleSignOn,
 };
 
 MobileServiceLogin.prototype._isAuthToken = function (value) {
-    return value && _.isString(value) && value.split('.').length === 3
+    return value && _.isString(value) && value.split('.').length === 3;
 };
 
 MobileServiceLogin.prototype.loginWithMobileServiceToken = function(authenticationToken, callback) {

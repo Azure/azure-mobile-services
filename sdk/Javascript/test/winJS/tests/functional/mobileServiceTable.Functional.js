@@ -589,7 +589,7 @@ $testGroup('Mobile Service Table Tests')
                     $assert.isNotNull(item.__version);
                     savedItem = item;
 
-                    return table.where(function (value) { return this.__version == value }, item.__version).read();
+                    return table.where(function (value) { return this.__version == value; }, item.__version).read();
                 },
                 function (items) {
                     $assert.areEqual(1, items.length);
@@ -598,7 +598,7 @@ $testGroup('Mobile Service Table Tests')
                     $assert.isNotNull(item.__updatedAt);
                     $assert.isNotNull(item.__version);
 
-                    return table.where(function (value) { return this.__createdAt == value }, savedItem.__createdAt).read();
+                    return table.where(function (value) { return this.__createdAt == value; }, savedItem.__createdAt).read();
                 },
                 function (items) {
                     $assert.areEqual(1, items.length);
@@ -607,7 +607,7 @@ $testGroup('Mobile Service Table Tests')
                     $assert.isNotNull(item.__updatedAt);
                     $assert.isNotNull(item.__version);
 
-                    return table.where(function (value) { return this.__updatedAt == value }, savedItem.__updatedAt).read();
+                    return table.where(function (value) { return this.__updatedAt == value; }, savedItem.__updatedAt).read();
                 },
                 function (items) {
                     $assert.areEqual(1, items.length);
