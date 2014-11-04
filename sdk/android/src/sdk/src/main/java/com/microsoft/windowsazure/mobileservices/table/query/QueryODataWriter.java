@@ -24,10 +24,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices.table.query;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.List;
-
-import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTableSystemPropertiesProvider;
 
 import android.util.Pair;
@@ -78,11 +75,11 @@ public class QueryODataWriter {
 					if (first) {
 						first = false;
 					} else {
-						sb.append(URLEncoder.encode(",", MobileServiceClient.UTF8_ENCODING));
+						sb.append(",");
 					}
 
-					sb.append(URLEncoder.encode(order.first, MobileServiceClient.UTF8_ENCODING));
-					sb.append(URLEncoder.encode(" ", MobileServiceClient.UTF8_ENCODING));
+					sb.append(QueryNodeODataWriter.percentEncode(order.first, "!$&'()*+,;=:@")); // odataIdentifier
+					sb.append("%20");
 					sb.append(order.second == QueryOrder.Ascending ? "asc" : "desc");
 
 				}
@@ -104,9 +101,9 @@ public class QueryODataWriter {
 				if (value == null)
 					value = "null";
 
-				sb.append(URLEncoder.encode(key, MobileServiceClient.UTF8_ENCODING));
+				sb.append(QueryNodeODataWriter.percentEncode(key, "!$'()*+,;:@")); // customName
 				sb.append("=");
-				sb.append(URLEncoder.encode(value, MobileServiceClient.UTF8_ENCODING));
+				sb.append(QueryNodeODataWriter.percentEncode(value, "!$'()*+,;=:@")); // customValue
 			}
 		}
 
@@ -118,10 +115,10 @@ public class QueryODataWriter {
 				if (first) {
 					first = false;
 				} else {
-					sb.append(URLEncoder.encode(",", MobileServiceClient.UTF8_ENCODING));
+					sb.append(",");
 				}
 
-				sb.append(URLEncoder.encode(field, MobileServiceClient.UTF8_ENCODING));
+				sb.append(QueryNodeODataWriter.percentEncode(field, "!$&'()*+,;=:@")); // odataIdentifier
 			}
 		}
 

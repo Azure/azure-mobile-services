@@ -78,7 +78,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 	/**
 	 * Executes a query to retrieve all the table rows
 	 * 
-	 * @throws com.microsoft.windowsazure.mobileservices.MobileServiceException
+	 * @throws MobileServiceException
 	 */
 	public ListenableFuture<JsonElement> execute() throws MobileServiceException {
 		return this.executeInternal();
@@ -87,7 +87,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 	/**
 	 * Executes a query to retrieve all the table rows
 	 * 
-	 * @throws com.microsoft.windowsazure.mobileservices.MobileServiceException
+	 * @throws MobileServiceException
 	 */
 	protected ListenableFuture<JsonElement> executeInternal() throws MobileServiceException {
 		return this.execute(this.where());
@@ -100,7 +100,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 	 * 
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
-	 * @throws com.microsoft.windowsazure.mobileservices.MobileServiceException
+	 * @throws MobileServiceException
 	 */
 	public void execute(final TableJsonQueryCallback callback) throws MobileServiceException {
 		this.where().execute(callback);
@@ -111,14 +111,14 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 	 *
 	 * @param query
 	 *            The query used to retrieve the rows
-	 * @throws com.microsoft.windowsazure.mobileservices.MobileServiceException
+	 * @throws MobileServiceException
 	 */
 	public ListenableFuture<JsonElement> execute(final Query query) {
 		final SettableFuture<JsonElement> future = SettableFuture.create();
 
 		String url = null;
 		try {
-			String filtersUrl = URLEncoder.encode(QueryODataWriter.getRowFilter(query).trim(), MobileServiceClient.UTF8_ENCODING);
+			String filtersUrl = QueryODataWriter.getRowFilter(query);
 			url = mClient.getAppUrl().toString() + TABLES_URL + URLEncoder.encode(mTableName, MobileServiceClient.UTF8_ENCODING);
 
 			if (filtersUrl.length() > 0) {
@@ -163,7 +163,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 	/**
 	 * Retrieves a set of rows from the table using a query
 	 * 
-	 * @deprecated use {@link execute(final com.microsoft.windowsazure.mobileservices.table.query.Query query)} instead
+	 * @deprecated use {@link execute(final Query query)} instead
 	 * 
 	 * @param query
 	 *            The query used to retrieve the rows
@@ -388,7 +388,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 	/**
 	 * Looks up a row in the table and retrieves its JSON value.
 	 * 
-	 * @deprecated use {@link lookUp(Object id, java.util.List< android.util.Pair<String, String>>
+	 * @deprecated use {@link lookUp(Object id, List<Pair<String, String>>
 	 *             parameters)} instead
 	 * 
 	 * @param id
@@ -435,7 +435,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 	/**
 	 * Inserts a JsonObject into a Mobile Service table
 	 * 
-	 * @deprecated use {@link insert(final com.google.gson.JsonObject element)} instead
+	 * @deprecated use {@link insert(final JsonObject element)} instead
 	 * 
 	 * @param element
 	 *            The JsonObject to insert
@@ -502,8 +502,8 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 
 	/**
 	 * Inserts a JsonObject into a Mobile Service Table
-	 *
-	 * @deprecated use {@link insert(final com.google.gson.JsonObject element, java.util.List< android.util.Pair<String,
+	 * 
+	 * @deprecated use {@link insert(final JsonObject element, List<Pair<String,
 	 *             String>> parameters)} instead
 	 * 
 	 * @param element
@@ -549,9 +549,9 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 
 	/**
 	 * Updates an element from a Mobile Service Table
-	 *
-	 * @deprecated use {@link update(final com.google.gson.JsonObject element)} instead
-	 *
+	 * 
+	 * @deprecated use {@link update(final JsonObject element)} instead
+	 * 
 	 * @param element
 	 *            The JsonObject to update
 	 * @param callback

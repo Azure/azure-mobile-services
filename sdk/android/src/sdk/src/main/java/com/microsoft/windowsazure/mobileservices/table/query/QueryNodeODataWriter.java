@@ -23,6 +23,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Locale;
 
@@ -66,8 +67,7 @@ class QueryNodeODataWriter implements QueryNodeVisitor<QueryNode> {
 
 	@Override
 	public QueryNode visit(FieldNode node) {
-		this.mBuilder.append(node.getFieldName());
-
+		this.mBuilder.append(percentEncode(node.getFieldName(), "!$&'()*+,;=:@")); // odataIdentifier
 		return node;
 	}
 
@@ -85,7 +85,7 @@ class QueryNodeODataWriter implements QueryNodeVisitor<QueryNode> {
 			this.mBuilder.append(node.getUnaryOperatorKind().name().toLowerCase(Locale.getDefault()));
 
 			if (node.getArgument() != null) {
-				this.mBuilder.append(" ");
+				this.mBuilder.append("%20");
 				node.getArgument().accept(this);
 			}
 		}
@@ -97,13 +97,13 @@ class QueryNodeODataWriter implements QueryNodeVisitor<QueryNode> {
 	public QueryNode visit(BinaryOperatorNode node) {
 		if (node.getLeftArgument() != null) {
 			node.getLeftArgument().accept(this);
-			this.mBuilder.append(" ");
+			this.mBuilder.append("%20");
 		}
 
 		this.mBuilder.append(node.getBinaryOperatorKind().name().toLowerCase(Locale.getDefault()));
 
 		if (node.getRightArgument() != null) {
-			this.mBuilder.append(" ");
+			this.mBuilder.append("%20");
 			node.getRightArgument().accept(this);
 		}
 
@@ -133,11 +133,11 @@ class QueryNodeODataWriter implements QueryNodeVisitor<QueryNode> {
 	}
 
 	private static String process(String s) {
-		return "'" + sanitize(s) + "'";
+		return "'" + percentEncode(sanitize(s)) + "'";
 	}
 
 	private static String process(Date date) {
-		return "'" + sanitize(DateSerializer.serialize(date)) + "'";
+		return "datetime'" + DateSerializer.serialize(date) + "'";
 	}
 
 	/**
@@ -153,5 +153,55 @@ class QueryNodeODataWriter implements QueryNodeVisitor<QueryNode> {
 		} else {
 			return null;
 		}
+	}
+
+	static String percentEncode(String s) {
+		return percentEncode(s, "");
+	}
+
+	static String percentEncode(String s, String reserved) {
+		if (s == null) {
+			return null;
+		}
+
+		StringBuilder builder = new StringBuilder(s.length());
+
+		int escapeStart = -1;
+
+		for (int i = 0; i < s.length(); i++) {
+			char c = s.charAt(i);
+
+			if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || "-._~".indexOf(c) != -1 || reserved.indexOf(c) != -1) {
+				if (escapeStart != -1) {
+					appendHex(builder, s.substring(escapeStart, i));
+					escapeStart = -1;
+				}
+
+				builder.append(c);
+			} else if (escapeStart == -1) {
+				escapeStart = i;
+			}
+		}
+
+		if (escapeStart != -1) {
+			appendHex(builder, s.substring(escapeStart, s.length()));
+		}
+
+		return builder.toString();
+	}
+
+	private static void appendHex(StringBuilder builder, String s) {
+		try {
+			for (byte b : s.getBytes("UTF-8")) {
+				appendHex(builder, b);
+			}
+		} catch (UnsupportedEncodingException e) {
+			// UTF-8 should support any string
+		}
+	}
+
+	private static void appendHex(StringBuilder sb, byte b) {
+		sb.append('%');
+		sb.append(String.format("%02X", b));
 	}
 }

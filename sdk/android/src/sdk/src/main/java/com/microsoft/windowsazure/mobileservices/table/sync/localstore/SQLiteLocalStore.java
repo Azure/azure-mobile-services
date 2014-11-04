@@ -393,7 +393,7 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
         invColumnName = invColumnName.trim().toLowerCase(Locale.getDefault());
 
         return invColumnName.equals("__version") || invColumnName.equals("__createdat") || invColumnName.equals("__updatedat")
-                || invColumnName.equals("__queueloadedat");
+                || invColumnName.equals("__queueloadedat") || invColumnName.equals("__deleted");
     }
 
     private void validateReservedProperties(ColumnDataType colDataType, String invColumnName) throws IllegalArgumentException {
