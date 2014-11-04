@@ -443,7 +443,7 @@
 
 -(void) testQueryStringFromQueryEscapesPredicateConstants
 {
-    NSString *expectedQueryString = @"$filter=(title%20eq%20'%23%3F%26$%20encode%20me%21')&$inlinecount=none";
+    NSString *expectedQueryString = @"$filter=(title%20eq%20'%23%3F%26$%20encode%20me%21')";
     NSString *appURL = @"http:\\someApp.com";
     NSString *tableName = @"someTable";
     NSString *predicateString = @"title == '#?&$ encode me!'";
