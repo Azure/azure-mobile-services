@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Query;
 using Microsoft.WindowsAzure.MobileServices.Test;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
@@ -86,6 +87,44 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         public void ReadAsync_Throws_WhenStoreIsNotInitialized()
         {
             TestStoreThrowOnUninitialized(store => store.ReadAsync(MobileServiceTableQueryDescription.Parse("abc", "")));
+        }
+
+        [AsyncTestMethod]
+        public async Task UpsertAsync_ThenReadAsync_AllTypes()
+        {
+            TestUtilities.DropTestTable(TestDbName, TestTable);
+
+            // first create a table called todo
+            using (MobileServiceSQLiteStore store = new MobileServiceSQLiteStore(TestDbName))
+            {
+                store.DefineTable(TestTable, JObjectTypes.GetObjectWithAllTypes());
+
+                await store.InitializeAsync();
+
+                var upserted = new JObject()
+                {
+                    { "id", "xyz" },
+                    { "Object", new JObject() { {"id", "abc"} }},
+                    { "Array", new JArray() { new JObject(){{"id", 3}} } },
+                    { "Integer", 123L },
+                    { "Float", 12.5m },
+                    { "String", "def" },
+                    { "Boolean", true },
+                    { "Date", new DateTime(2003, 5, 6, 4, 5, 1, DateTimeKind.Utc) },
+                    { "Bytes", new byte[] { 1, 2, 3} },
+                    { "Guid", new Guid("AB3EB1AB-53CD-4780-928B-A7E1CB7A927C") },
+                    { "TimeSpan", new TimeSpan(1234) }
+                };
+                await store.UpsertAsync(TestTable, new[] { upserted }, false);
+
+                var query = new MobileServiceTableQueryDescription(TestTable);
+                var items = await store.ReadAsync(query) as JArray;
+                Assert.IsNotNull(items);
+                Assert.AreEqual(items.Count, 1);
+
+                var lookedup = items.First as JObject;
+                Assert.AreEqual(upserted.ToString(Formatting.None), lookedup.ToString(Formatting.None));
+            }
         }
 
         [AsyncTestMethod]

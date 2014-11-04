@@ -799,7 +799,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                                 { "__systemProperties", "createdAt" },
                                 { "param1", "val1" } 
                              },
-                             "The key '__systemProperties' is reserved and cannot be specified as a query parameter.");
+                             "The key '__systemproperties' is reserved and cannot be specified as a query parameter.");
         }
 
         [AsyncTestMethod]
