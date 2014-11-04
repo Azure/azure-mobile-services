@@ -53,12 +53,15 @@ public class PullStrategy {
         return;
     }
 
-    public boolean moveToNextPage() {
+    public boolean moveToNextPage(int lastElementCount) {
 
         if (!this.supportSkip)
             return false;
 
         if (cursor.getComplete())
+            return false;
+
+        if (lastElementCount < this.query.getTop())
             return false;
 
         // then we continue downloading the changes using skip and top

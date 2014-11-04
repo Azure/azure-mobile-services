@@ -706,7 +706,7 @@ public class MobileServiceSyncContext {
                 }
 
             }
-            while (strategy.moveToNextPage());
+            while (strategy.moveToNextPage(elements.size()));
 
         } catch (ExecutionException e) {
             throw e.getCause();
