@@ -764,24 +764,6 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The assembly {0} does not define a type that implements the {1} interface..
-        /// </summary>
-        internal static string Platform_AssemblyDidNotHaveType {
-            get {
-                return ResourceManager.GetString("Platform_AssemblyDidNotHaveType", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Third-party provider authentication requires user interface components and is not supported with the platform-specific assembly {0}. To authenticate users with a third-party provider, ensure that the project references the platform-specific UI assembly {0}.UI..
-        /// </summary>
-        internal static string Platform_AssemblyDoesNotSupportLogin {
-            get {
-                return ResourceManager.GetString("Platform_AssemblyDoesNotSupportLogin", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to A Microsoft Azure Mobile Services assembly for the current platform was not found. Ensure that the current project references both {0} and the following platform-specific assembly: {1}..
         /// </summary>
         internal static string Platform_AssemblyNotFound {
@@ -796,6 +778,15 @@ namespace Microsoft.WindowsAzure.MobileServices {
         internal static string Platform_InstantiationFailed {
             get {
                 return ResourceManager.GetString("Platform_InstantiationFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The key &apos;{0}&apos; is reserved and cannot be specified as a query parameter..
+        /// </summary>
+        internal static string Pull_Cannot_Use_Reserved_Key {
+            get {
+                return ResourceManager.GetString("Pull_Cannot_Use_Reserved_Key", resourceCulture);
             }
         }
         

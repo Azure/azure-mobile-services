@@ -1007,6 +1007,94 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     XCTAssertTrue([self waitForTest:30.0], @"Test timed out.");
 }
 
+-(void) testPullWithCustomParameters
+{
+    NSString* stringData = @"[{\"id\": \"one\", \"text\":\"first item\"},{\"id\": \"two\", \"text\":\"second item\"}]";
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:stringData];
+    
+    __block NSURLRequest *actualRequest = nil;
+    testFilter.onInspectRequest = ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
+
+    offline.upsertCalls = 0;
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
+    query.parameters = @{@"mykey": @"myvalue"};
+    
+    [todoTable pullWithQuery:query completion:^(NSError *error) {
+        XCTAssertNil(error, @"Error found: %@", error.description);
+        XCTAssertEqual((int)offline.upsertCalls, 1, @"Unexpected number of upsert calls");
+        XCTAssertEqual((int)offline.upsertedItems, 2, @"Unexpected number of upsert calls");
+        done = YES;
+    }];
+    
+    XCTAssertTrue([self waitForTest:30.0], @"Test timed out.");
+    
+    XCTAssertEqualObjects(actualRequest.URL.absoluteString, @"https://someUrl/tables/TodoNoVersion?$inlinecount=none&mykey=myvalue&__includeDeleted=1&__systemProperties=__deleted");
+}
+
+-(void) testPullWithIncludeDeletedFails
+{
+    NSString* stringData = @"[{\"id\": \"one\", \"text\":\"first item\"},{\"id\": \"two\", \"text\":\"second item\"}]";
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:stringData];
+    
+    __block NSURLRequest *actualRequest = nil;
+    testFilter.onInspectRequest = ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
+    
+    offline.upsertCalls = 0;
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
+    query.parameters = @{@"__includeDeleted": @NO, @"mykey": @"myvalue"};
+    
+    [todoTable pullWithQuery:query completion:^(NSError *error) {
+        XCTAssertNotNil(error);
+        XCTAssertEqual(error.code, MSInvalidParameter);
+        XCTAssertEqual((int)offline.upsertCalls, 0, @"Unexpected number of upsert calls");
+        XCTAssertEqual((int)offline.upsertedItems, 0, @"Unexpected number of upsert calls");
+        done = YES;
+    }];
+    
+    XCTAssertTrue([self waitForTest:30.0], @"Test timed out.");
+}
+
+-(void) testPullWithSystemPropertiesFails
+{
+    NSString* stringData = @"[{\"id\": \"one\", \"text\":\"first item\"},{\"id\": \"two\", \"text\":\"second item\"}]";
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:stringData];
+    
+    __block NSURLRequest *actualRequest = nil;
+    testFilter.onInspectRequest = ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
+    
+    offline.upsertCalls = 0;
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
+    query.parameters = @{@"__systemProperties": @"__createdAt,__somethingRandom"};
+    
+    [todoTable pullWithQuery:query completion:^(NSError *error) {
+        XCTAssertNotNil(error);
+        XCTAssertEqual(error.code, MSInvalidParameter);
+        XCTAssertEqual((int)offline.upsertCalls, 0, @"Unexpected number of upsert calls");
+        XCTAssertEqual((int)offline.upsertedItems, 0, @"Unexpected number of upsert calls");
+        done = YES;
+    }];
+    
+    XCTAssertTrue([self waitForTest:30.0], @"Test timed out.");
+}
+
 -(void) testPushAddsProperFeaturesHeader
 {
     NSString* stringData = @"{\"id\": \"test1\", \"text\":\"test name\"}";
@@ -1144,7 +1232,6 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     
     XCTAssertTrue([self waitForTest:30.1], @"Test timed out.");
 }
-
 
 #pragma mark * Async Test Helper Method
 

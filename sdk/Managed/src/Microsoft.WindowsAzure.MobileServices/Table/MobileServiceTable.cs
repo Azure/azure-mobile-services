@@ -34,7 +34,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// The name of the system properties query string parameter
         /// </summary>
-        private const string SystemPropertiesQueryParameterName = "__systemproperties";
+        public const string SystemPropertiesQueryParameterName = "__systemproperties";
 
         /// <summary>
         /// The name of the include deleted query string parameter

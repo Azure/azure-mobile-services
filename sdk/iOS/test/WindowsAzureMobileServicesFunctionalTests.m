@@ -32,8 +32,8 @@
     // application key for the Windows Mobile Azure Service below.
     
     client = [MSClient
-                clientWithApplicationURLString:@"<Microsoft Azure Mobile Service App URL>"
-                applicationKey:@"<Application Key>"];
+              clientWithApplicationURLString:@"<Microsoft Azure Mobile Service App URL>"
+              applicationKey:@"<Application Key>"];
     
     XCTAssertTrue([client.applicationURL.description hasPrefix:@"https://"], @"The functional tests are currently disabled.");
 
@@ -126,7 +126,7 @@
     NSDictionary *item3 = @{ @"text":@"ItemB", @"complete": @(NO) };
     NSArray *items = @[item1,item2, item3];
 
-    id query7AfterQuery6 = ^(NSArray *items, NSInteger totalCount, NSError *error) {
+    id query7AfterQuery6 = ^(MSQueryResult *result, NSError *error) {
         
         // Check for an error
         if (error) {
@@ -134,13 +134,13 @@
             done = YES;
         }
         
-        XCTAssertTrue(items.count == 2, @"items.count was: %lu", (unsigned long)items.count);
-        XCTAssertTrue(totalCount == 3, @"totalCount was: %ld", (long)totalCount);
+        XCTAssertTrue(result.items.count == 2, @"items.count was: %lu", (unsigned long)result.items.count);
+        XCTAssertTrue(result.totalCount == 3, @"totalCount was: %ld", (long)result.totalCount);
         
         [todoTable deleteAllItemsWithCompletion:^(NSError *error) { done = YES; }];
     };
     
-    id query6AfterQuery5 = ^(NSArray *items, NSInteger totalCount, NSError *error) {
+    id query6AfterQuery5 = ^(MSQueryResult *result, NSError *error) {
         
         // Check for an error
         if (error) {
@@ -148,8 +148,8 @@
             done = YES;
         }
         
-        XCTAssertTrue(items.count == 2, @"items.count was: %lu", (unsigned long)items.count);
-        XCTAssertTrue(totalCount == 3, @"totalCount was: %ld", (long)totalCount);
+        XCTAssertTrue(result.items.count == 2, @"items.count was: %lu", (unsigned long)result.items.count);
+        XCTAssertTrue(result.totalCount == 3, @"totalCount was: %ld", (long)result.totalCount);
         
         MSQuery *query = [todoTable query];
         query.fetchOffset = 1;
@@ -157,7 +157,7 @@
         [query readWithCompletion:query7AfterQuery6];
     };
     
-    id query5AfterQuery4 = ^(NSArray *items, NSInteger totalCount, NSError *error) {
+    id query5AfterQuery4 = ^(MSQueryResult *result, NSError *error) {
         
         // Check for an error
         if (error) {
@@ -165,8 +165,8 @@
             done = YES;
         }
         
-        XCTAssertTrue(items.count == 3, @"items.count was: %lu", (unsigned long)items.count);
-        XCTAssertTrue(totalCount == -1, @"totalCount was: %ld", (long)totalCount);
+        XCTAssertTrue(result.items.count == 3, @"items.count was: %lu", (unsigned long)result.items.count);
+        XCTAssertTrue(result.totalCount == -1, @"totalCount was: %ld", (long)result.totalCount);
         
         [todoTable readWithQueryString:@"$top=2&$inlinecount=allpages"
                             completion:query6AfterQuery5];
@@ -185,7 +185,7 @@
         [todoTable readWithQueryString:nil completion:query5AfterQuery4];
     };
     
-    id query3AfterQuery2 = ^(NSArray *items, NSInteger totalCount, NSError *error) {
+    id query3AfterQuery2 = ^(MSQueryResult *result, NSError *error) {
         
         // Check for an error
         if (error) {
@@ -193,14 +193,14 @@
             done = YES;
         }
         
-        XCTAssertTrue(items.count == 1, @"items.count was: %lu", (unsigned long)items.count);
-        XCTAssertTrue(totalCount == -1, @"totalCount was: %ld", (long)totalCount);
+        XCTAssertTrue(result.items.count == 1, @"items.count was: %lu", (unsigned long)result.items.count);
+        XCTAssertTrue(result.totalCount == -1, @"totalCount was: %ld", (long)result.totalCount);
         
-        [todoTable readWithId:[items[0] valueForKey:@"id"]
+        [todoTable readWithId:[result.items[0] valueForKey:@"id"]
                     completion:query4AfterQuery3];
     };
     
-    id query2AfterQuery1 = ^(NSArray *items, NSInteger totalCount, NSError *error) {
+    id query2AfterQuery1 = ^(MSQueryResult *result, NSError *error) {
         
         // Check for an error
         if (error) {
@@ -208,8 +208,8 @@
             done = YES;
         }
         
-        XCTAssertTrue(items.count == 2, @"items.count was: %lu", (unsigned long)items.count);
-        XCTAssertTrue(totalCount == -1, @"totalCount was: %ld", (long)totalCount);
+        XCTAssertTrue(result.items.count == 2, @"items.count was: %lu", (unsigned long)result.items.count);
+        XCTAssertTrue(result.totalCount == -1, @"totalCount was: %ld", (long)result.totalCount);
         
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"text ENDSWITH 'B' AND complete == TRUE"];
         [todoTable readWithPredicate:predicate completion:query3AfterQuery2];
