@@ -18,7 +18,6 @@ static NSString *const orderByDescendingFormat = @"%@ desc";
 static NSString *const filterParameter = @"$filter";
 static NSString *const inlineCountParameter = @"$inlinecount";
 static NSString *const inlineCountAllPage = @"allpages";
-static NSString *const inlineCountNone = @"none";
 
 
 #pragma mark * MSURLBuilder Implementation
@@ -234,11 +233,11 @@ static NSString *const inlineCountNone = @"none";
             }
             
             // Add the $inlineCount parameter
-            NSString *includeTotalCountValue = query.includeTotalCount ?
-            inlineCountAllPage :
-            inlineCountNone;
-            [queryParameters setValue:includeTotalCountValue
-                               forKey:inlineCountParameter];
+            
+            if (query.includeTotalCount) {
+                [queryParameters setValue:inlineCountAllPage
+                                 forKey:inlineCountParameter];
+            }
             
             // Add the user parameters
             if (query.parameters) {
