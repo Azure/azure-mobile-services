@@ -792,25 +792,25 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
-        public async Task PullAsync_OverridesStoreSystemProperties_WhenProvidedInParameters()
+        public async Task PullAsync_Throws_IfSystemPropertiesProvidedInParameters()
         {
-            await TestPullQueryOverride(new Dictionary<string, string>() 
+            await this.TestPullQueryOverrideThrows(new Dictionary<string, string>() 
                              { 
                                 { "__systemProperties", "createdAt" },
                                 { "param1", "val1" } 
                              },
-                             "?$skip=0&$top=50&__systemProperties=createdAt&param1=val1&__includeDeleted=true");
+                             "The key '__systemProperties' is reserved and cannot be specified as a query parameter.");
         }
 
         [AsyncTestMethod]
-        public async Task PullAsync_OverridesIncludeDeleted_WhenProvidedInParameters()
+        public async Task PullAsync_Throws_IfIncludeDeletedProvidedInParameters()
         {
-            await TestPullQueryOverride(new Dictionary<string, string>() 
+            await this.TestPullQueryOverrideThrows(new Dictionary<string, string>() 
                              { 
                                 { "__includeDeleted", "false" },
                                 { "param1", "val1" } 
                              },
-                             "?$skip=0&$top=50&__includeDeleted=false&param1=val1&__systemproperties=__version%2C__deleted");
+                             "The key '__includeDeleted' is reserved and cannot be specified as a query parameter.");
         }
 
         [AsyncTestMethod]
@@ -826,26 +826,18 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             await ThrowsAsync<ArgumentException>(() => table.PullAsync("asd_^^234", table.CreateQuery(), CancellationToken.None));
         }
 
-        private static async Task TestPullQueryOverride(IDictionary<string, string> parameters, string uriQuery)
+        private async Task TestPullQueryOverrideThrows(IDictionary<string, string> parameters, string errorMessage)
         {
-            var hijack = new TestHttpHandler();
-            hijack.OnSendingRequest = req =>
-            {
-                Assert.AreEqual(req.RequestUri.Query, uriQuery);
-                return Task.FromResult(req);
-            };
-            hijack.AddResponseContent("[]"); // for pull
-
             var store = new MobileServiceLocalStoreMock();
-            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...");
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
             var query = table.CreateQuery()
                              .WithParameters(parameters);
 
-            await table.PullAsync(null, query, cancellationToken: CancellationToken.None);
-            Assert.AreEqual(hijack.Requests.Count, 1);
+            var ex = await ThrowsAsync<ArgumentException>(() => table.PullAsync(null, query, cancellationToken: CancellationToken.None));
+            Assert.AreEqual(errorMessage, ex.Message);
         }
 
         [AsyncTestMethod]

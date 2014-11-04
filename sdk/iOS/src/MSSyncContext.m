@@ -307,9 +307,11 @@ static NSOperationQueue *pushQueue_;
         error = [self errorWithDescription:@"Use of includeTotalCount is not supported in pullWithQuery:"
                               andErrorCode:MSInvalidParameter];
     }
-    else if (query.parameters) {
-        error = [self errorWithDescription:@"Use of parameters is not supported in pullWithQuery:"
-                              andErrorCode:MSInvalidParameter];
+    else if ([MSSyncContext dictionary:query.parameters containsCaseInsensitiveKey:@"__includedeleted"]){
+        error = [self errorWithDescription:@"Use of '__includeDeleted' is not supported in pullWithQuery parameters:" andErrorCode:MSInvalidParameter];
+    }
+    else if ([MSSyncContext dictionary:query.parameters containsCaseInsensitiveKey:@"__systemproperties"]) {
+        error = [self errorWithDescription:@"Use of '__systemProperties' is not supported in pullWithQuery parameters:" andErrorCode:MSInvalidParameter];
     }
     else if (query.syncTable) {
         // Otherwise we convert the sync table to a normal table
@@ -330,15 +332,22 @@ static NSOperationQueue *pushQueue_;
         return;
     }
     
-    // Get the required system properties from the server
+    // Get the required system properties from the Store
     if ([self.dataSource respondsToSelector:@selector(systemPropetiesForTable:)]) {
         query.table.systemProperties = [self.dataSource systemPropetiesForTable:query.table.name];
     } else {
         query.table.systemProperties = MSSystemPropertyVersion;
     }
     
-    // A pull should always include deleted records
-    query.parameters = @{@"__includeDeleted" : @YES };
+    // add __includeDeleted
+    if (!query.parameters) {
+        query.parameters = @{@"__includeDeleted" : @YES};
+    } else {
+        NSMutableDictionary *mutableParameters = [query.parameters mutableCopy];
+        [mutableParameters setObject:@YES forKey:@"__includeDeleted"];
+        query.parameters = mutableParameters;
+    }
+
     query.table.systemProperties |= MSSystemPropertyDeleted;
     
     // Begin the actual pull request
@@ -458,6 +467,15 @@ static NSOperationQueue *pushQueue_;
     });
 }
 
++ (BOOL) dictionary:(NSDictionary *)dictionary containsCaseInsensitiveKey:(NSString *)key
+{
+    for (NSString *object in dictionary.allKeys) {
+        if ([object caseInsensitiveCompare:key] == NSOrderedSame) {
+            return YES;
+        }
+    }
+    return NO;
+}
 
 # pragma mark * NSError helpers
 

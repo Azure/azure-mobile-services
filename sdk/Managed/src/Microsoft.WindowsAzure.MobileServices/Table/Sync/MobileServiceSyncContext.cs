@@ -179,6 +179,16 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         {
             await this.EnsureInitializedAsync();
 
+            if (parameters.Keys.Any(k => k.Equals(MobileServiceTable.IncludeDeletedParameterName, StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new ArgumentException(Resources.Pull_Cannot_Use_Reserved_Key.FormatInvariant(MobileServiceTable.IncludeDeletedParameterName));
+            }
+
+            if (parameters.Keys.Any(k => k.Equals(MobileServiceTable.SystemPropertiesQueryParameterName, StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new ArgumentException(Resources.Pull_Cannot_Use_Reserved_Key.FormatInvariant(MobileServiceTable.SystemPropertiesQueryParameterName));
+            }
+
             var table = await this.GetTable(tableName);
             var queryDescription = MobileServiceTableQueryDescription.Parse(this.client.ApplicationUri, tableName, query);
 

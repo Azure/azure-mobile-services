@@ -426,4 +426,7 @@
   <data name="WP8LoginPage_MustBeCalledFromAuthBroker" xml:space="preserve">
     <value>This page must be called from the type '{0}'.</value>
   </data>
+  <data name="Pull_Cannot_Use_Reserved_Key" xml:space="preserve">
+    <value>The key '{0}' is reserved and cannot be specified as a query parameter.</value>
+  </data>
 </root>
