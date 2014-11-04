@@ -6,6 +6,7 @@ if [ "$1" = "" ]; then
   echo .    with all four login providers.
 else
   azure mobile table create $1 stringIdRoundTripTable
+  azure mobile table create $1 stringIdRoundTripSoftDeleteTable
   azure mobile table create $1 stringIdMovies
   azure mobile table create $1 offlineReady
   azure mobile table create $1 offlineReadyNoVersion
