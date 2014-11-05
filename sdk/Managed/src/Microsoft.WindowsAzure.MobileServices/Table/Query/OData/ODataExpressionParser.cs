@@ -454,12 +454,18 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             QueryNode value;
             if (keywords.TryGetValue(this.lexer.Token.Text, out value))
             {
-                if (value == null)
+                // type construction has the format of type'value' e.g. datetime'2001-04-01T00:00:00Z'
+                // therefore if the next character is a single quote then we try to 
+                // interpret this as type construction else its a normal member access
+                if (value == null && this.lexer.CurrentChar == '\'')
                 {
                     return this.ParseTypeConstruction();
                 }
-                this.lexer.NextToken();
-                return value;
+                else if (value != null) // this is a constant
+                {
+                    this.lexer.NextToken();
+                    return value;
+                }
             }
 
             return this.ParseMemberAccess(null);
