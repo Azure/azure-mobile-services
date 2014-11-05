@@ -95,9 +95,13 @@ module.exports = function(grunt) {
       options: {
         banner: '//! Copyright (c) Microsoft Corporation. All rights reserved. <%= pkg.name %> v<%= pkg.version %>\n'
       },
-      build: {
+      web: {
         src: 'src/Generated/MobileServices.Web.js',
         dest: 'src/Generated/MobileServices.Web.min.js'
+      },
+      winjs: {
+        src: 'src/Generated/MobileServices.js',
+        dest: 'src/Generated/MobileServices.min.js'
       }
     }
   });
@@ -117,7 +121,7 @@ var header = '// ---------------------------------------------------------------
              '// ----------------------------------------------------------------------------\n' +
              '\n' +
              '(function (global) {\n' +
-             '\tvar $__fileVersion__ = \'<%= pkg.version %>.<%= grunt.template.today("yymmdd") %>\';\n',
+             '\tvar $__fileVersion__ = \'<%= pkg.version %>\';\n',
     footer = '\n\trequire(\'MobileServiceClient\');\n' + 
              '})(this || exports);';
 
