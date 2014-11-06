@@ -93,7 +93,8 @@ module.exports = function(grunt) {
     },
     uglify: {
       options: {
-        banner: '//! Copyright (c) Microsoft Corporation. All rights reserved. <%= pkg.name %> v<%= pkg.version %>\n'
+          banner: '//! Copyright (c) Microsoft Corporation. All rights reserved. <%= pkg.name %> v<%= pkg.version %>\n',
+          mangle: false
       },
       web: {
         src: 'src/Generated/MobileServices.Web.js',
