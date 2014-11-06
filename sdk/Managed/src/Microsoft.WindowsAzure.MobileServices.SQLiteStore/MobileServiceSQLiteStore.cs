@@ -25,7 +25,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         /// Note: The default maximum number of parameters allowed by sqlite is 999
         /// See: http://www.sqlite.org/limits.html#max_variable_number
         /// </summary>
-        private const int MaxParametersPerUpsertQuery = 800;
+        private const int MaxParametersPerQuery = 800;
 
         private Dictionary<string, TableDefinition> tableMap = new Dictionary<string, TableDefinition>(StringComparer.OrdinalIgnoreCase);
         private SQLiteConnection connection;
@@ -183,62 +183,15 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 return Task.FromResult(0);
             }
 
-            // Generate the prepared insert statement
-            string sqlBase = String.Format(
-                "INSERT OR REPLACE INTO {0} ({1}) VALUES ",
-                SqlHelpers.FormatTableName(tableName),
-                String.Join(", ", columns.Select(c => c.Name).Select(SqlHelpers.FormatMember))
-            );
 
-            // Use int division to calculate how many times this record will fit into our parameter quota
-            int batchSize = MaxParametersPerUpsertQuery / columns.Count;
-            if (batchSize == 0)
-            {
-                throw new InvalidOperationException(string.Format(Properties.Resources.SQLiteStore_TooManyColumns, MaxParametersPerUpsertQuery));
-            }
+            this.ExecuteNonQuery("BEGIN TRANSACTION", null);
 
-            foreach (var batch in items.Split(maxLength: batchSize))
-            {
-                var sql = new StringBuilder(sqlBase);
-                var parameters = new Dictionary<string, object>();
+            BatchInsert(tableName, items, columns.Where(c => c.Name.Equals(MobileServiceSystemColumns.Id)).Take(1).ToList());
+            BatchUpdate(tableName, items, columns);
 
-                foreach (JObject item in batch)
-                {
-                    AppendInsertValuesSql(sql, parameters, columns, item);
-                    sql.Append(",");
-                }
-
-                if (parameters.Any())
-                {
-                    sql.Remove(sql.Length - 1, 1); // remove the trailing comma
-                    this.ExecuteNonQuery(sql.ToString(), parameters);
-                }
-            }
+            this.ExecuteNonQuery("COMMIT TRANSACTION", null);
 
             return Task.FromResult(0);
-        }
-
-        private static void AppendInsertValuesSql(StringBuilder sql, Dictionary<string, object> parameters, List<ColumnDefinition> columns, JObject item)
-        {
-            sql.Append("(");
-            int colCount = 0;
-            foreach (var column in columns)
-            {
-                if (colCount > 0)
-                    sql.Append(",");
-
-                JToken rawValue = item.GetValue(column.Name, StringComparison.OrdinalIgnoreCase);
-                object value = SqlHelpers.SerializeValue(rawValue, column.StoreType, column.JsonType);
-
-                //The paramname for this field must be unique within this statement
-                string paramName = "@p" + parameters.Count;
-
-                sql.Append(paramName);
-                parameters[paramName] = value;
-
-                colCount++;
-            }
-            sql.Append(")");
         }
 
         /// <summary>
@@ -373,6 +326,110 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             }
         }
 
+        private void BatchUpdate(string tableName, IEnumerable<JObject> items, List<ColumnDefinition> columns)
+        {
+            if (columns.Count <= 1)
+            {
+                return; // For update to work there has to be at least once column besides Id that needs to be updated
+            }
+
+            ValidateParameterCount(columns.Count);
+
+            string sqlBase = String.Format("UPDATE {0} SET ", SqlHelpers.FormatTableName(tableName));
+
+            foreach (JObject item in items)
+            {
+                var sql = new StringBuilder(sqlBase);
+                var parameters = new Dictionary<string, object>();
+
+                ColumnDefinition idColumn = columns.FirstOrDefault(c => c.Name.Equals(MobileServiceSystemColumns.Id));
+                if (idColumn == null)
+                {
+                    continue;
+                }
+
+                foreach (var column in columns.Where(c => c != idColumn))
+                {
+                    string paramName = AddParameter(item, parameters, column);
+
+                    sql.AppendFormat("{0} = {1}", SqlHelpers.FormatMember(column.Name), paramName);
+                    sql.Append(",");
+                }
+
+                if (parameters.Any())
+                {
+                    sql.Remove(sql.Length - 1, 1); // remove the trailing comma
+
+                }
+
+                sql.AppendFormat(" WHERE {0} = {1}", SqlHelpers.FormatMember(MobileServiceSystemColumns.Id), AddParameter(item, parameters, idColumn));
+
+                this.ExecuteNonQuery(sql.ToString(), parameters);
+            }
+        }
+
+        private void BatchInsert(string tableName, IEnumerable<JObject> items, List<ColumnDefinition> columns)
+        {
+            if (columns.Count == 0) // we need to have some columns to insert the item
+            {
+                return;
+            }
+
+            // Generate the prepared insert statement
+            string sqlBase = String.Format(
+                "INSERT OR IGNORE INTO {0} ({1}) VALUES ",
+                SqlHelpers.FormatTableName(tableName),
+                String.Join(", ", columns.Select(c => c.Name).Select(SqlHelpers.FormatMember))
+            );
+
+            // Use int division to calculate how many times this record will fit into our parameter quota
+            int batchSize = ValidateParameterCount(columns.Count);
+
+            foreach (var batch in items.Split(maxLength: batchSize))
+            {
+                var sql = new StringBuilder(sqlBase);
+                var parameters = new Dictionary<string, object>();
+
+                foreach (JObject item in batch)
+                {
+                    AppendInsertValuesSql(sql, parameters, columns, item);
+                    sql.Append(",");
+                }
+
+                if (parameters.Any())
+                {
+                    sql.Remove(sql.Length - 1, 1); // remove the trailing comma
+                    this.ExecuteNonQuery(sql.ToString(), parameters);
+                }
+            }
+        }
+
+        private static int ValidateParameterCount(int parametersCount)
+        {
+            int batchSize = MaxParametersPerQuery / parametersCount;
+            if (batchSize == 0)
+            {
+                throw new InvalidOperationException(string.Format(Properties.Resources.SQLiteStore_TooManyColumns, MaxParametersPerQuery));
+            }
+            return batchSize;
+        }
+
+        private static void AppendInsertValuesSql(StringBuilder sql, Dictionary<string, object> parameters, List<ColumnDefinition> columns, JObject item)
+        {
+            sql.Append("(");
+            int colCount = 0;
+            foreach (var column in columns)
+            {
+                if (colCount > 0)
+                    sql.Append(",");
+
+                sql.Append(AddParameter(item, parameters, column));
+
+                colCount++;
+            }
+            sql.Append(")");
+        }
+
         internal virtual void CreateTableFromObject(string tableName, IEnumerable<ColumnDefinition> columns)
         {
             ColumnDefinition idColumn = columns.FirstOrDefault(c => c.Name.Equals(MobileServiceSystemColumns.Id));
@@ -402,6 +459,21 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             }
 
             // NOTE: In SQLite you cannot drop columns, only add them.
+        }
+
+        private static string AddParameter(JObject item, Dictionary<string, object> parameters, ColumnDefinition column)
+        {
+            JToken rawValue = item.GetValue(column.Name, StringComparison.OrdinalIgnoreCase);
+            object value = SqlHelpers.SerializeValue(rawValue, column.StoreType, column.JsonType);
+            string paramName = CreateParameter(parameters, value);
+            return paramName;
+        }
+
+        private static string CreateParameter(Dictionary<string, object> parameters, object value)
+        {
+            string paramName = "@p" + parameters.Count;
+            parameters[paramName] = value;
+            return paramName;
         }
 
         /// <summary>

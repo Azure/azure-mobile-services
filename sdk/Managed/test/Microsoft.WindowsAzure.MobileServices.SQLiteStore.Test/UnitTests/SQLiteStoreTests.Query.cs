@@ -274,13 +274,19 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             var store = new MobileServiceSQLiteStore(TestDbName);
             store.DefineTable(MathTestTable, new JObject()
             {
+                { "id", String.Empty },
                 { "val", 0f },
                 { "expected", 0f }
             });
 
             await store.InitializeAsync();
 
-            await InsertAll(store, MathTestTable, mathTestData);
+            foreach (JObject item in mathTestData)
+            {
+                item[MobileServiceSystemColumns.Id] = Guid.NewGuid().ToString();
+            }
+
+            await store.UpsertAsync(MathTestTable, mathTestData, fromServer: false);
 
             return store;
         }
@@ -308,7 +314,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
             if (!queryTableInitialized)
             {
-                await InsertAll(store, TestTable, testData);
+                await store.UpsertAsync(TestTable, testData, fromServer: false);
             }
 
             queryTableInitialized = true;
@@ -348,14 +354,6 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         private static async Task<T> Query<T>(MobileServiceSQLiteStore store, string tableName, string query) where T : JToken
         {
             return (T)await store.ReadAsync(MobileServiceTableQueryDescription.Parse(tableName, query));
-        }
-
-        private async static Task InsertAll(MobileServiceSQLiteStore store, string tableName, JObject[] items)
-        {
-            foreach (JObject item in items)
-            {
-                await store.UpsertAsync(tableName, new[] { item }, fromServer: false);
-            }
         }
     }
 }
