@@ -144,7 +144,7 @@ public final class ExecutableQuery<E> implements Query {
 		return this.mQuery.getOrderBy();
 	}
 
-	@Override
+    @Override
 	public List<String> getProjection() {
 		return this.mQuery.getProjection();
 	}
@@ -189,7 +189,7 @@ public final class ExecutableQuery<E> implements Query {
 		return this;
 	}
 
-	@Override
+    @Override
 	public ExecutableQuery<E> top(int top) {
 		this.mQuery.top(top);
 		return this;
@@ -382,6 +382,12 @@ public final class ExecutableQuery<E> implements Query {
 		this.mQuery.gt(dateValue);
 		return this;
 	}
+
+    @Override
+    public ExecutableQuery<E> gt(String stringValue) {
+        this.mQuery.gt(stringValue);
+        return this;
+    }
 
 	@Override
 	public ExecutableQuery<E> lt() {

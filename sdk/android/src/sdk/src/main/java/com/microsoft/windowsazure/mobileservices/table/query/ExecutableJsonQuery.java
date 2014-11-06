@@ -384,6 +384,12 @@ public final class ExecutableJsonQuery implements Query {
 		return this;
 	}
 
+    @Override
+    public ExecutableJsonQuery gt(String stringValue) {
+        this.mQuery.gt(stringValue);
+        return this;
+    }
+
 	@Override
 	public ExecutableJsonQuery lt() {
 		this.mQuery.lt();

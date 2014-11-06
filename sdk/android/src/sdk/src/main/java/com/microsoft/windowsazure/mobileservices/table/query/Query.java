@@ -375,7 +375,15 @@ public interface Query {
 	 */
 	Query gt(Date dateValue);
 
-	/**
+    /**
+     * Greater than comparison operator.
+     *
+     * @param stringValue
+     * @return Query
+     */
+    Query gt(String stringValue);
+
+    /**
 	 * Less than comparison operator.
 	 * 
 	 * @return Query

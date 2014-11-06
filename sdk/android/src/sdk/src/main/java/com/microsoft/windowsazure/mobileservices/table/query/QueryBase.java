@@ -391,7 +391,13 @@ class QueryBase implements Query {
 		return this;
 	}
 
-	@Override
+    @Override
+    public Query gt(String stringValue) {
+        QueryOperations.join(this, QueryOperations.gt(QueryOperations.val(stringValue)));
+        return this;
+    }
+
+    @Override
 	public Query lt() {
 		QueryOperations.join(this, QueryOperations.lt());
 		return this;

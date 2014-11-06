@@ -64,6 +64,7 @@ import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOper
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationError;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.RemoteTableOperationProcessor;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.UpdateOperation;
+import com.microsoft.windowsazure.mobileservices.table.sync.pull.IncrementalPullStrategy;
 import com.microsoft.windowsazure.mobileservices.table.sync.pull.PullCursor;
 import com.microsoft.windowsazure.mobileservices.table.sync.pull.PullStrategy;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushCompletionResult;
@@ -357,7 +358,7 @@ public class MobileServiceSyncContext {
 	 * @param query
 	 *            an optional query to filter results
 	 */
-	void pull(String tableName, Query query) throws Throwable {
+	void pull(String tableName, Query query, String queryKey) throws Throwable {
 		this.mInitLock.readLock().lock();
 
 		try {
@@ -387,7 +388,7 @@ public class MobileServiceSyncContext {
 						if (pendingTable > 0) {
 							pushFuture = push();
 						} else {
-							processPull(invTableName, query);
+							processPull(invTableName, query, queryKey);
 						}
 					} finally {
 						this.mTableLockMap.unLockWrite(multiRWLock);
@@ -560,6 +561,8 @@ public class MobileServiceSyncContext {
 
 						OperationQueue.initializeStore(this.mStore);
 						OperationErrorList.initializeStore(this.mStore);
+                        IncrementalPullStrategy.initializeStore(this.mStore);
+
 						initializeStore(this.mStore);
 
 						this.mStore.initialize();
@@ -648,7 +651,7 @@ public class MobileServiceSyncContext {
 		}
 	}
 
-	private void processPull(String tableName, Query query) throws Throwable {
+	private void processPull(String tableName, Query query, String queryKey) throws Throwable {
 
         try {
 
@@ -670,7 +673,13 @@ public class MobileServiceSyncContext {
             query.includeDeleted();
 
             PullCursor cursor = new PullCursor(query);
-            PullStrategy strategy = new PullStrategy(query, cursor);
+            PullStrategy strategy;
+
+            if (queryKey != null) {
+                strategy = new IncrementalPullStrategy(query, queryKey, cursor, this.mStore);
+            } else {
+                strategy = new PullStrategy(query, cursor);
+            }
 
             strategy.initialize();
 
@@ -703,6 +712,7 @@ public class MobileServiceSyncContext {
 
                     processElements(tableName, elements, cursor);
 
+                    strategy.onResultsProcessed(elements);
                 }
 
             }

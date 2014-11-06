@@ -7,6 +7,7 @@ import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemColumn
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -45,11 +46,7 @@ public class PullStrategy {
         }
     }
 
-    public void onResultsProcessed() {
-        return;
-    }
-
-    public void setUpdateAt() {
+    public void onResultsProcessed(JsonArray elements) {
         return;
     }
 

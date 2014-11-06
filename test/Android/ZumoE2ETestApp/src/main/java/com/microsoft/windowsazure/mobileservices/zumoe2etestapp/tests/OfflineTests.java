@@ -91,7 +91,9 @@ public class OfflineTests extends TestGroup {
 		this.addTest(createSyncTestForAuthenticatedTable(true));
 		this.addTest(LoginTests.createLogoutTest());
 
-        this.addTest(createOfflineIncrementalSyncTest());
+        this.addTest(createOfflineIncrementalSyncTest(null));
+        this.addTest(createOfflineIncrementalSyncTest("incrementalQuery"));
+
 	}
 
 	private TestCase createBasicTest(String name) {
@@ -642,7 +644,7 @@ public class OfflineTests extends TestGroup {
 		return test;
 	}
 
-    private TestCase createOfflineIncrementalSyncTest() {
+    private TestCase createOfflineIncrementalSyncTest(final String queryKey) {
 
         final String tableName = "offlinereadyitemnoversion";
 
@@ -707,7 +709,7 @@ public class OfflineTests extends TestGroup {
 
                     log("Insert Items on table");
 
-                    localTable.pull(pullQuery).get();
+                    localTable.pull(pullQuery, queryKey).get();
 
                     log("Done");
 

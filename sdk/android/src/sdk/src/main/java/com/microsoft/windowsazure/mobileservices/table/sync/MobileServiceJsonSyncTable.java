@@ -75,7 +75,7 @@ public class MobileServiceJsonSyncTable {
 	 * 
 	 * @return A ListenableFuture that is done when results have been pulled.
 	 */
-	public ListenableFuture<Void> pull(final Query query) {
+	public ListenableFuture<Void> pull(final Query query, final String queryKey) {
 		final MobileServiceJsonSyncTable thisTable = this;
 		final SettableFuture<Void> result = SettableFuture.create();
 
@@ -84,7 +84,7 @@ public class MobileServiceJsonSyncTable {
 			@Override
 			public void run() {
 				try {
-					thisTable.mClient.getSyncContext().pull(thisTable.mName, query);
+					thisTable.mClient.getSyncContext().pull(thisTable.mName, query, queryKey);
 
 					result.set(null);
 				} catch (Throwable throwable) {
@@ -95,6 +95,19 @@ public class MobileServiceJsonSyncTable {
 
 		return result;
 	}
+
+    /**
+     * Performs a query against the remote table and stores results.
+     *
+     * @param query
+     *            an optional query to filter results
+     *
+     * @return A ListenableFuture that is done when results have been pulled.
+     */
+    public ListenableFuture<Void> pull(final Query query) {
+
+        return pull(query, null);
+    }
 
 	/**
 	 * Performs a query against the local table and deletes the results.
