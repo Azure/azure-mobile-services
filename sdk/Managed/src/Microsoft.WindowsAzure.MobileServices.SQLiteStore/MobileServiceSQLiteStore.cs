@@ -375,7 +375,14 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
         internal virtual void CreateTableFromObject(string tableName, IEnumerable<ColumnDefinition> columns)
         {
-            String tblSql = string.Format("CREATE TABLE IF NOT EXISTS {0} ({1} PRIMARY KEY)", SqlHelpers.FormatTableName(tableName), SqlHelpers.FormatMember(MobileServiceSystemColumns.Id));
+            ColumnDefinition idColumn = columns.FirstOrDefault(c => c.Name.Equals(MobileServiceSystemColumns.Id));
+            var colDefinitions = columns.Where(c => c != idColumn).Select(c => String.Format("{0} {1}", SqlHelpers.FormatMember(c.Name), c.StoreType)).ToList();
+            if (idColumn != null)
+            {
+                colDefinitions.Insert(0, String.Format("{0} {1} PRIMARY KEY", SqlHelpers.FormatMember(idColumn.Name), idColumn.StoreType));
+            }
+
+            String tblSql = string.Format("CREATE TABLE IF NOT EXISTS {0} ({1})", SqlHelpers.FormatTableName(tableName), String.Join(", ", colDefinitions));
             this.ExecuteNonQuery(tblSql, parameters: null);
 
             string infoSql = string.Format("PRAGMA table_info({0});", SqlHelpers.FormatTableName(tableName));
