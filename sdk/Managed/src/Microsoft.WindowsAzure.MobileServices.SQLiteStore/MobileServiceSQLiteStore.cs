@@ -75,7 +75,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             }
 
             var tableDefinition = (from property in item.Properties()
-                                   let storeType = GetStoreType(property)
+                                   let storeType = SqlHelpers.GetStoreType(property.Value.Type, allowNull: false)
                                    select new ColumnDefinition(property.Name, property.Value.Type, storeType))
                                   .ToDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
 
@@ -465,31 +465,6 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             return rows;
         }
 
-        private JToken DeserializeValue(ColumnDefinition column, object value)
-        {
-            if (value == null)
-            {
-                return null;
-            }
-
-            string sqlType = column.StoreType;
-            JTokenType jsonType = column.JsonType;
-            if (sqlType == SqlColumnType.Integer)
-            {
-                return SqlHelpers.ParseInteger(jsonType, value);
-            }
-            if (sqlType == SqlColumnType.Real)
-            {
-                return SqlHelpers.ParseReal(jsonType, value);
-            }
-            if (sqlType == SqlColumnType.Text)
-            {
-                return SqlHelpers.ParseText(jsonType, value);
-            }
-
-            return null;
-        }
-
         private static void ValidateResult(SQLiteResult result)
         {
             if (result != SQLiteResult.DONE)
@@ -509,7 +484,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 ColumnDefinition column;
                 if (table.TryGetValue(name, out column))
                 {
-                    JToken jVal = this.DeserializeValue(column, value);
+                    JToken jVal = SqlHelpers.DeserializeValue(value, column.StoreType, column.JsonType);
                     row[name] = jVal;
                 }
                 else
@@ -541,11 +516,6 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 sysProperties = sysProperties | MobileServiceSystemProperties.Deleted;
             }
             return sysProperties;
-        }
-
-        private string GetStoreType(JProperty property)
-        {
-            return SqlHelpers.GetColumnType(property.Value.Type, allowNull: false);
         }
 
         protected override void Dispose(bool disposing)

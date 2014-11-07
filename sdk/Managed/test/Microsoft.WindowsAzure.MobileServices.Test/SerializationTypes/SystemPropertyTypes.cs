@@ -59,7 +59,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public string version { get; set; }
     }
 
-    public class AllBaseTypesWithAllSystemPropertiesType: IEquatable<AllBaseTypesWithAllSystemPropertiesType>
+    public class AllBaseTypesWithAllSystemPropertiesType : IEquatable<AllBaseTypesWithAllSystemPropertiesType>
     {
         public string Id { get; set; }
 
@@ -90,6 +90,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public DateTimeOffset DateTimeOffset { get; set; }
         public double? Nullable { get; set; }
         public DateTime? NullableDateTime { get; set; }
+        public TimeSpan TimeSpan { get; set; }
         public Uri Uri { get; set; }
         public Enum1 Enum1 { get; set; }
         public Enum2 Enum2 { get; set; }
@@ -131,6 +132,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                    this.DateTime == other.DateTime &&
                    this.DateTimeOffset == other.DateTimeOffset &&
                    this.Nullable == other.Nullable &&
+                   this.NullableDateTime == other.NullableDateTime &&
+                   this.TimeSpan == other.TimeSpan &&
                    this.Uri == other.Uri &&
                    this.Enum1 == other.Enum1 &&
                    this.Enum2 == other.Enum2 &&
@@ -214,7 +217,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [CreatedAt]
         public DateTime CreatedAt { get; set; }
 
-        [JsonProperty(PropertyName= "__createdAt")]
+        [JsonProperty(PropertyName = "__createdAt")]
         public DateTime AlsoCreatedAt { get; set; }
     }
 

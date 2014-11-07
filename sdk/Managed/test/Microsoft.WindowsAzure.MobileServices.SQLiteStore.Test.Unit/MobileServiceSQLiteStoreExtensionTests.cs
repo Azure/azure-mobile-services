@@ -17,6 +17,68 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
     public class MobileServiceSQLiteStoreExtensionTests
     {
         [TestMethod]
+        public async Task DefineTable_Succeeds_WithAllTypes_Generic()
+        {
+            var columns = new[]
+            {
+                new ColumnDefinition("id", JTokenType.String, SqlColumnType.Text),
+                new ColumnDefinition("__createdAt", JTokenType.Date, SqlColumnType.DateTime),
+                new ColumnDefinition("__updatedAt", JTokenType.Date, SqlColumnType.DateTime),
+                new ColumnDefinition("__version", JTokenType.String, SqlColumnType.Text),
+                new ColumnDefinition("Bool", JTokenType.Boolean, SqlColumnType.Boolean),
+                new ColumnDefinition("Byte", JTokenType.Integer, SqlColumnType.Integer),
+                new ColumnDefinition("SByte", JTokenType.Integer, SqlColumnType.Integer),
+                new ColumnDefinition("UShort", JTokenType.Integer, SqlColumnType.Integer),
+                new ColumnDefinition("Short", JTokenType.Integer, SqlColumnType.Integer),
+                new ColumnDefinition("UInt", JTokenType.Integer, SqlColumnType.Integer),
+                new ColumnDefinition("Int", JTokenType.Integer, SqlColumnType.Integer),
+                new ColumnDefinition("ULong", JTokenType.Integer, SqlColumnType.Integer),
+                new ColumnDefinition("Long", JTokenType.Integer, SqlColumnType.Integer),
+                new ColumnDefinition("Float", JTokenType.Float, SqlColumnType.Float),
+                new ColumnDefinition("Double", JTokenType.Float, SqlColumnType.Float),
+                new ColumnDefinition("Decimal", JTokenType.Float, SqlColumnType.Float),
+                new ColumnDefinition("String", JTokenType.String, SqlColumnType.Text),
+                new ColumnDefinition("Char", JTokenType.String, SqlColumnType.Text),
+                new ColumnDefinition("DateTime", JTokenType.Date, SqlColumnType.DateTime),
+                new ColumnDefinition("DateTimeOffset", JTokenType.Date, SqlColumnType.DateTime),
+                new ColumnDefinition("Nullable", JTokenType.Float, SqlColumnType.Float),
+                new ColumnDefinition("NullableDateTime", JTokenType.Date, SqlColumnType.DateTime),
+                new ColumnDefinition("TimeSpan", JTokenType.String, SqlColumnType.Text),
+                new ColumnDefinition("Uri", JTokenType.String, SqlColumnType.Text),
+                new ColumnDefinition("Enum1", JTokenType.String, SqlColumnType.Text),
+                new ColumnDefinition("Enum2", JTokenType.String, SqlColumnType.Text),
+                new ColumnDefinition("Enum3", JTokenType.String, SqlColumnType.Text),
+                new ColumnDefinition("Enum4", JTokenType.String, SqlColumnType.Text),
+                new ColumnDefinition("Enum5", JTokenType.String, SqlColumnType.Text),
+                new ColumnDefinition("Enum6", JTokenType.String, SqlColumnType.Text)
+            };
+            await TestDefineTable<AllBaseTypesWithAllSystemPropertiesType>("AllBaseTypesWithAllSystemPropertiesType", columns);
+        }
+
+        [TestMethod]
+        public async Task DefineTable_Succeeds_WithAllTypes()
+        {
+            var item = JObjectTypes.GetObjectWithAllTypes();
+
+            var columns = new[]
+            {
+                new ColumnDefinition("id", JTokenType.String, SqlColumnType.Text),
+                new ColumnDefinition("Object", JTokenType.Object, SqlColumnType.Json),
+                new ColumnDefinition("Array", JTokenType.Array, SqlColumnType.Json),
+                new ColumnDefinition("Integer", JTokenType.Integer, SqlColumnType.Integer),
+                new ColumnDefinition("Float", JTokenType.Float, SqlColumnType.Float),
+                new ColumnDefinition("String", JTokenType.String, SqlColumnType.Text),
+                new ColumnDefinition("Boolean", JTokenType.Boolean, SqlColumnType.Boolean),
+                new ColumnDefinition("Date", JTokenType.Date, SqlColumnType.DateTime),
+                new ColumnDefinition("Bytes", JTokenType.Bytes, SqlColumnType.Blob),
+                new ColumnDefinition("Guid", JTokenType.Guid, SqlColumnType.Guid),
+                new ColumnDefinition("TimeSpan", JTokenType.TimeSpan, SqlColumnType.TimeSpan)
+            };
+
+            await TestDefineTable(item, "AllTypes", columns);
+        }
+
+        [TestMethod]
         public async Task DefineTable_Succeeds_WithReadonlyProperty()
         {
             var columns = new[]
@@ -35,10 +97,10 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
             {
                 new ColumnDefinition("id", JTokenType.String, SqlColumnType.Text),
                 new ColumnDefinition("String", JTokenType.String, SqlColumnType.Text),
-                new ColumnDefinition("__createdAt", JTokenType.Date, SqlColumnType.Real),
-                new ColumnDefinition("__updatedAt", JTokenType.Date, SqlColumnType.Real),
+                new ColumnDefinition("__createdAt", JTokenType.Date, SqlColumnType.DateTime),
+                new ColumnDefinition("__updatedAt", JTokenType.Date, SqlColumnType.DateTime),
                 new ColumnDefinition("__version", JTokenType.String, SqlColumnType.Text),
-                new ColumnDefinition("__deleted", JTokenType.Boolean, SqlColumnType.Integer)
+                new ColumnDefinition("__deleted", JTokenType.Boolean, SqlColumnType.Boolean)
             };
 
             await TestDefineTable<ToDoWithSystemPropertiesType>("stringId_test_table", columns);
@@ -59,7 +121,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
             {
                 new ColumnDefinition("id", JTokenType.Integer, SqlColumnType.Integer),
                 new ColumnDefinition("Name", JTokenType.String, SqlColumnType.Text),
-                new ColumnDefinition("Child", JTokenType.Object, SqlColumnType.Text)
+                new ColumnDefinition("Child", JTokenType.Object, SqlColumnType.Json)
             };
 
             await TestDefineTable<ComplexType>("ComplexType", columns);
@@ -82,6 +144,16 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
 
         private static async Task TestDefineTable<T>(string testTableName, ColumnDefinition[] columns)
         {
+            await TestDefineTable(testTableName, columns, store => store.DefineTable<T>());
+        }
+
+        private static async Task TestDefineTable(JObject item, string testTableName, ColumnDefinition[] columns)
+        {
+            await TestDefineTable(testTableName, columns, store => store.DefineTable(testTableName, item));
+        }
+
+        private static async Task TestDefineTable(string testTableName, ColumnDefinition[] columns, Action<MobileServiceSQLiteStore> defineAction)
+        {
             bool defined = false;
 
             var storeMock = new Mock<MobileServiceSQLiteStore>() { CallBase = true };
@@ -99,7 +171,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
 
             storeMock.Setup(store => store.SaveSetting(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(0));
 
-            storeMock.Object.DefineTable<T>();
+            defineAction(storeMock.Object);
             await storeMock.Object.InitializeAsync();
 
             Assert.IsTrue(defined);

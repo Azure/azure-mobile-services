@@ -43,5 +43,10 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                    this.JsonType.Equals(other.JsonType) &&
                    this.StoreType.Equals(other.StoreType);
         }
+
+        public override string ToString()
+        {
+            return String.Format("{0}, {1}, {1}", this.Name, this.JsonType, this.StoreType);
+        }
     }
 }

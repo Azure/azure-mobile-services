@@ -484,7 +484,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
             this.sql.Append(" AS ");
 
-            string sqlType = SqlHelpers.GetColumnType(nodeIn.TargetType);
+            string sqlType = SqlHelpers.GetStoreCastType(nodeIn.TargetType);
             this.sql.Append(sqlType);
 
             this.sql.Append(")");
