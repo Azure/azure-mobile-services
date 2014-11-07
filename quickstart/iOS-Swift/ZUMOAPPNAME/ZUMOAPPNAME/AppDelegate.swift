@@ -27,7 +27,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let appearance = UINavigationBar.appearance()
         
         appearance.barTintColor = UIColor(red: 69.2/255.0, green: 177.2/255.0, blue: 255.0/255.0, alpha: 1.0)
-        appearance.titleTextAttributes = NSDictionary(objects: [UIColor.darkGrayColor(), UIFont(name: "Helvetica-Light", size: 20.0)], forKeys: [NSForegroundColorAttributeName, NSFontAttributeName])
+        
+        let font = UIFont(name: "Helvetica-Light", size: 20.0)!
+        appearance.titleTextAttributes = [NSForegroundColorAttributeName: UIColor.darkGrayColor(), NSFontAttributeName: font]
         appearance.tintColor = UIColor.whiteColor()
         
         return true
