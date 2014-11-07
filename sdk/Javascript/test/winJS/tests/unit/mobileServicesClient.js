@@ -576,7 +576,7 @@ function testLoginParameters(args, expectedStartUri, expectedEndUri) {
                 "userId": "bob"
             }
         });
-    }
+    };
 
     return client.loginWithOptions.apply(client, args).then(function (currentUser) {
         $assert.areEqual(client.currentUser.userId, 'bob');

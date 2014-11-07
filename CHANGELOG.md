@@ -39,6 +39,11 @@
 - Added support for offline and sync
 - Added support for soft delete
 
+
+### Version 1.2.6
+**Managed SDK**
+- Fixed an issue on Xamarin.iOS and Xamarin.Android where UI popups occur during failed user authentication flows. These popups are now suppressed so that the developer can handle the error however they want.
+
 ### Version 1.2.5
 **Managed SDK**
 - Updated to use a modified build of Xamarin.Auth that will not conflict with any user-included version of Xamarin.Auth

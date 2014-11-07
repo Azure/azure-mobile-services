@@ -14,7 +14,9 @@ exports.supportsCurrentRuntime = function () {
     /// Determines whether or not this login UI is usable in the current runtime.
     /// </summary>
 
-    return !!currentCordovaVersion();
+    // When running application inside of Ripple emulator, InAppBrowser functionality is not supported.
+    // We should use Browser popup login method instead.
+    return !!currentCordovaVersion() && !isRunUnderRippleEmulator();
 };
 
 exports.login = function (startUri, endUri, callback) {
@@ -24,14 +26,16 @@ exports.login = function (startUri, endUri, callback) {
 
     // Ensure it's a sufficiently new version of Cordova, and if not fail synchronously so that
     // the error message will show up in the browser console.
-    var foundCordovaVersion = currentCordovaVersion();
+    var foundCordovaVersion = currentCordovaVersion(),
+        message;
+
     if (!isSupportedCordovaVersion(foundCordovaVersion)) {
-        var message = "Not a supported version of Cordova. Detected: " + foundCordovaVersion +
+        message = "Not a supported version of Cordova. Detected: " + foundCordovaVersion +
                     ". Required: " + requiredCordovaVersion.major + "." + requiredCordovaVersion.minor;
         throw new Error(message);
     }
     if (!hasInAppBrowser) {
-        var message = 'A required plugin: "org.apache.cordova.inappbrowser" was not detected.';
+        message = 'A required plugin: "org.apache.cordova.inappbrowser" was not detected.';
         throw new Error(message);
     }
 
@@ -67,6 +71,11 @@ exports.login = function (startUri, endUri, callback) {
         });
     }, 500);
 };
+
+function isRunUnderRippleEmulator () {
+    // Returns true when application runs under Ripple emulator 
+    return window.parent && !!window.parent.ripple;
+}
 
 function currentCordovaVersion() {
     // If running inside Cordova, returns a string similar to "3.5.0". Otherwise, returns a falsey value.

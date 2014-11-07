@@ -389,7 +389,7 @@ global.$isDotNet = function() {
     /// <returns type="MobileServiceClient">MobileServiceClient</returns>
 
     return global.$harness.settings.custom.platform === 'dotNet';
-}
+};
 
 global.$getTableHelper = function () {
     /// <summary>
@@ -401,4 +401,4 @@ global.$getTableHelper = function () {
         global.$harness.settings.custom.MobileServiceRuntimeUrl,
         'TableHelper should only be called from functional tests!');
     return new (require("TableHelper")).TableHelper(global.$isDotNet);
-}
+};

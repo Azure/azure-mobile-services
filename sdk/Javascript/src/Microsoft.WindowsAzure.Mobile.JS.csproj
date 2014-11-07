@@ -165,9 +165,6 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="Generated\MobileServices.pri" />
-    <None Include="MobileServices.library">
-      <SubType>Designer</SubType>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -183,6 +180,7 @@
     <Content Include="Internals\NodeExports.js" />
     <Content Include="LoginUis\BrowserPopup.js" />
     <Content Include="LoginUis\CordovaPopup.js" />
+    <Content Include="LoginUis\WebAuthBroker.js" />
     <Content Include="MobileServiceClient.js" />
     <Content Include="MobileServiceLogin.js" />
     <Content Include="MobileServices.intellisense.js" />
@@ -204,19 +202,6 @@
     <PRIResource Include="Strings\en-US\Resources.resjson" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
-  <!-- Setup our JS Module system -->
-  <UsingTask TaskName="Microsoft.WindowsAzure.Mobile.JSBuild.MergeJSModules" AssemblyFile="$(ToolsPath)\Microsoft.WindowsAzure.Mobile.JSBuild.dll" />
-  <UsingTask TaskName="Microsoft.WindowsAzure.Mobile.JSBuild.CopyAndCheckout" AssemblyFile="$(ToolsPath)\Microsoft.WindowsAzure.Mobile.JSBuild.dll" />
-  <!-- Compile the single .JS files -->
-  <Target Name="CreateZumoLibrary">
-    <!-- get the submodule code -->
-    <!-- Message Importance="high" Text="Getting Git Submodules" /-->
-    <!-- Exec Command="git submodule init" WorkingDirectory="$(MSBuildProjectDirectory)\..\..\.." /-->
-    <!-- Exec Command="git submodule update" WorkingDirectory="$(MSBuildProjectDirectory)\..\..\.." /-->
-    <!-- Merge the modules into a library -->
-    <Message Importance="high" Text="Generating MobileServices Library" />
-    <MergeJSModules LibraryDefinitions="MobileServices.library" />
-  </Target>
   <!-- Create the .pri file -->
   <Target Name="CreatePriFile" Condition="'$(MakePriPath)' != ''">
     <Exec Command="&quot;$(MakePriPath)&quot; new /pr strings /cf MobileServices.priconfig.xml /of MobileServices.pri /in MobileServices /o" />
@@ -226,7 +211,6 @@
   <PropertyGroup>
     <BuildDependsOn>
       $(BuildDependsOn);
-      CreateZumoLibrary;
       CreatePriFile;
     </BuildDependsOn>
   </PropertyGroup>

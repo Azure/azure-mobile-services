@@ -47,7 +47,7 @@
     NSLog(@"%@ start", self.name);
     
     query = [[MSQuery alloc] initWithTable:table predicate:nil];
-    XCTAssertTrue([query.description isEqualToString:@"$inlinecount=none"],
+    XCTAssertTrue([query.description isEqualToString:@""],
                  @"OData query string was: %@",
                  query.description);
     
@@ -60,7 +60,7 @@
     
     query = [[MSQuery alloc] initWithTable:table predicate:predicate];
     XCTAssertTrue([query.description
-                  isEqualToString:@"$filter=(name%20eq%20'bob')&$inlinecount=none"],
+                  isEqualToString:@"$filter=(name%20eq%20'bob')"],
                  @"OData query string was: %@",
                  query.description);
 }
@@ -82,7 +82,7 @@
     query = [[MSQuery alloc] initWithTable:table predicate:nil];
     query.fetchLimit = 22;
     XCTAssertTrue([query.description isEqualToString:
-                  @"$top=22&$inlinecount=none"],
+                  @"$top=22"],
                   @"OData query string was: %@",
                   query.description);
 }
@@ -105,7 +105,7 @@
     
     NSArray *result = [[query.description componentsSeparatedByString:@"&"]
                         sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
-    NSArray *expected = @[@"$inlinecount=none", @"$skip=542"];
+    NSArray *expected = @[@"$skip=542"];
     
     XCTAssertTrue([result isEqualToArray:expected],
                  @"OData query string was: %@",
@@ -118,7 +118,7 @@
     query.fetchOffset = 0;
     NSArray *result = [[query.description componentsSeparatedByString:@"&"]
                        sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
-    NSArray *expected = @[@"$inlinecount=none", @"$skip=0"];
+    NSArray *expected = @[@"$skip=0"];
     
     XCTAssertTrue([result isEqualToArray:expected],
                  @"OData query string was: %@",
@@ -138,7 +138,7 @@
 {
     query = [[MSQuery alloc] initWithTable:table predicate:nil];
     query.includeTotalCount = NO;
-    XCTAssertTrue([query.description isEqualToString:@"$inlinecount=none"],
+    XCTAssertTrue([query.description isEqualToString:@""],
                  @"Query string was: %@",
                  query.description);
 }
@@ -153,7 +153,7 @@
 
     NSArray *result = [[query.description componentsSeparatedByString:@"&"]
                        sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
-    NSArray *expected = @[@"$inlinecount=none", @"key1=someValue", @"key2=14"];
+    NSArray *expected = @[@"key1=someValue", @"key2=14"];
     
     XCTAssertTrue([result isEqualToArray:expected],
                  @"Query string was: %@",
@@ -165,7 +165,7 @@
     query = [[MSQuery alloc] initWithTable:table predicate:nil];
     query.selectFields = @[ @"address", @"birthdate" ];
     XCTAssertTrue([query.description isEqualToString:
-                 @"$select=address,birthdate&$inlinecount=none"],
+                 @"$select=address,birthdate"],
                  @"Query string was: %@",
                  query.description);
 }
@@ -183,7 +183,7 @@
     
     NSArray *result = [[query.description componentsSeparatedByString:@"&"]
                        sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
-    NSArray *expected = @[@"$inlinecount=none", @"$orderby=name%20asc,zipcode%20desc,birthdate%20asc"];
+    NSArray *expected = @[@"$orderby=name%20asc,zipcode%20desc,birthdate%20asc"];
 
     XCTAssertTrue([result isEqualToArray:expected],
                  @"Query string was: %@",

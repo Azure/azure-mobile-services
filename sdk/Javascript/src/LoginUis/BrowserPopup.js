@@ -27,7 +27,9 @@ exports.login = function (startUri, endUri, callback) {
         useIntermediateIframe = window.navigator.userAgent.indexOf("MSIE") >= 0 || window.navigator.userAgent.indexOf("Trident") >= 0,
         intermediateIframe = useIntermediateIframe && createIntermediateIframeForLogin(runtimeOrigin, completionOrigin),
         completionType = useIntermediateIframe ? "iframe" : "postMessage";
-    startUri += "?completion_type=" + completionType + "&completion_origin=" + encodeURIComponent(completionOrigin);
+
+    startUri += startUri.indexOf('?') == -1 ? '?' : '&';
+    startUri += "completion_type=" + completionType + "&completion_origin=" + encodeURIComponent(completionOrigin);
 
     // Browsers don't allow postMessage to a file:// URL (except by setting origin to "*", which is unacceptable)
     // so abort the process early with an explanation in that case.

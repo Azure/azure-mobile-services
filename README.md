@@ -115,12 +115,17 @@ Our JavaScript SDK makes it easy to use our Microsoft Azure Mobile Services in a
 
 ### Prerequisites
 
-The Microsoft Azure Mobile Services for WinJS SDK requires Windows 8 RTM and Visual Studio 2012 RTM. 
+The Microsoft Azure Mobile Services for WinJS SDK requires Windows 8.1 and Visual Studio 2013 Update 3. 
 
 ### Building and Referencing the SDK
 
-1. Open the ```sdk\JavaScript\Microsoft.WindowsAzure.Mobile.JS.sln``` file in Visual Studio.
-2. Press F6 to build the solution. This will generate a single merged JavaScript file that will be used by your application.
+1. Install Node.js and grunt-cli (globally) for building in Visual Studio
+2. Install the Task Runner Explorer(https://visualstudiogallery.msdn.microsoft.com/8e1b4368-4afb-467a-bc13-9650572db708) add on for VS 2013 
+3. Open the ```sdk\JavaScript\Microsoft.WindowsAzure.Mobile.JS.sln``` file in Visual Studio.
+4. Right click on the gruntfile.js in the solution, and select Task Runner Explorer
+5. Run the default build option
+
+Alternatively, you can use Grunt from the command line to build the project as well.
 
 For WinJS Windows Store apps, copy the ```Generated/MobileServices[.min].js```, ```Generated/MobileServices.DevIntellisense.js``` and ```Generated/MobileService.pri``` files into your WinJS project. For HTML applications, copy the ```Generated/MobileServices.Web[.min].js``` and the ```Generated/MobileServices.DevIntellisense.js``` files into your HTML\JavaScript project.
 

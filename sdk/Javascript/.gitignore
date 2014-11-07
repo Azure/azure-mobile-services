@@ -8,4 +8,5 @@ test/*/js/MobileServices.*
 packages/*
 #just in case ignore the folders we pull from git (if a delete fails in the build process)
 tools/JSBuild/queryjs/*
-toold/JSBuild/esprima/*
+tools/JSBuild/esprima/*
+node_modules
