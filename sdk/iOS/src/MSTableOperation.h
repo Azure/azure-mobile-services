@@ -43,7 +43,7 @@ typedef NS_OPTIONS(NSUInteger, MSTableOperationTypes) {
 /// Perform's the associated PushOperationType (insert, etc) for the table item.
 /// The callback will be passed the result (an item on insert/update, and the string
 /// id on a delete) or the error from the mobile service.
--(void) executeWithCompletion:(void(^)(NSDictionary *item, NSError *error))completion;
+-(void) executeWithCompletion:(void(^)(id itemOrItemId, NSError *error))completion;
 
 /// @}
 
