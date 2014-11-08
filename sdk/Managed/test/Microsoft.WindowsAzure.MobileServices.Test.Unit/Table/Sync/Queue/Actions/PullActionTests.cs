@@ -70,7 +70,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
             opQueue.VerifyAll();
             table.VerifyAll();
 
-            store.Verify(s => s.DeleteAsync("test", It.IsAny<IEnumerable<string>>()), Times.Never(), "There shouldn't be any call to delete");
+            store.Verify(s => s.DeleteAsync(It.Is<MobileServiceTableQueryDescription>(q => q.TableName == "test")), Times.Never(), "There shouldn't be any call to delete");
         }
 
         [TestMethod]
@@ -175,7 +175,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
             this.table.VerifyAll();
             this.settings.VerifyAll();
 
-            store.Verify(s => s.DeleteAsync("test", It.IsAny<IEnumerable<string>>()), Times.Never(), "There shouldn't be any call to delete");
+            store.Verify(s => s.DeleteAsync(It.Is<MobileServiceTableQueryDescription>(q => q.TableName == "test")), Times.Never(), "There shouldn't be any call to delete");
         }
     }
 }

@@ -866,8 +866,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             // try purge on first table now
             await table1.PurgeAsync();
 
-            Assert.AreEqual(store.DeleteQueries[0].TableName, MobileServiceLocalSystemTables.SyncErrors); // push deletes all sync erros
-            Assert.AreEqual(store.DeleteQueries[1].TableName, table1.TableName); // purged table
+            Assert.AreEqual(store.DeleteQueries[1].TableName, MobileServiceLocalSystemTables.SyncErrors); // push deletes all sync erros
+            Assert.AreEqual(store.DeleteQueries[2].TableName, table1.TableName); // purged table
             Assert.AreEqual(hijack.Requests.Count, 1); // still 1 means no other push happened
             Assert.AreEqual(store.TableMap[table2.TableName].Count, 1); // this table should not be touched
         }

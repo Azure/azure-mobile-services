@@ -2,10 +2,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Query;
 using Newtonsoft.Json.Linq;
@@ -39,7 +37,38 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <returns>A task that compltes when delete has been executed on local table.</returns>
         public static Task DeleteAsync(this IMobileServiceLocalStore store, string tableName, string id)
         {
-            return store.DeleteAsync(tableName, new[] { id });
+            return store.DeleteAsync(GetLookupQuery(tableName, id));
+        }
+
+        /// <summary>
+        /// Deletes items from local table with the given list of ids
+        /// </summary>
+        /// <param name="store">Instance of <see cref="IMobileServiceLocalStore"/></param>
+        /// <param name="tableName">Name of the local table.</param>
+        /// <param name="ids">A list of ids of the items to be deleted</param>
+        /// <returns>A task that completes when delete query has executed.</returns>
+        public static async Task DeleteAsync(this IMobileServiceLocalStore store, string tableName, IEnumerable<string> ids)
+        {
+            if (!ids.Any())
+            {
+                return;
+            }
+            var query = new MobileServiceTableQueryDescription(tableName);
+            query.Filter = ids.Select(id => GetIdEqualNode(id)).Aggregate((first, second) => new BinaryOperatorNode(BinaryOperatorKind.Or, first, second));
+            await store.DeleteAsync(query);
+        }
+
+        /// <summary>
+        /// Reads a single item from local table with specified id.
+        /// </summary>
+        /// <param name="store">Instance of <see cref="IMobileServiceLocalStore"/></param>
+        /// <param name="tableName">Name of the local table.</param>
+        /// <param name="id">Id for the object to be read.</param>
+        /// <returns>A task that returns the item read from local table.</returns>
+        public static async Task<JObject> LookupAsync(this IMobileServiceLocalStore store, string tableName, string id)
+        {
+            QueryResult result = await store.QueryAsync(GetLookupQuery(tableName, id));
+            return result == null ? null : result.Values.FirstOrDefault() as JObject;
         }
 
         /// <summary>
@@ -90,6 +119,16 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         {
             QueryResult result = await store.QueryAsync(query);
             return result.Values.FirstOrDefault() as JObject;
+        }
+
+        private static MobileServiceTableQueryDescription GetLookupQuery(string tableName, string id)
+        {
+            return new MobileServiceTableQueryDescription(tableName) { Filter = GetIdEqualNode(id) };
+        }
+
+        private static BinaryOperatorNode GetIdEqualNode(string id)
+        {
+            return new BinaryOperatorNode(BinaryOperatorKind.Equal, new MemberAccessNode(null, MobileServiceSystemColumns.Id), new ConstantNode(id));
         }
     }
 }

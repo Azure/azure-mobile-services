@@ -89,7 +89,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
         public async Task ExecuteAsync_LoadsTheItem_IfItIsNotPresent()
         {
             var op = new InsertOperation("table", MobileServiceTableKind.Table, "id");
-            this.store.Setup(s => s.LookupAsync("table", "id")).Returns(Task.FromResult(new JObject()));
+            this.store.Setup(s => s.ReadAsync(It.Is<MobileServiceTableQueryDescription>(q => q.TableName == "table"))).Returns(Task.FromResult<JToken>(new JArray(new JObject())));
             await this.TestExecuteAsync(op, null, null);
         }
 
