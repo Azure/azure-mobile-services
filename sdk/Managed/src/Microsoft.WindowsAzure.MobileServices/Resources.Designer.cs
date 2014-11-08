@@ -818,6 +818,15 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Push operation has failed. See the PushResult for details..
+        /// </summary>
+        internal static string Push_Failure {
+            get {
+                return ResourceManager.GetString("Push_Failure", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Template name cannot contain &quot;;&quot; or &quot;:&quot;..
         /// </summary>
         internal static string Push_InvalidTemplateName {
