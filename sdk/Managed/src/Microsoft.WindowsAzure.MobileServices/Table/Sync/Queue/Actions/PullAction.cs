@@ -111,7 +111,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
             if (upsertList.Any())
             {
-                await this.Store.UpsertAsync(this.Table.TableName, upsertList, fromServer: true);
+                await this.Store.UpsertAsync(this.Table.TableName, upsertList, ignoreMissingColumns: true);
             }
 
             if (deletedIds.Any())

@@ -70,9 +70,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// </summary>
         /// <param name="tableName">Name of the local table.</param>
         /// <param name="items">A list of items to be inserted.</param>
-        /// <param name="fromServer"><code>true</code> if the call is made based on data coming from the server e.g. in a pull operation; <code>false</code> if the call is made by the client, such as insert or update calls on an <see cref="IMobileServiceSyncTable"/>.</param>
+        /// <param name="ignoreMissingColumns"><code>true</code> if the extra properties on item can be ignored; <code>false</code> otherwise.</param>        
         /// <returns>A task that completes when item has been upserted in local table.</returns>
-        public abstract Task UpsertAsync(string tableName, IEnumerable<JObject> items, bool fromServer);
+        public abstract Task UpsertAsync(string tableName, IEnumerable<JObject> items, bool ignoreMissingColumns);
 
         /// <summary>
         /// Deletes all the items from local table that match the query.
