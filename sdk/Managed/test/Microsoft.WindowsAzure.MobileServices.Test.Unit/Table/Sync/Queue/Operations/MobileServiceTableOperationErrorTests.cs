@@ -26,6 +26,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
             ""operationVersion"":123,
             ""operationKind"":0,
             ""tableName"":""test"",
+            ""tableKind"":1,
             ""item"":""{\""id\"":\""abc\"",\""text\"":\""example\""}"",
             ""rawResult"":""{\""id\"":\""abc\"",\""text\"":\""example\""}""
             }");
@@ -37,6 +38,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
             Assert.AreEqual(serializedError["operationVersion"], operation.OperationVersion);
             Assert.AreEqual(serializedError["operationKind"], (int)operation.OperationKind);
             Assert.AreEqual(serializedError["tableName"], operation.TableName);
+            Assert.AreEqual(serializedError["tableKind"], (int)operation.TableKind);
             Assert.AreEqual(serializedError["item"], operation.Item.ToString(Formatting.None));
             Assert.AreEqual(serializedError["rawResult"], operation.RawResult);
         }
@@ -51,6 +53,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
             ""operationVersion"":null,
             ""operationKind"":0,
             ""tableName"":""test"",
+            ""tableKind"":1,
             ""item"":""{\""id\"":\""abc\"",\""text\"":\""example\""}"",
             ""rawResult"":""{\""id\"":\""abc\"",\""text\"":\""example\""}""
             }");
@@ -62,6 +65,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
             Assert.AreEqual(0, operation.OperationVersion);
             Assert.AreEqual(serializedError["operationKind"], (int)operation.OperationKind);
             Assert.AreEqual(serializedError["tableName"], operation.TableName);
+            Assert.AreEqual(serializedError["tableKind"], (int)operation.TableKind);
             Assert.AreEqual(serializedError["item"], operation.Item.ToString(Formatting.None));
             Assert.AreEqual(serializedError["rawResult"], operation.RawResult);
         }
