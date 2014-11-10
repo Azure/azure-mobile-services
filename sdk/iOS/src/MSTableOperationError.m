@@ -132,7 +132,7 @@
         data = [serializer dataFromItem:properties idAllowed:YES ensureDictionary:NO removeSystemProperties:NO orError:&serializeError];
     }
         
-    return @{ @"id": self.guid, @"properties": data };
+    return @{ @"id": self.guid, @"operationId": [NSNumber numberWithInteger:self.operationId], @"tableKind": @0, @"properties": data };
 }
 
 #pragma mark - Error Resolution
