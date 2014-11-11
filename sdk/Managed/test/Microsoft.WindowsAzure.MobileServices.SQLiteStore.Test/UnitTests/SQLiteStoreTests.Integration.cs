@@ -317,7 +317,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(pullResult) }); // pull
             hijack.AddResponseContent("[]");
 
-            await table.PullAsync();
+            await table.PullAsync(null, null);
 
             var item = await table.LookupAsync("b");
             Assert.AreEqual(item.String, "Wow");
@@ -873,7 +873,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             await service.SyncContext.PushAsync();
 
             // then pull changes from server
-            await table.PullAsync();
+            await table.PullAsync(null, null);
 
             // order the records by id so we can assert them predictably 
             IList<ToDoWithStringId> items = await table.OrderBy(i => i.Id).ToListAsync();

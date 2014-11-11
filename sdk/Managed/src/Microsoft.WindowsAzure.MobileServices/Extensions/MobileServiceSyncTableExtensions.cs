@@ -16,26 +16,24 @@ namespace Microsoft.WindowsAzure.MobileServices
     public static class MobileServiceSyncTableExtensions
     {
         /// <summary>
-        /// Pulls all items from the associated remote table.
-        /// </summary>
-        public static Task PullAsync(this IMobileServiceSyncTable table)
-        {
-            return table.PullAsync(String.Empty);
-        }
-
-        /// <summary>
-        /// Pulls all items that match the given query
-        /// from the associated remote table.
+        /// Pulls all items that match the given query from the associated remote table. Supports incremental sync. For more information, see http://go.microsoft.com/fwlink/?LinkId=506788.
         /// </summary>
         /// <param name="table">The instance of table to execute pull on.</param>
+        /// <param name="queryKey">
+        /// A string that uniquely identifies this query and is used to keep track of its sync state. Supplying this parameter enables incremental sync whenever the same key is used again.
+        /// </param>
         /// <param name="query">
         /// An OData query that determines which items to 
         /// pull from the remote table.
         /// </param>
-        public static Task PullAsync(this IMobileServiceSyncTable table, string query)
+        /// <returns>
+        /// A task that completes when pull operation has finished.
+        /// </returns>
+        public static Task PullAsync(this IMobileServiceSyncTable table, string queryKey, string query)
         {
-            return table.PullAsync(null, query, null, cancellationToken: CancellationToken.None);
+            return table.PullAsync(queryKey, query, null, CancellationToken.None);
         }
+
 
         /// <summary>
         /// Pulls all items that match the given query from the associated remote table. Supports incremental sync. For more information, see http://go.microsoft.com/fwlink/?LinkId=506788.
