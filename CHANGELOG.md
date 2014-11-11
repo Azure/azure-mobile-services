@@ -5,6 +5,24 @@
 - Added support for following link headers returned from the .NET backend
 - **[Breaking]** Changed MSReadQueryBlock to return MSQueryResult instead of items and totalCount
 
+### Version 1.3 beta3
+**Managed SDK**
+- Improved the push failure error message d49a72e
+- Implement true upsert c5b0b38
+- Use more fine grained types in sqlite store de49712
+- Speedup store table creation eb7cc8d
+- Allow query on member name datetime 7d831cd
+- Make the sync handler optional as there is alternate way for handling sync errors edc04e5
+- Drop the unused createdat column in operations table 8a30df4
+- Remove redundant overloads in interface and move them to extensions d0a46b6
+- Support relative and absolute uri in pull same as table.read c9d8e39
+- Allow relative URI in invokeapi 5b3c6b3
+- Fixed the like implementation in sqlite store 77a0180
+- Purge should forget the deltatoken 18f1803
+- Renamed fromServer to ignoreMissingColumns 8b047eb
+- **[Breaking]** Removed PullAsync overloads that do not take queryKey d4ff784
+- Save tableKind in the errors table 23f2ef0
+
 ### Version 1.3 beta2
 **Managed SDK**
 - Updated Nuget references
