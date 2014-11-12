@@ -286,7 +286,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
                 item[MobileServiceSystemColumns.Id] = Guid.NewGuid().ToString();
             }
 
-            await store.UpsertAsync(MathTestTable, mathTestData, fromServer: false);
+            await store.UpsertAsync(MathTestTable, mathTestData, ignoreMissingColumns: false);
 
             return store;
         }
@@ -314,7 +314,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
             if (!queryTableInitialized)
             {
-                await store.UpsertAsync(TestTable, testData, fromServer: false);
+                await store.UpsertAsync(TestTable, testData, ignoreMissingColumns: false);
             }
 
             queryTableInitialized = true;

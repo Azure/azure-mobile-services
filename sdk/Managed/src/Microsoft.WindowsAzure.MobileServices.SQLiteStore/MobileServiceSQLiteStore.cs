@@ -130,9 +130,9 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         /// </summary>
         /// <param name="tableName">Name of the local table.</param>
         /// <param name="items">A list of items to be inserted.</param>
-        /// <param name="fromServer"><code>true</code> if the call is made based on data coming from the server e.g. in a pull operation; <code>false</code> if the call is made by the client, such as insert or update calls on an <see cref="IMobileServiceSyncTable"/>.</param>
+        /// <param name="ignoreMissingColumns"><code>true</code> if the extra properties on item can be ignored; <code>false</code> otherwise.</param>
         /// <returns>A task that completes when item has been upserted in local table.</returns>
-        public override Task UpsertAsync(string tableName, IEnumerable<JObject> items, bool fromServer)
+        public override Task UpsertAsync(string tableName, IEnumerable<JObject> items, bool ignoreMissingColumns)
         {
             if (tableName == null)
             {
@@ -145,10 +145,10 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
             this.EnsureInitialized();
 
-            return UpsertAsyncInternal(tableName, items, fromServer);
+            return UpsertAsyncInternal(tableName, items, ignoreMissingColumns);
         }
 
-        private Task UpsertAsyncInternal(string tableName, IEnumerable<JObject> items, bool fromServer)
+        private Task UpsertAsyncInternal(string tableName, IEnumerable<JObject> items, bool ignoreMissingColumns)
         {
             TableDefinition table = GetTable(tableName);
 
@@ -166,7 +166,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
                 // If the column is coming from the server we can just ignore it,
                 // otherwise, throw to alert the caller that they have passed an invalid column
-                if (!table.TryGetValue(prop.Name, out column) && !fromServer)
+                if (!table.TryGetValue(prop.Name, out column) && !ignoreMissingColumns)
                 {
                     throw new InvalidOperationException(string.Format(Properties.Resources.SQLiteStore_ColumnNotDefined, prop.Name, tableName));
                 }
@@ -301,7 +301,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 { "id", name }, 
                 { "value", value } 
             };
-            await this.UpsertAsyncInternal(MobileServiceLocalSystemTables.Config, new[] { setting }, fromServer: false);
+            await this.UpsertAsyncInternal(MobileServiceLocalSystemTables.Config, new[] { setting }, ignoreMissingColumns: false);
         }
 
         private async Task InitializeConfig()

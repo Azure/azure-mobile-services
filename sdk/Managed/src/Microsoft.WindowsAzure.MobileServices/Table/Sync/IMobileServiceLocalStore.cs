@@ -4,8 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Query;
 using Newtonsoft.Json.Linq;
@@ -15,13 +13,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     /// <summary>
     /// Allows saving and reading data in the local tables.
     /// </summary>
-    public interface IMobileServiceLocalStore: IDisposable
+    public interface IMobileServiceLocalStore : IDisposable
     {
         /// <summary>
         /// Initializes the store for use.
         /// </summary>
         /// <returns>A task that completes when store has initialized.</returns>
-        Task InitializeAsync();        
+        Task InitializeAsync();
 
         /// <summary>
         /// Reads data from local table by executing the query.
@@ -35,9 +33,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// </summary>
         /// <param name="tableName">Name of the local table.</param>
         /// <param name="items">A list of items to be inserted.</param>
-        /// <param name="fromServer"><code>true</code> if the call is made based on data coming from the server e.g. in a pull operation; <code>false</code> if the call is made by the client, such as insert or update calls on an <see cref="IMobileServiceSyncTable"/>.</param>
+        /// <param name="ignoreMissingColumns"><code>true</code> if the extra properties on item can be ignored; <code>false</code> otherwise.</param>
         /// <returns>A task that completes when item has been upserted in local table.</returns>
-        Task UpsertAsync(string tableName, IEnumerable<JObject> items, bool fromServer);
+        Task UpsertAsync(string tableName, IEnumerable<JObject> items, bool ignoreMissingColumns);
 
         /// <summary>
         /// Deletes all the items from local table that match the query.
