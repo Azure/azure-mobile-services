@@ -221,6 +221,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                                                                          rawResult,
                                                                          result)
                                                                          {
+                                                                             TableKind = this.tableKind,
                                                                              Context = this.context
                                                                          };
                     await batch.AddSyncErrorAsync(syncError);

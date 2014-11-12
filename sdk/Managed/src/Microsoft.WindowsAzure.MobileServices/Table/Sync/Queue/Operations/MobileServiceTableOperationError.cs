@@ -41,6 +41,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         public MobileServiceTableOperationKind OperationKind { get; private set; }
 
         /// <summary>
+        /// The kind of table 
+        /// </summary>
+        internal MobileServiceTableKind TableKind { get; set; }
+
+        /// <summary>
         /// The name of the remote table.
         /// </summary>
         public string TableName { get; private set; }
@@ -138,6 +143,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 { "operationVersion", 0 },
                 { "operationKind", 0 },
                 { "tableName", String.Empty },
+                { "tableKind", 0 },
                 { "item", String.Empty },
                 { "rawResult", String.Empty }
             });
@@ -153,6 +159,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 { "operationVersion", this.OperationVersion },
                 { "operationKind", (int)this.OperationKind },
                 { "tableName", this.TableName },
+                { "tableKind", (int)this.TableKind },
                 { "item", this.Item.ToString(Formatting.None) },
                 { "rawResult", this.RawResult }
             };
@@ -170,6 +177,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             long operationVersion = obj.Value<long?>("operationVersion").GetValueOrDefault();
             MobileServiceTableOperationKind operationKind = (MobileServiceTableOperationKind)obj.Value<int>("operationKind");
             var tableName = obj.Value<string>("tableName");
+            var tableKind = (MobileServiceTableKind)obj.Value<int?>("tableKind").GetValueOrDefault();
+
             string itemStr = obj.Value<string>("item");
             JObject item = itemStr == null ? null : JObject.Parse(itemStr);
             string rawResult = obj.Value<string>("rawResult");
@@ -184,7 +193,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                                                         rawResult,
                                                         result)
             {
-                Id = id
+                Id = id,
+                TableKind = tableKind
             };
         }
     }
