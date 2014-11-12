@@ -114,7 +114,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             await service.SyncContext.PushAsync(); // push to clear the queue 
 
             // now pull
-            await table.PullAsync();
+            await table.PullAsync(null, null);
 
             Assert.AreEqual(store.TableMap[table.TableName].Count, 2); // 1 from remote and 1 from local
             Assert.AreEqual(hijack.Requests.Count, 3); // one for push and 2 for pull
@@ -148,7 +148,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var item = new StringIdType() { Id = "an id", String = "what?" };
             await table2.InsertAsync(item);
 
-            await table1.PullAsync();
+            await table1.PullAsync(null, null);
 
             Assert.AreEqual(store.TableMap[table1.TableName].Count, 2); // table should contain 2 pulled items
             Assert.AreEqual(hijack.Requests.Count, 3); // 1 for push and 2 for pull
@@ -175,7 +175,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(store.TableMap[table1.TableName].Count, 1); // item is inserted
 
             // this should trigger a push
-            await table1.PullAsync();
+            await table1.PullAsync(null, null);
 
             Assert.AreEqual(hijack.Requests.Count, 3); // 1 for push and 2 for pull
             Assert.AreEqual(store.TableMap[table1.TableName].Count, 2); // table is populated
@@ -197,7 +197,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             await table.InsertAsync(new JObject() { { "id", "abc" } });
 
             // this should trigger a push
-            await table.PullAsync();
+            await table.PullAsync(null, null);
 
             Assert.AreEqual(hijack.Requests[0].Headers.GetValues("X-ZUMO-FEATURES").First(), "TU,OL");
             Assert.AreEqual(hijack.Requests[1].Headers.GetValues("X-ZUMO-FEATURES").First(), "QS,OL");
@@ -221,7 +221,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.IsFalse(store.TableMap.ContainsKey("stringId_test_table"));
 
-            await table.PullAsync();
+            await table.PullAsync(null, null);
 
             Assert.AreEqual(store.TableMap["stringId_test_table"].Count, 4);
             Assert.AreEqual(store.TableMap["stringId_test_table"]["abc"].Value<string>("String"), "Hey");
@@ -352,7 +352,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
                 Assert.IsFalse(store.TableMap.ContainsKey("stringId_test_table"));
 
-                await table.PullAsync(uri);
+                await table.PullAsync(null, uri);
 
                 Assert.AreEqual(store.TableMap["stringId_test_table"].Count, 2);
 
@@ -369,7 +369,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", new TestHttpHandler());
             IMobileServiceSyncTable<ToDo> table = service.GetSyncTable<ToDo>();
 
-            var ex = await AssertEx.Throws<ArgumentException>(async () => await table.PullAsync("http://www.contoso.com/about?$filter=a eq b&$orderby=c"));
+            var ex = await AssertEx.Throws<ArgumentException>(async () => await table.PullAsync(null, "http://www.contoso.com/about?$filter=a eq b&$orderby=c"));
 
             Assert.AreEqual(ex.Message, "The query uri must be on the same host as the Mobile Service.");
         }
@@ -391,7 +391,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.IsFalse(store.TableMap.ContainsKey("stringId_test_table"));
 
-            await table.PullAsync();
+            await table.PullAsync(null, null);
 
             Assert.AreEqual(store.TableMap["stringId_test_table"].Count, 4);
 
@@ -418,7 +418,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.IsFalse(store.TableMap.ContainsKey("stringId_test_table"));
 
-            await table.PullAsync();
+            await table.PullAsync(null, null);
 
             Assert.AreEqual(store.TableMap["stringId_test_table"].Count, 2);
 
@@ -530,7 +530,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(store.TableMap[table.TableName].Count, 1); // item is inserted
 
             // this should trigger a push
-            var ex = await ThrowsAsync<MobileServicePushFailedException>(() => table.PullAsync());
+            var ex = await ThrowsAsync<MobileServicePushFailedException>(() => table.PullAsync(null, null));
 
             Assert.AreEqual(ex.PushResult.Errors.Count(), 1);
             Assert.AreEqual(hijack.Requests.Count, 1); // 1 for push 
