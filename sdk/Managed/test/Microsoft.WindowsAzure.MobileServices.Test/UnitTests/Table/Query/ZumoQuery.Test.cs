@@ -902,9 +902,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 select p);
             AssertFilter(query.Filter, "(Updated eq null)");
 
+            var minDate = new DateTime(1, 1, 1, 8, 0, 0, DateTimeKind.Utc);
             query = Compile<Product, Product>(table =>
                from p in table
-               where p.Updated == DateTime.MinValue
+               where p.Updated == minDate
                select p);
             AssertFilter(query.Filter, "(Updated eq datetime'0001-01-01T08%3A00%3A00.000Z')");
 

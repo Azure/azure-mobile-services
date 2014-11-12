@@ -85,7 +85,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests.OData
         {
             var ex = AssertEx.Throws<MobileServiceODataException>(() => ODataExpressionParser.ParseFilter(string.Format("Field eq guid'this is not a guid'")));
 
-            Assert.AreEqual(ex.Message, "Guid should contain 32 digits with 4 dashes (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).");
+            Assert.IsTrue(ex.Message.Equals("Guid should contain 32 digits with 4 dashes (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).") || ex.Message.Equals("Invalid Guid format: this is not a guid"));
         }
     }
 }
