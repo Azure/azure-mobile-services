@@ -849,7 +849,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     
     XCTAssertTrue([self waitForTest:30.0], @"Test timed out.");
 
-    XCTAssertEqualObjects(actualRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?$inlinecount=none&__includeDeleted=1&__systemProperties=__version,__deleted");
+    XCTAssertEqualObjects(actualRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?__includeDeleted=1&__systemProperties=__version,__deleted");
 }
 
 -(void) testPullWithSystemPropeties
@@ -888,7 +888,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     
     XCTAssertTrue([self waitForTest:30.0], @"Test timed out.");
     
-    XCTAssertEqualObjects(actualRequest.URL.absoluteString, @"https://someUrl/tables/TodoNoVersion?$inlinecount=none&__includeDeleted=1&__systemProperties=__deleted");
+    XCTAssertEqualObjects(actualRequest.URL.absoluteString, @"https://someUrl/tables/TodoNoVersion?__includeDeleted=1&__systemProperties=__deleted");
 }
 
 -(void) testPullSuccessWithDeleted
@@ -928,7 +928,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     
     XCTAssertTrue([self waitForTest:30.0], @"Test timed out.");
     
-    XCTAssertEqualObjects(actualRequest.URL.absoluteString, @"https://someUrl/tables/TodoNoVersion?$inlinecount=none&__includeDeleted=1&__systemProperties=__deleted");
+    XCTAssertEqualObjects(actualRequest.URL.absoluteString, @"https://someUrl/tables/TodoNoVersion?__includeDeleted=1&__systemProperties=__deleted");
 }
 
 -(void) testPullWithPushSuccess
@@ -1034,7 +1034,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     
     XCTAssertTrue([self waitForTest:30.0], @"Test timed out.");
     
-    XCTAssertEqualObjects(actualRequest.URL.absoluteString, @"https://someUrl/tables/TodoNoVersion?$inlinecount=none&mykey=myvalue&__includeDeleted=1&__systemProperties=__deleted");
+    XCTAssertEqualObjects(actualRequest.URL.absoluteString, @"https://someUrl/tables/TodoNoVersion?mykey=myvalue&__includeDeleted=1&__systemProperties=__deleted");
 }
 
 -(void) testPullWithIncludeDeletedFails
