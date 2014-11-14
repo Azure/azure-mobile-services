@@ -666,11 +666,8 @@ public class MobileServiceSyncContext {
                 query = query.deepClone();
             }
 
-            if (query.getTop() == 0) {
-                query.includeInlineCount();
-            }
-
             query.includeDeleted();
+            query.includeInlineCount();
 
             PullCursor cursor = new PullCursor(query);
             PullStrategy strategy;
@@ -687,7 +684,7 @@ public class MobileServiceSyncContext {
 
             do {
 
-                JsonElement result = table.execute(query).get();
+                JsonElement result = table.execute(strategy.getLastQuery()).get();
 
                 if (result != null) {
 

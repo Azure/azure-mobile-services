@@ -30,15 +30,12 @@ public class IncrementalPullStrategy extends PullStrategy {
     private String lastElementId;
     private Date deltaToken;
     private String queryKey;
-    private QueryNode originalFilter;
+    private Query originalQuery;
 
     public IncrementalPullStrategy(Query query, String queryKey, PullCursor cursor, MobileServiceLocalStore localStore) {
         super(query, cursor);
         this.mStore = localStore;
         this.queryKey = queryKey;
-
-        originalFilter = query.getQueryNode();
-
     }
 
     public void initialize() {
@@ -46,30 +43,39 @@ public class IncrementalPullStrategy extends PullStrategy {
         JsonElement results = null;
 
         try {
+
+            originalQuery = query;
+
             results = mStore.read(
                     QueryOperations.tableName(INCREMENTAL_PULL_STRATEGY_TABLE)
                             .field("id")
                             .eq(query.getTableName() + "_" + queryKey));
 
-
-            JsonArray resultsArray = results.getAsJsonArray();
-
-            if (resultsArray.size() > 0) {
-                JsonElement result = resultsArray.get(0);
-
-                String stringMaxUpdatedDate = result.getAsJsonObject()
-                        .get("maxupdateddate").getAsString();
-
-                deltaToken = maxUpdatedAt = getDateFromString(stringMaxUpdatedDate);
-
-                setMaxUpdatedAtToQuery(maxUpdatedAt, null);
+            if (this.query.getTop() == 0) {
+                this.query.top(defaultTop);
+            } else {
+                this.query.top(Math.min(this.query.getTop(), defaultTop));
             }
+
+            if (results != null) {
+
+                JsonArray resultsArray = results.getAsJsonArray();
+
+                if (resultsArray.size() > 0) {
+                    JsonElement result = resultsArray.get(0);
+
+                    String stringMaxUpdatedDate = result.getAsJsonObject()
+                            .get("maxupdateddate").getAsString();
+
+                    deltaToken = maxUpdatedAt = getDateFromString(stringMaxUpdatedDate);
+                }
+            }
+
+            setupQuery(maxUpdatedAt, null);
 
         } catch (MobileServiceLocalStoreException e) {
 
         }
-
-        super.initialize();
     }
 
     public void onResultsProcessed(JsonArray elements) {
@@ -91,7 +97,13 @@ public class IncrementalPullStrategy extends PullStrategy {
 
     public boolean moveToNextPage(int lastElementCount) {
 
-        if (maxUpdatedAt.after(deltaToken)) {
+        if (deltaToken == null || maxUpdatedAt.after(deltaToken)) {
+
+            if (lastElementCount < this.query.getTop())
+                return false;
+
+            if (cursor.getComplete())
+                return false;
 
             deltaToken = maxUpdatedAt;
 
@@ -103,16 +115,13 @@ public class IncrementalPullStrategy extends PullStrategy {
                 this.query.skip(0);
             }
 
-            this.reduceTop();
-
-            setMaxUpdatedAtToQuery(maxUpdatedAt, lastElementId);
+            setupQuery(maxUpdatedAt, lastElementId);
 
             return true;
         }
 
         return super.moveToNextPage(lastElementCount);
     }
-
 
     public void pullComplete() {
         return;
@@ -132,31 +141,41 @@ public class IncrementalPullStrategy extends PullStrategy {
         }
     }
 
-    private void setMaxUpdatedAtToQuery(Date maxUpdatedAt, String lastItemId) {
+    private void setupQuery(Date maxUpdatedAt, String lastItemId) {
+
+        this.query = originalQuery.deepClone();
 
         if (query.getOrderBy().size() > 0) {
             this.query.getOrderBy().clear();
         }
 
+        if (maxUpdatedAt != null) {
+
+            if (this.query.getQueryNode() != null) {
+                this.query = query.and();
+            }
+
+            this.query = query.field(MobileServiceSystemColumns.UpdatedAt)
+                    .gt(this.maxUpdatedAt);
+
+            if (lastItemId != null) {
+
+                Query maxUpdatedAndIdFilter = QueryOperations.field(MobileServiceSystemColumns.UpdatedAt)
+                        .ge(maxUpdatedAt)
+                        .and()
+                        .field(MobileServiceSystemColumns.Id)
+                        .gt(lastItemId);
+
+                this.query.or(maxUpdatedAndIdFilter);
+            }
+        }
+
+        this.reduceTop();
+
+        this.query.getOrderBy().clear();
+
         this.query.orderBy(MobileServiceSystemColumns.UpdatedAt, QueryOrder.Ascending);
         this.query.orderBy(MobileServiceSystemColumns.Id, QueryOrder.Ascending);
-
-        this.query.setQueryNode(originalFilter);
-
-        this.query.field(MobileServiceSystemColumns.UpdatedAt)
-                .gt(this.maxUpdatedAt);
-
-
-        if (lastItemId != null) {
-
-            Query maxUpdatedAndIdFilter = QueryOperations.field(MobileServiceSystemColumns.UpdatedAt)
-                    .ge(this.maxUpdatedAt)
-                    .and()
-                    .field(MobileServiceSystemColumns.Id)
-                    .gt(lastItemId);
-
-            this.query.or(maxUpdatedAndIdFilter);
-        }
     }
 
     public static void initializeStore(MobileServiceLocalStore store) throws MobileServiceLocalStoreException {

@@ -317,6 +317,12 @@ public final class ExecutableQuery<E> implements Query {
 		return this;
 	}
 
+    @Override
+    public ExecutableQuery<E> ge(String stringValue) {
+        this.mQuery.ge(stringValue);
+        return this;
+    }
+
 	@Override
 	public ExecutableQuery<E> ge(Query otherQuery) {
 		this.mQuery.ge(otherQuery);

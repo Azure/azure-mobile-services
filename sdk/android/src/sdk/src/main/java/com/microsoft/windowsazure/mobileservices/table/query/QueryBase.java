@@ -325,6 +325,12 @@ class QueryBase implements Query {
 		return this;
 	}
 
+    @Override
+    public Query ge(String stringValue) {
+        QueryOperations.join(this, QueryOperations.ge(stringValue));
+        return this;
+    }
+
 	@Override
 	public Query ge(Query otherQuery) {
 		QueryOperations.join(this, QueryOperations.ge(otherQuery));

@@ -289,6 +289,13 @@ public interface Query {
 	 */
 	Query ge();
 
+    /**
+     * Greater than or equal comparison operator.
+     *
+     * @return Query
+     */
+    Query ge(String stringValue);
+
 	/**
 	 * Greater than or equal comparison operator.
 	 * 

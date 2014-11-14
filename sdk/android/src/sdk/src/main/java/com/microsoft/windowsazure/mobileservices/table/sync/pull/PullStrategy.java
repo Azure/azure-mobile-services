@@ -5,6 +5,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemColumns;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
+import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
+import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,6 +25,7 @@ public class PullStrategy {
     PullCursor cursor;
 
     public PullStrategy(Query query, PullCursor cursor) {
+
         this.query = query;
         this.supportSkip = true; //query.getSkip() > 0;
         this.supportTop = true; //query.getTop() > 0;
@@ -42,6 +45,11 @@ public class PullStrategy {
                 this.query.top(defaultTop);
             } else {
                 this.query.top(Math.min(this.query.getTop(), defaultTop));
+            }
+
+
+            if (query.getOrderBy().size() == 0) {
+               this.query.orderBy(MobileServiceSystemColumns.Id, QueryOrder.Ascending);
             }
         }
     }
@@ -68,7 +76,7 @@ public class PullStrategy {
         return true;
     }
 
-    void reduceTop() {
+    protected void reduceTop() {
         if (!this.supportTop)
             return;
 
@@ -78,5 +86,9 @@ public class PullStrategy {
 
     public void pullComplete() {
         return;
+    }
+
+    public Query getLastQuery() {
+        return this.query;
     }
 }
