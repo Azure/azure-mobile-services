@@ -717,6 +717,8 @@ public class MobileServiceSyncContext {
 
         } catch (ExecutionException e) {
             throw e.getCause();
+        } catch (RuntimeException e) {
+            throw e.getCause();
         }
     }
 

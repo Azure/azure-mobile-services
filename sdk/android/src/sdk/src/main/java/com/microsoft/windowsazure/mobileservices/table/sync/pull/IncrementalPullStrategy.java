@@ -74,7 +74,7 @@ public class IncrementalPullStrategy extends PullStrategy {
             setupQuery(maxUpdatedAt, null);
 
         } catch (MobileServiceLocalStoreException e) {
-
+            throw new RuntimeException(e);
         }
     }
 
@@ -123,10 +123,6 @@ public class IncrementalPullStrategy extends PullStrategy {
         return super.moveToNextPage(lastElementCount);
     }
 
-    public void pullComplete() {
-        return;
-    }
-
     private void saveMaxUpdatedDate(String lastElementUpdatedAt) {
 
         JsonObject updatedElement = new JsonObject();
@@ -137,7 +133,7 @@ public class IncrementalPullStrategy extends PullStrategy {
         try {
             mStore.upsert(INCREMENTAL_PULL_STRATEGY_TABLE, updatedElement);
         } catch (MobileServiceLocalStoreException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
