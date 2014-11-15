@@ -24,6 +24,33 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         public static string TestDbName = SQLiteStoreTests.TestDbName;
 
         [AsyncTestMethod]
+        public async Task InsertAsync_Throws_IfItemAlreadyExistsInLocalStore()
+        {
+            ResetDatabase(TestTable);
+
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable(TestTable, new JObject()
+            {
+                { "id", String.Empty},
+                { "String", String.Empty }
+            });
+
+            var hijack = new TestHttpHandler();
+            IMobileServiceClient service = await CreateClient(hijack, store);
+
+            string pullResult = "[{\"id\":\"abc\",\"String\":\"Wow\"}]";
+            hijack.AddResponseContent(pullResult);
+            hijack.AddResponseContent("[]");
+
+            IMobileServiceSyncTable table = service.GetSyncTable(TestTable);
+            await table.PullAsync(null, null);
+
+            var ex = await AssertEx.Throws<MobileServiceLocalStoreException>(() => table.InsertAsync(new JObject() { { "id", "abc" } }));
+
+            Assert.AreEqual(ex.Message, "An insert operation on the item is already in the queue.");
+        }
+
+        [AsyncTestMethod]
         public async Task ReadAsync_RoundTripsDate()
         {
             string tableName = "itemWithDate";
