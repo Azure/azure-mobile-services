@@ -212,10 +212,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                         rawResult = content.Item1;
                         result = content.Item2.ValidItemOrNull();
                     }
-                    var syncError = new MobileServiceTableOperationError(statusCode,
-                                                                         operation.Id,
+                    var syncError = new MobileServiceTableOperationError(operation.Id,
                                                                          operation.Version,
                                                                          operation.Kind,
+                                                                         statusCode,
                                                                          operation.TableName,
                                                                          operation.Item,
                                                                          rawResult,

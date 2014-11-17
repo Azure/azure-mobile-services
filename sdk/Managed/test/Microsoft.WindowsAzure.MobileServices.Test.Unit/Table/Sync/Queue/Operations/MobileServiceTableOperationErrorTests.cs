@@ -22,7 +22,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
             var serializedError = JObject.Parse(@"
             {""id"":""70cf6cc2-5981-4a32-ae6c-249572917a46"",
             ""httpStatus"": 200,
-            ""operationId"":""80cf6cc2-5981-4a32-ae6c-249572917a46"",
             ""operationVersion"":123,
             ""operationKind"":0,
             ""tableName"":""test"",
@@ -33,10 +32,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
             var operation = MobileServiceTableOperationError.Deserialize(serializedError, this.serializer.SerializerSettings);
 
             Assert.AreEqual(serializedError["id"], operation.Id);
-            Assert.AreEqual(serializedError["httpStatus"], (int)operation.Status);
-            Assert.AreEqual(serializedError["operationId"], operation.OperationId);
             Assert.AreEqual(serializedError["operationVersion"], operation.OperationVersion);
             Assert.AreEqual(serializedError["operationKind"], (int)operation.OperationKind);
+            Assert.AreEqual(serializedError["httpStatus"], (int)operation.Status);
             Assert.AreEqual(serializedError["tableName"], operation.TableName);
             Assert.AreEqual(serializedError["tableKind"], (int)operation.TableKind);
             Assert.AreEqual(serializedError["item"], operation.Item.ToString(Formatting.None));
@@ -49,7 +47,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
             var serializedError = JObject.Parse(@"
             {""id"":""70cf6cc2-5981-4a32-ae6c-249572917a46"",
             ""httpStatus"": 200,
-            ""operationId"":""80cf6cc2-5981-4a32-ae6c-249572917a46"",
             ""operationVersion"":null,
             ""operationKind"":0,
             ""tableName"":""test"",
@@ -60,10 +57,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
             var operation = MobileServiceTableOperationError.Deserialize(serializedError, this.serializer.SerializerSettings);
 
             Assert.AreEqual(serializedError["id"], operation.Id);
-            Assert.AreEqual(serializedError["httpStatus"], (int)operation.Status);
-            Assert.AreEqual(serializedError["operationId"], operation.OperationId);
             Assert.AreEqual(0, operation.OperationVersion);
             Assert.AreEqual(serializedError["operationKind"], (int)operation.OperationKind);
+            Assert.AreEqual(serializedError["httpStatus"], (int)operation.Status);
             Assert.AreEqual(serializedError["tableName"], operation.TableName);
             Assert.AreEqual(serializedError["tableKind"], (int)operation.TableKind);
             Assert.AreEqual(serializedError["item"], operation.Item.ToString(Formatting.None));

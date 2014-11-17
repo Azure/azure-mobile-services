@@ -1154,7 +1154,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task UpdateAsync_CancelsSecondUpdate_WhenUpdateIsInQueue()
         {
-            var store = new MobileServiceLocalStoreMock();
             await this.TestCollapseCancel(firstOperationOnItem1: (table, item1) => table.UpdateAsync(item1),
                                         operationOnItem2: (table, item2) => table.DeleteAsync(item2),
                                         secondOperationOnItem1: (table, item1) => table.UpdateAsync(item1),
@@ -1175,6 +1174,60 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                                             Assert.AreEqual(op.Value<long>("version"), 2L);
                                         });
         }
+
+        [AsyncTestMethod]
+        public async Task Collapse_DeletesTheError_OnMutualCancel()
+        {
+            var store = new MobileServiceLocalStoreMock();
+            var hijack = new TestHttpHandler();
+            MobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+
+            var item = new StringIdType() { Id = "item1", String = "what?" };
+
+            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
+            IMobileServiceSyncTable<StringIdType> table = service.GetSyncTable<StringIdType>();
+
+            await table.InsertAsync(item);
+            Assert.AreEqual(service.SyncContext.PendingOperations, 1L);
+
+            string id = store.TableMap[MobileServiceLocalSystemTables.OperationQueue].Values.First().Value<string>("id");
+            // inject an error to test if it is deleted on collapse
+            store.TableMap[MobileServiceLocalSystemTables.SyncErrors] = new Dictionary<string, JObject>() { { id, new JObject() } };
+
+            await table.DeleteAsync(item);
+            Assert.AreEqual(service.SyncContext.PendingOperations, 0L);
+
+            // error should be deleted
+            Assert.AreEqual(store.TableMap[MobileServiceLocalSystemTables.SyncErrors].Count, 0);
+        }
+
+        [AsyncTestMethod]
+        public async Task Collapse_DeletesTheError_OnReplace()
+        {
+            var store = new MobileServiceLocalStoreMock();
+            var hijack = new TestHttpHandler();
+            MobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+
+            var item = new StringIdType() { Id = "item1", String = "what?" };
+
+            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
+            IMobileServiceSyncTable<StringIdType> table = service.GetSyncTable<StringIdType>();
+
+            await table.InsertAsync(item);
+            Assert.AreEqual(service.SyncContext.PendingOperations, 1L);
+
+            string id = store.TableMap[MobileServiceLocalSystemTables.OperationQueue].Values.First().Value<string>("id");
+
+            // inject an error to test if it is deleted on collapse
+            store.TableMap[MobileServiceLocalSystemTables.SyncErrors] = new Dictionary<string, JObject>() { { id, new JObject() } };
+
+            await table.UpdateAsync(item);
+            Assert.AreEqual(service.SyncContext.PendingOperations, 1L);
+
+            // error should be deleted
+            Assert.AreEqual(store.TableMap[MobileServiceLocalSystemTables.SyncErrors].Count, 0);
+        }
+
 
         [AsyncTestMethod]
         public async Task UpdateAsync_CancelsSecondUpdate_WhenInsertIsInQueue()
@@ -1198,7 +1251,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                                             var op = queue.Values.Single(o => o.Value<string>("itemId") == "item1");
                                             Assert.AreEqual(op.Value<long>("version"), 2L);
                                         });
-
         }
 
         [AsyncTestMethod]
