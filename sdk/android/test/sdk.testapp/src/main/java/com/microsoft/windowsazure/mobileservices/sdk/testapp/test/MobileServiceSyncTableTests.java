@@ -24,6 +24,7 @@ import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -36,6 +37,8 @@ import android.test.InstrumentationTestCase;
 import com.google.common.base.Function;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
@@ -55,6 +58,7 @@ import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
 import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceJsonSyncTable;
 import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncTable;
+import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileServiceLocalStoreException;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushFailedException;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushStatus;
 import com.microsoft.windowsazure.mobileservices.table.sync.synchandler.SimpleSyncHandler;
@@ -421,17 +425,19 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
         ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        String queryKey = "QueryKey";
 
         MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-        String updatedAt = sdf.format(new Date());
+        String updatedAt1 = sdf.format(new Date());
+        String updatedAt2 = sdf.format(new Date());
 
         client = client.withFilter(getTestFilter(serviceFilterContainer,
-                "{\"count\":\"4\",\"results\":[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt + "\"},{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt + "\"}]}",
-                "[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt + "\"},{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt + "\"}]"
+                "{\"count\":\"4\",\"results\":[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt1 + "\"},{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt1 + "\"}]}",
+                "[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt2 + "\"},{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt2 + "\"}]"
                 // remote
                 // item
         ));
@@ -445,13 +451,58 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         table.pull(query, "QueryKey").get();
 
         assertEquals(
-                serviceFilterContainer.Url,
+                serviceFilterContainer.Requests.get(0).Url,
                 EncodingUtilities
                         .percentEncodeSpaces(
-                                "http://myapp.com/tables/stringidtype?$filter=__updatedAt%20gt%20(datetime'" + updatedAt +
-                                        "')%20or%20(__updatedAt%20ge%20(datetime'" + updatedAt +
-                                        "')%20and%20id%20gt%20('def'))&$top=2&$orderby=__updatedAt%20asc,id%20asc&__includeDeleted=true&__systemproperties=*"));
+                                "http://myapp.com/tables/stringidtype?$inlinecount=allpages&$top=2&$orderby=__updatedAt%20asc,id%20asc&__includeDeleted=true&__systemproperties=*"));
 
+        assertEquals(
+                serviceFilterContainer.Requests.get(1).Url,
+                EncodingUtilities
+                        .percentEncodeSpaces(
+                                "http://myapp.com/tables/stringidtype?$filter=__updatedAt%20gt%20(datetime'" + updatedAt1 +
+                                        "')%20or%20(__updatedAt%20ge%20(datetime'" + updatedAt1 +
+                                        "')%20and%20id%20gt%20('def'))&$top=2&$orderby=__updatedAt%20asc,id%20asc&__includeDeleted=true&__systemproperties=*"));
+    }
+
+    public void testIncrementalPullSaveLastUpdatedAtDate() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
+
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        String queryKey = "QueryKey";
+        String incrementalPullStrategyTable = "__incrementalPullData";
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        String updatedAt1 = sdf.format(new Date());
+        String updatedAt2 = sdf.format(new Date());
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer,
+                "{\"count\":\"4\",\"results\":[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt1 + "\"},{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt1 + "\"}]}",
+                "[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt2 + "\"},{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt2 + "\"}]"
+                // remote
+                // item
+        ));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        Query query = QueryOperations.tableName(table.getName()).top(2);
+
+        table.pull(query, queryKey).get();
+
+        LinkedHashMap<String, JsonObject> tableContent = store.Tables.get(incrementalPullStrategyTable);
+
+        JsonElement result = tableContent.get(table.getName() + "_" + queryKey);
+
+        String stringMaxUpdatedDate = result.getAsJsonObject()
+                .get("maxupdateddate").getAsString();
+
+        assertEquals(updatedAt2, stringMaxUpdatedDate);
     }
 
 	public void testPurgeDoesNotThrowExceptionWhenThereIsNoOperationInTable() throws MalformedURLException, InterruptedException, ExecutionException {
@@ -1220,6 +1271,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 				ServiceFilterRequestData serviceFilterRequestData = new ServiceFilterRequestData();
 				serviceFilterRequestData.Headers = request.getHeaders();
 				serviceFilterRequestData.Content = request.getContent();
+                serviceFilterRequestData.Url = request.getUrl();
 
 				serviceFilterContainer.Url = request.getUrl();
 				serviceFilterContainer.Requests.add(serviceFilterRequestData);
@@ -1261,6 +1313,8 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 		public Header[] Headers;
 
 		public String Content;
+
+        public String Url;
 
 		public int Count;
 

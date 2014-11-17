@@ -110,10 +110,10 @@ public class IncrementalPullStrategy extends PullStrategy {
             // reset the cursor because deltatoken has changed
             this.cursor.reset();
 
-            if (this.supportSkip)
-            {
+            //if (this.supportSkip)
+            //{
                 this.query.skip(0);
-            }
+            //}
 
             setupQuery(maxUpdatedAt, lastElementId);
 
@@ -128,7 +128,7 @@ public class IncrementalPullStrategy extends PullStrategy {
         JsonObject updatedElement = new JsonObject();
 
         updatedElement.addProperty("id", query.getTableName() + "_" + queryKey);
-        updatedElement.addProperty("maxUpdatedDate", lastElementUpdatedAt);
+        updatedElement.addProperty("maxupdateddate", lastElementUpdatedAt);
 
         try {
             mStore.upsert(INCREMENTAL_PULL_STRATEGY_TABLE, updatedElement);
