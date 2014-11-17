@@ -413,11 +413,11 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The query key must start with a letter and can contain only letters and digits..
+        ///   Looks up a localized string similar to The query id must start with a letter and can contain only letters and digits..
         /// </summary>
-        internal static string MobileServiceSyncTable_InvalidQueryKey {
+        internal static string MobileServiceSyncTable_InvalidQueryId {
             get {
-                return ResourceManager.GetString("MobileServiceSyncTable_InvalidQueryKey", resourceCulture);
+                return ResourceManager.GetString("MobileServiceSyncTable_InvalidQueryId", resourceCulture);
             }
         }
         

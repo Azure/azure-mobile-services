@@ -37,9 +37,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return (MobileServiceSystemProperties)Int32.Parse(value);
         }
 
-        public virtual async Task ResetDeltaTokenAsync(string tableName, string queryKey)
+        public virtual async Task ResetDeltaTokenAsync(string tableName, string queryId)
         {
-            string key = GetDeltaTokenKey(tableName, queryKey);
+            string key = GetDeltaTokenKey(tableName, queryId);
 
             using (await this.cacheLock.Acquire(key, CancellationToken.None))
             {
@@ -48,15 +48,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
         }
 
-        public async virtual Task<DateTimeOffset> GetDeltaTokenAsync(string tableName, string queryKey)
+        public async virtual Task<DateTimeOffset> GetDeltaTokenAsync(string tableName, string queryId)
         {
-            string value = await this.GetSettingAsync(GetDeltaTokenKey(tableName, queryKey), DefaultDeltaToken);
+            string value = await this.GetSettingAsync(GetDeltaTokenKey(tableName, queryId), DefaultDeltaToken);
             return DateTimeOffset.Parse(value);
         }
 
-        public virtual Task SetDeltaTokenAsync(string tableName, string queryKey, DateTimeOffset token)
+        public virtual Task SetDeltaTokenAsync(string tableName, string queryId, DateTimeOffset token)
         {
-            return this.SetSettingAsync(GetDeltaTokenKey(tableName, queryKey), token.ToString("o"));
+            return this.SetSettingAsync(GetDeltaTokenKey(tableName, queryId), token.ToString("o"));
         }
 
         /// <summary>
@@ -111,9 +111,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
         }
 
-        private string GetDeltaTokenKey(string tableName, string queryKey)
+        private string GetDeltaTokenKey(string tableName, string queryId)
         {
-            return tableName + "_" + queryKey + "_deltaToken";
+            return tableName + "_" + queryId + "_deltaToken";
         }
 
         private static string GetSystemPropertiesKey(string tableName)

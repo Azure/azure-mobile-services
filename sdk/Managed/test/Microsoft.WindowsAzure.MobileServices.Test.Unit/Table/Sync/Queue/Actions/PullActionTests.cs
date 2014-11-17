@@ -74,7 +74,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
         }
 
         [TestMethod]
-        public async Task SavesTheMaxUpdatedAt_IfQueryKeyIsSpecified_WithoutFilter()
+        public async Task SavesTheMaxUpdatedAt_IfQueryIdIsSpecified_WithoutFilter()
         {
             var query = new MobileServiceTableQueryDescription("test");
 
@@ -89,7 +89,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
         }
 
         [TestMethod]
-        public async Task SavesTheMaxUpdatedAt_IfQueryKeyIsSpecified()
+        public async Task SavesTheMaxUpdatedAt_IfQueryIdIsSpecified()
         {
             var query = new MobileServiceTableQueryDescription("test");
             query.Filter = new BinaryOperatorNode(BinaryOperatorKind.Equal, new ConstantNode(4), new ConstantNode(3));

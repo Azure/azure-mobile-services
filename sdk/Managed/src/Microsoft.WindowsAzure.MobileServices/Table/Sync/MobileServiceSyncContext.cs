@@ -159,7 +159,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// </summary>
         /// <param name="tableName">The name of table to pull</param>
         /// <param name="tableKind">The kind of table</param>
-        /// <param name="queryKey">A string that uniquely identifies this query and is used to keep track of its sync state.</param>
+        /// <param name="queryId">A string that uniquely identifies this query and is used to keep track of its sync state.</param>
         /// <param name="query">An OData query that determines which items to 
         /// pull from the remote table.</param>
         /// <param name="options">An instance of <see cref="MobileServiceRemoteTableOptions"/></param>
@@ -175,7 +175,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <returns>
         /// A task that completes when pull operation has finished.
         /// </returns>
-        public async Task PullAsync(string tableName, MobileServiceTableKind tableKind, string queryKey, string query, MobileServiceRemoteTableOptions options, IDictionary<string, string> parameters, IEnumerable<string> relatedTables, MobileServiceObjectReader reader, CancellationToken cancellationToken)
+        public async Task PullAsync(string tableName, MobileServiceTableKind tableKind, string queryId, string query, MobileServiceRemoteTableOptions options, IDictionary<string, string> parameters, IEnumerable<string> relatedTables, MobileServiceObjectReader reader, CancellationToken cancellationToken)
         {
             await this.EnsureInitializedAsync();
 
@@ -202,7 +202,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 throw new ArgumentException(Resources.MobileServiceSyncTable_PullWithSelectNotSupported, "query");
             }
 
-            bool isIncrementalSync = !String.IsNullOrEmpty(queryKey);
+            bool isIncrementalSync = !String.IsNullOrEmpty(queryId);
             if (isIncrementalSync)
             {
                 if (queryDescription.Ordering.Any())
@@ -233,17 +233,17 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             // let us not burden the server to calculate the count when we don't need it for pull
             queryDescription.IncludeTotalCount = false;
 
-            var action = new PullAction(table, tableKind, this, queryKey, queryDescription, parameters, relatedTables, this.opQueue, this.settings, this.Store, options, reader, cancellationToken);
+            var action = new PullAction(table, tableKind, this, queryId, queryDescription, parameters, relatedTables, this.opQueue, this.settings, this.Store, options, reader, cancellationToken);
             await this.ExecuteSyncAction(action);
         }
 
-        public async Task PurgeAsync(string tableName, MobileServiceTableKind tableKind, string queryKey, string query, CancellationToken cancellationToken)
+        public async Task PurgeAsync(string tableName, MobileServiceTableKind tableKind, string queryId, string query, CancellationToken cancellationToken)
         {
             await this.EnsureInitializedAsync();
 
             var table = await this.GetTable(tableName);
             var queryDescription = MobileServiceTableQueryDescription.Parse(tableName, query);
-            var action = new PurgeAction(table, tableKind, queryKey, queryDescription, this, this.opQueue, this.settings, this.Store, cancellationToken);
+            var action = new PurgeAction(table, tableKind, queryId, queryDescription, this, this.opQueue, this.settings, this.Store, cancellationToken);
             await this.ExecuteSyncAction(action);
         }
 

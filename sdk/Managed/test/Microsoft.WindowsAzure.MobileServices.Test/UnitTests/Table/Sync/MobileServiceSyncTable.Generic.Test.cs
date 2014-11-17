@@ -551,7 +551,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
-        public async Task PullAsync_Throws_WhenOrderByClauseIsSpecifiedWithQueryKey()
+        public async Task PullAsync_Throws_WhenOrderByClauseIsSpecifiedWithQueryId()
         {
             IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...");
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
@@ -610,7 +610,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
-        public async Task PullAsync_Throws_WhenTopOrSkipIsSpecifiedWithQueryKey()
+        public async Task PullAsync_Throws_WhenTopOrSkipIsSpecifiedWithQueryId()
         {
             IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...");
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
@@ -814,7 +814,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
-        public async Task PullAsync_Throws_WhenQueryKeyIsInvalid()
+        public async Task PullAsync_Throws_WhenQueryIdIsInvalid()
         {
             IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", new TestHttpHandler());
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
@@ -873,7 +873,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
-        public async Task PurgeAsync_ResetsDeltaToken_WhenQueryKeyIsSpecified()
+        public async Task PurgeAsync_ResetsDeltaToken_WhenQueryIdIsSpecified()
         {
             var hijack = new TestHttpHandler();
             hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""__updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""},
@@ -919,7 +919,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
-        public async Task PurgeAsync_Throws_WhenQueryKeyIsInvalid()
+        public async Task PurgeAsync_Throws_WhenQueryIdIsInvalid()
         {
             IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", new TestHttpHandler());
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());

@@ -89,7 +89,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// Pulls all items that match the given query from the associated remote table. Supports incremental sync. For more information, see http://go.microsoft.com/fwlink/?LinkId=506788.
         /// </summary>
         /// </summary>
-        /// <param name="queryKey">
+        /// <param name="queryId">
         /// A string that uniquely identifies this query and is used to keep track of its sync state. Supplying this parameter enables incremental sync whenever the same key is used again.
         /// </param>
         /// <param name="query">
@@ -108,18 +108,18 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <returns>
         /// A task that completes when pull operation has finished.
         /// </returns>
-        Task PullAsync(string queryKey, string query, IDictionary<string, string> parameters, bool pushOtherTables, CancellationToken cancellationToken);
+        Task PullAsync(string queryId, string query, IDictionary<string, string> parameters, bool pushOtherTables, CancellationToken cancellationToken);
 
         /// <summary>
         /// Deletes all the items in local table that match the query.
         /// </summary>
-        /// <param name="queryKey">
+        /// <param name="queryId">
         /// A string that uniquely identifies this query and is used to keep track of its sync state. Supplying this parameter resets the incremental sync state for the query.
         /// </param>
         /// <param name="query">An OData query that determines which items to delete.</param>
         /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe
         /// </param>
         /// <returns>A task that completes when purge operation has finished.</returns>
-        Task PurgeAsync(string queryKey, string query, CancellationToken cancellationToken);
+        Task PurgeAsync(string queryId, string query, CancellationToken cancellationToken);
     }
 }

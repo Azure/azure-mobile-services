@@ -15,7 +15,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         private readonly QueryNode originalFilter; // filter before the delta token was applied
         private readonly MobileServiceTable table;
-        private readonly string queryKey;
+        private readonly string queryId;
         private readonly MobileServiceSyncSettingsManager settings;
         private readonly bool ordered;
 
@@ -24,7 +24,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         public IncrementalPullStrategy(MobileServiceTable table,
                                        MobileServiceTableQueryDescription query,
-                                       string queryKey,
+                                       string queryId,
                                        MobileServiceSyncSettingsManager settings,
                                        PullCursor cursor,
                                        MobileServiceRemoteTableOptions options)
@@ -32,7 +32,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         {
             this.table = table;
             this.originalFilter = query.Filter;
-            this.queryKey = queryKey;
+            this.queryId = queryId;
             this.settings = settings;
             this.ordered = options.HasFlag(MobileServiceRemoteTableOptions.OrderBy);
         }
@@ -41,7 +41,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         public override async Task InitializeAsync()
         {
             this.table.SystemProperties = this.table.SystemProperties | MobileServiceSystemProperties.UpdatedAt;
-            this.maxUpdatedAt = await this.settings.GetDeltaTokenAsync(this.Query.TableName, this.queryKey);
+            this.maxUpdatedAt = await this.settings.GetDeltaTokenAsync(this.Query.TableName, this.queryId);
             this.UpdateDeltaToken();
 
             await base.InitializeAsync();
@@ -94,7 +94,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         {
             if (this.maxUpdatedAt > this.deltaToken)
             {
-                await this.settings.SetDeltaTokenAsync(this.Query.TableName, this.queryKey, this.maxUpdatedAt);
+                await this.settings.SetDeltaTokenAsync(this.Query.TableName, this.queryId, this.maxUpdatedAt);
             }
         }
 
