@@ -92,7 +92,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <summary>
         /// Pulls all items that match the given query from the associated remote table. Supports incremental sync. For more information, see http://go.microsoft.com/fwlink/?LinkId=506788.
         /// </summary>
-        /// <param name="queryKey">
+        /// <param name="queryId">
         /// A string that uniquely identifies this query and is used to keep track of its sync state. Supplying this parameter enables incremental sync whenever the same key is used again.
         /// </param>
         /// <param name="query">
@@ -107,19 +107,19 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <returns>
         /// A task that completes when pull operation has finished.
         /// </returns>
-        Task PullAsync<U>(string queryKey, IMobileServiceTableQuery<U> query, bool pushOtherTables, CancellationToken cancellationToken);
+        Task PullAsync<U>(string queryId, IMobileServiceTableQuery<U> query, bool pushOtherTables, CancellationToken cancellationToken);
 
         /// <summary>
         /// Deletes all the items in local table that match the query.
         /// </summary>
-        /// <param name="queryKey">
+        /// <param name="queryId">
         /// A string that uniquely identifies this query and is used to keep track of its sync state. Supplying this parameter resets the incremental sync state for the query.
         /// </param>
         /// <param name="query">An OData query that determines which items to delete.</param>
         /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe
         /// </param>
         /// <returns>A task that completes when purge operation has finished.</returns>
-        Task PurgeAsync<U>(string queryKey, IMobileServiceTableQuery<U> query, CancellationToken cancellationToken);
+        Task PurgeAsync<U>(string queryId, IMobileServiceTableQuery<U> query, CancellationToken cancellationToken);
 
         /// <summary>
         /// Lookup an instance from a table by its id.

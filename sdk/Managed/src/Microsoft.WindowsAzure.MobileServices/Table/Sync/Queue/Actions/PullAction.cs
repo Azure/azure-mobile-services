@@ -24,7 +24,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         public PullAction(MobileServiceTable table,
                           MobileServiceTableKind tableKind,
                           MobileServiceSyncContext context,
-                          string queryKey,
+                          string queryId,
                           MobileServiceTableQueryDescription query,
                           IDictionary<string, string> parameters,
                           IEnumerable<string> relatedTables,
@@ -34,7 +34,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                           MobileServiceRemoteTableOptions options,
                           MobileServiceObjectReader reader,
                           CancellationToken cancellationToken)
-            : base(table, tableKind, queryKey, query, relatedTables, context, operationQueue, settings, store, cancellationToken)
+            : base(table, tableKind, queryId, query, relatedTables, context, operationQueue, settings, store, cancellationToken)
         {
             this.options = options;
             this.parameters = parameters;
@@ -169,10 +169,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         private async Task CreatePullStrategy()
         {
-            bool isIncrementalSync = !String.IsNullOrEmpty(this.QueryKey);
+            bool isIncrementalSync = !String.IsNullOrEmpty(this.QueryId);
             if (isIncrementalSync)
             {
-                this.strategy = new IncrementalPullStrategy(this.Table, this.Query, this.QueryKey, this.Settings, this.cursor, this.options);
+                this.strategy = new IncrementalPullStrategy(this.Table, this.Query, this.QueryId, this.Settings, this.cursor, this.options);
             }
             else
             {

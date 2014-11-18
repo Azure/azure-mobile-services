@@ -18,7 +18,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         private Task pendingPush;
         private MobileServiceSyncContext context;
 
-        protected string QueryKey { get; private set; }
+        protected string QueryId { get; private set; }
         protected MobileServiceTableQueryDescription Query { get; private set; }
         public MobileServiceTable Table { get; private set; }
         public MobileServiceTableKind TableKind { get; private set; }
@@ -30,7 +30,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         public TableAction(MobileServiceTable table,
                            MobileServiceTableKind tableKind,
-                           string queryKey,
+                           string queryId,
                            MobileServiceTableQueryDescription query,
                            IEnumerable<string> relatedTables,
                            MobileServiceSyncContext context,
@@ -42,7 +42,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         {
             this.Table = table;
             this.TableKind = tableKind;
-            this.QueryKey = queryKey;
+            this.QueryId = queryId;
             this.Query = query;
             this.RelatedTables = relatedTables;
             this.Settings = settings;

@@ -15,7 +15,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
     internal class MobileServiceSyncTable : IMobileServiceSyncTable
     {
-        private static readonly Regex queryKeyRegex = new Regex("^[a-zA-Z][a-zA-Z0-9]{0,24}$");
+        private static readonly Regex queryIdRegex = new Regex("^[a-zA-Z][a-zA-Z0-9]{0,24}$");
         private MobileServiceSyncContext syncContext;
 
         public MobileServiceClient MobileServiceClient { get; private set; }
@@ -43,23 +43,23 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return this.syncContext.ReadAsync(this.TableName, query);
         }
 
-        public Task PullAsync(string queryKey, string query, IDictionary<string, string> parameters, MobileServiceObjectReader reader, CancellationToken cancellationToken, params string[] relatedTables)
+        public Task PullAsync(string queryId, string query, IDictionary<string, string> parameters, MobileServiceObjectReader reader, CancellationToken cancellationToken, params string[] relatedTables)
         {
-            ValidateQueryKey(queryKey);
+            ValidateQueryId(queryId);
 
-            return this.syncContext.PullAsync(this.TableName, this.Kind, queryKey, query, this.SupportedOptions, parameters, relatedTables, reader, cancellationToken);
+            return this.syncContext.PullAsync(this.TableName, this.Kind, queryId, query, this.SupportedOptions, parameters, relatedTables, reader, cancellationToken);
         }
 
-        public Task PullAsync(string queryKey, string query, IDictionary<string, string> parameters, bool pushOtherTables, CancellationToken cancellationToken)
+        public Task PullAsync(string queryId, string query, IDictionary<string, string> parameters, bool pushOtherTables, CancellationToken cancellationToken)
         {
-            ValidateQueryKey(queryKey);
-            return this.syncContext.PullAsync(this.TableName, this.Kind, queryKey, query, this.SupportedOptions, parameters, pushOtherTables ? new string[0] : null, null, cancellationToken);
+            ValidateQueryId(queryId);
+            return this.syncContext.PullAsync(this.TableName, this.Kind, queryId, query, this.SupportedOptions, parameters, pushOtherTables ? new string[0] : null, null, cancellationToken);
         }
 
-        public Task PurgeAsync(string queryKey, string query, CancellationToken cancellationToken)
+        public Task PurgeAsync(string queryId, string query, CancellationToken cancellationToken)
         {
-            ValidateQueryKey(queryKey);
-            return this.syncContext.PurgeAsync(this.TableName, this.Kind, queryKey, query, cancellationToken);
+            ValidateQueryId(queryId);
+            return this.syncContext.PurgeAsync(this.TableName, this.Kind, queryId, query, cancellationToken);
         }
 
         public async Task<JObject> InsertAsync(JObject instance)
@@ -126,20 +126,20 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return EnsureIdIsString(id);
         }
 
-        private static void ValidateQueryKey(string queryKey)
+        private static void ValidateQueryId(string queryId)
         {
-            if (string.IsNullOrWhiteSpace(queryKey))
+            if (string.IsNullOrWhiteSpace(queryId))
             {
                 return;
             }
 
-            if (!queryKeyRegex.IsMatch(queryKey))
+            if (!queryIdRegex.IsMatch(queryId))
             {
                 throw new ArgumentException(
                         string.Format(
                             CultureInfo.InvariantCulture,
-                            Resources.MobileServiceSyncTable_InvalidQueryKey,
-                            "queryKey"));
+                            Resources.MobileServiceSyncTable_InvalidQueryId,
+                            "queryId"));
             }
         }
 
