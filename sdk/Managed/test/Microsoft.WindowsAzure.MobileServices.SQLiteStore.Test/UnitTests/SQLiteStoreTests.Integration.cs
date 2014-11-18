@@ -361,6 +361,9 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         public async Task PullAsync_DoesNotTriggerPush_OnUnrelatedTables_WhenThereIsOperationTable()
         {
             ResetDatabase(TestTable);
+            TestUtilities.DropTestTable(TestDbName, "unrelatedTable");
+            TestUtilities.DropTestTable(TestDbName, "relatedTable");
+            TestUtilities.DropTestTable(TestDbName, "StringIdType");
 
             var hijack = new TestHttpHandler();
             hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
@@ -395,6 +398,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         public async Task PullAsync_DoesNotTriggerPush_WhenPushOtherTablesIsFalse()
         {
             ResetDatabase(TestTable);
+            TestUtilities.DropTestTable(TestDbName, "unrelatedTable");
+            TestUtilities.DropTestTable(TestDbName, "StringIdType");
 
             var hijack = new TestHttpHandler();
             hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
@@ -429,6 +434,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         public async Task PullAsync_TriggersPush_OnRelatedTables_WhenThereIsOperationTable()
         {
             ResetDatabase(TestTable);
+            TestUtilities.DropTestTable(TestDbName, "relatedTable");
+            TestUtilities.DropTestTable(TestDbName, "StringIdType");
 
             var hijack = new TestHttpHandler();
             hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
@@ -465,6 +472,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         public async Task PullAsync_TriggersPush_WhenPushOtherTablesIsTrue_AndThereIsOperationTable()
         {
             ResetDatabase(TestTable);
+            TestUtilities.DropTestTable(TestDbName, "relatedTable");
+            TestUtilities.DropTestTable(TestDbName, "StringIdType");
 
             var hijack = new TestHttpHandler();
             hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
@@ -501,6 +510,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         public async Task PushAsync_PushesOnlySelectedTables_WhenSpecified()
         {
             ResetDatabase(TestTable);
+            TestUtilities.DropTestTable(TestDbName, "someTable");
+            TestUtilities.DropTestTable(TestDbName, "StringIdType");
 
             var hijack = new TestHttpHandler();
             hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
@@ -531,6 +542,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         public async Task PushAsync_PushesAllTables_WhenEmptyListIsGiven()
         {
             ResetDatabase(TestTable);
+            TestUtilities.DropTestTable(TestDbName, "someTable");
+            TestUtilities.DropTestTable(TestDbName, "StringIdType");
 
             var hijack = new TestHttpHandler();
             hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
@@ -543,13 +556,13 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             IMobileServiceClient client = await CreateClient(hijack, store);
 
             // insert item in pull table
-            IMobileServiceSyncTable unrelatedTable = client.GetSyncTable("someTable");
-            await unrelatedTable.InsertAsync(new JObject() { { "id", "abc" } });
+            IMobileServiceSyncTable table1 = client.GetSyncTable("someTable");
+            await table1.InsertAsync(new JObject() { { "id", "abc" } });
 
             // then insert item in other table
-            MobileServiceSyncTable<StringIdType> mainTable = client.GetSyncTable<StringIdType>() as MobileServiceSyncTable<StringIdType>;
+            MobileServiceSyncTable<StringIdType> table2 = client.GetSyncTable<StringIdType>() as MobileServiceSyncTable<StringIdType>;
             var item = new StringIdType() { Id = "abc", String = "what?" };
-            await mainTable.InsertAsync(item);
+            await table2.InsertAsync(item);
 
             await (client.SyncContext as MobileServiceSyncContext).PushAsync(CancellationToken.None);
 
