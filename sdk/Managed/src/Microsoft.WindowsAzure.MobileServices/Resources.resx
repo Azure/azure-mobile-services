@@ -291,4 +291,7 @@
   <data name="WP8LoginPage_MustBeCalledFromAuthBroker" xml:space="preserve">
     <value>This page must be called from the type '{0}'.</value>
   </data>
+  <data name="MobileServiceTable_QueryUriHostIsDifferent" xml:space="preserve">
+    <value>The query uri must be on the same host as the Mobile Service.</value>
+  </data>
 </root>

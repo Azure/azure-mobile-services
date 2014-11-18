@@ -40,6 +40,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <!-- A reference to the entire .NET Framework is automatically included -->
+    <None Include="packages.config" />
+    <Compile Include="UnitTests\Http\HttpUtilityTests.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="AssertEx.cs" />
     <Compile Include="FunctionalTests\DataSourceTest.cs" />
     <Compile Include="FunctionalTests\Table\MobileServiceTableTest.cs" />
