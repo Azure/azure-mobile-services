@@ -372,6 +372,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 }
                 catch (Exception ex)
                 {
+                    if (ex is MobileServiceLocalStoreException)
+                    {
+                        throw;
+                    }
                     throw new MobileServiceLocalStoreException(Resources.SyncStore_OperationFailed, ex);
                 }
 
