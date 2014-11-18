@@ -56,10 +56,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return this.syncContext.PullAsync(this.TableName, this.Kind, queryId, query, this.SupportedOptions, parameters, pushOtherTables ? new string[0] : null, null, cancellationToken);
         }
 
-        public Task PurgeAsync(string queryId, string query, CancellationToken cancellationToken)
+        public Task PurgeAsync(string queryId, string query, bool force, CancellationToken cancellationToken)
         {
             ValidateQueryId(queryId);
-            return this.syncContext.PurgeAsync(this.TableName, this.Kind, queryId, query, cancellationToken);
+            return this.syncContext.PurgeAsync(this.TableName, this.Kind, queryId, query, force, cancellationToken);
         }
 
         public async Task<JObject> InsertAsync(JObject instance)

@@ -2,7 +2,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -121,29 +120,40 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Deletes all the items in local table
         /// </summary>
-        /// <param name="table">The instance of table to execute pull on.</param>
+        /// <param name="table">The instance of table to execute purge on.</param>
         /// <returns>A task that completes when purge operation has finished.</returns>
         public static Task PurgeAsync(this IMobileServiceSyncTable table)
         {
-            return table.PurgeAsync(String.Empty);
+            return table.PurgeAsync(null, null, false, CancellationToken.None);
+        }
+
+        /// <summary>
+        /// Deletes all the items in local table
+        /// </summary>
+        /// <param name="table">The instance of table to execute purge on.</param>
+        /// <param name="force">Force the purge by discarding the pending operations.</param>
+        /// <returns>A task that completes when purge operation has finished.</returns>
+        public static Task PurgeAsync(this IMobileServiceSyncTable table, bool force)
+        {
+            return table.PurgeAsync(null, null, force, CancellationToken.None);
         }
 
         /// <summary>
         /// Deletes all the items in local table that match the query.
         /// </summary>
-        /// <param name="table">The instance of table to execute pull on.</param>
+        /// <param name="table">The instance of table to execute purge on.</param>
         /// <param name="query">An OData query that determines which items to delete.</param>
         /// <returns>A task that completes when purge operation has finished.</returns>
         public static Task PurgeAsync(this IMobileServiceSyncTable table, string query)
         {
-            return table.PurgeAsync(null, query, CancellationToken.None);
+            return table.PurgeAsync(null, query, false, CancellationToken.None);
         }
 
 
         /// <summary>
         /// Deletes all the items in local table that match the query.
         /// </summary>
-        /// <param name="table">The instance of table to execute pull on.</param>
+        /// <param name="table">The instance of table to execute purge on.</param>
         /// <param name="query">An OData query that determines which items to delete.</param>
         /// <returns>A task that completes when purge operation has finished.</returns>
         public static Task PurgeAsync<T, U>(this IMobileServiceSyncTable<T> table, IMobileServiceTableQuery<U> query)

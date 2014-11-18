@@ -11,10 +11,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
     internal class PurgeAction : TableAction
     {
+        private bool force;
+
         public PurgeAction(MobileServiceTable table,
                            MobileServiceTableKind tableKind,
                            string queryId,
                            MobileServiceTableQueryDescription query,
+                           bool force,
                            MobileServiceSyncContext context,
                            OperationQueue operationQueue,
                            MobileServiceSyncSettingsManager settings,
@@ -22,11 +25,37 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                            CancellationToken cancellationToken)
             : base(table, tableKind, queryId, query, null, context, operationQueue, settings, store, cancellationToken)
         {
+            this.force = force;
         }
 
-        protected override bool CanDeferIfDirty
+        protected async override Task<bool> HandleDirtyTable()
         {
-            get { return false; }
+            if (this.Query.Filter != null || !this.force)
+            {
+                throw new InvalidOperationException(Resources.SyncContext_PurgeOnDirtyTable);
+            }
+
+            var delOperationsQuery = new MobileServiceTableQueryDescription(MobileServiceLocalSystemTables.OperationQueue);
+            delOperationsQuery.Filter = new BinaryOperatorNode(BinaryOperatorKind.Equal, new MemberAccessNode(null, "tableName"), new ConstantNode(this.Table.TableName));
+
+            // count ops to be deleted
+            delOperationsQuery.IncludeTotalCount = true;
+            delOperationsQuery.Top = 0;
+            long toRemove = QueryResult.Parse(await this.Store.ReadAsync(delOperationsQuery), null, validate: false).TotalCount;
+
+            // delete operations
+            delOperationsQuery.Top = null;
+            await this.Store.DeleteAsync(delOperationsQuery);
+
+            // delete errors
+            var delErrorsQuery = new MobileServiceTableQueryDescription(MobileServiceLocalSystemTables.SyncErrors);
+            delErrorsQuery.Filter = delOperationsQuery.Filter;
+            await this.Store.DeleteAsync(delErrorsQuery);
+
+            // update queue operation count
+            this.OperationQueue.UpdateOperationCount(-toRemove);
+
+            return true;
         }
 
         protected override async Task ProcessTableAsync()

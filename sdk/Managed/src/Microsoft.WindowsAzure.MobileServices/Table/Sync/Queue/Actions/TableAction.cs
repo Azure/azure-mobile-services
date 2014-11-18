@@ -15,8 +15,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     /// </summary>
     internal abstract class TableAction : SyncAction
     {
-        private Task pendingPush;
-        private MobileServiceSyncContext context;
+        protected MobileServiceSyncContext Context { get; private set; }
 
         protected string QueryId { get; private set; }
         protected MobileServiceTableQueryDescription Query { get; private set; }
@@ -25,7 +24,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         protected MobileServiceSyncSettingsManager Settings { get; private set; }
 
-        protected abstract bool CanDeferIfDirty { get; }
         public IEnumerable<string> RelatedTables { get; set; }
 
         public TableAction(MobileServiceTable table,
@@ -46,30 +44,20 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             this.Query = query;
             this.RelatedTables = relatedTables;
             this.Settings = settings;
-            this.context = context;
+            this.Context = context;
         }
 
         public async override Task ExecuteAsync()
         {
             try
             {
-                if (this.pendingPush != null)
-                {
-                    await pendingPush; // this will cause any failed push to fail this dependant table action also
-                }
+                await this.WaitPendingAction();
 
                 using (await this.OperationQueue.LockTableAsync(this.Table.TableName, this.CancellationToken))
                 {
-                    if (await this.OperationQueue.CountPending(this.Table.TableName) > 0)
+                    if (await this.OperationQueue.CountPending(this.Table.TableName) > 0 && !await this.HandleDirtyTable())
                     {
-                        if (this.CanDeferIfDirty)
-                        {
-                            // there are pending operations on the same table so defer the action
-                            this.pendingPush = this.context.DeferTableActionAsync(this);
-                            // we need to return in order to give PushAsync a chance to execute so we don't await the pending push
-                            return;
-                        }
-                        throw new InvalidOperationException(Resources.SyncContext_PurgeOnDirtyTable);
+                        return; // table is dirty and we cannot proceed for execution as handle return false
                     }
 
                     await this.ProcessTableAsync();
@@ -82,6 +70,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
             this.TaskSource.SetResult(0);
         }
+
+        protected virtual Task WaitPendingAction()
+        {
+            return Task.FromResult(0);
+        }
+
+        protected abstract Task<bool> HandleDirtyTable();
 
         protected abstract Task ProcessTableAsync();
     }

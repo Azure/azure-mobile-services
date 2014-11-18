@@ -19,6 +19,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         private IDictionary<string, string> parameters;
         private MobileServiceRemoteTableOptions options; // the supported options on remote table 
         private readonly PullCursor cursor;
+        private Task pendingAction;
         private PullStrategy strategy;
 
         public PullAction(MobileServiceTable table,
@@ -44,9 +45,18 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         public MobileServiceObjectReader Reader { get; private set; }
 
-        protected override bool CanDeferIfDirty
+
+        protected override Task<bool> HandleDirtyTable()
         {
-            get { return true; }
+            // there are pending operations on the same table so defer the action
+            this.pendingAction = this.Context.DeferTableActionAsync(this);
+            // we need to return in order to give PushAsync a chance to execute so we don't await the pending push
+            return Task.FromResult(false);
+        }
+
+        protected override Task WaitPendingAction()
+        {
+            return this.pendingAction ?? Task.FromResult(0);
         }
 
         protected async override Task ProcessTableAsync()

@@ -62,7 +62,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
             string queryString = this.queryProvider.ToODataString(query);
 
-            return this.PurgeAsync(queryId, queryString, cancellationToken);
+            return this.PurgeAsync(queryId, queryString, false, cancellationToken);
         }
 
         public async Task RefreshAsync(T instance)
