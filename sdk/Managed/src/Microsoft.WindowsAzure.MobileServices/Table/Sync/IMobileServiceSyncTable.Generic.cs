@@ -90,7 +90,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         Task DeleteAsync(T instance);
 
         /// <summary>
-        /// Pulls all items that match the given query from the associated remote table. Supports incremental sync. For more information, see http://go.microsoft.com/fwlink/?LinkId=506788.
+        /// Pulls all items that match the given query from the associated remote table.
         /// </summary>
         /// <param name="queryId">
         /// A string that uniquely identifies this query and is used to keep track of its sync state. Supplying this parameter enables incremental sync whenever the same key is used again.

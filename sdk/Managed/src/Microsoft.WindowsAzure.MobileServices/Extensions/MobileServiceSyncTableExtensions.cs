@@ -16,7 +16,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     public static class MobileServiceSyncTableExtensions
     {
         /// <summary>
-        /// Pulls all items that match the given query from the associated remote table. Supports incremental sync. For more information, see http://go.microsoft.com/fwlink/?LinkId=506788.
+        /// Pulls all items that match the given query from the associated remote table. Supports incremental sync.
         /// </summary>
         /// <param name="table">The instance of table to execute pull on.</param>
         /// <param name="queryId">
@@ -36,7 +36,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
 
         /// <summary>
-        /// Pulls all items that match the given query from the associated remote table. Supports incremental sync. For more information, see http://go.microsoft.com/fwlink/?LinkId=506788.
+        /// Pulls all items that match the given query from the associated remote table. Supports incremental sync.
         /// </summary>
         /// <param name="table">The instance of table to execute pull on.</param>
         /// <param name="queryId">
@@ -61,7 +61,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// Pulls all items that match the given query from the associated remote table. Supports incremental sync. For more information, see http://go.microsoft.com/fwlink/?LinkId=506788.
+        /// Pulls all items that match the given query from the associated remote table.
         /// </summary>
         /// <param name="table">The instance of table to execute pull on.</param>
         /// <param name="queryId">
