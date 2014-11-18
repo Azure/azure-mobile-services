@@ -34,7 +34,8 @@ static NSString *const inlineCountAllPage = @"allpages";
         return url;
     }
 
-    if(url.query != nil && [url.query rangeOfString:@"__systemProperties" options:NSCaseInsensitiveSearch].location != NSNotFound) {
+    if(url.query != nil && [url.query rangeOfString:@"__systemProperties" options:NSCaseInsensitiveSearch].location != NSNotFound)
+    {
         return url;
     }
                                
@@ -43,17 +44,17 @@ static NSString *const inlineCountAllPage = @"allpages";
         value = encodeToPercentEscapeString(@"*");
     } else {
         NSMutableArray *properties = [NSMutableArray array];
-        if (table.systemProperties & MSSystemPropertyCreatedAt) {
-            [properties addObject:MSSystemColumnCreatedAt];
+        if (table.systemProperties & MSSystemPropertyCreatedAt)
+        {
+            [properties addObject:@"__createdAt"];
         }
-        if (table.systemProperties & MSSystemPropertyUpdatedAt) {
-            [properties addObject:MSSystemColumnUpdatedAt];
+        if (table.systemProperties & MSSystemPropertyUpdatedAt)
+        {
+            [properties addObject:@"__updatedAt"];
         }
-        if (table.systemProperties & MSSystemPropertyVersion) {
-            [properties addObject:MSSystemColumnVersion];
-        }
-        if (table.systemProperties & MSSystemPropertyDeleted) {
-            [properties addObject:MSSystemColumnDeleted];
+        if (table.systemProperties & MSSystemPropertyVersion)
+        {
+            [properties addObject:@"__version"];
         }
         value = [properties componentsJoinedByString:@","];
     }

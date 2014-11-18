@@ -17,7 +17,4 @@
 // A singleton instance of the MSJSONSerializer.
 +(id<MSSerializer>)JSONSerializer;
 
-// Helper method to generate a random GUID
-+ (NSString *) generateGUID;
-
 @end

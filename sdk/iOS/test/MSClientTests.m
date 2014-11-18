@@ -4,7 +4,6 @@
 
 #import <XCTest/XCTest.h>
 #import "MSClient.h"
-#import "MSSDKFeatures.h"
 #import "MSTestFilter.h"
 
 @interface MSClientTests : XCTestCase {
@@ -616,101 +615,6 @@
      }];
     
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-}
-
--(void)testInvokeAPIJsonSetsCorrectFeaturesHeader:(BOOL)useQueryParam {
-    MSClient *client = [MSClient clientWithApplicationURLString:@"http://someURL.com"];
-    NSString *expectedFeatures = useQueryParam ? @"AJ,QS" : @"AJ";
-    NSDictionary *queryParams = useQueryParam ? @{@"x":@24} : nil;
-    __block NSURLRequest *actualRequest = nil;
-    
-    // Use the filter to capture the request being sent
-    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200];
-    testFilter.onInspectRequest = ^(NSURLRequest *request) {
-        actualRequest = request;
-        return request;
-    };
-
-    // Create a client that uses the filter
-    MSClient *filterClient = [client clientWithFilter:testFilter];
-
-    // Invoke the API
-    [filterClient invokeAPI:@"someAPI"
-                       body:nil
-                 HTTPMethod:@"GET"
-                 parameters:queryParams
-                    headers:nil
-                 completion:
-     ^(id result, NSURLResponse *response, NSError *error) {
-
-         XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
-         XCTAssertNil(error, @"error should have been nil.");
-
-         NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
-         XCTAssertNotNil(featuresHeader, @"actualHeader should not have been nil.");
-         XCTAssertTrue([featuresHeader isEqualToString:expectedFeatures], @"Header value (%@) was not as expected (%@)", featuresHeader, expectedFeatures);
-
-         done = YES;
-     }];
-    
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-}
-
--(void) testInvokeAPIJsonNoQueryParametersSetsCorrectFeaturesHeader
-{
-    [self testInvokeAPIJsonSetsCorrectFeaturesHeader:NO];
-}
-
--(void) testInvokeAPIJsonWithQueryParametersSetsCorrectFeaturesHeader
-{
-    [self testInvokeAPIJsonSetsCorrectFeaturesHeader:YES];
-}
-
--(void)testInvokeAPIDataSetsCorrectFeaturesHeader:(BOOL)useQueryParam {
-    MSClient *client = [MSClient clientWithApplicationURLString:@"http://someURL.com"];
-    NSString *expectedFeatures = useQueryParam ? @"AG,QS" : @"AG";
-    NSDictionary *queryParams = useQueryParam ? @{@"x":@24} : nil;
-    __block NSURLRequest *actualRequest = nil;
-
-    // Use the filter to capture the request being sent
-    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200];
-    testFilter.onInspectRequest = ^(NSURLRequest *request) {
-        actualRequest = request;
-        return request;
-    };
-
-    // Create a client that uses the filter
-    MSClient *filterClient = [client clientWithFilter:testFilter];
-
-    NSData *requestBody = [@"hello world" dataUsingEncoding:NSUTF8StringEncoding];
-    // Invoke the API
-    [filterClient invokeAPI:@"someApi"
-                       data:requestBody
-                 HTTPMethod:@"POST"
-                 parameters:queryParams
-                    headers:@{@"Content-Type": @"text/plain"}
-                 completion:^(NSData *result, NSHTTPURLResponse *response, NSError *error) {
-                     XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
-                     XCTAssertNil(error, @"error should have been nil.");
-
-                     NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
-                     XCTAssertNotNil(featuresHeader, @"actualHeader should not have been nil.");
-                     XCTAssertTrue([featuresHeader isEqualToString:expectedFeatures], @"Header value (%@) was not as expected (%@)", featuresHeader, expectedFeatures);
-
-                     done = YES;
-                 }];
-
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-}
-
--(void) testInvokeAPIDataNoQueryParametersSetsCorrectFeaturesHeader
-{
-    [self testInvokeAPIDataSetsCorrectFeaturesHeader:NO];
-}
-
--(void) testInvokeAPIDataWithQueryParametersSetsCorrectFeaturesHeader
-{
-    [self testInvokeAPIDataSetsCorrectFeaturesHeader:YES];
 }
 
 

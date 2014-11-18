@@ -210,25 +210,6 @@ static NSArray *allIdKeys;
     return idAsString;
 }
 
--(NSString *) stringIdFromItem:(NSDictionary *)item orError:(NSError **)error
-{
-    // Get the id field out of the item
-    id itemId = [self itemIdFromItem:item orError:error];
-    if (error && *error) {
-        return nil;
-    }
-    
-    // Verify the Id is a string
-    if (itemId && ![itemId isKindOfClass:[NSString class]]) {
-        if (error) {
-            *error = [self errorForInvalidItemId];
-        }
-        return nil;
-    }
-    
-    return [self stringFromItemId:itemId orError:error];
-}
-
 -(id) itemFromData:(NSData *)data
             withOriginalItem:(id)originalItem
             ensureDictionary:(BOOL)ensureDictionary
@@ -458,16 +439,6 @@ static NSArray *allIdKeys;
     return error;
 }
 
-- (void) removeSystemProperties:(NSMutableDictionary *) item
-{
-    NSSet *systemProperties = [item keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
-        return [[key substringToIndex:2] isEqualToString:@"__"];
-    }];
-    
-    [item removeObjectsForKeys:[systemProperties allObjects]];
-    
-    return;
-}
 
 #pragma mark * Private Pre/Post Serialization Methods
 
@@ -479,7 +450,10 @@ static NSArray *allIdKeys;
         preSerializedItem = [item mutableCopy];
         
         if(removeSystemProperties) {
-            [self removeSystemProperties:preSerializedItem];
+            NSSet *systemProperties = [preSerializedItem keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
+                return [key length] > 1 && [[key substringToIndex:2] isEqualToString:@"__"];
+            }];
+            [preSerializedItem removeObjectsForKeys:[systemProperties allObjects]];
         }
         
         for (NSString *key in [preSerializedItem allKeys]) {
@@ -646,15 +620,6 @@ static NSArray *allIdKeys;
     return [NSError errorWithDomain:MSErrorDomain
                                code:errorCode
                            userInfo:userInfo];
-}
-
-// Generates a random GUID to uniquely identify operations or objects missing an Id
-+ (NSString *) generateGUID {
-    CFUUIDRef newUUID = CFUUIDCreate(kCFAllocatorDefault);
-    NSString *newId = (__bridge_transfer NSString *)CFUUIDCreateString(kCFAllocatorDefault, newUUID);
-    CFRelease(newUUID);
-    
-    return newId;
 }
 
 @end

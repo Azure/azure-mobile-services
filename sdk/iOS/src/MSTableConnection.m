@@ -4,10 +4,7 @@
 
 #import "MSTableConnection.h"
 #import "MSSerializer.h"
-#import "MSQueryResult.h"
 
-// next link is the format "http://contoso.com; rel=next"
-static NSString *const nextLinkPattern = @"^(.*?);\\s*rel\\s*=\\s*(\\w+)\\s*"; // $1; rel = $2
 
 #pragma mark * MSTableConnection Implementation
 
@@ -156,11 +153,7 @@ static NSString *const nextLinkPattern = @"^(.*?);\\s*rel\\s*=\\s*(\\w+)\\s*"; /
             }
             
             [connection addRequestAndResponse:response toError:&error];
-
-            NSString *nextLink = [MSTableConnection parseNextLink:response];
-        
-            MSQueryResult *result = [[MSQueryResult alloc] initWithItems:items totalCount:totalCount nextLink:nextLink];
-            completion(result, error);
+            completion(items, totalCount, error);
             connection = nil;
         };
     }
@@ -172,31 +165,6 @@ static NSString *const nextLinkPattern = @"^(.*?);\\s*rel\\s*=\\s*(\\w+)\\s*"; /
 }
 
 # pragma mark * Private Static Methods
-
-+(NSString*) parseNextLink:(NSHTTPURLResponse *) response
-{
-    NSString *nextLink = nil;
-    
-    NSString *link = response.allHeaderFields[@"Link"];
-    if (link) {
-        NSRegularExpression *regEx = [NSRegularExpression regularExpressionWithPattern:nextLinkPattern
-                                                                               options:0
-                                                                               error:nil];
-        
-        if (regEx) {
-            NSTextCheckingResult *match = [regEx firstMatchInString:link options:0 range:NSMakeRange(0, link.length)];
-            if (match) {
-                NSString *linkUri = [link substringWithRange:[match rangeAtIndex:1]];
-                NSString *linkRel = [link substringWithRange:[match rangeAtIndex:2]];
-                if ([linkRel isEqualToString:@"next"]){
-                    nextLink = linkUri;
-                }
-            }
-        }
-    }
-    
-    return nextLink;
-}
 
 + (NSError *)handleConflictResponse:(NSHTTPURLResponse *)response data:(NSData *)data connection:(MSTableConnection *)connection
 {
