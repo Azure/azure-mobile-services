@@ -96,7 +96,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public Task DeleteAsync(MobileServiceTableQueryDescription query)
         {
             this.DeleteQueries.Add(query);
-            this.TableMap[query.TableName].Clear();
+            GetTable(query.TableName).Clear();
             return Task.FromResult(0);
         }
 

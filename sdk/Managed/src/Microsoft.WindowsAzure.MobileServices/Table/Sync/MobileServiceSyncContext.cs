@@ -237,13 +237,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             await this.ExecuteSyncAction(action);
         }
 
-        public async Task PurgeAsync(string tableName, MobileServiceTableKind tableKind, string queryId, string query, CancellationToken cancellationToken)
+        public async Task PurgeAsync(string tableName, MobileServiceTableKind tableKind, string queryId, string query, bool force, CancellationToken cancellationToken)
         {
             await this.EnsureInitializedAsync();
 
             var table = await this.GetTable(tableName);
             var queryDescription = MobileServiceTableQueryDescription.Parse(tableName, query);
-            var action = new PurgeAction(table, tableKind, queryId, queryDescription, this, this.opQueue, this.settings, this.Store, cancellationToken);
+            var action = new PurgeAction(table, tableKind, queryId, queryDescription, force, this, this.opQueue, this.settings, this.Store, cancellationToken);
             await this.ExecuteSyncAction(action);
         }
 

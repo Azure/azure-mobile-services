@@ -62,6 +62,17 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             get { return pendingOperations; }
         }
 
+        internal void UpdateOperationCount(long delta)
+        {
+            long current, updated;
+            do
+            {
+                current = this.pendingOperations;
+                updated = current + delta;
+            }
+            while (current != Interlocked.CompareExchange(ref this.pendingOperations, updated, current));
+        }
+
         public virtual async Task<long> CountPending(string tableName)
         {
             MobileServiceTableQueryDescription query = CreateQuery();

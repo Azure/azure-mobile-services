@@ -117,9 +117,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// A string that uniquely identifies this query and is used to keep track of its sync state. Supplying this parameter resets the incremental sync state for the query.
         /// </param>
         /// <param name="query">An OData query that determines which items to delete.</param>
+        /// <param name="force">Force the purge by discarding the pending operations.</param>
         /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe
         /// </param>
         /// <returns>A task that completes when purge operation has finished.</returns>
-        Task PurgeAsync(string queryId, string query, CancellationToken cancellationToken);
+        Task PurgeAsync(string queryId, string query, bool force, CancellationToken cancellationToken);
     }
 }
