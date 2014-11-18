@@ -337,10 +337,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         private async Task TryCancelOperation(MobileServiceTableOperationError error)
         {
-            if (!await this.opQueue.DeleteAsync(error.OperationId, error.OperationVersion))
+            if (!await this.opQueue.DeleteAsync(error.Id, error.OperationVersion))
             {
                 throw new InvalidOperationException(Resources.SyncError_OperationUpdated);
             }
+            // delete errors for cancelled operation
+            await this.Store.DeleteAsync(MobileServiceLocalSystemTables.SyncErrors, error.Id);
         }
 
         private async Task EnsureInitializedAsync()
@@ -382,6 +384,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 if (existing != null)
                 {
                     existing.Collapse(operation); // cancel either existing, new or both operation 
+                    // delete error for collapsed operation
+                    await this.Store.DeleteAsync(MobileServiceLocalSystemTables.SyncErrors, existing.Id);
                     if (existing.IsCancelled) // if cancelled we delete it
                     {
                         await this.opQueue.DeleteAsync(existing.Id, existing.Version);
