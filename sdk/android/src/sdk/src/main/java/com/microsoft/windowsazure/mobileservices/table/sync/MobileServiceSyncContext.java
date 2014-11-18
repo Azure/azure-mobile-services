@@ -358,7 +358,7 @@ public class MobileServiceSyncContext {
 	 * @param query
 	 *            an optional query to filter results
 	 */
-	void pull(String tableName, Query query, String queryKey) throws Throwable {
+	void pull(String tableName, Query query, String queryId) throws Throwable {
 		this.mInitLock.readLock().lock();
 
 		try {
@@ -388,7 +388,7 @@ public class MobileServiceSyncContext {
 						if (pendingTable > 0) {
 							pushFuture = push();
 						} else {
-							processPull(invTableName, query, queryKey);
+							processPull(invTableName, query, queryId);
 						}
 					} finally {
 						this.mTableLockMap.unLockWrite(multiRWLock);
@@ -651,7 +651,7 @@ public class MobileServiceSyncContext {
 		}
 	}
 
-	private void processPull(String tableName, Query query, String queryKey) throws Throwable {
+	private void processPull(String tableName, Query query, String queryId) throws Throwable {
 
         try {
 
@@ -672,8 +672,8 @@ public class MobileServiceSyncContext {
             PullCursor cursor = new PullCursor(query);
             PullStrategy strategy;
 
-            if (queryKey != null) {
-                strategy = new IncrementalPullStrategy(query, queryKey, cursor, this.mStore);
+            if (queryId != null) {
+                strategy = new IncrementalPullStrategy(query, queryId, cursor, this.mStore);
             } else {
                 strategy = new PullStrategy(query, cursor);
             }

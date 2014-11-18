@@ -78,8 +78,8 @@ public class MobileServiceSyncTable<E> {
      *            key to identify the query
 	 * @return A ListenableFuture that is done when results have been pulled.
 	 */
-	public ListenableFuture<Void> pull(Query query, String queryKey) {
-		ListenableFuture<Void> pull = this.mInternalTable.pull(query, queryKey);
+	public ListenableFuture<Void> pull(Query query, String queryId) {
+		ListenableFuture<Void> pull = this.mInternalTable.pull(query, queryId);
 
 		final SettableFuture<Void> result = SettableFuture.create();
 
