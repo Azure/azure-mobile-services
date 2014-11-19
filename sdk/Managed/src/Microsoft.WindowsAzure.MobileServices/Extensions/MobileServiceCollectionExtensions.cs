@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MobileServices.Sync;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
@@ -44,6 +45,21 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </param>
         /// <returns>The collection.</returns>
         public static Task<MobileServiceCollection<TTable, TTable>> ToCollectionAsync<TTable>(this IMobileServiceTable<TTable> table, int pageSize = 0)
+        {
+            return table.CreateQuery().ToCollectionAsync(pageSize);
+        }
+
+        /// <summary>
+        /// Create a new collection based on the local table.
+        /// </summary>
+        /// <param name="table">
+        /// The local table from which to create the new collection. 
+        /// </param>
+        /// <param name="pageSize">
+        /// Optional page size.
+        /// </param>
+        /// <returns>The collection.</returns>
+        public static Task<MobileServiceCollection<TTable, TTable>> ToCollectionAsync<TTable>(this IMobileServiceSyncTable<TTable> table, int pageSize = 0)
         {
             return table.CreateQuery().ToCollectionAsync(pageSize);
         }

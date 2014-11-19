@@ -31,8 +31,10 @@ namespace ZumoE2ETestApp.Tests
 #if WINDOWS_PHONE
                 ZumoWP8PushTests.CreateTests(),
 #endif
-#if NETFX_CORE                
-                ZumoPushTests.CreateTests()
+
+#if NETFX_CORE
+                ZumoPushTests.CreateTests(),
+                ZumoOfflineTests.CreateTests(),
 #endif
             };
 

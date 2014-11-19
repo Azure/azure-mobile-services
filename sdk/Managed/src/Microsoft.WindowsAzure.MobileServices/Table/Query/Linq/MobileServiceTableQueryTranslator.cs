@@ -9,11 +9,10 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Microsoft.WindowsAzure.MobileServices.Query;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-namespace Microsoft.WindowsAzure.MobileServices
+namespace Microsoft.WindowsAzure.MobileServices.Query
 {
     /// <summary>
     /// Compiles a LINQ expression tree into a
@@ -51,7 +50,10 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             this.query = query;
 
-            this.queryDescription = new MobileServiceTableQueryDescription(query.Table.TableName, query.RequestTotalCount);
+            this.queryDescription = new MobileServiceTableQueryDescription(query.Table.TableName)
+            { 
+                IncludeTotalCount = query.RequestTotalCount,
+            };
         }
 
         /// <summary>
@@ -153,13 +155,13 @@ namespace Microsoft.WindowsAzure.MobileServices
                     break;
                 case "OrderBy":
                     this.AddOrdering(expression, true, true);
-                    break;
+                    break;                    
                 case "ThenBy":
                     this.AddOrdering(expression, true);
                     break;
                 case "OrderByDescending":
                     this.AddOrdering(expression, false, true);
-                    break;
+                    break;                    
                 case "ThenByDescending":
                     this.AddOrdering(expression, false);
                     break;
@@ -175,7 +177,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                     break;
                 default:
                     ThrowForUnsupportedException(expression);
-                    break;
+                    break;                    
             }
 
             return expression;
@@ -194,13 +196,13 @@ namespace Microsoft.WindowsAzure.MobileServices
                 LambdaExpression lambda = StripQuote(expression.Arguments[1]) as LambdaExpression;
                 if (lambda != null)
                 {
-                    string filter = FilterBuildingExpressionVisitor.Create(lambda.Body, this.ContractResolver);
+                    QueryNode filter = FilterBuildingExpressionVisitor.Compile(lambda.Body, this.ContractResolver);
                     if (this.queryDescription.Filter != null)
                     {
                         // If there's already a filter value, that means the
                         // query has multiple where clauses which we'll just
                         // join together with "and"s.
-                        this.queryDescription.Filter += " and " + filter;
+                        this.queryDescription.Filter = new BinaryOperatorNode(BinaryOperatorKind.And, this.queryDescription.Filter, filter);
                     }
                     else
                     {
@@ -262,7 +264,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                         if (objectContract != null)
                         {
                             foreach (string propertyName in objectContract.Properties
-                                                                          .Where(p => p.Required == Required.Always ||
+                                                                          .Where(p => p.Required == Required.Always || 
                                                                                       p.Required == Required.AllowNull)
                                                                           .Select(p => p.PropertyName))
                             {
@@ -310,19 +312,21 @@ namespace Microsoft.WindowsAzure.MobileServices
 
                     // Find the name of the member being ordered
                     MemberExpression memberAccess = lambda.Body as MemberExpression;
-                    if (memberAccess != null)
+                    if (memberAccess != null) 
                     {
                         string memberName = FilterBuildingExpressionVisitor.GetTableMemberName(memberAccess, this.ContractResolver);
                         if (memberName != null)
                         {
+                            OrderByDirection direction = ascending ? OrderByDirection.Ascending : OrderByDirection.Descending;
+                            var node = new OrderByNode(new MemberAccessNode(null, memberName), direction);
                             // Add the ordering
-                            if (prepend)
+                            if(prepend)
                             {
-                                this.queryDescription.Ordering.Insert(0, new KeyValuePair<string, bool>(memberName, ascending));
-                            }
-                            else
+                                this.queryDescription.Ordering.Insert(0, node);
+                            } 
+                            else 
                             {
-                                this.queryDescription.Ordering.Add(new KeyValuePair<string, bool>(memberName, ascending));
+                                this.queryDescription.Ordering.Add(node);                            
                             }
 
                             return;

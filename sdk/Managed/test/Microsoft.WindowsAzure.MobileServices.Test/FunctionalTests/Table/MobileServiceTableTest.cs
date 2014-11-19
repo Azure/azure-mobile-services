@@ -53,6 +53,18 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
         [Version]
         public String Version { get; set; }
+
+        [Deleted]
+        public bool Deleted { get; set; }
+
+        public ToDoWithSystemPropertiesType()
+        {
+        }
+
+        public ToDoWithSystemPropertiesType(string id)
+        {
+            this.Id = id;
+        }
     }
 
     public class TypeWithArray
@@ -1539,6 +1551,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 Assert.IsNotNull(item.UpdatedAt);
                 Assert.IsNotNull(item.Version);
                 items.Add(item);
+
+                await Task.Delay(10); // to separate the items in time
             }
 
 

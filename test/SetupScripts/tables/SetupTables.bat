@@ -10,6 +10,13 @@ echo   with all four providers.
 goto :TheEnd
 
 :Start
+call azure mobile table create %1 stringIdRoundTripTable
+call azure mobile table create %1 stringIdMovies
+call azure mobile table create %1 offlineReady
+call azure mobile table create %1 offlineReadyNoVersionAuthenticated
+call azure mobile table update --deleteColumn __version --quiet %1 offlineReadyNoVersionAuthenticated
+call azure mobile table create --integerId %1 intIdMovies
+call azure mobile table create --integerId %1 ParamsTestTable
 REM Tables specific to functional tests
 call azure mobile table create --integerId %1 blog_posts
 call azure mobile table create --integerId %1 blog_comments
@@ -58,6 +65,7 @@ call azure mobile table update -p insert=application,read=application,update=app
 call azure mobile table update -p insert=user,read=user,update=user,delete=user %1 authenticated
 call azure mobile table update -p insert=application,read=public,update=public,delete=public %1 public
 call azure mobile table update -p insert=admin,read=application,update=admin,delete=admin %1 w8jsServerQueryMovies
+call azure mobile table update -p insert=user,read=user,update=user,delete=user %1 offlineReadyNoVersionAuthenticated
 
 REM Scripts
 REM Tables specific to unit tests

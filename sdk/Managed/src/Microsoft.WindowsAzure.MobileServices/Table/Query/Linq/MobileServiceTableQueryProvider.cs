@@ -7,13 +7,19 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MobileServices.Sync;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.Query
 {
     internal class MobileServiceTableQueryProvider
     {
+        private IMobileServiceSyncTable syncTable;
 
+        public MobileServiceTableQueryProvider(IMobileServiceSyncTable syncTable = null)
+        {
+            this.syncTable = syncTable;
+        }
 
         /// <summary>
         /// Feature which are sent as telemetry information to the service for all
@@ -107,17 +113,25 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 
         protected virtual async Task<QueryResult> Execute<T>(IMobileServiceTableQuery<T> query, string odata)
         {
-            var table = query.Table as MobileServiceTable;
-            if (table != null)
+            JToken result;
+            if (this.syncTable == null)
             {
-                // Add telemetry information if possible.
-                return await table.ReadAsync(odata, query.Parameters, this.Features | MobileServiceFeatures.TypedTable);
+                var table = query.Table as MobileServiceTable;
+                if (table != null)
+                {
+                    // Add telemetry information if possible.
+                    return await table.ReadAsync(odata, query.Parameters, this.Features | MobileServiceFeatures.TypedTable);
+                }
+                else
+                {
+                    result = await query.Table.ReadAsync(odata, query.Parameters);
+                }
             }
             else
             {
-                JToken result = await query.Table.ReadAsync(odata, query.Parameters);
-                return QueryResult.Parse(result, null, validate: true);
+                result = await this.syncTable.ReadAsync(odata);
             }
+            return QueryResult.Parse(result, null, validate: true);
         }
 
         /// <summary>

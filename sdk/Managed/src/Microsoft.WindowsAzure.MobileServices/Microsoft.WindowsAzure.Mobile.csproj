@@ -50,9 +50,17 @@
     <Compile Include="Exceptions\MobileServiceConflictException.cs" />
     <Compile Include="Exceptions\MobileServiceInvalidOperationException.cs" />
     <Compile Include="Exceptions\MobileServicePreconditionFailedException.cs" />
+    <Compile Include="Exceptions\MobileServiceLocalStoreException.cs" />
+    <Compile Include="Exceptions\MobileServiceODataException.cs" />
+    <Compile Include="Exceptions\MobileServicePushAbortException.cs" />
+    <Compile Include="Extensions\ExceptionExtensions.cs" />
     <Compile Include="Extensions\IDictionaryExtensions.cs" />
+    <Compile Include="Extensions\JTokenExtensions.cs" />
     <Compile Include="Extensions\MobileServiceClientExtensions.cs" />
     <Compile Include="Extensions\MobileServiceCollectionExtensions.cs" />
+    <Compile Include="Extensions\MobileServiceLocalStoreExtensions.cs" />
+    <Compile Include="Extensions\MobileServiceSyncContextExtensions.cs" />
+    <Compile Include="Extensions\MobileServiceSyncTableExtensions.cs" />
     <Compile Include="Extensions\MobileServiceTableExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
@@ -86,6 +94,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Table\MobileServiceObjectReader.cs" />
+    <Compile Include="Table\Sync\Queue\Operations\MobileServiceTableKind.cs" />
     <Compile Include="Table\MobileServiceSystemColumns.cs" />
     <Compile Include="Table\MobileServiceSystemProperties.cs" />
     <Compile Include="Table\Query\IQueryResultEnumerable.cs" />
@@ -96,7 +106,33 @@
     <Compile Include="Table\Query\Linq\MobileServiceTableQueryProvider.cs" />
     <Compile Include="Table\Query\Linq\MobileServiceTableQueryTranslator.cs" />
     <Compile Include="Table\Query\ODataOptions.cs" />
+    <Compile Include="Table\Query\OData\BinaryOperatorKind.cs" />
+    <Compile Include="Table\Query\OData\BinaryOperatorNode.cs" />
+    <Compile Include="Table\Query\OData\ConstantNode.cs" />
+    <Compile Include="Table\Query\OData\ConvertNode.cs" />
+    <Compile Include="Table\Query\OData\ODataExpressionLexer.cs" />
+    <Compile Include="Table\Query\OData\QueryNode.cs" />
+    <Compile Include="Table\Query\OData\QueryNodeVisitor.cs" />
+    <Compile Include="Table\Query\OData\MemberAccessNode.cs" />
+    <Compile Include="Table\Query\OData\FunctionCallNode.cs" />
+    <Compile Include="Table\Query\OData\QueryNodeKind.cs" />
+    <Compile Include="Table\Query\OData\ODataExpressionParser.cs" />
+    <Compile Include="Table\Query\OData\ODataExpressionVisitor.cs" />
+    <Compile Include="Table\Query\OData\QueryToken.cs" />
+    <Compile Include="Table\Query\OData\QueryTokenKind.cs" />
+    <Compile Include="Table\Query\OData\UnaryOperatorKind.cs" />
+    <Compile Include="Table\Query\OData\UnaryOperatorNode.cs" />
+    <Compile Include="Table\Query\OData\OrderByDirection.cs" />
+    <Compile Include="Table\Query\OData\OrderByNode.cs" />
     <Compile Include="Table\Query\QueryResult.cs" />
+    <Compile Include="Table\Serialization\DeletedAttribute.cs" />
+    <Compile Include="Table\Sync\IMobileServiceLocalStore.cs" />
+    <Compile Include="Table\Sync\MobileServiceLocalStore.cs" />
+    <Compile Include="Table\Sync\MobileServicePushStatus.cs" />
+    <Compile Include="Table\Sync\MobileServiceSyncHandler.cs" />
+    <Compile Include="Table\Sync\IMobileServiceSyncContext.cs" />
+    <Compile Include="Table\Sync\IMobileServiceSyncTable.cs" />
+    <Compile Include="Table\Sync\IMobileServiceSyncTable.Generic.cs" />
     <Compile Include="Table\Serialization\UpdatedAtAttribute.cs" />
     <Compile Include="Table\Serialization\CreatedAtAttribute.cs" />
     <Compile Include="Table\Serialization\VersionAttribute.cs" />
@@ -116,12 +152,44 @@
     <Compile Include="Table\Serialization\MobileServiceJsonSerializerSettings.cs" />
     <Compile Include="Table\Serialization\MobileServicePrecisionCheckConverter.cs" />
     <Compile Include="Table\Serialization\MobileServiceIsoDateTimeConverter.cs" />
+    <Compile Include="Table\Sync\MobileServiceSyncSettingsManager.cs" />
+    <Compile Include="Table\Sync\MobileServiceRemoteTableOptions.cs" />
+    <Compile Include="Table\Sync\Queue\Actions\IncrementalPullStrategy.cs" />
+    <Compile Include="Table\Sync\Queue\Actions\PullCursor.cs" />
+    <Compile Include="Table\Sync\Queue\Actions\PullStrategy.cs" />
+    <Compile Include="Table\Sync\Queue\Actions\SyncAction.cs" />
+    <Compile Include="Table\Sync\Queue\Actions\PurgeAction.cs" />
+    <Compile Include="Table\Sync\Queue\Actions\PullAction.cs" />
+    <Compile Include="Table\Sync\Queue\Actions\TableAction.cs" />
+    <Compile Include="Table\Sync\Queue\Operations\MobileServiceTableOperationError.cs" />
+    <Compile Include="Table\Sync\Queue\Operations\DeleteOperation.cs" />
+    <Compile Include="Table\Sync\Queue\Operations\MobileServiceTableOperationState.cs" />
+    <Compile Include="Table\Sync\Queue\Operations\UpdateOperation.cs" />
+    <Compile Include="Table\Sync\Queue\Operations\InsertOperation.cs" />
+    <Compile Include="Table\Sync\Queue\OperationBatch.cs" />
+    <Compile Include="Table\Sync\Queue\Operations\IMobileServiceTableOperation.cs" />
+    <Compile Include="Table\Sync\IMobileServiceSyncHandler.cs" />
+    <Compile Include="Table\Sync\MobileServiceSyncContext.cs" />
+    <Compile Include="Table\Sync\MobileServicePushCompletionResult.cs" />
+    <Compile Include="Table\Sync\MobileServiceSyncTable.cs" />
+    <Compile Include="Table\Sync\MobileServiceSyncTable.Generic.cs" />
+    <Compile Include="Table\Sync\Queue\Operations\MobileServiceTableOperationKind.cs" />
+    <Compile Include="Table\Sync\Queue\OperationQueue.cs" />
+    <Compile Include="Table\Sync\Queue\Operations\MobileServiceTableOperation.cs" />
+    <Compile Include="Table\Sync\Queue\Actions\PushAction.cs" />
+    <Compile Include="Exceptions\MobileServicePushFailedException.cs" />
+    <Compile Include="Table\Sync\MobileServiceLocalSystemTables.cs" />
+    <Compile Include="Threading\ActionBlock.cs" />
+    <Compile Include="Threading\AsyncLock.cs" />
+    <Compile Include="Threading\AsyncLockDictionary.cs" />
+    <Compile Include="Threading\AsyncReaderWriterLock.cs" />
+    <Compile Include="Threading\DisposeAction.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -139,7 +207,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <Import Project="..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />

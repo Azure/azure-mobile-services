@@ -120,7 +120,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.WindowsAzure.MobileServices.Net45\Microsoft.WindowsAzure.Mobile.Ext.Net45.csproj">
-      <Project>{8be160b5-adbf-4fe0-a0e2-a4a77a87e620}</Project>
+      <Project>{6c5430ce-1dee-422a-94e3-071eb25e7429}</Project>
       <Name>Microsoft.WindowsAzure.Mobile.Ext.Net45</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\Microsoft.WindowsAzure.MobileServices\Microsoft.WindowsAzure.Mobile.csproj">

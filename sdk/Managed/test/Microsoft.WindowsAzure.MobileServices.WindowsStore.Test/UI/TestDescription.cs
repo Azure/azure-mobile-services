@@ -9,10 +9,12 @@ using System.Runtime.CompilerServices;
 #if NETFX_CORE
 using Windows.UI;
 using Windows.UI.Xaml.Media;
+using System.Collections.Generic;
 #endif
 
 #if !NETFX_CORE
 using System.Windows.Media;
+using System.Collections.Generic;
 #endif
 
 namespace Microsoft.WindowsAzure.MobileServices.Test
@@ -22,6 +24,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     /// </summary>
     public class TestDescription : INotifyPropertyChanged
     {
+        private static Dictionary<Color, SolidColorBrush> BrushCache = new Dictionary<Color, SolidColorBrush>();
+        private static Color DescriptionColor = Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF);
         private string _name;
         
         public string Name
@@ -49,7 +53,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
         public SolidColorBrush Brush
         {
-            get { return new SolidColorBrush(Color); }
+            get 
+            { 
+                SolidColorBrush brush;
+                if (!BrushCache.TryGetValue(this.Color, out brush))
+                {
+                    BrushCache[this.Color] = brush = new SolidColorBrush(this.Color);
+                }
+                return brush;
+            }
         }
 
         public ObservableCollection<string> Details { get; private set; }
@@ -57,7 +69,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public TestDescription()
         {
             Details = new ObservableCollection<string>();
-            Color = Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF);
+            Color = DescriptionColor;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

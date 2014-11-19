@@ -1,4 +1,62 @@
-# Microsoft Azure Mobile Services Change Log
+# Azure Mobile Services Change Log
+
+### Version 2.0
+**iOS SDK**
+- Added support for following link headers returned from the .NET backend
+- **[Breaking]** Changed MSReadQueryBlock to return MSQueryResult instead of items and totalCount
+
+### Version 1.3 beta3
+**Managed SDK**
+- Improved the push failure error message d49a72e
+- Implement true upsert c5b0b38
+- Use more fine grained types in sqlite store de49712
+- Speedup store table creation eb7cc8d
+- Allow query on member name datetime 7d831cd
+- Make the sync handler optional as there is alternate way for handling sync errors edc04e5
+- Drop the unused createdat column in operations table 8a30df4
+- Remove redundant overloads in interface and move them to extensions d0a46b6
+- Support relative and absolute uri in pull same as table.read c9d8e39
+- Allow relative URI in invokeapi 5b3c6b3
+- Fixed the like implementation in sqlite store 77a0180
+- Purge should forget the deltatoken 18f1803
+- Renamed fromServer to ignoreMissingColumns 8b047eb
+- **[Breaking]** Removed PullAsync overloads that do not take queryKey d4ff784
+- Save tableKind in the errors table 23f2ef0
+
+### Version 1.3 beta2
+**Managed SDK**
+- Updated Nuget references
+- Request __deleted system property for sync
+- Default delta token set to 1970-01-01 for compatibility with Table Storage 
+- Expose protected methods from the MobileServiceSQLiteStore for intercepting sql
+- **[Breaking]** Expose a ReadOnlyCollection instead of IEnumerable from MobileServiceTableOperationError
+
+### Version 1.3 beta
+**Managed SDK**
+- Added support for incremental sync for .NET backend
+- Added support for byte[] properties in offline
+- Fixed issue with timezone roundtripping in incremental sync
+- Improved exception handling for 409 conflicts
+- Improved error handling for timeout errors during sync
+- Follow link headers returned from .NET backend and use skip and top for PullAsync()
+- Introduced the SupportedOptions enum on IMobileServiceSyncTable to configure the pull strategy
+- **[Breaking]** Do not Push changes on PurgeAsync() instead throw an exception
+- **[Breaking]** Renamed ToQueryString method to ToODataString on MobileServiceTableQueryDescription class
+
+### Version 1.3 alpha4
+**Managed SDK**
+- Added support for incremental sync (currently, for Mobile Services JavaScript backend only)
+- Added client support for soft delete
+- Added support for offline pull with query string
+
+### Version 1.3 alpha1
+**iOS SDK**
+- Added support for offline and sync
+
+**Managed SDK** 
+- Added support for offline and sync
+- Added support for soft delete
+
 
 ### Version 1.2.6
 **Managed SDK**

@@ -386,6 +386,78 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The id must be of type string..
+        /// </summary>
+        internal static string MobileServiceSyncTable_IdMustBeString {
+            get {
+                return ResourceManager.GetString("MobileServiceSyncTable_IdMustBeString", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Incremental pull query must not have orderby clause..
+        /// </summary>
+        internal static string MobileServiceSyncTable_IncrementalPullWithOrderNotAllowed {
+            get {
+                return ResourceManager.GetString("MobileServiceSyncTable_IncrementalPullWithOrderNotAllowed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Incremental pull query must not have skip or top specified..
+        /// </summary>
+        internal static string MobileServiceSyncTable_IncrementalPullWithSkipTopNotSupported {
+            get {
+                return ResourceManager.GetString("MobileServiceSyncTable_IncrementalPullWithSkipTopNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The query id must start with a letter and can contain only letters and digits..
+        /// </summary>
+        internal static string MobileServiceSyncTable_InvalidQueryId {
+            get {
+                return ResourceManager.GetString("MobileServiceSyncTable_InvalidQueryId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The supported table options does not include orderby..
+        /// </summary>
+        internal static string MobileServiceSyncTable_OrderByNotAllowed {
+            get {
+                return ResourceManager.GetString("MobileServiceSyncTable_OrderByNotAllowed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pull query with select clause is not supported..
+        /// </summary>
+        internal static string MobileServiceSyncTable_PullWithSelectNotSupported {
+            get {
+                return ResourceManager.GetString("MobileServiceSyncTable_PullWithSelectNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The supported table options does not include skip. .
+        /// </summary>
+        internal static string MobileServiceSyncTable_SkipNotAllowed {
+            get {
+                return ResourceManager.GetString("MobileServiceSyncTable_SkipNotAllowed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The supported table options does not include top..
+        /// </summary>
+        internal static string MobileServiceSyncTable_TopNotAllowed {
+            get {
+                return ResourceManager.GetString("MobileServiceSyncTable_TopNotAllowed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot delete if the {0} member is set to a default value..
         /// </summary>
         internal static string MobileServiceTable_DeleteWithoutId {
@@ -413,6 +485,15 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Item not found in local store..
+        /// </summary>
+        internal static string MobileServiceTable_ItemNotFoundInStore {
+            get {
+                return ResourceManager.GetString("MobileServiceTable_ItemNotFoundInStore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Could not get object from response {0}..
         /// </summary>
         internal static string MobileServiceTable_NotSingleObject {
@@ -422,11 +503,47 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The query uri must be on the same host as the Mobile Service..
+        /// </summary>
+        internal static string MobileServiceTable_QueryUriHostIsDifferent {
+            get {
+                return ResourceManager.GetString("MobileServiceTable_QueryUriHostIsDifferent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot update if the {0} member is set to a default value..
         /// </summary>
         internal static string MobileServiceTable_UpdateWithoutId {
             get {
                 return ResourceManager.GetString("MobileServiceTable_UpdateWithoutId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Operation must have an item associated with it..
+        /// </summary>
+        internal static string MobileServiceTableOperation_ItemNotFound {
+            get {
+                return ResourceManager.GetString("MobileServiceTableOperation_ItemNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mobile Service table operation returned an unexpected response..
+        /// </summary>
+        internal static string MobileServiceTableOperation_ResultNotJObject {
+            get {
+                return ResourceManager.GetString("MobileServiceTableOperation_ResultNotJObject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unrecognized query parameter &apos;{0}&apos;..
+        /// </summary>
+        internal static string MobileServiceTableQueryDescription_UnrecognizedQueryParameter {
+            get {
+                return ResourceManager.GetString("MobileServiceTableQueryDescription_UnrecognizedQueryParameter", resourceCulture);
             }
         }
         
@@ -503,6 +620,150 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &quot;&apos;)&apos; or &apos;,&apos; expected..
+        /// </summary>
+        internal static string ODataExpressionParser_CloseParenOrCommaExpected {
+            get {
+                return ResourceManager.GetString("ODataExpressionParser_CloseParenOrCommaExpected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &apos;)&apos; or operator expected.
+        /// </summary>
+        internal static string ODataExpressionParser_CloseParenOrOperatorExpected {
+            get {
+                return ResourceManager.GetString("ODataExpressionParser_CloseParenOrOperatorExpected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Digit expected..
+        /// </summary>
+        internal static string ODataExpressionParser_DigitExpected {
+            get {
+                return ResourceManager.GetString("ODataExpressionParser_DigitExpected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Expression expected..
+        /// </summary>
+        internal static string ODataExpressionParser_ExpressionExpected {
+            get {
+                return ResourceManager.GetString("ODataExpressionParser_ExpressionExpected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Function &apos;{0}&apos; requires {1} parameter(s)..
+        /// </summary>
+        internal static string ODataExpressionParser_FunctionArgsCount {
+            get {
+                return ResourceManager.GetString("ODataExpressionParser_FunctionArgsCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Expected identifier..
+        /// </summary>
+        internal static string ODataExpressionParser_IdentifierExpected {
+            get {
+                return ResourceManager.GetString("ODataExpressionParser_IdentifierExpected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Expected integer literal..
+        /// </summary>
+        internal static string ODataExpressionParser_IntegerLiteralExpected {
+            get {
+                return ResourceManager.GetString("ODataExpressionParser_IntegerLiteralExpected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The specified odata query has invalid integer literal &apos;{0}&apos;..
+        /// </summary>
+        internal static string ODataExpressionParser_InvalidIntegerLiteral {
+            get {
+                return ResourceManager.GetString("ODataExpressionParser_InvalidIntegerLiteral", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The specified odata query has invalid real literal &apos;{0}&apos;..
+        /// </summary>
+        internal static string ODataExpressionParser_InvalidRealLiteral {
+            get {
+                return ResourceManager.GetString("ODataExpressionParser_InvalidRealLiteral", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The specified odata query has invalid &apos;{0}&apos; type creation expression..
+        /// </summary>
+        internal static string ODataExpressionParser_InvalidTypeCreation {
+            get {
+                return ResourceManager.GetString("ODataExpressionParser_InvalidTypeCreation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &apos;(&apos; expected..
+        /// </summary>
+        internal static string ODataExpressionParser_OpenParenExpected {
+            get {
+                return ResourceManager.GetString("ODataExpressionParser_OpenParenExpected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Expected real literal..
+        /// </summary>
+        internal static string ODataExpressionParser_RealLiteralExpected {
+            get {
+                return ResourceManager.GetString("ODataExpressionParser_RealLiteralExpected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Expected string literal..
+        /// </summary>
+        internal static string ODataExpressionParser_StringLiteralExpected {
+            get {
+                return ResourceManager.GetString("ODataExpressionParser_StringLiteralExpected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Function &apos;substring&apos; requires 2 or 3 parameters..
+        /// </summary>
+        internal static string ODataExpressionParser_SubstringArgsCount {
+            get {
+                return ResourceManager.GetString("ODataExpressionParser_SubstringArgsCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The specified odata query has syntax errors..
+        /// </summary>
+        internal static string ODataExpressionParser_SyntaxError {
+            get {
+                return ResourceManager.GetString("ODataExpressionParser_SyntaxError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The specified odata query has unterminated string literal..
+        /// </summary>
+        internal static string ODataExpressionParser_UnterminatedStringLiteral {
+            get {
+                return ResourceManager.GetString("ODataExpressionParser_UnterminatedStringLiteral", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A Microsoft Azure Mobile Services assembly for the current platform was not found. Ensure that the current project references both {0} and the following platform-specific assembly: {1}..
         /// </summary>
         internal static string Platform_AssemblyNotFound {
@@ -512,11 +773,20 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to instantiate the platform implemenation of {0} from the assembly {1} due to the following error: {2}.
+        ///   Looks up a localized string similar to Failed to instantiate the platform implementation of {0} from the assembly {1} due to the following error: {2}.
         /// </summary>
         internal static string Platform_InstantiationFailed {
             get {
                 return ResourceManager.GetString("Platform_InstantiationFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The key &apos;{0}&apos; is reserved and cannot be specified as a query parameter..
+        /// </summary>
+        internal static string Pull_Cannot_Use_Reserved_Key {
+            get {
+                return ResourceManager.GetString("Pull_Cannot_Use_Reserved_Key", resourceCulture);
             }
         }
         
@@ -548,7 +818,16 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Template name can&apos;t contain &quot;;&quot; or &quot;:&quot;..
+        ///   Looks up a localized string similar to Push operation has failed. See the PushResult for details..
+        /// </summary>
+        internal static string Push_Failure {
+            get {
+                return ResourceManager.GetString("Push_Failure", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Template name cannot contain &quot;;&quot; or &quot;:&quot;..
         /// </summary>
         internal static string Push_InvalidTemplateName {
             get {
@@ -557,7 +836,7 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The bodyTemplate is not in accepted XML format. The first node of the bodyTemplate should be Badge/Tile/Toast, except for the wns/raw template, which need to be an valid XML..
+        ///   Looks up a localized string similar to The bodyTemplate is not in accepted XML format. The first node of the bodyTemplate should be Badge/Tile/Toast, except for the wns/raw template, which needs to be an valid XML..
         /// </summary>
         internal static string Push_NotSupportedXMLFormatAsBodyTemplateWin8 {
             get {
@@ -571,6 +850,150 @@ namespace Microsoft.WindowsAzure.MobileServices {
         internal static string Push_TagNoCommas {
             get {
                 return ResourceManager.GetString("Push_TagNoCommas", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A delete operation on the item is already in the queue..
+        /// </summary>
+        internal static string SyncContext_DeletePending {
+            get {
+                return ResourceManager.GetString("SyncContext_DeletePending", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An insert operation on the item is already in the queue..
+        /// </summary>
+        internal static string SyncContext_DuplicateInsert {
+            get {
+                return ResourceManager.GetString("SyncContext_DuplicateInsert", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The item is in inconsistent state in the local store. Please complete the pending sync by calling PushAsync()before deleting the item..
+        /// </summary>
+        internal static string SyncContext_InsertAttempted {
+            get {
+                return ResourceManager.GetString("SyncContext_InsertAttempted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SyncContext is not yet initialized..
+        /// </summary>
+        internal static string SyncContext_NotInitialized {
+            get {
+                return ResourceManager.GetString("SyncContext_NotInitialized", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The table cannot be purged because it has pending operations..
+        /// </summary>
+        internal static string SyncContext_PurgeOnDirtyTable {
+            get {
+                return ResourceManager.GetString("SyncContext_PurgeOnDirtyTable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An update operation on the item is already in the queue..
+        /// </summary>
+        internal static string SyncContext_UpdatePending {
+            get {
+                return ResourceManager.GetString("SyncContext_UpdatePending", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The operation has been updated and cannot be cancelled..
+        /// </summary>
+        internal static string SyncError_OperationUpdated {
+            get {
+                return ResourceManager.GetString("SyncError_OperationUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The store is already initialized..
+        /// </summary>
+        internal static string SyncStore_AlreadyInitialized {
+            get {
+                return ResourceManager.GetString("SyncStore_AlreadyInitialized", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to delete error from the local store..
+        /// </summary>
+        internal static string SyncStore_FailedToDeleteError {
+            get {
+                return ResourceManager.GetString("SyncStore_FailedToDeleteError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to delete operation from the local store..
+        /// </summary>
+        internal static string SyncStore_FailedToDeleteOperation {
+            get {
+                return ResourceManager.GetString("SyncStore_FailedToDeleteOperation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to read errors from the local store..
+        /// </summary>
+        internal static string SyncStore_FailedToLoadError {
+            get {
+                return ResourceManager.GetString("SyncStore_FailedToLoadError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to read the item from local store..
+        /// </summary>
+        internal static string SyncStore_FailedToReadItem {
+            get {
+                return ResourceManager.GetString("SyncStore_FailedToReadItem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to update operation in the local store..
+        /// </summary>
+        internal static string SyncStore_FailedToUpdateOperation {
+            get {
+                return ResourceManager.GetString("SyncStore_FailedToUpdateOperation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to update the item in the local store..
+        /// </summary>
+        internal static string SyncStore_FailedToUpsertItem {
+            get {
+                return ResourceManager.GetString("SyncStore_FailedToUpsertItem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The store must be initialized before it can be used..
+        /// </summary>
+        internal static string SyncStore_NotInitialized {
+            get {
+                return ResourceManager.GetString("SyncStore_NotInitialized", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to perform operation on local store..
+        /// </summary>
+        internal static string SyncStore_OperationFailed {
+            get {
+                return ResourceManager.GetString("SyncStore_OperationFailed", resourceCulture);
             }
         }
         

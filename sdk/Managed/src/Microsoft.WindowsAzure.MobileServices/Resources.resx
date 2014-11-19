@@ -151,7 +151,7 @@
     <value>A Microsoft Azure Mobile Services assembly for the current platform was not found. Ensure that the current project references both {0} and the following platform-specific assembly: {1}.</value>
   </data>
   <data name="Platform_InstantiationFailed" xml:space="preserve">
-    <value>Failed to instantiate the platform implemenation of {0} from the assembly {1} due to the following error: {2}</value>
+    <value>Failed to instantiate the platform implementation of {0} from the assembly {1} due to the following error: {2}</value>
   </data>
   <data name="FilterBuildingExpressionVisitor_MemberUnsupported" xml:space="preserve">
     <value>The member '{0}' is not supported in the 'Where' Mobile Services query expression '{1}'.</value>
@@ -268,10 +268,10 @@
     <value>Template name conflicts with reserved name '{0}'.</value>
   </data>
   <data name="Push_InvalidTemplateName" xml:space="preserve">
-    <value>Template name can't contain ";" or ":".</value>
+    <value>Template name cannot contain ";" or ":".</value>
   </data>
   <data name="Push_NotSupportedXMLFormatAsBodyTemplateWin8" xml:space="preserve">
-    <value>The bodyTemplate is not in accepted XML format. The first node of the bodyTemplate should be Badge/Tile/Toast, except for the wns/raw template, which need to be an valid XML.</value>
+    <value>The bodyTemplate is not in accepted XML format. The first node of the bodyTemplate should be Badge/Tile/Toast, except for the wns/raw template, which needs to be an valid XML.</value>
   </data>
   <data name="Push_BodyTemplateMustBeXml" xml:space="preserve">
     <value>Valid XML is required for any template without a raw header.</value>
@@ -288,7 +288,148 @@
   <data name="IAuthenticationBroker_NoLoginInProgress" xml:space="preserve">
     <value>Authentication has not been started.</value>
   </data>
+  <data name="MobileServiceSyncTable_IdMustBeString" xml:space="preserve">
+    <value>The id must be of type string.</value>
+  </data>
+  <data name="SyncContext_NotInitialized" xml:space="preserve">
+    <value>SyncContext is not yet initialized.</value>
+  </data>
+  <data name="SyncStore_FailedToUpsertItem" xml:space="preserve">
+    <value>Failed to update the item in the local store.</value>
+  </data>
+  <data name="MobileServiceTableQueryDescription_UnrecognizedQueryParameter" xml:space="preserve">
+    <value>Unrecognized query parameter '{0}'.</value>
+  </data>
+  <data name="SyncContext_DeletePending" xml:space="preserve">
+    <value>A delete operation on the item is already in the queue.</value>
+  </data>
+  <data name="SyncContext_DuplicateInsert" xml:space="preserve">
+    <value>An insert operation on the item is already in the queue.</value>
+  </data>
+  <data name="SyncContext_UpdatePending" xml:space="preserve">
+    <value>An update operation on the item is already in the queue.</value>
+  </data>
+  <data name="ODataExpressionParser_UnterminatedStringLiteral" xml:space="preserve">
+    <value>The specified odata query has unterminated string literal.</value>
+  </data>
+  <data name="ODataExpressionParser_SyntaxError" xml:space="preserve">
+    <value>The specified odata query has syntax errors.</value>
+  </data>
+  <data name="ODataExpressionParser_DigitExpected" xml:space="preserve">
+    <value>Digit expected.</value>
+  </data>
+  <data name="ODataExpressionParser_CloseParenOrCommaExpected" xml:space="preserve">
+    <value>"')' or ',' expected.</value>
+  </data>
+  <data name="ODataExpressionParser_ExpressionExpected" xml:space="preserve">
+    <value>Expression expected.</value>
+  </data>
+  <data name="ODataExpressionParser_OpenParenExpected" xml:space="preserve">
+    <value>'(' expected.</value>
+  </data>
+  <data name="ODataExpressionParser_SubstringArgsCount" xml:space="preserve">
+    <value>Function 'substring' requires 2 or 3 parameters.</value>
+  </data>
+  <data name="ODataExpressionParser_CloseParenOrOperatorExpected" xml:space="preserve">
+    <value>')' or operator expected</value>
+  </data>
+  <data name="ODataExpressionParser_FunctionArgsCount" xml:space="preserve">
+    <value>Function '{0}' requires {1} parameter(s).</value>
+  </data>
+  <data name="ODataExpressionParser_IdentifierExpected" xml:space="preserve">
+    <value>Expected identifier.</value>
+  </data>
+  <data name="ODataExpressionParser_IntegerLiteralExpected" xml:space="preserve">
+    <value>Expected integer literal.</value>
+  </data>
+  <data name="ODataExpressionParser_InvalidIntegerLiteral" xml:space="preserve">
+    <value>The specified odata query has invalid integer literal '{0}'.</value>
+  </data>
+  <data name="ODataExpressionParser_InvalidRealLiteral" xml:space="preserve">
+    <value>The specified odata query has invalid real literal '{0}'.</value>
+  </data>
+  <data name="ODataExpressionParser_InvalidTypeCreation" xml:space="preserve">
+    <value>The specified odata query has invalid '{0}' type creation expression.</value>
+  </data>
+  <data name="ODataExpressionParser_RealLiteralExpected" xml:space="preserve">
+    <value>Expected real literal.</value>
+  </data>
+  <data name="ODataExpressionParser_StringLiteralExpected" xml:space="preserve">
+    <value>Expected string literal.</value>
+  </data>
+  <data name="SyncStore_FailedToDeleteOperation" xml:space="preserve">
+    <value>Failed to delete operation from the local store.</value>
+  </data>
+  <data name="SyncStore_FailedToReadItem" xml:space="preserve">
+    <value>Failed to read the item from local store.</value>
+  </data>
+  <data name="SyncStore_FailedToLoadError" xml:space="preserve">
+    <value>Failed to read errors from the local store.</value>
+  </data>
+  <data name="SyncStore_FailedToDeleteError" xml:space="preserve">
+    <value>Failed to delete error from the local store.</value>
+  </data>
+  <data name="SyncStore_OperationFailed" xml:space="preserve">
+    <value>Failed to perform operation on local store.</value>
+  </data>
+  <data name="MobileServiceSyncTable_PullWithSelectNotSupported" xml:space="preserve">
+    <value>Pull query with select clause is not supported.</value>
+  </data>
+  <data name="MobileServiceTableOperation_ItemNotFound" xml:space="preserve">
+    <value>Operation must have an item associated with it.</value>
+  </data>
+  <data name="MobileServiceTable_ItemNotFoundInStore" xml:space="preserve">
+    <value>Item not found in local store.</value>
+  </data>
+  <data name="MobileServiceTableOperation_ResultNotJObject" xml:space="preserve">
+    <value>Mobile Service table operation returned an unexpected response.</value>
+  </data>
+  <data name="SyncStore_NotInitialized" xml:space="preserve">
+    <value>The store must be initialized before it can be used.</value>
+  </data>
+  <data name="SyncStore_AlreadyInitialized" xml:space="preserve">
+    <value>The store is already initialized.</value>
+  </data>
+  <data name="MobileServiceSyncTable_InvalidQueryId" xml:space="preserve">
+    <value>The query id must start with a letter and can contain only letters and digits.</value>
+  </data>
+  <data name="MobileServiceSyncTable_IncrementalPullWithOrderNotAllowed" xml:space="preserve">
+    <value>Incremental pull query must not have orderby clause.</value>
+  </data>
+  <data name="SyncStore_FailedToUpdateOperation" xml:space="preserve">
+    <value>Failed to update operation in the local store.</value>
+  </data>
+  <data name="SyncError_OperationUpdated" xml:space="preserve">
+    <value>The operation has been updated and cannot be cancelled.</value>
+  </data>
+  <data name="SyncContext_PurgeOnDirtyTable" xml:space="preserve">
+    <value>The table cannot be purged because it has pending operations.</value>
+  </data>
+  <data name="SyncContext_InsertAttempted" xml:space="preserve">
+    <value>The item is in inconsistent state in the local store. Please complete the pending sync by calling PushAsync()before deleting the item.</value>
+  </data>
+  <data name="MobileServiceSyncTable_IncrementalPullWithSkipTopNotSupported" xml:space="preserve">
+    <value>Incremental pull query must not have skip or top specified.</value>
+  </data>
+  <data name="MobileServiceSyncTable_SkipNotAllowed" xml:space="preserve">
+    <value>The supported table options does not include skip. </value>
+  </data>
+  <data name="MobileServiceSyncTable_TopNotAllowed" xml:space="preserve">
+    <value>The supported table options does not include top.</value>
+  </data>
+  <data name="MobileServiceSyncTable_OrderByNotAllowed" xml:space="preserve">
+    <value>The supported table options does not include orderby.</value>
+  </data>
+  <data name="MobileServiceTable_QueryUriHostIsDifferent" xml:space="preserve">
+    <value>The query uri must be on the same host as the Mobile Service.</value>
+  </data>
   <data name="WP8LoginPage_MustBeCalledFromAuthBroker" xml:space="preserve">
     <value>This page must be called from the type '{0}'.</value>
+  </data>
+  <data name="Pull_Cannot_Use_Reserved_Key" xml:space="preserve">
+    <value>The key '{0}' is reserved and cannot be specified as a query parameter.</value>
+  </data>
+  <data name="Push_Failure" xml:space="preserve">
+    <value>Push operation has failed. See the PushResult for details.</value>
   </data>
 </root>

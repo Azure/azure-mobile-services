@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MobileServices.Sync;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using Newtonsoft.Json.Linq;
 
@@ -155,8 +156,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             // string userAgent = hijack.Request.Headers.UserAgent.ToString();
 
             string userAgent = string.Join(" ", hijack.Request.Headers.GetValues("user-agent"));
-            Assert.IsTrue(userAgent.Contains("ZUMO/1.0"));
-            Assert.IsTrue(userAgent.Contains("version=1.0.0.0"));
+            Assert.IsTrue(userAgent.Contains("ZUMO/1."));
+            Assert.IsTrue(userAgent.Contains("version=1."));
         }
 
         [AsyncTestMethod]
@@ -215,6 +216,56 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             {
                 Assert.AreEqual("The request could not be completed.  (YOU SHALL NOT PASS.)", ex.Message);
             }
+        }
+
+        [TestMethod]
+        public async Task DeleteAsync_Throws_WhenSyncContextIsNotInitialized()
+        {
+            await this.TestSyncContextNotInitialized(table => table.DeleteAsync(new ToDoWithSystemPropertiesType("abc")));
+        }
+
+        [TestMethod]
+        public async Task InsertAsync_Throws_WhenSyncContextIsNotInitialized()
+        {
+            await this.TestSyncContextNotInitialized(table => table.InsertAsync(new ToDoWithSystemPropertiesType("abc")));
+        }
+
+        [TestMethod]
+        public async Task UpdateAsync_Throws_WhenSyncContextIsNotInitialized()
+        {
+            await this.TestSyncContextNotInitialized(table => table.UpdateAsync(new ToDoWithSystemPropertiesType("abc")));
+        }
+
+        [TestMethod]
+        public async Task LookupAsync_Throws_WhenSyncContextIsNotInitialized()
+        {
+            await this.TestSyncContextNotInitialized(table => table.LookupAsync("abc"));
+        }
+
+        [TestMethod]
+        public async Task ReadAsync_Throws_WhenSyncContextIsNotInitialized()
+        {
+            await this.TestSyncContextNotInitialized(table => table.Where(t => t.String == "abc").ToListAsync());
+        }
+
+        [TestMethod]
+        public async Task PurgeAsync_Throws_WhenSyncContextIsNotInitialized()
+        {
+            await this.TestSyncContextNotInitialized(table => table.PurgeAsync(table.Where(t => t.String == "abc")));
+        }
+
+        [TestMethod]
+        public async Task PullAsync_Throws_WhenSyncContextIsNotInitialized()
+        {
+            await this.TestSyncContextNotInitialized(table => table.PullAsync(table.Where(t => t.String == "abc")));
+        }
+
+        private async Task TestSyncContextNotInitialized(Func<IMobileServiceSyncTable<ToDoWithSystemPropertiesType>, Task> action)
+        {
+            var service = new MobileServiceClient("http://www.test.com", "secret...");
+            IMobileServiceSyncTable<ToDoWithSystemPropertiesType> table = service.GetSyncTable<ToDoWithSystemPropertiesType>();
+            var ex = await AssertEx.Throws<InvalidOperationException>(() => action(table));
+            Assert.AreEqual(ex.Message, "SyncContext is not yet initialized.");
         }
 
         [TestMethod]
@@ -372,6 +423,19 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(hijack.Request.RequestUri.LocalPath, "/api/calculator/add");
             Assert.Contains(hijack.Request.RequestUri.Query, "a=1&b=2");
             Assert.AreEqual(3, expected.Id);
+        }
+
+        [AsyncTestMethod]
+        public async Task InvokeApiAsync_DoesNotAppendApiPath_IfApiStartsWithSlash()
+        {
+            TestHttpHandler hijack = new TestHttpHandler();
+            var service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            hijack.SetResponseContent("{\"id\":3}");
+
+            await service.InvokeApiAsync<IntType>("/calculator/add?a=1&b=2", HttpMethod.Get, null);
+
+            Assert.AreEqual(hijack.Request.RequestUri.LocalPath, "/calculator/add");
+            Assert.Contains(hijack.Request.RequestUri.Query, "a=1&b=2");
         }
 
         [AsyncTestMethod]

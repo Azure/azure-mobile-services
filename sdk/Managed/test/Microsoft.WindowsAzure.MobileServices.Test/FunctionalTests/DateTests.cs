@@ -41,7 +41,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             IMobileServiceClient client = new MobileServiceClient("http://www.test.com", null, hijack);
             IMobileServiceTable<DateExample> table = client.GetTable<DateExample>();
 
-            hijack.Response.StatusCode = HttpStatusCode.OK;
+            hijack.Response = new HttpResponseMessage(HttpStatusCode.OK);
             hijack.SetResponseContent("[]");
 
             // Verify a full UTC date
@@ -64,12 +64,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             IMobileServiceClient client = new MobileServiceClient("http://www.test.com", null, hijack);
             IMobileServiceTable<DateOffsetExample> table = client.GetTable<DateOffsetExample>();
 
-            hijack.Response.StatusCode = HttpStatusCode.OK;
+            hijack.Response = new HttpResponseMessage(HttpStatusCode.OK);
             hijack.SetResponseContent("[]");
 
-            DateTimeOffset date = new DateTimeOffset(2009, 11, 21, 14, 22, 59, 860, TimeSpan.FromHours(-8));
+            var date = DateTimeOffset.Parse("2009-11-21T06:22:59.8600000-08:00");
             await table.Where(b => b.Date == date).ToEnumerableAsync();
-            Assert.EndsWith(hijack.Request.RequestUri.ToString(), "$filter=(DateOffsetExampleDate eq datetimeoffset'2009-11-21T14:22:59.8600000-08:00')");
+            Assert.EndsWith(hijack.Request.RequestUri.ToString(), "$filter=(DateOffsetExampleDate eq datetimeoffset'2009-11-21T06:22:59.8600000-08:00')");
         }
 
         [AsyncTestMethod]

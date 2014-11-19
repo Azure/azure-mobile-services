@@ -78,11 +78,11 @@
     NSPredicate * predicate = [NSPredicate predicateWithFormat:@"complete == NO"];
     
     // Query the TodoItem table and update the items property with the results from the service
-    [self.table readWithPredicate:predicate completion:^(NSArray *results, NSInteger totalCount, NSError *error)
+    [self.table readWithPredicate:predicate completion:^(MSQueryResult *result, NSError *error)
     {
         [self logErrorIfNotNil:error];
         
-        items = [results mutableCopy];
+        items = [result.items mutableCopy];
         
         // Let the caller know that we finished
         completion();

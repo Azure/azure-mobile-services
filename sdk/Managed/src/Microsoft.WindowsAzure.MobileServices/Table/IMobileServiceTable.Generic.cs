@@ -56,7 +56,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <remarks>
         /// This call will not handle paging, etc., for you.
         /// </remarks>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "It does not appear nested when used via the async pattern.")]
         Task<IEnumerable<T>> ReadAsync();
 
         /// <summary>
@@ -166,6 +165,24 @@ namespace Microsoft.WindowsAzure.MobileServices
         Task UpdateAsync(T instance, IDictionary<string, string> parameters);
 
         /// <summary>
+        /// Undeletes an <paramref name="instance"/> from the table. This requires the soft delete feature to be enabled on the Mobile Service. Visit <see href="http://go.microsoft.com/fwlink/?LinkId=507647">the link</see> for details.
+        /// </summary>
+        /// <param name="instance">The instance to undelete from the table.</param>
+        /// <returns>A task that will complete when the undelete finishes.</returns>
+        Task UndeleteAsync(T instance);
+
+        /// <summary>
+        /// Undeletes an <paramref name="instance"/> from the table. This requires the soft delete feature to be enabled on the Mobile Service. Visit <see href="http://go.microsoft.com/fwlink/?LinkId=507647">the link</see> for details.
+        /// </summary>
+        /// <param name="instance">The instance to undelete from the table.</param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in 
+        /// the request URI query string.
+        /// </param>
+        /// <returns>A task that will complete when the undelete finishes.</returns>
+        Task UndeleteAsync(T instance, IDictionary<string, string> parameters);
+
+        /// <summary>
         /// Delete an instance from the table.
         /// </summary>
         /// <param name="instance">
@@ -196,8 +213,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A query against the table.
         /// </returns>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Part of the LINQ query pattern.")]
-        IMobileServiceTableQuery<T> CreateQuery(); 
+        IMobileServiceTableQuery<T> CreateQuery();
 
         /// <summary>
         /// Creates a query that will ensure it gets the total count for all
@@ -208,6 +224,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// A query against the table.
         /// </returns>
         IMobileServiceTableQuery<T> IncludeTotalCount();
+
+        /// <summary>
+        /// Creates a query that will ensure it gets the deleted records. This requires the soft delete feature to be enabled on the Mobile Service. Visit <see href="http://go.microsoft.com/fwlink/?LinkId=507647">the link</see> for details.
+        /// </summary>        
+        /// <returns>
+        /// A query against the table.
+        /// </returns>
+        IMobileServiceTableQuery<T> IncludeDeleted();
 
         /// <summary>
         /// Applies to the source query the specified string key-value 
@@ -231,8 +255,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A query against the table.
         /// </returns>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Part of the LINQ query pattern.")]
-        IMobileServiceTableQuery<T> Where(Expression<Func<T, bool>> predicate);        
+        IMobileServiceTableQuery<T> Where(Expression<Func<T, bool>> predicate);
 
         /// <summary>
         /// Creates a query by applying the specified selection.
@@ -250,7 +273,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Select", Justification = "Part of the LINQ query pattern.")]
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "U", Justification = "Standard for LINQ")]
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Part of the LINQ query pattern.")]
-        IMobileServiceTableQuery<U> Select<U>(Expression<Func<T, U>> selector);        
+        IMobileServiceTableQuery<U> Select<U>(Expression<Func<T, U>> selector);
 
         /// <summary>
         /// Creates a query by applying the specified ascending order clause.
@@ -265,7 +288,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// A query against the table.
         /// </returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Part of the LINQ query pattern.")]
-        IMobileServiceTableQuery<T> OrderBy<TKey>(Expression<Func<T, TKey>> keySelector);        
+        IMobileServiceTableQuery<T> OrderBy<TKey>(Expression<Func<T, TKey>> keySelector);
 
         /// <summary>
         /// Creates a query by applying the specified descending order clause.
@@ -281,7 +304,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Part of the LINQ query pattern.")]
         IMobileServiceTableQuery<T> OrderByDescending<TKey>(Expression<Func<T, TKey>> keySelector);
-        
+
         /// <summary>
         /// Creates a query by applying the specified ascending order clause.
         /// </summary>
@@ -296,7 +319,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Part of the LINQ query pattern.")]
         IMobileServiceTableQuery<T> ThenBy<TKey>(Expression<Func<T, TKey>> keySelector);
-        
+
         /// <summary>
         /// Creates a query by applying the specified descending order clause.
         /// </summary>
@@ -311,7 +334,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Part of the LINQ query pattern.")]
         IMobileServiceTableQuery<T> ThenByDescending<TKey>(Expression<Func<T, TKey>> keySelector);
-        
+
         /// <summary>
         /// Creates a query by applying the specified skip clause.
         /// </summary>
@@ -322,7 +345,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// A query against the table.
         /// </returns>
         IMobileServiceTableQuery<T> Skip(int count);
-        
+
         /// <summary>
         /// Creates a query by applying the specified take clause.
         /// </summary>
@@ -340,9 +363,8 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// The table elements results as a sequence.
         /// </returns>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Not nested when used via async pattern.")]
         Task<IEnumerable<T>> ToEnumerableAsync();
-        
+
         /// <summary>
         /// Gets the elements of the table asynchronously and return the
         /// results in a new List.
@@ -350,7 +372,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// The table elements results as a List.
         /// </returns>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Not nested when used via async pattern.")]
-        Task<List<T>> ToListAsync();   
+        Task<List<T>> ToListAsync();
     }
 }

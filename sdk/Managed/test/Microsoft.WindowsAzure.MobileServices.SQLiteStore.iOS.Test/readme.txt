@@ -1,0 +1,4 @@
+Notes
+-----------
+- when you update NuGet packages for this project and other Xamarin projects, VS adds references to System.IO, System.Runtime, and System.Threading.Tasks which will cause compilation failures. You need to remove the references.
+- due to bugs in the HttpClient NuGet package, there are various VS warnings around assembly binding redirects. This project (and all Xamarin projects that use our SDK) needs to have the assembly binding redirect for System.Net.Http to v2.5.0.0 (the mono version). If it has assembly binding redirects to System.Net.Http.Primitives or Extensions, bad things can happen, and VS will try to auto generate these in some situations so watch out.
