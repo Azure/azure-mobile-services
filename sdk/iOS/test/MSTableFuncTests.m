@@ -27,8 +27,8 @@
     // application key for the Windows Mobile Azure Service below.
     
     MSClient *client = [MSClient
-              clientWithApplicationURLString:@"<Microsoft Azure Mobile Service App URL>"
-              applicationKey:@"<Application Key>"];
+                        clientWithApplicationURLString:@"<Microsoft Azure Mobile Service App URL>"
+                        applicationKey:@"<Application Key>"];
     
     XCTAssertTrue([client.applicationURL.description hasPrefix:@"https://"], @"The functional tests are currently disabled.");
     self.continueAfterFailure = YES;
@@ -108,9 +108,9 @@
         
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"id == %@", testId];
         self.done = NO;
-        [self.table readWithPredicate:predicate completion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+        [self.table readWithPredicate:predicate completion:^(MSQueryResult *result, NSError *error) {
             XCTAssertNil(error, @"Failure for id %@: %@", testId, error.localizedDescription);
-            NSDictionary *item = items[0];
+            NSDictionary *item = result.items[0];
             XCTAssertEqualObjects(testId, item[@"id"], @"Id %@ was not found", testId);
             XCTAssertEqualObjects(@"Hey", item[@"string"], @"String value was not retrieved correctly");
             self.done = YES;
@@ -121,10 +121,10 @@
         MSQuery *query = [[MSQuery alloc] initWithTable:self.table];
         query.selectFields = @[@"id", @"string"];
         self.done = NO;
-        [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
             XCTAssertNil(error, @"Failure for id %@: %@", testId, error.localizedDescription);
-            XCTAssertTrue(items.count == 1, @"Incorrect number of items found");
-            NSDictionary *item = items[0];
+            XCTAssertTrue(result.items.count == 1, @"Incorrect number of items found");
+            NSDictionary *item = result.items[0];
             XCTAssertEqualObjects(testId, item[@"id"], @"Invalid id found");
             XCTAssertEqualObjects(@"Hey", item[@"string"], @"Invalid string value found");
             self.done = YES;
@@ -202,12 +202,12 @@
     self.done = NO;
     MSQuery *query = [[MSQuery alloc] initWithTable:self.table];
     [query orderByAscending:@"id"];
-    [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+    [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
         XCTAssertNil(error, @"Test failed with error: %@", error.localizedDescription);
         NSDictionary *item;
         NSUInteger index = 0;
         for(NSString *sortedId in orderedTestIdData) {
-            item = items[index++];
+            item = result.items[index++];
             XCTAssertEqualObjects(sortedId, item[@"id"], @"incorrect id order");
         }
         self.done = YES;
@@ -218,12 +218,12 @@
     self.done = NO;
     query = [[MSQuery alloc] initWithTable:self.table];
     [query orderByDescending:@"id"];
-    [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+    [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
         XCTAssertNil(error, @"Test failed with error: %@", error.localizedDescription);
         NSDictionary *item;
         NSUInteger index = orderedTestIdData.count;
         for(NSString *sortedId in orderedTestIdData) {
-            item = items[--index];
+            item = result.items[--index];
             XCTAssertEqualObjects(sortedId, item[@"id"], @"incorrect id order");
         }
         self.done = YES;
@@ -240,9 +240,9 @@
     for (NSString *testId in testIds) {
         self.done = NO;
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"id == %@", testId];
-        [self.table readWithPredicate:predicate completion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+        [self.table readWithPredicate:predicate completion:^(MSQueryResult *result, NSError *error) {
             XCTAssertNil(error, @"Error: %@", error.localizedDescription);
-            XCTAssertTrue(items.count == 0, @"Received %lu results when none expected", (unsigned long)items.count);
+            XCTAssertTrue(result.items.count == 0, @"Received %lu results when none expected", (unsigned long)result.items.count);
             self.done = YES;
         }];
         XCTAssertTrue([self waitForTest:20.0], @"Test timed out.");
@@ -376,9 +376,9 @@
     
     self.done = NO;
     __block id savedItem;
-    [self.table readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
-        XCTAssertTrue(items.count == 1, @"Incorrect count: %lu", (unsigned long)items.count);
-        NSDictionary *item = items[0];
+    [self.table readWithCompletion:^(MSQueryResult *result, NSError *error) {
+        XCTAssertTrue(result.items.count == 1, @"Incorrect count: %lu", (unsigned long)result.items.count);
+        NSDictionary *item = result.items[0];
         XCTAssertNotNil(item[MSSystemColumnCreatedAt], @"Missing property");
         XCTAssertNotNil(item[MSSystemColumnUpdatedAt], @"Missing property");
         XCTAssertNotNil(item[MSSystemColumnVersion], @"Missing property");
@@ -389,9 +389,9 @@
 
     self.done = NO;
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"__version == %@", savedItem[MSSystemColumnVersion]];
-    [self.table readWithPredicate:predicate completion:^(NSArray *items, NSInteger totalCount, NSError *error) {
-        XCTAssertTrue(items.count == 1, @"Incorrect count: %lu for %@", (unsigned long)items.count, savedItem[MSSystemColumnVersion]);
-        NSDictionary *item = items[0];
+    [self.table readWithPredicate:predicate completion:^(MSQueryResult *result, NSError *error) {
+        XCTAssertTrue(result.items.count == 1, @"Incorrect count: %lu for %@", (unsigned long)result.items.count, savedItem[MSSystemColumnVersion]);
+        NSDictionary *item = result.items[0];
         XCTAssertEqualObjects(item[MSSystemColumnCreatedAt], savedItem[MSSystemColumnCreatedAt], @"Incorrect property");
         XCTAssertEqualObjects(item[MSSystemColumnUpdatedAt], savedItem[MSSystemColumnUpdatedAt], @"Incorrect property");
         XCTAssertEqualObjects(item[MSSystemColumnVersion], savedItem[MSSystemColumnVersion], @"Incorrect property");
@@ -402,9 +402,9 @@
     // Filter against createdAt
     self.done = NO;
     predicate = [NSPredicate predicateWithFormat:@"__createdAt == %@", savedItem[MSSystemColumnCreatedAt]];
-    [self.table readWithPredicate:predicate completion:^(NSArray *items, NSInteger totalCount, NSError *error) {
-        XCTAssertTrue(items.count == 1, @"Incorrect count: %lu for %@", (unsigned long)items.count, savedItem[MSSystemColumnCreatedAt]);
-        NSDictionary *item = items[0];
+    [self.table readWithPredicate:predicate completion:^(MSQueryResult *result, NSError *error) {
+        XCTAssertTrue(result.items.count == 1, @"Incorrect count: %lu for %@", (unsigned long)result.items.count, savedItem[MSSystemColumnCreatedAt]);
+        NSDictionary *item = result.items[0];
         XCTAssertEqualObjects(item[MSSystemColumnCreatedAt], savedItem[MSSystemColumnCreatedAt], @"Incorrect property");
         XCTAssertEqualObjects(item[MSSystemColumnUpdatedAt], savedItem[MSSystemColumnUpdatedAt], @"Incorrect property");
         XCTAssertEqualObjects(item[MSSystemColumnVersion], savedItem[MSSystemColumnVersion], @"Incorrect property");
@@ -415,9 +415,9 @@
     // Filter against updatedAt
     self.done = NO;
     predicate = [NSPredicate predicateWithFormat:@"__updatedAt == %@", savedItem[MSSystemColumnUpdatedAt]];
-    [self.table readWithPredicate:predicate completion:^(NSArray *items, NSInteger totalCount, NSError *error) {
-        XCTAssertTrue(items.count == 1, @"Incorrect count: %lu for %@", (unsigned long)items.count, savedItem[MSSystemColumnUpdatedAt]);
-        NSDictionary *item = items[0];
+    [self.table readWithPredicate:predicate completion:^(MSQueryResult *result, NSError *error) {
+        XCTAssertTrue(result.items.count == 1, @"Incorrect count: %lu for %@", (unsigned long)result.items.count, savedItem[MSSystemColumnUpdatedAt]);
+        NSDictionary *item = result.items[0];
         XCTAssertEqualObjects(item[MSSystemColumnCreatedAt], savedItem[MSSystemColumnCreatedAt], @"Incorrect property");
         XCTAssertEqualObjects(item[MSSystemColumnUpdatedAt], savedItem[MSSystemColumnUpdatedAt], @"Incorrect property");
         XCTAssertEqualObjects(item[MSSystemColumnVersion], savedItem[MSSystemColumnVersion], @"Incorrect property");
@@ -451,8 +451,8 @@
     [self waitForTest:30.0];
     
     self.done = NO;
-    [self.table readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
-        NSDictionary *item = items[0];
+    [self.table readWithCompletion:^(MSQueryResult *result, NSError *error) {
+        NSDictionary *item = result.items[0];
         XCTAssertEqualObjects(item[@"id"],savedItem[@"id"], @"Incorrect property");
         XCTAssertEqualObjects(item[MSSystemColumnCreatedAt],savedItem[MSSystemColumnCreatedAt], @"Incorrect property");
         XCTAssertEqualObjects(item[MSSystemColumnUpdatedAt], savedItem[MSSystemColumnUpdatedAt], @"Incorrect property");
@@ -489,8 +489,8 @@
     self.done = NO;
     __block NSString *savedItemId;
     self.table.systemProperties = MSSystemPropertyUpdatedAt | MSSystemPropertyCreatedAt;
-    [self.table readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
-        NSDictionary *item = items[0];
+    [self.table readWithCompletion:^(MSQueryResult *result, NSError *error) {
+        NSDictionary *item = result.items[0];
         XCTAssertNotNil(item[MSSystemColumnCreatedAt], @"Missing property");
         XCTAssertNotNil(item[MSSystemColumnUpdatedAt], @"Missing property");
         XCTAssertNil(item[MSSystemColumnVersion], @"Has extra property");
@@ -542,9 +542,9 @@
         self.done = NO;
         MSQuery *query = self.table.query;
         query.parameters = userParams;
-        [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
-            XCTAssertTrue(items.count == 1, @"Should have had results");
-            NSDictionary *item = items[0];
+        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
+            XCTAssertTrue(result.items.count == 1, @"Should have had results");
+            NSDictionary *item = result.items[0];
             XCTAssertEqual(shouldHaveCreatedAt, (BOOL)(item[MSSystemColumnCreatedAt] != nil), @"Property invalid: %@", systemProperties);
             XCTAssertEqual(shouldHaveUpdatedAt, (BOOL)(item[MSSystemColumnUpdatedAt] != nil), @"Property invalid: %@", systemProperties);
             XCTAssertEqual(shouldHaveVersion, (BOOL)(item[MSSystemColumnVersion] != nil), @"Property invalid: %@", systemProperties);
@@ -554,15 +554,15 @@
         
         self.done = NO;
         query.predicate = [NSPredicate predicateWithFormat:@"__version == %@", savedItem[MSSystemColumnVersion]];
-        [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
             if (shouldHaveVersion) {
-                XCTAssertTrue(items.count == 1, @"Should have had results");
-                NSDictionary *item = items[0];
+                XCTAssertTrue(result.items.count == 1, @"Should have had results");
+                NSDictionary *item = result.items[0];
                 XCTAssertEqual(shouldHaveCreatedAt, (BOOL)(item[MSSystemColumnCreatedAt] != nil), @"Property invalid: %@", systemProperties);
                 XCTAssertEqual(shouldHaveUpdatedAt, (BOOL)(item[MSSystemColumnUpdatedAt] != nil), @"Property invalid: %@", systemProperties);
                 XCTAssertEqual(shouldHaveVersion, (BOOL)(item[MSSystemColumnVersion] != nil), @"Property invalid: %@", systemProperties);
             } else {
-                XCTAssertTrue(items.count == 0, @"Shouldn't have had results");
+                XCTAssertTrue(result.items.count == 0, @"Shouldn't have had results");
             }
             self.done = YES;
         }];
@@ -570,15 +570,15 @@
         
         self.done = NO;
         query.predicate = [NSPredicate predicateWithFormat:@"__createdAt == %@", savedItem[MSSystemColumnCreatedAt]];
-        [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
             if (shouldHaveCreatedAt) {
-                XCTAssertTrue(items.count == 1, @"Should have had results");
-                NSDictionary *item = items[0];
+                XCTAssertTrue(result.items.count == 1, @"Should have had results");
+                NSDictionary *item = result.items[0];
                 XCTAssertEqual(shouldHaveCreatedAt, (BOOL)(item[MSSystemColumnCreatedAt] != nil), @"Property invalid: %@", systemProperties);
                 XCTAssertEqual(shouldHaveUpdatedAt, (BOOL)(item[MSSystemColumnUpdatedAt] != nil), @"Property invalid: %@", systemProperties);
                 XCTAssertEqual(shouldHaveVersion, (BOOL)(item[MSSystemColumnVersion] != nil), @"Property invalid: %@", systemProperties);
             } else {
-                XCTAssertTrue(items.count == 0, @"Shouldn't have had results");
+                XCTAssertTrue(result.items.count == 0, @"Shouldn't have had results");
             }
             self.done = YES;
         }];
@@ -586,15 +586,15 @@
         
         self.done = NO;
         query.predicate = [NSPredicate predicateWithFormat:@"__updatedAt == %@", savedItem[MSSystemColumnUpdatedAt]];
-        [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
             if (shouldHaveUpdatedAt) {
-                XCTAssertTrue(items.count == 1, @"Should have had results");
-                NSDictionary *item = items[0];
+                XCTAssertTrue(result.items.count == 1, @"Should have had results");
+                NSDictionary *item = result.items[0];
                 XCTAssertEqual(shouldHaveCreatedAt, (BOOL)(item[MSSystemColumnCreatedAt] != nil), @"Property invalid: %@", systemProperties);
                 XCTAssertEqual(shouldHaveUpdatedAt, (BOOL)(item[MSSystemColumnUpdatedAt] != nil), @"Property invalid: %@", systemProperties);
                 XCTAssertEqual(shouldHaveVersion, (BOOL)(item[MSSystemColumnVersion] != nil), @"Property invalid: %@", systemProperties);
             } else {
-                XCTAssertTrue(items.count == 0, @"Shouldn't have had results");
+                XCTAssertTrue(result.items.count == 0, @"Shouldn't have had results");
             }
             self.done = YES;
         }];
@@ -660,7 +660,7 @@
         self.done = NO;
         MSQuery *query = [[MSQuery alloc] initWithTable:self.table];
         query.parameters = userParams;
-        [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
             XCTAssertNotNil(error, @"An error should have occurred");
             XCTAssertEqual(error.code, [@MSErrorMessageErrorCode integerValue], @"Unexpected error %ld", (long)error.code);
             XCTAssertTrue([error.localizedDescription rangeOfString:@"is not a supported system property."].location != NSNotFound, @"Unexpected message %@", error.localizedDescription);
@@ -671,7 +671,7 @@
         self.done = NO;
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"__version == %@", savedItem[MSSystemColumnVersion]];
         query.predicate = predicate;
-        [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
             XCTAssertNotNil(error, @"An error should have occurred");
             XCTAssertEqual(error.code, [@MSErrorMessageErrorCode integerValue], @"Unexpected error %ld", (long)error.code);
             XCTAssertTrue([error.localizedDescription rangeOfString:@"is not a supported system property."].location != NSNotFound, @"Unexpected message %@", error.localizedDescription);
@@ -710,7 +710,12 @@
         NSDictionary *item = @{@"id": [NSString stringWithFormat:@"%lu", (unsigned long)i], @"string": @"a value"};
         self.done = NO;
         [self.table insert:item completion:^(NSDictionary *item, NSError *error) {
-            [savedItems addObject:item];
+            if (error) {
+                XCTAssertNotNil(error);
+            } else {
+                [savedItems addObject:item];
+            }
+            
             self.done = YES;
         }];
         [self waitForTest:30.0];
@@ -723,10 +728,10 @@
         MSQuery *query = self.table.query;
         [query orderByAscending:MSSystemColumnCreatedAt];
         self.done = NO;
-        [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
-            for (NSUInteger i = 0; i < items.count - 1; i++) {
-                NSInteger idOne = [items[i][@"id"] integerValue];
-                NSInteger idTwo = [items[i+1][@"id"] integerValue];
+        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
+            for (NSUInteger i = 0; i < result.items.count - 1; i++) {
+                NSInteger idOne = [result.items[i][@"id"] integerValue];
+                NSInteger idTwo = [result.items[i+1][@"id"] integerValue];
                 XCTAssertTrue(idOne < idTwo, @"Incorrect order");
             }
             self.done = YES;
@@ -736,10 +741,10 @@
         self.done = NO;
         query = self.table.query;
         [query orderByAscending:MSSystemColumnUpdatedAt];
-        [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
-            for (NSUInteger i = 0; i < items.count - 1; i++) {
-                NSInteger idOne = [items[i][@"id"] integerValue];
-                NSInteger idTwo = [items[i+1][@"id"] integerValue];
+        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
+            for (NSUInteger i = 0; i < result.items.count - 1; i++) {
+                NSInteger idOne = [result.items[i][@"id"] integerValue];
+                NSInteger idTwo = [result.items[i+1][@"id"] integerValue];
                 XCTAssertTrue(idOne < idTwo, @"Incorrect order");
             }
             self.done = YES;
@@ -749,10 +754,10 @@
         self.done = NO;
         query = self.table.query;
         [query orderByAscending:MSSystemColumnVersion];
-        [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
-            for (NSUInteger i = 0; i < items.count - 1; i++) {
-                NSInteger idOne = [items[i][@"id"] integerValue];
-                NSInteger idTwo = [items[i+1][@"id"] integerValue];
+        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
+            for (NSUInteger i = 0; i < result.items.count - 1; i++) {
+                NSInteger idOne = [result.items[i][@"id"] integerValue];
+                NSInteger idTwo = [result.items[i+1][@"id"] integerValue];
                 XCTAssertTrue(idOne < idTwo, @"Incorrect order");
             }
             self.done = YES;
@@ -762,24 +767,24 @@
         // Filtering
         self.done = NO;
         query = [self.table queryWithPredicate:[NSPredicate predicateWithFormat:@"__createdAt >= %@", savedItems[3][MSSystemColumnCreatedAt]]];
-        [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
-            XCTAssertTrue(items.count == 2, @"Incorrect results");
+        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
+            XCTAssertTrue(result.items.count == 2, @"Incorrect results");
             self.done = YES;
         }];
         [self waitForTest:30.0];
 
         self.done = NO;
         query = [self.table queryWithPredicate:[NSPredicate predicateWithFormat:@"__updatedAt >= %@", savedItems[3][MSSystemColumnUpdatedAt]]];
-        [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
-            XCTAssertTrue(items.count == 2, @"Incorrect results");
+        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
+            XCTAssertTrue(result.items.count == 2, @"Incorrect results");
             self.done = YES;
         }];
         [self waitForTest:30.0];
         
         self.done = NO;
         query = [self.table queryWithPredicate:[NSPredicate predicateWithFormat:@"__version == %@", savedItems[3][MSSystemColumnVersion]]];
-        [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
-            XCTAssertTrue(items.count == 1, @"Incorrect results");
+        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
+            XCTAssertTrue(result.items.count == 1, @"Incorrect results");
             self.done = YES;
         }];
         [self waitForTest:30.0];
@@ -787,8 +792,8 @@
         self.done = NO;
         query = self.table.query;
         query.selectFields = @[@"id", MSSystemColumnCreatedAt];
-        [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
-            for (NSDictionary *item in items) {
+        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
+            for (NSDictionary *item in result.items) {
                 XCTAssertNotNil(item[MSSystemColumnCreatedAt], @"Missing createdAt");
             }
             self.done = YES;
@@ -798,8 +803,8 @@
         self.done = NO;
         query = self.table.query;
         query.selectFields = @[@"id", MSSystemColumnUpdatedAt];
-        [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
-            for (NSDictionary *item in items) {
+        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
+            for (NSDictionary *item in result.items) {
                 XCTAssertNotNil(item[MSSystemColumnUpdatedAt], @"Missing updatedAt");
             }
             self.done = YES;
@@ -809,8 +814,8 @@
         self.done = NO;
         query = self.table.query;
         query.selectFields = @[@"id", MSSystemColumnVersion];
-        [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
-            for (NSDictionary *item in items) {
+        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
+            for (NSDictionary *item in result.items) {
                 XCTAssertNotNil(item[MSSystemColumnVersion], @"Missing version");
             }
             self.done = YES;
@@ -847,7 +852,6 @@
         XCTAssertNotNil(error, @"An error should have occcurred");
         XCTAssertEqual([@MSErrorPreconditionFailed integerValue], error.code, @"Should have had precondition failed error");
         
-        //NSDictionary *itemResponse = error.localizedDescription;
         NSHTTPURLResponse *response = (error.userInfo)[MSErrorResponseKey];
         XCTAssertNotNil(response, @"response should have been available");
         XCTAssertEqual([@412 integerValue], response.statusCode, @"response should have been pre condition failed");

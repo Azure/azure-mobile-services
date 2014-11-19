@@ -13,6 +13,34 @@
 @synthesize errorToUse = errorToUse_;
 @synthesize ignoreNextFilter = ignoreNextFilter_;
 
++(MSTestFilter *)testFilterWithStatusCode:(NSInteger)statusCode
+{
+    MSTestFilter *filter = [[MSTestFilter alloc] initWithStatusCode:statusCode data:nil];
+    return filter;
+}
+
++(MSTestFilter *)testFilterWithStatusCode:(NSInteger) statusCode data:(NSString *)data
+{
+    MSTestFilter *filter = [[MSTestFilter alloc] initWithStatusCode:statusCode data:data];
+    return filter;
+}
+
+- (id) initWithStatusCode:(NSInteger) statusCode data:(NSString *) data
+{
+    self = [super init];
+    if (self) {
+        self.ignoreNextFilter = YES;
+        self.responseToUse = [[NSHTTPURLResponse alloc]
+                              initWithURL:nil
+                              statusCode:statusCode
+                              HTTPVersion:nil headerFields:nil];
+        if (data) {
+            self.dataToUse = [data dataUsingEncoding:NSUTF8StringEncoding];
+        }
+    }
+    return self;
+}
+
 -(void) handleRequest:(NSURLRequest *)request
                next:(MSFilterNextBlock)next
            response:(MSFilterResponseBlock)response
@@ -36,7 +64,10 @@
             // with it
             response(nil, nil, self.errorToUse);
         }
-        else {
+        else {            
+            if (self.onInspectResponseData) {
+                self.dataToUse = self.onInspectResponseData(request, self.dataToUse);
+            }
             // Otherwise we'll assume a mock response/data are available
             response(self.responseToUse, self.dataToUse, nil);
         }
@@ -58,7 +89,9 @@
                     res = self.responseToUse;
                 }
                 
-                if (self.dataToUse) {
+                if (self.onInspectResponseData) {
+                    data = self.onInspectResponseData(request, data);
+                } else if (self.dataToUse) {
                     data = self.dataToUse;
                 }
                 

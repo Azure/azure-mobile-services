@@ -4,7 +4,7 @@
 
 #import "MSAPIRequest.h"
 #import "MSURLBuilder.h"
-
+#import "MSSDKFeatures.h"
 
 #pragma mark * MSAPIRequest Implementation
 
@@ -23,40 +23,7 @@
                              headers:(NSDictionary *)headers
                           completion:(MSAPIDataBlock)completion
 {
-    MSAPIRequest *request = nil;
-    NSError *error = nil;
-    
-    // Create the URL
-    NSURL *url = [MSURLBuilder URLForApi:client
-                                 APIName:APIName
-                              parameters:parameters
-                                 orError:&error];
-    
-    // If there was an error, call the completion and make sure
-    // to return nil for the request
-    if (error) {
-        if (completion) {
-            completion(nil, nil, error);
-        }
-    }
-    else {
-        // Create the request
-        request = [[MSAPIRequest alloc] initWithURL:url];
-        
-        // Set the body
-        request.HTTPBody = data;
-        
-        // Set the user-defined headers properties
-        [request setAllHTTPHeaderFields:headers];
-        
-        // Set the method and headers
-        request.HTTPMethod = [method uppercaseString];
-        if (!request.HTTPMethod) {
-            request.HTTPMethod = @"POST";
-        }
-    }
-    
-    return request;
+    return [MSAPIRequest requestToinvokeAPI:APIName client:client data:data HTTPMethod:method parameters:parameters headers:headers features:MSFeatureApiGeneric completion:completion];
 }
 
 +(MSAPIRequest *) requestToinvokeAPI:(NSString *)APIName
@@ -94,9 +61,68 @@
                                         HTTPMethod:method
                                         parameters:parameters
                                            headers:headers
+                                          features:MSFeatureApiJson
                                         completion:completion];
     }
     
+    return request;
+}
+
+#pragma mark * Private Static Constructor
+
++(MSAPIRequest *) requestToinvokeAPI:(NSString *)APIName
+                              client:(MSClient *)client
+                                data:(NSData *)data
+                          HTTPMethod:(NSString *)method
+                          parameters:(NSDictionary *)parameters
+                             headers:(NSDictionary *)headers
+                            features:(MSFeatures)features
+                          completion:(MSAPIDataBlock)completion
+{
+    MSAPIRequest *request = nil;
+    NSError *error = nil;
+
+    // Create the URL
+    NSURL *url = [MSURLBuilder URLForApi:client
+                                 APIName:APIName
+                              parameters:parameters
+                                 orError:&error];
+
+    // If there was an error, call the completion and make sure
+    // to return nil for the request
+    if (error) {
+        if (completion) {
+            completion(nil, nil, error);
+        }
+    }
+    else {
+        if (parameters && [parameters count]) {
+            features |= MSFeatureQueryParameters;
+        }
+
+        // Create the request
+        request = [[MSAPIRequest alloc] initWithURL:url];
+
+        // Set the body
+        request.HTTPBody = data;
+
+        // Set the user-defined headers properties
+        [request setAllHTTPHeaderFields:headers];
+
+        if (![headers objectForKey:MSFeaturesHeaderName]) {
+            NSString *featuresHeader = [MSSDKFeatures httpHeaderForFeatures:features];
+            if (featuresHeader) {
+                [request setValue:featuresHeader forHTTPHeaderField:MSFeaturesHeaderName];
+            }
+        }
+
+        // Set the method and headers
+        request.HTTPMethod = [method uppercaseString];
+        if (!request.HTTPMethod) {
+            request.HTTPMethod = @"POST";
+        }
+    }
+
     return request;
 }
 

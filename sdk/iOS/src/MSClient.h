@@ -7,10 +7,13 @@
 #import "MSError.h"
 #import "MSFilter.h"
 #import "MSLoginController.h"
+#import "MSSyncContext.h"
 
 @class MSTable;
 @class MSUser;
+@class MSSyncTable;
 @class MSPush;
+
 
 #pragma mark * Block Type Definitions
 /// Callback for method with no return other than error.
@@ -55,6 +58,10 @@ typedef void (^MSAPIDataBlock)(NSData *result,
 /// array is not-mutable. To apply a filter to a client, use the withFilter:
 /// method.
 @property (nonatomic, strong, readonly)         NSArray *filters;
+
+/// A sync context that defines how offline data is synced and allows for manually
+/// syncing data on demand
+@property (nonatomic, strong)     MSSyncContext *syncContext;
 
 /// @name Registering and unregistering for push notifications
 
@@ -156,6 +163,9 @@ typedef void (^MSAPIDataBlock)(NSData *result,
 /// Old method to return an MSTable instance for a table with the given name.
 /// This has been deprecated. Use tableWithName:
 -(MSTable *)getTable:(NSString *)tableName __deprecated;
+
+/// Returns an MSSyncTable instance for a table with the given name.
+-(MSSyncTable *)syncTableWithName:(NSString *)tableName;
 
 /// @}
 
