@@ -113,12 +113,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         private string GetDeltaTokenKey(string tableName, string queryId)
         {
-            return "deltaToken_" + tableName + "_" + queryId;
+            return "deltaToken|" + tableName + "|" + queryId;
         }
 
         private static string GetSystemPropertiesKey(string tableName)
         {
-            return "systemProperties_" + tableName;
+            return "systemProperties|" + tableName;
         }
 
         public void Dispose()

@@ -311,7 +311,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 if (!MobileServiceLocalSystemTables.All.Contains(table.Key))
                 {
                     // preserve system properties setting for non-system tables
-                    string name = String.Format("systemProperties_{0}", table.Key);
+                    string name = String.Format("systemProperties|{0}", table.Key);
                     string value = ((int)table.Value.SystemProperties).ToString();
                     await this.SaveSetting(name, value);
                 }

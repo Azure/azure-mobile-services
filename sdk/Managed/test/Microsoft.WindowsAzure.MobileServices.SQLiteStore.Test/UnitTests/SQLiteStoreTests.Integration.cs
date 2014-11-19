@@ -267,16 +267,19 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
                 await store.InitializeAsync();
 
-                await store.UpsertAsync("ITEMwithDATE", new[]{new JObject()
+                await store.UpsertAsync("ITEMwithDATE", new[]
                 {
-                    { "ID", Guid.NewGuid() },
-                    {"dATE", DateTime.UtcNow }
-                }}, ignoreMissingColumns: false);
+                    new JObject()
+                    {
+                        { "ID", Guid.NewGuid() },
+                        {"dATE", DateTime.UtcNow }
+                    }
+                }, ignoreMissingColumns: false);
             }
         }
 
         [AsyncTestMethod]
-        public async Task PullAsync_DoesIncrementalSync_WhenQueryKeyIsSpecified()
+        public async Task PullAsync_DoesIncrementalSync_WhenQueryIdIsSpecified()
         {
             ResetDatabase(TestTable);
 
@@ -304,7 +307,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         }
 
         [AsyncTestMethod]
-        public async Task PullAsync_DoesIncrementalSync_WhenQueryKeyIsSpecified_WithoutCache()
+        public async Task PullAsync_DoesIncrementalSync_WhenQueryIdIsSpecified_WithoutCache()
         {
             ResetDatabase(TestTable);
 
