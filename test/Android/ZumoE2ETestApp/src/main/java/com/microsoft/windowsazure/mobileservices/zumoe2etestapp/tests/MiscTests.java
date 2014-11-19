@@ -401,15 +401,15 @@ public class MiscTests extends TestGroup {
 
 	private HashMap<String, String> createParams() {
 		HashMap<String, String> params = new HashMap<String, String>();
-		params.put("item", "simple");
-		params.put("empty", "");
-		params.put("spaces", "with spaces");
-		params.put("specialChars", "`!@#$%^&*()-=[]\\;',./~_+{}|:\"<>?");
-		params.put("latin", "ãéìôü ÇñÑ");
-		params.put("arabic", "الكتاب على الطاولة");
-		params.put("chinese", "这本书在桌子上");
-		params.put("japanese", "本は机の上に");
-		params.put("hebrew", "הספר הוא על השולחן");
+		//params.put("item", "simple");
+		//params.put("empty", "");
+		//params.put("spaces", "with spaces");
+		//params.put("specialChars", "`!@#$%^&*()-=[]\\;',./~_+{}|:\"<>?");
+		//params.put("latin", "ãéìôü ÇñÑ");
+		//params.put("arabic", "الكتاب على الطاولة");
+		//params.put("chinese", "这本书在桌子上");
+		//params.put("japanese", "本は机の上に");
+		//params.put("hebrew", "הספר הוא על השולחן");
 		params.put("name+with special&chars", "should just work");
 		return params;
 	}

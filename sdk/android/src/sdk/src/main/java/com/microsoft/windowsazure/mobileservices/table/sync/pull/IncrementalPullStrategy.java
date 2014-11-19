@@ -107,13 +107,9 @@ public class IncrementalPullStrategy extends PullStrategy {
 
             deltaToken = maxUpdatedAt;
 
-            // reset the cursor because deltatoken has changed
             this.cursor.reset();
 
-            //if (this.supportSkip)
-            //{
-                this.query.skip(0);
-            //}
+            this.query.skip(0);
 
             setupQuery(maxUpdatedAt, lastElementId);
 
