@@ -11,7 +11,7 @@
 - rename queryKey to queryId [93e59f7](https://github.com/Azure/azure-mobile-services/commit/93e59f7)
 - insert should throw if the item already exists [#491](https://github.com/Azure/azure-mobile-services/issues/491) [fc13891](https://github.com/Azure/azure-mobile-services/commit/fc13891)
 
-### Version 1.3 [beta3](https://github.com/Azure/azure-mobile-services/commit/beta3)
+### Version 1.3 beta3
 **Managed SDK**
 - Improved the push failure error message [d49a72e](https://github.com/Azure/azure-mobile-services/commit/d49a72e)
 - Implement true upsert [c5b0b38](https://github.com/Azure/azure-mobile-services/commit/c5b0b38)
