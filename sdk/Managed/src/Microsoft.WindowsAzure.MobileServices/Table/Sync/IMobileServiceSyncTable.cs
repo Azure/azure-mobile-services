@@ -88,7 +88,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <summary>
         /// Pulls all items that match the given query from the associated remote table. Supports incremental sync.
         /// </summary>
-        /// </summary>
         /// <param name="queryId">
         /// A string that uniquely identifies this query and is used to keep track of its sync state. Supplying this parameter enables incremental sync whenever the same key is used again.
         /// </param>

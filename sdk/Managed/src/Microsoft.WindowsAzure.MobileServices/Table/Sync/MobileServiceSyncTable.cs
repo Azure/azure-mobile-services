@@ -15,7 +15,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
     internal class MobileServiceSyncTable : IMobileServiceSyncTable
     {
-        private static readonly Regex queryIdRegex = new Regex("^[a-zA-Z][a-zA-Z0-9]{0,24}$");
+        private static readonly Regex queryIdRegex = new Regex("^[a-zA-Z][a-zA-Z0-9_-]{0,24}$");
         private MobileServiceSyncContext syncContext;
 
         public MobileServiceClient MobileServiceClient { get; private set; }
@@ -126,7 +126,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return EnsureIdIsString(id);
         }
 
-        private static void ValidateQueryId(string queryId)
+        internal static void ValidateQueryId(string queryId)
         {
             if (string.IsNullOrWhiteSpace(queryId))
             {

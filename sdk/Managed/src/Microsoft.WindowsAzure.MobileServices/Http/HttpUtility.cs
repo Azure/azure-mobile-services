@@ -17,6 +17,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="applicationUri">The application uri to use as base</param>
         /// <param name="query">The query string that may be relative path starting with slash or absolute uri</param>
         /// <param name="uri">The uri in case it was relative path or absolute uri</param>
+        /// <param name="absolute">Returns true if the uri was absolute uri</param>
         /// <returns>True if it was relative or absolute uri, False otherwise</returns>
         public static bool TryParseQueryUri(Uri applicationUri, string query, out Uri uri, out bool absolute)
         {

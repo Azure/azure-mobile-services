@@ -254,7 +254,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// Occurs when <see cref="LoadMoreItemsAsync"/> 
+        /// Occurs when <see cref="LoadMoreItemsAsync(int)"/> 
         /// starting to load items. 
         /// </summary>
         public event EventHandler LoadingItems;
