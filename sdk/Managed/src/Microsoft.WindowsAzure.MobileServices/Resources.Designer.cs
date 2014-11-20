@@ -413,7 +413,7 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The query id must start with a letter and can contain only letters and digits..
+        ///   Looks up a localized string similar to The query id must start with a letter and can contain only letters, digits, hyphen or underscore..
         /// </summary>
         internal static string MobileServiceSyncTable_InvalidQueryId {
             get {

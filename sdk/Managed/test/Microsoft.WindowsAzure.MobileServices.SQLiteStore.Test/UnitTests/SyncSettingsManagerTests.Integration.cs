@@ -9,7 +9,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
     {
         public static string TestDbName = SQLiteStoreTests.TestDbName;
         private const string TestTable = "todoItem";
-        private const string TestQueryKey = "abc";
+        private const string TestQueryId = "abc";
 
 
         [AsyncTestMethod]
@@ -18,13 +18,13 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             MobileServiceSyncSettingsManager settings = await GetSettingManager();
 
             DateTimeOffset saved = new DateTime(2014, 7, 24, 3, 4, 5, DateTimeKind.Local);
-            await settings.SetDeltaTokenAsync(TestTable, TestQueryKey, saved);
+            await settings.SetDeltaTokenAsync(TestTable, TestQueryId, saved);
 
-            DateTimeOffset read = await settings.GetDeltaTokenAsync(TestTable, TestQueryKey);
+            DateTimeOffset read = await settings.GetDeltaTokenAsync(TestTable, TestQueryId);
             Assert.AreEqual(read, saved.ToUniversalTime());
 
-            await settings.ResetDeltaTokenAsync(TestTable, TestQueryKey);
-            read = await settings.GetDeltaTokenAsync(TestTable, TestQueryKey);
+            await settings.ResetDeltaTokenAsync(TestTable, TestQueryId);
+            read = await settings.GetDeltaTokenAsync(TestTable, TestQueryId);
             Assert.AreEqual(read, new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero).ToUniversalTime());
         }
 
@@ -33,7 +33,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         {
             MobileServiceSyncSettingsManager settings = await GetSettingManager();
 
-            DateTimeOffset token = await settings.GetDeltaTokenAsync(TestTable, TestQueryKey);
+            DateTimeOffset token = await settings.GetDeltaTokenAsync(TestTable, TestQueryId);
 
             Assert.AreEqual(token, new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero).ToUniversalTime());
         }
@@ -44,15 +44,15 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             MobileServiceSyncSettingsManager settings = await GetSettingManager();
 
             DateTimeOffset saved = new DateTime(2014, 7, 24, 3, 4, 5, DateTimeKind.Local);
-            await settings.SetDeltaTokenAsync(TestTable, TestQueryKey, saved);
+            await settings.SetDeltaTokenAsync(TestTable, TestQueryId, saved);
 
             // with cache
-            DateTimeOffset read = await settings.GetDeltaTokenAsync(TestTable, TestQueryKey);
+            DateTimeOffset read = await settings.GetDeltaTokenAsync(TestTable, TestQueryId);
             Assert.AreEqual(read, saved.ToUniversalTime());
 
             // without cache
             settings = await GetSettingManager(resetDb: false);
-            read = await settings.GetDeltaTokenAsync(TestTable, TestQueryKey);
+            read = await settings.GetDeltaTokenAsync(TestTable, TestQueryId);
             Assert.AreEqual(read, saved.ToUniversalTime());
         }
 
@@ -62,15 +62,15 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             MobileServiceSyncSettingsManager settings = await GetSettingManager();
 
             var saved = new DateTimeOffset(2014, 7, 24, 3, 4, 5, TimeSpan.Zero);
-            await settings.SetDeltaTokenAsync(TestTable, TestQueryKey, saved);
+            await settings.SetDeltaTokenAsync(TestTable, TestQueryId, saved);
 
             // with cache
-            DateTimeOffset read = await settings.GetDeltaTokenAsync(TestTable, TestQueryKey);
+            DateTimeOffset read = await settings.GetDeltaTokenAsync(TestTable, TestQueryId);
             Assert.AreEqual(read, saved);
 
             // without cache
             settings = await GetSettingManager(resetDb: false);
-            read = await settings.GetDeltaTokenAsync(TestTable, TestQueryKey);
+            read = await settings.GetDeltaTokenAsync(TestTable, TestQueryId);
             Assert.AreEqual(read, saved);
         }
 
@@ -81,19 +81,19 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
             // first save
             var saved = new DateTimeOffset(2014, 7, 24, 3, 4, 5, TimeSpan.Zero);
-            await settings.SetDeltaTokenAsync(TestTable, TestQueryKey, saved);
+            await settings.SetDeltaTokenAsync(TestTable, TestQueryId, saved);
 
             // then read and update
-            DateTimeOffset read = await settings.GetDeltaTokenAsync(TestTable, TestQueryKey);
-            await settings.SetDeltaTokenAsync(TestTable, TestQueryKey, read.AddDays(1));
+            DateTimeOffset read = await settings.GetDeltaTokenAsync(TestTable, TestQueryId);
+            await settings.SetDeltaTokenAsync(TestTable, TestQueryId, read.AddDays(1));
 
             // then read again
-            read = await settings.GetDeltaTokenAsync(TestTable, TestQueryKey);
+            read = await settings.GetDeltaTokenAsync(TestTable, TestQueryId);
             Assert.AreEqual(read, saved.AddDays(1));
 
             // then read again in fresh instance
             settings = await GetSettingManager(resetDb: false);
-            read = await settings.GetDeltaTokenAsync(TestTable, TestQueryKey);
+            read = await settings.GetDeltaTokenAsync(TestTable, TestQueryId);
             Assert.AreEqual(read, saved.AddDays(1));
         }
 

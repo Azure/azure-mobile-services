@@ -259,7 +259,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             AssertEx.MatchUris(hijack.Requests, "http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__version%2C__deleted",
                                                 "http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'2001-02-04T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__version%2C__deleted");
 
-            Assert.Equals(store.TableMap[MobileServiceLocalSystemTables.Config]["stringId_test_table_deltaToken_items"]["value"], "2001-02-04T00:00:00.0000000+00:00");
+            Assert.Equals(store.TableMap[MobileServiceLocalSystemTables.Config]["deltaToken|stringId_test_table|items"]["value"], "2001-02-04T00:00:00.0000000+00:00");
         }
 
         [AsyncTestMethod]
@@ -288,7 +288,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             AssertEx.MatchUris(hijack.Requests, "http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__version%2C__deleted",
                                                 "http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$skip=2&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__version%2C__deleted");
 
-            Assert.IsFalse(store.TableMap[MobileServiceLocalSystemTables.Config].ContainsKey("stringId_test_table_deltaToken_items"));
+            Assert.IsFalse(store.TableMap[MobileServiceLocalSystemTables.Config].ContainsKey("deltaToken|stringId_test_table|items"));
         }
 
         [AsyncTestMethod]
@@ -771,9 +771,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.AddResponseContent(@"[]");
 
 
-            store.TableMap[MobileServiceLocalSystemTables.Config]["stringId_test_table_systemProperties"] = new JObject
+            store.TableMap[MobileServiceLocalSystemTables.Config]["systemProperties|stringId_test_table"] = new JObject
             {
-                { MobileServiceSystemColumns.Id, "stringId_test_table_systemProperties" },
+                { MobileServiceSystemColumns.Id, "systemProperties|stringId_test_table" },
                 { "value", "1" }
             };
 
@@ -899,7 +899,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(store.TableMap["stringId_test_table"]["def"].Value<string>("String"), "How");
 
             // ensure delta token was updated
-            Assert.Equals(store.TableMap[MobileServiceLocalSystemTables.Config]["stringId_test_table_deltaToken_items"]["value"], "2001-02-04T00:00:00.0000000+00:00");
+            Assert.Equals(store.TableMap[MobileServiceLocalSystemTables.Config]["deltaToken|stringId_test_table|items"]["value"], "2001-02-04T00:00:00.0000000+00:00");
 
             // now purge and forget the delta token
             await table.PurgeAsync("items", null, false, CancellationToken.None);
@@ -907,7 +907,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             // make sure data is purged
             Assert.AreEqual(store.TableMap["stringId_test_table"].Count, 0);
             // make sure delta token is removed
-            Assert.IsFalse(store.TableMap[MobileServiceLocalSystemTables.Config].ContainsKey("stringId_test_table_deltaToken_items"));
+            Assert.IsFalse(store.TableMap[MobileServiceLocalSystemTables.Config].ContainsKey("deltaToken|stringId_test_table|items"));
 
             // pull again
             await table.PullAsync("items", table.CreateQuery());
@@ -983,7 +983,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
             // put a dummy delta token
-            string deltaKey = "someTable_deltaToken_abc";
+            string deltaKey = "deltaToken|someTable|abc";
             store.TableMap[MobileServiceLocalSystemTables.Config] = new Dictionary<string, JObject>() { { deltaKey, new JObject() } };
 
             // insert an item but don't push
