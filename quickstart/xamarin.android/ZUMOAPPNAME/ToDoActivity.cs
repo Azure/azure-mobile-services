@@ -6,207 +6,226 @@ using Android.Widget;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices;
-
+using Microsoft.WindowsAzure.MobileServices.Sync;
+using Microsoft.WindowsAzure.MobileServices.SQLiteStore;
+using System.IO;
 
 namespace ZUMOAPPNAME
 {
-	[Activity (MainLauncher = true, 
-	           Icon="@drawable/ic_launcher", Label="@string/app_name",
-	           Theme="@style/AppTheme")]
-	public class ToDoActivity : Activity
-	{
-		//Mobile Service Client reference
-		private MobileServiceClient client;
+    [Activity (MainLauncher = true, 
+               Icon="@drawable/ic_launcher", Label="@string/app_name",
+               Theme="@style/AppTheme")]
+    public class ToDoActivity : Activity
+    {
+        //Mobile Service Client reference
+        private MobileServiceClient client;
 
-		//Mobile Service Table used to access data
-		private IMobileServiceTable<ToDoItem> toDoTable;
+        //Mobile Service Table used to access data
+        private IMobileServiceSyncTable<ToDoItem> toDoTable;
 
-		//Adapter to sync the items list with the view
-		private ToDoItemAdapter adapter;
+        //Adapter to sync the items list with the view
+        private ToDoItemAdapter adapter;
 
-		//EditText containing the "New ToDo" text
-		private EditText textNewToDo;
+        //EditText containing the "New ToDo" text
+        private EditText textNewToDo;
 
-		//Progress spinner to use for table operations
-		private ProgressBar progressBar;
+        //Progress spinner to use for table operations
+        private ProgressBar progressBar;
 
-		const string applicationURL = @"ZUMOAPPURL";
-		const string applicationKey = @"ZUMOAPPKEY";
+        const string applicationURL = @"ZUMOAPPURL";
+        const string applicationKey = @"ZUMOAPPKEY";
 
-		protected override async void OnCreate (Bundle bundle)
-		{
-			base.OnCreate (bundle);
+        protected override async void OnCreate (Bundle bundle)
+        {
+            base.OnCreate (bundle);
 
-			// Set our view from the "main" layout resource
-			SetContentView (Resource.Layout.Activity_To_Do);
+            // Set our view from the "main" layout resource
+            SetContentView (Resource.Layout.Activity_To_Do);
 
-			progressBar = FindViewById<ProgressBar> (Resource.Id.loadingProgressBar);
+            progressBar = FindViewById<ProgressBar> (Resource.Id.loadingProgressBar);
 
-			// Initialize the progress bar
-			progressBar.Visibility = ViewStates.Gone;
+            // Initialize the progress bar
+            progressBar.Visibility = ViewStates.Gone;
 
-			// Create ProgressFilter to handle busy state
-			var progressHandler = new ProgressHandler ();
-			progressHandler.BusyStateChange += (busy) => {
-				if (progressBar != null) 
-					progressBar.Visibility = busy ? ViewStates.Visible : ViewStates.Gone;
-			};
+            // Create ProgressFilter to handle busy state
+            var progressHandler = new ProgressHandler ();
+            progressHandler.BusyStateChange += (busy) => {
+                if (progressBar != null) 
+                    progressBar.Visibility = busy ? ViewStates.Visible : ViewStates.Gone;
+            };
 
-			try {
-				CurrentPlatform.Init ();
+            try {
+                CurrentPlatform.Init ();
 
-				// Create the Mobile Service Client instance, using the provided
-				// Mobile Service URL and key
-				client = new MobileServiceClient (
-					applicationURL,
-					applicationKey, progressHandler);
+                // Create the Mobile Service Client instance, using the provided
+                // Mobile Service URL and key
+                client = new MobileServiceClient (applicationURL, applicationKey, progressHandler);
+                await InitLocalStore();
 
-				// Get the Mobile Service Table instance to use
-				toDoTable = client.GetTable <ToDoItem> ();
+                // Get the Mobile Service Table instance to use
+                toDoTable = client.GetSyncTable <ToDoItem> ();
 
-				textNewToDo = FindViewById<EditText> (Resource.Id.textNewToDo);
+                textNewToDo = FindViewById<EditText> (Resource.Id.textNewToDo);
 
-				// Create an adapter to bind the items with the view
-				adapter = new ToDoItemAdapter (this, Resource.Layout.Row_List_To_Do);
-				var listViewToDo = FindViewById<ListView> (Resource.Id.listViewToDo);
-				listViewToDo.Adapter = adapter;
+                // Create an adapter to bind the items with the view
+                adapter = new ToDoItemAdapter (this, Resource.Layout.Row_List_To_Do);
+                var listViewToDo = FindViewById<ListView> (Resource.Id.listViewToDo);
+                listViewToDo.Adapter = adapter;
 
-				// Load the items from the Mobile Service
-				await RefreshItemsFromTableAsync ();
+                // Load the items from the Mobile Service
+                await RefreshItemsFromTableAsync ();
 
-			} catch (Java.Net.MalformedURLException) {
-				CreateAndShowDialog (new Exception ("There was an error creating the Mobile Service. Verify the URL"), "Error");
-			} catch (Exception e) {
-				CreateAndShowDialog (e, "Error");
-			}
-		}
+            } catch (Java.Net.MalformedURLException) {
+                CreateAndShowDialog (new Exception ("There was an error creating the Mobile Service. Verify the URL"), "Error");
+            } catch (Exception e) {
+                CreateAndShowDialog (e, "Error");
+            }
+        }
 
-		//Initializes the activity menu
-		public override bool OnCreateOptionsMenu (IMenu menu)
-		{
-			MenuInflater.Inflate (Resource.Menu.activity_main, menu);
-			return true;
-		}
+        private async Task InitLocalStore()
+        {
+            // new code to initialize the SQLite store
+            string path = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), "localstore.db");
 
-		//Select an option from the menu
-		public override bool OnOptionsItemSelected (IMenuItem item)
-		{
-			if (item.ItemId == Resource.Id.menu_refresh) {
-				OnRefreshItemsSelected ();
-			}
-			return true;
-		}
+            if (!File.Exists(path))
+            {
+                File.Create(path).Dispose();
+            }
 
-		// Called when the refresh menu opion is selected
-		async void OnRefreshItemsSelected ()
-		{
-			await RefreshItemsFromTableAsync ();
-		}
+            var store = new MobileServiceSQLiteStore(path);
+            store.DefineTable<ToDoItem>();
 
-		//Refresh the list with the items in the Mobile Service Table
-		async Task RefreshItemsFromTableAsync ()
-		{
-			try {
-				// Get the items that weren't marked as completed and add them in the
-				// adapter
-				var list = await toDoTable.Where (item => item.Complete == false).ToListAsync ();
+            await client.SyncContext.InitializeAsync(store);
+        }
 
-				adapter.Clear ();
+        //Initializes the activity menu
+        public override bool OnCreateOptionsMenu (IMenu menu)
+        {
+            MenuInflater.Inflate (Resource.Menu.activity_main, menu);
+            return true;
+        }
 
-				foreach (ToDoItem current in list)
-					adapter.Add (current);
+        //Select an option from the menu
+        public override bool OnOptionsItemSelected (IMenuItem item)
+        {
+            if (item.ItemId == Resource.Id.menu_refresh) {
+                OnRefreshItemsSelected ();
+            }
+            return true;
+        }
 
-			} catch (Exception e) {
-				CreateAndShowDialog (e, "Error");
-			}
-		}
+        // Called when the refresh menu option is selected
+        private async void OnRefreshItemsSelected ()
+        {
+            await client.SyncContext.PushAsync();
+            await toDoTable.PullAsync("todoItems", toDoTable.CreateQuery());
+            await RefreshItemsFromTableAsync();
+        }
 
-		public async Task CheckItem (ToDoItem item)
-		{
-			if (client == null) {
-				return;
-			}
+        //Refresh the list with the items in the Mobile Service Table
+        private async Task RefreshItemsFromTableAsync ()
+        {
+            try {
+                // Get the items that weren't marked as completed and add them in the
+                // adapter
+                var list = await toDoTable.Where (item => item.Complete == false).ToListAsync ();
 
-			// Set the item as completed and update it in the table
-			item.Complete = true;
-			try {
-				await toDoTable.UpdateAsync (item);
-				if (item.Complete)
-					adapter.Remove (item);
+                adapter.Clear ();
 
-			} catch (Exception e) {
-				CreateAndShowDialog (e, "Error");
-			}
-		}
+                foreach (ToDoItem current in list)
+                    adapter.Add (current);
 
-		[Java.Interop.Export()]
-		public async void AddItem (View view)
-		{
-			if (client == null || string.IsNullOrWhiteSpace (textNewToDo.Text)) {
-				return;
-			}
+            } catch (Exception e) {
+                CreateAndShowDialog (e, "Error");
+            }
+        }
 
-			// Create a new item
-			var item = new ToDoItem {
-				Text = textNewToDo.Text,
-				Complete = false
-			};
+        public async Task CheckItem (ToDoItem item)
+        {
+            if (client == null) {
+                return;
+            }
 
-			try {
-				// Insert the new item
-				await toDoTable.InsertAsync (item);
+            // Set the item as completed and update it in the table
+            item.Complete = true;
+            try {
+                await toDoTable.UpdateAsync (item);
+                if (item.Complete)
+                    adapter.Remove (item);
 
-				if (!item.Complete) {
-					adapter.Add (item);
-				}
-			} catch (Exception e) {
-				CreateAndShowDialog (e, "Error");
-			}
+            } catch (Exception e) {
+                CreateAndShowDialog (e, "Error");
+            }
+        }
 
-			textNewToDo.Text = "";
-		}
+        [Java.Interop.Export()]
+        public async void AddItem (View view)
+        {
+            if (client == null || string.IsNullOrWhiteSpace (textNewToDo.Text)) {
+                return;
+            }
 
-		void CreateAndShowDialog (Exception exception, String title)
-		{
-			CreateAndShowDialog (exception.Message, title);
-		}
+            // Create a new item
+            var item = new ToDoItem {
+                Text = textNewToDo.Text,
+                Complete = false
+            };
 
-		void CreateAndShowDialog (string message, string title)
-		{
-			AlertDialog.Builder builder = new AlertDialog.Builder (this);
+            try {
+                // Insert the new item
+                await toDoTable.InsertAsync (item);
 
-			builder.SetMessage (message);
-			builder.SetTitle (title);
-			builder.Create ().Show ();
-		}
+                if (!item.Complete) {
+                    adapter.Add (item);
+                }
+            } catch (Exception e) {
+                CreateAndShowDialog (e, "Error");
+            }
 
-		class ProgressHandler : DelegatingHandler
-		{
-			int busyCount = 0;
+            textNewToDo.Text = "";
+        }
 
-			public event Action<bool> BusyStateChange;
+        private void CreateAndShowDialog (Exception exception, String title)
+        {
+            CreateAndShowDialog (exception.Message, title);
+        }
 
-			#region implemented abstract members of HttpMessageHandler
+        private void CreateAndShowDialog (string message, string title)
+        {
+            AlertDialog.Builder builder = new AlertDialog.Builder (this);
 
-			protected override async Task<HttpResponseMessage> SendAsync (HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
-			{
-				 //assumes always executes on UI thread
-				if (busyCount++ == 0 && BusyStateChange != null)
-					BusyStateChange (true);
+            builder.SetMessage (message);
+            builder.SetTitle (title);
+            builder.Create ().Show ();
+        }
 
-				var response = await base.SendAsync (request, cancellationToken);
+        class ProgressHandler : DelegatingHandler
+        {
+            int busyCount = 0;
 
-				// assumes always executes on UI thread
-				if (--busyCount == 0 && BusyStateChange != null)
-					BusyStateChange (false);
+            public event Action<bool> BusyStateChange;
 
-				return response;
-			}
+            #region implemented abstract members of HttpMessageHandler
 
-			#endregion
+            protected override async Task<HttpResponseMessage> SendAsync (HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
+            {
+                 //assumes always executes on UI thread
+                if (busyCount++ == 0 && BusyStateChange != null)
+                    BusyStateChange (true);
 
-		}
-	}
+                var response = await base.SendAsync (request, cancellationToken);
+
+                // assumes always executes on UI thread
+                if (--busyCount == 0 && BusyStateChange != null)
+                    BusyStateChange (false);
+
+                return response;
+            }
+
+            #endregion
+
+        }
+    }
 }
 
 
