@@ -6,6 +6,7 @@
 - **[Breaking]** Changed MSReadQueryBlock to return MSQueryResult instead of items and totalCount
 
 ### Version 1.3 
+- allow underscore and hyphen in queryId [7d192a3](https://github.com/Azure/azure-mobile-services/commit/7d192a3)
 - added force option to purge data and pending operations on data [aa51d9f](https://github.com/Azure/azure-mobile-services/commit/aa51d9f)
 - delete errors with operation on cancel and collapse [372ba61](https://github.com/Azure/azure-mobile-services/commit/372ba61)
 - rename queryKey to queryId [93e59f7](https://github.com/Azure/azure-mobile-services/commit/93e59f7)
