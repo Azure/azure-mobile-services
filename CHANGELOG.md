@@ -6,28 +6,28 @@
 - **[Breaking]** Changed MSReadQueryBlock to return MSQueryResult instead of items and totalCount
 
 ### Version 1.3 
-- added force option to purge data and pending operations on data aa51d9fae89d734e8ef515501c37a79c67ef81a9
-- delete errors with operation on cancel and collapse 372ba61def5bee16341ab59c07ec553081c47b5c
-- rename queryKey to queryId 93e59f70484b849a13fdc3335ffd7bcf28b02ca0
-- insert should throw if the item already exists #491 fc138913ce685f22c20dead9c3d0097f3d372acd
+- added force option to purge data and pending operations on data [aa51d9f](https://github.com/Azure/azure-mobile-services/commit/aa51d9f)
+- delete errors with operation on cancel and collapse [372ba61](https://github.com/Azure/azure-mobile-services/commit/372ba61)
+- rename queryKey to queryId [93e59f7](https://github.com/Azure/azure-mobile-services/commit/93e59f7)
+- insert should throw if the item already exists [#491](https://github.com/Azure/azure-mobile-services/issues/491) [fc13891](https://github.com/Azure/azure-mobile-services/commit/fc13891)
 
-### Version 1.3 beta3
+### Version 1.3 [beta3](https://github.com/Azure/azure-mobile-services/commit/beta3)
 **Managed SDK**
-- Improved the push failure error message d49a72e788027ebfe61e1e919d73720576fc7daa
-- Implement true upsert c5b0b38b391b89b314cfeae742aff332d8c32e61
-- Use more fine grained types in sqlite store de49712bf7078aa3ecb58a9d48c763e795dcb905
-- Speedup store table creation eb7cc8d2792589e0fb39328b880957f9e53ae59a
-- Allow query on member name datetime 7d831cdcbee550d9dbb808abc21d7cec7129aaff
-- Make the sync handler optional as there is alternate way for handling sync errors edc04e5f2cd770a1554df05fa6f3618ae4de4f50
-- Drop the unused createdat column in operations table 8a30df4747b89fd82f0066e4a9c17640111d7867
-- Remove redundant overloads in interface and move them to extensions d0a46b6481c31d750042e239732e5915ce30cd9e
-- Support relative and absolute uri in pull same as table.read c9d8e39234cbfdc9a7fcd4bee5e546ff26e4edd0
-- Allow relative URI in invokeapi 5b3c6b3d652b4bd18e795c1c071e4270d99487ee
-- Fixed the like implementation in sqlite store 77a01803ec4c1d11a23f705e618c361add940a67
-- Purge should forget the deltatoken 18f1803c56eb2e88e0d30de515f03208631a167e
-- Renamed fromServer to ignoreMissingColumns 8b047eb788315092965703566677cd87756edfd4
-- **[Breaking]** Removed PullAsync overloads that do not take queryKey d4ff78450f2335a8ca2b5c72275c8164355645f6
-- Save tableKind in the errors table 23f2ef022dd63561b7983cfba3e0bf385f706858
+- Improved the push failure error message [d49a72e](https://github.com/Azure/azure-mobile-services/commit/d49a72e)
+- Implement true upsert [c5b0b38](https://github.com/Azure/azure-mobile-services/commit/c5b0b38)
+- Use more fine grained types in sqlite store [de49712](https://github.com/Azure/azure-mobile-services/commit/de49712)
+- Speedup store table creation [eb7cc8d](https://github.com/Azure/azure-mobile-services/commit/eb7cc8d)
+- Allow query on member name datetime [7d831cd](https://github.com/Azure/azure-mobile-services/commit/7d831cd)
+- Make the sync handler optional as there is alternate way for handling sync errors [edc04e5](https://github.com/Azure/azure-mobile-services/commit/edc04e5)
+- Drop the unused createdat column in operations table [8a30df4](https://github.com/Azure/azure-mobile-services/commit/8a30df4)
+- Remove redundant overloads in interface and move them to extensions [d0a46b6](https://github.com/Azure/azure-mobile-services/commit/d0a46b6)
+- Support relative and absolute uri in pull same as table.read [c9d8e39](https://github.com/Azure/azure-mobile-services/commit/c9d8e39)
+- Allow relative URI in invokeapi [5b3c6b3](https://github.com/Azure/azure-mobile-services/commit/5b3c6b3)
+- Fixed the like implementation in sqlite store [77a0180](https://github.com/Azure/azure-mobile-services/commit/77a0180)
+- Purge should forget the deltatoken [18f1803](https://github.com/Azure/azure-mobile-services/commit/18f1803)
+- Renamed fromServer to ignoreMissingColumns [8b047eb](https://github.com/Azure/azure-mobile-services/commit/8b047eb)
+- **[Breaking]** Removed PullAsync overloads that do not take queryKey [d4ff784](https://github.com/Azure/azure-mobile-services/commit/d4ff784)
+- Save tableKind in the errors table [23f2ef0](https://github.com/Azure/azure-mobile-services/commit/23f2ef0)
 
 ### Version 1.3 beta2
 **Managed SDK**
