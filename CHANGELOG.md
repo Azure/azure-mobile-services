@@ -5,6 +5,12 @@
 - Added support for following link headers returned from the .NET backend
 - **[Breaking]** Changed MSReadQueryBlock to return MSQueryResult instead of items and totalCount
 
+### Version 1.3 
+- added force option to purge data and pending operations on data aa51d9fae89d734e8ef515501c37a79c67ef81a9
+- delete errors with operation on cancel and collapse 372ba61def5bee16341ab59c07ec553081c47b5c
+- rename queryKey to queryId 93e59f70484b849a13fdc3335ffd7bcf28b02ca0
+- insert should throw if the item already exists #491 fc138913ce685f22c20dead9c3d0097f3d372acd
+
 ### Version 1.3 beta3
 **Managed SDK**
 - Improved the push failure error message d49a72e
