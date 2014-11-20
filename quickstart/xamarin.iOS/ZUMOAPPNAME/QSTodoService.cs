@@ -3,29 +3,34 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.WindowsAzure.MobileServices;
+using Microsoft.WindowsAzure.MobileServices.Sync;
+using Microsoft.WindowsAzure.MobileServices.SQLiteStore;
 
 namespace ZUMOAPPNAME
 {
 	public class QSTodoService : DelegatingHandler
 	{
 		static QSTodoService instance = new QSTodoService ();
+
 		const string applicationURL = @"ZUMOAPPURL";
 		const string applicationKey = @"ZUMOAPPKEY";
-		MobileServiceClient client;
-		IMobileServiceTable<ToDoItem> todoTable;
-		int busyCount = 0;
+
+		private MobileServiceClient client;
+		private IMobileServiceSyncTable<ToDoItem> todoTable;
+		private int busyCount = 0;
 
 		public event Action<bool> BusyUpdate;
 
-		QSTodoService ()
+		private QSTodoService ()
 		{
 			CurrentPlatform.Init ();
+			SQLitePCL.CurrentPlatform.Init(); 
 
 			// Initialize the Mobile Service client with your URL and key
 			client = new MobileServiceClient (applicationURL, applicationKey, this);
 
 			// Create an MSTable instance to allow us to work with the TodoItem table
-			todoTable = client.GetTable <ToDoItem> ();
+			todoTable = client.GetSyncTable <ToDoItem> ();
 		}
 
 		public static QSTodoService DefaultService {
@@ -36,10 +41,35 @@ namespace ZUMOAPPNAME
 
 		public List<ToDoItem> Items { get; private set;}
 
-		async public Task<List<ToDoItem>> RefreshDataAsync ()
+		public async Task InitializeStoreAsync()
+		{
+			string path = "localstore.db";
+			var store = new MobileServiceSQLiteStore(path);
+			store.DefineTable<ToDoItem>();
+			await client.SyncContext.InitializeAsync(store);
+		}
+
+		public async Task SyncAsync()
+		{
+			try
+			{
+				await client.SyncContext.PushAsync();
+				await todoTable.PullAsync("todoItems", todoTable.CreateQuery());
+			}
+
+			catch (MobileServiceInvalidOperationException e)
+			{
+				Console.Error.WriteLine(@"Sync Failed: {0}", e.Message);
+			}
+		}
+
+		public async Task<List<ToDoItem>> RefreshDataAsync ()
 		{
 			try {
-				// This code refreshes the entries in the list view by querying the TodoItems table.
+				// update the local store
+				await SyncAsync();
+
+				// This code refreshes the entries in the list view by querying the local TodoItems table.
 				// The query excludes completed TodoItems
 				Items = await todoTable
 					.Where (todoItem => todoItem.Complete == false).ToListAsync ();
@@ -79,7 +109,7 @@ namespace ZUMOAPPNAME
 			}
 		}
 
-		void Busy (bool busy)
+		private void Busy (bool busy)
 		{
 			// assumes always executes on UI thread
 			if (busy) {

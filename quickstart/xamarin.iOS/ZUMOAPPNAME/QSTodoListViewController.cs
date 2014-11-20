@@ -8,9 +8,7 @@ namespace ZUMOAPPNAME
 {
 	public partial class QSTodoListViewController : UITableViewController
 	{
-
-		QSTodoService todoService;
-		bool useRefreshControl = false;
+		private QSTodoService todoService;
 
 		public QSTodoListViewController (IntPtr handle) : base (handle)
 		{
@@ -21,29 +19,27 @@ namespace ZUMOAPPNAME
 			base.ViewDidLoad ();
 
 			todoService = QSTodoService.DefaultService;
+			await todoService.InitializeStoreAsync ();
 
 			todoService.BusyUpdate += (bool busy) => {
 				if (busy)
-					activityIndicator.StartAnimating ();
+					UIApplication.SharedApplication.NetworkActivityIndicatorVisible = true;
 				else 
-					activityIndicator.StopAnimating ();
+					UIApplication.SharedApplication.NetworkActivityIndicatorVisible = false;
+			};
+				
+			RefreshControl.ValueChanged += async (sender, e) => {
+				await RefreshAsync ();
 			};
 
 			await RefreshAsync ();
-
-			AddRefreshControl ();
 		}
 
-		async Task RefreshAsync ()
+		private async Task RefreshAsync ()
 		{
-			// only activate the refresh control if the feature is available
-			if (useRefreshControl)
-				RefreshControl.BeginRefreshing ();
-
+			RefreshControl.BeginRefreshing ();
 			await todoService.RefreshDataAsync ();
-
-			if (useRefreshControl) 
-				RefreshControl.EndRefreshing ();
+			RefreshControl.EndRefreshing ();
 
 			TableView.ReloadData ();
 		}
@@ -98,7 +94,7 @@ namespace ZUMOAPPNAME
 			return UITableViewCellEditingStyle.Delete;
 		}
 
-		async public override void CommitEditingStyle (UITableView tableView, UITableViewCellEditingStyle editingStyle, NSIndexPath indexPath)
+		public async override void CommitEditingStyle (UITableView tableView, UITableViewCellEditingStyle editingStyle, NSIndexPath indexPath)
 		{
 			// Find item that was commited for editing (completed)
 			var item = todoService.Items [indexPath.Row];
@@ -117,7 +113,7 @@ namespace ZUMOAPPNAME
 		#endregion
 
 		#region UI Actions
-		async partial void OnAdd (NSObject sender)
+		async partial void OnAdd (UIButton sender)
 		{
 			if (string.IsNullOrWhiteSpace (itemText.Text))
 				return;
@@ -139,29 +135,11 @@ namespace ZUMOAPPNAME
 
 		#endregion
 
-		#region UITextFieldDelegate methods
 		[Export ("textFieldShouldReturn:")]
 		public virtual bool ShouldReturn (UITextField textField)
 		{
 			textField.ResignFirstResponder ();
 			return true;
 		}
-		#endregion
-
-		#region * iOS Specific Code
-		// This method will add the UIRefreshControl to the table view if
-		// it is available, ie, we are running on iOS 6+
-		void AddRefreshControl ()
-		{
-			if (UIDevice.CurrentDevice.CheckSystemVersion (6, 0)) {
-				// the refresh control is available, let's add it
-				RefreshControl = new UIRefreshControl ();
-				RefreshControl.ValueChanged += async (sender, e) => {
-					await RefreshAsync ();
-				};
-				useRefreshControl = true;
-			}
-		}
-		#endregion
 	}
 }
