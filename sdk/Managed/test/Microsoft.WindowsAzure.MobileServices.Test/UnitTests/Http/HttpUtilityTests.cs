@@ -7,7 +7,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     [Tag("http")]
     public class HttpUtilityTests : TestBase
     {
-
         [TestMethod]
         public static void TryParseQueryUri_ReturnsTrue_WhenQueryIsRelativeOrAbsoluteUri()
         {
@@ -81,6 +80,25 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             foreach (var item in input)
             {
                 AssertEx.QueryEquals(HttpUtility.GetUriWithoutQuery(new Uri(item.Item1)), item.Item2);
+            }
+        }
+
+        [TestMethod]
+        public void ConstructServicesUri_ReturnsUriWithServiceIfMobileService()
+        {
+            Tuple<Uri, Uri>[] input = new[]
+            {
+                Tuple.Create(new Uri("http://contoso.azure-mobile.net"), new Uri("http://contoso.scm.azure-mobile.net")),
+                Tuple.Create(new Uri("https://contoso.azure-mobile.net/"), new Uri("https://contoso.scm.azure-mobile.net/")),
+                Tuple.Create(new Uri("http://contoso.azure-mobile.cn/asdf"), new Uri("http://contoso.scm.azure-mobile.cn/asdf")),
+                Tuple.Create(new Uri("http://127.0.0.1"), new Uri("http://127.0.0.1")),
+                Tuple.Create(new Uri("http://localhost:8000"), new Uri("http://localhost:8000")),
+                Tuple.Create(new Uri("relativeUri", UriKind.Relative), new Uri("relativeUri", UriKind.Relative)),
+            };
+
+            foreach (var item in input)
+            {
+                Assert.AreEqual(HttpUtility.ConstructServicesUri(item.Item1, "scm"), item.Item2);
             }
         }
     }

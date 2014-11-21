@@ -66,7 +66,21 @@ namespace Microsoft.WindowsAzure.MobileServices.Http
             // if override the Login, need to specify the User path.
             path = path + queryPartOfName;
 
-            Uri u = new Uri(client.ApplicationUri, path);
+            Uri u = null;
+            switch (routeKind)
+            {
+                case RouteKind.API:
+                case RouteKind.Table:
+                    u = new Uri(client.ApplicationUri, path);
+                    break;
+                case RouteKind.Login:
+                case RouteKind.Push:
+                    var applicationServicesUri = HttpUtility.ConstructServicesUri(client.ApplicationUri, "scm");
+                    u = new Uri(applicationServicesUri, path);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException("clientRoute");
+            }
 
             return u.ToString();
         }

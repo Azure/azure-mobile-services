@@ -18,7 +18,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
     {
         private TestHttpHandler hijack;
         private MobileServiceClient client;
-        private string expectedUri = "http://contoso.azure-mobile.net";
+        private string expectedUri = "http://contoso.scm.azure-mobile.net";
 
         private void TestInitialize()
         {

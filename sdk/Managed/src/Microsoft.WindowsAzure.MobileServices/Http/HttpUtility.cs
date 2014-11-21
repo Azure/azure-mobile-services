@@ -59,5 +59,31 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             return parameters;
         }
+
+        /// <summary>
+        /// Constructs a URI for the services associated with the application.
+        /// </summary>
+        /// <param name="applicationUri">The URI of the application.</param>
+        /// <param name="servicesSubdomain">The subdomain for the services.</param>
+        /// <returns></returns>
+        public static Uri ConstructServicesUri(Uri applicationUri, string servicesSubdomain)
+        {
+            if (!applicationUri.IsAbsoluteUri)
+            {
+                return applicationUri;
+            }
+
+            var h = applicationUri.Host;
+            if (!h.ToLowerInvariant().Contains("azure-mobile"))
+            {
+                return applicationUri;
+            }
+
+            // TODO: This is ugly.
+            var x = applicationUri.ToString().Split('.').ToList();
+            x.Insert(1, servicesSubdomain);
+            var y = string.Join(".", x);
+            return new Uri(y);
+        }
     }
 }
