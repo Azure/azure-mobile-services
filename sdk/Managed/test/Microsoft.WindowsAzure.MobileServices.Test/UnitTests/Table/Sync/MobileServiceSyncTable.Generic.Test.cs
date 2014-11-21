@@ -313,7 +313,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.IsFalse(store.TableMap.ContainsKey("stringId_test_table"));
 
-            await table.PullAsync(table.Take(51).Skip(3));
+            await table.PullAsync(null, table.Take(51).Skip(3));
 
             Assert.AreEqual(store.TableMap["stringId_test_table"].Count, 6);
             Assert.AreEqual(store.TableMap["stringId_test_table"]["abc"].Value<string>("String"), "Hey");
@@ -440,7 +440,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.IsFalse(store.TableMap.ContainsKey("stringId_test_table"));
 
-            await table.PullAsync(table.Take(49));
+            await table.PullAsync(null, table.Take(49));
 
             Assert.AreEqual(store.TableMap["stringId_test_table"].Count, 2);
 
@@ -463,7 +463,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.IsFalse(store.TableMap.ContainsKey("stringId_test_table"));
 
-            await table.PullAsync(table.Take(51));
+            await table.PullAsync(null, table.Take(51));
 
             Assert.AreEqual(store.TableMap["stringId_test_table"].Count, 2);
 
@@ -487,7 +487,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.IsFalse(store.TableMap.ContainsKey("stringId_test_table"));
 
-            await table.PullAsync(table.Take(1));
+            await table.PullAsync(null, table.Take(1));
 
             Assert.AreEqual(store.TableMap["stringId_test_table"].Count, 1);
         }
@@ -508,7 +508,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.IsFalse(store.TableMap.ContainsKey("stringId_test_table"));
 
-            await table.PullAsync(table.Take(1));
+            await table.PullAsync(null, table.Take(1));
 
             Assert.IsFalse(store.TableMap.ContainsKey("stringId_test_table"));
         }
@@ -574,7 +574,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             table.SupportedOptions &= ~MobileServiceRemoteTableOptions.OrderBy;
             var query = table.OrderBy(x => x.String);
 
-            var exception = await ThrowsAsync<ArgumentException>(() => table.PullAsync(query));
+            var exception = await ThrowsAsync<ArgumentException>(() => table.PullAsync(null, query));
             Assert.AreEqual(exception.ParamName, "query");
             Assert.StartsWith(exception.Message, "The supported table options does not include orderby.");
         }
@@ -589,7 +589,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             table.SupportedOptions &= ~MobileServiceRemoteTableOptions.Top;
             var query = table.Take(30);
 
-            var exception = await ThrowsAsync<ArgumentException>(() => table.PullAsync(query));
+            var exception = await ThrowsAsync<ArgumentException>(() => table.PullAsync(null, query));
             Assert.AreEqual(exception.ParamName, "query");
             Assert.StartsWith(exception.Message, "The supported table options does not include top.");
         }
@@ -604,7 +604,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             table.SupportedOptions &= ~MobileServiceRemoteTableOptions.Skip;
             var query = table.Skip(30);
 
-            var exception = await ThrowsAsync<ArgumentException>(() => table.PullAsync(query));
+            var exception = await ThrowsAsync<ArgumentException>(() => table.PullAsync(null, query));
             Assert.AreEqual(exception.ParamName, "query");
             Assert.StartsWith(exception.Message, "The supported table options does not include skip.");
         }

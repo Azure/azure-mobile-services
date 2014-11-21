@@ -257,7 +257,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [TestMethod]
         public async Task PullAsync_Throws_WhenSyncContextIsNotInitialized()
         {
-            await this.TestSyncContextNotInitialized(table => table.PullAsync(table.Where(t => t.String == "abc")));
+            await this.TestSyncContextNotInitialized(table => table.PullAsync(null, table.Where(t => t.String == "abc")));
         }
 
         private async Task TestSyncContextNotInitialized(Func<IMobileServiceSyncTable<ToDoWithSystemPropertiesType>, Task> action)
