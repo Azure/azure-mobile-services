@@ -11,6 +11,7 @@
 - delete errors with operation on cancel and collapse [372ba61](https://github.com/Azure/azure-mobile-services/commit/372ba61)
 - rename queryKey to queryId [93e59f7](https://github.com/Azure/azure-mobile-services/commit/93e59f7)
 - insert should throw if the item already exists [#491](https://github.com/Azure/azure-mobile-services/issues/491) [fc13891](https://github.com/Azure/azure-mobile-services/commit/fc13891)
+- **[Breaking]** Removed PullAsync overloads that do not take queryId [88cac8c](https://github.com/Azure/azure-mobile-services/commit/88cac8c)
 
 ### Version 1.3 beta3
 **Managed SDK**
