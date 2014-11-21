@@ -20,14 +20,7 @@ namespace ZUMOAPPNAME
 
 			todoService = QSTodoService.DefaultService;
 			await todoService.InitializeStoreAsync ();
-
-			todoService.BusyUpdate += (bool busy) => {
-				if (busy)
-					UIApplication.SharedApplication.NetworkActivityIndicatorVisible = true;
-				else 
-					UIApplication.SharedApplication.NetworkActivityIndicatorVisible = false;
-			};
-				
+							
 			RefreshControl.ValueChanged += async (sender, e) => {
 				await RefreshAsync ();
 			};
