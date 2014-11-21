@@ -19,7 +19,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     public class PushTest : TestBase
     {        
         const string DefaultChannelUri = "http://channelUri.com/a b";
-        const string DefaultServiceUri = "http://www.test.com";
+        const string DefaultServiceUri = "http://contoso.azure-mobile.net";
         const string RegistrationsPath = "/push/registrations";
         const string DefaultRegistrationId = "7313155627197174428-6522078074300559092-1";
 
@@ -291,10 +291,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 }
             };
 
-            if (responseContent != null)
-            {
-                handler.SetResponseContent(responseContent);
-            }
+            handler.SetResponseContent(responseContent);
 
             if (location != null)
             {

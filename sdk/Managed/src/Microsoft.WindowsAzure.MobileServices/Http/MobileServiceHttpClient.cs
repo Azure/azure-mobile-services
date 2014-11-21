@@ -532,7 +532,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             HttpRequestMessage request = new HttpRequestMessage();
 
             // Set the Uri and Http Method
-            request.RequestUri = new Uri(this.applicationUri, uriPathAndQuery);
+            request.RequestUri = new Uri(uriPathAndQuery);
             request.Method = method;
 
             // Add the user's headers

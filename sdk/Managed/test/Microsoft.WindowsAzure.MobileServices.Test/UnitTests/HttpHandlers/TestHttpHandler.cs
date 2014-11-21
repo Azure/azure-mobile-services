@@ -92,11 +92,17 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
         public static HttpResponseMessage CreateResponse(string content, HttpStatusCode code = HttpStatusCode.OK)
         {
-            return new HttpResponseMessage(code)
+            if (content == null)
             {
-                Content = new StringContent(content, Encoding.UTF8, "application/json")
-            };
+                return new HttpResponseMessage(code);
+            }
+            else
+            {
+                return new HttpResponseMessage(code)
+                {
+                    Content = new StringContent(content, Encoding.UTF8, "application/json")
+                };
+            }
         }
-
     }
 }

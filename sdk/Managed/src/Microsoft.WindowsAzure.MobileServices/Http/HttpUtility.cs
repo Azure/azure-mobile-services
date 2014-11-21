@@ -28,11 +28,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
             else if (Uri.TryCreate(query, UriKind.Absolute, out uri))
             {
-                if (uri.Host != applicationUri.Host)
-                {
-                    throw new ArgumentException(Resources.MobileServiceTable_QueryUriHostIsDifferent);
-                }
-
                 absolute = true;
                 return true;
             }

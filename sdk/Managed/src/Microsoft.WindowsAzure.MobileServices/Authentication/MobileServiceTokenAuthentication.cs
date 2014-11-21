@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MobileServices.Http;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices
@@ -55,7 +56,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         protected override Task<string> LoginAsyncOverride()
         {
-            string path = MobileServiceUrlBuilder.CombinePaths(MobileServiceAuthentication.LoginAsyncUriFragment, this.ProviderName);
+            string path = RouteHelper.GetRoute(this.Client, RouteKind.Login, this.ProviderName);
             string queryString = MobileServiceUrlBuilder.GetQueryString(this.Parameters);
             string pathAndQuery = MobileServiceUrlBuilder.CombinePathAndQuery(path, queryString);
             return client.HttpClient.RequestWithoutHandlersAsync(HttpMethod.Post, pathAndQuery, this.client.CurrentUser, token.ToString());
