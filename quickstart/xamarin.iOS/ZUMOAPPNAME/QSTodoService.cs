@@ -8,18 +8,16 @@ using Microsoft.WindowsAzure.MobileServices.SQLiteStore;
 
 namespace ZUMOAPPNAME
 {
-    public class QSTodoService : DelegatingHandler
+    public class QSTodoService 
     {
         static QSTodoService instance = new QSTodoService ();
 
         const string applicationURL = @"ZUMOAPPURL";
         const string applicationKey = @"ZUMOAPPKEY";
+		const string localDbPath    = "localstore.db";
 
         private MobileServiceClient client;
         private IMobileServiceSyncTable<ToDoItem> todoTable;
-        private int busyCount = 0;
-
-        public event Action<bool> BusyUpdate;
 
         private QSTodoService ()
         {
@@ -27,7 +25,7 @@ namespace ZUMOAPPNAME
             SQLitePCL.CurrentPlatform.Init(); 
 
             // Initialize the Mobile Service client with your URL and key
-            client = new MobileServiceClient (applicationURL, applicationKey, this);
+            client = new MobileServiceClient (applicationURL, applicationKey);
 
             // Create an MSTable instance to allow us to work with the TodoItem table
             todoTable = client.GetSyncTable <ToDoItem> ();
@@ -43,8 +41,7 @@ namespace ZUMOAPPNAME
 
         public async Task InitializeStoreAsync()
         {
-            string path = "localstore.db";
-            var store = new MobileServiceSQLiteStore(path);
+			var store = new MobileServiceSQLiteStore(localDbPath);
             store.DefineTable<ToDoItem>();
 
             // Uses the default conflict handler, which fails on conflict
@@ -57,7 +54,7 @@ namespace ZUMOAPPNAME
             try
             {
                 await client.SyncContext.PushAsync();
-                await todoTable.PullAsync("todoItems", todoTable.CreateQuery());
+                await todoTable.PullAsync("allTodoItems", todoTable.CreateQuery()); // query ID is used for incremental sync
             }
 
             catch (MobileServiceInvalidOperationException e)
@@ -75,7 +72,7 @@ namespace ZUMOAPPNAME
                 // This code refreshes the entries in the list view by querying the local TodoItems table.
                 // The query excludes completed TodoItems
                 Items = await todoTable
-                    .Where (todoItem => todoItem.Complete == false).ToListAsync ();
+                    	.Where (todoItem => todoItem.Complete == false).ToListAsync ();
 
             } catch (MobileServiceInvalidOperationException e) {
                 Console.Error.WriteLine (@"ERROR {0}", e.Message);
@@ -88,8 +85,8 @@ namespace ZUMOAPPNAME
         public async Task InsertTodoItemAsync (ToDoItem todoItem)
         {
             try {
-                // This code inserts a new TodoItem into the database. When the operation completes
-                // and Mobile Services has assigned an Id, the item is added to the CollectionView
+                // Insert a new TodoItem into the local database. 
+				// When the user refreshes the view, changes will be synced with the mobile service
                 await todoTable.InsertAsync (todoItem);
                 Items.Add (todoItem); 
 
@@ -101,8 +98,8 @@ namespace ZUMOAPPNAME
         public async Task CompleteItemAsync (ToDoItem item)
         {
             try {
-                // This code takes a freshly completed TodoItem and updates the database. When the MobileService 
-                // responds, the item is removed from the list 
+				// Update a todo item as completed in the local database. 				
+				// When the user refreshes the view, changes will be synced with the mobile service
                 item.Complete = true;
                 await todoTable.UpdateAsync (item);
                 Items.Remove (item);
@@ -111,33 +108,6 @@ namespace ZUMOAPPNAME
                 Console.Error.WriteLine (@"ERROR {0}", e.Message);
             }
         }
-
-        private void Busy (bool busy)
-        {
-            // assumes always executes on UI thread
-            if (busy) {
-                if (busyCount++ == 0 && BusyUpdate != null)
-                    BusyUpdate (true);
-
-            } else {
-                if (--busyCount == 0 && BusyUpdate != null)
-                    BusyUpdate (false);
-
-            }
-        }
-
-        #region implemented abstract members of HttpMessageHandler
-
-        protected override async Task<System.Net.Http.HttpResponseMessage> SendAsync (System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
-        {
-            Busy (true);
-            var response = await base.SendAsync (request, cancellationToken);
-
-            Busy (false);
-            return response;
-        }
-
-        #endregion
     }
 }
 
