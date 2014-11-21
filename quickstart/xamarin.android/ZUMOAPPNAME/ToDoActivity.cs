@@ -29,11 +29,10 @@ namespace ZUMOAPPNAME
         //EditText containing the "New ToDo" text
         private EditText textNewToDo;
 
-        //Progress spinner to use for table operations
-        private ProgressBar progressBar;
-
         const string applicationURL = @"ZUMOAPPURL";
         const string applicationKey = @"ZUMOAPPKEY";
+
+        const string localDbFilename = "localstore.db";
 
         protected override async void OnCreate (Bundle bundle)
         {
@@ -42,24 +41,12 @@ namespace ZUMOAPPNAME
             // Set our view from the "main" layout resource
             SetContentView (Resource.Layout.Activity_To_Do);
 
-            progressBar = FindViewById<ProgressBar> (Resource.Id.loadingProgressBar);
-
-            // Initialize the progress bar
-            progressBar.Visibility = ViewStates.Gone;
-
-            // Create ProgressFilter to handle busy state
-            var progressHandler = new ProgressHandler ();
-            progressHandler.BusyStateChange += (busy) => {
-                if (progressBar != null) 
-                    progressBar.Visibility = busy ? ViewStates.Visible : ViewStates.Gone;
-            };
-
             try {
                 CurrentPlatform.Init ();
 
                 // Create the Mobile Service Client instance, using the provided
                 // Mobile Service URL and key
-                client = new MobileServiceClient (applicationURL, applicationKey, progressHandler);
+                client = new MobileServiceClient (applicationURL, applicationKey);
                 await InitLocalStoreAsync();
 
                 // Get the Mobile Service Table instance to use
@@ -85,7 +72,7 @@ namespace ZUMOAPPNAME
         private async Task InitLocalStoreAsync()
         {
             // new code to initialize the SQLite store
-            string path = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), "localstore.db");
+            string path = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), localDbFilename);
 
             if (!File.Exists(path))
             {
@@ -111,7 +98,9 @@ namespace ZUMOAPPNAME
         public override bool OnOptionsItemSelected (IMenuItem item)
         {
             if (item.ItemId == Resource.Id.menu_refresh) {
+                item.SetEnabled(false);
                 OnRefreshItemsSelected ();
+                item.SetEnabled(true);
             }
             return true;
         }
@@ -120,7 +109,7 @@ namespace ZUMOAPPNAME
         private async void OnRefreshItemsSelected ()
         {
             await client.SyncContext.PushAsync();
-            await toDoTable.PullAsync("todoItems", toDoTable.CreateQuery());
+            await toDoTable.PullAsync("allTodoItems", toDoTable.CreateQuery());
             await RefreshItemsFromTableAsync();
         }
 
@@ -199,33 +188,6 @@ namespace ZUMOAPPNAME
             builder.SetMessage (message);
             builder.SetTitle (title);
             builder.Create ().Show ();
-        }
-
-        class ProgressHandler : DelegatingHandler
-        {
-            int busyCount = 0;
-
-            public event Action<bool> BusyStateChange;
-
-            #region implemented abstract members of HttpMessageHandler
-
-            protected override async Task<HttpResponseMessage> SendAsync (HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
-            {
-                 //assumes always executes on UI thread
-                if (busyCount++ == 0 && BusyStateChange != null)
-                    BusyStateChange (true);
-
-                var response = await base.SendAsync (request, cancellationToken);
-
-                // assumes always executes on UI thread
-                if (--busyCount == 0 && BusyStateChange != null)
-                    BusyStateChange (false);
-
-                return response;
-            }
-
-            #endregion
-
         }
     }
 }
