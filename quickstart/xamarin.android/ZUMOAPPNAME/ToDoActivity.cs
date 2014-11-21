@@ -20,10 +20,10 @@ namespace ZUMOAPPNAME
         //Mobile Service Client reference
         private MobileServiceClient client;
 
-        //Mobile Service Table used to access data
+        //Mobile Service sync table used to access data
         private IMobileServiceSyncTable<ToDoItem> toDoTable;
 
-        //Adapter to sync the items list with the view
+        //Adapter to map the items list to the view
         private ToDoItemAdapter adapter;
 
         //EditText containing the "New ToDo" text
@@ -49,7 +49,7 @@ namespace ZUMOAPPNAME
                 client = new MobileServiceClient (applicationURL, applicationKey);
                 await InitLocalStoreAsync();
 
-                // Get the Mobile Service Table instance to use
+                // Get the Mobile Service sync table instance to use
                 toDoTable = client.GetSyncTable <ToDoItem> ();
 
                 textNewToDo = FindViewById<EditText> (Resource.Id.textNewToDo);
@@ -60,7 +60,7 @@ namespace ZUMOAPPNAME
                 listViewToDo.Adapter = adapter;
 
                 // Load the items from the Mobile Service
-                await RefreshItemsFromTableAsync ();
+                OnRefreshItemsSelected ();
 
             } catch (Java.Net.MalformedURLException) {
                 CreateAndShowDialog (new Exception ("There was an error creating the Mobile Service. Verify the URL"), "Error");
@@ -99,26 +99,32 @@ namespace ZUMOAPPNAME
         {
             if (item.ItemId == Resource.Id.menu_refresh) {
                 item.SetEnabled(false);
+
                 OnRefreshItemsSelected ();
+                
                 item.SetEnabled(true);
             }
             return true;
         }
 
+        private async Task SyncAsync()
+        {
+            await client.SyncContext.PushAsync();
+            await toDoTable.PullAsync("allTodoItems", toDoTable.CreateQuery()); // query ID is used for incremental sync
+        }
+
         // Called when the refresh menu option is selected
         private async void OnRefreshItemsSelected ()
         {
-            await client.SyncContext.PushAsync();
-            await toDoTable.PullAsync("allTodoItems", toDoTable.CreateQuery());
-            await RefreshItemsFromTableAsync();
+            await SyncAsync(); // get changes from the mobile service
+            await RefreshItemsFromTableAsync(); // refresh view using local database
         }
 
-        //Refresh the list with the items in the Mobile Service Table
+        //Refresh the list with the items in the local database
         private async Task RefreshItemsFromTableAsync ()
         {
             try {
-                // Get the items that weren't marked as completed and add them in the
-                // adapter
+                // Get the items that weren't marked as completed and add them in the adapter
                 var list = await toDoTable.Where (item => item.Complete == false).ToListAsync ();
 
                 adapter.Clear ();
@@ -140,7 +146,9 @@ namespace ZUMOAPPNAME
             // Set the item as completed and update it in the table
             item.Complete = true;
             try {
-                await toDoTable.UpdateAsync (item);
+                await toDoTable.UpdateAsync(item); // update the new item in the local database
+                await SyncAsync(); // send changes to the mobile service
+
                 if (item.Complete)
                     adapter.Remove (item);
 
@@ -163,8 +171,8 @@ namespace ZUMOAPPNAME
             };
 
             try {
-                // Insert the new item
-                await toDoTable.InsertAsync (item);
+                await toDoTable.InsertAsync(item); // insert the new item into the local database
+                await SyncAsync(); // send changes to the mobile service
 
                 if (!item.Complete) {
                     adapter.Add (item);
