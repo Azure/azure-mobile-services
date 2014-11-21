@@ -66,8 +66,9 @@ namespace ZUMOAPPNAME
         public async Task<List<ToDoItem>> RefreshDataAsync ()
         {
             try {
-                // update the local store
-                await SyncAsync();
+				// update the local store
+				// all operations on todoTable use the local database, call SyncAsync to send changes
+                await SyncAsync(); 							
 
                 // This code refreshes the entries in the list view by querying the local TodoItems table.
                 // The query excludes completed TodoItems
@@ -84,10 +85,10 @@ namespace ZUMOAPPNAME
 
         public async Task InsertTodoItemAsync (ToDoItem todoItem)
         {
-            try {
-                // Insert a new TodoItem into the local database. 
-				// When the user refreshes the view, changes will be synced with the mobile service
-                await todoTable.InsertAsync (todoItem);
+            try {                
+				await todoTable.InsertAsync (todoItem); // Insert a new TodoItem into the local database. 
+				await SyncAsync(); // send changes to the mobile service
+
                 Items.Add (todoItem); 
 
             } catch (MobileServiceInvalidOperationException e) {
@@ -98,10 +99,10 @@ namespace ZUMOAPPNAME
         public async Task CompleteItemAsync (ToDoItem item)
         {
             try {
-				// Update a todo item as completed in the local database. 				
-				// When the user refreshes the view, changes will be synced with the mobile service
-                item.Complete = true;
-                await todoTable.UpdateAsync (item);
+				item.Complete = true; 
+                await todoTable.UpdateAsync (item); // update todo item in the local database
+				await SyncAsync(); // send changes to the mobile service
+
                 Items.Remove (item);
 
             } catch (MobileServiceInvalidOperationException e) {
