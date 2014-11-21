@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MobileServices.Http;
 using Microsoft.WindowsAzure.MobileServices.Query;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -161,7 +162,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
             else
             {
-                uriPath = MobileServiceUrlBuilder.CombinePaths(TableRouteSeparatorName, this.TableName);
+                uriPath = RouteHelper.GetRoute(this.MobileServiceClient, RouteKind.Table, this.TableName);
             }
 
             string parametersString = MobileServiceUrlBuilder.GetQueryString(parameters);
@@ -740,11 +741,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A URI string.
         /// </returns>
-        private static string GetUri(string tableName, object id = null, IDictionary<string, string> parameters = null)
+        private string GetUri(string tableName, object id = null, IDictionary<string, string> parameters = null)
         {
             Debug.Assert(!string.IsNullOrEmpty(tableName));
 
-            string uriPath = MobileServiceUrlBuilder.CombinePaths(TableRouteSeparatorName, tableName);
+            string uriPath = RouteHelper.GetRoute(this.MobileServiceClient, RouteKind.Table, tableName);
             if (id != null)
             {
                 string idString = Uri.EscapeDataString(string.Format(CultureInfo.InvariantCulture, "{0}", id));

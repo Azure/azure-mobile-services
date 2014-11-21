@@ -67,6 +67,7 @@
     <Compile Include="Http\HttpUtility.cs" />
     <Compile Include="Http\LinkHeaderValue.cs" />
     <Compile Include="Http\MobileServiceHttpResponse.cs" />
+    <Compile Include="Http\RouteHelper.cs" />
     <Compile Include="IMobileServiceClient.cs" />
     <Compile Include="Authentication\MobileServiceAuthentication.cs" />
     <Compile Include="Authentication\MobileServiceAuthenticationProvider.cs" />
@@ -94,6 +95,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Http\RouteKind.cs" />
     <Compile Include="Table\MobileServiceObjectReader.cs" />
     <Compile Include="Table\Sync\Queue\Operations\MobileServiceTableKind.cs" />
     <Compile Include="Table\MobileServiceSystemColumns.cs" />

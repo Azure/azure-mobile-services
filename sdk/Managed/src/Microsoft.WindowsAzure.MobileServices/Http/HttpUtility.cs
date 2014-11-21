@@ -28,11 +28,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
             else if (Uri.TryCreate(query, UriKind.Absolute, out uri))
             {
-                if (uri.Host != applicationUri.Host)
-                {
-                    throw new ArgumentException(Resources.MobileServiceTable_QueryUriHostIsDifferent);
-                }
-
                 absolute = true;
                 return true;
             }
@@ -63,6 +58,32 @@ namespace Microsoft.WindowsAzure.MobileServices
                                   .ToDictionary(x => Uri.UnescapeDataString(x[0]), x => x.Length > 1 ? Uri.UnescapeDataString(x[1]) : String.Empty);
 
             return parameters;
+        }
+
+        /// <summary>
+        /// Constructs a URI for the services associated with the application.
+        /// </summary>
+        /// <param name="applicationUri">The URI of the application.</param>
+        /// <param name="servicesSubdomain">The subdomain for the services.</param>
+        /// <returns></returns>
+        public static Uri ConstructServicesUri(Uri applicationUri, string servicesSubdomain)
+        {
+            if (!applicationUri.IsAbsoluteUri)
+            {
+                return applicationUri;
+            }
+
+            var h = applicationUri.Host;
+            if (!h.ToLowerInvariant().Contains("azure-mobile"))
+            {
+                return applicationUri;
+            }
+
+            // TODO: This is ugly.
+            var x = applicationUri.ToString().Split('.').ToList();
+            x.Insert(1, servicesSubdomain);
+            var y = string.Join(".", x);
+            return new Uri(y);
         }
     }
 }

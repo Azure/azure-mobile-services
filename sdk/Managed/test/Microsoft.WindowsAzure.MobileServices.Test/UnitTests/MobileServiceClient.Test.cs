@@ -178,6 +178,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             try
             {
                 JToken response = await service.GetTable(collection).ReadAsync(query);
+                Assert.Fail("Should get a failure");
             }
             catch (InvalidOperationException ex)
             {
@@ -191,6 +192,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             try
             {
                 JToken response = await service.GetTable(collection).ReadAsync(query);
+                Assert.Fail("Should get a failure");
             }
             catch (MobileServiceInvalidOperationException ex)
             {

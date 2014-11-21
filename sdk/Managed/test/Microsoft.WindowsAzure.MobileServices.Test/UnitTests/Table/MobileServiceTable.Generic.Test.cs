@@ -36,14 +36,16 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
-        public async Task ReadAsync_Throws_IfAbsoluteUriHostNameDoesNotMatch()
+        public async Task ReadAsync_FollowsUri_IfReadAsyncHasAbsoluteUri()
         {
-            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", new TestHttpHandler());
+            var hijack = new TestHttpHandler();
+            hijack.SetResponseContent("[{\"col1\":\"Hey\"}]");
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             IMobileServiceTable<ToDo> table = service.GetTable<ToDo>();
 
-            var ex = await AssertEx.Throws<ArgumentException>(async () => await table.ReadAsync<ToDo>("http://www.contoso.com/about?$filter=a eq b&$orderby=c"));
+            await table.ReadAsync<ToDo>("http://www.contoso.com/about?$filter=a eq b&$orderby=c");
 
-            Assert.AreEqual(ex.Message, "The query uri must be on the same host as the Mobile Service.");
+            Assert.AreEqual("http://www.contoso.com/about?$filter=a eq b&$orderby=c", hijack.Request.RequestUri.ToString());
         }
 
         [AsyncTestMethod]

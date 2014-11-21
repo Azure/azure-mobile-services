@@ -8,6 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MobileServices.Http;
 using Microsoft.WindowsAzure.MobileServices.Sync;
 using Newtonsoft.Json.Linq;
 
@@ -554,7 +555,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns></returns>
         private string CreateAPIUriString(string apiName, IDictionary<string, string> parameters = null)
         {
-            string uriFragment = apiName.StartsWith("/") ? apiName : string.Format(CultureInfo.InvariantCulture, "api/{0}", apiName);
+            string uriFragment = RouteHelper.GetRoute(this, RouteKind.API, apiName);
             string queryString = MobileServiceUrlBuilder.GetQueryString(parameters, useTableAPIRules: false);
 
             return MobileServiceUrlBuilder.CombinePathAndQuery(uriFragment, queryString);

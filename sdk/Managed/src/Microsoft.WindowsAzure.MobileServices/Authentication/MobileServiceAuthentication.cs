@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MobileServices.Http;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices
@@ -22,14 +23,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         private const string LoginAsyncAuthenticationTokenKey = "authenticationToken";
 
         /// <summary>
-        /// Relative URI fragment of the login endpoint.
-        /// </summary>
-        protected const string LoginAsyncUriFragment = "login";
-
-        /// <summary>
         /// Relative URI fragment of the login/done endpoint.
         /// </summary>
-        protected const string LoginAsyncDoneUriFragment = "login/done";
+        protected const string LoginAsyncDoneName = "done";
 
         /// <summary>
         /// Name of the authentication provider as expected by the service REST API.
@@ -67,12 +63,12 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.Parameters = parameters;
             this.ProviderName = providerName;
 
-            string path = MobileServiceUrlBuilder.CombinePaths(LoginAsyncUriFragment, this.ProviderName);
+            string path = RouteHelper.GetRoute(this.Client, RouteKind.Login, this.ProviderName);
             string queryString = MobileServiceUrlBuilder.GetQueryString(parameters, useTableAPIRules: false);
             string pathAndQuery = MobileServiceUrlBuilder.CombinePathAndQuery(path, queryString);
 
-            this.StartUri = new Uri(this.Client.ApplicationUri, pathAndQuery);
-            this.EndUri = new Uri(this.Client.ApplicationUri, MobileServiceAuthentication.LoginAsyncDoneUriFragment);
+            this.StartUri = new Uri(pathAndQuery);
+            this.EndUri = new Uri(RouteHelper.GetRoute(this.Client, RouteKind.Login, LoginAsyncDoneName));
         }
 
         /// <summary>
