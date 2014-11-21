@@ -60,7 +60,7 @@ namespace ZUMOAPPNAME
                 // Create the Mobile Service Client instance, using the provided
                 // Mobile Service URL and key
                 client = new MobileServiceClient (applicationURL, applicationKey, progressHandler);
-                await InitLocalStore();
+                await InitLocalStoreAsync();
 
                 // Get the Mobile Service Table instance to use
                 toDoTable = client.GetSyncTable <ToDoItem> ();
@@ -82,7 +82,7 @@ namespace ZUMOAPPNAME
             }
         }
 
-        private async Task InitLocalStore()
+        private async Task InitLocalStoreAsync()
         {
             // new code to initialize the SQLite store
             string path = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), "localstore.db");
@@ -95,6 +95,8 @@ namespace ZUMOAPPNAME
             var store = new MobileServiceSQLiteStore(path);
             store.DefineTable<ToDoItem>();
 
+            // Uses the default conflict handler, which fails on conflict
+            // To use a different conflict handler, pass a parameter to InitializeAsync. For more details, see http://go.microsoft.com/fwlink/?LinkId=521416
             await client.SyncContext.InitializeAsync(store);
         }
 
