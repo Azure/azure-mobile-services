@@ -35,8 +35,14 @@ extern NSString *const MSErrorResponseKey;
 /// errors.
 extern NSString *const MSErrorServerItemKey;
 
+/// The key to use with the *NSError* userInfo dictionary to retrieve the
+/// *MSPushCompletionResult* object of accumalted operation errors when a push
+/// was attempted
+extern NSString *const MSErrorPushResultKey;
+
 
 #pragma mark * MSErrorCodes
+
 
 /// Indicates that a request to the Microsoft Azure Mobile Service failed because
 /// a nil item was used.
@@ -66,7 +72,53 @@ extern NSString *const MSErrorServerItemKey;
 /// an item with an id was used with an insert operation.
 #define MSExistingItemIdWithRequest             -1107
 
-/// Indicates that the response from the Microsoft Azure Mobile Service did not
+/// Indicates that a sync table request failed because an invalid operation was
+/// requested. This can occur due to operations on the same item that can not be
+/// reconciled, such as two inserts on the same record
+#define MSSyncTableInvalidAction                -1150
+
+/// Indicates a sync table operation failed because the datasource returned an
+/// error when attempting to read or write to it
+#define MSSyncTableLocalStoreError              -1153
+
+/// Indicates a sync table operation failed due to an internal error
+#define MSSyncTableInternalError                -1154
+
+/// Indicates a mobile service sync operation (such as a syncTable insert) failed
+/// because the sync context object was not properly initialized
+#define MSSyncContextInvalid                    -1160
+
+/// Indicates that the push completed sending all operation to the server but not
+/// all table operations completed successfully. An array of the errors that
+/// resulted can be found using the MSErrorPushResultKey
+#define MSPushCompleteWithErrors                -1170
+
+/// Indicates that the push was aborted (not all pending operations were sent to
+/// the server) because the data source returned an error. The error causing the
+/// abort can be found using the NSUnderlyingErrorKey
+#define MSPushAbortedDataSource                 -1171
+
+/// Indicates that the push was aborted (not all pending operations were sent to
+/// the server) because of a network related issue, such as the mobile service
+/// was not found. The error causing the abort can be found using the
+/// NSUnderlyingErrorKey
+#define MSPushAbortedNetwork                    -1172
+
+/// Indicates that the push was aborted (not all pending operations were sent to
+/// the server) because authentication was required to complete an operation.
+/// The error causing the abort can be found using the NSUnderlyingErrorKey
+#define MSPushAbortedAuthentication             -1173
+
+/// Indicates that the push was aborted (not all pending operations were sent to
+/// the server) for an unknown reason. The error causing the abort can be found
+/// using the NSUnderlyingErrorKey
+#define MSPushAbortedUnknown                    -1174
+
+/// Indicates that the purge was aborted because items in the requested table to
+/// purge have pending changes that need to be pushed to the server
+#define MSPurgeAbortedPendingChanges            -1180
+
+/// Indicates that the response from the Windows Azure Mobile Service did not
 /// include an item as expected.
 #define MSExpectedItemWithResponse              -1201
 
@@ -98,6 +150,10 @@ extern NSString *const MSErrorServerItemKey;
 /// the *NSPredicate* used in the query could not be translated into a query
 /// string supported by the Microsoft Azure Mobile Service.
 #define MSPredicateNotSupported                 -1400
+
+/// Indicates that a request to the Windows Azure Mobile Service failed because
+/// a invalid parameter was passed to the function
+#define MSInvalidParameter                      -1401
 
 /// Indicates that the login operation has failed.
 #define MSLoginFailed                           -1501

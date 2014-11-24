@@ -6,207 +6,198 @@ using Android.Widget;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices;
-
+using Microsoft.WindowsAzure.MobileServices.Sync;
+using Microsoft.WindowsAzure.MobileServices.SQLiteStore;
+using System.IO;
 
 namespace ZUMOAPPNAME
 {
-	[Activity (MainLauncher = true, 
-	           Icon="@drawable/ic_launcher", Label="@string/app_name",
-	           Theme="@style/AppTheme")]
-	public class ToDoActivity : Activity
-	{
-		//Mobile Service Client reference
-		private MobileServiceClient client;
+    [Activity (MainLauncher = true, 
+               Icon="@drawable/ic_launcher", Label="@string/app_name",
+               Theme="@style/AppTheme")]
+    public class ToDoActivity : Activity
+    {
+        //Mobile Service Client reference
+        private MobileServiceClient client;
 
-		//Mobile Service Table used to access data
-		private IMobileServiceTable<ToDoItem> toDoTable;
+        //Mobile Service sync table used to access data
+        private IMobileServiceSyncTable<ToDoItem> toDoTable;
 
-		//Adapter to sync the items list with the view
-		private ToDoItemAdapter adapter;
+        //Adapter to map the items list to the view
+        private ToDoItemAdapter adapter;
 
-		//EditText containing the "New ToDo" text
-		private EditText textNewToDo;
+        //EditText containing the "New ToDo" text
+        private EditText textNewToDo;
 
-		//Progress spinner to use for table operations
-		private ProgressBar progressBar;
+        const string applicationURL = @"ZUMOAPPURL";
+        const string applicationKey = @"ZUMOAPPKEY";
 
-		const string applicationURL = @"ZUMOAPPURL";
-		const string applicationKey = @"ZUMOAPPKEY";
+        const string localDbFilename = "localstore.db";
 
-		protected override async void OnCreate (Bundle bundle)
-		{
-			base.OnCreate (bundle);
+        protected override async void OnCreate (Bundle bundle)
+        {
+            base.OnCreate (bundle);
 
-			// Set our view from the "main" layout resource
-			SetContentView (Resource.Layout.Activity_To_Do);
+            // Set our view from the "main" layout resource
+            SetContentView (Resource.Layout.Activity_To_Do);
 
-			progressBar = FindViewById<ProgressBar> (Resource.Id.loadingProgressBar);
+            try {
+                CurrentPlatform.Init ();
 
-			// Initialize the progress bar
-			progressBar.Visibility = ViewStates.Gone;
+                // Create the Mobile Service Client instance, using the provided
+                // Mobile Service URL and key
+                client = new MobileServiceClient (applicationURL, applicationKey);
+                await InitLocalStoreAsync();
 
-			// Create ProgressFilter to handle busy state
-			var progressHandler = new ProgressHandler ();
-			progressHandler.BusyStateChange += (busy) => {
-				if (progressBar != null) 
-					progressBar.Visibility = busy ? ViewStates.Visible : ViewStates.Gone;
-			};
+                // Get the Mobile Service sync table instance to use
+                toDoTable = client.GetSyncTable <ToDoItem> ();
 
-			try {
-				CurrentPlatform.Init ();
+                textNewToDo = FindViewById<EditText> (Resource.Id.textNewToDo);
 
-				// Create the Mobile Service Client instance, using the provided
-				// Mobile Service URL and key
-				client = new MobileServiceClient (
-					applicationURL,
-					applicationKey, progressHandler);
+                // Create an adapter to bind the items with the view
+                adapter = new ToDoItemAdapter (this, Resource.Layout.Row_List_To_Do);
+                var listViewToDo = FindViewById<ListView> (Resource.Id.listViewToDo);
+                listViewToDo.Adapter = adapter;
 
-				// Get the Mobile Service Table instance to use
-				toDoTable = client.GetTable <ToDoItem> ();
+                // Load the items from the Mobile Service
+                OnRefreshItemsSelected ();
 
-				textNewToDo = FindViewById<EditText> (Resource.Id.textNewToDo);
+            } catch (Java.Net.MalformedURLException) {
+                CreateAndShowDialog (new Exception ("There was an error creating the Mobile Service. Verify the URL"), "Error");
+            } catch (Exception e) {
+                CreateAndShowDialog (e, "Error");
+            }
+        }
 
-				// Create an adapter to bind the items with the view
-				adapter = new ToDoItemAdapter (this, Resource.Layout.Row_List_To_Do);
-				var listViewToDo = FindViewById<ListView> (Resource.Id.listViewToDo);
-				listViewToDo.Adapter = adapter;
+        private async Task InitLocalStoreAsync()
+        {
+            // new code to initialize the SQLite store
+            string path = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), localDbFilename);
 
-				// Load the items from the Mobile Service
-				await RefreshItemsFromTableAsync ();
+            if (!File.Exists(path))
+            {
+                File.Create(path).Dispose();
+            }
 
-			} catch (Java.Net.MalformedURLException) {
-				CreateAndShowDialog (new Exception ("There was an error creating the Mobile Service. Verify the URL"), "Error");
-			} catch (Exception e) {
-				CreateAndShowDialog (e, "Error");
-			}
-		}
+            var store = new MobileServiceSQLiteStore(path);
+            store.DefineTable<ToDoItem>();
 
-		//Initializes the activity menu
-		public override bool OnCreateOptionsMenu (IMenu menu)
-		{
-			MenuInflater.Inflate (Resource.Menu.activity_main, menu);
-			return true;
-		}
+            // Uses the default conflict handler, which fails on conflict
+            // To use a different conflict handler, pass a parameter to InitializeAsync. For more details, see http://go.microsoft.com/fwlink/?LinkId=521416
+            await client.SyncContext.InitializeAsync(store);
+        }
 
-		//Select an option from the menu
-		public override bool OnOptionsItemSelected (IMenuItem item)
-		{
-			if (item.ItemId == Resource.Id.menu_refresh) {
-				OnRefreshItemsSelected ();
-			}
-			return true;
-		}
+        //Initializes the activity menu
+        public override bool OnCreateOptionsMenu (IMenu menu)
+        {
+            MenuInflater.Inflate (Resource.Menu.activity_main, menu);
+            return true;
+        }
 
-		// Called when the refresh menu opion is selected
-		async void OnRefreshItemsSelected ()
-		{
-			await RefreshItemsFromTableAsync ();
-		}
+        //Select an option from the menu
+        public override bool OnOptionsItemSelected (IMenuItem item)
+        {
+            if (item.ItemId == Resource.Id.menu_refresh) {
+                item.SetEnabled(false);
 
-		//Refresh the list with the items in the Mobile Service Table
-		async Task RefreshItemsFromTableAsync ()
-		{
-			try {
-				// Get the items that weren't marked as completed and add them in the
-				// adapter
-				var list = await toDoTable.Where (item => item.Complete == false).ToListAsync ();
+                OnRefreshItemsSelected ();
+                
+                item.SetEnabled(true);
+            }
+            return true;
+        }
 
-				adapter.Clear ();
+        private async Task SyncAsync()
+        {
+            await client.SyncContext.PushAsync();
+            await toDoTable.PullAsync("allTodoItems", toDoTable.CreateQuery()); // query ID is used for incremental sync
+        }
 
-				foreach (ToDoItem current in list)
-					adapter.Add (current);
+        // Called when the refresh menu option is selected
+        private async void OnRefreshItemsSelected ()
+        {
+            await SyncAsync(); // get changes from the mobile service
+            await RefreshItemsFromTableAsync(); // refresh view using local database
+        }
 
-			} catch (Exception e) {
-				CreateAndShowDialog (e, "Error");
-			}
-		}
+        //Refresh the list with the items in the local database
+        private async Task RefreshItemsFromTableAsync ()
+        {
+            try {
+                // Get the items that weren't marked as completed and add them in the adapter
+                var list = await toDoTable.Where (item => item.Complete == false).ToListAsync ();
 
-		public async Task CheckItem (ToDoItem item)
-		{
-			if (client == null) {
-				return;
-			}
+                adapter.Clear ();
 
-			// Set the item as completed and update it in the table
-			item.Complete = true;
-			try {
-				await toDoTable.UpdateAsync (item);
-				if (item.Complete)
-					adapter.Remove (item);
+                foreach (ToDoItem current in list)
+                    adapter.Add (current);
 
-			} catch (Exception e) {
-				CreateAndShowDialog (e, "Error");
-			}
-		}
+            } catch (Exception e) {
+                CreateAndShowDialog (e, "Error");
+            }
+        }
 
-		[Java.Interop.Export()]
-		public async void AddItem (View view)
-		{
-			if (client == null || string.IsNullOrWhiteSpace (textNewToDo.Text)) {
-				return;
-			}
+        public async Task CheckItem (ToDoItem item)
+        {
+            if (client == null) {
+                return;
+            }
 
-			// Create a new item
-			var item = new ToDoItem {
-				Text = textNewToDo.Text,
-				Complete = false
-			};
+            // Set the item as completed and update it in the table
+            item.Complete = true;
+            try {
+                await toDoTable.UpdateAsync(item); // update the new item in the local database
+                await SyncAsync(); // send changes to the mobile service
 
-			try {
-				// Insert the new item
-				await toDoTable.InsertAsync (item);
+                if (item.Complete)
+                    adapter.Remove (item);
 
-				if (!item.Complete) {
-					adapter.Add (item);
-				}
-			} catch (Exception e) {
-				CreateAndShowDialog (e, "Error");
-			}
+            } catch (Exception e) {
+                CreateAndShowDialog (e, "Error");
+            }
+        }
 
-			textNewToDo.Text = "";
-		}
+        [Java.Interop.Export()]
+        public async void AddItem (View view)
+        {
+            if (client == null || string.IsNullOrWhiteSpace (textNewToDo.Text)) {
+                return;
+            }
 
-		void CreateAndShowDialog (Exception exception, String title)
-		{
-			CreateAndShowDialog (exception.Message, title);
-		}
+            // Create a new item
+            var item = new ToDoItem {
+                Text = textNewToDo.Text,
+                Complete = false
+            };
 
-		void CreateAndShowDialog (string message, string title)
-		{
-			AlertDialog.Builder builder = new AlertDialog.Builder (this);
+            try {
+                await toDoTable.InsertAsync(item); // insert the new item into the local database
+                await SyncAsync(); // send changes to the mobile service
 
-			builder.SetMessage (message);
-			builder.SetTitle (title);
-			builder.Create ().Show ();
-		}
+                if (!item.Complete) {
+                    adapter.Add (item);
+                }
+            } catch (Exception e) {
+                CreateAndShowDialog (e, "Error");
+            }
 
-		class ProgressHandler : DelegatingHandler
-		{
-			int busyCount = 0;
+            textNewToDo.Text = "";
+        }
 
-			public event Action<bool> BusyStateChange;
+        private void CreateAndShowDialog (Exception exception, String title)
+        {
+            CreateAndShowDialog (exception.Message, title);
+        }
 
-			#region implemented abstract members of HttpMessageHandler
+        private void CreateAndShowDialog (string message, string title)
+        {
+            AlertDialog.Builder builder = new AlertDialog.Builder (this);
 
-			protected override async Task<HttpResponseMessage> SendAsync (HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
-			{
-				 //assumes always executes on UI thread
-				if (busyCount++ == 0 && BusyStateChange != null)
-					BusyStateChange (true);
-
-				var response = await base.SendAsync (request, cancellationToken);
-
-				// assumes always executes on UI thread
-				if (--busyCount == 0 && BusyStateChange != null)
-					BusyStateChange (false);
-
-				return response;
-			}
-
-			#endregion
-
-		}
-	}
+            builder.SetMessage (message);
+            builder.SetTitle (title);
+            builder.Create ().Show ();
+        }
+    }
 }
 
 

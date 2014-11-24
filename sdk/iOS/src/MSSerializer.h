@@ -34,6 +34,9 @@
 // Called to obtain a string representation of an id of an item.
 -(NSString *)stringFromItemId:(id)itemId orError:(NSError **)error;
 
+// Called to get a string id only from a given item
+-(NSString *) stringIdFromItem:(NSDictionary *)item orError:(NSError **)error;
+
 #pragma mark * Deserialization Methods
 
 
@@ -62,5 +65,7 @@
 // an item; for example, if the HTTP response status code was >= 400. May
 // return nil if no error message could be obtained from the data.
 -(NSError *)errorFromData:(NSData *)data MIMEType:(NSString *)MIMEType;
+
+- (void) removeSystemProperties:(NSMutableDictionary *) item;
 
 @end

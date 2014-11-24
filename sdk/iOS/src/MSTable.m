@@ -8,19 +8,22 @@
 #import "MSJSONSerializer.h"
 #import "MSTableRequest.h"
 #import "MSTableConnection.h"
-
+#import "MSSDKFeatures.h"
+#import "MSTableInternal.h"
 
 #pragma mark * MSTable Implementation
 
+NSString *const MSSystemColumnId = @"id";
 NSString *const MSSystemColumnCreatedAt = @"__createdAt";
 NSString *const MSSystemColumnUpdatedAt = @"__updatedAt";
 NSString *const MSSystemColumnVersion = @"__version";
+NSString *const MSSystemColumnDeleted = @"__deleted";
 
 @implementation MSTable
 
 @synthesize client = client_;
 @synthesize name = name_;
-
+@synthesize features = features_;
 
 #pragma mark * Public Initializer Methods
 
@@ -32,6 +35,7 @@ NSString *const MSSystemColumnVersion = @"__version";
     {
         client_ = client;
         name_ = tableName;
+        features_ = MSFeatureNone;
     }
     return self;
 }
@@ -54,6 +58,7 @@ NSString *const MSSystemColumnVersion = @"__version";
                                    requestToInsertItem:item
                                    table:self
                                    parameters:parameters
+                                   features:self.features
                                    completion:completion];
     // Send the request
     if (request) {
@@ -77,6 +82,7 @@ NSString *const MSSystemColumnVersion = @"__version";
                                    requestToUpdateItem:item
                                    table:self
                                    parameters:parameters
+                                   features:self.features
                                    completion:completion];
     
     // Send the request
@@ -102,6 +108,7 @@ NSString *const MSSystemColumnVersion = @"__version";
                                      requestToDeleteItem:item
                                      table:self
                                      parameters:parameters
+                                     features:self.features
                                      completion:completion];
     // Send the request
     if (request) {
@@ -126,6 +133,7 @@ NSString *const MSSystemColumnVersion = @"__version";
                                      requestToDeleteItemWithId:itemId
                                      table:self
                                      parameters:parameters
+                                     features:self.features
                                      completion:completion];
     // Send the request
     if (request) {
@@ -134,6 +142,33 @@ NSString *const MSSystemColumnVersion = @"__version";
                                                 completion:completion];
         [connection start];
     }
+}
+
+-(void)undelete:(NSDictionary *)item completion:(MSItemBlock)completion
+{
+    [self undelete:item parameters:nil completion:completion];
+}
+
+-(void)undelete:(NSDictionary *)item
+        parameters:(NSDictionary *)parameters
+        completion:(MSItemBlock)completion
+{
+    // Create the request
+    MSTableItemRequest *request = [MSTableRequest
+                                     requestToUndeleteItem:item
+                                     table:self
+                                     parameters:parameters
+                                   features:self.features
+                                     completion:completion];
+                                     
+    // Send the request
+    if (request) {
+        MSTableConnection *connection =
+        [MSTableConnection connectionWithItemRequest:request
+                                          completion:completion];
+        [connection start];
+    }
+    
 }
 
 
@@ -167,16 +202,23 @@ NSString *const MSSystemColumnVersion = @"__version";
 -(void) readWithQueryString:(NSString *)queryString
                  completion:(MSReadQueryBlock)completion
 {
+    return [self readWithQueryStringInternal:queryString features:MSFeatureTableReadRaw completion:completion];
+}
+
+-(void)readWithQueryStringInternal:(NSString *)queryString
+                          features:(MSFeatures)features
+                        completion:(MSReadQueryBlock)completion {
     // Create the request
     MSTableReadQueryRequest *request = [MSTableRequest
                                         requestToReadItemsWithQuery:queryString
                                         table:self
+                                        features:features
                                         completion:completion];
     // Send the request
     if (request) {
         MSTableConnection *connection =
-            [MSTableConnection connectionWithReadRequest:request
-                                              completion:completion];
+        [MSTableConnection connectionWithReadRequest:request
+                                          completion:completion];
         [connection start];
     }
 }
@@ -184,7 +226,7 @@ NSString *const MSSystemColumnVersion = @"__version";
 -(void) readWithCompletion:(MSReadQueryBlock)completion
 {
     // Read without a query string
-    [self readWithQueryString:nil completion:completion];
+    [self readWithQueryStringInternal:nil features:self.features completion:completion];
 }
 
 -(void) readWithPredicate:(NSPredicate *) predicate
