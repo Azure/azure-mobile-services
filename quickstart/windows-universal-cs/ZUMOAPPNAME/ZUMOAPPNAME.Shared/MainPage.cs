@@ -33,6 +33,8 @@ namespace ZUMOAPPNAME
             // and Mobile Services has assigned an Id, the item is added to the CollectionView
             await todoTable.InsertAsync(todoItem);
             items.Add(todoItem);
+
+            //await SyncAsync(); // offline sync
         }
 
         private async Task RefreshTodoItems()
@@ -69,6 +71,8 @@ namespace ZUMOAPPNAME
             await todoTable.UpdateAsync(item);
             items.Remove(item);
             ListItems.Focus(Windows.UI.Xaml.FocusState.Unfocused);
+
+            //await SyncAsync(); // offline sync
         }
 
         private async void ButtonRefresh_Click(object sender, RoutedEventArgs e)
