@@ -33,6 +33,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.MobileServiceFeatures;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProperty;
@@ -97,10 +98,32 @@ public class RemoteTableOperationProcessor implements TableOperationVisitor<Json
 
 			return null;
 		} catch (ExecutionException ex) {
-			throw ex.getCause();
-		}
+
+            if (!ExceptionIs404NotFound(ex)) {
+                throw ex.getCause();
+            }
+
+            return null;
+        }
 	}
 
+    public boolean ExceptionIs404NotFound(ExecutionException ex) {
+
+        MobileServiceException mse = (MobileServiceException) ex.getCause();
+
+        if (ex == null) {
+            return false;
+        }
+
+        int statusCode = mse.getResponse().getStatus().getStatusCode();
+
+        if (statusCode != 404 ){
+            return false;
+        }
+
+        return true;
+
+    }
 	/**
 	 * Gets the item to process
 	 */
