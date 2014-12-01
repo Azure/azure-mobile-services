@@ -35,7 +35,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         {
             QueryNode expr = this.ParseExpression();
 
-            this.ValidateToken(QueryTokenKind.End, Resources.ODataExpressionParser_SyntaxError);
+            this.ValidateToken(QueryTokenKind.End, () => Resources.ODataExpressionParser_SyntaxError);
 
             return expr;
         }
@@ -63,7 +63,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                 }
                 this.lexer.NextToken();
             }
-            this.ValidateToken(QueryTokenKind.End, Resources.ODataExpressionParser_SyntaxError);
+            this.ValidateToken(QueryTokenKind.End, () => Resources.ODataExpressionParser_SyntaxError);
             return orderings;
         }
 
@@ -319,12 +319,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 
         private IList<QueryNode> ParseArgumentList()
         {
-            this.ValidateToken(QueryTokenKind.OpenParen, Resources.ODataExpressionParser_OpenParenExpected);
+            this.ValidateToken(QueryTokenKind.OpenParen, () => Resources.ODataExpressionParser_OpenParenExpected);
             this.lexer.NextToken();
 
             IList<QueryNode> args = this.lexer.Token.Kind != QueryTokenKind.CloseParen ? this.ParseArguments() : new List<QueryNode>();
 
-            this.ValidateToken(QueryTokenKind.CloseParen, Resources.ODataExpressionParser_CloseParenOrCommaExpected);
+            this.ValidateToken(QueryTokenKind.CloseParen, () => Resources.ODataExpressionParser_CloseParenOrCommaExpected);
             this.lexer.NextToken();
             return args;
         }
@@ -346,7 +346,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 
         private string GetIdentifier()
         {
-            this.ValidateToken(QueryTokenKind.Identifier, Resources.ODataExpressionParser_IdentifierExpected);
+            this.ValidateToken(QueryTokenKind.Identifier, () => Resources.ODataExpressionParser_IdentifierExpected);
             return this.lexer.Token.Text;
         }
 
@@ -372,7 +372,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 
         private QueryNode ParseIntegerLiteral()
         {
-            this.ValidateToken(QueryTokenKind.IntegerLiteral, Resources.ODataExpressionParser_IntegerLiteralExpected);
+            this.ValidateToken(QueryTokenKind.IntegerLiteral, () => Resources.ODataExpressionParser_IntegerLiteralExpected);
             var text = this.lexer.Token.Text;
 
             long value;
@@ -392,7 +392,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 
         private QueryNode ParseRealLiteral()
         {
-            this.ValidateToken(QueryTokenKind.RealLiteral, Resources.ODataExpressionParser_RealLiteralExpected);
+            this.ValidateToken(QueryTokenKind.RealLiteral, () => Resources.ODataExpressionParser_RealLiteralExpected);
             string text = this.lexer.Token.Text;
 
             char last = Char.ToUpper(text[text.Length - 1]);
@@ -439,17 +439,17 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 
         private QueryNode ParseParenExpression()
         {
-            this.ValidateToken(QueryTokenKind.OpenParen, Resources.ODataExpressionParser_OpenParenExpected);
+            this.ValidateToken(QueryTokenKind.OpenParen, () => Resources.ODataExpressionParser_OpenParenExpected);
             this.lexer.NextToken();
             QueryNode e = this.ParseExpression();
-            this.ValidateToken(QueryTokenKind.CloseParen, Resources.ODataExpressionParser_CloseParenOrOperatorExpected);
+            this.ValidateToken(QueryTokenKind.CloseParen, () => Resources.ODataExpressionParser_CloseParenOrOperatorExpected);
             this.lexer.NextToken();
             return e;
         }
 
         private QueryNode ParseIdentifier()
         {
-            this.ValidateToken(QueryTokenKind.Identifier, Resources.ODataExpressionParser_IdentifierExpected);
+            this.ValidateToken(QueryTokenKind.Identifier, () => Resources.ODataExpressionParser_IdentifierExpected);
 
             QueryNode value;
             if (keywords.TryGetValue(this.lexer.Token.Text, out value))
@@ -518,7 +518,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 
         private ConstantNode ParseStringLiteral()
         {
-            this.ValidateToken(QueryTokenKind.StringLiteral, Resources.ODataExpressionParser_StringLiteralExpected);
+            this.ValidateToken(QueryTokenKind.StringLiteral, () => Resources.ODataExpressionParser_StringLiteralExpected);
 
             char quote = this.lexer.Token.Text[0];
             // Unwrap string (remove surrounding quotes) 
@@ -552,11 +552,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             return this.lexer.Token.Kind == QueryTokenKind.Identifier && this.lexer.Token.Text == id;
         }
 
-        private void ValidateToken(QueryTokenKind tokenKind, string message)
+        private void ValidateToken(QueryTokenKind tokenKind, Func<string> errorString)
         {
             if (this.lexer.Token.Kind != tokenKind)
             {
-                this.ParseError(message, this.lexer.Token.Position);
+                this.ParseError(errorString(), this.lexer.Token.Position);
             }
         }
     }
