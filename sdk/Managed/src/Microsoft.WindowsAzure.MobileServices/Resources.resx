@@ -391,7 +391,7 @@
     <value>The store is already initialized.</value>
   </data>
   <data name="MobileServiceSyncTable_InvalidQueryId" xml:space="preserve">
-    <value>The query id must start with a letter and can contain only letters, digits, hyphen or underscore.</value>
+    <value>The query id must not contain pipe character and should be less than 50 characters in length.</value>
   </data>
   <data name="MobileServiceSyncTable_IncrementalPullWithOrderNotAllowed" xml:space="preserve">
     <value>Incremental pull query must not have orderby clause.</value>
