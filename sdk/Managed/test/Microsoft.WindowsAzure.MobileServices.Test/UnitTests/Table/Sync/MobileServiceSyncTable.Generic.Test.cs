@@ -821,9 +821,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
 
-            await ThrowsAsync<ArgumentException>(() => table.PullAsync("2asdf", table.CreateQuery(), CancellationToken.None));
-            await ThrowsAsync<ArgumentException>(() => table.PullAsync("asd_@#234", table.CreateQuery(), CancellationToken.None));
-            await ThrowsAsync<ArgumentException>(() => table.PullAsync("asd_^^234", table.CreateQuery(), CancellationToken.None));
+            await ThrowsAsync<ArgumentException>(() => table.PullAsync("2as|df", table.CreateQuery(), CancellationToken.None));
         }
 
         private async Task TestPullQueryOverrideThrows(IDictionary<string, string> parameters, string errorMessage)
@@ -926,9 +924,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
 
-            await ThrowsAsync<ArgumentException>(() => table.PurgeAsync("2asdf", table.CreateQuery(), CancellationToken.None));
-            await ThrowsAsync<ArgumentException>(() => table.PurgeAsync("asd_@#234", table.CreateQuery(), CancellationToken.None));
-            await ThrowsAsync<ArgumentException>(() => table.PurgeAsync("asd_^^234", table.CreateQuery(), CancellationToken.None));
+            await ThrowsAsync<ArgumentException>(() => table.PurgeAsync("2as|df", table.CreateQuery(), CancellationToken.None));
         }
 
         [AsyncTestMethod]
