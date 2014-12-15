@@ -60,10 +60,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.WindowsAzure.Mobile">
-      <HintPath>..\..\packages\WindowsAzure.MobileServices.<#= ManagedSDKVersion #>\lib\netcore45\Microsoft.WindowsAzure.Mobile.dll</HintPath>
+      <HintPath>..\..\packages\WindowsAzure.MobileServices.<#= ManagedSDKVersion #>\lib\monotouch\Microsoft.WindowsAzure.Mobile.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.WindowsAzure.Mobile.Ext">
-      <HintPath>..\..\packages\WindowsAzure.MobileServices.<#= ManagedSDKVersion #>\lib\netcore45\Microsoft.WindowsAzure.Mobile.Ext.dll</HintPath>
+      <HintPath>..\..\packages\WindowsAzure.MobileServices.<#= ManagedSDKVersion #>\lib\monotouch\Microsoft.WindowsAzure.Mobile.Ext.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.WindowsAzure.Mobile.SQLiteStore">
       <HintPath>..\packages\WindowsAzure.MobileServices.SQLiteStore.<#= StoreSDKVersion #>\lib\portable-win+net45+wp8+wpa81+monotouch+monoandroid\Microsoft.WindowsAzure.Mobile.SQLiteStore.dll</HintPath>
