@@ -146,4 +146,27 @@
     return [self queryStringOrError:nil];
 }
 
+-(id)copyWithZone:(NSZone *)zone
+{
+    MSQuery *query = [[MSQuery allocWithZone:zone] init];
+    query.predicate = [self.predicate copyWithZone:zone];
+    query.parameters = [self.parameters copyWithZone:zone];
+    query.selectFields = [query.selectFields copyWithZone:zone];
+    query.fetchLimit = self.fetchLimit;
+    query.fetchOffset = self.fetchOffset;
+    query.orderBy = [self.orderBy copyWithZone:zone];
+    query.includeTotalCount = self.includeTotalCount;
+    
+    if (self.syncTable) {
+        query.syncTable = [[MSSyncTable alloc] initWithName:self.syncTable.name
+                                                     client:self.syncTable.client];
+    }
+    if (self.table) {
+        query.table = [[MSTable alloc] initWithName:self.table.name
+                                             client:self.table.client];
+    }
+    
+    return query;
+}
+
 @end

@@ -52,6 +52,10 @@ typedef void (^MSSyncPushCompletionBlock)(void);
 
 /// Provides the name of the table to track all table operation errors until they have been resolved
 - (NSString *) errorTableName;
+
+/// Provides the name of the table to track configuration data
+- (NSString *) configTableName;
+
 /// @}
 
 /// @name Fetching and Retrieving Data

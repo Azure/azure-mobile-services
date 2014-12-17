@@ -84,6 +84,9 @@ extern NSString *const MSErrorPushResultKey;
 /// Indicates a sync table operation failed due to an internal error
 #define MSSyncTableInternalError                -1154
 
+/// Indicates that the query key contains invalid characters
+#define MSInvalidQueryId                        -1155
+
 /// Indicates a mobile service sync operation (such as a syncTable insert) failed
 /// because the sync context object was not properly initialized
 #define MSSyncContextInvalid                    -1160
@@ -117,6 +120,10 @@ extern NSString *const MSErrorPushResultKey;
 /// Indicates that the purge was aborted because items in the requested table to
 /// purge have pending changes that need to be pushed to the server
 #define MSPurgeAbortedPendingChanges            -1180
+
+/// Indicates that the pull was aborted (not all records were retrieved from the
+/// server) for an unknown reason.
+#define MSPullAbortedUnknown                    -1190
 
 /// Indicates that the response from the Windows Azure Mobile Service did not
 /// include an item as expected.

@@ -34,6 +34,10 @@ NSString *const StoreDeleted = @"ms_deleted";
     return @"MS_TableOperationErrors";
 }
 
+-(NSString *) configTableName {
+    return @"MS_TableConfig";
+}
+
 /// Helper function to get a specific record from a table, if
 -(id) getRecordForTable:(NSString *)table itemId:(NSString *)itemId asDictionary:(BOOL)asDictionary orError:(NSError **)error
 {

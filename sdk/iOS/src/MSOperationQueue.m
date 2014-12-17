@@ -88,10 +88,22 @@
 
 -(void) removeOperation:(MSTableOperation *)operation orError:(NSError **)error
 {
+    // Find all errors for this operation and delete them first
+    MSSyncTable *errorsTable = [[MSSyncTable alloc] initWithName:self.dataSource.errorTableName client:self.client];
+    MSQuery *errorsQuery = [[MSQuery alloc] initWithSyncTable:errorsTable];
+    errorsQuery.predicate = [NSPredicate predicateWithFormat:@"operationId == %ld", operation.operationId];
+    [self.dataSource deleteUsingQuery:errorsQuery
+                              orError:error];
+    if (error && *error) {
+        return;
+    }
+
     [self.dataSource deleteItemsWithIds:[NSArray arrayWithObject:[NSNumber numberWithInteger:operation.operationId]]
                                   table:[self.dataSource operationTableName]
                                 orError:error];
-    
+    if (error && *error) {
+        return;
+    }
     // Make sure to clean up any lock if one existed
     [self unlockOperation:operation];
 }

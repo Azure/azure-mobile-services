@@ -69,6 +69,14 @@
 		A2ADF7E91914481B0078BB16 /* MSTableOperationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A2ADF7E81914481B0078BB16 /* MSTableOperationTests.m */; };
 		A2C14C6A19105D9F00A58609 /* MSSyncContextReadResult.h in Headers */ = {isa = PBXBuildFile; fileRef = A2C14C6819105D9F00A58609 /* MSSyncContextReadResult.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A2C14C6B19105D9F00A58609 /* MSSyncContextReadResult.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C14C6919105D9F00A58609 /* MSSyncContextReadResult.m */; };
+		CF4D49861A2E5C96006AEB70 /* MSQueuePullOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = CF4D49851A2E5C96006AEB70 /* MSQueuePullOperation.h */; };
+		CF4D498A1A2E5CF8006AEB70 /* MSQueuePullOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = CF4D49891A2E5CF8006AEB70 /* MSQueuePullOperation.m */; };
+		CF4D498C1A3253E2006AEB70 /* MSTestWaiter.m in Sources */ = {isa = PBXBuildFile; fileRef = CF4D498B1A3253E2006AEB70 /* MSTestWaiter.m */; };
+		CF4D49921A363537006AEB70 /* settings.plist in Resources */ = {isa = PBXBuildFile; fileRef = CF4D49911A36334C006AEB70 /* settings.plist */; };
+		CF762EC61A1D366E0018C292 /* MSDateOffset.h in Headers */ = {isa = PBXBuildFile; fileRef = CF762EC51A1D366E0018C292 /* MSDateOffset.h */; };
+		CF762EC91A1D37A40018C292 /* MSDateOffset.m in Sources */ = {isa = PBXBuildFile; fileRef = CF762EC71A1D36950018C292 /* MSDateOffset.m */; };
+		CFAE6E0A1A3B84D700734128 /* MSTableConfigValue.m in Sources */ = {isa = PBXBuildFile; fileRef = CFAE6E091A3B84D700734128 /* MSTableConfigValue.m */; };
+		CFAE6E0C1A3B84E400734128 /* MSTableConfigValue.h in Headers */ = {isa = PBXBuildFile; fileRef = CFAE6E0B1A3B84E400734128 /* MSTableConfigValue.h */; };
 		E8146642165BE0150038EBE5 /* MSLogin.h in Headers */ = {isa = PBXBuildFile; fileRef = E8146640165BE0150038EBE5 /* MSLogin.h */; };
 		E8146643165BE0150038EBE5 /* MSLogin.m in Sources */ = {isa = PBXBuildFile; fileRef = E8146641165BE0150038EBE5 /* MSLogin.m */; };
 		E8146646165BE2440038EBE5 /* MSLoginSerializer.h in Headers */ = {isa = PBXBuildFile; fileRef = E8146644165BE2440038EBE5 /* MSLoginSerializer.h */; };
@@ -214,6 +222,15 @@
 		A2ADF7E81914481B0078BB16 /* MSTableOperationTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSTableOperationTests.m; sourceTree = "<group>"; };
 		A2C14C6819105D9F00A58609 /* MSSyncContextReadResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSSyncContextReadResult.h; sourceTree = "<group>"; };
 		A2C14C6919105D9F00A58609 /* MSSyncContextReadResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSSyncContextReadResult.m; sourceTree = "<group>"; };
+		CF4D49851A2E5C96006AEB70 /* MSQueuePullOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSQueuePullOperation.h; sourceTree = "<group>"; };
+		CF4D49891A2E5CF8006AEB70 /* MSQueuePullOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSQueuePullOperation.m; sourceTree = "<group>"; };
+		CF4D498B1A3253E2006AEB70 /* MSTestWaiter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSTestWaiter.m; sourceTree = "<group>"; };
+		CF4D498D1A3253F7006AEB70 /* MSTestWaiter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSTestWaiter.h; sourceTree = "<group>"; };
+		CF4D49911A36334C006AEB70 /* settings.plist */ = {isa = PBXFileReference; explicitFileType = text.plist.xml; fileEncoding = 4; path = settings.plist; sourceTree = "<group>"; };
+		CF762EC51A1D366E0018C292 /* MSDateOffset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSDateOffset.h; sourceTree = "<group>"; };
+		CF762EC71A1D36950018C292 /* MSDateOffset.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSDateOffset.m; sourceTree = "<group>"; };
+		CFAE6E091A3B84D700734128 /* MSTableConfigValue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSTableConfigValue.m; sourceTree = "<group>"; };
+		CFAE6E0B1A3B84E400734128 /* MSTableConfigValue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSTableConfigValue.h; sourceTree = "<group>"; };
 		E8146640165BE0150038EBE5 /* MSLogin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSLogin.h; sourceTree = "<group>"; };
 		E8146641165BE0150038EBE5 /* MSLogin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSLogin.m; sourceTree = "<group>"; };
 		E8146644165BE2440038EBE5 /* MSLoginSerializer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSLoginSerializer.h; sourceTree = "<group>"; };
@@ -270,7 +287,7 @@
 		E8F33B2916166837002DD7C6 /* MSSerializer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSSerializer.h; sourceTree = "<group>"; };
 		E8F33B2B1616684F002DD7C6 /* MSPredicateTranslator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSPredicateTranslator.h; sourceTree = "<group>"; };
 		E8F33B2C1616684F002DD7C6 /* MSPredicateTranslator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSPredicateTranslator.m; sourceTree = "<group>"; };
-		E8F33B34161668C4002DD7C6 /* WindowsAzureMobileServicesFunctionalTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WindowsAzureMobileServicesFunctionalTests.m; sourceTree = "<group>"; };
+		E8F33B34161668C4002DD7C6 /* WindowsAzureMobileServicesFunctionalTests.m */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = WindowsAzureMobileServicesFunctionalTests.m; sourceTree = "<group>"; };
 		E8F33B36161668DA002DD7C6 /* MSJSONSerializerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSJSONSerializerTests.m; sourceTree = "<group>"; };
 		E8F33B38161668E4002DD7C6 /* MSPredicateTranslatorTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSPredicateTranslatorTests.m; sourceTree = "<group>"; };
 		E8F33B3A161668ED002DD7C6 /* MSQueryTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSQueryTests.m; sourceTree = "<group>"; };
@@ -348,6 +365,8 @@
 			children = (
 				A25888FC18A19D0B00962F9A /* MSOperationQueue.h */,
 				A25888FD18A19D0B00962F9A /* MSOperationQueue.m */,
+				CF4D49851A2E5C96006AEB70 /* MSQueuePullOperation.h */,
+				CF4D49891A2E5CF8006AEB70 /* MSQueuePullOperation.m */,
 				A2818FFA18BB0660001B14E7 /* MSQueuePushOperation.h */,
 				A2818FFB18BB0660001B14E7 /* MSQueuePushOperation.m */,
 				A281900218BB2FF5001B14E7 /* MSTableOperationError.h */,
@@ -355,6 +374,8 @@
 				A258890018A19D0B00962F9A /* MSTableOperation.h */,
 				A258890218A19D0B00962F9A /* MSTableOperationInternal.h */,
 				A258890118A19D0B00962F9A /* MSTableOperation.m */,
+				CFAE6E0B1A3B84E400734128 /* MSTableConfigValue.h */,
+				CFAE6E091A3B84D700734128 /* MSTableConfigValue.m */,
 			);
 			name = Operations;
 			sourceTree = "<group>";
@@ -474,6 +495,8 @@
 				E8F33B0A161667CE002DD7C6 /* MSClient.h */,
 				E8EE7841170CAEDC00C2848F /* MSClientInternal.h */,
 				E8F33B0B161667CE002DD7C6 /* MSClient.m */,
+				CF762EC51A1D366E0018C292 /* MSDateOffset.h */,
+				CF762EC71A1D36950018C292 /* MSDateOffset.m */,
 				E8F33B0C161667CE002DD7C6 /* MSError.h */,
 				E8F33B0D161667CE002DD7C6 /* MSError.m */,
 				E8F33B0E161667CE002DD7C6 /* MSQuery.h */,
@@ -508,20 +531,22 @@
 		E8F33AF51616659C002DD7C6 /* Test */ = {
 			isa = PBXGroup;
 			children = (
-				A24701C21968978000385DA2 /* Push */,
-				A2B8D6011909D42100F198DC /* Offline */,
+				E8F33B3116166889002DD7C6 /* Connection */,
+				E8E37901161E2F8D00C13F00 /* Filters */,
 				A2E7D5EF18237F21007153E4 /* Functional */,
-				E8F33B34161668C4002DD7C6 /* WindowsAzureMobileServicesFunctionalTests.m */,
 				E87BB01B161A28FC008053F9 /* MSClientTests.m */,
+				E8E37906161F4D0D00C13F00 /* MSFilterTest.m */,
 				E8F33B3A161668ED002DD7C6 /* MSQueryTests.m */,
 				E87BB024161B5A4D008053F9 /* MSTableTests.m */,
+				CF4D498D1A3253F7006AEB70 /* MSTestWaiter.h */,
+				CF4D498B1A3253E2006AEB70 /* MSTestWaiter.m */,
 				E87BB021161B57C8008053F9 /* MSUserTests.m */,
-				E8E37906161F4D0D00C13F00 /* MSFilterTest.m */,
-				E8E37901161E2F8D00C13F00 /* Filters */,
-				E8F33B3116166889002DD7C6 /* Connection */,
-				E8F33B321616689A002DD7C6 /* Serialization */,
+				A2B8D6011909D42100F198DC /* Offline */,
+				A24701C21968978000385DA2 /* Push */,
 				E8F33B33161668AA002DD7C6 /* Query */,
+				E8F33B321616689A002DD7C6 /* Serialization */,
 				E8F33AF61616659C002DD7C6 /* Supporting Files */,
+				E8F33B34161668C4002DD7C6 /* WindowsAzureMobileServicesFunctionalTests.m */,
 			);
 			name = Test;
 			path = test;
@@ -532,6 +557,7 @@
 			children = (
 				E8F33AF71616659C002DD7C6 /* WindowsAzureMobileServicesTests-Info.plist */,
 				E8F33AF81616659C002DD7C6 /* InfoPlist.strings */,
+				CF4D49911A36334C006AEB70 /* settings.plist */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -627,6 +653,7 @@
 				A281900418BB2FF5001B14E7 /* MSTableOperationError.h in Headers */,
 				E8E37913161F769D00C13F00 /* MSFilter.h in Headers */,
 				A2ACD540192322C50012B1ED /* MSCoreDataStore.h in Headers */,
+				CF762EC61A1D366E0018C292 /* MSDateOffset.h in Headers */,
 				A24701B9196896F500385DA2 /* MSPush.h in Headers */,
 				870C0C9C199C246700A134DD /* MSSDKFeatures.h in Headers */,
 				E8E3790F161F769D00C13F00 /* MSError.h in Headers */,
@@ -636,6 +663,7 @@
 				A2818FFC18BB0660001B14E7 /* MSQueuePushOperation.h in Headers */,
 				A258891118A19D0B00962F9A /* MSTableOperationInternal.h in Headers */,
 				E8E37916161F769D00C13F00 /* MSTableRequest.h in Headers */,
+				CF4D49861A2E5C96006AEB70 /* MSQueuePullOperation.h in Headers */,
 				E8E37917161F769D00C13F00 /* MSURLBuilder.h in Headers */,
 				E8E37918161F769D00C13F00 /* MSNaiveISODateFormatter.h in Headers */,
 				E8E37919161F769D00C13F00 /* MSSerializer.h in Headers */,
@@ -647,6 +675,7 @@
 				E8146646165BE2440038EBE5 /* MSLoginSerializer.h in Headers */,
 				A24701BB196896F500385DA2 /* MSPushHttp.h in Headers */,
 				A258890B18A19D0B00962F9A /* MSOperationQueue.h in Headers */,
+				CFAE6E0C1A3B84E400734128 /* MSTableConfigValue.h in Headers */,
 				E8C44042170BAD49002FC997 /* MSAPIConnection.h in Headers */,
 				A258891518A19D0B00962F9A /* MSSyncContextInternal.h in Headers */,
 				E8C44047170BAD93002FC997 /* MSAPIRequest.h in Headers */,
@@ -667,6 +696,7 @@
 				E8E3790C161F766400C13F00 /* Headers */,
 				E8F33AD91616659C002DD7C6 /* Copy Files */,
 				E8E37A27161FAA9600C13F00 /* ShellScript */,
+				CF48157A1A363A330044D898 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -726,11 +756,19 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		CF48157A1A363A330044D898 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E8F33AE91616659C002DD7C6 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				A28224B4192AD00E00EF8743 /* CoreDataTestModel.xcdatamodeld in Resources */,
+				CF4D49921A363537006AEB70 /* settings.plist in Resources */,
 				E8F33AFA1616659C002DD7C6 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -784,6 +822,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CF762EC91A1D37A40018C292 /* MSDateOffset.m in Sources */,
 				E8F33B15161667CE002DD7C6 /* MSClient.m in Sources */,
 				A258890C18A19D0B00962F9A /* MSOperationQueue.m in Sources */,
 				E8F33B16161667CE002DD7C6 /* MSError.m in Sources */,
@@ -791,6 +830,7 @@
 				E8F33B17161667CE002DD7C6 /* MSQuery.m in Sources */,
 				E8F33B18161667CE002DD7C6 /* MSTable.m in Sources */,
 				A25888F918A19CBA00962F9A /* MSSyncContext.m in Sources */,
+				CF4D498A1A2E5CF8006AEB70 /* MSQueuePullOperation.m in Sources */,
 				E8F33B19161667CE002DD7C6 /* MSUser.m in Sources */,
 				E8F33B2416166822002DD7C6 /* MSClientConnection.m in Sources */,
 				A24701C0196896F500385DA2 /* MSRegistrationManager.m in Sources */,
@@ -815,8 +855,10 @@
 				E8C44043170BAD49002FC997 /* MSAPIConnection.m in Sources */,
 				A24701BC196896F500385DA2 /* MSPushHttp.m in Sources */,
 				E8C44048170BAD93002FC997 /* MSAPIRequest.m in Sources */,
+				CF4D498C1A3253E2006AEB70 /* MSTestWaiter.m in Sources */,
 				A2818FFD18BB0660001B14E7 /* MSQueuePushOperation.m in Sources */,
 				A24701B8196896F500385DA2 /* MSLocalStorage.m in Sources */,
+				CFAE6E0A1A3B84D700734128 /* MSTableConfigValue.m in Sources */,
 				A24701BA196896F500385DA2 /* MSPush.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

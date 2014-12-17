@@ -7,11 +7,13 @@
 #import "MSClientInternal.h"
 #import "MSTable.h"
 #import "MSTableOperationInternal.h"
-#import "MSTableOperationError.h"
 #import "MSJSONSerializer.h"
 #import "MSQuery.h"
 #import "MSQueryInternal.h"
 #import "MSQueuePushOperation.h"
+#import "MSQueuePullOperation.h"
+#import "MSNaiveISODateFormatter.h"
+#import "MSDateOffset.h"
 
 @implementation MSSyncContext {
     dispatch_queue_t writeOperationQueue;
@@ -22,7 +24,6 @@ static NSOperationQueue *pushQueue_;
 @synthesize delegate = delegate_;
 @synthesize dataSource = dataSource_;
 @synthesize operationQueue = operationQueue_;
-@synthesize errors = errors_;
 @synthesize client = client_;
 @synthesize callbackQueue = callbackQueue_;
 
@@ -30,7 +31,7 @@ static NSOperationQueue *pushQueue_;
 {
     client_ = client;
     operationQueue_ = [[MSOperationQueue alloc] initWithClient:client_ dataSource:self.dataSource];
-
+    
     // We don't need to wait for this, and all operation creation goes onto this queue so its guaranteed to
     // happen only after this is populated.
     dispatch_async(writeOperationQueue, ^{
@@ -63,7 +64,6 @@ static NSOperationQueue *pushQueue_;
         
         dataSource_ = dataSource;
         delegate_ = delegate;
-        errors_ = [NSMutableArray new];
     }
     
     return self;
@@ -81,14 +81,11 @@ static NSOperationQueue *pushQueue_;
 -(void) pushWithCompletion:(MSSyncBlock)completion
 {
     // TODO: Allow users to cancel operations
-    
-    dispatch_async(writeOperationQueue, ^{
-        MSQueuePushOperation *push = [[MSQueuePushOperation alloc] initWithSyncContext:self
+    MSQueuePushOperation *push = [[MSQueuePushOperation alloc] initWithSyncContext:self
                                                                          dispatchQueue:writeOperationQueue
                                                                             completion:completion];
         
-        [pushQueue_ addOperation:push];
-    });
+    [pushQueue_ addOperation:push];
 }
 
 
@@ -129,7 +126,7 @@ static NSOperationQueue *pushQueue_;
         }
         return;
     }
-
+    
     // Add the operation to the queue
     dispatch_async(writeOperationQueue, ^{
         NSError *error;
@@ -152,14 +149,14 @@ static NSOperationQueue *pushQueue_;
             operation.operationId = self.operationSequence;
             self.operationSequence++;
         }
-
+        
         // Update local store and then the operation queue
         if (error == nil) {
             switch (action) {
                 case MSTableOperationInsert:
                     [self.dataSource upsertItems:[NSArray arrayWithObject:itemToSave] table:table orError:&error];
                     break;
-                
+                    
                 case MSTableOperationUpdate:
                     [self.dataSource upsertItems:[NSArray arrayWithObject:itemToSave] table:table orError:&error];
                     break;
@@ -170,7 +167,7 @@ static NSOperationQueue *pushQueue_;
                     // Capture the deleted item in case the user wants to cancel it or a conflict occur
                     operation.item = item;
                     break;
-                
+                    
                 default:
                     error = [self errorWithDescription:@"Unknown table action" andErrorCode:MSSyncTableInvalidAction];
                     break;
@@ -185,7 +182,7 @@ static NSOperationQueue *pushQueue_;
             }
             return;
         }
-
+        
         // Update the operation queue now
         if (condenseAction == MSCondenseAddNew) {
             [self.operationQueue addOperation:operation orError:&error];
@@ -195,8 +192,8 @@ static NSOperationQueue *pushQueue_;
             
             // FUTURE: Look at moving these upserts into the operation queue object
             [self.dataSource upsertItems:[NSArray arrayWithObject:[operation serialize]]
-                                  table:[self.dataSource operationTableName]
-                                orError:&error];
+                                   table:[self.dataSource operationTableName]
+                                 orError:&error];
             
         } else if (condenseAction != MSCondenseKeep) {
             [self.operationQueue removeOperation:operation orError:&error];
@@ -276,9 +273,9 @@ static NSOperationQueue *pushQueue_;
     // Removing an operation requires write access to the queue
     dispatch_async(writeOperationQueue, ^{
         NSError *error;
-
+        
         // FUTURE: Verify operation hasn't been modified by others
-
+        
         [self.dataSource deleteItemsWithIds:[NSArray arrayWithObject:operation.itemId]
                                       table:operation.tableName
                                     orError:&error];
@@ -295,33 +292,53 @@ static NSOperationQueue *pushQueue_;
 }
 
 /// Verify our input is valid and try to pull our data down from the server
-- (void) pullWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion;
+- (void) pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion;
 {
+    // make a copy since we'll be modifying it internally
+    MSQuery *queryCopy = [query copy];
+    
     // We want to throw on unsupported fields so we can change this decision later
     NSError *error;
-    if (query.selectFields) {
+    NSDictionary *isDeletedParams = [MSSyncContext dictionary:queryCopy.parameters entriesForCaseInsensitiveKey:@"__includedeleted"];
+    if (queryCopy.selectFields) {
         error = [self errorWithDescription:@"Use of selectFields in not supported in pullWithQuery:"
                               andErrorCode:MSInvalidParameter];
     }
-    else if (query.includeTotalCount) {
+    else if (queryCopy.includeTotalCount) {
         error = [self errorWithDescription:@"Use of includeTotalCount is not supported in pullWithQuery:"
                               andErrorCode:MSInvalidParameter];
     }
-    else if ([MSSyncContext dictionary:query.parameters containsCaseInsensitiveKey:@"__includedeleted"]){
-        error = [self errorWithDescription:@"Use of '__includeDeleted' is not supported in pullWithQuery parameters:" andErrorCode:MSInvalidParameter];
+    else if (queryId && queryCopy.orderBy.count > 0) {
+        error = [self errorWithDescription: @"Use of orderBy is not supported when a queryId is specified"
+                              andErrorCode:MSInvalidParameter];
     }
-    else if ([MSSyncContext dictionary:query.parameters containsCaseInsensitiveKey:@"__systemproperties"]) {
+    else if (queryId && queryCopy.fetchOffset > 0) {
+        error = [self errorWithDescription: @"Use of fetchOffset is not supported when a queryId is specified"
+                              andErrorCode:MSInvalidParameter];
+    }
+    else if ([MSSyncContext dictionary:queryCopy.parameters containsCaseInsensitiveKey:@"__systemproperties"]) {
         error = [self errorWithDescription:@"Use of '__systemProperties' is not supported in pullWithQuery parameters:" andErrorCode:MSInvalidParameter];
     }
-    else if (query.syncTable) {
+    else if (queryCopy.syncTable) {
         // Otherwise we convert the sync table to a normal table
-        query.table = [[MSTable alloc] initWithName:query.syncTable.name client:query.syncTable.client];
-        query.syncTable = nil;
+        queryCopy.table = [[MSTable alloc] initWithName:queryCopy.syncTable.name client:queryCopy.syncTable.client];
+        queryCopy.syncTable = nil;
     }
-    else if (!query.table) {
+    else if (!queryCopy.table) {
         // MSQuery itself should disallow this, but for safety verify we have a table object
         error = [self errorWithDescription:@"Missing required syncTable object in query"
                               andErrorCode:MSInvalidParameter];
+    }
+    
+    if (!error && isDeletedParams.count > 0) {
+        // if there are any __includeDeleted params set to NO we want to throw because we would overwrite them
+        for (NSNumber *value in isDeletedParams.allValues) {
+            if (!value.boolValue) {
+                error = [self errorWithDescription:@"The '__includeDeleted' parameter value must be YES if used for pullWithQuery:"
+                                      andErrorCode:MSInvalidParameter];
+                break;
+            }
+        }
     }
     
     // Return error if possible, return on calling
@@ -334,24 +351,30 @@ static NSOperationQueue *pushQueue_;
     
     // Get the required system properties from the Store
     if ([self.dataSource respondsToSelector:@selector(systemPropetiesForTable:)]) {
-        query.table.systemProperties = [self.dataSource systemPropetiesForTable:query.table.name];
+        queryCopy.table.systemProperties = [self.dataSource systemPropetiesForTable:queryCopy.table.name];
     } else {
-        query.table.systemProperties = MSSystemPropertyVersion;
+        queryCopy.table.systemProperties = MSSystemPropertyVersion;
     }
     
     // add __includeDeleted
-    if (!query.parameters) {
-        query.parameters = @{@"__includeDeleted" : @YES};
+    if (!queryCopy.parameters) {
+        queryCopy.parameters = @{@"__includeDeleted" : @YES};
     } else {
-        NSMutableDictionary *mutableParameters = [query.parameters mutableCopy];
+        NSMutableDictionary *mutableParameters = [queryCopy.parameters mutableCopy];
         [mutableParameters setObject:@YES forKey:@"__includeDeleted"];
-        query.parameters = mutableParameters;
+        queryCopy.parameters = mutableParameters;
     }
-
-    query.table.systemProperties |= MSSystemPropertyDeleted;
+    
+    queryCopy.table.systemProperties |= MSSystemPropertyDeleted;
+    
+    if (queryId) {
+        queryCopy.table.systemProperties |= MSSystemPropertyUpdatedAt;
+        NSSortDescriptor *orderByUpdatedAt = [NSSortDescriptor sortDescriptorWithKey:MSSystemColumnUpdatedAt ascending:YES];
+        queryCopy.orderBy = [NSArray arrayWithObject:orderByUpdatedAt];
+    }
     
     // Begin the actual pull request
-    [self pullWithQueryInternal:query completion:completion];
+    [self pullWithQueryInternal:queryCopy queryId:queryId completion:completion];
 }
 
 /// Basic pull logic is:
@@ -360,7 +383,7 @@ static NSOperationQueue *pushQueue_;
 ///  Read from server and get the new results
 ///  If our table became dirty while we read from the server, start over
 ///  Else save our data into the local store
-- (void) pullWithQueryInternal:(MSQuery *)query completion:(MSSyncBlock)completion
+- (void) pullWithQueryInternal:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion
 {
     dispatch_async(writeOperationQueue, ^{
         // Before we can pull from the remote, we need to make sure out table doesn't having pending operations
@@ -376,67 +399,23 @@ static NSOperationQueue *pushQueue_;
                 }
                 else {
                     // Check again if we have new pending ops while we synced, and repeat as needed
-                    [self pullWithQueryInternal:query completion:completion];
+                    [self pullWithQueryInternal:query queryId:queryId completion:completion];
                 }
             }];
             return;
         }
-        
-        // Read from server
-        [query readInternalWithFeatures:MSFeatureOffline completion:^(MSQueryResult*result, NSError *error) {
-            // If error, or no results we can stop processing
-            if (error || !result || !result.items || result.items.count == 0) {
-                if (completion) {
-                    [self.callbackQueue addOperationWithBlock:^{
-                        completion(error);
-                    }];
-                }
-                return;
-            }
-            
-            // Update our local store (we need to block inbound operations while we do this)
-            dispatch_sync(writeOperationQueue, ^{
-                // Check if have any pending ops on this table
-                NSArray *pendingOps = [self.operationQueue getOperationsForTable:query.table.name item:nil];
-                if (pendingOps.count > 0) {
-                    // This is not the best choice here, but for simplicity in the initial cut we just start over
-                    // if someone else has made our table dirty
-                    [self pullWithQueryInternal:query completion:completion];
-                    return;
-                }
-                
-                //Check if results include the deleted column
-                NSError *localDataSourceError;
-                NSArray *itemsToUpsert = result.items;
-                NSArray *itemsToDelete = [result.items filteredArrayUsingPredicate:
-                                          [NSPredicate predicateWithFormat:@"%K == YES", MSSystemColumnDeleted]];
-                if ([itemsToDelete count] > 0) {
-                    // Remove the deleted items from the overall list if we had some
-                    itemsToUpsert = [result.items filteredArrayUsingPredicate:
-                                     [NSPredicate predicateWithFormat:@"%K != YES", MSSystemColumnDeleted]];
+        else {
+            // TODO: Allow users to cancel operations
+            MSQueuePullOperation *pull = [[MSQueuePullOperation alloc] initWithSyncContext:self
+                                                                                         query:query
+                                                                                       queryId:queryId
+                                                                                 dispatchQueue:writeOperationQueue
+                                                                                 callbackQueue:self.callbackQueue
+                                                                                    completion:completion];
 
-                    
-                    NSMutableArray *itemIds = [NSMutableArray arrayWithCapacity:itemsToDelete.count];
-                    for (NSDictionary *item in itemsToDelete) {
-                        [itemIds addObject:item[@"id"]];
-                    }
-                    
-                    [self.dataSource deleteItemsWithIds:itemIds table:query.table.name orError:&localDataSourceError];
-                    
-                }
                 
-                if (!localDataSourceError) {
-                    // upsert each item into table that isn't pending to go to the server
-                    [self.dataSource upsertItems:itemsToUpsert table:query.table.name orError:&localDataSourceError];
-                }
-                
-                if (completion) {
-                    [self.callbackQueue addOperationWithBlock:^{
-                        completion(localDataSourceError);
-                    }];
-                }
-            });
-        }];
+            [pushQueue_ addOperation:pull];
+        }
     });
 }
 
@@ -449,7 +428,7 @@ static NSOperationQueue *pushQueue_;
     dispatch_async(writeOperationQueue, ^{
         // Check if our table is dirty, if so, cancel the purge action
         NSArray *tableOps = [self.operationQueue getOperationsForTable:query.syncTable.name item:nil];
-
+        
         NSError *error;
         if (tableOps.count > 0) {
             error = [self errorWithDescription:@"The table cannot be purged because it has pending operations"
@@ -467,6 +446,11 @@ static NSOperationQueue *pushQueue_;
     });
 }
 
++ (NSString *) createKeyFromTable:(NSString *) table queryId:(NSString*) queryId
+{
+    return [NSString stringWithFormat:@"%@_%@", table, queryId];
+}
+
 + (BOOL) dictionary:(NSDictionary *)dictionary containsCaseInsensitiveKey:(NSString *)key
 {
     for (NSString *object in dictionary.allKeys) {
@@ -475,6 +459,17 @@ static NSOperationQueue *pushQueue_;
         }
     }
     return NO;
+}
+
++ (NSDictionary *) dictionary:(NSDictionary *)dictionary entriesForCaseInsensitiveKey:(NSString *)key
+{
+    NSMutableDictionary *matches = [NSMutableDictionary dictionary];
+    for (NSString *object in dictionary.allKeys) {
+        if ([object caseInsensitiveCompare:key] == NSOrderedSame) {
+            [matches setValue:dictionary[object] forKey:object];
+        }
+    }
+    return matches;
 }
 
 # pragma mark * NSError helpers

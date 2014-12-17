@@ -59,9 +59,10 @@
 #pragma mark * Public Local Storage Management commands
 
 
--(void)pullWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion
+-(void)pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion
 {
-    [self.client.syncContext pullWithQuery:query completion:completion];
+    // we may manipulate the query so we make a copy to preserve the user's version
+    [self.client.syncContext pullWithQuery:query queryId:queryId completion:completion];
 }
 
 -(void)purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion
