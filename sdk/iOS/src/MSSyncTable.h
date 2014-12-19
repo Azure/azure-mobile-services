@@ -96,7 +96,7 @@
 /// MSQeury object.
 /// Before a pull is allowed to run, all pending requests on the specified table will be sent to
 /// the server. If a pending request for this table fails, the pull will be cancelled
--(void)pullWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion;
+-(void)pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion;
 
 /// Removes all records in the local cache that match the results of the specified query.
 /// If query is nil, all records in the local table will be removed.

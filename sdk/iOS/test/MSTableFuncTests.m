@@ -23,12 +23,15 @@
     NSLog(@"%@ setUp", self.name);
     
     // These functional tests requires a working Windows Mobile Azure Service
-    // with a table named "todoItem". Simply enter the application URL and
-    // application key for the Windows Mobile Azure Service below.
+    // with a table named "todoItem". Enter the application URL and application
+    // key for the Windows Mobile Azure Service in the settings.plist file.
+    
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"settings" ofType:@"plist"];
+    NSDictionary *settings = [[NSDictionary alloc] initWithContentsOfFile:path];
     
     MSClient *client = [MSClient
-                        clientWithApplicationURLString:@"<Microsoft Azure Mobile Service App URL>"
-                        applicationKey:@"<Application Key>"];
+                        clientWithApplicationURLString:[settings objectForKey:@"TestAppUrl"]
+                        applicationKey:[settings objectForKey:@"TestAppApplicationKey"]];
     
     XCTAssertTrue([client.applicationURL.description hasPrefix:@"https://"], @"The functional tests are currently disabled.");
     self.continueAfterFailure = YES;

@@ -4,6 +4,8 @@
 
 #import "MSOfflinePassthroughHelper.h"
 #import "MSQuery.h"
+#import "MSSyncContext.h"
+#import "MSCoreDataStore.h"
 
 @implementation MSOfflinePassthroughHelper
 
@@ -54,12 +56,46 @@
     return NO;
 }
 
+- (MSSyncContextReadResult *) readWithQuery:(MSQuery *)query orError:(NSError **)error
+{
+    self.readWithQueryCalls++;
+    
+    MSSyncContextReadResult *results = [super readWithQuery:query orError:error];
+    if (self.errorOnReadWithQueryOrError) {
+        *error = [NSError errorWithDomain:@"TestError" code:1 userInfo:nil];
+        return nil;
+    }
+    
+    self.readWithQueryItems += results.items.count;
+    return results;
+}
+
+
+-(NSDictionary *) readTable:(NSString *)table withItemId:(NSString *)itemId orError:(NSError **)error
+{
+    self.readTableCalls++;
+    
+    NSDictionary *results = [super readTable:table withItemId:itemId orError:error];
+    
+    if (self.errorOnReadTableWithItemIdOrError) {
+        *error = [NSError errorWithDomain:@"TestError" code:1 userInfo:nil];
+        return nil;
+    }
+    
+    self.readTableItems += results.count;
+    return results;
+}
+
 -(void) resetCounts
 {
     self.upsertedItems = 0;
     self.upsertCalls = 0;
     self.deleteCalls = 0;
     self.deletedItems = 0;
+    self.readTableCalls = 0;
+    self.readTableItems = 0;
+    self.readWithQueryCalls = 0;
+    self.readWithQueryItems = 0;
 }
 
 @end

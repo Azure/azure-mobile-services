@@ -75,6 +75,7 @@
     operation_ = operation.type;
     itemId_ = [operation.itemId copy];
     item_ = [item copy];
+    operationId_ = operation.operationId;
     
     return self;
 }
@@ -111,7 +112,7 @@
             @"operation": [NSNumber numberWithInteger:self.operation],
             @"itemId": self.itemId,
             @"statusCode": [NSNumber numberWithInteger:self.statusCode]
-        } mutableCopy];
+    } mutableCopy];
     
     if (self.item) {
         [properties setValue:self.item forKey:@"item"];
