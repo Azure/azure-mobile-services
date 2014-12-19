@@ -446,11 +446,6 @@ static NSOperationQueue *pushQueue_;
     });
 }
 
-+ (NSString *) createKeyFromTable:(NSString *) table queryId:(NSString*) queryId
-{
-    return [NSString stringWithFormat:@"%@_%@", table, queryId];
-}
-
 + (BOOL) dictionary:(NSDictionary *)dictionary containsCaseInsensitiveKey:(NSString *)key
 {
     for (NSString *object in dictionary.allKeys) {

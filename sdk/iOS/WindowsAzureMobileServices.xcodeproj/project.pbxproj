@@ -73,7 +73,7 @@
 		CF4D498A1A2E5CF8006AEB70 /* MSQueuePullOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = CF4D49891A2E5CF8006AEB70 /* MSQueuePullOperation.m */; };
 		CF4D498C1A3253E2006AEB70 /* MSTestWaiter.m in Sources */ = {isa = PBXBuildFile; fileRef = CF4D498B1A3253E2006AEB70 /* MSTestWaiter.m */; };
 		CF4D49921A363537006AEB70 /* settings.plist in Resources */ = {isa = PBXBuildFile; fileRef = CF4D49911A36334C006AEB70 /* settings.plist */; };
-		CF762EC61A1D366E0018C292 /* MSDateOffset.h in Headers */ = {isa = PBXBuildFile; fileRef = CF762EC51A1D366E0018C292 /* MSDateOffset.h */; };
+		CF762EC61A1D366E0018C292 /* MSDateOffset.h in Headers */ = {isa = PBXBuildFile; fileRef = CF762EC51A1D366E0018C292 /* MSDateOffset.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CF762EC91A1D37A40018C292 /* MSDateOffset.m in Sources */ = {isa = PBXBuildFile; fileRef = CF762EC71A1D36950018C292 /* MSDateOffset.m */; };
 		CFAE6E0A1A3B84D700734128 /* MSTableConfigValue.m in Sources */ = {isa = PBXBuildFile; fileRef = CFAE6E091A3B84D700734128 /* MSTableConfigValue.m */; };
 		CFAE6E0C1A3B84E400734128 /* MSTableConfigValue.h in Headers */ = {isa = PBXBuildFile; fileRef = CFAE6E0B1A3B84E400734128 /* MSTableConfigValue.h */; };

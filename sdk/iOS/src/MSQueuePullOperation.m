@@ -212,6 +212,8 @@
     }];
 }
 
+/// Updates deltaToken and deltaTokenEntity with the date stored in self.maxDate. The deltaToken is then
+/// upserted in the syncContext's dataSource. This method must be called on self.dispatchQueue.
 -(void) upsertDeltaTokenOrError:(NSError **)error
 {
     NSDateFormatter *formatter = [MSNaiveISODateFormatter naiveISODateFormatter];
