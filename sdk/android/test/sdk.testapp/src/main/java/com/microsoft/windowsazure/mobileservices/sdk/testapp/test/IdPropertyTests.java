@@ -5228,7 +5228,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
     }
 
 	/*
-	 * public void testLookupWithIntIdTypeAndIntParseableIdResponseContent()
+     * public void testLookupWithIntIdTypeAndIntParseableIdResponseContent()
 	 * throws Throwable { Object[] testIdData =
 	 * IdTestData.NonStringNonIntValidJsonIds;
 	 * 

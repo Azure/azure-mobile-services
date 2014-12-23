@@ -1216,12 +1216,12 @@ class AllOfflineReadyItemsNoVersion {
         return mOfflineReadyItemsNoVersion;
     }
 
-    public void setOfflineReadyItems(OfflineReadyItemNoVersion[] offlineReadyItemsNoVersion) {
-        mOfflineReadyItemsNoVersion = offlineReadyItemsNoVersion;
-    }
-
     public void setOfflineReadyItems(List<OfflineReadyItemNoVersion> offlineReadyItemsNoVersion) {
         mOfflineReadyItemsNoVersion = offlineReadyItemsNoVersion.toArray(mOfflineReadyItemsNoVersion);
+    }
+
+    public void setOfflineReadyItems(OfflineReadyItemNoVersion[] offlineReadyItemsNoVersion) {
+        mOfflineReadyItemsNoVersion = offlineReadyItemsNoVersion;
     }
 }
 

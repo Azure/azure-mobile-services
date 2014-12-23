@@ -57,11 +57,11 @@ public class AllStringIdMovies {
         return mMovies;
     }
 
-    public void setMovies(StringIdMovie[] movies) {
-        mMovies = movies;
-    }
-
     public void setMovies(List<StringIdMovie> movies) {
         mMovies = movies.toArray(mMovies);
+    }
+
+    public void setMovies(StringIdMovie[] movies) {
+        mMovies = movies;
     }
 }

@@ -63,16 +63,16 @@ public class ServiceFilterResponseMock implements ServiceFilterResponse {
         }
     }
 
+    public void setContent(byte[] content) {
+        this.content = content;
+    }
+
     public void setContent(String content) {
         if (content != null) {
             this.content = content.getBytes();
         } else {
             this.content = null;
         }
-    }
-
-    public void setContent(byte[] content) {
-        this.content = content;
     }
 
     @Override
