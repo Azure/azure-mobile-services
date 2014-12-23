@@ -30,80 +30,76 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * A key-lock dictionary that discards no longer referenced locks
- * 
- * @param <T>
- *            type of the key and param to the MultiLock<T> lock
+ *
+ * @param <T> type of the key and param to the MultiLock<T> lock
  */
 public class MultiLockDictionary<T> {
-	/**
-	 * A lock that implements reference count
-	 * 
-	 * @param <T>
-	 *            type of the corresponding key
-	 */
-	public static class MultiLock<T> {
-		private T mKey;
-		private int mCount;
-		private Lock mLock;
+    private Map<T, MultiLock<T>> mMap;
+    private Object sync;
 
-		/**
-		 * Constructor for MultiLock
-		 */
-		public MultiLock() {
-			this.mCount = 0;
-			this.mLock = new ReentrantLock(true);
-		}
-	}
+    /**
+     * Constructor for MultiLockDictionary
+     */
+    public MultiLockDictionary() {
+        this.mMap = new HashMap<T, MultiLock<T>>();
+        this.sync = new Object();
+    }
 
-	private Map<T, MultiLock<T>> mMap;
-	private Object sync;
+    /**
+     * Aquire a lock for the requested key
+     *
+     * @param key the key
+     * @return the lock
+     */
+    public MultiLock<T> lock(T key) {
+        MultiLock<T> multiLock = null;
 
-	/**
-	 * Constructor for MultiLockDictionary
-	 */
-	public MultiLockDictionary() {
-		this.mMap = new HashMap<T, MultiLock<T>>();
-		this.sync = new Object();
-	}
+        synchronized (sync) {
+            if (!this.mMap.containsKey(key)) {
+                this.mMap.put(key, new MultiLock<T>());
+            }
 
-	/**
-	 * Aquire a lock for the requested key
-	 * 
-	 * @param key
-	 *            the key
-	 * @return the lock
-	 */
-	public MultiLock<T> lock(T key) {
-		MultiLock<T> multiLock = null;
+            multiLock = this.mMap.get(key);
+            multiLock.mCount++;
+        }
 
-		synchronized (sync) {
-			if (!this.mMap.containsKey(key)) {
-				this.mMap.put(key, new MultiLock<T>());
-			}
+        multiLock.mLock.lock();
 
-			multiLock = this.mMap.get(key);
-			multiLock.mCount++;
-		}
+        return multiLock;
+    }
 
-		multiLock.mLock.lock();
+    /**
+     * Release the provided lock
+     *
+     * @param multiLock the lock
+     */
+    public void unLock(MultiLock<T> multiLock) {
+        synchronized (sync) {
+            multiLock.mCount--;
+            multiLock.mLock.unlock();
 
-		return multiLock;
-	}
+            if (multiLock.mCount == 0) {
+                this.mMap.remove(multiLock.mKey);
+            }
+        }
+    }
 
-	/**
-	 * Release the provided lock
-	 * 
-	 * @param multiLock
-	 *            the lock
-	 */
-	public void unLock(MultiLock<T> multiLock) {
-		synchronized (sync) {
-			multiLock.mCount--;
-			multiLock.mLock.unlock();
+    /**
+     * A lock that implements reference count
+     *
+     * @param <T> type of the corresponding key
+     */
+    public static class MultiLock<T> {
+        private T mKey;
+        private int mCount;
+        private Lock mLock;
 
-			if (multiLock.mCount == 0) {
-				this.mMap.remove(multiLock.mKey);
-			}
-		}
-	}
+        /**
+         * Constructor for MultiLock
+         */
+        public MultiLock() {
+            this.mCount = 0;
+            this.mLock = new ReentrantLock(true);
+        }
+    }
 }

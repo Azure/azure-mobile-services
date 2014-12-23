@@ -23,185 +23,184 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
+import com.microsoft.windowsazure.mobileservices.table.serialization.DateSerializer;
+
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Locale;
-
-import com.microsoft.windowsazure.mobileservices.table.serialization.DateSerializer;
 
 /**
  * Query node visitor used to generate OData filter.
  */
 class QueryNodeODataWriter implements QueryNodeVisitor<QueryNode> {
-	private StringBuilder mBuilder;
+    private StringBuilder mBuilder;
 
-	/**
-	 * Constructor for QueryNodeODataWriter
-	 */
-	QueryNodeODataWriter() {
-		this.mBuilder = new StringBuilder();
-	}
+    /**
+     * Constructor for QueryNodeODataWriter
+     */
+    QueryNodeODataWriter() {
+        this.mBuilder = new StringBuilder();
+    }
 
-	/**
-	 * Gets the StringBuilder with the OData representation of the node
-	 */
-	StringBuilder getBuilder() {
-		return this.mBuilder;
-	}
+    private static String process(String s) {
+        return "'" + percentEncode(sanitize(s)) + "'";
+    }
 
-	@Override
-	public QueryNode visit(ConstantNode node) {
-		Object value = node.getValue();
-		String constant = value != null ? value.toString() : "null";
+    private static String process(Date date) {
+        return "datetime'" + DateSerializer.serialize(date) + "'";
+    }
 
-		if (value instanceof String) {
-			constant = process((String) value);
-		} else if (value instanceof Date) {
-			constant = process((Date) value);
-		}
+    /**
+     * Sanitizes the string to use in a oData query
+     *
+     * @param s The string to sanitize
+     * @return The sanitized string
+     */
+    private static String sanitize(String s) {
+        if (s != null) {
+            return s.replace("'", "''");
+        } else {
+            return null;
+        }
+    }
 
-		this.mBuilder.append(constant);
+    static String percentEncode(String s) {
+        return percentEncode(s, "");
+    }
 
-		return node;
-	}
+    static String percentEncode(String s, String reserved) {
+        if (s == null) {
+            return null;
+        }
 
-	@Override
-	public QueryNode visit(FieldNode node) {
-		this.mBuilder.append(percentEncode(node.getFieldName(), "!$&'()*+,;=:@")); // odataIdentifier
-		return node;
-	}
+        StringBuilder builder = new StringBuilder(s.length());
 
-	@Override
-	public QueryNode visit(UnaryOperatorNode node) {
-		if (node.getUnaryOperatorKind() == UnaryOperatorKind.Parenthesis) {
-			this.mBuilder.append("(");
+        int escapeStart = -1;
 
-			if (node.getArgument() != null) {
-				node.getArgument().accept(this);
-			}
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
 
-			this.mBuilder.append(")");
-		} else {
-			this.mBuilder.append(node.getUnaryOperatorKind().name().toLowerCase(Locale.getDefault()));
+            if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || "-._~".indexOf(c) != -1 || reserved.indexOf(c) != -1) {
+                if (escapeStart != -1) {
+                    appendHex(builder, s.substring(escapeStart, i));
+                    escapeStart = -1;
+                }
 
-			if (node.getArgument() != null) {
-				this.mBuilder.append("%20");
-				node.getArgument().accept(this);
-			}
-		}
+                builder.append(c);
+            } else if (escapeStart == -1) {
+                escapeStart = i;
+            }
+        }
 
-		return node;
-	}
+        if (escapeStart != -1) {
+            appendHex(builder, s.substring(escapeStart, s.length()));
+        }
 
-	@Override
-	public QueryNode visit(BinaryOperatorNode node) {
-		if (node.getLeftArgument() != null) {
-			node.getLeftArgument().accept(this);
-			this.mBuilder.append("%20");
-		}
+        return builder.toString();
+    }
 
-		this.mBuilder.append(node.getBinaryOperatorKind().name().toLowerCase(Locale.getDefault()));
+    private static void appendHex(StringBuilder builder, String s) {
+        try {
+            for (byte b : s.getBytes("UTF-8")) {
+                appendHex(builder, b);
+            }
+        } catch (UnsupportedEncodingException e) {
+            // UTF-8 should support any string
+        }
+    }
 
-		if (node.getRightArgument() != null) {
-			this.mBuilder.append("%20");
-			node.getRightArgument().accept(this);
-		}
+    private static void appendHex(StringBuilder sb, byte b) {
+        sb.append('%');
+        sb.append(String.format("%02X", b));
+    }
 
-		return node;
-	}
+    /**
+     * Gets the StringBuilder with the OData representation of the node
+     */
+    StringBuilder getBuilder() {
+        return this.mBuilder;
+    }
 
-	@Override
-	public QueryNode visit(FunctionCallNode node) {
-		this.mBuilder.append(node.getFunctionCallKind().name().toLowerCase(Locale.getDefault()));
-		this.mBuilder.append("(");
+    @Override
+    public QueryNode visit(ConstantNode node) {
+        Object value = node.getValue();
+        String constant = value != null ? value.toString() : "null";
 
-		boolean first = true;
+        if (value instanceof String) {
+            constant = process((String) value);
+        } else if (value instanceof Date) {
+            constant = process((Date) value);
+        }
 
-		for (QueryNode argument : node.getArguments()) {
-			if (!first) {
-				this.mBuilder.append(",");
-			} else {
-				first = false;
-			}
+        this.mBuilder.append(constant);
 
-			argument.accept(this);
-		}
+        return node;
+    }
 
-		this.mBuilder.append(")");
+    @Override
+    public QueryNode visit(FieldNode node) {
+        this.mBuilder.append(percentEncode(node.getFieldName(), "!$&'()*+,;=:@")); // odataIdentifier
+        return node;
+    }
 
-		return node;
-	}
+    @Override
+    public QueryNode visit(UnaryOperatorNode node) {
+        if (node.getUnaryOperatorKind() == UnaryOperatorKind.Parenthesis) {
+            this.mBuilder.append("(");
 
-	private static String process(String s) {
-		return "'" + percentEncode(sanitize(s)) + "'";
-	}
+            if (node.getArgument() != null) {
+                node.getArgument().accept(this);
+            }
 
-	private static String process(Date date) {
-		return "datetime'" + DateSerializer.serialize(date) + "'";
-	}
+            this.mBuilder.append(")");
+        } else {
+            this.mBuilder.append(node.getUnaryOperatorKind().name().toLowerCase(Locale.getDefault()));
 
-	/**
-	 * Sanitizes the string to use in a oData query
-	 * 
-	 * @param s
-	 *            The string to sanitize
-	 * @return The sanitized string
-	 */
-	private static String sanitize(String s) {
-		if (s != null) {
-			return s.replace("'", "''");
-		} else {
-			return null;
-		}
-	}
+            if (node.getArgument() != null) {
+                this.mBuilder.append("%20");
+                node.getArgument().accept(this);
+            }
+        }
 
-	static String percentEncode(String s) {
-		return percentEncode(s, "");
-	}
+        return node;
+    }
 
-	static String percentEncode(String s, String reserved) {
-		if (s == null) {
-			return null;
-		}
+    @Override
+    public QueryNode visit(BinaryOperatorNode node) {
+        if (node.getLeftArgument() != null) {
+            node.getLeftArgument().accept(this);
+            this.mBuilder.append("%20");
+        }
 
-		StringBuilder builder = new StringBuilder(s.length());
+        this.mBuilder.append(node.getBinaryOperatorKind().name().toLowerCase(Locale.getDefault()));
 
-		int escapeStart = -1;
+        if (node.getRightArgument() != null) {
+            this.mBuilder.append("%20");
+            node.getRightArgument().accept(this);
+        }
 
-		for (int i = 0; i < s.length(); i++) {
-			char c = s.charAt(i);
+        return node;
+    }
 
-			if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || "-._~".indexOf(c) != -1 || reserved.indexOf(c) != -1) {
-				if (escapeStart != -1) {
-					appendHex(builder, s.substring(escapeStart, i));
-					escapeStart = -1;
-				}
+    @Override
+    public QueryNode visit(FunctionCallNode node) {
+        this.mBuilder.append(node.getFunctionCallKind().name().toLowerCase(Locale.getDefault()));
+        this.mBuilder.append("(");
 
-				builder.append(c);
-			} else if (escapeStart == -1) {
-				escapeStart = i;
-			}
-		}
+        boolean first = true;
 
-		if (escapeStart != -1) {
-			appendHex(builder, s.substring(escapeStart, s.length()));
-		}
+        for (QueryNode argument : node.getArguments()) {
+            if (!first) {
+                this.mBuilder.append(",");
+            } else {
+                first = false;
+            }
 
-		return builder.toString();
-	}
+            argument.accept(this);
+        }
 
-	private static void appendHex(StringBuilder builder, String s) {
-		try {
-			for (byte b : s.getBytes("UTF-8")) {
-				appendHex(builder, b);
-			}
-		} catch (UnsupportedEncodingException e) {
-			// UTF-8 should support any string
-		}
-	}
+        this.mBuilder.append(")");
 
-	private static void appendHex(StringBuilder sb, byte b) {
-		sb.append('%');
-		sb.append(String.format("%02X", b));
-	}
+        return node;
+    }
 }

@@ -19,9 +19,6 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.push;
 
-import java.util.Set;
-import java.util.Map.Entry;
-
 import android.content.Intent;
 
 import com.google.gson.JsonElement;
@@ -34,107 +31,110 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestSt
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.EnhancedPushTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.PushTests;
 
+import java.util.Map.Entry;
+import java.util.Set;
+
 public class GCMMessageHelper {
-	public static GCMMessageCallback getRegistrationCallBack(final TestCase test, final TestExecutionCallback callback, final Class<?> clazz) {
-		return new GCMMessageCallback() {
-			@Override
-			public void timeoutElapsed() {
-				test.log("Error, registration message did not arrive on time");
-				TestResult testResult = new TestResult();
-				testResult.setTestCase(test);
-				testResult.setStatus(TestStatus.Failed);
-				callback.onTestComplete(test, testResult);
-			}
+    public static GCMMessageCallback getRegistrationCallBack(final TestCase test, final TestExecutionCallback callback, final Class<?> clazz) {
+        return new GCMMessageCallback() {
+            @Override
+            public void timeoutElapsed() {
+                test.log("Error, registration message did not arrive on time");
+                TestResult testResult = new TestResult();
+                testResult.setTestCase(test);
+                testResult.setStatus(TestStatus.Failed);
+                callback.onTestComplete(test, testResult);
+            }
 
-			@Override
-			public void registrationMessageReceived(boolean isError, String value) {
-				TestResult testResult = new TestResult();
-				testResult.setTestCase(test);
+            @Override
+            public void registrationMessageReceived(boolean isError, String value) {
+                TestResult testResult = new TestResult();
+                testResult.setTestCase(test);
 
-				if (isError) {
-					test.log("Received error during registration: errorId = " + value);
-					testResult.setStatus(TestStatus.Failed);
-					callback.onTestComplete(test, testResult);
-				} else {
-					if (clazz.getCanonicalName().equals(EnhancedPushTests.class.getCanonicalName())) {
-						EnhancedPushTests.registrationId = value;
-					} else if (clazz.getCanonicalName().equals(PushTests.class.getCanonicalName())) {
-						PushTests.registrationId = value;
-					}
+                if (isError) {
+                    test.log("Received error during registration: errorId = " + value);
+                    testResult.setStatus(TestStatus.Failed);
+                    callback.onTestComplete(test, testResult);
+                } else {
+                    if (clazz.getCanonicalName().equals(EnhancedPushTests.class.getCanonicalName())) {
+                        EnhancedPushTests.registrationId = value;
+                    } else if (clazz.getCanonicalName().equals(PushTests.class.getCanonicalName())) {
+                        PushTests.registrationId = value;
+                    }
 
-					test.log("Registration completed successfully. RegistrationId = " + value);
-					testResult.setStatus(TestStatus.Passed);
-					callback.onTestComplete(test, testResult);
-				}
-			}
-		};
-	}
+                    test.log("Registration completed successfully. RegistrationId = " + value);
+                    testResult.setStatus(TestStatus.Passed);
+                    callback.onTestComplete(test, testResult);
+                }
+            }
+        };
+    }
 
-	public static GCMMessageCallback getPushCallback(TestCase test, String expectedPayload, TestExecutionCallback callback) {
-		return getPushCallback(test, new JsonParser().parse(expectedPayload).getAsJsonObject(), callback);
-	}
+    public static GCMMessageCallback getPushCallback(TestCase test, String expectedPayload, TestExecutionCallback callback) {
+        return getPushCallback(test, new JsonParser().parse(expectedPayload).getAsJsonObject(), callback);
+    }
 
-	public static GCMMessageCallback getPushCallback(final TestCase test, final JsonObject expectedPayload, final TestExecutionCallback callback) {
-		return new GCMMessageCallback() {
+    public static GCMMessageCallback getPushCallback(final TestCase test, final JsonObject expectedPayload, final TestExecutionCallback callback) {
+        return new GCMMessageCallback() {
 
-			@Override
-			public void timeoutElapsed() {
-				
-				test.log("Did not receive push message on time, test failed");
-				TestResult testResult = new TestResult();
-				testResult.setTestCase(test);
-				testResult.setStatus(TestStatus.Failed);
-				callback.onTestComplete(test, testResult);
-			}
+            @Override
+            public void timeoutElapsed() {
 
-			@Override
-			public void pushMessageReceived(Intent intent) {
-				test.log("Received push message: " + intent.toString());
-				TestResult testResult = new TestResult();
-				testResult.setTestCase(test);
-				testResult.setStatus(TestStatus.Passed);
+                test.log("Did not receive push message on time, test failed");
+                TestResult testResult = new TestResult();
+                testResult.setTestCase(test);
+                testResult.setStatus(TestStatus.Failed);
+                callback.onTestComplete(test, testResult);
+            }
 
-				Set<Entry<String, JsonElement>> payloadEntries = expectedPayload.entrySet();
+            @Override
+            public void pushMessageReceived(Intent intent) {
+                test.log("Received push message: " + intent.toString());
+                TestResult testResult = new TestResult();
+                testResult.setTestCase(test);
+                testResult.setStatus(TestStatus.Passed);
 
-				for (Entry<String, JsonElement> entry : payloadEntries) {
-					String key = entry.getKey();
-					String value = entry.getValue().getAsString();
-					String intentExtra = intent.getStringExtra(key);
+                Set<Entry<String, JsonElement>> payloadEntries = expectedPayload.entrySet();
 
-					if (value.equals(intentExtra)) {
-						test.log("Retrieved correct value for key " + key);
-					} else {
-						test.log("Error retrieving value for key " + key + ". Expected: " + value + "; actual: " + intentExtra);
-						testResult.setStatus(TestStatus.Failed);
-					}
-				}
+                for (Entry<String, JsonElement> entry : payloadEntries) {
+                    String key = entry.getKey();
+                    String value = entry.getValue().getAsString();
+                    String intentExtra = intent.getStringExtra(key);
 
-				callback.onTestComplete(test, testResult);
-			}
-		};
-	}
+                    if (value.equals(intentExtra)) {
+                        test.log("Retrieved correct value for key " + key);
+                    } else {
+                        test.log("Error retrieving value for key " + key + ". Expected: " + value + "; actual: " + intentExtra);
+                        testResult.setStatus(TestStatus.Failed);
+                    }
+                }
 
-	public static GCMMessageCallback getNegativePushCallback(final TestCase test, final TestExecutionCallback callback) {
-		return new GCMMessageCallback() {
+                callback.onTestComplete(test, testResult);
+            }
+        };
+    }
 
-			@Override
-			public void timeoutElapsed() {
-				test.log("Did not receive push message after timeout. Correctly unregistered. Test succeded");
-				TestResult testResult = new TestResult();
-				testResult.setTestCase(test);
-				testResult.setStatus(TestStatus.Passed);
-				callback.onTestComplete(test, testResult);
-			}
+    public static GCMMessageCallback getNegativePushCallback(final TestCase test, final TestExecutionCallback callback) {
+        return new GCMMessageCallback() {
 
-			@Override
-			public void pushMessageReceived(Intent intent) {
-				test.log("Received push message: " + intent.toString() + ". Incorrectly unregistered. Test failed.");
-				TestResult testResult = new TestResult();
-				testResult.setTestCase(test);
-				testResult.setStatus(TestStatus.Failed);
+            @Override
+            public void timeoutElapsed() {
+                test.log("Did not receive push message after timeout. Correctly unregistered. Test succeded");
+                TestResult testResult = new TestResult();
+                testResult.setTestCase(test);
+                testResult.setStatus(TestStatus.Passed);
+                callback.onTestComplete(test, testResult);
+            }
 
-				callback.onTestComplete(test, testResult);
-			}
-		};
-	}
+            @Override
+            public void pushMessageReceived(Intent intent) {
+                test.log("Received push message: " + intent.toString() + ". Incorrectly unregistered. Test failed.");
+                TestResult testResult = new TestResult();
+                testResult.setTestCase(test);
+                testResult.setStatus(TestStatus.Failed);
+
+                callback.onTestComplete(test, testResult);
+            }
+        };
+    }
 }

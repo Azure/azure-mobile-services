@@ -23,15 +23,6 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.table.sync.queue;
 
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -43,184 +34,190 @@ import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileSer
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationError;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationKind;
 
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 /**
  * List of all table operation errors
  */
 public class OperationErrorList {
-	/**
-	 * Table that stores operation errors
-	 */
-	private static final String OPERATION_ERROR_TABLE = "__errors";
+    /**
+     * Table that stores operation errors
+     */
+    private static final String OPERATION_ERROR_TABLE = "__errors";
 
-	private MobileServiceLocalStore mStore;
+    private MobileServiceLocalStore mStore;
 
-	private List<TableOperationError> mList;
+    private List<TableOperationError> mList;
 
-	private ReadWriteLock mSyncLock;
+    private ReadWriteLock mSyncLock;
 
-	private OperationErrorList(MobileServiceLocalStore store) {
-		this.mStore = store;
-		this.mList = new ArrayList<TableOperationError>();
-		this.mSyncLock = new ReentrantReadWriteLock(true);
-	}
+    private OperationErrorList(MobileServiceLocalStore store) {
+        this.mStore = store;
+        this.mList = new ArrayList<TableOperationError>();
+        this.mSyncLock = new ReentrantReadWriteLock(true);
+    }
 
-	/**
-	 * Adds a new table operation error
-	 * 
-	 * @param operationError
-	 *            the table operation error
-	 * @throws java.text.ParseException
-	 * @throws MobileServiceLocalStoreException
-	 */
-	public void add(TableOperationError operationError) throws ParseException, MobileServiceLocalStoreException {
-		this.mSyncLock.writeLock().lock();
+    /**
+     * Initializes requirements on the local store
+     *
+     * @param store the local store
+     * @throws MobileServiceLocalStoreException
+     */
+    public static void initializeStore(MobileServiceLocalStore store) throws MobileServiceLocalStoreException {
+        Map<String, ColumnDataType> columns = new HashMap<String, ColumnDataType>();
+        columns.put("id", ColumnDataType.String);
+        columns.put("tablename", ColumnDataType.String);
+        columns.put("itemid", ColumnDataType.String);
+        columns.put("clientitem", ColumnDataType.Other);
+        columns.put("errormessage", ColumnDataType.String);
+        columns.put("statuscode", ColumnDataType.Number);
+        columns.put("serverresponse", ColumnDataType.String);
+        columns.put("serveritem", ColumnDataType.Other);
+        columns.put("__createdat", ColumnDataType.Date);
 
-		try {
-			this.mStore.upsert(OPERATION_ERROR_TABLE, serialize(operationError));
+        store.defineTable(OPERATION_ERROR_TABLE, columns);
+    }
 
-			this.mList.add(operationError);
-		} finally {
-			this.mSyncLock.writeLock().unlock();
-		}
-	}
+    /**
+     * Loads the list of table operation errors from the local store
+     *
+     * @param store the local store
+     * @return the list of table operation errors
+     * @throws java.text.ParseException
+     * @throws MobileServiceLocalStoreException
+     */
+    public static OperationErrorList load(MobileServiceLocalStore store) throws ParseException, MobileServiceLocalStoreException {
+        OperationErrorList opQueue = new OperationErrorList(store);
 
-	/**
-	 * Returns the count of pending table operation errors
-	 */
-	public int countPending() {
-		this.mSyncLock.readLock().lock();
+        JsonElement operations = store.read(QueryOperations.tableName(OPERATION_ERROR_TABLE));
 
-		try {
-			return this.mList.size();
-		} finally {
-			this.mSyncLock.readLock().unlock();
-		}
-	}
+        if (operations.isJsonArray()) {
+            JsonArray array = (JsonArray) operations;
 
-	/**
-	 * Returns the list of all pending table operation errors
-	 */
-	public List<TableOperationError> getAll() {
-		this.mSyncLock.readLock().lock();
+            for (JsonElement element : array) {
+                if (element.isJsonObject()) {
+                    TableOperationError operationError = deserialize((JsonObject) element);
+                    opQueue.mList.add(operationError);
+                }
+            }
+        }
 
-		try {
-			return new ArrayList<TableOperationError>(this.mList);
-		} finally {
-			this.mSyncLock.readLock().unlock();
-		}
-	}
+        return opQueue;
+    }
 
-	/**
-	 * Empties the list of pending table operation errors
-	 * 
-	 * @throws MobileServiceLocalStoreException
-	 */
-	public void clear() throws MobileServiceLocalStoreException {
-		this.mSyncLock.writeLock().lock();
+    private static JsonObject serialize(TableOperationError operationError) throws ParseException {
+        JsonObject element = new JsonObject();
 
-		try {
-			this.mList.clear();
+        element.addProperty("id", operationError.getId());
+        element.addProperty("operationkind", operationError.getOperationKind().getValue());
+        element.addProperty("tablename", operationError.getTableName());
+        element.addProperty("itemid", operationError.getItemId());
 
-			this.mStore.delete(QueryOperations.tableName(OPERATION_ERROR_TABLE));
-		} finally {
-			this.mSyncLock.writeLock().unlock();
-		}
-	}
+        if (operationError.getClientItem() != null) {
+            element.add("clientitem", operationError.getClientItem());
+        }
 
-	/**
-	 * Initializes requirements on the local store
-	 * 
-	 * @param store
-	 *            the local store
-	 * @throws MobileServiceLocalStoreException
-	 */
-	public static void initializeStore(MobileServiceLocalStore store) throws MobileServiceLocalStoreException {
-		Map<String, ColumnDataType> columns = new HashMap<String, ColumnDataType>();
-		columns.put("id", ColumnDataType.String);
-		columns.put("tablename", ColumnDataType.String);
-		columns.put("itemid", ColumnDataType.String);
-		columns.put("clientitem", ColumnDataType.Other);
-		columns.put("errormessage", ColumnDataType.String);
-		columns.put("statuscode", ColumnDataType.Number);
-		columns.put("serverresponse", ColumnDataType.String);
-		columns.put("serveritem", ColumnDataType.Other);
-		columns.put("__createdat", ColumnDataType.Date);
+        element.addProperty("errormessage", operationError.getErrorMessage());
 
-		store.defineTable(OPERATION_ERROR_TABLE, columns);
-	}
+        if (operationError.getStatusCode() != null) {
+            element.addProperty("statuscode", operationError.getStatusCode());
+        }
 
-	/**
-	 * Loads the list of table operation errors from the local store
-	 * 
-	 * @param store
-	 *            the local store
-	 * @return the list of table operation errors
-	 * @throws java.text.ParseException
-	 * @throws MobileServiceLocalStoreException
-	 */
-	public static OperationErrorList load(MobileServiceLocalStore store) throws ParseException, MobileServiceLocalStoreException {
-		OperationErrorList opQueue = new OperationErrorList(store);
+        if (operationError.getServerResponse() != null) {
+            element.addProperty("serverresponse", operationError.getServerResponse());
+        }
 
-		JsonElement operations = store.read(QueryOperations.tableName(OPERATION_ERROR_TABLE));
+        if (operationError.getServerItem() != null) {
+            element.add("serveritem", operationError.getServerItem());
+        }
 
-		if (operations.isJsonArray()) {
-			JsonArray array = (JsonArray) operations;
+        element.addProperty("__createdat", DateSerializer.serialize(operationError.getCreatedAt()));
 
-			for (JsonElement element : array) {
-				if (element.isJsonObject()) {
-					TableOperationError operationError = deserialize((JsonObject) element);
-					opQueue.mList.add(operationError);
-				}
-			}
-		}
+        return element;
+    }
 
-		return opQueue;
-	}
+    private static TableOperationError deserialize(JsonObject element) throws ParseException {
+        String id = element.get("id").getAsString();
+        int operationKind = element.get("operationkind").getAsInt();
+        String tableName = element.get("tablename").getAsString();
+        String itemId = element.get("itemid").getAsString();
+        JsonObject clientItem = element.get("clientitem") != null ? element.get("clientitem").getAsJsonObject() : null;
+        String errorMessage = element.get("errormessage").getAsString();
+        Integer statusCode = element.get("statuscode") != null ? element.get("statuscode").getAsInt() : null;
+        String serverResponse = element.get("serverresponse") != null ? element.get("serverresponse").getAsString() : null;
+        JsonObject serverItem = element.get("serveritem") != null ? element.get("serveritem").getAsJsonObject() : null;
+        Date createdAt = DateSerializer.deserialize(element.get("__createdat").getAsString());
 
-	private static JsonObject serialize(TableOperationError operationError) throws ParseException {
-		JsonObject element = new JsonObject();
+        return TableOperationError.create(id, TableOperationKind.parse(operationKind), tableName, itemId, clientItem, errorMessage, statusCode, serverResponse,
+                serverItem, createdAt);
+    }
 
-		element.addProperty("id", operationError.getId());
-		element.addProperty("operationkind", operationError.getOperationKind().getValue());
-		element.addProperty("tablename", operationError.getTableName());
-		element.addProperty("itemid", operationError.getItemId());
+    /**
+     * Adds a new table operation error
+     *
+     * @param operationError the table operation error
+     * @throws java.text.ParseException
+     * @throws MobileServiceLocalStoreException
+     */
+    public void add(TableOperationError operationError) throws ParseException, MobileServiceLocalStoreException {
+        this.mSyncLock.writeLock().lock();
 
-		if (operationError.getClientItem() != null) {
-			element.add("clientitem", operationError.getClientItem());
-		}
+        try {
+            this.mStore.upsert(OPERATION_ERROR_TABLE, serialize(operationError));
 
-		element.addProperty("errormessage", operationError.getErrorMessage());
+            this.mList.add(operationError);
+        } finally {
+            this.mSyncLock.writeLock().unlock();
+        }
+    }
 
-		if (operationError.getStatusCode() != null) {
-			element.addProperty("statuscode", operationError.getStatusCode());
-		}
+    /**
+     * Returns the count of pending table operation errors
+     */
+    public int countPending() {
+        this.mSyncLock.readLock().lock();
 
-		if (operationError.getServerResponse() != null) {
-			element.addProperty("serverresponse", operationError.getServerResponse());
-		}
+        try {
+            return this.mList.size();
+        } finally {
+            this.mSyncLock.readLock().unlock();
+        }
+    }
 
-		if (operationError.getServerItem() != null) {
-			element.add("serveritem", operationError.getServerItem());
-		}
+    /**
+     * Returns the list of all pending table operation errors
+     */
+    public List<TableOperationError> getAll() {
+        this.mSyncLock.readLock().lock();
 
-		element.addProperty("__createdat", DateSerializer.serialize(operationError.getCreatedAt()));
+        try {
+            return new ArrayList<TableOperationError>(this.mList);
+        } finally {
+            this.mSyncLock.readLock().unlock();
+        }
+    }
 
-		return element;
-	}
+    /**
+     * Empties the list of pending table operation errors
+     *
+     * @throws MobileServiceLocalStoreException
+     */
+    public void clear() throws MobileServiceLocalStoreException {
+        this.mSyncLock.writeLock().lock();
 
-	private static TableOperationError deserialize(JsonObject element) throws ParseException {
-		String id = element.get("id").getAsString();
-		int operationKind = element.get("operationkind").getAsInt();
-		String tableName = element.get("tablename").getAsString();
-		String itemId = element.get("itemid").getAsString();
-		JsonObject clientItem = element.get("clientitem") != null ? element.get("clientitem").getAsJsonObject() : null;
-		String errorMessage = element.get("errormessage").getAsString();
-		Integer statusCode = element.get("statuscode") != null ? element.get("statuscode").getAsInt() : null;
-		String serverResponse = element.get("serverresponse") != null ? element.get("serverresponse").getAsString() : null;
-		JsonObject serverItem = element.get("serveritem") != null ? element.get("serveritem").getAsJsonObject() : null;
-		Date createdAt = DateSerializer.deserialize(element.get("__createdat").getAsString());
+        try {
+            this.mList.clear();
 
-		return TableOperationError.create(id, TableOperationKind.parse(operationKind), tableName, itemId, clientItem, errorMessage, statusCode, serverResponse,
-				serverItem, createdAt);
-	}
+            this.mStore.delete(QueryOperations.tableName(OPERATION_ERROR_TABLE));
+        } finally {
+            this.mSyncLock.writeLock().unlock();
+        }
+    }
 }

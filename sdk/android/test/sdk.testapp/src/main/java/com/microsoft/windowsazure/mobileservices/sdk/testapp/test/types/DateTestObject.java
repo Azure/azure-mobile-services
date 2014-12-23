@@ -22,26 +22,26 @@ package com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types;
 import java.util.Date;
 
 public class DateTestObject {
-	private int id;
-	private Date date;
+    private int id;
+    private Date date;
 
-	public DateTestObject(Date date) {
-		this.date = date;
-	}
+    public DateTestObject(Date date) {
+        this.date = date;
+    }
 
-	public Date getDate() {
-		return date;
-	}
+    public Date getDate() {
+        return date;
+    }
 
-	public void setDate(Date date) {
-		this.date = date;
-	}
+    public void setDate(Date date) {
+        this.date = date;
+    }
 
-	public int getId() {
-		return id;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 }

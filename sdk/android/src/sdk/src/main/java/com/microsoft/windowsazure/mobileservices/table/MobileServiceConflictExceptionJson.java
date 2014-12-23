@@ -28,21 +28,19 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 
 public class MobileServiceConflictExceptionJson extends MobileServiceExceptionBase {
 
-	/**
-	 * UID used for serialization
-	 */
-	private static final long serialVersionUID = 4489352410883725274L;
+    /**
+     * UID used for serialization
+     */
+    private static final long serialVersionUID = 4489352410883725274L;
 
-	/**
-	 * Initializes a new instance of the
-	 * MobileServiceConflictExceptionJson class.
-	 * 
-	 * @param throwable
-	 *            The inner exception.
-	 * @param value
-	 *            The current instance from server that the conflict occurred for.
-	 */
-	public MobileServiceConflictExceptionJson(MobileServiceException msException, JsonObject value) {
-		super(msException, value);
-	}
+    /**
+     * Initializes a new instance of the
+     * MobileServiceConflictExceptionJson class.
+     *
+     * @param throwable The inner exception.
+     * @param value     The current instance from server that the conflict occurred for.
+     */
+    public MobileServiceConflictExceptionJson(MobileServiceException msException, JsonObject value) {
+        super(msException, value);
+    }
 }

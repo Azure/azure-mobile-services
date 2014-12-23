@@ -27,5 +27,5 @@ package com.microsoft.windowsazure.mobileservices.table.query;
  * Sort order values
  */
 public enum QueryOrder {
-	Ascending, Descending
+    Ascending, Descending
 }

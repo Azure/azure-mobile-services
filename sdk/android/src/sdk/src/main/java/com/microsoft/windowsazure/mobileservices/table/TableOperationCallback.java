@@ -26,22 +26,17 @@ package com.microsoft.windowsazure.mobileservices.table;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
 /**
- * 
  * Callback used after a TableOperation is executed
- * 
- * @param <E>
- *            The table's entity
+ *
+ * @param <E> The table's entity
  */
 public interface TableOperationCallback<E> {
-	/**
-	 * Method to call if the operation finishes successfully
-	 * 
-	 * @param entity
-	 *            The obtained entity
-	 * @param exception
-	 *            An exception representing the error, in case there was one
-	 * @param response
-	 *            Response object
-	 */
-	public void onCompleted(E entity, Exception exception, ServiceFilterResponse response);
+    /**
+     * Method to call if the operation finishes successfully
+     *
+     * @param entity    The obtained entity
+     * @param exception An exception representing the error, in case there was one
+     * @param response  Response object
+     */
+    public void onCompleted(E entity, Exception exception, ServiceFilterResponse response);
 }

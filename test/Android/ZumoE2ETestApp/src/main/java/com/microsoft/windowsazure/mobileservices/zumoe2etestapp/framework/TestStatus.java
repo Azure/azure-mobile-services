@@ -20,5 +20,5 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework;
 
 public enum TestStatus {
-	NotRun, Running, Failed, Passed, MissingFeatures
+    NotRun, Running, Failed, Passed, MissingFeatures
 }

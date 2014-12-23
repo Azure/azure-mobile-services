@@ -23,34 +23,32 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.table;
 
+import android.util.Pair;
+
 import java.util.EnumSet;
 import java.util.List;
-
-import android.util.Pair;
 
 /**
  * Interface used to decouple the table implementation from the query writers.
  */
 public interface MobileServiceTableSystemPropertiesProvider {
-	/**
-	 * Returns the set of enabled System Properties
-	 */
-	public EnumSet<MobileServiceSystemProperty> getSystemProperties();
+    /**
+     * Returns the set of enabled System Properties
+     */
+    public EnumSet<MobileServiceSystemProperty> getSystemProperties();
 
-	/**
-	 * Sets the set of enabled system properties
-	 */
-	public void setSystemProperties(EnumSet<MobileServiceSystemProperty> systemProperties);
+    /**
+     * Sets the set of enabled system properties
+     */
+    public void setSystemProperties(EnumSet<MobileServiceSystemProperty> systemProperties);
 
-	/**
-	 * Adds the tables requested system properties to the parameters collection.
-	 * 
-	 * @param systemProperties
-	 *            The system properties to add.
-	 * @param parameters
-	 *            The parameters collection.
-	 * @return The parameters collection with any requested system properties
-	 *         included.
-	 */
-	List<Pair<String, String>> addSystemProperties(EnumSet<MobileServiceSystemProperty> systemProperties, List<Pair<String, String>> existingProperties);
+    /**
+     * Adds the tables requested system properties to the parameters collection.
+     *
+     * @param systemProperties The system properties to add.
+     * @param parameters       The parameters collection.
+     * @return The parameters collection with any requested system properties
+     * included.
+     */
+    List<Pair<String, String>> addSystemProperties(EnumSet<MobileServiceSystemProperty> systemProperties, List<Pair<String, String>> existingProperties);
 }

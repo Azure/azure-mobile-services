@@ -21,9 +21,9 @@ package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework;
 
 public class ExpectedValueException extends Exception {
 
-	private static final long serialVersionUID = -1566510176488795332L;
+    private static final long serialVersionUID = -1566510176488795332L;
 
-	public ExpectedValueException(Object expected, Object actual) {
-		super(String.format("Expected %s - Actual %s", expected != null ? expected.toString() : "null", actual != null ? actual.toString() : "null"));
-	}
+    public ExpectedValueException(Object expected, Object actual) {
+        super(String.format("Expected %s - Actual %s", expected != null ? expected.toString() : "null", actual != null ? actual.toString() : "null"));
+    }
 }

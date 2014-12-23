@@ -30,73 +30,67 @@ import java.util.UUID;
  * Class representing an update operation against remote table.
  */
 public class UpdateOperation implements TableOperation {
-	private String mId;
-	private String mTableName;
-	private String mItemId;
-	private Date mCreatedAt;
+    private String mId;
+    private String mTableName;
+    private String mItemId;
+    private Date mCreatedAt;
 
-	/**
-	 * Constructor for UpdateOperation
-	 * 
-	 * @param tableName
-	 *            the table name
-	 * @param itemId
-	 *            the item id
-	 */
-	public UpdateOperation(String tableName, String itemId) {
-		this.mId = UUID.randomUUID().toString();
-		this.mTableName = tableName;
-		this.mItemId = itemId;
-		this.mCreatedAt = new Date();
-	}
+    /**
+     * Constructor for UpdateOperation
+     *
+     * @param tableName the table name
+     * @param itemId    the item id
+     */
+    public UpdateOperation(String tableName, String itemId) {
+        this.mId = UUID.randomUUID().toString();
+        this.mTableName = tableName;
+        this.mItemId = itemId;
+        this.mCreatedAt = new Date();
+    }
 
-	@Override
-	public String getId() {
-		return this.mId;
-	}
+    /**
+     * Create a new UpdateOperation
+     *
+     * @param id        the table operation id
+     * @param tableName the table name
+     * @param itemId    the item id
+     * @param createdAt the creation date of the table operation
+     * @return the UpdateOperation
+     */
+    public static UpdateOperation create(String id, String tableName, String itemId, Date createdAt) {
+        UpdateOperation operation = new UpdateOperation(tableName, itemId);
+        operation.mId = id;
+        operation.mCreatedAt = createdAt;
+        return operation;
+    }
 
-	@Override
-	public TableOperationKind getKind() {
-		return TableOperationKind.Update;
-	}
+    @Override
+    public String getId() {
+        return this.mId;
+    }
 
-	@Override
-	public String getTableName() {
-		return this.mTableName;
-	}
+    @Override
+    public TableOperationKind getKind() {
+        return TableOperationKind.Update;
+    }
 
-	@Override
-	public String getItemId() {
-		return this.mItemId;
-	}
+    @Override
+    public String getTableName() {
+        return this.mTableName;
+    }
 
-	@Override
-	public Date getCreatedAt() {
-		return this.mCreatedAt;
-	}
+    @Override
+    public String getItemId() {
+        return this.mItemId;
+    }
 
-	@Override
-	public <T> T accept(TableOperationVisitor<T> visitor) throws Throwable {
-		return visitor.visit(this);
-	}
+    @Override
+    public Date getCreatedAt() {
+        return this.mCreatedAt;
+    }
 
-	/**
-	 * Create a new UpdateOperation
-	 * 
-	 * @param id
-	 *            the table operation id
-	 * @param tableName
-	 *            the table name
-	 * @param itemId
-	 *            the item id
-	 * @param createdAt
-	 *            the creation date of the table operation
-	 * @return the UpdateOperation
-	 */
-	public static UpdateOperation create(String id, String tableName, String itemId, Date createdAt) {
-		UpdateOperation operation = new UpdateOperation(tableName, itemId);
-		operation.mId = id;
-		operation.mCreatedAt = createdAt;
-		return operation;
-	}
+    @Override
+    public <T> T accept(TableOperationVisitor<T> visitor) throws Throwable {
+        return visitor.visit(this);
+    }
 }

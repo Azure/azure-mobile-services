@@ -20,5 +20,5 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types;
 
 public enum EnumType {
-	Empty, First, Second, Third
+    Empty, First, Second, Third
 }

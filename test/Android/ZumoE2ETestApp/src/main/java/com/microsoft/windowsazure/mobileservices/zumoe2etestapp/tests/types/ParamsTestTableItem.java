@@ -23,18 +23,18 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 public class ParamsTestTableItem {
-	public int id;
-	public String parameters;
+    public int id;
+    public String parameters;
 
-	public ParamsTestTableItem() {
-		this(0);
-	}
+    public ParamsTestTableItem() {
+        this(0);
+    }
 
-	public ParamsTestTableItem(int id) {
-		this.id = id;
-	}
+    public ParamsTestTableItem(int id) {
+        this.id = id;
+    }
 
-	public JsonObject getParameters() {
-		return new JsonParser().parse(parameters).getAsJsonObject();
-	}
+    public JsonObject getParameters() {
+        return new JsonParser().parse(parameters).getAsJsonObject();
+    }
 }

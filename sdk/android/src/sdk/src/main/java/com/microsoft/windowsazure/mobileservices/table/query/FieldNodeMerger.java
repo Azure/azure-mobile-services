@@ -27,46 +27,45 @@ package com.microsoft.windowsazure.mobileservices.table.query;
  * Class that represents a field node merger
  */
 class FieldNodeMerger implements QueryNodeVisitor<QueryNode> {
-	private FieldNode mLeftNode;
+    private FieldNode mLeftNode;
 
-	/**
-	 * Constructor for FieldNodeMerger
-	 * 
-	 * @param leftNode
-	 *            The left field node
-	 */
-	FieldNodeMerger(FieldNode leftNode) {
-		this.mLeftNode = leftNode;
-	}
+    /**
+     * Constructor for FieldNodeMerger
+     *
+     * @param leftNode The left field node
+     */
+    FieldNodeMerger(FieldNode leftNode) {
+        this.mLeftNode = leftNode;
+    }
 
-	@Override
-	public QueryNode visit(ConstantNode rightNode) {
-		throw QueryNodeMerger.getInvalidSequenceException();
-	}
+    @Override
+    public QueryNode visit(ConstantNode rightNode) {
+        throw QueryNodeMerger.getInvalidSequenceException();
+    }
 
-	@Override
-	public QueryNode visit(FieldNode rightNode) {
-		throw QueryNodeMerger.getInvalidSequenceException();
-	}
+    @Override
+    public QueryNode visit(FieldNode rightNode) {
+        throw QueryNodeMerger.getInvalidSequenceException();
+    }
 
-	@Override
-	public QueryNode visit(UnaryOperatorNode rightNode) {
-		throw QueryNodeMerger.getInvalidSequenceException();
-	}
+    @Override
+    public QueryNode visit(UnaryOperatorNode rightNode) {
+        throw QueryNodeMerger.getInvalidSequenceException();
+    }
 
-	@Override
-	public QueryNode visit(BinaryOperatorNode rightNode) {
-		if (rightNode.getLeftArgument() != null) {
-			throw QueryNodeMerger.getInvalidSequenceException();
-		}
+    @Override
+    public QueryNode visit(BinaryOperatorNode rightNode) {
+        if (rightNode.getLeftArgument() != null) {
+            throw QueryNodeMerger.getInvalidSequenceException();
+        }
 
-		rightNode.setLeftArgument(this.mLeftNode);
+        rightNode.setLeftArgument(this.mLeftNode);
 
-		return rightNode;
-	}
+        return rightNode;
+    }
 
-	@Override
-	public QueryNode visit(FunctionCallNode rightNode) {
-		throw QueryNodeMerger.getInvalidSequenceException();
-	}
+    @Override
+    public QueryNode visit(FunctionCallNode rightNode) {
+        throw QueryNodeMerger.getInvalidSequenceException();
+    }
 }

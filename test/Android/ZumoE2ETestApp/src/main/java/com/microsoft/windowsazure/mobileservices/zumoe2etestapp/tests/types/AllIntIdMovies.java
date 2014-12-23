@@ -19,48 +19,48 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types;
 
-import java.util.List;
-
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+
 public class AllIntIdMovies {
-	private int id;
+    private int id;
 
-	@SerializedName("status")
-	private String mStatus;
+    @SerializedName("status")
+    private String mStatus;
 
-	@SerializedName("movies")
-	private IntIdMovie[] mMovies;
+    @SerializedName("movies")
+    private IntIdMovie[] mMovies;
 
-	public AllIntIdMovies() {
-		mMovies = new IntIdMovie[0];
-	}
+    public AllIntIdMovies() {
+        mMovies = new IntIdMovie[0];
+    }
 
-	public int getId() {
-		return id;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public String getStatus() {
-		return mStatus;
-	}
+    public String getStatus() {
+        return mStatus;
+    }
 
-	public void setStatus(String status) {
-		mStatus = status;
-	}
+    public void setStatus(String status) {
+        mStatus = status;
+    }
 
-	public IntIdMovie[] getMovies() {
-		return mMovies;
-	}
+    public IntIdMovie[] getMovies() {
+        return mMovies;
+    }
 
-	public void setMovies(IntIdMovie[] movies) {
-		mMovies = movies;
-	}
+    public void setMovies(IntIdMovie[] movies) {
+        mMovies = movies;
+    }
 
-	public void setMovies(List<IntIdMovie> movies) {
-		mMovies = movies.toArray(mMovies);
-	}
+    public void setMovies(List<IntIdMovie> movies) {
+        mMovies = movies.toArray(mMovies);
+    }
 }

@@ -27,48 +27,47 @@ package com.microsoft.windowsazure.mobileservices.table.query;
  * Class that represents a query node merger
  */
 class QueryNodeMerger implements QueryNodeVisitor<QueryNode> {
-	private QueryNode mRightNode;
+    private QueryNode mRightNode;
 
-	/**
-	 * Constructor for QueryNodeMerger
-	 * 
-	 * @param rightNode
-	 *            The right query node
-	 */
-	QueryNodeMerger(QueryNode rightNode) {
-		this.mRightNode = rightNode;
-	}
+    /**
+     * Constructor for QueryNodeMerger
+     *
+     * @param rightNode The right query node
+     */
+    QueryNodeMerger(QueryNode rightNode) {
+        this.mRightNode = rightNode;
+    }
 
-	@Override
-	public QueryNode visit(ConstantNode leftNode) {
-		return mRightNode.accept(new ConstantNodeMerger(leftNode));
-	}
+    /**
+     * Gets a QueryException that represents an invalid sequence of query
+     * operations
+     */
+    static QueryException getInvalidSequenceException() {
+        return new QueryException("Invalid query operations sequence.");
+    }
 
-	@Override
-	public QueryNode visit(FieldNode leftNode) {
-		return mRightNode.accept(new FieldNodeMerger(leftNode));
-	}
+    @Override
+    public QueryNode visit(ConstantNode leftNode) {
+        return mRightNode.accept(new ConstantNodeMerger(leftNode));
+    }
 
-	@Override
-	public QueryNode visit(UnaryOperatorNode leftNode) {
-		return mRightNode.accept(new UnaryOperatorNodeMerger(leftNode));
-	}
+    @Override
+    public QueryNode visit(FieldNode leftNode) {
+        return mRightNode.accept(new FieldNodeMerger(leftNode));
+    }
 
-	@Override
-	public QueryNode visit(BinaryOperatorNode leftNode) {
-		return mRightNode.accept(new BinaryOperatorNodeMerger(leftNode));
-	}
+    @Override
+    public QueryNode visit(UnaryOperatorNode leftNode) {
+        return mRightNode.accept(new UnaryOperatorNodeMerger(leftNode));
+    }
 
-	@Override
-	public QueryNode visit(FunctionCallNode leftNode) {
-		return mRightNode.accept(new FunctionCallNodeMerger(leftNode));
-	}
+    @Override
+    public QueryNode visit(BinaryOperatorNode leftNode) {
+        return mRightNode.accept(new BinaryOperatorNodeMerger(leftNode));
+    }
 
-	/**
-	 * Gets a QueryException that represents an invalid sequence of query
-	 * operations
-	 */
-	static QueryException getInvalidSequenceException() {
-		return new QueryException("Invalid query operations sequence.");
-	}
+    @Override
+    public QueryNode visit(FunctionCallNode leftNode) {
+        return mRightNode.accept(new FunctionCallNodeMerger(leftNode));
+    }
 }

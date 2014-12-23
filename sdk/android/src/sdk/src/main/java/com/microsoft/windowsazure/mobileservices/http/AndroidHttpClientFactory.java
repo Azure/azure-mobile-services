@@ -30,10 +30,10 @@ import android.net.http.AndroidHttpClient;
  */
 public interface AndroidHttpClientFactory {
 
-	/**
-	 * Creates a new AndroidHttpClient
-	 * 
-	 * @return A new AndroidHttpClient
-	 */
-	public AndroidHttpClient createAndroidHttpClient();
+    /**
+     * Creates a new AndroidHttpClient
+     *
+     * @return A new AndroidHttpClient
+     */
+    public AndroidHttpClient createAndroidHttpClient();
 }

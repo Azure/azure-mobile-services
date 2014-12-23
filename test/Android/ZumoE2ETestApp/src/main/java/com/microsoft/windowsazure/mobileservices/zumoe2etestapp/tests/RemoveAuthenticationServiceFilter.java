@@ -27,13 +27,13 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
 public class RemoveAuthenticationServiceFilter implements ServiceFilter {
 
-	@Override
-	public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, 
-			NextServiceFilterCallback nextServiceFilterCallback) {
-    			
-		request.removeHeader("X-ZUMO-AUTH");
-		request.removeHeader("X-ZUMO-APPLICATION");
-		
-		return nextServiceFilterCallback.onNext(request);
-	}
+    @Override
+    public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request,
+                                                                 NextServiceFilterCallback nextServiceFilterCallback) {
+
+        request.removeHeader("X-ZUMO-AUTH");
+        request.removeHeader("X-ZUMO-APPLICATION");
+
+        return nextServiceFilterCallback.onNext(request);
+    }
 }

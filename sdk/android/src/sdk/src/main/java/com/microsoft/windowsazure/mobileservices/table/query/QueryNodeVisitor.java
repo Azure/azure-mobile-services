@@ -28,48 +28,43 @@ package com.microsoft.windowsazure.mobileservices.table.query;
  */
 interface QueryNodeVisitor<E> {
 
-	/**
-	 * Visit a constant node.
-	 * 
-	 * @param nodeIn
-	 *            The node to visit
-	 * @return Defined by the implementer.
-	 */
-	E visit(ConstantNode nodeIn);
+    /**
+     * Visit a constant node.
+     *
+     * @param nodeIn The node to visit
+     * @return Defined by the implementer.
+     */
+    E visit(ConstantNode nodeIn);
 
-	/**
-	 * Visit a field node.
-	 * 
-	 * @param nodeIn
-	 *            The node to visit
-	 * @return Defined by the implementer.
-	 */
-	E visit(FieldNode nodeIn);
+    /**
+     * Visit a field node.
+     *
+     * @param nodeIn The node to visit
+     * @return Defined by the implementer.
+     */
+    E visit(FieldNode nodeIn);
 
-	/**
-	 * Visit a unary operator node.
-	 * 
-	 * @param nodeIn
-	 *            The node to visit
-	 * @return Defined by the implementer.
-	 */
-	E visit(UnaryOperatorNode nodeIn);
+    /**
+     * Visit a unary operator node.
+     *
+     * @param nodeIn The node to visit
+     * @return Defined by the implementer.
+     */
+    E visit(UnaryOperatorNode nodeIn);
 
-	/**
-	 * Visit a binary operator node.
-	 * 
-	 * @param nodeIn
-	 *            The node to visit
-	 * @return Defined by the implementer.
-	 */
-	E visit(BinaryOperatorNode nodeIn);
+    /**
+     * Visit a binary operator node.
+     *
+     * @param nodeIn The node to visit
+     * @return Defined by the implementer.
+     */
+    E visit(BinaryOperatorNode nodeIn);
 
-	/**
-	 * Visit a function call node.
-	 * 
-	 * @param nodeIn
-	 *            The node to visit
-	 * @return Defined by the implementer.
-	 */
-	E visit(FunctionCallNode nodeIn);
+    /**
+     * Visit a function call node.
+     *
+     * @param nodeIn The node to visit
+     * @return Defined by the implementer.
+     */
+    E visit(FunctionCallNode nodeIn);
 }

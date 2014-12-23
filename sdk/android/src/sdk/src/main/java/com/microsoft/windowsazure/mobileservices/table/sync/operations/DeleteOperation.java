@@ -30,73 +30,67 @@ import java.util.UUID;
  * Class representing a delete operation against remote table.
  */
 public class DeleteOperation implements TableOperation {
-	private String mId;
-	private String mTableName;
-	private String mItemId;
-	private Date mCreatedAt;
+    private String mId;
+    private String mTableName;
+    private String mItemId;
+    private Date mCreatedAt;
 
-	/**
-	 * Constructor for DeleteOperation
-	 * 
-	 * @param tableName
-	 *            the table name
-	 * @param itemId
-	 *            the item id
-	 */
-	public DeleteOperation(String tableName, String itemId) {
-		this.mId = UUID.randomUUID().toString();
-		this.mTableName = tableName;
-		this.mItemId = itemId;
-		this.mCreatedAt = new Date();
-	}
+    /**
+     * Constructor for DeleteOperation
+     *
+     * @param tableName the table name
+     * @param itemId    the item id
+     */
+    public DeleteOperation(String tableName, String itemId) {
+        this.mId = UUID.randomUUID().toString();
+        this.mTableName = tableName;
+        this.mItemId = itemId;
+        this.mCreatedAt = new Date();
+    }
 
-	@Override
-	public String getId() {
-		return this.mId;
-	}
+    /**
+     * Create a new DeleteOperation
+     *
+     * @param id        the table operation id
+     * @param tableName the table name
+     * @param itemId    the item id
+     * @param createdAt the creation date of the table operation
+     * @return the DeleteOperation
+     */
+    public static DeleteOperation create(String id, String tableName, String itemId, Date createdAt) {
+        DeleteOperation operation = new DeleteOperation(tableName, itemId);
+        operation.mId = id;
+        operation.mCreatedAt = createdAt;
+        return operation;
+    }
 
-	@Override
-	public TableOperationKind getKind() {
-		return TableOperationKind.Delete;
-	}
+    @Override
+    public String getId() {
+        return this.mId;
+    }
 
-	@Override
-	public String getTableName() {
-		return this.mTableName;
-	}
+    @Override
+    public TableOperationKind getKind() {
+        return TableOperationKind.Delete;
+    }
 
-	@Override
-	public String getItemId() {
-		return this.mItemId;
-	}
+    @Override
+    public String getTableName() {
+        return this.mTableName;
+    }
 
-	@Override
-	public Date getCreatedAt() {
-		return this.mCreatedAt;
-	}
+    @Override
+    public String getItemId() {
+        return this.mItemId;
+    }
 
-	@Override
-	public <T> T accept(TableOperationVisitor<T> visitor) throws Throwable {
-		return visitor.visit(this);
-	}
+    @Override
+    public Date getCreatedAt() {
+        return this.mCreatedAt;
+    }
 
-	/**
-	 * Create a new DeleteOperation
-	 * 
-	 * @param id
-	 *            the table operation id
-	 * @param tableName
-	 *            the table name
-	 * @param itemId
-	 *            the item id
-	 * @param createdAt
-	 *            the creation date of the table operation
-	 * @return the DeleteOperation
-	 */
-	public static DeleteOperation create(String id, String tableName, String itemId, Date createdAt) {
-		DeleteOperation operation = new DeleteOperation(tableName, itemId);
-		operation.mId = id;
-		operation.mCreatedAt = createdAt;
-		return operation;
-	}
+    @Override
+    public <T> T accept(TableOperationVisitor<T> visitor) throws Throwable {
+        return visitor.visit(this);
+    }
 }

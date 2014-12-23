@@ -19,119 +19,119 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.push;
 
+import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import android.content.Intent;
-import android.os.Handler;
-import android.os.Looper;
-
 public class GCMMessageManager {
-	static {
-		instance = new GCMMessageManager();
-	}
+    static {
+        instance = new GCMMessageManager();
+    }
 
-	public final static GCMMessageManager instance;
+    public final static GCMMessageManager instance;
 
-	private List<GCMRegistrationMessage> registrationMessages;
-	private List<Intent> pushMessages;
+    private List<GCMRegistrationMessage> registrationMessages;
+    private List<Intent> pushMessages;
 
-	private GCMMessageManager() {
-		pushMessages = new ArrayList<Intent>();
-		registrationMessages = new ArrayList<GCMRegistrationMessage>();
-	}
+    private GCMMessageManager() {
+        pushMessages = new ArrayList<Intent>();
+        registrationMessages = new ArrayList<GCMRegistrationMessage>();
+    }
 
-	public synchronized void newRegistrationMessage(boolean isError, String value) {
-		registrationMessages.add(new GCMRegistrationMessage(value, isError));
-	}
+    public synchronized void newRegistrationMessage(boolean isError, String value) {
+        registrationMessages.add(new GCMRegistrationMessage(value, isError));
+    }
 
-	public synchronized void newPushMessage(Intent intent) {
-		pushMessages.add(intent);
-	}
+    public synchronized void newPushMessage(Intent intent) {
+        pushMessages.add(intent);
+    }
 
-	public synchronized void waitForRegistrationMessage(long milliseconds, final GCMMessageCallback callback) {
-		if (!registrationMessages.isEmpty()) {
-			GCMRegistrationMessage message = registrationMessages.get(0);
-			registrationMessages.remove(0);
-			callback.registrationMessageReceived(message.isError, message.value);
-		} else {
-			Looper looper = Looper.myLooper();
-			if (looper == null) {
-				looper = Looper.getMainLooper();
-			}
+    public synchronized void waitForRegistrationMessage(long milliseconds, final GCMMessageCallback callback) {
+        if (!registrationMessages.isEmpty()) {
+            GCMRegistrationMessage message = registrationMessages.get(0);
+            registrationMessages.remove(0);
+            callback.registrationMessageReceived(message.isError, message.value);
+        } else {
+            Looper looper = Looper.myLooper();
+            if (looper == null) {
+                looper = Looper.getMainLooper();
+            }
 
-			final Handler handler = new Handler(looper);
+            final Handler handler = new Handler(looper);
 
-			TimerTask task = new TimerTask() {
+            TimerTask task = new TimerTask() {
 
-				@Override
-				public void run() {
-					handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    handler.post(new Runnable() {
 
-						@Override
-						public void run() {
-							if (!registrationMessages.isEmpty()) {
-								GCMRegistrationMessage message = registrationMessages.get(0);
-								registrationMessages.remove(0);
-								callback.registrationMessageReceived(message.isError, message.value);
-							} else {
-								callback.timeoutElapsed();
-							}
-						}
-					});
-				}
-			};
+                        @Override
+                        public void run() {
+                            if (!registrationMessages.isEmpty()) {
+                                GCMRegistrationMessage message = registrationMessages.get(0);
+                                registrationMessages.remove(0);
+                                callback.registrationMessageReceived(message.isError, message.value);
+                            } else {
+                                callback.timeoutElapsed();
+                            }
+                        }
+                    });
+                }
+            };
 
-			Timer timer = new Timer();
-			timer.schedule(task, milliseconds);
-		}
-	}
+            Timer timer = new Timer();
+            timer.schedule(task, milliseconds);
+        }
+    }
 
-	public void waitForPushMessage(long milliseconds, final GCMMessageCallback callback) {
-		if (!pushMessages.isEmpty()) {
-			Intent message = pushMessages.get(0);
-			pushMessages.remove(0);
-			callback.pushMessageReceived(message);
-		} else {
-			Looper looper = Looper.myLooper();
-			if (looper == null) {
-				looper = Looper.getMainLooper();
-			}
+    public void waitForPushMessage(long milliseconds, final GCMMessageCallback callback) {
+        if (!pushMessages.isEmpty()) {
+            Intent message = pushMessages.get(0);
+            pushMessages.remove(0);
+            callback.pushMessageReceived(message);
+        } else {
+            Looper looper = Looper.myLooper();
+            if (looper == null) {
+                looper = Looper.getMainLooper();
+            }
 
-			final Handler handler = new Handler(looper);
+            final Handler handler = new Handler(looper);
 
-			TimerTask task = new TimerTask() {
+            TimerTask task = new TimerTask() {
 
-				@Override
-				public void run() {
-					handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    handler.post(new Runnable() {
 
-						@Override
-						public void run() {
-							if (!pushMessages.isEmpty()) {
-								Intent message = pushMessages.get(0);
-								pushMessages.remove(0);
-								callback.pushMessageReceived(message);
-							} else {
-								callback.timeoutElapsed();
-							}
-						}
-					});
-				}
-			};
+                        @Override
+                        public void run() {
+                            if (!pushMessages.isEmpty()) {
+                                Intent message = pushMessages.get(0);
+                                pushMessages.remove(0);
+                                callback.pushMessageReceived(message);
+                            } else {
+                                callback.timeoutElapsed();
+                            }
+                        }
+                    });
+                }
+            };
 
-			Timer timer = new Timer();
-			timer.schedule(task, milliseconds);
-		}
-	}
+            Timer timer = new Timer();
+            timer.schedule(task, milliseconds);
+        }
+    }
 
-	public void clearRegistrationMessages() {
-		registrationMessages.clear();
-	}
+    public void clearRegistrationMessages() {
+        registrationMessages.clear();
+    }
 
-	public void clearPushMessages() {
-		pushMessages.clear();
-	}
+    public void clearPushMessages() {
+        pushMessages.clear();
+    }
 }

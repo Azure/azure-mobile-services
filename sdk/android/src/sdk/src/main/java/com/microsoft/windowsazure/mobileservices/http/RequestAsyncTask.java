@@ -23,70 +23,68 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.http;
 
-import com.microsoft.windowsazure.mobileservices.MobileServiceException;
-
 import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import android.os.Build;
+
+import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 
 /**
  * Default implementation for performing requests using AsyncTask
  */
 public abstract class RequestAsyncTask extends AsyncTask<Void, Void, ServiceFilterResponse> {
-	/**
-	 * Error message
-	 */
-	protected MobileServiceException mTaskException = null;
+    /**
+     * Error message
+     */
+    protected MobileServiceException mTaskException = null;
 
-	/**
-	 * Connection to use for the request
-	 */
-	private MobileServiceConnection mConnection;
+    /**
+     * Connection to use for the request
+     */
+    private MobileServiceConnection mConnection;
 
-	/**
-	 * Request to execute
-	 */
-	private ServiceFilterRequest mRequest;
+    /**
+     * Request to execute
+     */
+    private ServiceFilterRequest mRequest;
 
-	/**
-	 * Constructor that specifies request and connection
-	 * 
-	 * @param request
-	 *            Request to use
-	 * @param connection
-	 *            Connection to use
-	 */
-	public RequestAsyncTask(ServiceFilterRequest request, MobileServiceConnection connection) {
-		mRequest = request;
-		mConnection = connection;
-	}
+    /**
+     * Constructor that specifies request and connection
+     *
+     * @param request    Request to use
+     * @param connection Connection to use
+     */
+    public RequestAsyncTask(ServiceFilterRequest request, MobileServiceConnection connection) {
+        mRequest = request;
+        mConnection = connection;
+    }
 
-	@SuppressLint("NewApi")
-	public void executeTask() {
-		// If it's running with Honeycomb or greater, it must execute each
-		// request in a different thread
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-			this.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-		} else {
-			this.execute();
-		}
-	}
+    @SuppressLint("NewApi")
+    public void executeTask() {
+        // If it's running with Honeycomb or greater, it must execute each
+        // request in a different thread
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            this.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        } else {
+            this.execute();
+        }
+    }
 
-	@Override
-	protected ServiceFilterResponse doInBackground(Void... params) {
-		// Call start method that executes the request
-		ServiceFilterResponse response = null;
-		try {
-			response = mConnection.start(mRequest).get();
-			return response;
-		} catch (Exception e) {
-			if (e.getCause() instanceof MobileServiceException) {
-				mTaskException = (MobileServiceException) e.getCause();
-			} else {
-				mTaskException = new MobileServiceException(e);
-			}
-		}
+    @Override
+    protected ServiceFilterResponse doInBackground(Void... params) {
+        // Call start method that executes the request
+        ServiceFilterResponse response = null;
+        try {
+            response = mConnection.start(mRequest).get();
+            return response;
+        } catch (Exception e) {
+            if (e.getCause() instanceof MobileServiceException) {
+                mTaskException = (MobileServiceException) e.getCause();
+            } else {
+                mTaskException = new MobileServiceException(e);
+            }
+        }
 
-		return response;
-	}
+        return response;
+    }
 }
