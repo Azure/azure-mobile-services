@@ -29,12 +29,11 @@ import com.google.common.util.concurrent.ListenableFuture;
  * Callback used to chain service filters
  */
 public interface NextServiceFilterCallback {
-	/**
-	 * Method called to execute the next ServiceFilter in the pipeline
-	 * 
-	 * @param request
-	 *            The ServiceFilterRequest to process
-	 * @return A ListenableFuture of the ServiceFilterResponse
-	 */
-	public ListenableFuture<ServiceFilterResponse> onNext(ServiceFilterRequest request);
+    /**
+     * Method called to execute the next ServiceFilter in the pipeline
+     *
+     * @param request The ServiceFilterRequest to process
+     * @return A ListenableFuture of the ServiceFilterResponse
+     */
+    public ListenableFuture<ServiceFilterResponse> onNext(ServiceFilterRequest request);
 }

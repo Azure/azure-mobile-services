@@ -27,30 +27,29 @@ package com.microsoft.windowsazure.mobileservices.table.sync.operations;
  * Class that encapsulates collapse logic for new table operation.
  */
 public class TableOperationCollapser implements TableOperationVisitor<TableOperation> {
-	private TableOperation mNewOperation;
+    private TableOperation mNewOperation;
 
-	/**
-	 * Constructor for TableOperationCollapser
-	 * 
-	 * @param newOperation
-	 *            the new operation to collapse
-	 */
-	public TableOperationCollapser(TableOperation newOperation) {
-		this.mNewOperation = newOperation;
-	}
+    /**
+     * Constructor for TableOperationCollapser
+     *
+     * @param newOperation the new operation to collapse
+     */
+    public TableOperationCollapser(TableOperation newOperation) {
+        this.mNewOperation = newOperation;
+    }
 
-	@Override
-	public TableOperation visit(InsertOperation existingOperation) throws Throwable {
-		return mNewOperation.accept(new InsertOperationCollapser(existingOperation));
-	}
+    @Override
+    public TableOperation visit(InsertOperation existingOperation) throws Throwable {
+        return mNewOperation.accept(new InsertOperationCollapser(existingOperation));
+    }
 
-	@Override
-	public TableOperation visit(UpdateOperation existingOperation) throws Throwable {
-		return mNewOperation.accept(new UpdateOperationCollapser(existingOperation));
-	}
+    @Override
+    public TableOperation visit(UpdateOperation existingOperation) throws Throwable {
+        return mNewOperation.accept(new UpdateOperationCollapser(existingOperation));
+    }
 
-	@Override
-	public TableOperation visit(DeleteOperation existingOperation) throws Throwable {
-		return mNewOperation.accept(new DeleteOperationCollapser(existingOperation));
-	}
+    @Override
+    public TableOperation visit(DeleteOperation existingOperation) throws Throwable {
+        return mNewOperation.accept(new DeleteOperationCollapser(existingOperation));
+    }
 }

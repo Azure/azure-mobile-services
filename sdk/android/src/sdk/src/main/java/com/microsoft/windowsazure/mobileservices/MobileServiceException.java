@@ -27,60 +27,57 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
 public class MobileServiceException extends Exception {
 
-	/**
-	 * UID used for serialization
-	 */
-	private static final long serialVersionUID = 5267990724102948298L;
+    /**
+     * UID used for serialization
+     */
+    private static final long serialVersionUID = 5267990724102948298L;
 
-	private ServiceFilterResponse mResponse;
+    private ServiceFilterResponse mResponse;
 
-	public MobileServiceException(Throwable throwable) {
-		this("There was an error executing the request", throwable, null);
-	}
+    public MobileServiceException(Throwable throwable) {
+        this("There was an error executing the request", throwable, null);
+    }
 
-	public MobileServiceException(String detail, Throwable throwable, ServiceFilterResponse response) {
-		this(detail, throwable);
-		mResponse = response;
-	}
+    public MobileServiceException(String detail, Throwable throwable, ServiceFilterResponse response) {
+        this(detail, throwable);
+        mResponse = response;
+    }
 
-	public MobileServiceException(String detail, ServiceFilterResponse response) {
-		this(detail);
-		mResponse = response;
-	}
+    public MobileServiceException(String detail, ServiceFilterResponse response) {
+        this(detail);
+        mResponse = response;
+    }
 
-	/**
-	 * Creates a new MobileServiceException with a detail message and a cause
-	 * 
-	 * @param detail
-	 *            The detail message
-	 * @param throwable
-	 *            The exception cause
-	 */
-	public MobileServiceException(String detail, Throwable throwable) {
-		super(detail, throwable);
-	}
+    /**
+     * Creates a new MobileServiceException with a detail message and a cause
+     *
+     * @param detail    The detail message
+     * @param throwable The exception cause
+     */
+    public MobileServiceException(String detail, Throwable throwable) {
+        super(detail, throwable);
+    }
 
-	/**
-	 * Creates a new MobileServiceException with a detail message
-	 * 
-	 * @param detail
-	 *            The detail message
-	 */
-	public MobileServiceException(String detail) {
-		super(detail);
-	}
+    /**
+     * Creates a new MobileServiceException with a detail message
+     *
+     * @param detail The detail message
+     */
+    public MobileServiceException(String detail) {
+        super(detail);
+    }
 
-	public ServiceFilterResponse getResponse() {
-		return mResponse;
-	}
+    public static ServiceFilterResponse getServiceResponse(Throwable throwable) {
+        if (!(throwable instanceof MobileServiceException)) {
+            return null;
+        }
 
-	public static ServiceFilterResponse getServiceResponse(Throwable throwable) {
-		if (!(throwable instanceof MobileServiceException)) {
-			return null;
-		}
+        MobileServiceException exception = (MobileServiceException) throwable;
 
-		MobileServiceException exception = (MobileServiceException) throwable;
+        return exception.getResponse();
+    }
 
-		return exception.getResponse();
-	}
+    public ServiceFilterResponse getResponse() {
+        return mResponse;
+    }
 }

@@ -19,24 +19,24 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
-import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceUser;
-
 import android.test.InstrumentationTestCase;
+
+import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceUser;
 
 public class MobileServiceUserTests extends InstrumentationTestCase {
 
-	public void testNewMobileServiceUser() {
+    public void testNewMobileServiceUser() {
 
-		MobileServiceUser user = new MobileServiceUser(null);
-		assertNull(user.getUserId());
+        MobileServiceUser user = new MobileServiceUser(null);
+        assertNull(user.getUserId());
 
-		user = new MobileServiceUser("myUserId");
-		assertEquals("myUserId", user.getUserId());
+        user = new MobileServiceUser("myUserId");
+        assertEquals("myUserId", user.getUserId());
 
-		user.setAuthenticationToken(null);
-		assertNull(user.getAuthenticationToken());
+        user.setAuthenticationToken(null);
+        assertNull(user.getAuthenticationToken());
 
-		user.setAuthenticationToken("myAuthToken");
-		assertEquals("myAuthToken", user.getAuthenticationToken());
-	}
+        user.setAuthenticationToken("myAuthToken");
+        assertEquals("myAuthToken", user.getAuthenticationToken());
+    }
 }

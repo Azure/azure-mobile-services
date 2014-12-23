@@ -27,72 +27,71 @@ package com.microsoft.windowsazure.mobileservices.table.query;
  * Class that represents a binary operator query node
  */
 class BinaryOperatorNode implements QueryNode {
-	private BinaryOperatorKind mBinaryOperatorKind;
-	private QueryNode mLeftArgument;
-	private QueryNode mRightArgument;
+    private BinaryOperatorKind mBinaryOperatorKind;
+    private QueryNode mLeftArgument;
+    private QueryNode mRightArgument;
 
-	/**
-	 * Constructor for BinaryOperatorNode
-	 * 
-	 * @param binaryOperatorKind
-	 *            The binary operator kind
-	 */
-	BinaryOperatorNode(BinaryOperatorKind binaryOperatorKind) {
-		this.mBinaryOperatorKind = binaryOperatorKind;
-	}
+    /**
+     * Constructor for BinaryOperatorNode
+     *
+     * @param binaryOperatorKind The binary operator kind
+     */
+    BinaryOperatorNode(BinaryOperatorKind binaryOperatorKind) {
+        this.mBinaryOperatorKind = binaryOperatorKind;
+    }
 
-	@Override
-	public QueryNode deepClone() {
-		BinaryOperatorNode clone = new BinaryOperatorNode(this.mBinaryOperatorKind);
+    @Override
+    public QueryNode deepClone() {
+        BinaryOperatorNode clone = new BinaryOperatorNode(this.mBinaryOperatorKind);
 
-		clone.mLeftArgument = this.mLeftArgument.deepClone();
-		clone.mRightArgument = this.mRightArgument.deepClone();
+        clone.mLeftArgument = this.mLeftArgument.deepClone();
+        clone.mRightArgument = this.mRightArgument.deepClone();
 
-		return clone;
-	}
+        return clone;
+    }
 
-	@Override
-	public QueryNodeKind getKind() {
-		return QueryNodeKind.BinaryOperator;
-	}
+    @Override
+    public QueryNodeKind getKind() {
+        return QueryNodeKind.BinaryOperator;
+    }
 
-	@Override
-	public <T> T accept(QueryNodeVisitor<T> visitor) {
-		return visitor.visit(this);
-	}
+    @Override
+    public <T> T accept(QueryNodeVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
 
-	/**
-	 * Gets the kind of binary operator node.
-	 */
-	BinaryOperatorKind getBinaryOperatorKind() {
-		return this.mBinaryOperatorKind;
-	}
+    /**
+     * Gets the kind of binary operator node.
+     */
+    BinaryOperatorKind getBinaryOperatorKind() {
+        return this.mBinaryOperatorKind;
+    }
 
-	/**
-	 * Gets the left argument query node of the binary operator node.
-	 */
-	QueryNode getLeftArgument() {
-		return this.mLeftArgument;
-	}
+    /**
+     * Gets the left argument query node of the binary operator node.
+     */
+    QueryNode getLeftArgument() {
+        return this.mLeftArgument;
+    }
 
-	/**
-	 * Sets the left argument query node of the binary operator node.
-	 */
-	void setLeftArgument(QueryNode leftArgument) {
-		this.mLeftArgument = leftArgument;
-	}
+    /**
+     * Sets the left argument query node of the binary operator node.
+     */
+    void setLeftArgument(QueryNode leftArgument) {
+        this.mLeftArgument = leftArgument;
+    }
 
-	/**
-	 * Gets the right argument query node of the binary operator node.
-	 */
-	QueryNode getRightArgument() {
-		return this.mRightArgument;
-	}
+    /**
+     * Gets the right argument query node of the binary operator node.
+     */
+    QueryNode getRightArgument() {
+        return this.mRightArgument;
+    }
 
-	/**
-	 * Sets the right argument query node of the binary operator node.
-	 */
-	void setRightArgument(QueryNode rightArgument) {
-		this.mRightArgument = rightArgument;
-	}
+    /**
+     * Sets the right argument query node of the binary operator node.
+     */
+    void setRightArgument(QueryNode rightArgument) {
+        this.mRightArgument = rightArgument;
+    }
 }

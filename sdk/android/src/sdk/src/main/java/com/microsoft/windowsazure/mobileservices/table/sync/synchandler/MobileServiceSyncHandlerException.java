@@ -27,41 +27,37 @@ package com.microsoft.windowsazure.mobileservices.table.sync.synchandler;
  * Class that represents an exception during sync handling
  */
 public class MobileServiceSyncHandlerException extends Exception {
-	/**
-	 * UID used for serialization
-	 */
-	private static final long serialVersionUID = 7017018356478886950L;
+    /**
+     * UID used for serialization
+     */
+    private static final long serialVersionUID = 7017018356478886950L;
 
-	/**
-	 * Creates a new MobileServiceSyncHandlerException with a detail message
-	 * 
-	 * @param detail
-	 *            The detail message
-	 */
-	public MobileServiceSyncHandlerException(String detailMessage) {
-		super(detailMessage);
-	}
+    /**
+     * Creates a new MobileServiceSyncHandlerException with a detail message
+     *
+     * @param detail The detail message
+     */
+    public MobileServiceSyncHandlerException(String detailMessage) {
+        super(detailMessage);
+    }
 
-	/**
-	 * Creates a new MobileServiceSyncHandlerException with a cause
-	 * 
-	 * @param throwable
-	 *            The exception cause
-	 */
-	public MobileServiceSyncHandlerException(Throwable throwable) {
-		super(throwable);
-	}
+    /**
+     * Creates a new MobileServiceSyncHandlerException with a cause
+     *
+     * @param throwable The exception cause
+     */
+    public MobileServiceSyncHandlerException(Throwable throwable) {
+        super(throwable);
+    }
 
-	/**
-	 * Creates a new MobileServiceSyncHandlerException with a detail message and
-	 * a cause
-	 * 
-	 * @param detail
-	 *            The detail message
-	 * @param throwable
-	 *            The exception cause
-	 */
-	public MobileServiceSyncHandlerException(String detailMessage, Throwable throwable) {
-		super(detailMessage, throwable);
-	}
+    /**
+     * Creates a new MobileServiceSyncHandlerException with a detail message and
+     * a cause
+     *
+     * @param detail    The detail message
+     * @param throwable The exception cause
+     */
+    public MobileServiceSyncHandlerException(String detailMessage, Throwable throwable) {
+        super(detailMessage, throwable);
+    }
 }

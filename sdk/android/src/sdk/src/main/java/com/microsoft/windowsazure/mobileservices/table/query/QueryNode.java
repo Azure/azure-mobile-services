@@ -27,25 +27,24 @@ package com.microsoft.windowsazure.mobileservices.table.query;
  * Interface of a query node used to represent a row filter expression.
  */
 interface QueryNode {
-	/**
-	 * Deep clone the QueryNode instance
-	 * 
-	 * @return A cloned instance of the QueryNode
-	 */
-	QueryNode deepClone();
+    /**
+     * Deep clone the QueryNode instance
+     *
+     * @return A cloned instance of the QueryNode
+     */
+    QueryNode deepClone();
 
-	/**
-	 * Gets the kind of the query node.
-	 */
-	QueryNodeKind getKind();
+    /**
+     * Gets the kind of the query node.
+     */
+    QueryNodeKind getKind();
 
-	/**
-	 * Accept a MobileServiceQueryNodeVisitor that walks a tree of QueryNode.
-	 * 
-	 * @param visitor
-	 *            An implementation of the visitor interface.
-	 * @return An object whose type is determined by the type parameter of the
-	 *         visitor.
-	 */
-	<T> T accept(QueryNodeVisitor<T> visitor);
+    /**
+     * Accept a MobileServiceQueryNodeVisitor that walks a tree of QueryNode.
+     *
+     * @param visitor An implementation of the visitor interface.
+     * @return An object whose type is determined by the type parameter of the
+     * visitor.
+     */
+    <T> T accept(QueryNodeVisitor<T> visitor);
 }

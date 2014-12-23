@@ -23,11 +23,6 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.table.sync.operations;
 
-import java.util.EnumSet;
-import java.util.Locale;
-import java.util.Map.Entry;
-import java.util.concurrent.ExecutionException;
-
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -37,134 +32,137 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceFeatures;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProperty;
 
+import java.util.EnumSet;
+import java.util.Locale;
+import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
+
 /**
  * Processes a table operation against a remote store.
  */
 public class RemoteTableOperationProcessor implements TableOperationVisitor<JsonObject> {
-	private MobileServiceClient mClient;
-	private JsonObject mItem;
+    private MobileServiceClient mClient;
+    private JsonObject mItem;
 
-	/**
-	 * Constructor for RemoteTableOperationProcessor
-	 * 
-	 * @param client
-	 *            the mobile service client
-	 * @param item
-	 *            the item to process
-	 */
-	public RemoteTableOperationProcessor(MobileServiceClient client, JsonObject item) {
-		this.mClient = client;
-		this.mItem = item;
-	}
+    /**
+     * Constructor for RemoteTableOperationProcessor
+     *
+     * @param client the mobile service client
+     * @param item   the item to process
+     */
+    public RemoteTableOperationProcessor(MobileServiceClient client, JsonObject item) {
+        this.mClient = client;
+        this.mItem = item;
+    }
 
-	@Override
-	public JsonObject visit(InsertOperation operation) throws Throwable {
-		MobileServiceJsonTable table = this.getRemoteTable(operation.getTableName());
-		table.setSystemProperties(EnumSet.allOf(MobileServiceSystemProperty.class));
+    private static EnumSet<MobileServiceSystemProperty> getSystemProperties(JsonObject instance) {
+        EnumSet<MobileServiceSystemProperty> systemProperties = EnumSet.noneOf(MobileServiceSystemProperty.class);
 
-		JsonObject item = removeSystemProperties(this.mItem);
+        for (Entry<String, JsonElement> property : instance.entrySet()) {
+            String propertyName = property.getKey().trim().toLowerCase(Locale.getDefault());
 
-		ListenableFuture<JsonObject> future = table.insert(item);
+            switch (propertyName) {
+                case "__createdat":
+                    systemProperties.add(MobileServiceSystemProperty.CreatedAt);
+                    break;
+                case "__updatedat":
+                    systemProperties.add(MobileServiceSystemProperty.UpdatedAt);
+                    break;
+                case "__version":
+                    systemProperties.add(MobileServiceSystemProperty.Version);
+                    break;
+                default:
+                    break;
+            }
+        }
 
-		try {
-			return future.get();
-		} catch (ExecutionException ex) {
-			throw ex.getCause();
-		}
-	}
+        return systemProperties;
+    }
 
-	@Override
-	public JsonObject visit(UpdateOperation operation) throws Throwable {
-		MobileServiceJsonTable table = this.getRemoteTable(operation.getTableName());
-		table.setSystemProperties(getSystemProperties(this.mItem));
+    private static JsonObject removeSystemProperties(JsonObject instance) {
+        boolean haveCloned = false;
 
-		ListenableFuture<JsonObject> future = table.update(this.mItem);
+        for (Entry<String, JsonElement> property : instance.entrySet()) {
+            if (property.getKey().startsWith("__")) {
+                if (!haveCloned) {
+                    instance = (JsonObject) new JsonParser().parse(instance.toString());
+                    haveCloned = true;
+                }
 
-		try {
-			return future.get();
-		} catch (ExecutionException ex) {
-			throw ex.getCause();
-		}
-	}
+                instance.remove(property.getKey());
+            }
+        }
 
-	@Override
-	public JsonObject visit(DeleteOperation operation) throws Throwable {
-		MobileServiceJsonTable table = this.getRemoteTable(operation.getTableName());
-		ListenableFuture<Void> future = table.delete(operation.getItemId());
+        return instance;
+    }
 
-		try {
-			future.get();
+    @Override
+    public JsonObject visit(InsertOperation operation) throws Throwable {
+        MobileServiceJsonTable table = this.getRemoteTable(operation.getTableName());
+        table.setSystemProperties(EnumSet.allOf(MobileServiceSystemProperty.class));
 
-			return null;
-		} catch (ExecutionException ex) {
-			throw ex.getCause();
-		}
-	}
+        JsonObject item = removeSystemProperties(this.mItem);
 
-	/**
-	 * Gets the item to process
-	 */
-	public JsonObject getItem() {
-		return this.mItem;
-	}
+        ListenableFuture<JsonObject> future = table.insert(item);
 
-	/**
-	 * Sets the item to process
-	 */
-	public void setItem(JsonObject item) {
-		this.mItem = item;
-	}
+        try {
+            return future.get();
+        } catch (ExecutionException ex) {
+            throw ex.getCause();
+        }
+    }
 
-	/**
-	 * Returns an instance of a remote table to be used by this processor
-	 *
-	 * @param tableName the name of the remote table
-	 * @return an instance of a remote table with the given name
-	 */
-	private MobileServiceJsonTable getRemoteTable(String tableName) {
-		MobileServiceJsonTable table = this.mClient.getTable(tableName);
-		table.addFeature(MobileServiceFeatures.Offline);
-		return table;
-	}
+    @Override
+    public JsonObject visit(UpdateOperation operation) throws Throwable {
+        MobileServiceJsonTable table = this.getRemoteTable(operation.getTableName());
+        table.setSystemProperties(getSystemProperties(this.mItem));
 
-	private static EnumSet<MobileServiceSystemProperty> getSystemProperties(JsonObject instance) {
-		EnumSet<MobileServiceSystemProperty> systemProperties = EnumSet.noneOf(MobileServiceSystemProperty.class);
+        ListenableFuture<JsonObject> future = table.update(this.mItem);
 
-		for (Entry<String, JsonElement> property : instance.entrySet()) {
-			String propertyName = property.getKey().trim().toLowerCase(Locale.getDefault());
+        try {
+            return future.get();
+        } catch (ExecutionException ex) {
+            throw ex.getCause();
+        }
+    }
 
-			switch (propertyName) {
-			case "__createdat":
-				systemProperties.add(MobileServiceSystemProperty.CreatedAt);
-				break;
-			case "__updatedat":
-				systemProperties.add(MobileServiceSystemProperty.UpdatedAt);
-				break;
-			case "__version":
-				systemProperties.add(MobileServiceSystemProperty.Version);
-				break;
-			default:
-				break;
-			}
-		}
+    @Override
+    public JsonObject visit(DeleteOperation operation) throws Throwable {
+        MobileServiceJsonTable table = this.getRemoteTable(operation.getTableName());
+        ListenableFuture<Void> future = table.delete(operation.getItemId());
 
-		return systemProperties;
-	}
+        try {
+            future.get();
 
-	private static JsonObject removeSystemProperties(JsonObject instance) {
-		boolean haveCloned = false;
+            return null;
+        } catch (ExecutionException ex) {
+            throw ex.getCause();
+        }
+    }
 
-		for (Entry<String, JsonElement> property : instance.entrySet()) {
-			if (property.getKey().startsWith("__")) {
-				if (!haveCloned) {
-					instance = (JsonObject) new JsonParser().parse(instance.toString());
-					haveCloned = true;
-				}
+    /**
+     * Gets the item to process
+     */
+    public JsonObject getItem() {
+        return this.mItem;
+    }
 
-				instance.remove(property.getKey());
-			}
-		}
+    /**
+     * Sets the item to process
+     */
+    public void setItem(JsonObject item) {
+        this.mItem = item;
+    }
 
-		return instance;
-	}
+    /**
+     * Returns an instance of a remote table to be used by this processor
+     *
+     * @param tableName the name of the remote table
+     * @return an instance of a remote table with the given name
+     */
+    private MobileServiceJsonTable getRemoteTable(String tableName) {
+        MobileServiceJsonTable table = this.mClient.getTable(tableName);
+        table.addFeature(MobileServiceFeatures.Offline);
+        return table;
+    }
 }

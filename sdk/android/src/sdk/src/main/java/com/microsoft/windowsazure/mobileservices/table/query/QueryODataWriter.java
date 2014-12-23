@@ -23,108 +23,108 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.List;
+import android.util.Pair;
 
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTableSystemPropertiesProvider;
 
-import android.util.Pair;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.List;
 
 public class QueryODataWriter {
 
-	/**
-	 * Returns the OData string representation of the query
-	 */
-	public static String getRowFilter(Query query) {
-		QueryNodeODataWriter oDataWriter = new QueryNodeODataWriter();
+    /**
+     * Returns the OData string representation of the query
+     */
+    public static String getRowFilter(Query query) {
+        QueryNodeODataWriter oDataWriter = new QueryNodeODataWriter();
 
-		if (query != null && query.getQueryNode() != null) {
-			query.getQueryNode().accept(oDataWriter);
-		}
+        if (query != null && query.getQueryNode() != null) {
+            query.getQueryNode().accept(oDataWriter);
+        }
 
-		return oDataWriter.getBuilder().toString();
-	}
+        return oDataWriter.getBuilder().toString();
+    }
 
-	/**
-	 * Returns the OData string representation of the rowset's modifiers
-	 * 
-	 * @throws java.io.UnsupportedEncodingException
-	 */
-	public static String getRowSetModifiers(Query query, MobileServiceTableSystemPropertiesProvider table) throws UnsupportedEncodingException {
-		StringBuilder sb = new StringBuilder();
+    /**
+     * Returns the OData string representation of the rowset's modifiers
+     *
+     * @throws java.io.UnsupportedEncodingException
+     */
+    public static String getRowSetModifiers(Query query, MobileServiceTableSystemPropertiesProvider table) throws UnsupportedEncodingException {
+        StringBuilder sb = new StringBuilder();
 
-		if (query != null) {
-			if (query.hasInlineCount()) {
-				sb.append("&$inlinecount=allpages");
-			}
+        if (query != null) {
+            if (query.hasInlineCount()) {
+                sb.append("&$inlinecount=allpages");
+            }
 
-			if (query.getTop() > 0) {
-				sb.append("&$top=");
-				sb.append(query.getTop());
-			}
+            if (query.getTop() > 0) {
+                sb.append("&$top=");
+                sb.append(query.getTop());
+            }
 
-			if (query.getSkip() > 0) {
-				sb.append("&$skip=");
-				sb.append(query.getSkip());
-			}
+            if (query.getSkip() > 0) {
+                sb.append("&$skip=");
+                sb.append(query.getSkip());
+            }
 
-			if (query.getOrderBy().size() > 0) {
-				sb.append("&$orderby=");
+            if (query.getOrderBy().size() > 0) {
+                sb.append("&$orderby=");
 
-				boolean first = true;
-				for (Pair<String, QueryOrder> order : query.getOrderBy()) {
-					if (first) {
-						first = false;
-					} else {
-						sb.append(URLEncoder.encode(",", MobileServiceClient.UTF8_ENCODING));
-					}
+                boolean first = true;
+                for (Pair<String, QueryOrder> order : query.getOrderBy()) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        sb.append(URLEncoder.encode(",", MobileServiceClient.UTF8_ENCODING));
+                    }
 
-					sb.append(URLEncoder.encode(order.first, MobileServiceClient.UTF8_ENCODING));
-					sb.append(URLEncoder.encode(" ", MobileServiceClient.UTF8_ENCODING));
-					sb.append(order.second == QueryOrder.Ascending ? "asc" : "desc");
+                    sb.append(URLEncoder.encode(order.first, MobileServiceClient.UTF8_ENCODING));
+                    sb.append(URLEncoder.encode(" ", MobileServiceClient.UTF8_ENCODING));
+                    sb.append(order.second == QueryOrder.Ascending ? "asc" : "desc");
 
-				}
-			}
+                }
+            }
 
             if (query.hasDeleted()) {
                 sb.append("&__includeDeleted=true");
             }
-		}
+        }
 
-		List<Pair<String, String>> parameters = table.addSystemProperties(table.getSystemProperties(), query != null ? query.getUserDefinedParameters() : null);
+        List<Pair<String, String>> parameters = table.addSystemProperties(table.getSystemProperties(), query != null ? query.getUserDefinedParameters() : null);
 
-		for (Pair<String, String> parameter : parameters) {
-			if (parameter.first != null) {
-				sb.append("&");
+        for (Pair<String, String> parameter : parameters) {
+            if (parameter.first != null) {
+                sb.append("&");
 
-				String key = parameter.first;
-				String value = parameter.second;
-				if (value == null)
-					value = "null";
+                String key = parameter.first;
+                String value = parameter.second;
+                if (value == null)
+                    value = "null";
 
-				sb.append(URLEncoder.encode(key, MobileServiceClient.UTF8_ENCODING));
-				sb.append("=");
-				sb.append(URLEncoder.encode(value, MobileServiceClient.UTF8_ENCODING));
-			}
-		}
+                sb.append(URLEncoder.encode(key, MobileServiceClient.UTF8_ENCODING));
+                sb.append("=");
+                sb.append(URLEncoder.encode(value, MobileServiceClient.UTF8_ENCODING));
+            }
+        }
 
-		if (query != null && query.getProjection() != null && query.getProjection().size() > 0) {
-			sb.append("&$select=");
+        if (query != null && query.getProjection() != null && query.getProjection().size() > 0) {
+            sb.append("&$select=");
 
-			boolean first = true;
-			for (String field : query.getProjection()) {
-				if (first) {
-					first = false;
-				} else {
-					sb.append(URLEncoder.encode(",", MobileServiceClient.UTF8_ENCODING));
-				}
+            boolean first = true;
+            for (String field : query.getProjection()) {
+                if (first) {
+                    first = false;
+                } else {
+                    sb.append(URLEncoder.encode(",", MobileServiceClient.UTF8_ENCODING));
+                }
 
-				sb.append(URLEncoder.encode(field, MobileServiceClient.UTF8_ENCODING));
-			}
-		}
+                sb.append(URLEncoder.encode(field, MobileServiceClient.UTF8_ENCODING));
+            }
+        }
 
-		return sb.toString();
-	}
+        return sb.toString();
+    }
 }

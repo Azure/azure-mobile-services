@@ -27,103 +27,103 @@ package com.microsoft.windowsazure.mobileservices.table.query;
  * Enumeration of function calls.
  */
 enum FunctionCallKind {
-	/**
-	 * The year date function.
-	 */
-	Year,
+    /**
+     * The year date function.
+     */
+    Year,
 
-	/**
-	 * The month date function.
-	 */
-	Month,
+    /**
+     * The month date function.
+     */
+    Month,
 
-	/**
-	 * The day date function.
-	 */
-	Day,
+    /**
+     * The day date function.
+     */
+    Day,
 
-	/**
-	 * The hour date function.
-	 */
-	Hour,
+    /**
+     * The hour date function.
+     */
+    Hour,
 
-	/**
-	 * The minute date function.
-	 */
-	Minute,
+    /**
+     * The minute date function.
+     */
+    Minute,
 
-	/**
-	 * The second date function.
-	 */
-	Second,
+    /**
+     * The second date function.
+     */
+    Second,
 
-	/**
-	 * The floor math function.
-	 */
-	Floor,
+    /**
+     * The floor math function.
+     */
+    Floor,
 
-	/**
-	 * The ceiling math function.
-	 */
-	Ceiling,
+    /**
+     * The ceiling math function.
+     */
+    Ceiling,
 
-	/**
-	 * The round math function.
-	 */
-	Round,
+    /**
+     * The round math function.
+     */
+    Round,
 
-	/**
-	 * The to lower string function.
-	 */
-	ToLower,
+    /**
+     * The to lower string function.
+     */
+    ToLower,
 
-	/**
-	 * The to upper string function.
-	 */
-	ToUpper,
+    /**
+     * The to upper string function.
+     */
+    ToUpper,
 
-	/**
-	 * The length string function.
-	 */
-	Length,
+    /**
+     * The length string function.
+     */
+    Length,
 
-	/**
-	 * The trim string function.
-	 */
-	Trim,
+    /**
+     * The trim string function.
+     */
+    Trim,
 
-	/**
-	 * The starts with string function.
-	 */
-	StartsWith,
+    /**
+     * The starts with string function.
+     */
+    StartsWith,
 
-	/**
-	 * The ends with string function.
-	 */
-	EndsWith,
+    /**
+     * The ends with string function.
+     */
+    EndsWith,
 
-	/**
-	 * The substring of string function.
-	 */
-	SubstringOf,
+    /**
+     * The substring of string function.
+     */
+    SubstringOf,
 
-	/**
-	 * The concat string function.
-	 */
-	Concat,
+    /**
+     * The concat string function.
+     */
+    Concat,
 
-	/**
-	 * The index of string function.
-	 */
-	IndexOf,
+    /**
+     * The index of string function.
+     */
+    IndexOf,
 
-	/**
-	 * The substring string function.
-	 */
-	Substring,
+    /**
+     * The substring string function.
+     */
+    Substring,
 
-	/**
-	 * The replace string function.
-	 */
-	Replace
+    /**
+     * The replace string function.
+     */
+    Replace
 }

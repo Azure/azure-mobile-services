@@ -19,74 +19,74 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters;
 
-import java.io.UnsupportedEncodingException;
+import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
 import org.apache.http.Header;
 import org.apache.http.StatusLine;
 
-import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
-import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import java.io.UnsupportedEncodingException;
 
 public class ServiceFilterResponseMock implements ServiceFilterResponse {
-	private Header[] headers;
-	private byte[] content;
-	private StatusLine status;
+    private Header[] headers;
+    private byte[] content;
+    private StatusLine status;
 
-	public ServiceFilterResponseMock() {
-		 try {
-			content = "{}".getBytes(MobileServiceClient.UTF8_ENCODING);
-		} catch (UnsupportedEncodingException e) {
-			//this should never happen
-		}
-	}
+    public ServiceFilterResponseMock() {
+        try {
+            content = "{}".getBytes(MobileServiceClient.UTF8_ENCODING);
+        } catch (UnsupportedEncodingException e) {
+            //this should never happen
+        }
+    }
 
-	@Override
-	public Header[] getHeaders() {
-		return this.headers;
-	}
+    @Override
+    public Header[] getHeaders() {
+        return this.headers;
+    }
 
-	@Override
-	public String getContent() {
-		if (this.content != null) {
-			String content = null;
-			try {
-				content = new String(this.content, MobileServiceClient.UTF8_ENCODING);
-			} catch (UnsupportedEncodingException e) {
-			}
-			return content;
-		} else {
-			return null;
-		}
-	}
+    public void setHeaders(Header[] headers) {
+        this.headers = headers;
+    }
 
-	@Override
-	public StatusLine getStatus() {
-		return this.status;
-	}
+    @Override
+    public String getContent() {
+        if (this.content != null) {
+            String content = null;
+            try {
+                content = new String(this.content, MobileServiceClient.UTF8_ENCODING);
+            } catch (UnsupportedEncodingException e) {
+            }
+            return content;
+        } else {
+            return null;
+        }
+    }
 
-	public void setHeaders(Header[] headers) {
-		this.headers = headers;
-	}
+    public void setContent(byte[] content) {
+        this.content = content;
+    }
 
-	public void setContent(String content) {
-		if (content != null) {
-			this.content = content.getBytes();
-		} else {
-			this.content = null;
-		}
-	}
-	
-	public void setContent(byte[] content) {
-		this.content = content;
-	}
+    @Override
+    public StatusLine getStatus() {
+        return this.status;
+    }
 
-	public void setStatus(StatusLine status) {
-		this.status = status;
-	}
+    public void setStatus(StatusLine status) {
+        this.status = status;
+    }
 
-	@Override
-	public byte[] getRawContent() {
-		return content;
-	}
+    public void setContent(String content) {
+        if (content != null) {
+            this.content = content.getBytes();
+        } else {
+            this.content = null;
+        }
+    }
+
+    @Override
+    public byte[] getRawContent() {
+        return content;
+    }
 
 }

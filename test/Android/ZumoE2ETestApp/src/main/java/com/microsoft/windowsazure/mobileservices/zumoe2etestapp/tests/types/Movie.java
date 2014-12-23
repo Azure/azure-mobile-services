@@ -22,27 +22,27 @@ package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types;
 import java.util.Date;
 
 public interface Movie {
-	String getTitle();
+    String getTitle();
 
-	void setTitle(String title);
+    void setTitle(String title);
 
-	int getDuration();
+    int getDuration();
 
-	void setDuration(int duration);
+    void setDuration(int duration);
 
-	String getMPAARating();
+    String getMPAARating();
 
-	void setMPAARating(String mPAARating);
+    void setMPAARating(String mPAARating);
 
-	Date getReleaseDate();
+    Date getReleaseDate();
 
-	void setReleaseDate(Date releaseDate);
+    void setReleaseDate(Date releaseDate);
 
-	boolean isBestPictureWinner();
+    boolean isBestPictureWinner();
 
-	void setBestPictureWinner(boolean bestPictureWinner);
+    void setBestPictureWinner(boolean bestPictureWinner);
 
-	int getYear();
+    int getYear();
 
-	void setYear(int year);
+    void setYear(int year);
 }

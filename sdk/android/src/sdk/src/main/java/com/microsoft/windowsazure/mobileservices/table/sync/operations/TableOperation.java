@@ -29,50 +29,49 @@ import java.util.Date;
  * Interface representing a table operation against remote table.
  */
 public interface TableOperation {
-	/**
-	 * Gets the unique id of the operation.
-	 * 
-	 * @return The unique id.
-	 */
-	String getId();
+    /**
+     * Gets the unique id of the operation.
+     *
+     * @return The unique id.
+     */
+    String getId();
 
-	/**
-	 * Gets the kind of table operation.
-	 * 
-	 * @return The table operation kind.
-	 */
-	TableOperationKind getKind();
+    /**
+     * Gets the kind of table operation.
+     *
+     * @return The table operation kind.
+     */
+    TableOperationKind getKind();
 
-	/**
-	 * Gets the name of the table the operation will be executed against.
-	 * 
-	 * @return The table name.
-	 */
-	String getTableName();
+    /**
+     * Gets the name of the table the operation will be executed against.
+     *
+     * @return The table name.
+     */
+    String getTableName();
 
-	/**
-	 * Gets the id of the item associated with the operation.
-	 * 
-	 * @return The item id.
-	 */
-	String getItemId();
+    /**
+     * Gets the id of the item associated with the operation.
+     *
+     * @return The item id.
+     */
+    String getItemId();
 
-	/**
-	 * Gets the creation date of the operation.
-	 * 
-	 * @return The operation creation date.
-	 */
-	Date getCreatedAt();
+    /**
+     * Gets the creation date of the operation.
+     *
+     * @return The operation creation date.
+     */
+    Date getCreatedAt();
 
-	/**
-	 * Accept a MobileServiceTableOperationVisitor that works against the
-	 * operation.
-	 * 
-	 * @param visitor
-	 *            An implementation of the visitor interface.
-	 * @return An object whose type is determined by the type parameter of the
-	 *         visitor.
-	 * @throws Throwable
-	 */
-	<T> T accept(TableOperationVisitor<T> visitor) throws Throwable;
+    /**
+     * Accept a MobileServiceTableOperationVisitor that works against the
+     * operation.
+     *
+     * @param visitor An implementation of the visitor interface.
+     * @return An object whose type is determined by the type parameter of the
+     * visitor.
+     * @throws Throwable
+     */
+    <T> T accept(TableOperationVisitor<T> visitor) throws Throwable;
 }

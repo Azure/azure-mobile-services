@@ -31,51 +31,51 @@ import com.google.gson.annotations.SerializedName;
  */
 public class GcmNativeRegistration extends Registration {
 
-	/**
-	 * Gcm Platform identifier
-	 */
-	static final String GCM_PLATFORM = "gcm";
+    /**
+     * Gcm Platform identifier
+     */
+    static final String GCM_PLATFORM = "gcm";
 
-	@Expose
-	@SerializedName("platform")
-	private String mPlatform = GCM_PLATFORM;
+    @Expose
+    @SerializedName("platform")
+    private String mPlatform = GCM_PLATFORM;
 
-	/**
-	 * The PNS specific identifier
-	 */
-	@Expose
-	@SerializedName("deviceId")
-	protected String mPNSHandle;
+    /**
+     * The PNS specific identifier
+     */
+    @Expose
+    @SerializedName("deviceId")
+    protected String mPNSHandle;
 
-	/**
-	 * The registration name
-	 */
-	protected String mName;
+    /**
+     * The registration name
+     */
+    protected String mName;
 
-	/**
-	 * Creates a new native registration
-	 */
-	GcmNativeRegistration() {
-		super();
-	}
+    /**
+     * Creates a new native registration
+     */
+    GcmNativeRegistration() {
+        super();
+    }
 
-	@Override
-	public String getName() {
-		return mName;
-	}
+    @Override
+    public String getName() {
+        return mName;
+    }
 
-	@Override
-	protected void setName(String name) {
-		this.mName = name;
-	}
+    @Override
+    protected void setName(String name) {
+        this.mName = name;
+    }
 
-	@Override
-	public String getPNSHandle() {
-		return mPNSHandle;
-	}
+    @Override
+    public String getPNSHandle() {
+        return mPNSHandle;
+    }
 
-	@Override
-	protected void setPNSHandle(String pNSHandle) {
-		this.mPNSHandle = pNSHandle;
-	}
+    @Override
+    protected void setPNSHandle(String pNSHandle) {
+        this.mPNSHandle = pNSHandle;
+    }
 }

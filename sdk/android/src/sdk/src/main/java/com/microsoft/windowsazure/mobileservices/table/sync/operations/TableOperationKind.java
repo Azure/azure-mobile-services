@@ -24,6 +24,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices.table.sync.operations;
 
 import android.annotation.SuppressLint;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,51 +34,47 @@ import java.util.Map;
 @SuppressLint("UseSparseArrays")
 public enum TableOperationKind {
 
-	/**
-	 * Insert operation.
-	 */
-	Insert(0),
+    /**
+     * Insert operation.
+     */
+    Insert(0),
 
-	/**
-	 * Update operation.
-	 */
-	Update(1),
+    /**
+     * Update operation.
+     */
+    Update(1),
 
-	/**
-	 * Delete operation.
-	 */
-	Delete(2);
+    /**
+     * Delete operation.
+     */
+    Delete(2);
+    private static final Map<Integer, TableOperationKind> mValuesMap;
+    static {
+        mValuesMap = new HashMap<Integer, TableOperationKind>(3);
+        mValuesMap.put(0, TableOperationKind.Insert);
+        mValuesMap.put(1, TableOperationKind.Update);
+        mValuesMap.put(2, TableOperationKind.Delete);
+    }
+    private final int mValue;
 
-	private final int mValue;
+    private TableOperationKind(int value) {
+        this.mValue = value;
+    }
 
-	private static final Map<Integer, TableOperationKind> mValuesMap;
+    /**
+     * Return the TableOperationKind with the provided int value
+     *
+     * @param value the int value
+     * @return the matching TableOperationKind
+     */
+    public static TableOperationKind parse(int value) {
+        return mValuesMap.get(value);
+    }
 
-	static {
-		mValuesMap = new HashMap<Integer, TableOperationKind>(3);
-		mValuesMap.put(0, TableOperationKind.Insert);
-		mValuesMap.put(1, TableOperationKind.Update);
-		mValuesMap.put(2, TableOperationKind.Delete);
-	}
-
-	private TableOperationKind(int value) {
-		this.mValue = value;
-	}
-
-	/**
-	 * Return the int value associated to the enum
-	 */
-	public int getValue() {
-		return this.mValue;
-	}
-
-	/**
-	 * Return the TableOperationKind with the provided int value
-	 * 
-	 * @param value
-	 *            the int value
-	 * @return the matching TableOperationKind
-	 */
-	public static TableOperationKind parse(int value) {
-		return mValuesMap.get(value);
-	}
+    /**
+     * Return the int value associated to the enum
+     */
+    public int getValue() {
+        return this.mValue;
+    }
 }
