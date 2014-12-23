@@ -28,32 +28,30 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 
 public class MobileServiceExceptionBase extends MobileServiceException {
 
-	/**
-	 * UID used for serialization
-	 */
-	private static final long serialVersionUID = 4489352410883725274L;
+    /**
+     * UID used for serialization
+     */
+    private static final long serialVersionUID = 4489352410883725274L;
 
-	private JsonObject mValue;
+    private JsonObject mValue;
 
-	/**
-	 * Initializes a new instance of the
-	 * MobileServiceExceptionBase class.
-	 * 
-	 * @param throwable
-	 *            The inner exception.
-	 * @param value
-	 *            The current instance from the server for that the exception was created
-	 */
-	public MobileServiceExceptionBase(MobileServiceException msException, JsonObject value) {
-		super(msException.getMessage(), msException.getCause(), msException.getResponse());
-		this.mValue = value;
-	}
+    /**
+     * Initializes a new instance of the
+     * MobileServiceExceptionBase class.
+     *
+     * @param throwable The inner exception.
+     * @param value     The current instance from the server for that the exception was created
+     */
+    public MobileServiceExceptionBase(MobileServiceException msException, JsonObject value) {
+        super(msException.getMessage(), msException.getCause(), msException.getResponse());
+        this.mValue = value;
+    }
 
-	public JsonObject getValue() {
-		return mValue;
-	}
+    public JsonObject getValue() {
+        return mValue;
+    }
 
-	public void setValue(JsonObject mValue) {
-		this.mValue = mValue;
-	}
+    public void setValue(JsonObject mValue) {
+        this.mValue = mValue;
+    }
 }

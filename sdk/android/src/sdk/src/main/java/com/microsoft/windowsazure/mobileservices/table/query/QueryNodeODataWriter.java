@@ -23,135 +23,134 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
+import com.microsoft.windowsazure.mobileservices.table.serialization.DateSerializer;
+
 import java.util.Date;
 import java.util.Locale;
-
-import com.microsoft.windowsazure.mobileservices.table.serialization.DateSerializer;
 
 /**
  * Query node visitor used to generate OData filter.
  */
 class QueryNodeODataWriter implements QueryNodeVisitor<QueryNode> {
-	private StringBuilder mBuilder;
+    private StringBuilder mBuilder;
 
-	/**
-	 * Constructor for QueryNodeODataWriter
-	 */
-	QueryNodeODataWriter() {
-		this.mBuilder = new StringBuilder();
-	}
+    /**
+     * Constructor for QueryNodeODataWriter
+     */
+    QueryNodeODataWriter() {
+        this.mBuilder = new StringBuilder();
+    }
 
-	/**
-	 * Gets the StringBuilder with the OData representation of the node
-	 */
-	StringBuilder getBuilder() {
-		return this.mBuilder;
-	}
+    private static String process(String s) {
+        return "'" + sanitize(s) + "'";
+    }
 
-	@Override
-	public QueryNode visit(ConstantNode node) {
-		Object value = node.getValue();
-		String constant = value != null ? value.toString() : "null";
+    private static String process(Date date) {
+        return "'" + sanitize(DateSerializer.serialize(date)) + "'";
+    }
 
-		if (value instanceof String) {
-			constant = process((String) value);
-		} else if (value instanceof Date) {
-			constant = process((Date) value);
-		}
+    /**
+     * Sanitizes the string to use in a oData query
+     *
+     * @param s The string to sanitize
+     * @return The sanitized string
+     */
+    private static String sanitize(String s) {
+        if (s != null) {
+            return s.replace("'", "''");
+        } else {
+            return null;
+        }
+    }
 
-		this.mBuilder.append(constant);
+    /**
+     * Gets the StringBuilder with the OData representation of the node
+     */
+    StringBuilder getBuilder() {
+        return this.mBuilder;
+    }
 
-		return node;
-	}
+    @Override
+    public QueryNode visit(ConstantNode node) {
+        Object value = node.getValue();
+        String constant = value != null ? value.toString() : "null";
 
-	@Override
-	public QueryNode visit(FieldNode node) {
-		this.mBuilder.append(node.getFieldName());
+        if (value instanceof String) {
+            constant = process((String) value);
+        } else if (value instanceof Date) {
+            constant = process((Date) value);
+        }
 
-		return node;
-	}
+        this.mBuilder.append(constant);
 
-	@Override
-	public QueryNode visit(UnaryOperatorNode node) {
-		if (node.getUnaryOperatorKind() == UnaryOperatorKind.Parenthesis) {
-			this.mBuilder.append("(");
+        return node;
+    }
 
-			if (node.getArgument() != null) {
-				node.getArgument().accept(this);
-			}
+    @Override
+    public QueryNode visit(FieldNode node) {
+        this.mBuilder.append(node.getFieldName());
 
-			this.mBuilder.append(")");
-		} else {
-			this.mBuilder.append(node.getUnaryOperatorKind().name().toLowerCase(Locale.getDefault()));
+        return node;
+    }
 
-			if (node.getArgument() != null) {
-				this.mBuilder.append(" ");
-				node.getArgument().accept(this);
-			}
-		}
+    @Override
+    public QueryNode visit(UnaryOperatorNode node) {
+        if (node.getUnaryOperatorKind() == UnaryOperatorKind.Parenthesis) {
+            this.mBuilder.append("(");
 
-		return node;
-	}
+            if (node.getArgument() != null) {
+                node.getArgument().accept(this);
+            }
 
-	@Override
-	public QueryNode visit(BinaryOperatorNode node) {
-		if (node.getLeftArgument() != null) {
-			node.getLeftArgument().accept(this);
-			this.mBuilder.append(" ");
-		}
+            this.mBuilder.append(")");
+        } else {
+            this.mBuilder.append(node.getUnaryOperatorKind().name().toLowerCase(Locale.getDefault()));
 
-		this.mBuilder.append(node.getBinaryOperatorKind().name().toLowerCase(Locale.getDefault()));
+            if (node.getArgument() != null) {
+                this.mBuilder.append(" ");
+                node.getArgument().accept(this);
+            }
+        }
 
-		if (node.getRightArgument() != null) {
-			this.mBuilder.append(" ");
-			node.getRightArgument().accept(this);
-		}
+        return node;
+    }
 
-		return node;
-	}
+    @Override
+    public QueryNode visit(BinaryOperatorNode node) {
+        if (node.getLeftArgument() != null) {
+            node.getLeftArgument().accept(this);
+            this.mBuilder.append(" ");
+        }
 
-	@Override
-	public QueryNode visit(FunctionCallNode node) {
-		this.mBuilder.append(node.getFunctionCallKind().name().toLowerCase(Locale.getDefault()));
-		this.mBuilder.append("(");
+        this.mBuilder.append(node.getBinaryOperatorKind().name().toLowerCase(Locale.getDefault()));
 
-		boolean first = true;
+        if (node.getRightArgument() != null) {
+            this.mBuilder.append(" ");
+            node.getRightArgument().accept(this);
+        }
 
-		for (QueryNode argument : node.getArguments()) {
-			if (!first) {
-				this.mBuilder.append(",");
-			} else {
-				first = false;
-			}
+        return node;
+    }
 
-			argument.accept(this);
-		}
+    @Override
+    public QueryNode visit(FunctionCallNode node) {
+        this.mBuilder.append(node.getFunctionCallKind().name().toLowerCase(Locale.getDefault()));
+        this.mBuilder.append("(");
 
-		this.mBuilder.append(")");
+        boolean first = true;
 
-		return node;
-	}
+        for (QueryNode argument : node.getArguments()) {
+            if (!first) {
+                this.mBuilder.append(",");
+            } else {
+                first = false;
+            }
 
-	private static String process(String s) {
-		return "'" + sanitize(s) + "'";
-	}
+            argument.accept(this);
+        }
 
-	private static String process(Date date) {
-		return "'" + sanitize(DateSerializer.serialize(date)) + "'";
-	}
+        this.mBuilder.append(")");
 
-	/**
-	 * Sanitizes the string to use in a oData query
-	 * 
-	 * @param s
-	 *            The string to sanitize
-	 * @return The sanitized string
-	 */
-	private static String sanitize(String s) {
-		if (s != null) {
-			return s.replace("'", "''");
-		} else {
-			return null;
-		}
-	}
+        return node;
+    }
 }

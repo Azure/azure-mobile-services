@@ -20,10 +20,11 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.push;
 
 public class GCMRegistrationMessage {
-	public final boolean isError;
-	public final String value;
-	public GCMRegistrationMessage(String value, boolean isError) {
-		this.value = value;
-		this.isError = isError;
-	}
+    public final boolean isError;
+    public final String value;
+
+    public GCMRegistrationMessage(String value, boolean isError) {
+        this.value = value;
+        this.isError = isError;
+    }
 }

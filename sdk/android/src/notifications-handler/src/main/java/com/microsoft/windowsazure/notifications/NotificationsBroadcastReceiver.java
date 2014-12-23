@@ -6,12 +6,12 @@ import android.content.Intent;
 
 public class NotificationsBroadcastReceiver extends BroadcastReceiver {
 
-	@Override
-	public void onReceive(Context context, Intent intent) {
-		NotificationsHandler handler = NotificationsManager.getHandler(context);
-		
-		if (handler != null) {
-			handler.onReceive(context, intent.getExtras());
-		}
-	}
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        NotificationsHandler handler = NotificationsManager.getHandler(context);
+
+        if (handler != null) {
+            handler.onReceive(context, intent.getExtras());
+        }
+    }
 }

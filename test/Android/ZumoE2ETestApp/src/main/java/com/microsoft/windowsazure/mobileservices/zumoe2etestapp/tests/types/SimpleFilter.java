@@ -24,44 +24,44 @@ import java.util.List;
 
 public abstract class SimpleFilter<E> implements ListFilter<E> {
 
-	@Override
-	public FilterResult<E> filter(List<? extends E> list) {
-		return getElements(list);
-	}
+    @Override
+    public FilterResult<E> filter(List<? extends E> list) {
+        return getElements(list);
+    }
 
-	abstract protected boolean criteria(E element);
+    abstract protected boolean criteria(E element);
 
-	protected FilterResult<E> getElements(List<? extends E> list) {
-		List<E> newList = new ArrayList<E>();
-		FilterResult<E> result = new FilterResult<E>();
+    protected FilterResult<E> getElements(List<? extends E> list) {
+        List<E> newList = new ArrayList<E>();
+        FilterResult<E> result = new FilterResult<E>();
 
-		for (E element : list) {
-			if (criteria(element)) {
-				newList.add(element);
-			}
-		}
-		result.totalCount = newList.size();
+        for (E element : list) {
+            if (criteria(element)) {
+                newList.add(element);
+            }
+        }
+        result.totalCount = newList.size();
 
-		result.elements = applyOrder(newList);
-		return result;
-	}
+        result.elements = applyOrder(newList);
+        return result;
+    }
 
-	protected List<E> applyOrder(List<E> list) {
-		return list;
-	}
+    protected List<E> applyOrder(List<E> list) {
+        return list;
+    }
 
-	protected FilterResult<E> applyTopSkip(FilterResult<E> result, int top, int skip) {
-		if (result.elements.size() <= skip) {
-			result.elements = new ArrayList<E>();
-			return result;
-		} else {
-			result.elements = result.elements.subList(skip, result.elements.size());
-		}
+    protected FilterResult<E> applyTopSkip(FilterResult<E> result, int top, int skip) {
+        if (result.elements.size() <= skip) {
+            result.elements = new ArrayList<E>();
+            return result;
+        } else {
+            result.elements = result.elements.subList(skip, result.elements.size());
+        }
 
-		if (result.elements.size() > top) {
-			result.elements = result.elements.subList(0, top);
-		}
+        if (result.elements.size() > top) {
+            result.elements = result.elements.subList(0, top);
+        }
 
-		return result;
-	}
+        return result;
+    }
 }

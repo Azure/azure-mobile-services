@@ -19,117 +19,117 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types;
 
-import java.util.Date;
-
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Date;
+
 public class SystemPropertyTestClasses {
-	public static class CreatedAtType {
-		public String Id;
+    public static class CreatedAtType {
+        public String Id;
 
-		@SerializedName("__createdAt")
-		public Date CreatedAt;
-	}
+        @SerializedName("__createdAt")
+        public Date CreatedAt;
+    }
 
-	public static class UpdatedAtType {
-		public String Id;
+    public static class UpdatedAtType {
+        public String Id;
 
-		@SerializedName("__updatedAt")
-		public Date UpdatedAt;
-	}
+        @SerializedName("__updatedAt")
+        public Date UpdatedAt;
+    }
 
-	public static class VersionType {
-		public String Id;
+    public static class VersionType {
+        public String Id;
 
-		@SerializedName("__version")
-		public String Version;
-	}
+        @SerializedName("__version")
+        public String Version;
+    }
 
-	public static class AllSystemPropertiesType {
-		public String Id;
+    public static class AllSystemPropertiesType {
+        public String Id;
 
-		@SerializedName("__createdAt")
-		public Date CreatedAt;
+        @SerializedName("__createdAt")
+        public Date CreatedAt;
 
-		@SerializedName("__updatedAt")
-		public Date UpdatedAt;
+        @SerializedName("__updatedAt")
+        public Date UpdatedAt;
 
-		@SerializedName("__version")
-		public String Version;
-	}
+        @SerializedName("__version")
+        public String Version;
+    }
 
-	public static class NamedSystemPropertiesType {
-		public String Id;
+    public static class NamedSystemPropertiesType {
+        public String Id;
 
-		public Date __createdAt;
-	}
+        public Date __createdAt;
+    }
 
-	public static class NotSystemPropertyCreatedAtType {
-		public String Id;
+    public static class NotSystemPropertyCreatedAtType {
+        public String Id;
 
-		public Date CreatedAt;
-	}
+        public Date CreatedAt;
+    }
 
-	public static class NotSystemPropertyUpdatedAtType {
-		public String Id;
+    public static class NotSystemPropertyUpdatedAtType {
+        public String Id;
 
-		public Date _UpdatedAt;
-	}
+        public Date _UpdatedAt;
+    }
 
-	public static class NotSystemPropertyVersionType {
-		public String Id;
+    public static class NotSystemPropertyVersionType {
+        public String Id;
 
-		public String version;
-	}
+        public String version;
+    }
 
-	public static class StringType {
-		public int Id;
-		public String String;
-	}
+    public static class StringType {
+        public int Id;
+        public String String;
+    }
 
-	public static class IntegerIdNotSystemPropertyCreatedAtType {
-		public int Id;
+    public static class IntegerIdNotSystemPropertyCreatedAtType {
+        public int Id;
 
-		public Date __createdAt;
-	}
+        public Date __createdAt;
+    }
 
-	public static class IntegerIdWithNamedSystemPropertiesType {
-		public int Id;
+    public static class IntegerIdWithNamedSystemPropertiesType {
+        public int Id;
 
-		public Date __createdAt;
-	}
+        public Date __createdAt;
+    }
 
-	public static class LongIdWithNamedSystemPropertiesType {
-		public long Id;
+    public static class LongIdWithNamedSystemPropertiesType {
+        public long Id;
 
-		public Date __createdAt;
-	}
+        public Date __createdAt;
+    }
 
-	public static class DoubleNamedSystemPropertiesType {
-		public String Id;
+    public static class DoubleNamedSystemPropertiesType {
+        public String Id;
 
-		public Date __createdAt;
+        public Date __createdAt;
 
-		public Date CreatedAt;
-	}
+        public Date CreatedAt;
+    }
 
-	public static class NamedDifferentCasingSystemPropertiesType {
-		public String Id;
+    public static class NamedDifferentCasingSystemPropertiesType {
+        public String Id;
 
-		public Date __CreatedAt;
-	}
+        public Date __CreatedAt;
+    }
 
-	public static class StringCreatedAtType {
-		public String Id;
+    public static class StringCreatedAtType {
+        public String Id;
 
-		@SerializedName("__createdAt")
-		public String CreatedAt;
-	}
+        @SerializedName("__createdAt")
+        public String CreatedAt;
+    }
 
-	public static class StringUpdatedAtType {
-		public String Id;
+    public static class StringUpdatedAtType {
+        public String Id;
 
-		@SerializedName("__updatedAt")
-		public String UpdatedAt;
-	}
+        @SerializedName("__updatedAt")
+        public String UpdatedAt;
+    }
 }

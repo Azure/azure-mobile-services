@@ -27,30 +27,29 @@ package com.microsoft.windowsazure.mobileservices.table.sync.operations;
  * Class that encapsulates collapse logic for existing insert operation
  */
 class InsertOperationCollapser implements TableOperationVisitor<TableOperation> {
-	private InsertOperation mExistingOperation;
+    private InsertOperation mExistingOperation;
 
-	/**
-	 * Constructor for InsertOperationCollapser
-	 * 
-	 * @param existingOperation
-	 *            the existing operation to collapse
-	 */
-	InsertOperationCollapser(InsertOperation existingOperation) {
-		this.mExistingOperation = existingOperation;
-	}
+    /**
+     * Constructor for InsertOperationCollapser
+     *
+     * @param existingOperation the existing operation to collapse
+     */
+    InsertOperationCollapser(InsertOperation existingOperation) {
+        this.mExistingOperation = existingOperation;
+    }
 
-	@Override
-	public TableOperation visit(InsertOperation newOperation) {
-		throw new IllegalStateException("An insert operation on the item is already in the queue.");
-	}
+    @Override
+    public TableOperation visit(InsertOperation newOperation) {
+        throw new IllegalStateException("An insert operation on the item is already in the queue.");
+    }
 
-	@Override
-	public TableOperation visit(UpdateOperation newOperation) {
-		return this.mExistingOperation;
-	}
+    @Override
+    public TableOperation visit(UpdateOperation newOperation) {
+        return this.mExistingOperation;
+    }
 
-	@Override
-	public TableOperation visit(DeleteOperation newOperation) {
-		return null;
-	}
+    @Override
+    public TableOperation visit(DeleteOperation newOperation) {
+        return null;
+    }
 }

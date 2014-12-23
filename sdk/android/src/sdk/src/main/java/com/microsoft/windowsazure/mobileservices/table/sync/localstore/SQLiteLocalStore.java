@@ -2,19 +2,19 @@
 Copyright (c) Microsoft Open Technologies, Inc.
 All Rights Reserved
 Apache 2.0 License
- 
+
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
- 
+
      http://www.apache.org/licenses/LICENSE-2.0
- 
+
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
- 
+
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
 
@@ -22,13 +22,6 @@ See the Apache Version 2.0 License for specific language governing permissions a
  * SQLiteLocalStore.java
  */
 package com.microsoft.windowsazure.mobileservices.table.sync.localstore;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -47,15 +40,17 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QuerySQLWriter;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+
 /**
  * Implements MobileServiceLocalStore backed by an SQLite DB
  */
 public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceLocalStore {
-    private static class Statement {
-        private String sql;
-        private List<Object> parameters;
-    }
-
     private Map<String, Map<String, ColumnDataType>> mTables;
 
     /**
@@ -288,6 +283,25 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
     }
 
     @Override
+    public void delete(String tableName, String[] itemsIds) throws MobileServiceLocalStoreException {
+        try {
+            String invTableName = normalizeTableName(tableName);
+
+            SQLiteDatabase db = this.getWritableDatabase();
+
+            try {
+                for (String itemId : itemsIds) {
+                    db.delete(invTableName, "id = '" + itemId + "'", null);
+                }
+            } finally {
+                db.close();
+            }
+        } catch (Throwable t) {
+            throw new MobileServiceLocalStoreException(t);
+        }
+    }
+
+    @Override
     public void delete(Query query) throws MobileServiceLocalStoreException {
         try {
             String invTableName = normalizeTableName(query.getTableName());
@@ -374,7 +388,7 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
         invColumnName = invColumnName.trim().toLowerCase(Locale.getDefault());
 
         return invColumnName.equals("__version") || invColumnName.equals("__createdat") || invColumnName.equals("__updatedat")
-                || invColumnName.equals("__queueloadedat");
+                || invColumnName.equals("__queueloadedat") || invColumnName.equals("__deleted");
     }
 
     private void validateReservedProperties(ColumnDataType colDataType, String invColumnName) throws IllegalArgumentException {
@@ -391,6 +405,8 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
             throw new IllegalArgumentException("System column \"__updatedat\" must be ColumnDataType.Date.");
         } else if (invColumnName.equals("__queueloadedat") && colDataType != ColumnDataType.Date) {
             throw new IllegalArgumentException("System column \"__queueloadedat\" must be ColumnDataType.Date.");
+        } else if (invColumnName.equals("__deleted") && colDataType != ColumnDataType.Boolean) {
+            throw new IllegalArgumentException("System column \"__deleted\" must be ColumnDataType.Boolean.");
         }
     }
 
@@ -521,7 +537,6 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
         sql.append(")");
     }
 
-
     private String[] getColumns(Query query, Map<String, ColumnDataType> table) {
         String[] columns = table.keySet().toArray(new String[0]);
 
@@ -611,5 +626,10 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 
             db.execSQL(createSql);
         }
+    }
+
+    private static class Statement {
+        private String sql;
+        private List<Object> parameters;
     }
 }

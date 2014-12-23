@@ -30,118 +30,111 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * A key-readWriteLock dictionary that discards no longer referenced locks
- * 
- * @param <T>
- *            type of the key and param to the MultiReadWriteLock<T> lock
+ *
+ * @param <T> type of the key and param to the MultiReadWriteLock<T> lock
  */
 public class MultiReadWriteLockDictionary<T> {
-	/**
-	 * A readWriteLock that implements reference count
-	 * 
-	 * @param <T>
-	 *            type of the corresponding key
-	 */
-	public static class MultiReadWriteLock<T> {
-		private T mKey;
-		private int mCount;
-		private ReadWriteLock mReadWriteLock;
+    private Map<T, MultiReadWriteLock<T>> mMap;
+    private Object sync;
+    /**
+     * Constructor for MultiReadWriteLockDictionary
+     */
+    public MultiReadWriteLockDictionary() {
+        this.mMap = new HashMap<T, MultiReadWriteLock<T>>();
+        this.sync = new Object();
+    }
 
-		/**
-		 * Constructor for MultiReadWriteLock
-		 */
-		public MultiReadWriteLock() {
-			this.mCount = 0;
-			this.mReadWriteLock = new ReentrantReadWriteLock(true);
-		}
-	}
+    /**
+     * Aquire a read lock for the requested key
+     *
+     * @param key the key
+     * @return the lock
+     */
+    public MultiReadWriteLock<T> lockRead(T key) {
+        MultiReadWriteLock<T> multiRWLock = increaseLock(key);
 
-	private Map<T, MultiReadWriteLock<T>> mMap;
-	private Object sync;
+        multiRWLock.mReadWriteLock.readLock().lock();
 
-	/**
-	 * Constructor for MultiReadWriteLockDictionary
-	 */
-	public MultiReadWriteLockDictionary() {
-		this.mMap = new HashMap<T, MultiReadWriteLock<T>>();
-		this.sync = new Object();
-	}
+        return multiRWLock;
+    }
 
-	/**
-	 * Aquire a read lock for the requested key
-	 * 
-	 * @param key
-	 *            the key
-	 * @return the lock
-	 */
-	public MultiReadWriteLock<T> lockRead(T key) {
-		MultiReadWriteLock<T> multiRWLock = increaseLock(key);
+    /**
+     * Aquire a write lock for the requested key
+     *
+     * @param key the key
+     * @return the lock
+     */
+    public MultiReadWriteLock<T> lockWrite(T key) {
+        MultiReadWriteLock<T> multiRWLock = increaseLock(key);
 
-		multiRWLock.mReadWriteLock.readLock().lock();
+        multiRWLock.mReadWriteLock.writeLock().lock();
 
-		return multiRWLock;
-	}
+        return multiRWLock;
+    }
 
-	/**
-	 * Aquire a write lock for the requested key
-	 * 
-	 * @param key
-	 *            the key
-	 * @return the lock
-	 */
-	public MultiReadWriteLock<T> lockWrite(T key) {
-		MultiReadWriteLock<T> multiRWLock = increaseLock(key);
+    /**
+     * Release the provided read lock
+     *
+     * @param multiRWLock the lock
+     */
+    public void unLockRead(MultiReadWriteLock<T> multiRWLock) {
+        multiRWLock.mReadWriteLock.readLock().unlock();
 
-		multiRWLock.mReadWriteLock.writeLock().lock();
+        decreaseLock(multiRWLock);
+    }
 
-		return multiRWLock;
-	}
+    /**
+     * Release the provided write lock
+     *
+     * @param multiRWLock the lock
+     */
+    public void unLockWrite(MultiReadWriteLock<T> multiRWLock) {
+        multiRWLock.mReadWriteLock.writeLock().unlock();
 
-	/**
-	 * Release the provided read lock
-	 * 
-	 * @param multiRWLock
-	 *            the lock
-	 */
-	public void unLockRead(MultiReadWriteLock<T> multiRWLock) {
-		multiRWLock.mReadWriteLock.readLock().unlock();
+        decreaseLock(multiRWLock);
+    }
 
-		decreaseLock(multiRWLock);
-	}
+    private MultiReadWriteLock<T> increaseLock(T key) {
+        MultiReadWriteLock<T> multiRWLock = null;
 
-	/**
-	 * Release the provided write lock
-	 * 
-	 * @param multiRWLock
-	 *            the lock
-	 */
-	public void unLockWrite(MultiReadWriteLock<T> multiRWLock) {
-		multiRWLock.mReadWriteLock.writeLock().unlock();
+        synchronized (sync) {
+            if (!this.mMap.containsKey(key)) {
+                this.mMap.put(key, new MultiReadWriteLock<T>());
+            }
 
-		decreaseLock(multiRWLock);
-	}
+            multiRWLock = this.mMap.get(key);
+            multiRWLock.mCount++;
+        }
 
-	private MultiReadWriteLock<T> increaseLock(T key) {
-		MultiReadWriteLock<T> multiRWLock = null;
+        return multiRWLock;
+    }
 
-		synchronized (sync) {
-			if (!this.mMap.containsKey(key)) {
-				this.mMap.put(key, new MultiReadWriteLock<T>());
-			}
+    private void decreaseLock(MultiReadWriteLock<T> multiRWLock) {
+        synchronized (sync) {
+            multiRWLock.mCount--;
 
-			multiRWLock = this.mMap.get(key);
-			multiRWLock.mCount++;
-		}
+            if (multiRWLock.mCount == 0) {
+                this.mMap.remove(multiRWLock.mKey);
+            }
+        }
+    }
 
-		return multiRWLock;
-	}
+    /**
+     * A readWriteLock that implements reference count
+     *
+     * @param <T> type of the corresponding key
+     */
+    public static class MultiReadWriteLock<T> {
+        private T mKey;
+        private int mCount;
+        private ReadWriteLock mReadWriteLock;
 
-	private void decreaseLock(MultiReadWriteLock<T> multiRWLock) {
-		synchronized (sync) {
-			multiRWLock.mCount--;
-
-			if (multiRWLock.mCount == 0) {
-				this.mMap.remove(multiRWLock.mKey);
-			}
-		}
-	}
+        /**
+         * Constructor for MultiReadWriteLock
+         */
+        public MultiReadWriteLock() {
+            this.mCount = 0;
+            this.mReadWriteLock = new ReentrantReadWriteLock(true);
+        }
+    }
 }

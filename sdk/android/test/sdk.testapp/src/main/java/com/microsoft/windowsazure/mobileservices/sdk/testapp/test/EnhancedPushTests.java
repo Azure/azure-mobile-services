@@ -19,17 +19,6 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-
-import junit.framework.Assert;
-
-import org.apache.http.Header;
-import org.apache.http.HeaderElement;
-import org.apache.http.ParseException;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -52,810 +41,818 @@ import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.S
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterResponseMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.StatusLineMock;
 
+import junit.framework.Assert;
+
+import org.apache.http.Header;
+import org.apache.http.HeaderElement;
+import org.apache.http.ParseException;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+
 public class EnhancedPushTests extends InstrumentationTestCase {
 
-	/**
-	 * Prefix for Storage keys
-	 */
-	private static final String STORAGE_PREFIX = "__NH_";
+    /**
+     * Name for default registration
+     */
+    static final String DEFAULT_REGISTRATION_NAME = "$Default";
+    /**
+     * Prefix for Storage keys
+     */
+    private static final String STORAGE_PREFIX = "__NH_";
+    /**
+     * Prefix for registration information keys in local storage
+     */
+    private static final String REGISTRATION_NAME_STORAGE_KEY = "REG_NAME_";
+    /**
+     * New registration location header name
+     */
+    private static final String NEW_REGISTRATION_LOCATION_HEADER = "Location";
+
+    String appUrl = "";
+    String appKey = "";
+
+    private static void forceRefreshSync(MobileServicePush push, String handle) throws InterruptedException, ExecutionException {
+        push.unregisterAll(handle).get();
+    }
+
+    private static boolean matchTags(final String[] tags, List<String> regTags) {
+        if (tags == null || regTags == null) {
+            return (tags == null && regTags == null) || (tags == null && regTags.size() == 0) || (regTags == null && tags.length == 0);
+        } else if (regTags.size() != tags.length) {
+            return false;
+        } else {
+            for (String tag : tags) {
+                if (!regTags.contains(tag)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private static ServiceFilter getUpsertTestFilter(final String registrationId) {
+        return new ServiceFilter() {
+
+            @Override
+            public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+                ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+                response.setStatus(new StatusLineMock(400));
+
+                final String url = request.getUrl();
+                String method = request.getMethod();
+
+                if (method == "POST" && url.contains("registrationids/")) {
+                    response = new ServiceFilterResponseMock();
+                    response.setStatus(new StatusLineMock(201));
+                    response.setHeaders(new Header[]{new Header() {
+
+                        @Override
+                        public String getValue() {
+                            return url + registrationId;
+                        }
+
+                        @Override
+                        public String getName() {
+                            return NEW_REGISTRATION_LOCATION_HEADER;
+                        }
+
+                        @Override
+                        public HeaderElement[] getElements() throws ParseException {
+                            return null;
+                        }
+                    }});
+                } else if (method == "PUT" && url.contains("registrations/" + registrationId)) {
+                    response = new ServiceFilterResponseMock();
+                    response.setStatus(new StatusLineMock(204));
+                } else if (method == "PUT" && url.contains("registrations/")) {
+                    response = new ServiceFilterResponseMock();
+                    response.setStatus(new StatusLineMock(204));
+                } else if (method == "DELETE" && url.contains("registrations/")) {
+                    response = new ServiceFilterResponseMock();
+                    response.setStatus(new StatusLineMock(204));
+                } else if (method == "GET" && url.contains("registrations/")) {
+                    response = new ServiceFilterResponseMock();
+                    response.setStatus(new StatusLineMock(200));
+                    response.setContent("[ ]");
+                }
+
+                // create a mock request to replace the existing one
+                ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
+                return nextServiceFilterCallback.onNext(requestMock);
+            }
+        };
+    }
+
+    private static ServiceFilter getUpsertFailTestFilter(final String registrationId) {
+        return new ServiceFilter() {
+
+            @Override
+            public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+                ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+                response.setStatus(new StatusLineMock(400));
+
+                final String url = request.getUrl();
+                String method = request.getMethod();
 
-	/**
-	 * Prefix for registration information keys in local storage
-	 */
-	private static final String REGISTRATION_NAME_STORAGE_KEY = "REG_NAME_";
+                if (method == "POST" && url.contains("registrationids/")) {
+                    response = new ServiceFilterResponseMock();
+                    response.setStatus(new StatusLineMock(201));
+                    response.setHeaders(new Header[]{new Header() {
 
-	/**
-	 * Name for default registration
-	 */
-	static final String DEFAULT_REGISTRATION_NAME = "$Default";
+                        @Override
+                        public String getValue() {
+                            return url + registrationId;
+                        }
 
-	/**
-	 * New registration location header name
-	 */
-	private static final String NEW_REGISTRATION_LOCATION_HEADER = "Location";
+                        @Override
+                        public String getName() {
+                            return NEW_REGISTRATION_LOCATION_HEADER;
+                        }
 
-	String appUrl = "";
-	String appKey = "";
+                        @Override
+                        public HeaderElement[] getElements() throws ParseException {
+                            return null;
+                        }
+                    }});
+                } else if (method == "PUT" && url.contains("registrations/")) {
+                    response = new ServiceFilterResponseMock();
+                    response.setStatus(new StatusLineMock(410));
+                } else if (method == "DELETE" && url.contains("registrations/")) {
+                    response = new ServiceFilterResponseMock();
+                    response.setStatus(new StatusLineMock(204));
+                } else if (method == "GET" && url.contains("registrations/")) {
+                    response = new ServiceFilterResponseMock();
+                    response.setStatus(new StatusLineMock(200));
+                    response.setContent("[ ]");
+                }
 
-	protected void setUp() throws Exception {
-		appUrl = "http://myapp.com/";
-		appKey = "qwerty";
-		super.setUp();
-	}
+                // create a mock request to replace the existing one
+                ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
+                return nextServiceFilterCallback.onNext(requestMock);
+            }
+        };
+    }
 
-	protected void tearDown() throws Exception {
-		super.tearDown();
-	}
+    protected void setUp() throws Exception {
+        appUrl = "http://myapp.com/";
+        appKey = "qwerty";
+        super.setUp();
+    }
 
-	public void testRegisterUnregisterNative() throws Throwable {
-		Context context = getInstrumentation().getTargetContext();
-		final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
+    protected void tearDown() throws Exception {
+        super.tearDown();
+    }
 
-		final Container container = new Container();
-		final String handle = "handle";
+    public void testRegisterUnregisterNative() throws Throwable {
+        Context context = getInstrumentation().getTargetContext();
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
 
-		String registrationId = "registrationId";
+        final Container container = new Container();
+        final String handle = "handle";
 
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+        String registrationId = "registrationId";
 
-		client = client.withFilter(getUpsertTestFilter(registrationId));
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
 
-		final MobileServicePush push = client.getPush();
+        client = client.withFilter(getUpsertTestFilter(registrationId));
 
-		forceRefreshSync(push, handle);
+        final MobileServicePush push = client.getPush();
 
-		try {
+        forceRefreshSync(push, handle);
 
-			Registration registration = push.register(handle, new String[] { "tag1" }).get();
+        try {
 
-			container.registrationId = registration.getRegistrationId();
+            Registration registration = push.register(handle, new String[]{"tag1"}).get();
 
-			container.storedRegistrationId = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + DEFAULT_REGISTRATION_NAME, null);
+            container.registrationId = registration.getRegistrationId();
 
-			push.unregister().get();
+            container.storedRegistrationId = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + DEFAULT_REGISTRATION_NAME, null);
 
-			container.unregister = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + DEFAULT_REGISTRATION_NAME, null);
+            push.unregister().get();
 
-		} catch (Exception exception) {
+            container.unregister = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + DEFAULT_REGISTRATION_NAME, null);
 
-			if (exception instanceof ExecutionException) {
-				container.exception = (Exception) exception.getCause();
-			} else {
-				container.exception = exception;
-			}
+        } catch (Exception exception) {
 
-			fail(container.exception.getMessage());
-		}
+            if (exception instanceof ExecutionException) {
+                container.exception = (Exception) exception.getCause();
+            } else {
+                container.exception = exception;
+            }
 
-		Assert.assertEquals(registrationId, container.storedRegistrationId);
-		Assert.assertEquals(registrationId, container.registrationId);
-		Assert.assertNull(container.unregister);
-	}
+            fail(container.exception.getMessage());
+        }
 
-	@SuppressWarnings("deprecation")
-	public void testRegisterUnregisterNativeCallback() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
+        Assert.assertEquals(registrationId, container.storedRegistrationId);
+        Assert.assertEquals(registrationId, container.registrationId);
+        Assert.assertNull(container.unregister);
+    }
 
-		Context context = getInstrumentation().getTargetContext();
-		final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
+    @SuppressWarnings("deprecation")
+    public void testRegisterUnregisterNativeCallback() throws Throwable {
+        final CountDownLatch latch = new CountDownLatch(1);
 
-		final Container container = new Container();
-		final String handle = "handle";
+        Context context = getInstrumentation().getTargetContext();
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
 
-		String registrationId = "registrationId";
+        final Container container = new Container();
+        final String handle = "handle";
 
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+        String registrationId = "registrationId";
 
-		client = client.withFilter(getUpsertTestFilter(registrationId));
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
 
-		final MobileServicePush push = client.getPush();
+        client = client.withFilter(getUpsertTestFilter(registrationId));
 
-		forceRefreshSync(push, handle);
+        final MobileServicePush push = client.getPush();
 
-		push.register(handle, new String[] { "tag1" }, new RegistrationCallback() {
+        forceRefreshSync(push, handle);
 
-			@Override
-			public void onRegister(Registration registration, Exception exception) {
-				if (exception != null) {
-					container.exception = exception;
+        push.register(handle, new String[]{"tag1"}, new RegistrationCallback() {
 
-					latch.countDown();
-				} else {
-					container.registrationId = registration.getRegistrationId();
+            @Override
+            public void onRegister(Registration registration, Exception exception) {
+                if (exception != null) {
+                    container.exception = exception;
 
-					container.storedRegistrationId = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + DEFAULT_REGISTRATION_NAME,
-							null);
+                    latch.countDown();
+                } else {
+                    container.registrationId = registration.getRegistrationId();
 
-					push.unregister(new UnregisterCallback() {
+                    container.storedRegistrationId = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + DEFAULT_REGISTRATION_NAME,
+                            null);
 
-						@Override
-						public void onUnregister(Exception exception) {
-							if (exception != null) {
-								container.exception = exception;
-							} else {
-								container.unregister = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + DEFAULT_REGISTRATION_NAME,
-										null);
-							}
+                    push.unregister(new UnregisterCallback() {
 
-							latch.countDown();
-						}
-					});
-				}
-			}
-		});
+                        @Override
+                        public void onUnregister(Exception exception) {
+                            if (exception != null) {
+                                container.exception = exception;
+                            } else {
+                                container.unregister = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + DEFAULT_REGISTRATION_NAME,
+                                        null);
+                            }
 
-		latch.await();
+                            latch.countDown();
+                        }
+                    });
+                }
+            }
+        });
 
-		// Asserts
-		Exception exception = container.exception;
+        latch.await();
 
-		if (exception != null) {
-			fail(exception.getMessage());
-		} else {
-			Assert.assertEquals(registrationId, container.storedRegistrationId);
-			Assert.assertEquals(registrationId, container.registrationId);
-			Assert.assertNull(container.unregister);
-		}
-	}
+        // Asserts
+        Exception exception = container.exception;
 
-	public void testRegisterUnregisterTemplate() throws Throwable {
+        if (exception != null) {
+            fail(exception.getMessage());
+        } else {
+            Assert.assertEquals(registrationId, container.storedRegistrationId);
+            Assert.assertEquals(registrationId, container.registrationId);
+            Assert.assertNull(container.unregister);
+        }
+    }
 
-		Context context = getInstrumentation().getTargetContext();
-		final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
+    public void testRegisterUnregisterTemplate() throws Throwable {
 
-		final Container container = new Container();
-		final String handle = "handle";
-		final String templateName = "templateName";
+        Context context = getInstrumentation().getTargetContext();
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
 
-		String registrationId = "registrationId";
+        final Container container = new Container();
+        final String handle = "handle";
+        final String templateName = "templateName";
 
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+        String registrationId = "registrationId";
 
-		client = client.withFilter(getUpsertTestFilter(registrationId));
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
 
-		final MobileServicePush push = client.getPush();
+        client = client.withFilter(getUpsertTestFilter(registrationId));
 
-		forceRefreshSync(push, handle);
+        final MobileServicePush push = client.getPush();
 
-		try {
-			TemplateRegistration registration = push.registerTemplate(handle, templateName, "{ }", new String[] { "tag1" }).get();
+        forceRefreshSync(push, handle);
 
-			container.registrationId = registration.getRegistrationId();
+        try {
+            TemplateRegistration registration = push.registerTemplate(handle, templateName, "{ }", new String[]{"tag1"}).get();
 
-			container.storedRegistrationId = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + templateName, null);
+            container.registrationId = registration.getRegistrationId();
 
-			push.unregisterTemplate(templateName).get();
+            container.storedRegistrationId = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + templateName, null);
 
-			container.unregister = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + templateName, null);
+            push.unregisterTemplate(templateName).get();
 
-			Assert.assertEquals(registrationId, container.storedRegistrationId);
-			Assert.assertEquals(registrationId, container.registrationId);
-			Assert.assertNull(container.unregister);
+            container.unregister = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + templateName, null);
 
-		} catch (Exception exception) {
+            Assert.assertEquals(registrationId, container.storedRegistrationId);
+            Assert.assertEquals(registrationId, container.registrationId);
+            Assert.assertNull(container.unregister);
 
-			if (exception instanceof ExecutionException) {
-				container.exception = (Exception) exception.getCause();
-			} else {
-				container.exception = exception;
-			}
+        } catch (Exception exception) {
 
-			fail(container.exception.getMessage());
-		}
-	}
+            if (exception instanceof ExecutionException) {
+                container.exception = (Exception) exception.getCause();
+            } else {
+                container.exception = exception;
+            }
 
-	@SuppressWarnings("deprecation")
-	public void testRegisterUnregisterTemplateCallback() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
+            fail(container.exception.getMessage());
+        }
+    }
 
-		Context context = getInstrumentation().getTargetContext();
-		final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
+    @SuppressWarnings("deprecation")
+    public void testRegisterUnregisterTemplateCallback() throws Throwable {
+        final CountDownLatch latch = new CountDownLatch(1);
 
-		final Container container = new Container();
-		final String handle = "handle";
-		final String templateName = "templateName";
+        Context context = getInstrumentation().getTargetContext();
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
 
-		String registrationId = "registrationId";
+        final Container container = new Container();
+        final String handle = "handle";
+        final String templateName = "templateName";
 
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+        String registrationId = "registrationId";
 
-		client = client.withFilter(getUpsertTestFilter(registrationId));
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
 
-		final MobileServicePush push = client.getPush();
+        client = client.withFilter(getUpsertTestFilter(registrationId));
 
-		forceRefreshSync(push, handle);
+        final MobileServicePush push = client.getPush();
 
-		push.registerTemplate(handle, templateName, "{ }", new String[] { "tag1" }, new TemplateRegistrationCallback() {
+        forceRefreshSync(push, handle);
 
-			@Override
-			public void onRegister(TemplateRegistration registration, Exception exception) {
-				if (exception != null) {
-					container.exception = exception;
+        push.registerTemplate(handle, templateName, "{ }", new String[]{"tag1"}, new TemplateRegistrationCallback() {
 
-					latch.countDown();
-				} else {
-					container.registrationId = registration.getRegistrationId();
+            @Override
+            public void onRegister(TemplateRegistration registration, Exception exception) {
+                if (exception != null) {
+                    container.exception = exception;
 
-					container.storedRegistrationId = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + templateName, null);
+                    latch.countDown();
+                } else {
+                    container.registrationId = registration.getRegistrationId();
 
-					push.unregisterTemplate(templateName, new UnregisterCallback() {
+                    container.storedRegistrationId = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + templateName, null);
 
-						@Override
-						public void onUnregister(Exception exception) {
-							if (exception != null) {
-								container.exception = exception;
-							} else {
-								container.unregister = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + templateName, null);
-							}
+                    push.unregisterTemplate(templateName, new UnregisterCallback() {
 
-							latch.countDown();
-						}
-					});
-				}
-			}
-		});
+                        @Override
+                        public void onUnregister(Exception exception) {
+                            if (exception != null) {
+                                container.exception = exception;
+                            } else {
+                                container.unregister = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + templateName, null);
+                            }
 
-		latch.await();
+                            latch.countDown();
+                        }
+                    });
+                }
+            }
+        });
 
-		// Asserts
-		Exception exception = container.exception;
+        latch.await();
 
-		if (exception != null) {
-			fail(exception.getMessage());
-		} else {
-			Assert.assertEquals(registrationId, container.storedRegistrationId);
-			Assert.assertEquals(registrationId, container.registrationId);
-			Assert.assertNull(container.unregister);
-		}
-	}
+        // Asserts
+        Exception exception = container.exception;
 
-	public void testRegisterFailNative() throws Throwable {
+        if (exception != null) {
+            fail(exception.getMessage());
+        } else {
+            Assert.assertEquals(registrationId, container.storedRegistrationId);
+            Assert.assertEquals(registrationId, container.registrationId);
+            Assert.assertNull(container.unregister);
+        }
+    }
 
-		final Container container = new Container();
-		Context context = getInstrumentation().getTargetContext();
-		final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
+    public void testRegisterFailNative() throws Throwable {
 
-		final String handle = "handle";
+        final Container container = new Container();
+        Context context = getInstrumentation().getTargetContext();
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
 
-		String registrationId = "registrationId";
+        final String handle = "handle";
 
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+        String registrationId = "registrationId";
 
-		client = client.withFilter(getUpsertFailTestFilter(registrationId));
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
 
-		final MobileServicePush push = client.getPush();
+        client = client.withFilter(getUpsertFailTestFilter(registrationId));
 
-		forceRefreshSync(push, handle);
+        final MobileServicePush push = client.getPush();
 
-		try {
-			push.register(handle, new String[] { "tag1" }).get();
-			fail("Expected Exception RegistrationGoneException");
-		} catch (Exception exception) {
+        forceRefreshSync(push, handle);
 
-			if (exception instanceof ExecutionException) {
-				container.exception = (Exception) exception.getCause();
-			} else {
-				container.exception = exception;
-			}
+        try {
+            push.register(handle, new String[]{"tag1"}).get();
+            fail("Expected Exception RegistrationGoneException");
+        } catch (Exception exception) {
 
-			if (!(container.exception instanceof RegistrationGoneException)) {
-				fail("Expected Exception RegistrationGoneException");
-			}
+            if (exception instanceof ExecutionException) {
+                container.exception = (Exception) exception.getCause();
+            } else {
+                container.exception = exception;
+            }
 
-			Assert.assertNull(sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + DEFAULT_REGISTRATION_NAME, null));
-		}
-	}
+            if (!(container.exception instanceof RegistrationGoneException)) {
+                fail("Expected Exception RegistrationGoneException");
+            }
 
-	public void testRegisterFailTemplate() throws Throwable {
+            Assert.assertNull(sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + DEFAULT_REGISTRATION_NAME, null));
+        }
+    }
 
-		final Container container = new Container();
-		Context context = getInstrumentation().getTargetContext();
-		final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
+    public void testRegisterFailTemplate() throws Throwable {
 
-		final String handle = "handle";
-		final String templateName = "templateName";
+        final Container container = new Container();
+        Context context = getInstrumentation().getTargetContext();
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
 
-		String registrationId = "registrationId";
+        final String handle = "handle";
+        final String templateName = "templateName";
 
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+        String registrationId = "registrationId";
 
-		client = client.withFilter(getUpsertFailTestFilter(registrationId));
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
 
-		final MobileServicePush push = client.getPush();
+        client = client.withFilter(getUpsertFailTestFilter(registrationId));
 
-		forceRefreshSync(push, handle);
+        final MobileServicePush push = client.getPush();
 
-		try {
-			push.registerTemplate(handle, templateName, "{ }", new String[] { "tag1" }).get();
-			fail("Expected Exception RegistrationGoneException");
-		} catch (Exception exception) {
+        forceRefreshSync(push, handle);
 
-			if (exception instanceof ExecutionException) {
-				container.exception = (Exception) exception.getCause();
-			} else {
-				container.exception = exception;
-			}
+        try {
+            push.registerTemplate(handle, templateName, "{ }", new String[]{"tag1"}).get();
+            fail("Expected Exception RegistrationGoneException");
+        } catch (Exception exception) {
 
-			if (!(container.exception instanceof RegistrationGoneException)) {
-				fail("Expected Exception RegistrationGoneException");
-			}
+            if (exception instanceof ExecutionException) {
+                container.exception = (Exception) exception.getCause();
+            } else {
+                container.exception = exception;
+            }
 
-			Assert.assertNull(sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + DEFAULT_REGISTRATION_NAME, null));
-		}
-	}
+            if (!(container.exception instanceof RegistrationGoneException)) {
+                fail("Expected Exception RegistrationGoneException");
+            }
 
-	public void testReRegisterNative() throws Throwable {
-		try {
+            Assert.assertNull(sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + DEFAULT_REGISTRATION_NAME, null));
+        }
+    }
 
-			Context context = getInstrumentation().getTargetContext();
-			final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
+    public void testReRegisterNative() throws Throwable {
+        try {
 
-			final Container container = new Container();
-			final String handle = "handle";
+            Context context = getInstrumentation().getTargetContext();
+            final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
 
-			String registrationId1 = "registrationId1";
-			String registrationId2 = "registrationId2";
+            final Container container = new Container();
+            final String handle = "handle";
 
-			String[] tags1 = new String[] { "tag1" };
-			final String[] tags2 = new String[] { "tag2" };
+            String registrationId1 = "registrationId1";
+            String registrationId2 = "registrationId2";
 
-			MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+            String[] tags1 = new String[]{"tag1"};
+            final String[] tags2 = new String[]{"tag2"};
 
-			MobileServiceClient registrationclient = client.withFilter(getUpsertTestFilter(registrationId1));
-			MobileServiceClient reRegistrationclient = client.withFilter(getUpsertTestFilter(registrationId2));
+            MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
 
-			final MobileServicePush registrationPush = registrationclient.getPush();
-			final MobileServicePush reRegistrationPush = reRegistrationclient.getPush();
+            MobileServiceClient registrationclient = client.withFilter(getUpsertTestFilter(registrationId1));
+            MobileServiceClient reRegistrationclient = client.withFilter(getUpsertTestFilter(registrationId2));
 
-			forceRefreshSync(registrationPush, handle);
-			forceRefreshSync(reRegistrationPush, handle);
+            final MobileServicePush registrationPush = registrationclient.getPush();
+            final MobileServicePush reRegistrationPush = reRegistrationclient.getPush();
 
-			try {
-				registrationPush.register(handle, tags1).get();
+            forceRefreshSync(registrationPush, handle);
+            forceRefreshSync(reRegistrationPush, handle);
 
-				Registration registration2 = reRegistrationPush.register(handle, tags2).get();
+            try {
+                registrationPush.register(handle, tags1).get();
 
-				container.storedRegistrationId = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + DEFAULT_REGISTRATION_NAME, null);
-				container.tags = registration2.getTags();
+                Registration registration2 = reRegistrationPush.register(handle, tags2).get();
 
-			} catch (Exception exception) {
-				container.exception = exception;
-			}
+                container.storedRegistrationId = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + DEFAULT_REGISTRATION_NAME, null);
+                container.tags = registration2.getTags();
 
-			// Asserts
-			Exception exception = container.exception;
+            } catch (Exception exception) {
+                container.exception = exception;
+            }
 
-			if (exception != null) {
-				fail(exception.getMessage());
-			} else {
-				Assert.assertEquals(registrationId2, container.storedRegistrationId);
-				Assert.assertTrue(matchTags(tags2, container.tags));
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+            // Asserts
+            Exception exception = container.exception;
 
-	public void testReRegisterTemplate() throws Throwable {
-		try {
+            if (exception != null) {
+                fail(exception.getMessage());
+            } else {
+                Assert.assertEquals(registrationId2, container.storedRegistrationId);
+                Assert.assertTrue(matchTags(tags2, container.tags));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-			Context context = getInstrumentation().getTargetContext();
-			final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
+    public void testReRegisterTemplate() throws Throwable {
+        try {
 
-			final Container container = new Container();
-			final String handle = "handle";
-			final String templateName = "templateName";
+            Context context = getInstrumentation().getTargetContext();
+            final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
 
-			String registrationId1 = "registrationId1";
-			String registrationId2 = "registrationId2";
+            final Container container = new Container();
+            final String handle = "handle";
+            final String templateName = "templateName";
 
-			String[] tags1 = new String[] { "tag1" };
-			final String[] tags2 = new String[] { "tag2" };
+            String registrationId1 = "registrationId1";
+            String registrationId2 = "registrationId2";
 
-			String templateBody1 = "\"data\"={\"text\"=\"$message1\"}";
-			final String templateBody2 = "\"data\"={\"text\"=\"$message2\"}";
+            String[] tags1 = new String[]{"tag1"};
+            final String[] tags2 = new String[]{"tag2"};
 
-			MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+            String templateBody1 = "\"data\"={\"text\"=\"$message1\"}";
+            final String templateBody2 = "\"data\"={\"text\"=\"$message2\"}";
 
-			MobileServiceClient registrationclient = client.withFilter(getUpsertTestFilter(registrationId1));
-			MobileServiceClient reRegistrationclient = client.withFilter(getUpsertTestFilter(registrationId2));
+            MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
 
-			final MobileServicePush registrationPush = registrationclient.getPush();
-			final MobileServicePush reRegistrationPush = reRegistrationclient.getPush();
+            MobileServiceClient registrationclient = client.withFilter(getUpsertTestFilter(registrationId1));
+            MobileServiceClient reRegistrationclient = client.withFilter(getUpsertTestFilter(registrationId2));
 
-			forceRefreshSync(registrationPush, handle);
-			forceRefreshSync(reRegistrationPush, handle);
+            final MobileServicePush registrationPush = registrationclient.getPush();
+            final MobileServicePush reRegistrationPush = reRegistrationclient.getPush();
 
-			try {
-				registrationPush.registerTemplate(handle, templateName, templateBody1, tags1).get();
+            forceRefreshSync(registrationPush, handle);
+            forceRefreshSync(reRegistrationPush, handle);
 
-				TemplateRegistration registration2 = reRegistrationPush.registerTemplate(handle, templateName, templateBody2, tags2).get();
+            try {
+                registrationPush.registerTemplate(handle, templateName, templateBody1, tags1).get();
 
-				container.storedRegistrationId = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + templateName, null);
-				container.tags = registration2.getTags();
-				container.templateBody = registration2.getTemplateBody();
-			} catch (Exception exception) {
-				container.exception = exception;
-			}
+                TemplateRegistration registration2 = reRegistrationPush.registerTemplate(handle, templateName, templateBody2, tags2).get();
 
-			// Asserts
-			Exception exception = container.exception;
+                container.storedRegistrationId = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + templateName, null);
+                container.tags = registration2.getTags();
+                container.templateBody = registration2.getTemplateBody();
+            } catch (Exception exception) {
+                container.exception = exception;
+            }
 
-			if (exception != null) {
-				fail(exception.getMessage());
-			} else {
-				Assert.assertEquals(registrationId2, container.storedRegistrationId);
-				Assert.assertTrue(matchTags(tags2, container.tags));
-				Assert.assertEquals(templateBody2, container.templateBody);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+            // Asserts
+            Exception exception = container.exception;
 
-	public void testReRegisterFailNative() throws Throwable {
-		try {
+            if (exception != null) {
+                fail(exception.getMessage());
+            } else {
+                Assert.assertEquals(registrationId2, container.storedRegistrationId);
+                Assert.assertTrue(matchTags(tags2, container.tags));
+                Assert.assertEquals(templateBody2, container.templateBody);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-			Context context = getInstrumentation().getTargetContext();
-			final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
+    public void testReRegisterFailNative() throws Throwable {
+        try {
 
-			final Container container = new Container();
-			final String handle = "handle";
+            Context context = getInstrumentation().getTargetContext();
+            final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
 
-			String registrationId1 = "registrationId1";
-			String registrationId2 = "registrationId2";
+            final Container container = new Container();
+            final String handle = "handle";
 
-			MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+            String registrationId1 = "registrationId1";
+            String registrationId2 = "registrationId2";
 
-			MobileServiceClient registrationclient = client.withFilter(getUpsertTestFilter(registrationId1));
-			MobileServiceClient reRegistrationclient = client.withFilter(getUpsertFailTestFilter(registrationId2));
+            MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
 
-			final MobileServicePush registrationPush = registrationclient.getPush();
-			final MobileServicePush reRegistrationPush = reRegistrationclient.getPush();
+            MobileServiceClient registrationclient = client.withFilter(getUpsertTestFilter(registrationId1));
+            MobileServiceClient reRegistrationclient = client.withFilter(getUpsertFailTestFilter(registrationId2));
 
-			forceRefreshSync(registrationPush, handle);
-			forceRefreshSync(reRegistrationPush, handle);
+            final MobileServicePush registrationPush = registrationclient.getPush();
+            final MobileServicePush reRegistrationPush = reRegistrationclient.getPush();
 
-			try {
-				registrationPush.register(handle, new String[] { "tag1" }).get();
-			} catch (Exception exception) {
-				fail(exception.getMessage());
-			}
+            forceRefreshSync(registrationPush, handle);
+            forceRefreshSync(reRegistrationPush, handle);
 
-			try {
-				reRegistrationPush.register(handle, new String[] { "tag1" }).get();
+            try {
+                registrationPush.register(handle, new String[]{"tag1"}).get();
+            } catch (Exception exception) {
+                fail(exception.getMessage());
+            }
 
-			} catch (Exception exception) {
-				if (exception instanceof ExecutionException) {
-					container.exception = (Exception) exception.getCause();
-				} else {
-					container.exception = exception;
-				}
+            try {
+                reRegistrationPush.register(handle, new String[]{"tag1"}).get();
 
-				container.storedRegistrationId = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + DEFAULT_REGISTRATION_NAME, null);
-			}
+            } catch (Exception exception) {
+                if (exception instanceof ExecutionException) {
+                    container.exception = (Exception) exception.getCause();
+                } else {
+                    container.exception = exception;
+                }
 
-			// Asserts
-			Exception exception = container.exception;
+                container.storedRegistrationId = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + DEFAULT_REGISTRATION_NAME, null);
+            }
 
-			if (!(exception instanceof RegistrationGoneException)) {
-				fail("Expected Exception RegistrationGoneException");
-			}
+            // Asserts
+            Exception exception = container.exception;
 
-			Assert.assertNull(container.storedRegistrationId);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+            if (!(exception instanceof RegistrationGoneException)) {
+                fail("Expected Exception RegistrationGoneException");
+            }
 
-	public void testReRegisterFailTemplate() throws Throwable {
-		try {
+            Assert.assertNull(container.storedRegistrationId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-			Context context = getInstrumentation().getTargetContext();
-			final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
+    public void testReRegisterFailTemplate() throws Throwable {
+        try {
 
-			final Container container = new Container();
-			final String handle = "handle";
-			final String templateName = "templateName";
+            Context context = getInstrumentation().getTargetContext();
+            final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
 
-			String registrationId1 = "registrationId1";
-			String registrationId2 = "registrationId2";
+            final Container container = new Container();
+            final String handle = "handle";
+            final String templateName = "templateName";
 
-			MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+            String registrationId1 = "registrationId1";
+            String registrationId2 = "registrationId2";
 
-			MobileServiceClient registrationclient = client.withFilter(getUpsertTestFilter(registrationId1));
-			MobileServiceClient reRegistrationclient = client.withFilter(getUpsertFailTestFilter(registrationId2));
+            MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
 
-			final MobileServicePush registrationPush = registrationclient.getPush();
-			final MobileServicePush reRegistrationPush = reRegistrationclient.getPush();
+            MobileServiceClient registrationclient = client.withFilter(getUpsertTestFilter(registrationId1));
+            MobileServiceClient reRegistrationclient = client.withFilter(getUpsertFailTestFilter(registrationId2));
 
-			forceRefreshSync(registrationPush, handle);
-			forceRefreshSync(reRegistrationPush, handle);
+            final MobileServicePush registrationPush = registrationclient.getPush();
+            final MobileServicePush reRegistrationPush = reRegistrationclient.getPush();
 
-			try {
-				registrationPush.registerTemplate(handle, templateName, "{ }", new String[] { "tag1" }).get();
-			} catch (Exception exception) {
-				fail(exception.getMessage());
-			}
+            forceRefreshSync(registrationPush, handle);
+            forceRefreshSync(reRegistrationPush, handle);
 
-			try {
-				reRegistrationPush.registerTemplate(handle, templateName, "{ }", new String[] { "tag1" }).get();
-			} catch (Exception exception) {
-				if (exception instanceof ExecutionException) {
-					container.exception = (Exception) exception.getCause();
-				} else {
-					container.exception = exception;
-				}
+            try {
+                registrationPush.registerTemplate(handle, templateName, "{ }", new String[]{"tag1"}).get();
+            } catch (Exception exception) {
+                fail(exception.getMessage());
+            }
 
-				container.storedRegistrationId = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + templateName, null);
-			}
+            try {
+                reRegistrationPush.registerTemplate(handle, templateName, "{ }", new String[]{"tag1"}).get();
+            } catch (Exception exception) {
+                if (exception instanceof ExecutionException) {
+                    container.exception = (Exception) exception.getCause();
+                } else {
+                    container.exception = exception;
+                }
 
-			// Asserts
-			Exception exception = container.exception;
+                container.storedRegistrationId = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + templateName, null);
+            }
 
-			if (!(exception instanceof RegistrationGoneException)) {
-				fail("Expected Exception RegistrationGoneException");
-			}
+            // Asserts
+            Exception exception = container.exception;
 
-			Assert.assertNull(container.storedRegistrationId);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+            if (!(exception instanceof RegistrationGoneException)) {
+                fail("Expected Exception RegistrationGoneException");
+            }
 
-	public void testRegisterNativeEmptyGcmRegistrationId() throws Throwable {
-		try {
+            Assert.assertNull(container.storedRegistrationId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-			final Container container = new Container();
+    public void testRegisterNativeEmptyGcmRegistrationId() throws Throwable {
+        try {
 
-			Context context = getInstrumentation().getTargetContext();
+            final Container container = new Container();
 
-			MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+            Context context = getInstrumentation().getTargetContext();
 
-			try {
-				client.getPush().register("", new String[] { "tag1" }).get();
-			} catch (Exception exception) {
-				if (exception instanceof ExecutionException) {
-					container.exception = (Exception) exception.getCause();
-				} else {
-					container.exception = exception;
-				}
-			}
+            MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
 
-			// Asserts
-			Exception exception = container.exception;
+            try {
+                client.getPush().register("", new String[]{"tag1"}).get();
+            } catch (Exception exception) {
+                if (exception instanceof ExecutionException) {
+                    container.exception = (Exception) exception.getCause();
+                } else {
+                    container.exception = exception;
+                }
+            }
 
-			if (!(exception instanceof IllegalArgumentException)) {
-				fail("Expected Exception IllegalArgumentException");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+            // Asserts
+            Exception exception = container.exception;
 
-	public void testRegisterTemplateEmptyGcmRegistrationId() throws Throwable {
-		try {
-			final Container container = new Container();
+            if (!(exception instanceof IllegalArgumentException)) {
+                fail("Expected Exception IllegalArgumentException");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-			Context context = getInstrumentation().getTargetContext();
+    public void testRegisterTemplateEmptyGcmRegistrationId() throws Throwable {
+        try {
+            final Container container = new Container();
 
-			MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+            Context context = getInstrumentation().getTargetContext();
 
-			try {
-				client.getPush().registerTemplate("", "template1", "{\"data\"={\"text\"=\"$message\"}}", new String[] { "tag1" }).get();
-			} catch (Exception exception) {
-				if (exception instanceof ExecutionException) {
-					container.exception = (Exception) exception.getCause();
-				} else {
-					container.exception = exception;
-				}
-			}
+            MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
 
-			// Asserts
-			Exception exception = container.exception;
+            try {
+                client.getPush().registerTemplate("", "template1", "{\"data\"={\"text\"=\"$message\"}}", new String[]{"tag1"}).get();
+            } catch (Exception exception) {
+                if (exception instanceof ExecutionException) {
+                    container.exception = (Exception) exception.getCause();
+                } else {
+                    container.exception = exception;
+                }
+            }
 
-			if (!(exception instanceof IllegalArgumentException)) {
-				fail("Expected Exception IllegalArgumentException");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+            // Asserts
+            Exception exception = container.exception;
 
-	public void testRegisterTemplateEmptyTemplateName() throws Throwable {
-		try {
+            if (!(exception instanceof IllegalArgumentException)) {
+                fail("Expected Exception IllegalArgumentException");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-			final Container container = new Container();
+    // Test Filter
 
-			Context context = getInstrumentation().getTargetContext();
+    public void testRegisterTemplateEmptyTemplateName() throws Throwable {
+        try {
 
-			MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+            final Container container = new Container();
 
-			try {
-				client.getPush().registerTemplate(UUID.randomUUID().toString(), "", "{\"data\"={\"text\"=\"$message\"}}", new String[] { "tag1" }).get();
-			} catch (Exception exception) {
-				if (exception instanceof ExecutionException) {
-					container.exception = (Exception) exception.getCause();
-				} else {
-					container.exception = exception;
-				}
-			}
+            Context context = getInstrumentation().getTargetContext();
 
-			// Asserts
-			Exception exception = container.exception;
+            MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
 
-			if (!(exception instanceof IllegalArgumentException)) {
-				fail("Expected Exception IllegalArgumentException");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+            try {
+                client.getPush().registerTemplate(UUID.randomUUID().toString(), "", "{\"data\"={\"text\"=\"$message\"}}", new String[]{"tag1"}).get();
+            } catch (Exception exception) {
+                if (exception instanceof ExecutionException) {
+                    container.exception = (Exception) exception.getCause();
+                } else {
+                    container.exception = exception;
+                }
+            }
 
-	public void testRegisterTemplateEmptyTemplateBody() throws Throwable {
-		try {
+            // Asserts
+            Exception exception = container.exception;
 
-			final Container container = new Container();
+            if (!(exception instanceof IllegalArgumentException)) {
+                fail("Expected Exception IllegalArgumentException");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-			Context context = getInstrumentation().getTargetContext();
+    public void testRegisterTemplateEmptyTemplateBody() throws Throwable {
+        try {
 
-			MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+            final Container container = new Container();
 
-			try {
-				client.getPush().registerTemplate(UUID.randomUUID().toString(), "template1", "", new String[] { "tag1" }).get();
-			} catch (Exception exception) {
-				if (exception instanceof ExecutionException) {
-					container.exception = (Exception) exception.getCause();
-				} else {
-					container.exception = exception;
-				}
-			}
+            Context context = getInstrumentation().getTargetContext();
 
-			// Asserts
-			Exception exception = container.exception;
+            MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
 
-			if (!(exception instanceof IllegalArgumentException)) {
-				fail("Expected Exception IllegalArgumentException");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+            try {
+                client.getPush().registerTemplate(UUID.randomUUID().toString(), "template1", "", new String[]{"tag1"}).get();
+            } catch (Exception exception) {
+                if (exception instanceof ExecutionException) {
+                    container.exception = (Exception) exception.getCause();
+                } else {
+                    container.exception = exception;
+                }
+            }
 
-	private static void forceRefreshSync(MobileServicePush push, String handle) throws InterruptedException, ExecutionException {
-		push.unregisterAll(handle).get();
-	}
+            // Asserts
+            Exception exception = container.exception;
 
-	private static boolean matchTags(final String[] tags, List<String> regTags) {
-		if (tags == null || regTags == null) {
-			return (tags == null && regTags == null) || (tags == null && regTags.size() == 0) || (regTags == null && tags.length == 0);
-		} else if (regTags.size() != tags.length) {
-			return false;
-		} else {
-			for (String tag : tags) {
-				if (!regTags.contains(tag)) {
-					return false;
-				}
-			}
-		}
+            if (!(exception instanceof IllegalArgumentException)) {
+                fail("Expected Exception IllegalArgumentException");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-		return true;
-	}
+    private class Container {
+        public String storedRegistrationId;
+        public String registrationId;
 
-	// Test Filter
+        public List<String> tags;
+        public String templateBody;
 
-	private static ServiceFilter getUpsertTestFilter(final String registrationId) {
-		return new ServiceFilter() {
+        public String unregister;
 
-			@Override
-			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
-				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-				response.setStatus(new StatusLineMock(400));
-
-				final String url = request.getUrl();
-				String method = request.getMethod();
-
-				if (method == "POST" && url.contains("registrationids/")) {
-					response = new ServiceFilterResponseMock();
-					response.setStatus(new StatusLineMock(201));
-					response.setHeaders(new Header[] { new Header() {
-
-						@Override
-						public String getValue() {
-							return url + registrationId;
-						}
-
-						@Override
-						public String getName() {
-							return NEW_REGISTRATION_LOCATION_HEADER;
-						}
-
-						@Override
-						public HeaderElement[] getElements() throws ParseException {
-							return null;
-						}
-					} });
-				} else if (method == "PUT" && url.contains("registrations/" + registrationId)) {
-					response = new ServiceFilterResponseMock();
-					response.setStatus(new StatusLineMock(204));
-				} else if (method == "PUT" && url.contains("registrations/")) {
-					response = new ServiceFilterResponseMock();
-					response.setStatus(new StatusLineMock(204));
-				} else if (method == "DELETE" && url.contains("registrations/")) {
-					response = new ServiceFilterResponseMock();
-					response.setStatus(new StatusLineMock(204));
-				} else if (method == "GET" && url.contains("registrations/")) {
-					response = new ServiceFilterResponseMock();
-					response.setStatus(new StatusLineMock(200));
-					response.setContent("[ ]");
-				}
-
-				// create a mock request to replace the existing one
-				ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
-				return nextServiceFilterCallback.onNext(requestMock);
-			}
-		};
-	}
-
-	private static ServiceFilter getUpsertFailTestFilter(final String registrationId) {
-		return new ServiceFilter() {
-
-			@Override
-			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
-				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-				response.setStatus(new StatusLineMock(400));
-
-				final String url = request.getUrl();
-				String method = request.getMethod();
-
-				if (method == "POST" && url.contains("registrationids/")) {
-					response = new ServiceFilterResponseMock();
-					response.setStatus(new StatusLineMock(201));
-					response.setHeaders(new Header[] { new Header() {
-
-						@Override
-						public String getValue() {
-							return url + registrationId;
-						}
-
-						@Override
-						public String getName() {
-							return NEW_REGISTRATION_LOCATION_HEADER;
-						}
-
-						@Override
-						public HeaderElement[] getElements() throws ParseException {
-							return null;
-						}
-					} });
-				} else if (method == "PUT" && url.contains("registrations/")) {
-					response = new ServiceFilterResponseMock();
-					response.setStatus(new StatusLineMock(410));
-				} else if (method == "DELETE" && url.contains("registrations/")) {
-					response = new ServiceFilterResponseMock();
-					response.setStatus(new StatusLineMock(204));
-				} else if (method == "GET" && url.contains("registrations/")) {
-					response = new ServiceFilterResponseMock();
-					response.setStatus(new StatusLineMock(200));
-					response.setContent("[ ]");
-				}
-
-				// create a mock request to replace the existing one
-				ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
-				return nextServiceFilterCallback.onNext(requestMock);
-			}
-		};
-	}
-
-	private class Container {
-		public String storedRegistrationId;
-		public String registrationId;
-
-		public List<String> tags;
-		public String templateBody;
-
-		public String unregister;
-
-		public Exception exception;
-	}
+        public Exception exception;
+    }
 }

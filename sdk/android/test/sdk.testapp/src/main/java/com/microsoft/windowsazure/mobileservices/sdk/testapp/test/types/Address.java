@@ -20,37 +20,37 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types;
 
 public class Address {
-	private String streetAddress;
-	private int zipCode;
-	private String country;
+    private String streetAddress;
+    private int zipCode;
+    private String country;
 
-	public Address(String streetAddress, int zipCode, String country) {
-		this.streetAddress = streetAddress;
-		this.zipCode = zipCode;
-		this.country = country;
-	}
+    public Address(String streetAddress, int zipCode, String country) {
+        this.streetAddress = streetAddress;
+        this.zipCode = zipCode;
+        this.country = country;
+    }
 
-	public String getStreetAddress() {
-		return streetAddress;
-	}
+    public String getStreetAddress() {
+        return streetAddress;
+    }
 
-	public void setStreetAddress(String streetAddress) {
-		this.streetAddress = streetAddress;
-	}
+    public void setStreetAddress(String streetAddress) {
+        this.streetAddress = streetAddress;
+    }
 
-	public int getZipCode() {
-		return zipCode;
-	}
+    public int getZipCode() {
+        return zipCode;
+    }
 
-	public void setZipCode(int zipCode) {
-		this.zipCode = zipCode;
-	}
+    public void setZipCode(int zipCode) {
+        this.zipCode = zipCode;
+    }
 
-	public String getCountry() {
-		return country;
-	}
+    public String getCountry() {
+        return country;
+    }
 
-	public void setCountry(String country) {
-		this.country = country;
-	}
+    public void setCountry(String country) {
+        this.country = country;
+    }
 }

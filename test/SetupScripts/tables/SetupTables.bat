@@ -11,6 +11,7 @@ goto :TheEnd
 
 :Start
 call azure mobile table create %1 stringIdRoundTripTable
+call azure mobile table create %1 stringIdRoundTripSoftDeleteTable
 call azure mobile table create %1 stringIdMovies
 call azure mobile table create %1 offlineReady
 call azure mobile table create %1 offlineReadyNoVersionAuthenticated

@@ -19,38 +19,38 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types;
 
-import java.util.Locale;
-
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.Util;
+
+import java.util.Locale;
 
 public class StringIdTableItem {
 
-	public String id;
+    public String id;
 
-	public String data;
+    public String data;
 
-	public StringIdTableItem() {
-	}
+    public StringIdTableItem() {
+    }
 
-	@Override
-	public boolean equals(Object o) {
-		if (o == null)
-			return false;
+    @Override
+    public boolean equals(Object o) {
+        if (o == null)
+            return false;
 
-		if (!(o instanceof StringIdTableItem))
-			return false;
-		
-		StringIdTableItem m = (StringIdTableItem) o;
-		if (!Util.compare(this.id, m.id))
-			return false;
-		if (!Util.compare(this.data, m.data))
-			return false;
-		return true;
-	}
+        if (!(o instanceof StringIdTableItem))
+            return false;
 
-	@Override
-	public String toString() {
-		return String.format(Locale.getDefault(), "StringIdTableItem[Data=%s]", this.data);
-	}
+        StringIdTableItem m = (StringIdTableItem) o;
+        if (!Util.compare(this.id, m.id))
+            return false;
+        if (!Util.compare(this.data, m.data))
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return String.format(Locale.getDefault(), "StringIdTableItem[Data=%s]", this.data);
+    }
 
 }
