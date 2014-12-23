@@ -7,7 +7,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
-using MonoTouch.Foundation;
+using Foundation;
 
 namespace Microsoft.WindowsAzure.MobileServices.Test
 {

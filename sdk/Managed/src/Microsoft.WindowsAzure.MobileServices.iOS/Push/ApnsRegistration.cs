@@ -5,7 +5,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using MonoTouch.Foundation;
+using Foundation;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {

@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
-using MonoTouch.Foundation;
+using Foundation;
 using Newtonsoft.Json;
 
 namespace Microsoft.WindowsAzure.MobileServices

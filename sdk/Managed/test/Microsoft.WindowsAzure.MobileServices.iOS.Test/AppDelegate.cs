@@ -1,13 +1,14 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Microsoft.WindowsAzure.MobileServices;
 using Microsoft.WindowsAzure.MobileServices.Test;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
-using MonoTouch.Foundation;
-using MonoTouch.UIKit;
+using Foundation;
+using UIKit;
+using CoreGraphics;
 
 namespace MicrosoftWindowsAzureMobileiOSTest
 {
-	[Register("AppDelegate")]
+	[Foundation.Register("AppDelegate")]
 	public partial class AppDelegate : UIApplicationDelegate
 	{
 		UIWindow window;
@@ -25,7 +26,7 @@ namespace MicrosoftWindowsAzureMobileiOSTest
 
 		public override bool FinishedLaunching (UIApplication app, NSDictionary options)
 		{
-			window = new UIWindow (UIScreen.MainScreen.Bounds);
+			window = new UIWindow ((CGRect)UIScreen.MainScreen.Bounds);
 		    window.RootViewController = new UINavigationController (new LoginViewController());
 			window.MakeKeyAndVisible();
 
