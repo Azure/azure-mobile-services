@@ -295,6 +295,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             {
                 handler.SetResponseContent(responseContent);
             }
+            else
+            {
+                handler.Response = new HttpResponseMessage(HttpStatusCode.OK);
+            }
 
             if (location != null)
             {
