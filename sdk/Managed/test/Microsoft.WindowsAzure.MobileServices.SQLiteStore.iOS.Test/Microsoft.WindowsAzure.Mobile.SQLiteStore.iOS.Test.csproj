@@ -123,9 +123,10 @@
     <BundleResource Include="Resources\Default-568h%402x.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Microsoft.WindowsAzure.MobileServices.iOS\Microsoft.WindowsAzure.Mobile.Ext.iOS.csproj">
-      <Project>{a871b137-83a8-4e9b-913d-30ee0288e161}</Project>
-      <Name>Microsoft.WindowsAzure.Mobile.Ext.iOS</Name>
+    <ProjectReference Include="..\..\src\Microsoft.WindowsAzure.MobileServices.iOS\Microsoft.WindowsAzure.Mobile.Ext.iOS-Classic.csproj">
+      <Project>{9d2109b6-f005-4419-b9db-8fa2a4514d28}</Project>
+      <Name>Microsoft.WindowsAzure.Mobile.Ext.iOS-Classic</Name>
+      <IsAppExtension>false</IsAppExtension>
     </ProjectReference>
     <ProjectReference Include="..\..\src\Microsoft.WindowsAzure.MobileServices.SQLiteStore\Microsoft.WindowsAzure.Mobile.SQLiteStore.csproj">
       <Project>{4c20d49a-fe5e-4d9c-98b9-8125450074f5}</Project>
