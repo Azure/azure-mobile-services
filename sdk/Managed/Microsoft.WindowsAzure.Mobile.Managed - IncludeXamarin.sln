@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile", "src\Microsoft.WindowsAzure.MobileServices\Microsoft.WindowsAzure.Mobile.csproj", "{75557793-E36E-4190-8714-5BD2665859FB}"
 EndProject
@@ -49,6 +49,7 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.WP81.Test", "test\Microsoft.WindowsAzure.MobileServices.WindowsPhone81.Test\Microsoft.WindowsAzure.Mobile.WP81.Test.csproj", "{92CD4A69-950A-45FE-B8EA-774BA69E7482}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.Test.Unit", "test\Microsoft.WindowsAzure.MobileServices.Test.Unit\Microsoft.WindowsAzure.Mobile.Test.Unit.csproj", "{574B5567-FF51-4B0F-A9ED-CC9F711E9156}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.Ext.iOS-Classic", "src\Microsoft.WindowsAzure.MobileServices.iOS\Microsoft.WindowsAzure.Mobile.Ext.iOS-Classic.csproj", "{9D2109B6-F005-4419-B9DB-8FA2A4514D28}"
 EndProject
 Global
