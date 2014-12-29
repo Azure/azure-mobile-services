@@ -882,8 +882,8 @@ public class OfflineTests extends TestGroup {
                     remoteTable.insert(offlineReadyClient.getGsonBuilder()
                             .create().toJsonTree(allOfflineReadyItemsNoVersion).getAsJsonObject()).get();
 
-                    //Pause for 10 seconds to ensure the massive insert
-                    Thread.sleep(10000);
+                    //Pause for 20 seconds to ensure the massive insert
+                    Thread.sleep(20000);
 
                     log("Inserted New Items on table");
 
