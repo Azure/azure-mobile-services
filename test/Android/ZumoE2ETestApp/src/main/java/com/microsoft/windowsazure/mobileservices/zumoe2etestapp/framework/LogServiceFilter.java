@@ -19,6 +19,8 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework;
 
+import android.util.Log;
+
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -28,49 +30,47 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
-import android.util.Log;
-
 public class LogServiceFilter implements ServiceFilter {
 
-	@Override
-	public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+    @Override
+    public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-		final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+        final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-		String content = request.getContent();
-		if (content == null)
-			content = "NULL";
+        String content = request.getContent();
+        if (content == null)
+            content = "NULL";
 
-		String url = request.getUrl();
-		if (url == null)
-			url = "";
+        String url = request.getUrl();
+        if (url == null)
+            url = "";
 
-		Log.d("REQUEST URL", url);
-		Log.d("REQUEST CONTENT", content);
+        Log.d("REQUEST URL", url);
+        Log.d("REQUEST CONTENT", content);
 
-		ListenableFuture<ServiceFilterResponse> nextServiceFilterCallbackFuture = nextServiceFilterCallback.onNext(request);
+        ListenableFuture<ServiceFilterResponse> nextServiceFilterCallbackFuture = nextServiceFilterCallback.onNext(request);
 
-		Futures.addCallback(nextServiceFilterCallbackFuture, new FutureCallback<ServiceFilterResponse>() {
+        Futures.addCallback(nextServiceFilterCallbackFuture, new FutureCallback<ServiceFilterResponse>() {
 
-			@Override
-			public void onFailure(Throwable exception) {
-				resultFuture.setException(exception);
+            @Override
+            public void onFailure(Throwable exception) {
+                resultFuture.setException(exception);
 
-			}
+            }
 
-			@Override
-			public void onSuccess(ServiceFilterResponse response) {
-				if (response != null) {
-					String content = response.getContent();
-					if (content != null) {
-						Log.d("RESPONSE CONTENT", content);
-					}
-				}
+            @Override
+            public void onSuccess(ServiceFilterResponse response) {
+                if (response != null) {
+                    String content = response.getContent();
+                    if (content != null) {
+                        Log.d("RESPONSE CONTENT", content);
+                    }
+                }
 
-				resultFuture.set(response);
-			}
-		});
+                resultFuture.set(response);
+            }
+        });
 
-		return resultFuture;
-	}
+        return resultFuture;
+    }
 }

@@ -28,33 +28,30 @@ package com.microsoft.windowsazure.mobileservices.table.sync.operations;
  */
 public interface TableOperationVisitor<E> {
 
-	/**
-	 * Visit an insert operation.
-	 * 
-	 * @param operation
-	 *            The operation to visit
-	 * @return Defined by the implementer.
-	 * @throws Throwable
-	 */
-	E visit(InsertOperation operation) throws Throwable;
+    /**
+     * Visit an insert operation.
+     *
+     * @param operation The operation to visit
+     * @return Defined by the implementer.
+     * @throws Throwable
+     */
+    E visit(InsertOperation operation) throws Throwable;
 
-	/**
-	 * Visit an update operation.
-	 * 
-	 * @param operation
-	 *            The operation to visit
-	 * @return Defined by the implementer.
-	 * @throws Throwable
-	 */
-	E visit(UpdateOperation operation) throws Throwable;
+    /**
+     * Visit an update operation.
+     *
+     * @param operation The operation to visit
+     * @return Defined by the implementer.
+     * @throws Throwable
+     */
+    E visit(UpdateOperation operation) throws Throwable;
 
-	/**
-	 * Visit a delete operation.
-	 * 
-	 * @param operation
-	 *            The operation to visit
-	 * @return Defined by the implementer.
-	 * @throws Throwable
-	 */
-	E visit(DeleteOperation operation) throws Throwable;
+    /**
+     * Visit a delete operation.
+     *
+     * @param operation The operation to visit
+     * @return Defined by the implementer.
+     * @throws Throwable
+     */
+    E visit(DeleteOperation operation) throws Throwable;
 }

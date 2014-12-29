@@ -27,62 +27,61 @@ package com.microsoft.windowsazure.mobileservices.table.query;
  * Class that represents a unary operator node merger
  */
 class UnaryOperatorNodeMerger implements QueryNodeVisitor<QueryNode> {
-	private UnaryOperatorNode mLeftNode;
+    private UnaryOperatorNode mLeftNode;
 
-	/**
-	 * Constructor for UnaryOperatorNodeMerger
-	 * 
-	 * @param leftNode
-	 *            The left binary operator node
-	 */
-	UnaryOperatorNodeMerger(UnaryOperatorNode leftNode) {
-		this.mLeftNode = leftNode;
-	}
+    /**
+     * Constructor for UnaryOperatorNodeMerger
+     *
+     * @param leftNode The left binary operator node
+     */
+    UnaryOperatorNodeMerger(UnaryOperatorNode leftNode) {
+        this.mLeftNode = leftNode;
+    }
 
-	@Override
-	public QueryNode visit(ConstantNode rightNode) {
-		return mergeLeft(rightNode);
-	}
+    @Override
+    public QueryNode visit(ConstantNode rightNode) {
+        return mergeLeft(rightNode);
+    }
 
-	@Override
-	public QueryNode visit(FieldNode rightNode) {
-		return mergeLeft(rightNode);
-	}
+    @Override
+    public QueryNode visit(FieldNode rightNode) {
+        return mergeLeft(rightNode);
+    }
 
-	@Override
-	public QueryNode visit(UnaryOperatorNode rightNode) {
-		return mergeLeft(rightNode);
-	}
+    @Override
+    public QueryNode visit(UnaryOperatorNode rightNode) {
+        return mergeLeft(rightNode);
+    }
 
-	@Override
-	public QueryNode visit(BinaryOperatorNode rightNode) {
-		if (this.mLeftNode.getArgument() != null) {
-			if (rightNode.getLeftArgument() != null) {
-				throw QueryNodeMerger.getInvalidSequenceException();
-			}
+    @Override
+    public QueryNode visit(BinaryOperatorNode rightNode) {
+        if (this.mLeftNode.getArgument() != null) {
+            if (rightNode.getLeftArgument() != null) {
+                throw QueryNodeMerger.getInvalidSequenceException();
+            }
 
-			rightNode.setLeftArgument(this.mLeftNode);
+            rightNode.setLeftArgument(this.mLeftNode);
 
-			return rightNode;
-		} else {
-			this.mLeftNode.setArgument(rightNode);
+            return rightNode;
+        } else {
+            this.mLeftNode.setArgument(rightNode);
 
-			return this.mLeftNode;
-		}
-	}
+            return this.mLeftNode;
+        }
+    }
 
-	@Override
-	public QueryNode visit(FunctionCallNode rightNode) {
-		return mergeLeft(rightNode);
-	}
+    @Override
+    public QueryNode visit(FunctionCallNode rightNode) {
+        return mergeLeft(rightNode);
+    }
 
-	private QueryNode mergeLeft(QueryNode rightNode) {
-		if (this.mLeftNode.getArgument() != null) {
-			throw QueryNodeMerger.getInvalidSequenceException();
-		}
+    private QueryNode mergeLeft(QueryNode rightNode) {
+        if (this.mLeftNode.getArgument() != null) {
+            throw QueryNodeMerger.getInvalidSequenceException();
+        }
 
-		this.mLeftNode.setArgument(rightNode);
+        this.mLeftNode.setArgument(rightNode);
 
-		return this.mLeftNode;
-	}
+        return this.mLeftNode;
+    }
 }

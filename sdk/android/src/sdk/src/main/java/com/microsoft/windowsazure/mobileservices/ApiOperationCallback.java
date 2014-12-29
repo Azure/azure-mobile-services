@@ -27,22 +27,17 @@ package com.microsoft.windowsazure.mobileservices;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
 /**
- * 
  * Callback used after a custom Api invocation is executed
- * 
- * @param <E>
- *            The API return value entity
+ *
+ * @param <E> The API return value entity
  */
 public interface ApiOperationCallback<E> {
-	/**
-	 * Method to call when the operation is completed
-	 * 
-	 * @param result
-	 *            The obtained result
-	 * @param exception
-	 *            An exception representing the error, in case there was one
-	 * @param response
-	 *            Response object
-	 */
-	public void onCompleted(E result, Exception exception, ServiceFilterResponse response);
+    /**
+     * Method to call when the operation is completed
+     *
+     * @param result    The obtained result
+     * @param exception An exception representing the error, in case there was one
+     * @param response  Response object
+     */
+    public void onCompleted(E result, Exception exception, ServiceFilterResponse response);
 }

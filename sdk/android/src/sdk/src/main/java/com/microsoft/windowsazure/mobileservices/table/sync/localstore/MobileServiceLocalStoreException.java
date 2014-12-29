@@ -24,41 +24,37 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices.table.sync.localstore;
 
 public class MobileServiceLocalStoreException extends Exception {
-	/**
-	 * UID used for serialization
-	 */
-	private static final long serialVersionUID = 8665204682638151717L;
+    /**
+     * UID used for serialization
+     */
+    private static final long serialVersionUID = 8665204682638151717L;
 
-	/**
-	 * Creates a new MobileServiceLocalStoreException with a detail message
-	 * 
-	 * @param detail
-	 *            The detail message
-	 */
-	public MobileServiceLocalStoreException(String detailMessage) {
-		super(detailMessage);
-	}
+    /**
+     * Creates a new MobileServiceLocalStoreException with a detail message
+     *
+     * @param detail The detail message
+     */
+    public MobileServiceLocalStoreException(String detailMessage) {
+        super(detailMessage);
+    }
 
-	/**
-	 * Creates a new MobileServiceLocalStoreException with a cause
-	 * 
-	 * @param throwable
-	 *            The exception cause
-	 */
-	public MobileServiceLocalStoreException(Throwable throwable) {
-		super(throwable);
-	}
+    /**
+     * Creates a new MobileServiceLocalStoreException with a cause
+     *
+     * @param throwable The exception cause
+     */
+    public MobileServiceLocalStoreException(Throwable throwable) {
+        super(throwable);
+    }
 
-	/**
-	 * Creates a new MobileServiceLocalStoreException with a detail message and
-	 * a cause
-	 * 
-	 * @param detail
-	 *            The detail message
-	 * @param throwable
-	 *            The exception cause
-	 */
-	public MobileServiceLocalStoreException(String detailMessage, Throwable throwable) {
-		super(detailMessage, throwable);
-	}
+    /**
+     * Creates a new MobileServiceLocalStoreException with a detail message and
+     * a cause
+     *
+     * @param detail    The detail message
+     * @param throwable The exception cause
+     */
+    public MobileServiceLocalStoreException(String detailMessage, Throwable throwable) {
+        super(detailMessage, throwable);
+    }
 }

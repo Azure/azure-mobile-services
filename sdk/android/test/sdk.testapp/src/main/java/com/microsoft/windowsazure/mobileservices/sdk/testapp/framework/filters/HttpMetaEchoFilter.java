@@ -19,7 +19,6 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters;
 
-import org.apache.http.Header;
 import android.net.Uri;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -29,45 +28,47 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
+import org.apache.http.Header;
+
 public class HttpMetaEchoFilter implements ServiceFilter {
 
-	@Override
-	public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+    @Override
+    public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-		JsonObject jResponse = new JsonObject();
-		
-		jResponse.addProperty("method", request.getMethod());
-		
-		Header[] headers = request.getHeaders();
-		if (headers != null && headers.length > 0) {
-			JsonObject jHeaders = new JsonObject();
-			
-			for (Header header : headers) {
-				jHeaders.addProperty(header.getName(), header.getValue());
-			}
-			
-			jResponse.add("headers", jHeaders);
-		}
-		
-		Uri uri = Uri.parse(request.getUrl());
-		String query = uri.getQuery();
-		
-		if (query != null && query.trim() != "") {
-			JsonObject jParameters = new JsonObject();
-			
-			for (String parameter : query.split("&")) {
-				jParameters.addProperty(parameter.split("=")[0], parameter.split("=")[1]);
-			}
-			jResponse.add("parameters", jParameters);
-		}		
-		
-		ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-		response.setContent(jResponse.toString());
-		response.setStatus(new StatusLineMock(200));
+        JsonObject jResponse = new JsonObject();
 
-		ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
-		return nextServiceFilterCallback.onNext(requestMock);
-		
-		//return nextServiceFilterCallback.onNext(request);
-	}
+        jResponse.addProperty("method", request.getMethod());
+
+        Header[] headers = request.getHeaders();
+        if (headers != null && headers.length > 0) {
+            JsonObject jHeaders = new JsonObject();
+
+            for (Header header : headers) {
+                jHeaders.addProperty(header.getName(), header.getValue());
+            }
+
+            jResponse.add("headers", jHeaders);
+        }
+
+        Uri uri = Uri.parse(request.getUrl());
+        String query = uri.getQuery();
+
+        if (query != null && query.trim() != "") {
+            JsonObject jParameters = new JsonObject();
+
+            for (String parameter : query.split("&")) {
+                jParameters.addProperty(parameter.split("=")[0], parameter.split("=")[1]);
+            }
+            jResponse.add("parameters", jParameters);
+        }
+
+        ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+        response.setContent(jResponse.toString());
+        response.setStatus(new StatusLineMock(200));
+
+        ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
+        return nextServiceFilterCallback.onNext(requestMock);
+
+        //return nextServiceFilterCallback.onNext(request);
+    }
 }

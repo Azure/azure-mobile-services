@@ -19,73 +19,73 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests;
 
-import java.io.UnsupportedEncodingException;
+import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
 import org.apache.http.Header;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.StatusLine;
 
-import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
-import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import java.io.UnsupportedEncodingException;
 
 public class MockResponse implements ServiceFilterResponse {
 
-	private int mStatus;
-	private byte[] mContent;
+    private int mStatus;
+    private byte[] mContent;
 
-	public MockResponse(String content, int status) {
-		mStatus = status;
-		mContent = content.getBytes();
-	}
-	
-	public MockResponse(byte[] content, int status) {
-		mStatus = status;
-		mContent = content;
-	}
+    public MockResponse(String content, int status) {
+        mStatus = status;
+        mContent = content.getBytes();
+    }
 
-	@Override
-	public Header[] getHeaders() {
-		return null;
-	}
+    public MockResponse(byte[] content, int status) {
+        mStatus = status;
+        mContent = content;
+    }
 
-	@Override
-	public String getContent() {
-		if (mContent != null) {
-			String content = null;
-			try {
-				content = new String(mContent, MobileServiceClient.UTF8_ENCODING);
-			} catch (UnsupportedEncodingException e) {
-			}
-			return content;
-		} else {
-			return null;
-		}
-	}
+    @Override
+    public Header[] getHeaders() {
+        return null;
+    }
 
-	@Override
-	public StatusLine getStatus() {
-		return new StatusLine() {
+    @Override
+    public String getContent() {
+        if (mContent != null) {
+            String content = null;
+            try {
+                content = new String(mContent, MobileServiceClient.UTF8_ENCODING);
+            } catch (UnsupportedEncodingException e) {
+            }
+            return content;
+        } else {
+            return null;
+        }
+    }
 
-			@Override
-			public int getStatusCode() {
-				return mStatus;
-			}
+    @Override
+    public StatusLine getStatus() {
+        return new StatusLine() {
 
-			@Override
-			public String getReasonPhrase() {
-				return null;
-			}
+            @Override
+            public int getStatusCode() {
+                return mStatus;
+            }
 
-			@Override
-			public ProtocolVersion getProtocolVersion() {
-				return new ProtocolVersion("HTTP", 1, 1);
-			}
-		};
-	}
+            @Override
+            public String getReasonPhrase() {
+                return null;
+            }
 
-	@Override
-	public byte[] getRawContent() {
-		return mContent;
-	}
+            @Override
+            public ProtocolVersion getProtocolVersion() {
+                return new ProtocolVersion("HTTP", 1, 1);
+            }
+        };
+    }
+
+    @Override
+    public byte[] getRawContent() {
+        return mContent;
+    }
 
 }

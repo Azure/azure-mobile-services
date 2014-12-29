@@ -23,25 +23,25 @@ import org.apache.http.ProtocolVersion;
 import org.apache.http.StatusLine;
 
 public class StatusLineMock implements StatusLine {
-	private int statusCode;
+    private int statusCode;
 
-	public StatusLineMock(int statusCode) {
-		this.statusCode = statusCode;
-	}
+    public StatusLineMock(int statusCode) {
+        this.statusCode = statusCode;
+    }
 
-	@Override
-	public ProtocolVersion getProtocolVersion() {
-		return null;
-	}
+    @Override
+    public ProtocolVersion getProtocolVersion() {
+        return null;
+    }
 
-	@Override
-	public String getReasonPhrase() {
-		return null;
-	}
+    @Override
+    public String getReasonPhrase() {
+        return null;
+    }
 
-	@Override
-	public int getStatusCode() {
-		return this.statusCode;
-	}
+    @Override
+    public int getStatusCode() {
+        return this.statusCode;
+    }
 
 }

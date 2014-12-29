@@ -28,22 +28,20 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 
 public class MobileServicePreconditionFailedExceptionJson extends MobileServiceExceptionBase {
 
-	/**
-	 * UID used for serialization
-	 */
-	private static final long serialVersionUID = 4489352410883725274L;
+    /**
+     * UID used for serialization
+     */
+    private static final long serialVersionUID = 4489352410883725274L;
 
-	/**
-	 * Initializes a new instance of the
-	 * MobileServicePreconditionFailedExceptionJson class.
-	 * 
-	 * @param throwable
-	 *            The inner exception.
-	 * @param value
-	 *            The current instance from the server that the precondition
-	 *            failed for.
-	 */
-	public MobileServicePreconditionFailedExceptionJson(MobileServiceException msException, JsonObject value) {
-		super(msException, value);
-	}
+    /**
+     * Initializes a new instance of the
+     * MobileServicePreconditionFailedExceptionJson class.
+     *
+     * @param throwable The inner exception.
+     * @param value     The current instance from the server that the precondition
+     *                  failed for.
+     */
+    public MobileServicePreconditionFailedExceptionJson(MobileServiceException msException, JsonObject value) {
+        super(msException, value);
+    }
 }

@@ -27,27 +27,26 @@ package com.microsoft.windowsazure.mobileservices.table.sync.operations;
  * Class that encapsulates collapse logic for existing delete operation
  */
 class DeleteOperationCollapser implements TableOperationVisitor<TableOperation> {
-	/**
-	 * Constructor for DeleteOperationCollapser
-	 * 
-	 * @param existingOperation
-	 *            the existing operation to collapse
-	 */
-	DeleteOperationCollapser(DeleteOperation existingOperation) {
-	}
+    /**
+     * Constructor for DeleteOperationCollapser
+     *
+     * @param existingOperation the existing operation to collapse
+     */
+    DeleteOperationCollapser(DeleteOperation existingOperation) {
+    }
 
-	@Override
-	public TableOperation visit(InsertOperation newOperation) {
-		throw new IllegalStateException("A delete operation on the item is already in the queue.");
-	}
+    @Override
+    public TableOperation visit(InsertOperation newOperation) {
+        throw new IllegalStateException("A delete operation on the item is already in the queue.");
+    }
 
-	@Override
-	public TableOperation visit(UpdateOperation newOperation) {
-		throw new IllegalStateException("A delete operation on the item is already in the queue.");
-	}
+    @Override
+    public TableOperation visit(UpdateOperation newOperation) {
+        throw new IllegalStateException("A delete operation on the item is already in the queue.");
+    }
 
-	@Override
-	public TableOperation visit(DeleteOperation newOperation) {
-		throw new IllegalStateException("A delete operation on the item is already in the queue.");
-	}
+    @Override
+    public TableOperation visit(DeleteOperation newOperation) {
+        throw new IllegalStateException("A delete operation on the item is already in the queue.");
+    }
 }

@@ -20,33 +20,33 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework;
 
 public class TestResult {
-	private TestStatus mStatus;
+    private TestStatus mStatus;
 
-	private Exception mException;
+    private Exception mException;
 
-	private TestCase mTestCase;
+    private TestCase mTestCase;
 
-	public TestStatus getStatus() {
-		return mStatus;
-	}
+    public TestStatus getStatus() {
+        return mStatus;
+    }
 
-	public void setStatus(TestStatus status) {
-		this.mStatus = status;
-	}
+    public void setStatus(TestStatus status) {
+        this.mStatus = status;
+    }
 
-	public Exception getException() {
-		return mException;
-	}
+    public Exception getException() {
+        return mException;
+    }
 
-	public void setException(Exception e) {
-		this.mException = e;
-	}
+    public void setException(Exception e) {
+        this.mException = e;
+    }
 
-	public TestCase getTestCase() {
-		return mTestCase;
-	}
+    public TestCase getTestCase() {
+        return mTestCase;
+    }
 
-	public void setTestCase(TestCase testCase) {
-		mTestCase = testCase;
-	}
+    public void setTestCase(TestCase testCase) {
+        mTestCase = testCase;
+    }
 }

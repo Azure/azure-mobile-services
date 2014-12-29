@@ -23,12 +23,12 @@ public class PullCursor {
         return this.initialSkip + this.totalRead;
     }
 
-    public void setRemaining(int remaining) {
-        this.remaining = remaining;
-    }
-
     public int getRemaining() {
         return this.remaining;
+    }
+
+    public void setRemaining(int remaining) {
+        this.remaining = remaining;
     }
 
     public boolean getComplete() {
@@ -37,6 +37,7 @@ public class PullCursor {
 
     /**
      * Called when ever an item is processed from result
+     *
      * @return True if cursor is still open, False when it is completed.
      */
     public boolean onNext() {

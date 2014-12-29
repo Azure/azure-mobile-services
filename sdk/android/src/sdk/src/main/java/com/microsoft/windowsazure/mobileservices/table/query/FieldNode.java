@@ -27,38 +27,38 @@ package com.microsoft.windowsazure.mobileservices.table.query;
  * Class that represents a field query node
  */
 class FieldNode implements QueryNode {
-	private String mFieldName;
+    private String mFieldName;
 
-	@Override
-	public QueryNode deepClone() {
-		FieldNode clone = new FieldNode();
+    @Override
+    public QueryNode deepClone() {
+        FieldNode clone = new FieldNode();
 
-		clone.mFieldName = this.mFieldName;
+        clone.mFieldName = this.mFieldName;
 
-		return clone;
-	}
+        return clone;
+    }
 
-	@Override
-	public QueryNodeKind getKind() {
-		return QueryNodeKind.Field;
-	}
+    @Override
+    public QueryNodeKind getKind() {
+        return QueryNodeKind.Field;
+    }
 
-	@Override
-	public <T> T accept(QueryNodeVisitor<T> visitor) {
-		return visitor.visit(this);
-	}
+    @Override
+    public <T> T accept(QueryNodeVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
 
-	/**
-	 * Gets the field name
-	 */
-	String getFieldName() {
-		return this.mFieldName;
-	}
+    /**
+     * Gets the field name
+     */
+    String getFieldName() {
+        return this.mFieldName;
+    }
 
-	/**
-	 * Sets the field name
-	 */
-	void setFieldName(String fieldName) {
-		this.mFieldName = fieldName;
-	}
+    /**
+     * Sets the field name
+     */
+    void setFieldName(String fieldName) {
+        this.mFieldName = fieldName;
+    }
 }

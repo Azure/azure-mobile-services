@@ -24,34 +24,34 @@ import java.util.Collections;
 import java.util.List;
 
 public class AggregateException extends Exception {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -3507943118377161658L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = -3507943118377161658L;
 
-	private List<Exception> mAggregatedExceptions = Collections.synchronizedList(new ArrayList<Exception>());
+    private List<Exception> mAggregatedExceptions = Collections.synchronizedList(new ArrayList<Exception>());
 
-	public AggregateException() {
-		super();
-	}
+    public AggregateException() {
+        super();
+    }
 
-	public AggregateException(String detailMessage) {
-		super(detailMessage);
-	}
+    public AggregateException(String detailMessage) {
+        super(detailMessage);
+    }
 
-	public AggregateException(Throwable throwable) {
-		super(throwable);
-	}
+    public AggregateException(Throwable throwable) {
+        super(throwable);
+    }
 
-	public AggregateException(String detailMessage, Throwable throwable) {
-		super(detailMessage, throwable);
-	}
+    public AggregateException(String detailMessage, Throwable throwable) {
+        super(detailMessage, throwable);
+    }
 
-	public void addException(Exception exception) {
-		mAggregatedExceptions.add(exception);
-	}
+    public void addException(Exception exception) {
+        mAggregatedExceptions.add(exception);
+    }
 
-	public List<Exception> getAggregatedExceptions() {
-		return mAggregatedExceptions;
-	}
+    public List<Exception> getAggregatedExceptions() {
+        return mAggregatedExceptions;
+    }
 }

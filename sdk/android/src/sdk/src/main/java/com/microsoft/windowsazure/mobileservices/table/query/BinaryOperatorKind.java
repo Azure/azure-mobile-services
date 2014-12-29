@@ -27,68 +27,68 @@ package com.microsoft.windowsazure.mobileservices.table.query;
  * Enumeration of binary operators.
  */
 enum BinaryOperatorKind {
-	/**
-	 * The logical or operator.
-	 */
-	Or,
+    /**
+     * The logical or operator.
+     */
+    Or,
 
-	/**
-	 * The logical and operator.
-	 */
-	And,
+    /**
+     * The logical and operator.
+     */
+    And,
 
-	/**
-	 * The equal to operator.
-	 */
-	Eq,
+    /**
+     * The equal to operator.
+     */
+    Eq,
 
-	/**
-	 * The not equal to operator.
-	 */
-	Ne,
+    /**
+     * The not equal to operator.
+     */
+    Ne,
 
-	/**
-	 * The greater than operator.
-	 */
-	Gt,
+    /**
+     * The greater than operator.
+     */
+    Gt,
 
-	/**
-	 * The greater than or equal to operator.
-	 */
-	Ge,
+    /**
+     * The greater than or equal to operator.
+     */
+    Ge,
 
-	/**
-	 * The less than operator.
-	 */
-	Lt,
+    /**
+     * The less than operator.
+     */
+    Lt,
 
-	/**
-	 * The less than or equal to operator.
-	 */
-	Le,
+    /**
+     * The less than or equal to operator.
+     */
+    Le,
 
-	/**
-	 * The add operator.
-	 */
-	Add,
+    /**
+     * The add operator.
+     */
+    Add,
 
-	/**
-	 * The subtract operator.
-	 */
-	Sub,
+    /**
+     * The subtract operator.
+     */
+    Sub,
 
-	/**
-	 * The multiply operator.
-	 */
-	Mul,
+    /**
+     * The multiply operator.
+     */
+    Mul,
 
-	/**
-	 * The divide operator.
-	 */
-	Div,
+    /**
+     * The divide operator.
+     */
+    Div,
 
-	/**
-	 * The modulo operator.
-	 */
-	Mod
+    /**
+     * The modulo operator.
+     */
+    Mod
 }

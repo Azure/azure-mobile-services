@@ -21,7 +21,7 @@ package com.microsoft.windowsazure.mobileservices.sdk.testapp.test.helpers;
 
 public class EncodingUtilities {
 
-	public static String percentEncodeSpaces(String value) {
-		return value.replace(" ", "%20");
-	}
+    public static String percentEncodeSpaces(String value) {
+        return value.replace(" ", "%20");
+    }
 }

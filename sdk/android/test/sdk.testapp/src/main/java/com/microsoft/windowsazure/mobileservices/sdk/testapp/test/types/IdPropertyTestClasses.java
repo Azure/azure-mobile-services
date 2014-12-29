@@ -22,133 +22,133 @@ package com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types;
 import com.google.gson.annotations.SerializedName;
 
 public class IdPropertyTestClasses {
-	// Class with an invalid Id property but using a valid gson serialized name
-	public static class IdPropertyWithGsonAnnotation {
-		@SerializedName("id")
-		private int myId;
+    // Class with an invalid Id property but using a valid gson serialized name
+    public static class IdPropertyWithGsonAnnotation {
+        @SerializedName("id")
+        private int myId;
 
-		private String name;
+        private String name;
 
-		public IdPropertyWithGsonAnnotation(String name) {
-			this.name = name;
-		}
+        public IdPropertyWithGsonAnnotation(String name) {
+            this.name = name;
+        }
 
-		public String getName() {
-			return name;
-		}
+        public String getName() {
+            return name;
+        }
 
-		public void setName(String name) {
-			this.name = name;
-		}
+        public void setName(String name) {
+            this.name = name;
+        }
 
-		public int getId() {
-			return myId;
-		}
+        public int getId() {
+            return myId;
+        }
 
-		public void setId(int id) {
-			myId = id;
-		}
-	}
+        public void setId(int id) {
+            myId = id;
+        }
+    }
 
-	// Class with a different cased id property
-	public static class IdPropertyWithDifferentIdPropertyCasing {
-		private int ID;
+    // Class with a different cased id property
+    public static class IdPropertyWithDifferentIdPropertyCasing {
+        private int ID;
 
-		private String name;
+        private String name;
 
-		public IdPropertyWithDifferentIdPropertyCasing(String name) {
-			this.name = name;
-		}
+        public IdPropertyWithDifferentIdPropertyCasing(String name) {
+            this.name = name;
+        }
 
-		public String getName() {
-			return name;
-		}
+        public String getName() {
+            return name;
+        }
 
-		public void setName(String name) {
-			this.name = name;
-		}
+        public void setName(String name) {
+            this.name = name;
+        }
 
-		public int getId() {
-			return ID;
-		}
+        public int getId() {
+            return ID;
+        }
 
-		public void setId(int id) {
-			ID = id;
-		}
-	}
+        public void setId(int id) {
+            ID = id;
+        }
+    }
 
-	// Class with multiple id properties
-	public static class IdPropertyMultipleIdsTestObject {
-		private int id;
-		private int ID;
-		private int iD;
+    // Class with multiple id properties
+    public static class IdPropertyMultipleIdsTestObject {
+        private int id;
+        private int ID;
+        private int iD;
 
-		private String name;
+        private String name;
 
-		public IdPropertyMultipleIdsTestObject(String name) {
-			this.name = name;
-		}
+        public IdPropertyMultipleIdsTestObject(String name) {
+            this.name = name;
+        }
 
-		public String getName() {
-			return name;
-		}
+        public String getName() {
+            return name;
+        }
 
-		public void setName(String name) {
-			this.name = name;
-		}
+        public void setName(String name) {
+            this.name = name;
+        }
 
-		public int getId() {
-			return id;
-		}
+        public int getId() {
+            return id;
+        }
 
-		public void setId(int id) {
-			this.id = id;
-		}
+        public void setId(int id) {
+            this.id = id;
+        }
 
-		public int getID() {
-			return ID;
-		}
+        public int getID() {
+            return ID;
+        }
 
-		public void setID(int iD) {
-			ID = iD;
-		}
+        public void setID(int iD) {
+            ID = iD;
+        }
 
-		public int getiD() {
-			return iD;
-		}
+        public int getiD() {
+            return iD;
+        }
 
-		public void setiD(int iD) {
-			this.iD = iD;
-		}
+        public void setiD(int iD) {
+            this.iD = iD;
+        }
 
-	}
+    }
 
-	// Class with no Id property
-	public static class NoIdProperty {
-		private String name;
+    // Class with no Id property
+    public static class NoIdProperty {
+        private String name;
 
-		public NoIdProperty(String name) {
-			this.name = name;
-		}
+        public NoIdProperty(String name) {
+            this.name = name;
+        }
 
-		public String getName() {
-			return name;
-		}
+        public String getName() {
+            return name;
+        }
 
-		public void setName(String name) {
-			this.name = name;
-		}
-	}
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
 
-	public static class StringIdType {
-		public String Id;
+    public static class StringIdType {
+        public String Id;
 
-		public String String;
-	}
+        public String String;
+    }
 
-	public static class LongIdType {
-		public long Id;
+    public static class LongIdType {
+        public long Id;
 
-		public String String;
-	}
+        public String String;
+    }
 }

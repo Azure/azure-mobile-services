@@ -29,42 +29,42 @@ import java.util.Date;
  * Class that represents a constant query node
  */
 class ConstantNode implements QueryNode {
-	private Object mValue;
+    private Object mValue;
 
-	@Override
-	public QueryNode deepClone() {
-		ConstantNode clone = new ConstantNode();
+    @Override
+    public QueryNode deepClone() {
+        ConstantNode clone = new ConstantNode();
 
-		if (this.mValue instanceof Date) {
-			clone.mValue = new Date(((Date) this.mValue).getTime());
-		} else {
-			clone.mValue = this.mValue;
-		}
+        if (this.mValue instanceof Date) {
+            clone.mValue = new Date(((Date) this.mValue).getTime());
+        } else {
+            clone.mValue = this.mValue;
+        }
 
-		return clone;
-	}
+        return clone;
+    }
 
-	@Override
-	public QueryNodeKind getKind() {
-		return QueryNodeKind.Constant;
-	}
+    @Override
+    public QueryNodeKind getKind() {
+        return QueryNodeKind.Constant;
+    }
 
-	@Override
-	public <T> T accept(QueryNodeVisitor<T> visitor) {
-		return visitor.visit(this);
-	}
+    @Override
+    public <T> T accept(QueryNodeVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
 
-	/**
-	 * Gets the constant node value.
-	 */
-	Object getValue() {
-		return this.mValue;
-	}
+    /**
+     * Gets the constant node value.
+     */
+    Object getValue() {
+        return this.mValue;
+    }
 
-	/**
-	 * Sets the constant node value.
-	 */
-	void setValue(Object value) {
-		this.mValue = value;
-	}
+    /**
+     * Sets the constant node value.
+     */
+    void setValue(Object value) {
+        this.mValue = value;
+    }
 }

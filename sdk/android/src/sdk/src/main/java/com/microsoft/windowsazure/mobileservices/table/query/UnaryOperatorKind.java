@@ -28,13 +28,13 @@ package com.microsoft.windowsazure.mobileservices.table.query;
  */
 public enum UnaryOperatorKind {
 
-	/**
-	 * Logical Not Operator.
-	 */
-	Not,
+    /**
+     * Logical Not Operator.
+     */
+    Not,
 
-	/**
-	 * Parenthesis precedence modifier.
-	 */
-	Parenthesis
+    /**
+     * Parenthesis precedence modifier.
+     */
+    Parenthesis
 }

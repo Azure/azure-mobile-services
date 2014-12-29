@@ -27,56 +27,55 @@ package com.microsoft.windowsazure.mobileservices.table.query;
  * Class that represents a unary operator query node
  */
 class UnaryOperatorNode implements QueryNode {
-	private UnaryOperatorKind mUnaryOperatorKind;
-	private QueryNode mArgument;
+    private UnaryOperatorKind mUnaryOperatorKind;
+    private QueryNode mArgument;
 
-	/**
-	 * Constructor for UnaryOperatorNode
-	 * 
-	 * @param unaryOperatorKind
-	 *            The unary operator kind
-	 */
-	UnaryOperatorNode(UnaryOperatorKind unaryOperatorKind) {
-		this.mUnaryOperatorKind = unaryOperatorKind;
-	}
+    /**
+     * Constructor for UnaryOperatorNode
+     *
+     * @param unaryOperatorKind The unary operator kind
+     */
+    UnaryOperatorNode(UnaryOperatorKind unaryOperatorKind) {
+        this.mUnaryOperatorKind = unaryOperatorKind;
+    }
 
-	@Override
-	public QueryNode deepClone() {
-		UnaryOperatorNode clone = new UnaryOperatorNode(this.mUnaryOperatorKind);
+    @Override
+    public QueryNode deepClone() {
+        UnaryOperatorNode clone = new UnaryOperatorNode(this.mUnaryOperatorKind);
 
-		clone.mArgument = this.mArgument.deepClone();
+        clone.mArgument = this.mArgument.deepClone();
 
-		return clone;
-	}
+        return clone;
+    }
 
-	@Override
-	public QueryNodeKind getKind() {
-		return QueryNodeKind.UnaryOperator;
-	}
+    @Override
+    public QueryNodeKind getKind() {
+        return QueryNodeKind.UnaryOperator;
+    }
 
-	@Override
-	public <T> T accept(QueryNodeVisitor<T> visitor) {
-		return visitor.visit(this);
-	}
+    @Override
+    public <T> T accept(QueryNodeVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
 
-	/**
-	 * Gets the kind of unary operator node.
-	 */
-	UnaryOperatorKind getUnaryOperatorKind() {
-		return this.mUnaryOperatorKind;
-	}
+    /**
+     * Gets the kind of unary operator node.
+     */
+    UnaryOperatorKind getUnaryOperatorKind() {
+        return this.mUnaryOperatorKind;
+    }
 
-	/**
-	 * Gets the argument query node of the unary operator.
-	 */
-	QueryNode getArgument() {
-		return this.mArgument;
-	}
+    /**
+     * Gets the argument query node of the unary operator.
+     */
+    QueryNode getArgument() {
+        return this.mArgument;
+    }
 
-	/**
-	 * Sets the argument query node of the unary operator.
-	 */
-	void setArgument(QueryNode argument) {
-		this.mArgument = argument;
-	}
+    /**
+     * Sets the argument query node of the unary operator.
+     */
+    void setArgument(QueryNode argument) {
+        this.mArgument = argument;
+    }
 }

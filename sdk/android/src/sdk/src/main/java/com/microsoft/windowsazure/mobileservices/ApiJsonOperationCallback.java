@@ -31,15 +31,12 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
  * Callback used after a custom Api invocation is executed using JSON
  */
 public interface ApiJsonOperationCallback {
-	/**
-	 * Method to call when the operation is completed
-	 * 
-	 * @param jsonElement
-	 *            The obtained jsonElement
-	 * @param exception
-	 *            An exception representing the error, in case there was one
-	 * @param response
-	 *            Response object
-	 */
-	public void onCompleted(JsonElement jsonObject, Exception exception, ServiceFilterResponse response);
+    /**
+     * Method to call when the operation is completed
+     *
+     * @param jsonElement The obtained jsonElement
+     * @param exception   An exception representing the error, in case there was one
+     * @param response    Response object
+     */
+    public void onCompleted(JsonElement jsonObject, Exception exception, ServiceFilterResponse response);
 }

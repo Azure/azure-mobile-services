@@ -19,46 +19,46 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types;
 
-import java.util.Random;
-
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.Util;
+
+import java.util.Random;
 
 public class ComplexType2 {
 
-	public String name;
-	public Integer age;
-	public String[] friends;
+    public String name;
+    public Integer age;
+    public String[] friends;
 
-	public ComplexType2() {
-	}
+    public ComplexType2() {
+    }
 
-	public ComplexType2(Random rndGen) {
-		this.name = Util.createSimpleRandomString(rndGen, 10);
-		this.age = rndGen.nextInt(80);
-		this.friends = new String[5];
+    public ComplexType2(Random rndGen) {
+        this.name = Util.createSimpleRandomString(rndGen, 10);
+        this.age = rndGen.nextInt(80);
+        this.friends = new String[5];
 
-		for (int i = 0; i < 5; i++) {
-			this.friends[i] = Util.createSimpleRandomString(rndGen, 5);
-		}
-	}
+        for (int i = 0; i < 5; i++) {
+            this.friends[i] = Util.createSimpleRandomString(rndGen, 5);
+        }
+    }
 
-	@Override
-	public boolean equals(Object o) {
-		if (o == null)
-			return false;
-		if (!(o instanceof ComplexType2))
-			return false;
+    @Override
+    public boolean equals(Object o) {
+        if (o == null)
+            return false;
+        if (!(o instanceof ComplexType2))
+            return false;
 
-		ComplexType2 element = (ComplexType2) o;
+        ComplexType2 element = (ComplexType2) o;
 
-		if (!Util.compare(element.name, name))
-			return false;
-		if (!Util.compare(element.age, age))
-			return false;
-		if (!Util.compareArrays(element.friends, friends))
-			return false;
+        if (!Util.compare(element.name, name))
+            return false;
+        if (!Util.compare(element.age, age))
+            return false;
+        if (!Util.compareArrays(element.friends, friends))
+            return false;
 
-		return true;
-	}
+        return true;
+    }
 
 }

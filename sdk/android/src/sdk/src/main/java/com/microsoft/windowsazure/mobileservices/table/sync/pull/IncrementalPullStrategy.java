@@ -5,12 +5,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemColumns;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
-import com.microsoft.windowsazure.mobileservices.table.query.QueryNode;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
 import com.microsoft.windowsazure.mobileservices.table.sync.localstore.ColumnDataType;
 import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileServiceLocalStore;
 import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileServiceLocalStoreException;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -36,6 +36,15 @@ public class IncrementalPullStrategy extends PullStrategy {
         super(query, cursor);
         this.mStore = localStore;
         this.queryId = queryId;
+    }
+
+    public static void initializeStore(MobileServiceLocalStore store) throws MobileServiceLocalStoreException {
+
+        Map<String, ColumnDataType> columns = new HashMap<String, ColumnDataType>();
+        columns.put("id", ColumnDataType.String);
+        columns.put("maxupdateddate", ColumnDataType.String);
+
+        store.defineTable(INCREMENTAL_PULL_STRATEGY_TABLE, columns);
     }
 
     public void initialize() {
@@ -90,7 +99,7 @@ public class IncrementalPullStrategy extends PullStrategy {
 
         maxUpdatedAt = getDateFromString(lastElementUpdatedAt);
 
-        lastElementId =  lastElement.get(MobileServiceSystemColumns.Id).getAsString();
+        lastElementId = lastElement.get(MobileServiceSystemColumns.Id).getAsString();
 
         saveMaxUpdatedDate(lastElementUpdatedAt);
     }
@@ -170,15 +179,6 @@ public class IncrementalPullStrategy extends PullStrategy {
         this.query.orderBy(MobileServiceSystemColumns.Id, QueryOrder.Ascending);
     }
 
-    public static void initializeStore(MobileServiceLocalStore store) throws MobileServiceLocalStoreException {
-
-        Map<String, ColumnDataType> columns = new HashMap<String, ColumnDataType>();
-        columns.put("id", ColumnDataType.String);
-        columns.put("maxupdateddate", ColumnDataType.String);
-
-        store.defineTable(INCREMENTAL_PULL_STRATEGY_TABLE, columns);
-    }
-
     private Date getDateFromString(String stringValue) {
 
         if (stringValue == null) {
@@ -189,7 +189,7 @@ public class IncrementalPullStrategy extends PullStrategy {
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         try {
-           return sdf.parse(stringValue);
+            return sdf.parse(stringValue);
         } catch (ParseException e) {
             return null;
         }

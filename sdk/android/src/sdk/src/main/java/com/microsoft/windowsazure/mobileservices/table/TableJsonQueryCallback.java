@@ -28,19 +28,15 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
 /**
  * Callback used after a query is executed using JSON
- * 
  */
 public interface TableJsonQueryCallback {
-	/**
-	 * Method to call if the operation finishes successfully
-	 * 
-	 * @param result
-	 *            JSON result
-	 * @param exception
-	 *            An exception representing the error, in case there was one
-	 * @param response
-	 *            Response object
-	 */
-	public void onCompleted(JsonElement result, Exception exception, ServiceFilterResponse response);
+    /**
+     * Method to call if the operation finishes successfully
+     *
+     * @param result    JSON result
+     * @param exception An exception representing the error, in case there was one
+     * @param response  Response object
+     */
+    public void onCompleted(JsonElement result, Exception exception, ServiceFilterResponse response);
 
 }

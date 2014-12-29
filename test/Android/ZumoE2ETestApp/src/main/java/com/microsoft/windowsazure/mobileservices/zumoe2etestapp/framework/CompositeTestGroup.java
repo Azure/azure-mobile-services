@@ -23,12 +23,12 @@ import java.util.List;
 
 public class CompositeTestGroup extends TestGroup {
 
-	public CompositeTestGroup(String name, List<TestCase> testCases) {
-		super(name);
-		
-		for (TestCase test : testCases) {
-			this.addTest(test);
-		}
-	}
+    public CompositeTestGroup(String name, List<TestCase> testCases) {
+        super(name);
+
+        for (TestCase test : testCases) {
+            this.addTest(test);
+        }
+    }
 
 }

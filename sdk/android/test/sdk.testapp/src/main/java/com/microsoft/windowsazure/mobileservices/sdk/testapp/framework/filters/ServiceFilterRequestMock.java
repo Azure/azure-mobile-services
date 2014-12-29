@@ -19,109 +19,109 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters;
 
-import java.io.InvalidClassException;
-import java.net.URISyntaxException;
-
-import org.apache.http.Header;
-import org.apache.http.message.BasicHeader;
-
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
+import org.apache.http.Header;
+import org.apache.http.message.BasicHeader;
+
+import java.io.InvalidClassException;
+import java.net.URISyntaxException;
+
 public class ServiceFilterRequestMock implements ServiceFilterRequest {
-	private ServiceFilterResponse responseToUse;
-	private Boolean hasErrorOnExecute;
-	private Exception exceptionToThrow;
+    private ServiceFilterResponse responseToUse;
+    private Boolean hasErrorOnExecute;
+    private Exception exceptionToThrow;
 
-	public ServiceFilterRequestMock(ServiceFilterResponse response) {
-		this.responseToUse = response;
-		this.hasErrorOnExecute = false;
-	}
+    public ServiceFilterRequestMock(ServiceFilterResponse response) {
+        this.responseToUse = response;
+        this.hasErrorOnExecute = false;
+    }
 
-	@Override
-	public Header[] getHeaders() {
-		return null;
-	}
+    @Override
+    public Header[] getHeaders() {
+        return null;
+    }
 
-	@Override
-	public void addHeader(String name, String val) {
-		Header[] currentHeaders = this.responseToUse.getHeaders();
-		int oldSize = currentHeaders == null ? 0 : currentHeaders.length;
-		Header[] newHeaders = new Header[oldSize + 1];
-		if (oldSize > 0) {
-			System.arraycopy(currentHeaders, 0, newHeaders, 0, oldSize);
-		}
+    @Override
+    public void addHeader(String name, String val) {
+        Header[] currentHeaders = this.responseToUse.getHeaders();
+        int oldSize = currentHeaders == null ? 0 : currentHeaders.length;
+        Header[] newHeaders = new Header[oldSize + 1];
+        if (oldSize > 0) {
+            System.arraycopy(currentHeaders, 0, newHeaders, 0, oldSize);
+        }
 
-		newHeaders[oldSize] = new BasicHeader(name, val);
+        newHeaders[oldSize] = new BasicHeader(name, val);
 
-		((ServiceFilterResponseMock) this.responseToUse).setHeaders(newHeaders);
-	}
+        ((ServiceFilterResponseMock) this.responseToUse).setHeaders(newHeaders);
+    }
 
-	@Override
-	public void removeHeader(String name) {
-	}
+    @Override
+    public void removeHeader(String name) {
+    }
 
-	@Override
-	public void setContent(String content) throws InvalidClassException {
-	}
+    @Override
+    public void setContent(String content) throws InvalidClassException {
+    }
 
-	@Override
-	public String getContent() {
-		return null;
-	}
+    @Override
+    public String getContent() {
+        return null;
+    }
 
-	@Override
-	public String getUrl() {
-		return null;
-	}
+    @Override
+    public void setContent(byte[] content) throws Exception {
+    }
 
-	@Override
-	public void setUrl(String url) throws URISyntaxException {
-	}
+    @Override
+    public String getUrl() {
+        return null;
+    }
 
-	@Override
-	public String getMethod() {
-		return null;
-	}
+    @Override
+    public void setUrl(String url) throws URISyntaxException {
+    }
 
-	@Override
-	public ServiceFilterResponse execute() throws Exception {
-		if (this.hasErrorOnExecute) {
+    @Override
+    public String getMethod() {
+        return null;
+    }
 
-			if (exceptionToThrow == null) {
-				throw new MobileServiceException("Error while processing request");
-			} else {
-				throw exceptionToThrow;
-			}
-		}
+    @Override
+    public ServiceFilterResponse execute() throws Exception {
+        if (this.hasErrorOnExecute) {
 
-		return this.responseToUse;
-	}
+            if (exceptionToThrow == null) {
+                throw new MobileServiceException("Error while processing request");
+            } else {
+                throw exceptionToThrow;
+            }
+        }
 
-	public Boolean getHasErrorOnExecute() {
-		return hasErrorOnExecute;
-	}
+        return this.responseToUse;
+    }
 
-	public void setHasErrorOnExecute(Boolean hasErrorOnExecute) {
-		this.hasErrorOnExecute = hasErrorOnExecute;
-	}
+    public Boolean getHasErrorOnExecute() {
+        return hasErrorOnExecute;
+    }
 
-	public Exception getExceptionToThrow() {
-		return exceptionToThrow;
-	}
+    public void setHasErrorOnExecute(Boolean hasErrorOnExecute) {
+        this.hasErrorOnExecute = hasErrorOnExecute;
+    }
 
-	public void setExceptionToThrow(Exception exceptionToThrow) {
-		this.exceptionToThrow = exceptionToThrow;
-	}
+    public Exception getExceptionToThrow() {
+        return exceptionToThrow;
+    }
 
-	@Override
-	public void setContent(byte[] content) throws Exception {
-	}
+    public void setExceptionToThrow(Exception exceptionToThrow) {
+        this.exceptionToThrow = exceptionToThrow;
+    }
 
-	@Override
-	public byte[] getRawContent() {
-		return null;
-	}
+    @Override
+    public byte[] getRawContent() {
+        return null;
+    }
 
 }

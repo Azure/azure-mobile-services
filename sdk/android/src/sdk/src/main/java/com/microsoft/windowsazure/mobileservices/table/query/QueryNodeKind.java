@@ -28,28 +28,28 @@ package com.microsoft.windowsazure.mobileservices.table.query;
  */
 enum QueryNodeKind {
 
-	/**
-	 * Node used to represent a constant value.
-	 */
-	Constant,
+    /**
+     * Node used to represent a constant value.
+     */
+    Constant,
 
-	/**
-	 * Node used to represent a field.
-	 */
-	Field,
+    /**
+     * Node used to represent a field.
+     */
+    Field,
 
-	/**
-	 * Node used to represent a unary operator.
-	 */
-	UnaryOperator,
+    /**
+     * Node used to represent a unary operator.
+     */
+    UnaryOperator,
 
-	/**
-	 * Node used to represent a binary operator.
-	 */
-	BinaryOperator,
+    /**
+     * Node used to represent a binary operator.
+     */
+    BinaryOperator,
 
-	/**
-	 * Node used to represent a function call.
-	 */
-	FunctionCall
+    /**
+     * Node used to represent a function call.
+     */
+    FunctionCall
 }

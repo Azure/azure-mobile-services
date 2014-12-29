@@ -19,226 +19,224 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CountDownLatch;
-
 import android.annotation.TargetApi;
 import android.os.Build;
 
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
+
 public abstract class TestGroup {
-	List<TestCase> mTestCases;
-	String mName;
-	TestStatus mStatus;
-	ConcurrentLinkedQueue<TestCase> mTestRunQueue;
-	boolean mNewTestRun;
+    public static final String AllTestsGroupName = "All tests";
+    public static final String AllUnattendedTestsGroupName = AllTestsGroupName + " (unattended)";
+    public static final String ClientVersionKey = "client-version";
+    public static final String ServerVersionKey = "server-version";
+    List<TestCase> mTestCases;
+    String mName;
+    TestStatus mStatus;
+    ConcurrentLinkedQueue<TestCase> mTestRunQueue;
+    boolean mNewTestRun;
 
-	public static final String AllTestsGroupName = "All tests";
-	public static final String AllUnattendedTestsGroupName = AllTestsGroupName + " (unattended)";
+    public TestGroup(String name) {
+        mName = name;
+        mStatus = TestStatus.NotRun;
+        mTestCases = new ArrayList<TestCase>();
+        mTestRunQueue = new ConcurrentLinkedQueue<TestCase>();
+        mNewTestRun = false;
+    }
 
-	public static final String ClientVersionKey = "client-version";
-	public static final String ServerVersionKey = "server-version";
+    public TestStatus getStatus() {
+        return mStatus;
+    }
 
-	public TestGroup(String name) {
-		mName = name;
-		mStatus = TestStatus.NotRun;
-		mTestCases = new ArrayList<TestCase>();
-		mTestRunQueue = new ConcurrentLinkedQueue<TestCase>();
-		mNewTestRun = false;
-	}
+    public List<TestCase> getTestCases() {
+        return mTestCases;
+    }
 
-	public TestStatus getStatus() {
-		return mStatus;
-	}
+    protected void addTest(TestCase testCase) {
+        mTestCases.add(testCase);
+    }
 
-	public List<TestCase> getTestCases() {
-		return mTestCases;
-	}
+    public void runTests(MobileServiceClient client, TestExecutionCallback callback) {
+        List<TestCase> testsToRun = new ArrayList<TestCase>();
 
-	protected void addTest(TestCase testCase) {
-		mTestCases.add(testCase);
-	}
+        for (int i = 0; i < mTestCases.size(); i++) {
+            if (mTestCases.get(i).isEnabled()) {
+                testsToRun.add(mTestCases.get(i));
+            }
+        }
 
-	public void runTests(MobileServiceClient client, TestExecutionCallback callback) {
-		List<TestCase> testsToRun = new ArrayList<TestCase>();
+        if (testsToRun.size() > 0) {
+            runTests(testsToRun, client, callback);
+        }
+    }
 
-		for (int i = 0; i < mTestCases.size(); i++) {
-			if (mTestCases.get(i).isEnabled()) {
-				testsToRun.add(mTestCases.get(i));
-			}
-		}
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public void runTests(List<TestCase> testsToRun, final MobileServiceClient client, final TestExecutionCallback callback) {
+        try {
+            onPreExecute(client);
+        } catch (Exception e) {
+            mStatus = TestStatus.Failed;
+            if (callback != null)
+                callback.onTestGroupComplete(this, null);
+            return;
+        }
 
-		if (testsToRun.size() > 0) {
-			runTests(testsToRun, client, callback);
-		}
-	}
+        final TestRunStatus testRunStatus = new TestRunStatus();
 
-	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
-	public void runTests(List<TestCase> testsToRun, final MobileServiceClient client, final TestExecutionCallback callback) {
-		try {
-			onPreExecute(client);
-		} catch (Exception e) {
-			mStatus = TestStatus.Failed;
-			if (callback != null)
-				callback.onTestGroupComplete(this, null);
-			return;
-		}
+        mNewTestRun = true;
 
-		final TestRunStatus testRunStatus = new TestRunStatus();
+        int oldQueueSize = mTestRunQueue.size();
+        mTestRunQueue.clear();
+        mTestRunQueue.addAll(testsToRun);
+        cleanTestsState();
+        testRunStatus.results.clear();
+        mStatus = TestStatus.NotRun;
+        if (oldQueueSize == 0) {
+            for (final TestCase test : mTestRunQueue) {
 
-		mNewTestRun = true;
+                final CountDownLatch latch = new CountDownLatch(1);
 
-		int oldQueueSize = mTestRunQueue.size();
-		mTestRunQueue.clear();
-		mTestRunQueue.addAll(testsToRun);
-		cleanTestsState();
-		testRunStatus.results.clear();
-		mStatus = TestStatus.NotRun;
-		if (oldQueueSize == 0) {
-			for (final TestCase test : mTestRunQueue) {
-				
-				final CountDownLatch latch = new CountDownLatch(1);
-				
-				Thread thread = new Thread() {
-					public void run() {
-						executeNextTest(test, client, callback, testRunStatus, latch);
-					}
-				};
-				
-				thread.run();
-				
-				try {
-					latch.await();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-			}
-		}
-	}
+                Thread thread = new Thread() {
+                    public void run() {
+                        executeNextTest(test, client, callback, testRunStatus, latch);
+                    }
+                };
 
-	private void cleanTestsState() {
-		for (TestCase test : mTestRunQueue) {
-			test.setStatus(TestStatus.NotRun);
-			test.clearLog();
-		}
-	}
+                thread.run();
 
-	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
-	private void executeNextTest(final TestCase nextTest, final MobileServiceClient client, final TestExecutionCallback callback,
-			final TestRunStatus testRunStatus, final CountDownLatch latch) {
-		mNewTestRun = false;
-		final TestGroup group = this;
+                try {
+                    latch.await();
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
 
-		try {
-			// TestCase nextTest = mTestRunQueue.poll();
-			if (nextTest != null) {
-				nextTest.run(client, new TestExecutionCallback() {
-					@Override
-					public void onTestStart(TestCase test) {
-						if (!mNewTestRun && callback != null)
-							callback.onTestStart(test);
-					}
+            }
+        }
+    }
 
-					@Override
-					public void onTestGroupComplete(TestGroup group, List<TestResult> results) {
-						if (!mNewTestRun && callback != null)
-							callback.onTestGroupComplete(group, results);
-					}
+    private void cleanTestsState() {
+        for (TestCase test : mTestRunQueue) {
+            test.setStatus(TestStatus.NotRun);
+            test.clearLog();
+        }
+    }
 
-					@Override
-					public void onTestComplete(TestCase test, TestResult result) {
-						if (mNewTestRun) {
-							cleanTestsState();
-							testRunStatus.results.clear();
-							mStatus = TestStatus.NotRun;
-						} else {
-							if (test.getExpectedExceptionClass() != null) {
-								if (result.getException() != null && result.getException().getClass() == test.getExpectedExceptionClass()) {
-									result.setStatus(TestStatus.Passed);
-								} else {
-									result.setStatus(TestStatus.Failed);
-								}
-							}
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    private void executeNextTest(final TestCase nextTest, final MobileServiceClient client, final TestExecutionCallback callback,
+                                 final TestRunStatus testRunStatus, final CountDownLatch latch) {
+        mNewTestRun = false;
+        final TestGroup group = this;
 
-							test.setStatus(result.getStatus());
-							testRunStatus.results.add(result);
+        try {
+            // TestCase nextTest = mTestRunQueue.poll();
+            if (nextTest != null) {
+                nextTest.run(client, new TestExecutionCallback() {
+                    @Override
+                    public void onTestStart(TestCase test) {
+                        if (!mNewTestRun && callback != null)
+                            callback.onTestStart(test);
+                    }
 
-							if (callback != null)
-								callback.onTestComplete(test, result);
-						}
+                    @Override
+                    public void onTestGroupComplete(TestGroup group, List<TestResult> results) {
+                        if (!mNewTestRun && callback != null)
+                            callback.onTestGroupComplete(group, results);
+                    }
 
-						latch.countDown();
-						// executeNextTest(client, callback, testRunStatus);
-					}
-				});
+                    @Override
+                    public void onTestComplete(TestCase test, TestResult result) {
+                        if (mNewTestRun) {
+                            cleanTestsState();
+                            testRunStatus.results.clear();
+                            mStatus = TestStatus.NotRun;
+                        } else {
+                            if (test.getExpectedExceptionClass() != null) {
+                                if (result.getException() != null && result.getException().getClass() == test.getExpectedExceptionClass()) {
+                                    result.setStatus(TestStatus.Passed);
+                                } else {
+                                    result.setStatus(TestStatus.Failed);
+                                }
+                            }
 
-			} else {
-				// end run
+                            test.setStatus(result.getStatus());
+                            testRunStatus.results.add(result);
 
-				try {
-					group.onPostExecute(client);
-				} catch (Exception e) {
-					mStatus = TestStatus.Failed;
-				}
+                            if (callback != null)
+                                callback.onTestComplete(test, result);
+                        }
 
-				// if at least one test failed, the test group
-				// failed
-				if (mStatus != TestStatus.Failed) {
-					mStatus = TestStatus.Passed;
-					for (TestResult r : testRunStatus.results) {
-						if (r.getStatus() == TestStatus.Failed) {
-							mStatus = TestStatus.Failed;
-							break;
-						}
-					}
-				}
+                        latch.countDown();
+                        // executeNextTest(client, callback, testRunStatus);
+                    }
+                });
 
-				if (callback != null)
-					callback.onTestGroupComplete(group, testRunStatus.results);
-				
-				latch.countDown();
-			}
+            } else {
+                // end run
 
-		} catch (Exception e) {
-			if (callback != null)
-				callback.onTestGroupComplete(group, testRunStatus.results);
-			
-			latch.countDown();
-		}
+                try {
+                    group.onPostExecute(client);
+                } catch (Exception e) {
+                    mStatus = TestStatus.Failed;
+                }
 
-	}
+                // if at least one test failed, the test group
+                // failed
+                if (mStatus != TestStatus.Failed) {
+                    mStatus = TestStatus.Passed;
+                    for (TestResult r : testRunStatus.results) {
+                        if (r.getStatus() == TestStatus.Failed) {
+                            mStatus = TestStatus.Failed;
+                            break;
+                        }
+                    }
+                }
 
-	public String getName() {
-		return mName;
-	}
+                if (callback != null)
+                    callback.onTestGroupComplete(group, testRunStatus.results);
 
-	protected void setName(String name) {
-		mName = name;
-	}
+                latch.countDown();
+            }
 
-	@Override
-	public String toString() {
-		return getName();
-	}
+        } catch (Exception e) {
+            if (callback != null)
+                callback.onTestGroupComplete(group, testRunStatus.results);
 
-	public void onPreExecute(MobileServiceClient client) {
+            latch.countDown();
+        }
 
-	}
+    }
 
-	public void onPostExecute(MobileServiceClient client) {
+    public String getName() {
+        return mName;
+    }
 
-	}
+    protected void setName(String name) {
+        mName = name;
+    }
 
-	private class TestRunStatus {
-		public List<TestResult> results;
+    @Override
+    public String toString() {
+        return getName();
+    }
 
-		public TestRunStatus() {
-			results = new ArrayList<TestResult>();
-		}
-	}
+    public void onPreExecute(MobileServiceClient client) {
+
+    }
+
+    public void onPostExecute(MobileServiceClient client) {
+
+    }
+
+    private class TestRunStatus {
+        public List<TestResult> results;
+
+        public TestRunStatus() {
+            results = new ArrayList<TestResult>();
+        }
+    }
 }

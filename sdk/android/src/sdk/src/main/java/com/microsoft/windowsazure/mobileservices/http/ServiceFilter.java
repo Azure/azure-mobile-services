@@ -31,14 +31,12 @@ import com.google.common.util.concurrent.ListenableFuture;
  * associated with a MobileServiceClient via the WithFilter method.
  */
 public interface ServiceFilter {
-	/**
-	 * Method to handle the requests
-	 * 
-	 * @param request
-	 *            Request to execute
-	 * @param nextServiceFilterCallback
-	 *            The next filter to execute
-	 * @return A ListenableFuture of the ServiceFilterResponse
-	 */
-	public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback);
+    /**
+     * Method to handle the requests
+     *
+     * @param request                   Request to execute
+     * @param nextServiceFilterCallback The next filter to execute
+     * @return A ListenableFuture of the ServiceFilterResponse
+     */
+    public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback);
 }
