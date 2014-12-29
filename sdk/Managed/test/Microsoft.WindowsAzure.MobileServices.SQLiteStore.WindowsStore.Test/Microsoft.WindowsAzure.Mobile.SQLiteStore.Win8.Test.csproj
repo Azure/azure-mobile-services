@@ -18,6 +18,7 @@
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <PackageCertificateThumbprint>2FCC506A2DC4282F55D9EEE504107696B661355D</PackageCertificateThumbprint>
     <NuGetPackageImportStamp>ad09126e</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>701185cc</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
