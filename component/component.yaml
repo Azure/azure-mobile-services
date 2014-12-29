@@ -35,8 +35,6 @@ libraries:
 samples:
   - name: Android Sample
     path: samples\androidsample\androidsample.sln
-  - name: iOS Classic API Sample
-    path: samples\iOSsample-Classic\iOSsample-Classic.sln
   - name: iOS Unified API Sample
     path: samples\iOSsample\iOSsample.sln
 screenshots:
