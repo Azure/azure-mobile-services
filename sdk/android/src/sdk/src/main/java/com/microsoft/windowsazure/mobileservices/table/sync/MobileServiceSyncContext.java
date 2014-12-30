@@ -48,6 +48,8 @@ import com.microsoft.windowsazure.mobileservices.table.sync.operations.RemoteTab
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationError;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.UpdateOperation;
+import com.microsoft.windowsazure.mobileservices.table.sync.pull.PullCursor;
+import com.microsoft.windowsazure.mobileservices.table.sync.pull.PullStrategy;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushCompletionResult;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushFailedException;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushStatus;
@@ -569,7 +571,9 @@ public class MobileServiceSyncContext {
     }
 
     private void processPull(String tableName, Query query) throws Throwable {
+
         try {
+
             MobileServiceJsonTable table = this.mClient.getTable(tableName);
             table.setSystemProperties(EnumSet.allOf(MobileServiceSystemProperty.class));
 
@@ -581,93 +585,92 @@ public class MobileServiceSyncContext {
                 query = query.deepClone();
             }
 
-            int originalTop = query.getTop();
-            int top = originalTop;
-            int skip = query.getSkip();
-            long count = -1;
-
-            if (originalTop <= 0 || originalTop > 1000) {
-                query = query.includeInlineCount();
-                top = 1000;
-            } else {
-                query = query.removeInlineCount();
+            if (query.getTop() == 0) {
+                query.includeInlineCount();
             }
 
             query.includeDeleted();
 
-            boolean allProcessed = false;
+            PullCursor cursor = new PullCursor(query);
+            PullStrategy strategy = new PullStrategy(query, cursor);
 
-            while (!allProcessed) {
-                query.top(top);
-                query.skip(skip);
+            strategy.initialize();
+
+            JsonArray elements = null;
+
+            do {
 
                 JsonElement result = table.execute(query).get();
 
                 if (result != null) {
-                    JsonArray elements = null;
 
                     if (result.isJsonObject()) {
                         JsonObject jsonObject = result.getAsJsonObject();
 
+                        //Set the total count to the cursor
                         if (jsonObject.has("count")) {
-                            count = jsonObject.get("count").getAsLong();
+                            int count = jsonObject.get("count").getAsInt();
+                            cursor.setRemaining(count);
+
+                            query.removeInlineCount();
                         }
 
                         if (jsonObject.has("results") && jsonObject.get("results").isJsonArray()) {
                             elements = jsonObject.get("results").getAsJsonArray();
-                            count -= elements.size();
                         }
 
-                        query.removeInlineCount();
                     } else if (result.isJsonArray()) {
                         elements = result.getAsJsonArray();
                     }
 
-                    if (elements != null) {
+                    processElements(tableName, elements, cursor);
 
-                        List<JsonObject> updatedJsonObjects = new ArrayList<JsonObject>();
-                        List<String> deletedIds = new ArrayList<String>();
-
-
-                        for (JsonElement element : elements) {
-
-                            JsonObject jsonObject = element.getAsJsonObject();
-                            JsonElement elementId = jsonObject.get(MobileServiceSystemColumns.Id);
-
-                            if (elementId == null) {
-                                continue;
-                            }
-
-                            if (isDeleted(jsonObject)) {
-                                deletedIds.add(elementId.getAsString());
-                            } else {
-                                updatedJsonObjects.add(jsonObject);
-                            }
-                        }
-
-                        if (deletedIds.size() > 0) {
-                            this.mStore.delete(tableName,
-                                    deletedIds.toArray(new String[deletedIds.size()]));
-                        }
-
-                        if (updatedJsonObjects.size() > 0) {
-                            this.mStore.upsert(tableName,
-                                    updatedJsonObjects.toArray(new JsonObject[updatedJsonObjects.size()]));
-                        }
-
-                        originalTop -= elements.size();
-                        top = originalTop > 1000 ? 1000 : originalTop;
-                        skip += elements.size();
-                        count -= elements.size();
-                    }
-
-                    if (count <= 0) {
-                        allProcessed = true;
-                    }
                 }
+
             }
+            while (strategy.moveToNextPage());
+
         } catch (ExecutionException e) {
             throw e.getCause();
+        }
+    }
+
+    private void processElements(String tableName, JsonArray elements, PullCursor cursor) throws Throwable {
+        if (elements != null) {
+
+            List<JsonObject> updatedJsonObjects = new ArrayList<JsonObject>();
+            List<String> deletedIds = new ArrayList<String>();
+
+
+            for (JsonElement element : elements) {
+
+                if (!cursor.onNext()) {
+                    break;
+                }
+
+                JsonObject jsonObject = element.getAsJsonObject();
+                JsonElement elementId = jsonObject.get(MobileServiceSystemColumns.Id);
+
+                if (elementId == null) {
+                    continue;
+                }
+
+                if (isDeleted(jsonObject)) {
+                    deletedIds.add(elementId.getAsString());
+                } else {
+                    updatedJsonObjects.add(jsonObject);
+                }
+            }
+
+            if (deletedIds.size() > 0) {
+                this.mStore.delete(tableName,
+                        deletedIds.toArray(new String[deletedIds.size()]));
+            }
+
+            if (updatedJsonObjects.size() > 0) {
+                this.mStore.upsert(tableName,
+                        updatedJsonObjects.toArray(new JsonObject[updatedJsonObjects.size()]));
+            }
         }
     }
 

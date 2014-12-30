@@ -2,19 +2,19 @@
 Copyright (c) Microsoft Open Technologies, Inc.
 All Rights Reserved
 Apache 2.0 License
- 
+
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
- 
+
      http://www.apache.org/licenses/LICENSE-2.0
- 
+
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
- 
+
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests;
@@ -29,6 +29,7 @@ import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServicePreconditionFailedExceptionJson;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
@@ -52,6 +53,7 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestRe
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestStatus;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.Util;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -64,6 +66,7 @@ import java.util.concurrent.ExecutionException;
 public class OfflineTests extends TestGroup {
 
     protected static final String OFFLINE_TABLE_NAME = "offlineTest.db";
+    protected static final String OFFLINE_TABLE_NOVERSION_NAME = "offlineNoVersionTest.db";
 
     public OfflineTests() {
         super("Offline tests");
@@ -85,6 +88,8 @@ public class OfflineTests extends TestGroup {
 
         this.addTest(createSyncTestForAuthenticatedTable(true));
         this.addTest(LoginTests.createLogoutTest());
+
+        this.addTest(createOfflineIncrementalSyncTest());
     }
 
     private TestCase createBasicTest(String name) {
@@ -643,6 +648,92 @@ public class OfflineTests extends TestGroup {
         return test;
     }
 
+    private TestCase createOfflineIncrementalSyncTest() {
+
+        final String tableName = "offlinereadyitemnoversion";
+
+        final TestCase test = new TestCase() {
+
+            @Override
+            protected void executeTest(MobileServiceClient offlineReadyClient, final TestExecutionCallback callback) {
+
+                TestCase testCase = this;
+                TestResult result = new TestResult();
+                result.setStatus(TestStatus.Passed);
+                result.setTestCase(testCase);
+                try {
+
+                    SQLiteLocalStore localStore = new SQLiteLocalStore(offlineReadyClient.getContext(), OFFLINE_TABLE_NOVERSION_NAME, null, 1);
+
+                    log("Defined the table on the local store");
+
+                    Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
+                    tableDefinition.put("id", ColumnDataType.String);
+                    tableDefinition.put("name", ColumnDataType.String);
+                    tableDefinition.put("age", ColumnDataType.Number);
+                    tableDefinition.put("float", ColumnDataType.Number);
+                    tableDefinition.put("date", ColumnDataType.Date);
+                    tableDefinition.put("bool", ColumnDataType.Boolean);
+
+                    log("Initialized the store and sync context");
+
+                    localStore.defineTable(tableName, tableDefinition);
+
+                    offlineReadyClient.getSyncContext().initialize(localStore, new SimpleSyncHandler()).get();
+
+                    MobileServiceSyncTable<OfflineReadyItemNoVersion> localTable = offlineReadyClient.getSyncTable(tableName, OfflineReadyItemNoVersion.class);
+
+                    MobileServiceJsonTable remoteTable = offlineReadyClient.getTable(tableName);
+
+                    offlineReadyClient.getSyncContext().initialize(localStore, new SimpleSyncHandler()).get();
+
+                    localTable.purge(null).get();
+                    log("Removed all items from the local table");
+
+                    List<OfflineReadyItemNoVersion> mOfflineReadyItemsNoVersion = new ArrayList<OfflineReadyItemNoVersion>();
+
+                    /*for(int i = 0; i < 100; i++) {
+
+                        OfflineReadyItemNoVersion item = new OfflineReadyItemNoVersion(new Random());
+                        mOfflineReadyItemsNoVersion.add(item);
+
+                        //remoteTable.insert(offlineReadyClient.getGsonBuilder()
+                        //        .create().toJsonTree(item).getAsJsonObject()).get();
+                    }
+
+                    AllOfflineReadyItemsNoVersion allOfflineReadyItemsNoVersion = new AllOfflineReadyItemsNoVersion();
+
+                    allOfflineReadyItemsNoVersion.setOfflineReadyItems(mOfflineReadyItemsNoVersion);
+
+                    remoteTable.insert(offlineReadyClient.getGsonBuilder()
+                            .create().toJsonTree(allOfflineReadyItemsNoVersion).getAsJsonObject()).get();
+                    */
+
+                    Query pullQuery = QueryOperations.tableName(tableName);
+
+                    log("Insert Items on table");
+
+                    localTable.pull(pullQuery).get();
+
+                    log("Done");
+
+                    callback.onTestComplete(this, result);
+
+                } catch (Exception e) {
+                    callback.onTestComplete(this, createResultFromException(e));
+                    return;
+                }
+            }
+
+            ;
+        };
+
+        test.setName("Offline - Incremental Sync - Simple Pull Strategy");
+
+        return test;
+    }
+
+
     private TestCase createClearStoreTest() {
         final TestCase test = new TestCase() {
 
@@ -1007,3 +1098,46 @@ class OfflineReadyItemNoVersion {
                 mFloatingNumber, Util.dateToString(mDate), mFlag);
     }
 }
+
+class AllOfflineReadyItemsNoVersion {
+    private int id;
+
+    @SerializedName("status")
+    private String mStatus;
+
+    @SerializedName("offlinereadyitems")
+    private OfflineReadyItemNoVersion[] mOfflineReadyItemsNoVersion;
+
+    public AllOfflineReadyItemsNoVersion() {
+        mOfflineReadyItemsNoVersion = new OfflineReadyItemNoVersion[0];
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getStatus() {
+        return mStatus;
+    }
+
+    public void setStatus(String status) {
+        mStatus = status;
+    }
+
+    public OfflineReadyItemNoVersion[] getOfflineReadyItems() {
+        return mOfflineReadyItemsNoVersion;
+    }
+
+    public void setOfflineReadyItems(List<OfflineReadyItemNoVersion> offlineReadyItemsNoVersion) {
+        mOfflineReadyItemsNoVersion = offlineReadyItemsNoVersion.toArray(mOfflineReadyItemsNoVersion);
+    }
+
+    public void setOfflineReadyItems(OfflineReadyItemNoVersion[] offlineReadyItemsNoVersion) {
+        mOfflineReadyItemsNoVersion = offlineReadyItemsNoVersion;
+    }
+}
+

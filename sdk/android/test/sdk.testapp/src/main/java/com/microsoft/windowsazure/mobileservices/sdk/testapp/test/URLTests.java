@@ -33,6 +33,7 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterResponseMock;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.helpers.EncodingUtilities;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.PersonTestObject;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.ResultsContainer;
 
@@ -204,7 +205,8 @@ public class URLTests extends InstrumentationTestCase {
         client.getTable(tableName, PersonTestObject.class).update(person, parameters).get();
 
         // Assert
-        String expectedURL = appUrl + "tables/" + tableName + "/" + person.getId() + "?a%20key=my%20%3C%3E%26%3D%3F%40%20value";
+        String expectedURL = appUrl + "tables/" + tableName + "/" + person.getId()
+                + EncodingUtilities.percentEncodeSpaces("?a key=my %3C%3E%26%3D%3F%40 value");
         assertEquals(expectedURL, result.getRequestUrl());
     }
 
@@ -285,7 +287,7 @@ public class URLTests extends InstrumentationTestCase {
         client.getTable(tableName, PersonTestObject.class).insert(person, parameters).get();
 
         // Assert
-        String expectedURL = appUrl + "tables/" + tableName + "?a%20key=my%20%3C%3E%26%3D%3F%40%20value";
+        String expectedURL = appUrl + "tables/" + tableName + EncodingUtilities.percentEncodeSpaces("?a key=my %3C%3E%26%3D%3F%40 value");
         assertEquals(expectedURL, result.getRequestUrl());
     }
 
@@ -367,7 +369,7 @@ public class URLTests extends InstrumentationTestCase {
         client.getTable(tableName).lookUp(id, parameters).get();
 
         // Assert
-        String expectedURL = appUrl + "tables/" + tableName + "/" + id + "?a%20key=my%20%3C%3E%26%3D%3F%40%20value";
+        String expectedURL = appUrl + "tables/" + tableName + "/" + id + EncodingUtilities.percentEncodeSpaces("?a key=my %3C%3E%26%3D%3F%40 value");
         assertEquals(expectedURL, result.getRequestUrl());
     }
 
@@ -448,7 +450,7 @@ public class URLTests extends InstrumentationTestCase {
         client.getTable(tableName).delete(id, parameters).get();
 
         // Assert
-        String expectedURL = appUrl + "tables/" + tableName + "/" + id + "?a%20key=my%20%3C%3E%26%3D%3F%40%20value";
+        String expectedURL = appUrl + "tables/" + tableName + "/" + id + EncodingUtilities.percentEncodeSpaces("?a key=my %3C%3E%26%3D%3F%40 value");
         assertEquals(expectedURL, result.getRequestUrl());
     }
 

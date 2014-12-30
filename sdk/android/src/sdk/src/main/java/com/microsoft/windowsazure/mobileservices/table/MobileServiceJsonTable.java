@@ -132,7 +132,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 
         String url = null;
         try {
-            String filtersUrl = URLEncoder.encode(QueryODataWriter.getRowFilter(query).trim(), MobileServiceClient.UTF8_ENCODING);
+            String filtersUrl = QueryODataWriter.getRowFilter(query);
             url = mClient.getAppUrl().toString() + TABLES_URL + URLEncoder.encode(mTableName, MobileServiceClient.UTF8_ENCODING);
 
             if (filtersUrl.length() > 0) {

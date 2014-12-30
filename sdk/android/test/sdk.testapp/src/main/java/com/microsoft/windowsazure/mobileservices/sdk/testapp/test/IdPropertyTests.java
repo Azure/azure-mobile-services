@@ -4998,7 +4998,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
     }
 
 	/*
-	 * public void testLookupWithStringIdTypeAndIntIdParameter() throws
+     * public void testLookupWithStringIdTypeAndIntIdParameter() throws
 	 * Throwable { long[] testIdData = IdTestData.concat(IdTestData.ValidIntIds,
 	 * IdTestData.InvalidIntIds);
 	 * 

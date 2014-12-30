@@ -36,6 +36,7 @@ import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.S
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.StatusLineMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.mocks.MobileServiceLocalStoreMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.mocks.MobileServiceSyncHandlerMock;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.helpers.EncodingUtilities;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.CustomFunctionTwoParameters;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.IdPropertyTestClasses.StringIdType;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
@@ -367,8 +368,10 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         table.pull(query).get();
 
-        assertEquals(serviceFilterContainer.Url,
-                "http://myapp.com/tables/stringidtype?$filter=String+eq+%28%27world%27%29&$top=3&$skip=5&$orderby=Id+desc&__includeDeleted=true&__systemproperties=*&$select=String");
+        assertEquals(
+                serviceFilterContainer.Url,
+                EncodingUtilities
+                        .percentEncodeSpaces("http://myapp.com/tables/stringidtype?$filter=String%20eq%20('world')&$inlinecount=allpages&$top=3&$skip=5&$orderby=Id%20desc&__includeDeleted=true&__systemproperties=*&$select=String"));
     }
 
     public void testPurgeDoesNotThrowExceptionWhenThereIsNoOperationInTable() throws MalformedURLException, InterruptedException, ExecutionException {
