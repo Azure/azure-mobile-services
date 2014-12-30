@@ -36,7 +36,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class MultiReadWriteLockDictionary<T> {
     private Map<T, MultiReadWriteLock<T>> mMap;
     private Object sync;
-
     /**
      * Constructor for MultiReadWriteLockDictionary
      */

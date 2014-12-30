@@ -26,7 +26,7 @@ package com.microsoft.windowsazure.mobileservices.table.query;
 /**
  * Interface of a query node used to represent a row filter expression.
  */
-interface QueryNode {
+public interface QueryNode {
     /**
      * Deep clone the QueryNode instance
      *

@@ -49,19 +49,17 @@ public enum TableOperationKind {
      */
     Delete(2);
     private static final Map<Integer, TableOperationKind> mValuesMap;
-
     static {
         mValuesMap = new HashMap<Integer, TableOperationKind>(3);
         mValuesMap.put(0, TableOperationKind.Insert);
         mValuesMap.put(1, TableOperationKind.Update);
         mValuesMap.put(2, TableOperationKind.Delete);
     }
-
     private final int mValue;
 
-    private TableOperationKind(int value) {
-        this.mValue = value;
-    }
+	private TableOperationKind(int value) {
+		this.mValue = value;
+	}
 
     /**
      * Return the TableOperationKind with the provided int value

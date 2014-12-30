@@ -77,10 +77,6 @@ public class PullStrategy {
         this.query.top(Math.min(this.query.getTop(), cursor.getRemaining()));
     }
 
-    public void pullComplete() {
-        return;
-    }
-
     public Query getLastQuery() {
         return this.query;
     }

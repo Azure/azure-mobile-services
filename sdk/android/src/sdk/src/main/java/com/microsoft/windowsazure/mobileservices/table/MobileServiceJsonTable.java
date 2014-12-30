@@ -95,7 +95,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
     /**
      * Executes a query to retrieve all the table rows
      *
-     * @throws com.microsoft.windowsazure.mobileservices.MobileServiceException
+     * @throws MobileServiceException
      */
     public ListenableFuture<JsonElement> execute() throws MobileServiceException {
         return this.executeInternal();
@@ -104,7 +104,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
     /**
      * Executes a query to retrieve all the table rows
      *
-     * @throws com.microsoft.windowsazure.mobileservices.MobileServiceException
+     * @throws MobileServiceException
      */
     protected ListenableFuture<JsonElement> executeInternal() throws MobileServiceException {
         return this.execute(this.where());
@@ -114,7 +114,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
      * Executes the query
      *
      * @param callback Callback to invoke when the operation is completed
-     * @throws com.microsoft.windowsazure.mobileservices.MobileServiceException
+     * @throws MobileServiceException
      * @deprecated use {@link execute()} instead
      */
     public void execute(final TableJsonQueryCallback callback) throws MobileServiceException {
@@ -125,7 +125,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
      * Retrieves a set of rows from the table using a query
      *
      * @param query The query used to retrieve the rows
-     * @throws com.microsoft.windowsazure.mobileservices.MobileServiceException
+     * @throws MobileServiceException
      */
     public ListenableFuture<JsonElement> execute(final Query query) {
         final SettableFuture<JsonElement> future = SettableFuture.create();
@@ -179,7 +179,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
      *
      * @param query    The query used to retrieve the rows
      * @param callback Callback to invoke when the operation is completed
-     * @deprecated use {@link execute(final com.microsoft.windowsazure.mobileservices.table.query.Query query)} instead
+     * @deprecated use {@link execute(final Query query)} instead
      */
     public void execute(final Query query, final TableJsonQueryCallback callback) {
         ListenableFuture<JsonElement> executeFuture = execute(query);
@@ -391,7 +391,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
      * @param parameters A list of user-defined parameters and values to include in the
      *                   request URI query string
      * @param callback   Callback to invoke after the operation is completed
-     * @deprecated use {@link lookUp(Object id, java.util.List< android.util.Pair<String, String>>
+     * @deprecated use {@link lookUp(Object id, List<Pair<String, String>>
      * parameters)} instead
      */
     public void lookUp(Object id, List<Pair<String, String>> parameters, final TableJsonOperationCallback callback) {
@@ -432,7 +432,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
      * @param callback Callback to invoke when the operation is completed
      * @throws IllegalArgumentException if the element has an id property set with a numeric value
      *                                  other than default (0), or an invalid string value
-     * @deprecated use {@link insert(final com.google.gson.JsonObject element)} instead
+     * @deprecated use {@link insert(final JsonObject element)} instead
      */
     public void insert(final JsonObject element, TableJsonOperationCallback callback) {
         this.insert(element, null, callback);
@@ -495,7 +495,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
      * @param callback   Callback to invoke when the operation is completed
      * @throws IllegalArgumentException if the element has an id property set with a numeric value
      *                                  other than default (0), or an invalid string value
-     * @deprecated use {@link insert(final com.google.gson.JsonObject element, java.util.List< android.util.Pair<String,
+     * @deprecated use {@link insert(final JsonObject element, List<Pair<String,
      * String>> parameters)} instead
      */
     public void insert(final JsonObject element, List<Pair<String, String>> parameters, final TableJsonOperationCallback callback) {
@@ -532,7 +532,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
      *
      * @param element  The JsonObject to update
      * @param callback Callback to invoke when the operation is completed
-     * @deprecated use {@link update(final com.google.gson.JsonObject element)} instead
+     * @deprecated use {@link update(final JsonObject element)} instead
      */
     public void update(final JsonObject element, final TableJsonOperationCallback callback) {
         this.update(element, null, callback);
@@ -644,7 +644,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
      *
      * @param element  The JsonObject to update
      * @param callback Callback to invoke when the operation is completed
-     * @deprecated use {@link undelete(final com.google.gson.JsonObject element)} instead
+     * @deprecated use {@link update(final com.google.gson.JsonObject element)} instead
      */
     public void undelete(final JsonObject element, final TableJsonOperationCallback callback) {
         this.undelete(element, null, callback);
@@ -709,13 +709,13 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
     }
 
     /**
-     * Undelete an element from a Mobile Service Table
+     * Undeete an element from a Mobile Service Table
      *
      * @param element    The JsonObject to undelete
      * @param parameters A list of user-defined parameters and values to include in the
      *                   request URI query string
      * @param callback   Callback to invoke when the operation is completed
-     * @deprecated use {@link undelete(final com.google.gson.JsonObject element, java.util.List< android.util.Pair<String,
+     * @deprecated use {@link update(final com.google.gson.JsonObject element, java.util.List< android.util.Pair<String,
      * String>> parameters)} instead
      */
     public void undelete(final JsonObject element, List<Pair<String, String>> parameters, final TableJsonOperationCallback callback) {
@@ -864,3 +864,4 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
     }
 
 }
+
