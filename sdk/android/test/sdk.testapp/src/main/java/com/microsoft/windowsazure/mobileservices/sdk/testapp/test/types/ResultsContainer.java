@@ -19,220 +19,218 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.gson.JsonElement;
 import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceUser;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.IdPropertyTestClasses.IdPropertyWithDifferentIdPropertyCasing;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.IdPropertyTestClasses.IdPropertyWithGsonAnnotation;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * 
  * Class used in tests to temporally store results obtained in AsyncTasks to
  * have them available in the asserts' section
- * 
  */
 public class ResultsContainer {
-	private PersonTestObject person;
+    private PersonTestObject person;
 
-	private PersonTestObjectWithoutId personWithoutId;
+    private PersonTestObjectWithoutId personWithoutId;
 
-	private PersonTestObjectWithStringId personWithStringId;
+    private PersonTestObjectWithStringId personWithStringId;
 
-	private ComplexPersonTestObject complexPerson;
+    private ComplexPersonTestObject complexPerson;
 
-	private String requestUrl;
+    private String requestUrl;
 
-	private List<PersonTestObject> peopleResult;
+    private List<PersonTestObject> peopleResult;
 
-	private int count;
+    private int count;
 
-	private String errorMessage;
+    private String errorMessage;
 
-	private MobileServiceUser user;
+    private MobileServiceUser user;
 
-	private Boolean operationSucceded;
+    private Boolean operationSucceded;
 
-	private String responseContent;
+    private String responseContent;
 
-	private String requestContent;
+    private String requestContent;
 
-	private DateTestObject dateTestObject;
+    private DateTestObject dateTestObject;
 
-	private IdPropertyWithGsonAnnotation idPropertyWithGsonAnnotation;
+    private IdPropertyWithGsonAnnotation idPropertyWithGsonAnnotation;
 
-	private IdPropertyWithDifferentIdPropertyCasing idPropertyWithDifferentIdPropertyCasing;
+    private IdPropertyWithDifferentIdPropertyCasing idPropertyWithDifferentIdPropertyCasing;
 
-	private Exception exception;
+    private Exception exception;
 
-	private JsonElement jsonResult;
+    private JsonElement jsonResult;
 
-	private byte[] rawResponseContent;
+    private byte[] rawResponseContent;
 
-	private Object customResult;
+    private Object customResult;
 
-	public PersonTestObject getPerson() {
-		return person;
-	}
+    public PersonTestObject getPerson() {
+        return person;
+    }
 
-	public void setPerson(PersonTestObject person) {
-		this.person = person;
-	}
+    public void setPerson(PersonTestObject person) {
+        this.person = person;
+    }
 
-	public String getRequestUrl() {
-		return requestUrl;
-	}
+    public String getRequestUrl() {
+        return requestUrl;
+    }
 
-	public void setRequestUrl(String requestUrl) {
-		this.requestUrl = requestUrl;
-	}
+    public void setRequestUrl(String requestUrl) {
+        this.requestUrl = requestUrl;
+    }
 
-	public List<PersonTestObject> getPeopleResult() {
-		return peopleResult;
-	}
+    public List<PersonTestObject> getPeopleResult() {
+        return peopleResult;
+    }
 
-	public void setPeopleResult(PersonTestObject[] peopleResult) {
-		this.peopleResult = new ArrayList<PersonTestObject>();
-		for (PersonTestObject person : peopleResult) {
-			this.peopleResult.add(person);
-		}
-	}
+    public void setPeopleResult(List<PersonTestObject> peopleResult) {
+        this.peopleResult = peopleResult;
+    }
 
-	public void setPeopleResult(List<PersonTestObject> peopleResult) {
-		this.peopleResult = peopleResult;
-	}
+    public void setPeopleResult(PersonTestObject[] peopleResult) {
+        this.peopleResult = new ArrayList<PersonTestObject>();
+        for (PersonTestObject person : peopleResult) {
+            this.peopleResult.add(person);
+        }
+    }
 
-	public int getCount() {
-		return count;
-	}
+    public int getCount() {
+        return count;
+    }
 
-	public void setCount(int count) {
-		this.count = count;
-	}
+    public void setCount(int count) {
+        this.count = count;
+    }
 
-	public String getErrorMessage() {
-		return errorMessage;
-	}
+    public String getErrorMessage() {
+        return errorMessage;
+    }
 
-	public void setErrorMessage(String errorMessage) {
-		this.errorMessage = errorMessage;
-	}
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
 
-	public MobileServiceUser getUser() {
-		return user;
-	}
+    public MobileServiceUser getUser() {
+        return user;
+    }
 
-	public void setUser(MobileServiceUser user) {
-		this.user = user;
-	}
+    public void setUser(MobileServiceUser user) {
+        this.user = user;
+    }
 
-	public Boolean getOperationSucceded() {
-		return operationSucceded;
-	}
+    public Boolean getOperationSucceded() {
+        return operationSucceded;
+    }
 
-	public void setOperationSucceded(Boolean operationSucceded) {
-		this.operationSucceded = operationSucceded;
-	}
+    public void setOperationSucceded(Boolean operationSucceded) {
+        this.operationSucceded = operationSucceded;
+    }
 
-	public String getResponseValue() {
-		return responseContent;
-	}
+    public String getResponseValue() {
+        return responseContent;
+    }
 
-	public void setResponseValue(String responseValue) {
-		this.responseContent = responseValue;
-	}
+    public void setResponseValue(String responseValue) {
+        this.responseContent = responseValue;
+    }
 
-	public String getRequestContent() {
-		return requestContent;
-	}
+    public String getRequestContent() {
+        return requestContent;
+    }
 
-	public void setRequestContent(String requestContent) {
-		this.requestContent = requestContent;
-	}
+    public void setRequestContent(String requestContent) {
+        this.requestContent = requestContent;
+    }
 
-	public ComplexPersonTestObject getComplexPerson() {
-		return complexPerson;
-	}
+    public ComplexPersonTestObject getComplexPerson() {
+        return complexPerson;
+    }
 
-	public void setComplexPerson(ComplexPersonTestObject complexPerson) {
-		this.complexPerson = complexPerson;
-	}
+    public void setComplexPerson(ComplexPersonTestObject complexPerson) {
+        this.complexPerson = complexPerson;
+    }
 
-	public DateTestObject getDateTestObject() {
-		return dateTestObject;
-	}
+    public DateTestObject getDateTestObject() {
+        return dateTestObject;
+    }
 
-	public void setDateTestObject(DateTestObject dateTestObject) {
-		this.dateTestObject = dateTestObject;
-	}
+    public void setDateTestObject(DateTestObject dateTestObject) {
+        this.dateTestObject = dateTestObject;
+    }
 
-	public PersonTestObjectWithoutId getPersonWithoutId() {
-		return personWithoutId;
-	}
+    public PersonTestObjectWithoutId getPersonWithoutId() {
+        return personWithoutId;
+    }
 
-	public void setPersonWithoutId(PersonTestObjectWithoutId personWithNoId) {
-		this.personWithoutId = personWithNoId;
-	}
+    public void setPersonWithoutId(PersonTestObjectWithoutId personWithNoId) {
+        this.personWithoutId = personWithNoId;
+    }
 
-	public PersonTestObjectWithStringId getPersonWithStringId() {
-		return personWithStringId;
-	}
+    public PersonTestObjectWithStringId getPersonWithStringId() {
+        return personWithStringId;
+    }
 
-	public void setPersonWithStringId(PersonTestObjectWithStringId personWithStringId) {
-		this.personWithStringId = personWithStringId;
-	}
+    public void setPersonWithStringId(PersonTestObjectWithStringId personWithStringId) {
+        this.personWithStringId = personWithStringId;
+    }
 
-	public IdPropertyWithGsonAnnotation getIdPropertyWithGsonAnnotation() {
-		return idPropertyWithGsonAnnotation;
-	}
+    public IdPropertyWithGsonAnnotation getIdPropertyWithGsonAnnotation() {
+        return idPropertyWithGsonAnnotation;
+    }
 
-	public void setIdPropertyWithGsonAnnotation(IdPropertyWithGsonAnnotation idPropertyWithGsonAnnotation) {
-		this.idPropertyWithGsonAnnotation = idPropertyWithGsonAnnotation;
-	}
+    public void setIdPropertyWithGsonAnnotation(IdPropertyWithGsonAnnotation idPropertyWithGsonAnnotation) {
+        this.idPropertyWithGsonAnnotation = idPropertyWithGsonAnnotation;
+    }
 
-	public IdPropertyWithDifferentIdPropertyCasing getIdPropertyWithDifferentIdPropertyCasing() {
-		return idPropertyWithDifferentIdPropertyCasing;
-	}
+    public IdPropertyWithDifferentIdPropertyCasing getIdPropertyWithDifferentIdPropertyCasing() {
+        return idPropertyWithDifferentIdPropertyCasing;
+    }
 
-	public void setIdPropertyWithDifferentIdPropertyCasing(IdPropertyWithDifferentIdPropertyCasing idPropertyWithDifferentIdPropertyCasing) {
-		this.idPropertyWithDifferentIdPropertyCasing = idPropertyWithDifferentIdPropertyCasing;
-	}
+    public void setIdPropertyWithDifferentIdPropertyCasing(IdPropertyWithDifferentIdPropertyCasing idPropertyWithDifferentIdPropertyCasing) {
+        this.idPropertyWithDifferentIdPropertyCasing = idPropertyWithDifferentIdPropertyCasing;
+    }
 
-	public Exception getException() {
-		return exception;
-	}
+    public Exception getException() {
+        return exception;
+    }
 
-	public void setException(Exception exception) {
-		this.exception = exception;
-	}
+    public void setException(Throwable exception) {
+        this.exception = (Exception) exception;
+    }
 
-	public void setException(Throwable exception) {
-		this.exception = (Exception) exception;
-	}
+    public void setException(Exception exception) {
+        this.exception = exception;
+    }
 
-	public JsonElement getJsonResult() {
-		return jsonResult;
-	}
+    public JsonElement getJsonResult() {
+        return jsonResult;
+    }
 
-	public void setJsonResult(JsonElement jsonResult) {
-		this.jsonResult = jsonResult;
-	}
+    public void setJsonResult(JsonElement jsonResult) {
+        this.jsonResult = jsonResult;
+    }
 
-	public byte[] getRawResponseContent() {
-		return rawResponseContent;
-	}
+    public byte[] getRawResponseContent() {
+        return rawResponseContent;
+    }
 
-	public void setRawResponseContent(byte[] rawResponseContent) {
-		this.rawResponseContent = rawResponseContent;
-	}
+    public void setRawResponseContent(byte[] rawResponseContent) {
+        this.rawResponseContent = rawResponseContent;
+    }
 
-	public Object getCustomResult() {
-		return customResult;
-	}
+    public Object getCustomResult() {
+        return customResult;
+    }
 
-	public void setCustomResult(Object customResult) {
-		this.customResult = customResult;
-	}
+    public void setCustomResult(Object customResult) {
+        this.customResult = customResult;
+    }
 
 }

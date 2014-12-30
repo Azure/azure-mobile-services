@@ -22,9 +22,9 @@ package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework;
 import java.util.List;
 
 public interface TestExecutionCallback {
-	public void onTestStart(TestCase test);
+    public void onTestStart(TestCase test);
 
-	public void onTestComplete(TestCase test, TestResult result);
+    public void onTestComplete(TestCase test, TestResult result);
 
-	public void onTestGroupComplete(TestGroup group, List<TestResult> results);
+    public void onTestGroupComplete(TestGroup group, List<TestResult> results);
 }

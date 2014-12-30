@@ -27,34 +27,32 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 
 public class MobileServiceConflictException extends MobileServiceException {
 
-	/**
-	 * UID used for serialization
-	 */
-	private static final long serialVersionUID = 5188346485829981214L;
+    /**
+     * UID used for serialization
+     */
+    private static final long serialVersionUID = 5188346485829981214L;
 
-	private Object mItem;
+    private Object mItem;
 
 
-	/**
-	 * Initializes a new instance of the
-	 * MobileServiceConflictExceptionJson class.
-	 * 
-	 * @param throwable
-	 *            The inner exception.
-	 * @param value
-	 *            The current instance from server that the conflict occurred for.
-	 */
-	
-	public MobileServiceConflictException(MobileServiceException msException, Object item) {
-		super(msException.getMessage(), msException.getCause(), msException.getResponse());
-		this.mItem = item;
-	}
+    /**
+     * Initializes a new instance of the
+     * MobileServiceConflictExceptionJson class.
+     *
+     * @param throwable The inner exception.
+     * @param value     The current instance from server that the conflict occurred for.
+     */
 
-	public Object getItem() {
-		return mItem;
-	}
+    public MobileServiceConflictException(MobileServiceException msException, Object item) {
+        super(msException.getMessage(), msException.getCause(), msException.getResponse());
+        this.mItem = item;
+    }
 
-	public void setItem(Object item) {
-		this.mItem = item;
-	}
+    public Object getItem() {
+        return mItem;
+    }
+
+    public void setItem(Object item) {
+        this.mItem = item;
+    }
 }

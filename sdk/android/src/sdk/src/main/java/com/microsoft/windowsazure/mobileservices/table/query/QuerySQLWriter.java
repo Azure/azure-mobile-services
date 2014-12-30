@@ -23,98 +23,99 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
-import java.util.Locale;
+import android.util.Pair;
+
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 
-import android.util.Pair;
+import java.util.Locale;
 
 public class QuerySQLWriter {
 
-	/**
-	 * Returns the SQL string representation of the query's select clause
-	 */
-	public static String getSelectClause(Query query) {
-		String result = "*";
+    /**
+     * Returns the SQL string representation of the query's select clause
+     */
+    public static String getSelectClause(Query query) {
+        String result = "*";
 
-		if (query != null && query.getProjection() != null && query.getProjection().size() > 0) {
-			StringBuilder sb = new StringBuilder();
+        if (query != null && query.getProjection() != null && query.getProjection().size() > 0) {
+            StringBuilder sb = new StringBuilder();
 
-			int index = 0;
-			for (String projection : query.getProjection()) {
-				sb.append("\"");
-				sb.append(projection.trim().toLowerCase(Locale.getDefault()));
-				sb.append("\" ");
+            int index = 0;
+            for (String projection : query.getProjection()) {
+                sb.append("\"");
+                sb.append(projection.trim().toLowerCase(Locale.getDefault()));
+                sb.append("\" ");
 
-				if (index < query.getProjection().size() - 1) {
-					sb.append(", ");
-				}
+                if (index < query.getProjection().size() - 1) {
+                    sb.append(", ");
+                }
 
-				index++;
-			}
+                index++;
+            }
 
-			result = sb.toString();
-		}
+            result = sb.toString();
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	/**
-	 * Returns the SQL string representation of the query's where clause
-	 */
-	public static String getWhereClause(Query query) throws MobileServiceException {
-		QueryNodeSQLWriter sqlWriter = new QueryNodeSQLWriter();
+    /**
+     * Returns the SQL string representation of the query's where clause
+     */
+    public static String getWhereClause(Query query) throws MobileServiceException {
+        QueryNodeSQLWriter sqlWriter = new QueryNodeSQLWriter();
 
-		if (query != null && query.getQueryNode() != null) {
-			query.getQueryNode().accept(sqlWriter);
-		}
+        if (query != null && query.getQueryNode() != null) {
+            query.getQueryNode().accept(sqlWriter);
+        }
 
-		return sqlWriter.getBuilder().toString();
-	}
+        return sqlWriter.getBuilder().toString();
+    }
 
-	/**
-	 * Returns the SQL string representation of the query's order by clause
-	 */
-	public static String getOrderByClause(Query query) {
-		String result = null;
+    /**
+     * Returns the SQL string representation of the query's order by clause
+     */
+    public static String getOrderByClause(Query query) {
+        String result = null;
 
-		if (query != null && query.getOrderBy() != null && query.getOrderBy().size() > 0) {
-			StringBuilder sb = new StringBuilder();
+        if (query != null && query.getOrderBy() != null && query.getOrderBy().size() > 0) {
+            StringBuilder sb = new StringBuilder();
 
-			int index = 0;
-			for (Pair<String, QueryOrder> order : query.getOrderBy()) {
-				sb.append("\"");
-				sb.append(order.first.trim().toLowerCase(Locale.getDefault()));
-				sb.append("\" ");
+            int index = 0;
+            for (Pair<String, QueryOrder> order : query.getOrderBy()) {
+                sb.append("\"");
+                sb.append(order.first.trim().toLowerCase(Locale.getDefault()));
+                sb.append("\" ");
 
-				String direction = order.second == QueryOrder.Ascending ? "ASC" : "DESC";
-				sb.append(direction);
+                String direction = order.second == QueryOrder.Ascending ? "ASC" : "DESC";
+                sb.append(direction);
 
-				if (index < query.getOrderBy().size() - 1) {
-					sb.append(", ");
-				}
+                if (index < query.getOrderBy().size() - 1) {
+                    sb.append(", ");
+                }
 
-				index++;
-			}
+                index++;
+            }
 
-			result = sb.toString();
-		}
+            result = sb.toString();
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	/**
-	 * Returns the SQL string representation of the query's limit clause
-	 */
-	public static String getLimitClause(Query query) {
-		String result = null;
+    /**
+     * Returns the SQL string representation of the query's limit clause
+     */
+    public static String getLimitClause(Query query) {
+        String result = null;
 
-		int limit = query != null ? query.getTop() : 0;
-		int offset = query != null ? query.getSkip() : 0;
+        int limit = query != null ? query.getTop() : 0;
+        int offset = query != null ? query.getSkip() : 0;
 
-		if (limit > 0 || offset > 0) {
-			result = String.valueOf(offset) + "," + String.valueOf(limit);
-		}
+        if (limit > 0 || offset > 0) {
+            result = String.valueOf(offset) + "," + String.valueOf(limit);
+        }
 
-		return result;
-	}
+        return result;
+    }
 }

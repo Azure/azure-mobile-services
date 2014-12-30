@@ -19,18 +19,6 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
-import java.util.concurrent.ExecutionException;
-
-import org.apache.http.Header;
-
 import android.test.InstrumentationTestCase;
 
 import com.google.common.base.Function;
@@ -39,15 +27,16 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
+import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
-import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterRequestMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterResponseMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.StatusLineMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.mocks.MobileServiceLocalStoreMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.mocks.MobileServiceSyncHandlerMock;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.helpers.EncodingUtilities;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.CustomFunctionTwoParameters;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.IdPropertyTestClasses.StringIdType;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
@@ -58,305 +47,316 @@ import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncTab
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushFailedException;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushStatus;
 import com.microsoft.windowsazure.mobileservices.table.sync.synchandler.SimpleSyncHandler;
-import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.helpers.EncodingUtilities;
+
+import org.apache.http.Header;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
+import java.util.concurrent.ExecutionException;
 
 public class MobileServiceSyncTableTests extends InstrumentationTestCase {
-	String appUrl = "";
-	String appKey = "";
-	GsonBuilder gsonBuilder;
-	String OperationQueue = "__operations";
-	String SyncErrors = "__errors";
+    String appUrl = "";
+    String appKey = "";
+    GsonBuilder gsonBuilder;
+    String OperationQueue = "__operations";
+    String SyncErrors = "__errors";
 
-	protected void setUp() throws Exception {
-		appUrl = "http://myapp.com/";
-		appKey = "qwerty";
-		gsonBuilder = new GsonBuilder();
-		super.setUp();
-	}
+    protected void setUp() throws Exception {
+        appUrl = "http://myapp.com/";
+        appKey = "qwerty";
+        gsonBuilder = new GsonBuilder();
+        super.setUp();
+    }
 
-	protected void tearDown() throws Exception {
-		super.tearDown();
-	}
+    protected void tearDown() throws Exception {
+        super.tearDown();
+    }
 
-	public void testPushExecutesThePendingOperationsInOrder() throws InterruptedException, ExecutionException, MalformedURLException {
-		MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
-		ServiceFilterContainer serviceFilterContainer1 = new ServiceFilterContainer();
+    public void testPushExecutesThePendingOperationsInOrder() throws InterruptedException, ExecutionException, MalformedURLException {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        ServiceFilterContainer serviceFilterContainer1 = new ServiceFilterContainer();
 
-		MobileServiceClient client1 = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client1 = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
-		client1 = client1.withFilter(getTestFilter(serviceFilterContainer1, ""));
+        client1 = client1.withFilter(getTestFilter(serviceFilterContainer1, ""));
 
-		client1.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+        client1.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
 
-		MobileServiceJsonSyncTable table = client1.getSyncTable("someTable");
+        MobileServiceJsonSyncTable table = client1.getSyncTable("someTable");
 
-		JsonObject item1 = new JsonObject();
-		item1.addProperty("id", "abc");
+        JsonObject item1 = new JsonObject();
+        item1.addProperty("id", "abc");
 
-		JsonObject item2 = new JsonObject();
-		item2.addProperty("id", "def");
+        JsonObject item2 = new JsonObject();
+        item2.addProperty("id", "def");
 
-		table.insert(item1).get();
-		table.insert(item2).get();
+        table.insert(item1).get();
+        table.insert(item2).get();
 
-		assertEquals(serviceFilterContainer1.Requests.size(), 0);
+        assertEquals(serviceFilterContainer1.Requests.size(), 0);
 
-		// create a new service to test that operations are loaded from store
-		ServiceFilterContainer serviceFilterContainer2 = new ServiceFilterContainer();
+        // create a new service to test that operations are loaded from store
+        ServiceFilterContainer serviceFilterContainer2 = new ServiceFilterContainer();
 
-		MobileServiceClient client2 = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client2 = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
-		client2 = client2.withFilter(getTestFilter(serviceFilterContainer2, "{\"id\":\"abc\",\"String\":\"Hey\"}", "{\"id\":\"def\",\"String\":\"What\"}"));
+        client2 = client2.withFilter(getTestFilter(serviceFilterContainer2, "{\"id\":\"abc\",\"String\":\"Hey\"}", "{\"id\":\"def\",\"String\":\"What\"}"));
 
-		client2.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+        client2.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
 
-		assertEquals(serviceFilterContainer2.Requests.size(), 0);
-		client2.getSyncContext().push().get();
-		assertEquals(serviceFilterContainer2.Requests.size(), 2);
+        assertEquals(serviceFilterContainer2.Requests.size(), 0);
+        client2.getSyncContext().push().get();
+        assertEquals(serviceFilterContainer2.Requests.size(), 2);
 
-		assertEquals(serviceFilterContainer2.Requests.get(0).Content, item1.toString());
-		// Assert.AreEqual(hijack.Requests[0].Headers.GetValues("X-ZUMO-FEATURES").First(),
-		// "OL");
-		assertEquals(serviceFilterContainer2.Requests.get(1).Content, item2.toString());
-		// Assert.AreEqual(hijack.Requests[1].Headers.GetValues("X-ZUMO-FEATURES").First(),
-		// "OL");
+        assertEquals(serviceFilterContainer2.Requests.get(0).Content, item1.toString());
+        // Assert.AreEqual(hijack.Requests[0].Headers.GetValues("X-ZUMO-FEATURES").First(),
+        // "OL");
+        assertEquals(serviceFilterContainer2.Requests.get(1).Content, item2.toString());
+        // Assert.AreEqual(hijack.Requests[1].Headers.GetValues("X-ZUMO-FEATURES").First(),
+        // "OL");
 
-		// create yet another service to make sure the old items were purged
-		// from queue
-		ServiceFilterContainer serviceFilterContainer3 = new ServiceFilterContainer();
-		MobileServiceClient client3 = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        // create yet another service to make sure the old items were purged
+        // from queue
+        ServiceFilterContainer serviceFilterContainer3 = new ServiceFilterContainer();
+        MobileServiceClient client3 = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
-		client3 = client3.withFilter(getTestFilter(serviceFilterContainer3, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+        client3 = client3.withFilter(getTestFilter(serviceFilterContainer3, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
 
-		client3.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+        client3.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
 
-		assertEquals(serviceFilterContainer3.Requests.size(), 0);
-		client3.getSyncContext().push().get();
-		assertEquals(serviceFilterContainer3.Requests.size(), 0);
-	}
+        assertEquals(serviceFilterContainer3.Requests.size(), 0);
+        client3.getSyncContext().push().get();
+        assertEquals(serviceFilterContainer3.Requests.size(), 0);
+    }
 
-	public void testPullThrowsWhenPushThrows() throws MalformedURLException, InterruptedException, ExecutionException {
-		MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
-		ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+    public void testPullThrowsWhenPushThrows() throws MalformedURLException, InterruptedException, ExecutionException {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
 
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-		client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
 
-		client = client.withFilter(getTestFilter(serviceFilterContainer, 401, "")); // for
-																					// push
+        client = client.withFilter(getTestFilter(serviceFilterContainer, 401, "")); // for
+        // push
 
-		client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
 
-		// insert an item but don't push
-		MobileServiceJsonSyncTable table = client.getSyncTable("someTable");
+        // insert an item but don't push
+        MobileServiceJsonSyncTable table = client.getSyncTable("someTable");
 
-		JsonObject jsonObject = new JsonObject();
-		jsonObject.addProperty("id", "abc");
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("id", "abc");
 
-		table.insert(jsonObject).get();
+        table.insert(jsonObject).get();
 
-		assertEquals(store.Tables.get(table.getName().toLowerCase(Locale.getDefault())).size(), 1); // item
-																									// is
-																									// inserted
-		// this should trigger a push
-		try {
-			table.pull(null).get();
-			fail("MobileServicePushFailedException expected");
-			return;
-		} catch (Exception ex) {
-			if (ex.getCause() instanceof MobileServicePushFailedException) {
-				MobileServicePushFailedException mobileServicePushFailedException = (MobileServicePushFailedException) ex.getCause();
+        assertEquals(store.Tables.get(table.getName().toLowerCase(Locale.getDefault())).size(), 1); // item
+        // is
+        // inserted
+        // this should trigger a push
+        try {
+            table.pull(null).get();
+            fail("MobileServicePushFailedException expected");
+            return;
+        } catch (Exception ex) {
+            if (ex.getCause() instanceof MobileServicePushFailedException) {
+                MobileServicePushFailedException mobileServicePushFailedException = (MobileServicePushFailedException) ex.getCause();
 
-				assertEquals(mobileServicePushFailedException.getPushCompletionResult().getOperationErrors().size(), 0);
-				assertEquals(serviceFilterContainer.Requests.size(), 1);
-			} else {
-				fail("MobileServicePushFailedException expected");
-			}
-		}
-	}
+                assertEquals(mobileServicePushFailedException.getPushCompletionResult().getOperationErrors().size(), 0);
+                assertEquals(serviceFilterContainer.Requests.size(), 1);
+            } else {
+                fail("MobileServicePushFailedException expected");
+            }
+        }
+    }
 
-	public void testPullDoesNotPurgeWhenItemIsMissing() throws InterruptedException, ExecutionException, MalformedURLException {
+    public void testPullDoesNotPurgeWhenItemIsMissing() throws InterruptedException, ExecutionException, MalformedURLException {
 
-		MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
-		ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
 
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
-		client = client.withFilter(getTestFilter(serviceFilterContainer, "{\"id\":\"abc\",\"String\":\"Hey\"}", "[{\"id\":\"def\",\"String\":\"World\"}]"));
+        client = client.withFilter(getTestFilter(serviceFilterContainer, "{\"id\":\"abc\",\"String\":\"Hey\"}", "[{\"id\":\"def\",\"String\":\"World\"}]"));
 
-		client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
 
-		MobileServiceJsonSyncTable table = client.getSyncTable("someTable");
+        MobileServiceJsonSyncTable table = client.getSyncTable("someTable");
 
-		JsonObject jsonObject = new JsonObject();
-		jsonObject.addProperty("id", "abc");
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("id", "abc");
 
-		table.insert(jsonObject).get(); // insert an item
+        table.insert(jsonObject).get(); // insert an item
 
-		client.getSyncContext().push().get(); // push to clear the queue
+        client.getSyncContext().push().get(); // push to clear the queue
 
-		// now pull
-		table.pull(null).get();
+        // now pull
+        table.pull(null).get();
 
-		assertEquals(store.Tables.get(table.getName().toLowerCase(Locale.getDefault())).size(), 2); // 1
-		// from
-		// remote
-		// and
-		// 1
-		// from
-		// local
-		assertEquals(serviceFilterContainer.Requests.size(), 2);
-	}
+        assertEquals(store.Tables.get(table.getName().toLowerCase(Locale.getDefault())).size(), 2); // 1
+        // from
+        // remote
+        // and
+        // 1
+        // from
+        // local
+        assertEquals(serviceFilterContainer.Requests.size(), 2);
+    }
 
-	public void testPullDoesNotTriggerPushWhenThereIsNoOperationInTable() throws InterruptedException, ExecutionException, MalformedURLException {
-		MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
-		ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+    public void testPullDoesNotTriggerPushWhenThereIsNoOperationInTable() throws InterruptedException, ExecutionException, MalformedURLException {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
 
-		store.ReadResponses.add("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for
-																												// pull
+        store.ReadResponses.add("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for
+        // pull
 
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
-		client = client.withFilter(getTestFilter(serviceFilterContainer, "{\"id\":\"abc\",\"String\":\"Hey\"}",
-				"[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"));
+        client = client.withFilter(getTestFilter(serviceFilterContainer, "{\"id\":\"abc\",\"String\":\"Hey\"}",
+                "[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"));
 
-		client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
 
-		// insert item in pull table
-		MobileServiceJsonSyncTable table1 = client.getSyncTable("someTable");
-
-		JsonObject jsonObject = new JsonObject();
-		jsonObject.addProperty("id", "abc");
-
-		table1.insert(jsonObject).get(); // insert an item
-
-		// but push to clear the queue
-		client.getSyncContext().push().get();
-
-		assertEquals(store.Tables.get(table1.getName().toLowerCase(Locale.getDefault())).size(), 1); // item
-		// is
-		// inserted
-		assertEquals(serviceFilterContainer.Requests.size(), 1); // first push
-
-		// then insert item in other table
-		MobileServiceSyncTable<StringIdType> table2 = client.getSyncTable(StringIdType.class);
-
-		StringIdType item = new StringIdType();
-
-		item.Id = "an id";
-		item.String = "what?";
-
-		table2.insert(item).get();
-
-		table1.pull(null).get();
-
-		assertEquals(store.Tables.get(table1.getName().toLowerCase(Locale.getDefault())).size(), 2); // table
-		// should
-		// contain
-		// 2
-		// pulled
-		// items
-		assertEquals(serviceFilterContainer.Requests.size(), 2); // 1 for push
-																	// and 1 for
-		// pull
-		assertEquals(store.Tables.get(table2.getName().toLowerCase(Locale.getDefault())).size(), 1); // this
-		// table
-		// should
-		// not
-		// be
-		// touched
-	}
-
-	public void testPullTriggersPushWhenThereIsOperationInTable() throws InterruptedException, ExecutionException, MalformedURLException {
-		MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
-		ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
-
-		store.ReadResponses.add("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for
-																												// pull
-
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-
-		client = client.withFilter(getTestFilter(serviceFilterContainer, "{\"id\":\"abc\",\"String\":\"Hey\"}", // for
-																												// insert
-				"[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]" // remote
-																								// item
-		));
-
-		client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
-
-		// insert an item but don't push
-		MobileServiceJsonSyncTable table1 = client.getSyncTable("someTable");
-
-		JsonObject jsonObject = new JsonObject();
-		jsonObject.addProperty("id", "abc");
-
-		table1.insert(jsonObject).get(); // insert an item
-
-		assertEquals(store.Tables.get(table1.getName().toLowerCase(Locale.getDefault())).size(), 1); // item
-		// is
-		// inserted
-
-		// this should trigger a push
-		table1.pull(null).get();
-
-		assertEquals(serviceFilterContainer.Requests.size(), 2); // 1 for push
-																	// and 1 for
-		// pull
-		assertEquals(store.Tables.get(table1.getName().toLowerCase(Locale.getDefault())).size(), 2); // table
-		// is
-		// populated
-	}
-
-	// REVISAR EL TEMA DE LOS HANDLERS Y LAS EXCEPCIONES
-	// public void testPullThrowsWhenPushThrows()
-	// throws MalformedURLException, InterruptedException,
-	// ExecutionException {
-	// MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
-	//
-	// MobileServiceClient client = null;
-	//
-	// client = new MobileServiceClient(appUrl, appKey, getInstrumentation()
-	// .getTargetContext());
-	//
-	// client = client.withFilter(getTestFilter(404)); // for push
-	//
-	// client.getSyncContext().initialize(store, new SimpleSyncHandler())
-	// .get();
-	//
-	// // insert an item but don't push
-	// MobileServiceJsonSyncTable table = client.getSyncTable("someTable");
-	//
-	// JsonObject jsonObject = new JsonObject();
-	// jsonObject.addProperty("id", "abc");
-	//
-	// table.insert(jsonObject).get(); // insert an item
-	//
-	// assertEquals(store.Tables.get(table.getName().toLowerCase()).size(), 1);
-	// // item
-	// // is
-	// // inserted
-	//
-	// try {
-	// table.pull(null).get();
-	// } catch (Throwable throwable) {
-	//
-	// if (throwable instanceof MobileServicePushFailedException) {
-	// MobileServicePushFailedException ex = (MobileServicePushFailedException)
-	// throwable;
-	// assertEquals(ex.getPushCompletionResult().getOperationErrors()
-	// .size(), 1);
-	// }
-	// }
-	//
-	// // Assert.AreEqual(hijack.Requests.Count, 1); // 1 for push
-	// }
-
-	public void testPullSucceds() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
-
-		MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
-		ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
-
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        // insert item in pull table
+        MobileServiceJsonSyncTable table1 = client.getSyncTable("someTable");
+
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("id", "abc");
+
+        table1.insert(jsonObject).get(); // insert an item
+
+        // but push to clear the queue
+        client.getSyncContext().push().get();
+
+        assertEquals(store.Tables.get(table1.getName().toLowerCase(Locale.getDefault())).size(), 1); // item
+        // is
+        // inserted
+        assertEquals(serviceFilterContainer.Requests.size(), 1); // first push
+
+        // then insert item in other table
+        MobileServiceSyncTable<StringIdType> table2 = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "an id";
+        item.String = "what?";
+
+        table2.insert(item).get();
+
+        table1.pull(null).get();
+
+        assertEquals(store.Tables.get(table1.getName().toLowerCase(Locale.getDefault())).size(), 2); // table
+        // should
+        // contain
+        // 2
+        // pulled
+        // items
+        assertEquals(serviceFilterContainer.Requests.size(), 2); // 1 for push
+        // and 1 for
+        // pull
+        assertEquals(store.Tables.get(table2.getName().toLowerCase(Locale.getDefault())).size(), 1); // this
+        // table
+        // should
+        // not
+        // be
+        // touched
+    }
+
+    public void testPullTriggersPushWhenThereIsOperationInTable() throws InterruptedException, ExecutionException, MalformedURLException {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+
+        store.ReadResponses.add("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for
+        // pull
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, "{\"id\":\"abc\",\"String\":\"Hey\"}", // for
+                // insert
+                "[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]" // remote
+                // item
+        ));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        // insert an item but don't push
+        MobileServiceJsonSyncTable table1 = client.getSyncTable("someTable");
+
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("id", "abc");
+
+        table1.insert(jsonObject).get(); // insert an item
+
+        assertEquals(store.Tables.get(table1.getName().toLowerCase(Locale.getDefault())).size(), 1); // item
+        // is
+        // inserted
+
+        // this should trigger a push
+        table1.pull(null).get();
+
+        assertEquals(serviceFilterContainer.Requests.size(), 2); // 1 for push
+        // and 1 for
+        // pull
+        assertEquals(store.Tables.get(table1.getName().toLowerCase(Locale.getDefault())).size(), 2); // table
+        // is
+        // populated
+    }
+
+    // REVISAR EL TEMA DE LOS HANDLERS Y LAS EXCEPCIONES
+    // public void testPullThrowsWhenPushThrows()
+    // throws MalformedURLException, InterruptedException,
+    // ExecutionException {
+    // MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+    //
+    // MobileServiceClient client = null;
+    //
+    // client = new MobileServiceClient(appUrl, appKey, getInstrumentation()
+    // .getTargetContext());
+    //
+    // client = client.withFilter(getTestFilter(404)); // for push
+    //
+    // client.getSyncContext().initialize(store, new SimpleSyncHandler())
+    // .get();
+    //
+    // // insert an item but don't push
+    // MobileServiceJsonSyncTable table = client.getSyncTable("someTable");
+    //
+    // JsonObject jsonObject = new JsonObject();
+    // jsonObject.addProperty("id", "abc");
+    //
+    // table.insert(jsonObject).get(); // insert an item
+    //
+    // assertEquals(store.Tables.get(table.getName().toLowerCase()).size(), 1);
+    // // item
+    // // is
+    // // inserted
+    //
+    // try {
+    // table.pull(null).get();
+    // } catch (Throwable throwable) {
+    //
+    // if (throwable instanceof MobileServicePushFailedException) {
+    // MobileServicePushFailedException ex = (MobileServicePushFailedException)
+    // throwable;
+    // assertEquals(ex.getPushCompletionResult().getOperationErrors()
+    // .size(), 1);
+    // }
+    // }
+    //
+    // // Assert.AreEqual(hijack.Requests.Count, 1); // 1 for push
+    // }
+
+    public void testPullSucceds() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
+
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -368,21 +368,21 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
                 // item
         ));
 
-		client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
 
-		MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
 
-		Query query = QueryOperations.tableName(table.getName()).skip(5).top(3).field("String").eq("world").orderBy("Id", QueryOrder.Descending)
-				.includeInlineCount().select("String");
+        Query query = QueryOperations.tableName(table.getName()).skip(5).top(3).field("String").eq("world").orderBy("Id", QueryOrder.Descending)
+                .includeInlineCount().select("String");
 
-		table.pull(query).get();
+        table.pull(query).get();
 
-		assertEquals(
-				serviceFilterContainer.Url,
-				EncodingUtilities
-						.percentEncodeSpaces(
+        assertEquals(
+                serviceFilterContainer.Url,
+                EncodingUtilities
+                        .percentEncodeSpaces(
                                 "http://myapp.com/tables/stringidtype?$filter=String%20eq%20('world')&$inlinecount=allpages&$top=3&$skip=5&$orderby=Id%20desc&__includeDeleted=true&__systemproperties=*&$select=String"));
-	}
+    }
 
     public void testPullSuccedsNoTopNoOrderBy() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
 
@@ -454,825 +454,825 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
     }
 
-	public void testPurgeDoesNotThrowExceptionWhenThereIsNoOperationInTable() throws MalformedURLException, InterruptedException, ExecutionException {
-		MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
-		ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+    public void testPurgeDoesNotThrowExceptionWhenThereIsNoOperationInTable() throws MalformedURLException, InterruptedException, ExecutionException {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
 
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
-		client = client.withFilter(getTestFilter(serviceFilterContainer, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+        client = client.withFilter(getTestFilter(serviceFilterContainer, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
 
-		client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
 
-		// insert item in purge table
-		MobileServiceJsonSyncTable table1 = client.getSyncTable("someTable");
-		JsonObject jsonObject = new JsonObject();
-		jsonObject.addProperty("id", "abc");
+        // insert item in purge table
+        MobileServiceJsonSyncTable table1 = client.getSyncTable("someTable");
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("id", "abc");
 
-		table1.insert(jsonObject).get();
+        table1.insert(jsonObject).get();
 
-		// but push to clear the queue
-		client.getSyncContext().push().get();
+        // but push to clear the queue
+        client.getSyncContext().push().get();
 
-		assertEquals(store.Tables.get(table1.getName().toLowerCase(Locale.getDefault())).size(), 1);// item
-																									// is
-																									// inserted
+        assertEquals(store.Tables.get(table1.getName().toLowerCase(Locale.getDefault())).size(), 1);// item
+        // is
+        // inserted
 
-		// then insert item in other table
-		MobileServiceSyncTable<StringIdType> table2 = client.getSyncTable(StringIdType.class);
+        // then insert item in other table
+        MobileServiceSyncTable<StringIdType> table2 = client.getSyncTable(StringIdType.class);
 
-		StringIdType item = new StringIdType();
+        StringIdType item = new StringIdType();
 
-		item.Id = "an id";
-		item.String = "what?";
+        item.Id = "an id";
+        item.String = "what?";
 
-		table2.insert(item).get();
+        table2.insert(item).get();
 
-		// try purge on first table now
-		table1.purge(null).get();
+        // try purge on first table now
+        table1.purge(null).get();
 
-		assertEquals(store.DeleteQueries.get(0).getTableName(), SyncErrors); // push
-																				// deletes
-																				// all
-																				// sync
-		// erros
+        assertEquals(store.DeleteQueries.get(0).getTableName(), SyncErrors); // push
+        // deletes
+        // all
+        // sync
+        // erros
 
-		assertEquals(store.DeleteQueries.get(1).getTableName(), table1.getName().toLowerCase(Locale.getDefault()));
-		// purged table
-		assertEquals(serviceFilterContainer.Requests.size(), 1); // still 1
-																	// means no
-																	// other
-		// push happened
-		assertEquals(store.Tables.get(table2.getName().toLowerCase(Locale.getDefault())).size(), 1); // this
-		// table
-		// should
-		// not
-		// be
-		// touched
-	}
+        assertEquals(store.DeleteQueries.get(1).getTableName(), table1.getName().toLowerCase(Locale.getDefault()));
+        // purged table
+        assertEquals(serviceFilterContainer.Requests.size(), 1); // still 1
+        // means no
+        // other
+        // push happened
+        assertEquals(store.Tables.get(table2.getName().toLowerCase(Locale.getDefault())).size(), 1); // this
+        // table
+        // should
+        // not
+        // be
+        // touched
+    }
 
-	public void testPurgeThrowsExceptionWhenThereIsOperationInTable() throws InterruptedException, ExecutionException, MalformedURLException {
-		MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
-		ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+    public void testPurgeThrowsExceptionWhenThereIsOperationInTable() throws InterruptedException, ExecutionException, MalformedURLException {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
 
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
-		client = client.withFilter(getTestFilter(serviceFilterContainer, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+        client = client.withFilter(getTestFilter(serviceFilterContainer, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
 
-		client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
 
-		// insert an item but don't push
-		MobileServiceJsonSyncTable table1 = client.getSyncTable("someTable");
-		JsonObject jsonObject = new JsonObject();
-		jsonObject.addProperty("id", "abc");
+        // insert an item but don't push
+        MobileServiceJsonSyncTable table1 = client.getSyncTable("someTable");
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("id", "abc");
 
-		table1.insert(jsonObject).get();
+        table1.insert(jsonObject).get();
 
-		assertEquals(store.Tables.get(table1.getName().toLowerCase(Locale.getDefault())).size(), 1); // item
-																										// is
-																										// inserted
+        assertEquals(store.Tables.get(table1.getName().toLowerCase(Locale.getDefault())).size(), 1); // item
+        // is
+        // inserted
 
-		try {
-			// this should throw an exception
-			table1.purge(null).get();
-		} catch (Throwable throwable) {
-			if (throwable.getCause() instanceof MobileServiceException) {
-				assertEquals(store.DeleteQueries.size(), 0); // no purge queries
-				return;
-			}
-		}
-		
-		fail("MobileServiceException expected");
-		
-	}
+        try {
+            // this should throw an exception
+            table1.purge(null).get();
+        } catch (Throwable throwable) {
+            if (throwable.getCause() instanceof MobileServiceException) {
+                assertEquals(store.DeleteQueries.size(), 0); // no purge queries
+                return;
+            }
+        }
 
-	public void testPushExecutesThePendingOperations() throws InterruptedException, ExecutionException, MalformedURLException {
-		MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
-		ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        fail("MobileServiceException expected");
 
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+    }
 
-		client = client.withFilter(getTestFilter(serviceFilterContainer, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+    public void testPushExecutesThePendingOperations() throws InterruptedException, ExecutionException, MalformedURLException {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
 
-		client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
-		MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+        client = client.withFilter(getTestFilter(serviceFilterContainer, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
 
-		StringIdType item = new StringIdType();
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
 
-		item.Id = "an id";
-		item.String = "what?";
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
 
-		table.insert(item).get();
+        StringIdType item = new StringIdType();
 
-		assertEquals(store.Tables.get(table.getName().toLowerCase(Locale.getDefault())).size(), 1);
+        item.Id = "an id";
+        item.String = "what?";
 
-		client.getSyncContext().push().get();
-	}
+        table.insert(item).get();
 
-	public void testDeleteDoesNotUpsertResultOnStoreWhenOperationIsPushed() throws InterruptedException, ExecutionException, MalformedURLException {
-		MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
-		ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        assertEquals(store.Tables.get(table.getName().toLowerCase(Locale.getDefault())).size(), 1);
 
-		MobileServiceClient client = null;
+        client.getSyncContext().push().get();
+    }
 
-		client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+    public void testDeleteDoesNotUpsertResultOnStoreWhenOperationIsPushed() throws InterruptedException, ExecutionException, MalformedURLException {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
 
-		client = client.withFilter(getTestFilter(serviceFilterContainer, "{\"id\":\"abc\",\"String\":\"Hey\"}", // for
-																												// insert
-				"{\"id\":\"abc\",\"String\":\"Hey\"}"// for delete
+        MobileServiceClient client = null;
 
-		));
+        client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
-		client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+        client = client.withFilter(getTestFilter(serviceFilterContainer, "{\"id\":\"abc\",\"String\":\"Hey\"}", // for
+                // insert
+                "{\"id\":\"abc\",\"String\":\"Hey\"}"// for delete
 
-		MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+        ));
 
-		StringIdType item = new StringIdType();
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
 
-		item.Id = "abc";
-		item.String = "what?";
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
 
-		// first add an item
-		table.insert(item).get();
+        StringIdType item = new StringIdType();
 
-		assertEquals(store.Tables.get(table.getName().toLowerCase(Locale.getDefault())).size(), 1);
+        item.Id = "abc";
+        item.String = "what?";
 
-		// for good measure also push it
-		client.getSyncContext().push().get();
+        // first add an item
+        table.insert(item).get();
 
-		table.delete(item).get();
+        assertEquals(store.Tables.get(table.getName().toLowerCase(Locale.getDefault())).size(), 1);
 
-		assertEquals(store.Tables.get(table.getName().toLowerCase(Locale.getDefault())).size(), 0);
+        // for good measure also push it
+        client.getSyncContext().push().get();
 
-		// now play it on server
-		client.getSyncContext().push().get();
+        table.delete(item).get();
 
-		// wait we don't want to upsert the result back because its delete
-		// operation
-		assertEquals(store.Tables.get(table.getName().toLowerCase(Locale.getDefault())).size(), 0);
-		// looks good
-	}
+        assertEquals(store.Tables.get(table.getName().toLowerCase(Locale.getDefault())).size(), 0);
 
-	public void testDeleteCancelsAllWhenInsertIsInQueue() throws Throwable {
-		MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
-		ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        // now play it on server
+        client.getSyncContext().push().get();
 
-		MobileServiceClient client = null;
+        // wait we don't want to upsert the result back because its delete
+        // operation
+        assertEquals(store.Tables.get(table.getName().toLowerCase(Locale.getDefault())).size(), 0);
+        // looks good
+    }
 
-		client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+    public void testDeleteCancelsAllWhenInsertIsInQueue() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
 
-		client = client.withFilter(getTestFilter(serviceFilterContainer, "[{\"id\":\"abc\",\"String\":\"Hey\"}]"));
+        MobileServiceClient client = null;
 
-		client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+        client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
-		MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+        client = client.withFilter(getTestFilter(serviceFilterContainer, "[{\"id\":\"abc\",\"String\":\"Hey\"}]"));
 
-		StringIdType item = new StringIdType();
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
 
-		item.Id = "abc";
-		item.String = "what?";
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
 
-		table.insert(item).get();
-		assertEquals(client.getSyncContext().getPendingOperations(), 1);
+        StringIdType item = new StringIdType();
 
-		table.delete(item).get();
-		client.getSyncContext().push().get();
+        item.Id = "abc";
+        item.String = "what?";
 
-		assertEquals(client.getSyncContext().getPendingOperations(), 0);
-	}
+        table.insert(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
 
-	public void testDeleteCancelsUpdateWhenUpdateIsInQueue() throws Throwable {
-		CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> firstOperationOnItem1 = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
+        table.delete(item).get();
+        client.getSyncContext().push().get();
 
-			@Override
-			public Void apply(MobileServiceSyncTable<StringIdType> table, StringIdType item) throws Exception {
-				try {
-					table.update(item).get();
-				} catch (Exception e) {
-					throw e;
-				}
+        assertEquals(client.getSyncContext().getPendingOperations(), 0);
+    }
 
-				return null;
-			}
+    public void testDeleteCancelsUpdateWhenUpdateIsInQueue() throws Throwable {
+        CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> firstOperationOnItem1 = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
 
-		};
+            @Override
+            public Void apply(MobileServiceSyncTable<StringIdType> table, StringIdType item) throws Exception {
+                try {
+                    table.update(item).get();
+                } catch (Exception e) {
+                    throw e;
+                }
 
-		CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> operationOnItem2 = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
+                return null;
+            }
 
-			@Override
-			public Void apply(MobileServiceSyncTable<StringIdType> table, StringIdType item) throws Exception {
-				try {
-					table.insert(item).get();
-				} catch (Exception e) {
-					throw e;
-				}
+        };
 
-				return null;
-			}
+        CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> operationOnItem2 = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
 
-		};
+            @Override
+            public Void apply(MobileServiceSyncTable<StringIdType> table, StringIdType item) throws Exception {
+                try {
+                    table.insert(item).get();
+                } catch (Exception e) {
+                    throw e;
+                }
 
-		CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> secondOperationOnItem1 = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
+                return null;
+            }
 
-			@Override
-			public Void apply(MobileServiceSyncTable<StringIdType> table, StringIdType item) throws Exception {
-				try {
-					table.delete(item).get();
-				} catch (Exception e) {
-					throw e;
-				}
+        };
 
-				return null;
-			}
+        CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> secondOperationOnItem1 = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
 
-		};
+            @Override
+            public Void apply(MobileServiceSyncTable<StringIdType> table, StringIdType item) throws Exception {
+                try {
+                    table.delete(item).get();
+                } catch (Exception e) {
+                    throw e;
+                }
 
-		CustomFunctionTwoParameters<ServiceFilterRequest, Integer, Void> assertRequest = new CustomFunctionTwoParameters<ServiceFilterRequest, Integer, Void>() {
+                return null;
+            }
 
-			@Override
-			public Void apply(ServiceFilterRequest serviceFilterRequest, Integer executed) {
-				if (executed == 1) // order is maintained by doing insert first
-									// and delete after that. This means first
-									// update was cancelled, not the second one.
-				{
-					assertEquals(serviceFilterRequest.getMethod(), "POST");
-				} else {
-					assertEquals(serviceFilterRequest.getMethod(), "DELETE");
-				}
+        };
 
-				return null;
-			}
+        CustomFunctionTwoParameters<ServiceFilterRequest, Integer, Void> assertRequest = new CustomFunctionTwoParameters<ServiceFilterRequest, Integer, Void>() {
 
-		};
+            @Override
+            public Void apply(ServiceFilterRequest serviceFilterRequest, Integer executed) {
+                if (executed == 1) // order is maintained by doing insert first
+                // and delete after that. This means first
+                // update was cancelled, not the second one.
+                {
+                    assertEquals(serviceFilterRequest.getMethod(), "POST");
+                } else {
+                    assertEquals(serviceFilterRequest.getMethod(), "DELETE");
+                }
 
-		this.TestCollapseCancel(firstOperationOnItem1, operationOnItem2, secondOperationOnItem1, assertRequest);
-	}
+                return null;
+            }
 
-	public void testDeleteThrowsWhenDeleteIsInQueue() throws Throwable {
-		CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> firstOperation = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
+        };
 
-			@Override
-			public Void apply(MobileServiceSyncTable<StringIdType> table, StringIdType item) throws Exception {
-				try {
-					table.delete(item).get();
-				} catch (Exception e) {
-					throw e;
-				}
+        this.TestCollapseCancel(firstOperationOnItem1, operationOnItem2, secondOperationOnItem1, assertRequest);
+    }
 
-				return null;
-			}
+    public void testDeleteThrowsWhenDeleteIsInQueue() throws Throwable {
+        CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> firstOperation = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
 
-		};
+            @Override
+            public Void apply(MobileServiceSyncTable<StringIdType> table, StringIdType item) throws Exception {
+                try {
+                    table.delete(item).get();
+                } catch (Exception e) {
+                    throw e;
+                }
 
-		CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> secondOperation = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
+                return null;
+            }
 
-			@Override
-			public Void apply(MobileServiceSyncTable<StringIdType> table, StringIdType item) throws Exception {
-				try {
-					table.delete(item).get();
-				} catch (Exception e) {
-					throw e;
-				}
+        };
 
-				return null;
-			}
+        CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> secondOperation = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
 
-		};
+            @Override
+            public Void apply(MobileServiceSyncTable<StringIdType> table, StringIdType item) throws Exception {
+                try {
+                    table.delete(item).get();
+                } catch (Exception e) {
+                    throw e;
+                }
 
-		this.TestCollapseThrow(firstOperation, secondOperation);
-	}
+                return null;
+            }
 
-	public void testInsertThrowsWhenUpdateIsInQueue() throws Throwable {
-		CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> firstOperation = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
+        };
 
-			@Override
-			public Void apply(MobileServiceSyncTable<StringIdType> table, StringIdType item) throws Exception {
-				try {
-					table.update(item).get();
-				} catch (Exception e) {
-					throw e;
-				}
+        this.TestCollapseThrow(firstOperation, secondOperation);
+    }
 
-				return null;
-			}
+    public void testInsertThrowsWhenUpdateIsInQueue() throws Throwable {
+        CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> firstOperation = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
 
-		};
+            @Override
+            public Void apply(MobileServiceSyncTable<StringIdType> table, StringIdType item) throws Exception {
+                try {
+                    table.update(item).get();
+                } catch (Exception e) {
+                    throw e;
+                }
 
-		CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> secondOperation = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
+                return null;
+            }
 
-			@Override
-			public Void apply(MobileServiceSyncTable<StringIdType> table, StringIdType item) throws Exception {
-				try {
-					table.insert(item).get();
-				} catch (Exception e) {
-					throw e;
-				}
+        };
 
-				return null;
-			}
+        CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> secondOperation = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
 
-		};
+            @Override
+            public Void apply(MobileServiceSyncTable<StringIdType> table, StringIdType item) throws Exception {
+                try {
+                    table.insert(item).get();
+                } catch (Exception e) {
+                    throw e;
+                }
 
-		this.TestCollapseThrow(firstOperation, secondOperation);
-	}
+                return null;
+            }
 
-	public void testInsertThrowsWhenInsertIsInQueue() throws Throwable {
-		CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> firstOperation = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
+        };
 
-			@Override
-			public Void apply(MobileServiceSyncTable<StringIdType> table, StringIdType item) throws Exception {
-				try {
-					table.insert(item).get();
-				} catch (Exception e) {
-					throw e;
-				}
+        this.TestCollapseThrow(firstOperation, secondOperation);
+    }
 
-				return null;
-			}
+    public void testInsertThrowsWhenInsertIsInQueue() throws Throwable {
+        CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> firstOperation = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
 
-		};
+            @Override
+            public Void apply(MobileServiceSyncTable<StringIdType> table, StringIdType item) throws Exception {
+                try {
+                    table.insert(item).get();
+                } catch (Exception e) {
+                    throw e;
+                }
 
-		CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> secondOperation = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
+                return null;
+            }
 
-			@Override
-			public Void apply(MobileServiceSyncTable<StringIdType> table, StringIdType item) throws Exception {
-				try {
-					table.insert(item).get();
-				} catch (Exception e) {
-					throw e;
-				}
+        };
 
-				return null;
-			}
-
-		};
-
-		this.TestCollapseThrow(firstOperation, secondOperation);
-	}
-
-	public void testUpdateThrowsWhenDeleteIsInQueue() throws Throwable {
-		CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> firstOperation = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
-
-			@Override
-			public Void apply(MobileServiceSyncTable<StringIdType> table, StringIdType item) throws Exception {
-				try {
-					table.delete(item).get();
-				} catch (Exception e) {
-					throw e;
-				}
-
-				return null;
-			}
-
-		};
-
-		CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> secondOperation = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
-
-			@Override
-			public Void apply(MobileServiceSyncTable<StringIdType> table, StringIdType item) throws Exception {
-				try {
-					table.update(item).get();
-				} catch (Exception e) {
-					throw e;
-				}
-
-				return null;
-			}
-
-		};
-
-		this.TestCollapseThrow(firstOperation, secondOperation);
-	}
-
-	// public void testUpdateCancelsSecondUpdateWhenUpdateIsInQueue()
-	// throws Throwable
-	// {
-	// CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>,
-	// StringIdType, Void>
-	// firstOperationOnItem1 = new
-	// CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>,
-	// StringIdType,
-	// Void>() {
-	//
-	// @Override
-	// public Void apply(MobileServiceSyncTable<StringIdType> table,
-	// StringIdType item) throws Exception {
-	// try {
-	// table.update(item).get();
-	// } catch (Exception e) {
-	// throw e;
-	// }
-	//
-	// return null;
-	// }
-	//
-	// };
-	//
-	// CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>,
-	// StringIdType, Void>
-	// operationOnItem2 = new
-	// CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>,
-	// StringIdType,
-	// Void>() {
-	//
-	// @Override
-	// public Void apply(MobileServiceSyncTable<StringIdType> table,
-	// StringIdType item) throws Exception {
-	// try {
-	// table.delete(item).get();
-	// } catch (Exception e) {
-	// throw e;
-	// }
-	//
-	// return null;
-	// }
-	//
-	// };
-	//
-	// CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>,
-	// StringIdType, Void>
-	// secondOperationOnItem1 = new
-	// CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>,
-	// StringIdType,
-	// Void>() {
-	//
-	// @Override
-	// public Void apply(MobileServiceSyncTable<StringIdType> table,
-	// StringIdType item) throws Exception {
-	// try {
-	// table.update(item).get();
-	// } catch (Exception e) {
-	// throw e;
-	// }
-	//
-	// return null;
-	// }
-	//
-	// };
-	//
-	// CustomFunctionTwoParameters<ServiceFilterRequest, Integer, Void>
-	// assertRequest = new
-	// CustomFunctionTwoParameters<ServiceFilterRequest, Integer, Void>() {
-	//
-	// @Override
-	// public Void apply(ServiceFilterRequest serviceFilterRequest, Integer
-	// executed) {
-	//
-	// // if (executed == 1) // order is maintained by doing insert first
-	// // // and delete after that. This means first
-	// // // update was cancelled, not the second one.
-	// // {
-	// // assertEquals(serviceFilterRequest.getMethod(), "PATCH");
-	// // } else {
-	// // assertEquals(serviceFilterRequest.getMethod(), "DELETE");
-	// // }
-	//
-	// return null;
-	// }
-	//
-	// };
-	//
-	// this.TestCollapseCancel(firstOperationOnItem1, operationOnItem2,
-	// secondOperationOnItem1, assertRequest);
-	// }
-
-	public void testUpdateCancelsSecondUpdateWhenInsertIsInQueue() throws Throwable {
-		CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> firstOperationOnItem1 = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
-
-			@Override
-			public Void apply(MobileServiceSyncTable<StringIdType> table, StringIdType item) throws Exception {
-				try {
-					table.insert(item).get();
-				} catch (Exception e) {
-					throw e;
-				}
-
-				return null;
-			}
-
-		};
-
-		CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> operationOnItem2 = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
-
-			@Override
-			public Void apply(MobileServiceSyncTable<StringIdType> table, StringIdType item) throws Exception {
-				try {
-					table.delete(item).get();
-				} catch (Exception e) {
-					throw e;
-				}
-
-				return null;
-			}
-
-		};
-
-		CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> secondOperationOnItem1 = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
-
-			@Override
-			public Void apply(MobileServiceSyncTable<StringIdType> table, StringIdType item) throws Exception {
-				try {
-					table.update(item).get();
-				} catch (Exception e) {
-					throw e;
-				}
-
-				return null;
-			}
-
-		};
-
-		CustomFunctionTwoParameters<ServiceFilterRequest, Integer, Void> assertRequest = new CustomFunctionTwoParameters<ServiceFilterRequest, Integer, Void>() {
-
-			@Override
-			public Void apply(ServiceFilterRequest serviceFilterRequest, Integer executed) {
-				if (executed == 1) // order is maintained by doing insert first
-									// and delete after that. This means first
-									// update was cancelled, not the second one.
-				{
-					assertEquals(serviceFilterRequest.getMethod(), "POST");
-				} else {
-					assertEquals(serviceFilterRequest.getMethod(), "DELETE");
-				}
-
-				return null;
-			}
-
-		};
-
-		this.TestCollapseCancel(firstOperationOnItem1, operationOnItem2, secondOperationOnItem1, assertRequest);
-	}
-
-	public void testPushIsAbortedOnNetworkError() throws Throwable {
-		this.TestPushAbort(new IOException(), MobileServicePushStatus.CancelledByNetworkError);
-	}
-
-	public void testPushIsAbortedOnAuthenticationError() throws Throwable {
-		// Create a mock response simulating an error
-		ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-		response.setStatus(new StatusLineMock(401));
-
-		MobileServiceException authError = new MobileServiceException("", response);
-		TestPushAbort(authError, MobileServicePushStatus.CancelledByAuthenticationError);
-	}
+        CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> secondOperation = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
 
-	private void TestCollapseCancel(CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> firstOperationOnItem1,
-			CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> operationOnItem2,
-			CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> secondOperationOnItem1,
-			final CustomFunctionTwoParameters<ServiceFilterRequest, Integer, Void> assertRequest) throws Throwable {
-
-		MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
-		final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
-
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-
-		Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
-			public Void apply(ServiceFilterRequest request) {
-				try {
-					assertRequest.apply(request, serviceFilterContainer.Requests.size());
-				} catch (Exception e) {
-					// throw e;
-				}
-
-				return null;
-			}
-		};
+            @Override
+            public Void apply(MobileServiceSyncTable<StringIdType> table, StringIdType item) throws Exception {
+                try {
+                    table.insert(item).get();
+                } catch (Exception e) {
+                    throw e;
+                }
 
-		client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+                return null;
+            }
+
+        };
+
+        this.TestCollapseThrow(firstOperation, secondOperation);
+    }
+
+    public void testUpdateThrowsWhenDeleteIsInQueue() throws Throwable {
+        CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> firstOperation = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
+
+            @Override
+            public Void apply(MobileServiceSyncTable<StringIdType> table, StringIdType item) throws Exception {
+                try {
+                    table.delete(item).get();
+                } catch (Exception e) {
+                    throw e;
+                }
+
+                return null;
+            }
+
+        };
+
+        CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> secondOperation = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
+
+            @Override
+            public Void apply(MobileServiceSyncTable<StringIdType> table, StringIdType item) throws Exception {
+                try {
+                    table.update(item).get();
+                } catch (Exception e) {
+                    throw e;
+                }
+
+                return null;
+            }
+
+        };
+
+        this.TestCollapseThrow(firstOperation, secondOperation);
+    }
+
+    // public void testUpdateCancelsSecondUpdateWhenUpdateIsInQueue()
+    // throws Throwable
+    // {
+    // CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>,
+    // StringIdType, Void>
+    // firstOperationOnItem1 = new
+    // CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>,
+    // StringIdType,
+    // Void>() {
+    //
+    // @Override
+    // public Void apply(MobileServiceSyncTable<StringIdType> table,
+    // StringIdType item) throws Exception {
+    // try {
+    // table.update(item).get();
+    // } catch (Exception e) {
+    // throw e;
+    // }
+    //
+    // return null;
+    // }
+    //
+    // };
+    //
+    // CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>,
+    // StringIdType, Void>
+    // operationOnItem2 = new
+    // CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>,
+    // StringIdType,
+    // Void>() {
+    //
+    // @Override
+    // public Void apply(MobileServiceSyncTable<StringIdType> table,
+    // StringIdType item) throws Exception {
+    // try {
+    // table.delete(item).get();
+    // } catch (Exception e) {
+    // throw e;
+    // }
+    //
+    // return null;
+    // }
+    //
+    // };
+    //
+    // CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>,
+    // StringIdType, Void>
+    // secondOperationOnItem1 = new
+    // CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>,
+    // StringIdType,
+    // Void>() {
+    //
+    // @Override
+    // public Void apply(MobileServiceSyncTable<StringIdType> table,
+    // StringIdType item) throws Exception {
+    // try {
+    // table.update(item).get();
+    // } catch (Exception e) {
+    // throw e;
+    // }
+    //
+    // return null;
+    // }
+    //
+    // };
+    //
+    // CustomFunctionTwoParameters<ServiceFilterRequest, Integer, Void>
+    // assertRequest = new
+    // CustomFunctionTwoParameters<ServiceFilterRequest, Integer, Void>() {
+    //
+    // @Override
+    // public Void apply(ServiceFilterRequest serviceFilterRequest, Integer
+    // executed) {
+    //
+    // // if (executed == 1) // order is maintained by doing insert first
+    // // // and delete after that. This means first
+    // // // update was cancelled, not the second one.
+    // // {
+    // // assertEquals(serviceFilterRequest.getMethod(), "PATCH");
+    // // } else {
+    // // assertEquals(serviceFilterRequest.getMethod(), "DELETE");
+    // // }
+    //
+    // return null;
+    // }
+    //
+    // };
+    //
+    // this.TestCollapseCancel(firstOperationOnItem1, operationOnItem2,
+    // secondOperationOnItem1, assertRequest);
+    // }
+
+    public void testUpdateCancelsSecondUpdateWhenInsertIsInQueue() throws Throwable {
+        CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> firstOperationOnItem1 = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
+
+            @Override
+            public Void apply(MobileServiceSyncTable<StringIdType> table, StringIdType item) throws Exception {
+                try {
+                    table.insert(item).get();
+                } catch (Exception e) {
+                    throw e;
+                }
+
+                return null;
+            }
+
+        };
+
+        CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> operationOnItem2 = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
+
+            @Override
+            public Void apply(MobileServiceSyncTable<StringIdType> table, StringIdType item) throws Exception {
+                try {
+                    table.delete(item).get();
+                } catch (Exception e) {
+                    throw e;
+                }
+
+                return null;
+            }
+
+        };
+
+        CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> secondOperationOnItem1 = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
+
+            @Override
+            public Void apply(MobileServiceSyncTable<StringIdType> table, StringIdType item) throws Exception {
+                try {
+                    table.update(item).get();
+                } catch (Exception e) {
+                    throw e;
+                }
+
+                return null;
+            }
+
+        };
+
+        CustomFunctionTwoParameters<ServiceFilterRequest, Integer, Void> assertRequest = new CustomFunctionTwoParameters<ServiceFilterRequest, Integer, Void>() {
+
+            @Override
+            public Void apply(ServiceFilterRequest serviceFilterRequest, Integer executed) {
+                if (executed == 1) // order is maintained by doing insert first
+                // and delete after that. This means first
+                // update was cancelled, not the second one.
+                {
+                    assertEquals(serviceFilterRequest.getMethod(), "POST");
+                } else {
+                    assertEquals(serviceFilterRequest.getMethod(), "DELETE");
+                }
+
+                return null;
+            }
+
+        };
+
+        this.TestCollapseCancel(firstOperationOnItem1, operationOnItem2, secondOperationOnItem1, assertRequest);
+    }
+
+    public void testPushIsAbortedOnNetworkError() throws Throwable {
+        this.TestPushAbort(new IOException(), MobileServicePushStatus.CancelledByNetworkError);
+    }
+
+    public void testPushIsAbortedOnAuthenticationError() throws Throwable {
+        // Create a mock response simulating an error
+        ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+        response.setStatus(new StatusLineMock(401));
+
+        MobileServiceException authError = new MobileServiceException("", response);
+        TestPushAbort(authError, MobileServicePushStatus.CancelledByAuthenticationError);
+    }
 
-		client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+    private void TestCollapseCancel(CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> firstOperationOnItem1,
+                                    CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> operationOnItem2,
+                                    CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> secondOperationOnItem1,
+                                    final CustomFunctionTwoParameters<ServiceFilterRequest, Integer, Void> assertRequest) throws Throwable {
+
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    assertRequest.apply(request, serviceFilterContainer.Requests.size());
+                } catch (Exception e) {
+                    // throw e;
+                }
+
+                return null;
+            }
+        };
 
-		StringIdType item1 = new StringIdType();
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
 
-		item1.Id = "an id";
-		item1.String = "what?";
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
 
-		StringIdType item2 = new StringIdType();
+        StringIdType item1 = new StringIdType();
 
-		item2.Id = "two";
-		item2.String = "this";
+        item1.Id = "an id";
+        item1.String = "what?";
 
-		MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+        StringIdType item2 = new StringIdType();
 
-		firstOperationOnItem1.apply(table, item1);
-		assertEquals(client.getSyncContext().getPendingOperations(), 1);
+        item2.Id = "two";
+        item2.String = "this";
 
-		operationOnItem2.apply(table, item2);
-		assertEquals(client.getSyncContext().getPendingOperations(), 2);
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
 
-		secondOperationOnItem1.apply(table, item1);
-		assertEquals(client.getSyncContext().getPendingOperations(), 2);
+        firstOperationOnItem1.apply(table, item1);
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
 
-		client.getSyncContext().push().get();
+        operationOnItem2.apply(table, item2);
+        assertEquals(client.getSyncContext().getPendingOperations(), 2);
 
-		assertEquals(client.getSyncContext().getPendingOperations(), 0);
-		assertEquals(serviceFilterContainer.Requests.size(), 2); // total two
-																	// operations
-																	// executed
-	}
+        secondOperationOnItem1.apply(table, item1);
+        assertEquals(client.getSyncContext().getPendingOperations(), 2);
 
-	private void TestCollapseThrow(CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> firstOperation,
-			CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> secondOperation) throws Throwable {
-		MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        client.getSyncContext().push().get();
 
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        assertEquals(client.getSyncContext().getPendingOperations(), 0);
+        assertEquals(serviceFilterContainer.Requests.size(), 2); // total two
+        // operations
+        // executed
+    }
 
-		client = client.withFilter(getTestFilter());
+    private void TestCollapseThrow(CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> firstOperation,
+                                   CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> secondOperation) throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
 
-		client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
-		StringIdType item = new StringIdType();
+        client = client.withFilter(getTestFilter());
 
-		item.Id = "an id";
-		item.String = "what?";
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
 
-		MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+        StringIdType item = new StringIdType();
 
-		firstOperation.apply(table, item);
-		assertEquals(client.getSyncContext().getPendingOperations(), 1);
+        item.Id = "an id";
+        item.String = "what?";
 
-		try {
-			secondOperation.apply(table, item);
-		} catch (Exception e) {
-			e.printStackTrace();
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
 
-			assertEquals(client.getSyncContext().getPendingOperations(), 1);
-			return;
-		}
+        firstOperation.apply(table, item);
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
 
-		fail("Exception expected");
+        try {
+            secondOperation.apply(table, item);
+        } catch (Exception e) {
+            e.printStackTrace();
 
-	}
+            assertEquals(client.getSyncContext().getPendingOperations(), 1);
+            return;
+        }
 
-	private void TestPushAbort(final Exception toThrow, MobileServicePushStatus expectedStatus) throws Throwable {
-		MobileServiceSyncHandlerMock operationHandler = new MobileServiceSyncHandlerMock();
+        fail("Exception expected");
 
-		final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
-		thrownExceptionFlag.Thrown = false;
+    }
 
-		MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
-		final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+    private void TestPushAbort(final Exception toThrow, MobileServicePushStatus expectedStatus) throws Throwable {
+        MobileServiceSyncHandlerMock operationHandler = new MobileServiceSyncHandlerMock();
 
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+        thrownExceptionFlag.Thrown = false;
 
-		Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
-			public Void apply(ServiceFilterRequest request) {
-				try {
-					if (!thrownExceptionFlag.Thrown) {
-						thrownExceptionFlag.Thrown = true;
-						throw toThrow;
-					}
-				} catch (Exception e) {
-					serviceFilterContainer.Exception = e;
-				}
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
 
-				return null;
-			}
-		};
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
-		client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (!thrownExceptionFlag.Thrown) {
+                        thrownExceptionFlag.Thrown = true;
+                        throw toThrow;
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
 
-		client.getSyncContext().initialize(store, operationHandler).get();
+                return null;
+            }
+        };
 
-		StringIdType item = new StringIdType();
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
 
-		item.Id = "an id";
-		item.String = "what?";
+        client.getSyncContext().initialize(store, operationHandler).get();
 
-		MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+        StringIdType item = new StringIdType();
 
-		table.insert(item).get();
+        item.Id = "an id";
+        item.String = "what?";
 
-		assertEquals(client.getSyncContext().getPendingOperations(), 1);
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
 
-		try {
-			client.getSyncContext().push().get();
+        table.insert(item).get();
 
-			fail("MobileServicePushFailedException expected");
-			return;
-		} catch (Exception ex) {
-			if (ex.getCause() instanceof MobileServicePushFailedException) {
-				MobileServicePushFailedException mobileServicePushFailedException = (MobileServicePushFailedException) ex.getCause();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
 
-				assertEquals(mobileServicePushFailedException.getPushCompletionResult().getStatus(), expectedStatus);
-				assertEquals(mobileServicePushFailedException.getPushCompletionResult().getOperationErrors().size(), 0);
-			} else {
-				fail("MobileServicePushFailedException expected");
-			}
-		}
+        try {
+            client.getSyncContext().push().get();
 
-		assertEquals(operationHandler.PushCompletionResult.getStatus(), expectedStatus);
+            fail("MobileServicePushFailedException expected");
+            return;
+        } catch (Exception ex) {
+            if (ex.getCause() instanceof MobileServicePushFailedException) {
+                MobileServicePushFailedException mobileServicePushFailedException = (MobileServicePushFailedException) ex.getCause();
 
-		// the insert operation is still in queue
-		assertEquals(client.getSyncContext().getPendingOperations(), 1);
+                assertEquals(mobileServicePushFailedException.getPushCompletionResult().getStatus(), expectedStatus);
+                assertEquals(mobileServicePushFailedException.getPushCompletionResult().getOperationErrors().size(), 0);
+            } else {
+                fail("MobileServicePushFailedException expected");
+            }
+        }
 
-		client.getSyncContext().push().get();
+        assertEquals(operationHandler.PushCompletionResult.getStatus(), expectedStatus);
 
-		assertEquals(client.getSyncContext().getPendingOperations(), 0);
+        // the insert operation is still in queue
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
 
-		assertEquals(operationHandler.PushCompletionResult.getStatus(), MobileServicePushStatus.Complete);
-	}
+        client.getSyncContext().push().get();
 
-	// Test Filter
-	private ServiceFilter getTestFilter(String... content) {
-		return getTestFilter(new ServiceFilterContainer(), 200, content);
-	}
+        assertEquals(client.getSyncContext().getPendingOperations(), 0);
 
-	// Test Filter
-	private ServiceFilter getTestFilter(ServiceFilterContainer serviceFilterContainer, Function<ServiceFilterRequest, Void> onHandleRequest, String... content) {
-		return getTestFilter(serviceFilterContainer, 200, onHandleRequest, content);
-	}
+        assertEquals(operationHandler.PushCompletionResult.getStatus(), MobileServicePushStatus.Complete);
+    }
 
-	// Test Filter
-	private ServiceFilter getTestFilter(ServiceFilterContainer serviceFilterContainer, String... content) {
-		return getTestFilter(serviceFilterContainer, 200, content);
-	}
+    // Test Filter
+    private ServiceFilter getTestFilter(String... content) {
+        return getTestFilter(new ServiceFilterContainer(), 200, content);
+    }
 
-	// Test Filter
-	private ServiceFilter getTestFilter(ServiceFilterContainer serviceFilterContainer, int statusCode, String... content) {
-		return getTestFilter(serviceFilterContainer, statusCode, null, content);
-	}
+    // Test Filter
+    private ServiceFilter getTestFilter(ServiceFilterContainer serviceFilterContainer, Function<ServiceFilterRequest, Void> onHandleRequest, String... content) {
+        return getTestFilter(serviceFilterContainer, 200, onHandleRequest, content);
+    }
 
-	// Test Filter
-	private ServiceFilter getTestFilter(final ServiceFilterContainer serviceFilterContainer, final int statusCode,
-			final Function<ServiceFilterRequest, Void> onHandleRequest, final String... contents) {
+    // Test Filter
+    private ServiceFilter getTestFilter(ServiceFilterContainer serviceFilterContainer, String... content) {
+        return getTestFilter(serviceFilterContainer, 200, content);
+    }
 
-		return new ServiceFilter() {
+    // Test Filter
+    private ServiceFilter getTestFilter(ServiceFilterContainer serviceFilterContainer, int statusCode, String... content) {
+        return getTestFilter(serviceFilterContainer, statusCode, null, content);
+    }
 
-			@Override
-			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+    // Test Filter
+    private ServiceFilter getTestFilter(final ServiceFilterContainer serviceFilterContainer, final int statusCode,
+                                        final Function<ServiceFilterRequest, Void> onHandleRequest, final String... contents) {
 
-				// Create a mock response simulating an error
-				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-				response.setStatus(new StatusLineMock(statusCode));
+        return new ServiceFilter() {
 
-				String content = "";
+            @Override
+            public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				if (contents.length > serviceFilterContainer.Requests.size()) {
-					content = contents[serviceFilterContainer.Requests.size()];
-				} else {
-					content = contents[contents.length - 1];
-				}
+                // Create a mock response simulating an error
+                ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+                response.setStatus(new StatusLineMock(statusCode));
 
-				response.setContent(content);
+                String content = "";
 
-				ServiceFilterRequestData serviceFilterRequestData = new ServiceFilterRequestData();
-				serviceFilterRequestData.Headers = request.getHeaders();
-				serviceFilterRequestData.Content = request.getContent();
+                if (contents.length > serviceFilterContainer.Requests.size()) {
+                    content = contents[serviceFilterContainer.Requests.size()];
+                } else {
+                    content = contents[contents.length - 1];
+                }
 
-				serviceFilterContainer.Url = request.getUrl();
-				serviceFilterContainer.Requests.add(serviceFilterRequestData);
+                response.setContent(content);
 
-				if (onHandleRequest != null) {
-					onHandleRequest.apply(request);
-				}
+                ServiceFilterRequestData serviceFilterRequestData = new ServiceFilterRequestData();
+                serviceFilterRequestData.Headers = request.getHeaders();
+                serviceFilterRequestData.Content = request.getContent();
 
-				// create a mock request to replace the existing one
-				ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
+                serviceFilterContainer.Url = request.getUrl();
+                serviceFilterContainer.Requests.add(serviceFilterRequestData);
 
-				if (serviceFilterContainer.Exception != null) {
-					requestMock.setExceptionToThrow(serviceFilterContainer.Exception);
-					requestMock.setHasErrorOnExecute(true);
+                if (onHandleRequest != null) {
+                    onHandleRequest.apply(request);
+                }
 
-					// used exception
-					serviceFilterContainer.Exception = null;
-				}
+                // create a mock request to replace the existing one
+                ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
 
-				return nextServiceFilterCallback.onNext(requestMock);
-			}
+                if (serviceFilterContainer.Exception != null) {
+                    requestMock.setExceptionToThrow(serviceFilterContainer.Exception);
+                    requestMock.setHasErrorOnExecute(true);
 
-		};
-	}
+                    // used exception
+                    serviceFilterContainer.Exception = null;
+                }
 
-	public class ServiceFilterContainer {
-		public String Url;
+                return nextServiceFilterCallback.onNext(requestMock);
+            }
 
-		public List<ServiceFilterRequestData> Requests = new ArrayList<ServiceFilterRequestData>();
+        };
+    }
 
-		public Exception Exception;
-	}
+    public class ServiceFilterContainer {
+        public String Url;
 
-	public class ThrownExceptionFlag {
-		public boolean Thrown;
-	}
+        public List<ServiceFilterRequestData> Requests = new ArrayList<ServiceFilterRequestData>();
 
-	public class ServiceFilterRequestData {
-		public Header[] Headers;
+        public Exception Exception;
+    }
 
-		public String Content;
+    public class ThrownExceptionFlag {
+        public boolean Thrown;
+    }
 
-		public int Count;
+    public class ServiceFilterRequestData {
+        public Header[] Headers;
 
-		public String getHeaderValue(String headerName) {
+        public String Content;
 
-			for (Header header : Headers) {
-				if (header.getName().equals(headerName)) {
-					return header.getValue();
-				}
-			}
+        public int Count;
 
-			return null;
-		}
-	}
+        public String getHeaderValue(String headerName) {
+
+            for (Header header : Headers) {
+                if (header.getName().equals(headerName)) {
+                    return header.getValue();
+                }
+            }
+
+            return null;
+        }
+    }
 }

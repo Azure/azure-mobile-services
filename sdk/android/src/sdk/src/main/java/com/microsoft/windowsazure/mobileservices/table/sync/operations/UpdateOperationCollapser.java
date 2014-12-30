@@ -27,30 +27,29 @@ package com.microsoft.windowsazure.mobileservices.table.sync.operations;
  * Class that encapsulates collapse logic for existing update operation
  */
 class UpdateOperationCollapser implements TableOperationVisitor<TableOperation> {
-	private UpdateOperation mPreviousOperation;
+    private UpdateOperation mPreviousOperation;
 
-	/**
-	 * Constructor for UpdateOperationCollapser
-	 * 
-	 * @param existingOperation
-	 *            the existing operation to collapse
-	 */
-	UpdateOperationCollapser(UpdateOperation previousOperation) {
-		this.mPreviousOperation = previousOperation;
-	}
+    /**
+     * Constructor for UpdateOperationCollapser
+     *
+     * @param existingOperation the existing operation to collapse
+     */
+    UpdateOperationCollapser(UpdateOperation previousOperation) {
+        this.mPreviousOperation = previousOperation;
+    }
 
-	@Override
-	public TableOperation visit(InsertOperation newOperation) {
-		throw new IllegalStateException("An update operation on the item is already in the queue.");
-	}
+    @Override
+    public TableOperation visit(InsertOperation newOperation) {
+        throw new IllegalStateException("An update operation on the item is already in the queue.");
+    }
 
-	@Override
-	public TableOperation visit(UpdateOperation newOperation) {
-		return this.mPreviousOperation;
-	}
+    @Override
+    public TableOperation visit(UpdateOperation newOperation) {
+        return this.mPreviousOperation;
+    }
 
-	@Override
-	public TableOperation visit(DeleteOperation newOperation) {
-		return newOperation;
-	}
+    @Override
+    public TableOperation visit(DeleteOperation newOperation) {
+        return newOperation;
+    }
 }

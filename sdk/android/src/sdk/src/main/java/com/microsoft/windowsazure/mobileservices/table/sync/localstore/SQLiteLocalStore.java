@@ -23,13 +23,6 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.table.sync.localstore;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.database.Cursor;
@@ -47,15 +40,17 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QuerySQLWriter;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+
 /**
  * Implements MobileServiceLocalStore backed by an SQLite DB
  */
 public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceLocalStore {
-    private static class Statement {
-        private String sql;
-        private List<Object> parameters;
-    }
-
     private Map<String, Map<String, ColumnDataType>> mTables;
 
     /**
@@ -295,7 +290,7 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
             SQLiteDatabase db = this.getWritableDatabase();
 
             try {
-                for(String itemId : itemsIds) {
+                for (String itemId : itemsIds) {
                     db.delete(invTableName, "id = '" + itemId + "'", null);
                 }
             } finally {
@@ -542,7 +537,6 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
         sql.append(")");
     }
 
-
     private String[] getColumns(Query query, Map<String, ColumnDataType> table) {
         String[] columns = table.keySet().toArray(new String[0]);
 
@@ -632,5 +626,10 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 
             db.execSQL(createSql);
         }
+    }
+
+    private static class Statement {
+        private String sql;
+        private List<Object> parameters;
     }
 }

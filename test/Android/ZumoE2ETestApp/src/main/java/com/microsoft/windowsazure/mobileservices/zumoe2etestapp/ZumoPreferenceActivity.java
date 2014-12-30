@@ -26,17 +26,19 @@ import android.preference.PreferenceActivity;
  * A {@link android.preference.PreferenceActivity} that presents a set of application settings.
  */
 public class ZumoPreferenceActivity extends PreferenceActivity {
-	@SuppressWarnings("deprecation")
-	@Override
-	protected void onPostCreate(Bundle savedInstanceState) {
-		super.onPostCreate(savedInstanceState);
+    @SuppressWarnings("deprecation")
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
 
-		addPreferencesFromResource(R.xml.pref_general);
-	}
+        addPreferencesFromResource(R.xml.pref_general);
+    }
 
-	/** {@inheritDoc} */
-	@Override
-	public boolean onIsMultiPane() {
-		return false;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean onIsMultiPane() {
+        return false;
+    }
 }

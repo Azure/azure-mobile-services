@@ -20,11 +20,11 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp;
 
 public class Constants {
-	public static final String PREFERENCE_MOBILE_SERVICE_URL = "pref_mobile_service_url";
+    public static final String PREFERENCE_MOBILE_SERVICE_URL = "pref_mobile_service_url";
 
-	public static final String PREFERENCE_MOBILE_SERVICE_KEY = "pref_mobile_service_key";
+    public static final String PREFERENCE_MOBILE_SERVICE_KEY = "pref_mobile_service_key";
 
-	public static final String PREFERENCE_LOG_POST_URL = "pref_log_post_url";
-	
-	public static final String PREFERENCE_GCM_SENDER_ID = "pref_GCM_sender_id";
+    public static final String PREFERENCE_LOG_POST_URL = "pref_log_post_url";
+
+    public static final String PREFERENCE_GCM_SENDER_ID = "pref_GCM_sender_id";
 }

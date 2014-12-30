@@ -30,13 +30,11 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
  * request
  */
 public interface ServiceFilterResponseCallback {
-	/**
-	 * Method to execute when the response is ready to be processed
-	 * 
-	 * @param response
-	 *            The response to process
-	 * @param exception
-	 *            An exception representing the error, in case there was one
-	 */
-	public void onResponse(ServiceFilterResponse response, Exception exception);
+    /**
+     * Method to execute when the response is ready to be processed
+     *
+     * @param response  The response to process
+     * @param exception An exception representing the error, in case there was one
+     */
+    public void onResponse(ServiceFilterResponse response, Exception exception);
 }

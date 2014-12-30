@@ -19,50 +19,50 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types;
 
-import java.util.Random;
-
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.Util;
+
+import java.util.Random;
 
 public class ComplexType {
 
-	public String name;
+    public String name;
 
-	public Integer age;
+    public Integer age;
 
-	public ComplexType() {
+    public ComplexType() {
 
-	}
+    }
 
-	public ComplexType(Random r) {
-		name = Util.createSimpleRandomString(r, 10);
-		age = r.nextInt(80);
-	}
+    public ComplexType(Random r) {
+        name = Util.createSimpleRandomString(r, 10);
+        age = r.nextInt(80);
+    }
 
-	public ComplexType(ComplexType other) {
-		name = String.valueOf(other.name);
-		age = Integer.valueOf(other.age);
-	}
+    public ComplexType(ComplexType other) {
+        name = String.valueOf(other.name);
+        age = Integer.valueOf(other.age);
+    }
 
-	@Override
-	public String toString() {
-		return String.format("ComplexType[Name=%s},Age=%s]", name, age);
-	}
+    @Override
+    public String toString() {
+        return String.format("ComplexType[Name=%s},Age=%s]", name, age);
+    }
 
-	@Override
-	public boolean equals(Object o) {
-		if (o == null)
-			return false;
+    @Override
+    public boolean equals(Object o) {
+        if (o == null)
+            return false;
 
-		if (!(o instanceof ComplexType))
-			return false;
+        if (!(o instanceof ComplexType))
+            return false;
 
-		ComplexType element = (ComplexType) o;
+        ComplexType element = (ComplexType) o;
 
-		if (!Util.compare(element.name, name))
-			return false;
-		if (!Util.compare(element.age, age))
-			return false;
+        if (!Util.compare(element.name, name))
+            return false;
+        if (!Util.compare(element.age, age))
+            return false;
 
-		return true;
-	}
+        return true;
+    }
 }

@@ -19,14 +19,6 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
-import java.lang.reflect.Type;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.TimeZone;
-
 import android.test.InstrumentationTestCase;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -44,6 +36,10 @@ import com.google.gson.JsonSerializer;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterResponseMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.StatusLineMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.Address;
@@ -51,462 +47,466 @@ import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.ComplexP
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.DateTestObject;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.ResultsContainer;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
-import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
-import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
-import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
-import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
+
+import java.lang.reflect.Type;
+import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.TimeZone;
 
 class Person {
-	@Expose
-	@SerializedName("id")
-	private Integer mId;
+    @Expose
+    @SerializedName("id")
+    private Integer mId;
 
-	@Expose
-	@SerializedName("name")
-	private String mName;
+    @Expose
+    @SerializedName("name")
+    private String mName;
 
-	@SerializedName("age")
-	private Integer mAge;
+    @SerializedName("age")
+    private Integer mAge;
 
-	public Person(int id) {
-		mId = id;
-	}
+    public Person(int id) {
+        mId = id;
+    }
 
-	public Person(int id, String name, int age) {
-		mId = id;
-		mName = name;
-		mAge = age;
-	}
+    public Person(int id, String name, int age) {
+        mId = id;
+        mName = name;
+        mAge = age;
+    }
 
-	public Person(String name, int age) {
-		mName = name;
-		mAge = age;
-	}
+    public Person(String name, int age) {
+        mName = name;
+        mAge = age;
+    }
 
-	public Integer getmId() {
-		return mId;
-	}
+    public Integer getmId() {
+        return mId;
+    }
 
-	public void setmId(int mId) {
-		this.mId = mId;
-	}
+    public void setmId(int mId) {
+        this.mId = mId;
+    }
 
-	public String getmName() {
-		return mName;
-	}
+    public String getmName() {
+        return mName;
+    }
 
-	public void setmName(String mName) {
-		this.mName = mName;
-	}
+    public void setmName(String mName) {
+        this.mName = mName;
+    }
 
-	public Integer getmAge() {
-		return mAge;
-	}
+    public Integer getmAge() {
+        return mAge;
+    }
 
-	public void setmAge(int mAge) {
-		this.mAge = mAge;
-	}
+    public void setmAge(int mAge) {
+        this.mAge = mAge;
+    }
 }
 
 class Group {
-	int mId;
+    int mId;
 
-	String mName;
+    String mName;
 
-	private List<Person> people;
+    private List<Person> people;
 
-	public Group(int id, String name) {
-		mId = id;
-		mName = name;
-	}
+    public Group(int id, String name) {
+        mId = id;
+        mName = name;
+    }
 
-	public List<Person> getPeople() {
-		return people;
-	}
+    public List<Person> getPeople() {
+        return people;
+    }
 
-	public void setPeople(List<Person> people) {
-		this.people = people;
-	}
+    public void setPeople(List<Person> people) {
+        this.people = people;
+    }
 }
 
 public class SerializationTests extends InstrumentationTestCase {
 
-	String appUrl = "";
-	String appKey = "";
-	GsonBuilder gsonBuilder;
-
-	protected void setUp() throws Exception {
-		appUrl = "http://myapp.com/";
-		appKey = "qwerty";
-		gsonBuilder = new GsonBuilder();
-		super.setUp();
-	}
-
-	protected void tearDown() throws Exception {
-		super.tearDown();
-	}
-
-	public void testSimpleSerialization() throws Throwable {
-		// Serialize instance with all fields defined
-		Person person = new Person(1, "John", 23);
-		String serializedObject = new Gson().toJson(person);
-		JsonObject jsonPerson = new JsonParser().parse(serializedObject).getAsJsonObject();
-
-		// Asserts
-		assertEquals("{\"age\":23,\"id\":1,\"name\":\"John\"}", serializedObject);
-		assertEquals(person.getmAge().intValue(), jsonPerson.get("age").getAsInt());
-		assertEquals(person.getmId().intValue(), jsonPerson.get("id").getAsInt());
-		assertEquals(person.getmName(), jsonPerson.get("name").getAsString());
-
-		// Serialize instance with not id defined
-		Person person2 = new Person("John", 23);
-		String serializedObject2 = new Gson().toJson(person2);
-		JsonObject jsonPerson2 = new JsonParser().parse(serializedObject2).getAsJsonObject();
-
-		// Asserts
-		assertEquals("{\"age\":23,\"name\":\"John\"}", serializedObject2);
-		assertEquals(person.getmAge().intValue(), jsonPerson2.get("age").getAsInt());
-		assertNull(jsonPerson2.get("id"));
-		assertEquals(person.getmName(), jsonPerson2.get("name").getAsString());
-
-		// Serialize instance with all fields null except id
-		Person person3 = new Person(1);
-		String serializedObject3 = new Gson().toJson(person3);
-		JsonObject jsonPerson3 = new JsonParser().parse(serializedObject3).getAsJsonObject();
-
-		// Asserts
-		assertEquals("{\"id\":1}", serializedObject3);
-		assertNull(jsonPerson3.get("age"));
-		assertEquals(person3.getmId().intValue(), jsonPerson3.get("id").getAsInt());
-		assertNull(jsonPerson3.get("name"));
-	}
-
-	public void testSimpleDeserialization() throws Throwable {
-		// Deserialize instance with all fields defined
-		String serializedObject = "{\"age\":23,\"id\":1,\"name\":\"John\"}";
-		JsonObject jsonPerson = new JsonParser().parse(serializedObject).getAsJsonObject();
-		Person person = new Gson().fromJson(serializedObject, Person.class);
-
-		// Asserts
-		assertEquals(jsonPerson.get("age").getAsInt(), person.getmAge().intValue());
-		assertEquals(jsonPerson.get("id").getAsInt(), person.getmId().intValue());
-		assertEquals(jsonPerson.get("name").getAsString(), person.getmName());
-
-		// Serialize instance with not id defined
-		String serializedObject2 = "{\"age\":23,\"name\":\"John\"}";
-		JsonObject jsonPerson2 = new JsonParser().parse(serializedObject2).getAsJsonObject();
-		Person person2 = new Gson().fromJson(serializedObject2, Person.class);
-
-		// Asserts
-		assertEquals(jsonPerson2.get("age").getAsInt(), person2.getmAge().intValue());
-		assertNull(person2.getmId());
-		assertEquals(jsonPerson2.get("name").getAsString(), person2.getmName());
-
-		// Serialize instance with all fields null except id
-		String serializedObject3 = "{\"id\":1}";
-		JsonObject jsonPerson3 = new JsonParser().parse(serializedObject3).getAsJsonObject();
-		Person person3 = new Gson().fromJson(serializedObject3, Person.class);
-
-		// Asserts
-		assertEquals(jsonPerson3.get("id").getAsInt(), person3.getmId().intValue());
-		assertNull(person3.getmName());
-		assertNull(person3.getmAge());
-	}
-
-	public void testSerializationExcludingFieldsWithoutExposeAttribute() {
-		// Serialize instance with all fields defined, but excluding those
-		// without Expose attribute
-		Person person = new Person(1, "John", 23);
-		String serializedObject = gsonBuilder.excludeFieldsWithoutExposeAnnotation().create().toJson(person);
-
-		JsonObject jsonPerson = new JsonParser().parse(serializedObject).getAsJsonObject();
-
-		// Asserts
-		assertEquals("{\"id\":1,\"name\":\"John\"}", serializedObject);
-		assertNull(jsonPerson.get("age"));
-		assertEquals(person.getmId().intValue(), jsonPerson.get("id").getAsInt());
-		assertEquals(person.getmName(), jsonPerson.get("name").getAsString());
-
-	}
-
-	public void testCustomSerializationWithoutUsingMobileServiceTable() {
-		ComplexPersonTestObject person = new ComplexPersonTestObject("John", "Doe", new Address("1345 Washington St", 1313, "US"));
-
-		gsonBuilder.registerTypeAdapter(Address.class, new JsonSerializer<Address>() {
+    String appUrl = "";
+    String appKey = "";
+    GsonBuilder gsonBuilder;
+
+    protected void setUp() throws Exception {
+        appUrl = "http://myapp.com/";
+        appKey = "qwerty";
+        gsonBuilder = new GsonBuilder();
+        super.setUp();
+    }
+
+    protected void tearDown() throws Exception {
+        super.tearDown();
+    }
+
+    public void testSimpleSerialization() throws Throwable {
+        // Serialize instance with all fields defined
+        Person person = new Person(1, "John", 23);
+        String serializedObject = new Gson().toJson(person);
+        JsonObject jsonPerson = new JsonParser().parse(serializedObject).getAsJsonObject();
+
+        // Asserts
+        assertEquals("{\"age\":23,\"id\":1,\"name\":\"John\"}", serializedObject);
+        assertEquals(person.getmAge().intValue(), jsonPerson.get("age").getAsInt());
+        assertEquals(person.getmId().intValue(), jsonPerson.get("id").getAsInt());
+        assertEquals(person.getmName(), jsonPerson.get("name").getAsString());
+
+        // Serialize instance with not id defined
+        Person person2 = new Person("John", 23);
+        String serializedObject2 = new Gson().toJson(person2);
+        JsonObject jsonPerson2 = new JsonParser().parse(serializedObject2).getAsJsonObject();
+
+        // Asserts
+        assertEquals("{\"age\":23,\"name\":\"John\"}", serializedObject2);
+        assertEquals(person.getmAge().intValue(), jsonPerson2.get("age").getAsInt());
+        assertNull(jsonPerson2.get("id"));
+        assertEquals(person.getmName(), jsonPerson2.get("name").getAsString());
+
+        // Serialize instance with all fields null except id
+        Person person3 = new Person(1);
+        String serializedObject3 = new Gson().toJson(person3);
+        JsonObject jsonPerson3 = new JsonParser().parse(serializedObject3).getAsJsonObject();
+
+        // Asserts
+        assertEquals("{\"id\":1}", serializedObject3);
+        assertNull(jsonPerson3.get("age"));
+        assertEquals(person3.getmId().intValue(), jsonPerson3.get("id").getAsInt());
+        assertNull(jsonPerson3.get("name"));
+    }
+
+    public void testSimpleDeserialization() throws Throwable {
+        // Deserialize instance with all fields defined
+        String serializedObject = "{\"age\":23,\"id\":1,\"name\":\"John\"}";
+        JsonObject jsonPerson = new JsonParser().parse(serializedObject).getAsJsonObject();
+        Person person = new Gson().fromJson(serializedObject, Person.class);
+
+        // Asserts
+        assertEquals(jsonPerson.get("age").getAsInt(), person.getmAge().intValue());
+        assertEquals(jsonPerson.get("id").getAsInt(), person.getmId().intValue());
+        assertEquals(jsonPerson.get("name").getAsString(), person.getmName());
+
+        // Serialize instance with not id defined
+        String serializedObject2 = "{\"age\":23,\"name\":\"John\"}";
+        JsonObject jsonPerson2 = new JsonParser().parse(serializedObject2).getAsJsonObject();
+        Person person2 = new Gson().fromJson(serializedObject2, Person.class);
+
+        // Asserts
+        assertEquals(jsonPerson2.get("age").getAsInt(), person2.getmAge().intValue());
+        assertNull(person2.getmId());
+        assertEquals(jsonPerson2.get("name").getAsString(), person2.getmName());
+
+        // Serialize instance with all fields null except id
+        String serializedObject3 = "{\"id\":1}";
+        JsonObject jsonPerson3 = new JsonParser().parse(serializedObject3).getAsJsonObject();
+        Person person3 = new Gson().fromJson(serializedObject3, Person.class);
+
+        // Asserts
+        assertEquals(jsonPerson3.get("id").getAsInt(), person3.getmId().intValue());
+        assertNull(person3.getmName());
+        assertNull(person3.getmAge());
+    }
+
+    public void testSerializationExcludingFieldsWithoutExposeAttribute() {
+        // Serialize instance with all fields defined, but excluding those
+        // without Expose attribute
+        Person person = new Person(1, "John", 23);
+        String serializedObject = gsonBuilder.excludeFieldsWithoutExposeAnnotation().create().toJson(person);
+
+        JsonObject jsonPerson = new JsonParser().parse(serializedObject).getAsJsonObject();
+
+        // Asserts
+        assertEquals("{\"id\":1,\"name\":\"John\"}", serializedObject);
+        assertNull(jsonPerson.get("age"));
+        assertEquals(person.getmId().intValue(), jsonPerson.get("id").getAsInt());
+        assertEquals(person.getmName(), jsonPerson.get("name").getAsString());
+
+    }
+
+    public void testCustomSerializationWithoutUsingMobileServiceTable() {
+        ComplexPersonTestObject person = new ComplexPersonTestObject("John", "Doe", new Address("1345 Washington St", 1313, "US"));
+
+        gsonBuilder.registerTypeAdapter(Address.class, new JsonSerializer<Address>() {
 
-			@Override
-			public JsonElement serialize(Address arg0, Type arg1, JsonSerializationContext arg2) {
+            @Override
+            public JsonElement serialize(Address arg0, Type arg1, JsonSerializationContext arg2) {
 
-				JsonObject json = new JsonObject();
-				json.addProperty("zipcode", arg0.getZipCode());
-				json.addProperty("country", arg0.getCountry());
-				json.addProperty("streetaddress", arg0.getStreetAddress());
+                JsonObject json = new JsonObject();
+                json.addProperty("zipcode", arg0.getZipCode());
+                json.addProperty("country", arg0.getCountry());
+                json.addProperty("streetaddress", arg0.getStreetAddress());
 
-				return json;
-			}
-		});
+                return json;
+            }
+        });
 
-		String serializedObject = gsonBuilder.create().toJson(person);
+        String serializedObject = gsonBuilder.create().toJson(person);
 
-		// Asserts
-		assertEquals(
-				"{\"address\":{\"zipcode\":1313,\"country\":\"US\",\"streetaddress\":\"1345 Washington St\"},\"firstName\":\"John\",\"lastName\":\"Doe\",\"id\":0}",
-				serializedObject);
-	}
+        // Asserts
+        assertEquals(
+                "{\"address\":{\"zipcode\":1313,\"country\":\"US\",\"streetaddress\":\"1345 Washington St\"},\"firstName\":\"John\",\"lastName\":\"Doe\",\"id\":0}",
+                serializedObject);
+    }
 
-	public void testCustomDeserializationUsingWithoutUsingMobileServiceTable() {
-		String serializedObject = "{\"address\":{\"zipcode\":1313,\"country\":\"US\",\"streetaddress\":\"1345 Washington St\"},\"firstName\":\"John\",\"lastName\":\"Doe\"}";
-		JsonObject jsonObject = new JsonParser().parse(serializedObject).getAsJsonObject();
+    public void testCustomDeserializationUsingWithoutUsingMobileServiceTable() {
+        String serializedObject = "{\"address\":{\"zipcode\":1313,\"country\":\"US\",\"streetaddress\":\"1345 Washington St\"},\"firstName\":\"John\",\"lastName\":\"Doe\"}";
+        JsonObject jsonObject = new JsonParser().parse(serializedObject).getAsJsonObject();
 
-		gsonBuilder.registerTypeAdapter(Address.class, new JsonDeserializer<Address>() {
+        gsonBuilder.registerTypeAdapter(Address.class, new JsonDeserializer<Address>() {
 
-			@Override
-			public Address deserialize(JsonElement arg0, Type arg1, JsonDeserializationContext arg2) throws JsonParseException {
-				Address a = new Address(arg0.getAsJsonObject().get("streetaddress").getAsString(), arg0.getAsJsonObject().get("zipcode").getAsInt(), arg0
-						.getAsJsonObject().get("country").getAsString());
+            @Override
+            public Address deserialize(JsonElement arg0, Type arg1, JsonDeserializationContext arg2) throws JsonParseException {
+                Address a = new Address(arg0.getAsJsonObject().get("streetaddress").getAsString(), arg0.getAsJsonObject().get("zipcode").getAsInt(), arg0
+                        .getAsJsonObject().get("country").getAsString());
 
-				return a;
-			}
+                return a;
+            }
 
-		});
+        });
 
-		ComplexPersonTestObject deserializedPerson = gsonBuilder.create().fromJson(jsonObject, ComplexPersonTestObject.class);
+        ComplexPersonTestObject deserializedPerson = gsonBuilder.create().fromJson(jsonObject, ComplexPersonTestObject.class);
 
-		// Asserts
-		assertEquals("John", deserializedPerson.getFirstName());
-		assertEquals("Doe", deserializedPerson.getLastName());
-		assertEquals(1313, deserializedPerson.getAddress().getZipCode());
-		assertEquals("US", deserializedPerson.getAddress().getCountry());
-		assertEquals("1345 Washington St", deserializedPerson.getAddress().getStreetAddress());
-	}
+        // Asserts
+        assertEquals("John", deserializedPerson.getFirstName());
+        assertEquals("Doe", deserializedPerson.getLastName());
+        assertEquals(1313, deserializedPerson.getAddress().getZipCode());
+        assertEquals("US", deserializedPerson.getAddress().getCountry());
+        assertEquals("1345 Washington St", deserializedPerson.getAddress().getStreetAddress());
+    }
 
-	public void testSimpleTreeSerialization() {
-		Group group = new Group(1, "Group1");
-		List<Person> list = new ArrayList<Person>();
-		list.add(new Person(2, "John", 23));
-		list.add(new Person(4, "Paul", 18));
-		list.add(new Person(5, "Maria", 25));
-		group.setPeople(list);
+    public void testSimpleTreeSerialization() {
+        Group group = new Group(1, "Group1");
+        List<Person> list = new ArrayList<Person>();
+        list.add(new Person(2, "John", 23));
+        list.add(new Person(4, "Paul", 18));
+        list.add(new Person(5, "Maria", 25));
+        group.setPeople(list);
 
-		String serializedObject = gsonBuilder.create().toJson(group);
-		// Asserts
-		assertEquals(
-				"{\"people\":[{\"age\":23,\"id\":2,\"name\":\"John\"},{\"age\":18,\"id\":4,\"name\":\"Paul\"},{\"age\":25,\"id\":5,\"name\":\"Maria\"}],\"mName\":\"Group1\",\"mId\":1}",
-				serializedObject);
-	}
+        String serializedObject = gsonBuilder.create().toJson(group);
+        // Asserts
+        assertEquals(
+                "{\"people\":[{\"age\":23,\"id\":2,\"name\":\"John\"},{\"age\":18,\"id\":4,\"name\":\"Paul\"},{\"age\":25,\"id\":5,\"name\":\"Maria\"}],\"mName\":\"Group1\",\"mId\":1}",
+                serializedObject);
+    }
 
-	public void testDateSerializationShouldReturnExpectedJson() throws Throwable {
+    public void testDateSerializationShouldReturnExpectedJson() throws Throwable {
 
-		// Container to store callback's results and do the asserts.
-		final ResultsContainer container = new ResultsContainer();
+        // Container to store callback's results and do the asserts.
+        final ResultsContainer container = new ResultsContainer();
 
-		final String tableName = "MyTableName";
+        final String tableName = "MyTableName";
 
-		final GregorianCalendar date = new GregorianCalendar(2013, 0, 22, 10, 30, 40);
-		date.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+        final GregorianCalendar date = new GregorianCalendar(2013, 0, 22, 10, 30, 40);
+        date.setTimeZone(TimeZone.getTimeZone("GMT-4"));
 
-		final DateTestObject dateObject = new DateTestObject(date.getTime());
+        final DateTestObject dateObject = new DateTestObject(date.getTime());
 
-		MobileServiceClient client = null;
-		try {
-			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
+        MobileServiceClient client = null;
+        try {
+            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
 
-		client = client.withFilter(new ServiceFilter() {
+        client = client.withFilter(new ServiceFilter() {
 
-			@Override
-			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
-				// Store the request content
-				container.setRequestContent(request.getContent());
-				ServiceFilterResponseMock mockedResponse = new ServiceFilterResponseMock();
-				mockedResponse.setContent("{}");
+            @Override
+            public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+                // Store the request content
+                container.setRequestContent(request.getContent());
+                ServiceFilterResponseMock mockedResponse = new ServiceFilterResponseMock();
+                mockedResponse.setContent("{}");
 
-				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+                final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-				resultFuture.set(mockedResponse);
+                resultFuture.set(mockedResponse);
 
-				return resultFuture;
-			}
-		});
+                return resultFuture;
+            }
+        });
 
-		MobileServiceTable<DateTestObject> table = client.getTable(tableName, DateTestObject.class);
+        MobileServiceTable<DateTestObject> table = client.getTable(tableName, DateTestObject.class);
 
-		table.insert(dateObject).get();
+        table.insert(dateObject).get();
 
-		// Asserts
-		// Date should have UTC format (+4 that date value)
-		assertEquals("{\"date\":\"2013-01-22T14:30:40.000Z\"}", container.getRequestContent());
-	}
+        // Asserts
+        // Date should have UTC format (+4 that date value)
+        assertEquals("{\"date\":\"2013-01-22T14:30:40.000Z\"}", container.getRequestContent());
+    }
 
-	@SuppressWarnings("deprecation")
-	public void testDateDeserializationShouldReturnExpectedEntity() throws Throwable {
+    @SuppressWarnings("deprecation")
+    public void testDateDeserializationShouldReturnExpectedEntity() throws Throwable {
 
-		final String tableName = "MyTableName";
+        final String tableName = "MyTableName";
 
-		final GregorianCalendar calendar = new GregorianCalendar(2013, 0, 22, 10, 30, 40);
-		calendar.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+        final GregorianCalendar calendar = new GregorianCalendar(2013, 0, 22, 10, 30, 40);
+        calendar.setTimeZone(TimeZone.getTimeZone("GMT-4"));
 
-		final DateTestObject dateObject = new DateTestObject(calendar.getTime());
+        final DateTestObject dateObject = new DateTestObject(calendar.getTime());
 
-		MobileServiceClient client = null;
-		try {
-			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
+        MobileServiceClient client = null;
+        try {
+            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
 
-		client = client.withFilter(new ServiceFilter() {
+        client = client.withFilter(new ServiceFilter() {
 
-			@Override
-			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+            @Override
+            public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				// Create a mock response simulating an error
-				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-				response.setStatus(new StatusLineMock(404));
-				response.setContent("{\"date\":\"2013-01-22T14:30:40.000Z\"}");
+                // Create a mock response simulating an error
+                ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+                response.setStatus(new StatusLineMock(404));
+                response.setContent("{\"date\":\"2013-01-22T14:30:40.000Z\"}");
 
-				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+                final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-				resultFuture.set(response);
+                resultFuture.set(response);
 
-				return resultFuture;
-			}
-		});
+                return resultFuture;
+            }
+        });
 
-		MobileServiceTable<DateTestObject> table = client.getTable(tableName, DateTestObject.class);
+        MobileServiceTable<DateTestObject> table = client.getTable(tableName, DateTestObject.class);
 
-		DateTestObject entity = table.insert(dateObject).get();
-		// Asserts
-		Date expctedDate = dateObject.getDate();
+        DateTestObject entity = table.insert(dateObject).get();
+        // Asserts
+        Date expctedDate = dateObject.getDate();
 
-		DateTestObject returnedDateObject = entity;
-		assertNotNull("DateTestObject should not be null", returnedDateObject);
-		Date d = returnedDateObject.getDate();
-		assertNotNull("Date should not be null", d);
-		assertEquals(expctedDate.getYear(), d.getYear());
-		assertEquals(expctedDate.getMonth(), d.getMonth());
-		assertEquals(expctedDate.getDay(), d.getDay());
-		assertEquals(expctedDate.getHours(), d.getHours());
-		assertEquals(expctedDate.getMinutes(), d.getMinutes());
-		assertEquals(expctedDate.getSeconds(), d.getSeconds());
-	}
+        DateTestObject returnedDateObject = entity;
+        assertNotNull("DateTestObject should not be null", returnedDateObject);
+        Date d = returnedDateObject.getDate();
+        assertNotNull("Date should not be null", d);
+        assertEquals(expctedDate.getYear(), d.getYear());
+        assertEquals(expctedDate.getMonth(), d.getMonth());
+        assertEquals(expctedDate.getDay(), d.getDay());
+        assertEquals(expctedDate.getHours(), d.getHours());
+        assertEquals(expctedDate.getMinutes(), d.getMinutes());
+        assertEquals(expctedDate.getSeconds(), d.getSeconds());
+    }
 
-	public void testSerializationWithComplexObjectsShouldReturnExpectedJsonUsingMobileServiceTable() throws Throwable {
+    public void testSerializationWithComplexObjectsShouldReturnExpectedJsonUsingMobileServiceTable() throws Throwable {
 
-		// Container to store callback's results and do the asserts.
-		final ResultsContainer container = new ResultsContainer();
+        // Container to store callback's results and do the asserts.
+        final ResultsContainer container = new ResultsContainer();
 
-		final String tableName = "MyTableName";
+        final String tableName = "MyTableName";
 
-		final ComplexPersonTestObject person = new ComplexPersonTestObject("John", "Doe", new Address("1345 Washington St", 1313, "US"));
+        final ComplexPersonTestObject person = new ComplexPersonTestObject("John", "Doe", new Address("1345 Washington St", 1313, "US"));
 
-		MobileServiceClient client = null;
-		try {
-			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
+        MobileServiceClient client = null;
+        try {
+            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
 
-		client = client.withFilter(new ServiceFilter() {
+        client = client.withFilter(new ServiceFilter() {
 
-			@Override
-			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
-				// Store the request content
-				container.setRequestContent(request.getContent());
+            @Override
+            public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+                // Store the request content
+                container.setRequestContent(request.getContent());
 
-				ServiceFilterResponseMock mockedResponse = new ServiceFilterResponseMock();
-				mockedResponse.setContent("{}");
+                ServiceFilterResponseMock mockedResponse = new ServiceFilterResponseMock();
+                mockedResponse.setContent("{}");
 
-				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+                final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-				resultFuture.set(mockedResponse);
+                resultFuture.set(mockedResponse);
 
-				return resultFuture;
-			}
-		});
+                return resultFuture;
+            }
+        });
 
-		MobileServiceTable<ComplexPersonTestObject> table = client.getTable(tableName, ComplexPersonTestObject.class);
+        MobileServiceTable<ComplexPersonTestObject> table = client.getTable(tableName, ComplexPersonTestObject.class);
 
-		client.registerSerializer(Address.class, new JsonSerializer<Address>() {
+        client.registerSerializer(Address.class, new JsonSerializer<Address>() {
 
-			@Override
-			public JsonElement serialize(Address arg0, Type arg1, JsonSerializationContext arg2) {
+            @Override
+            public JsonElement serialize(Address arg0, Type arg1, JsonSerializationContext arg2) {
 
-				JsonObject json = new JsonObject();
-				json.addProperty("zipcode", arg0.getZipCode());
-				json.addProperty("country", arg0.getCountry());
-				json.addProperty("streetaddress", arg0.getStreetAddress());
+                JsonObject json = new JsonObject();
+                json.addProperty("zipcode", arg0.getZipCode());
+                json.addProperty("country", arg0.getCountry());
+                json.addProperty("streetaddress", arg0.getStreetAddress());
 
-				return json;
-			}
-		});
+                return json;
+            }
+        });
 
-		table.insert(person).get();
+        table.insert(person).get();
 
-		// Asserts
-		assertEquals(
-				"{\"address\":{\"zipcode\":1313,\"country\":\"US\",\"streetaddress\":\"1345 Washington St\"},\"firstName\":\"John\",\"lastName\":\"Doe\"}",
-				container.getRequestContent());
-	}
+        // Asserts
+        assertEquals(
+                "{\"address\":{\"zipcode\":1313,\"country\":\"US\",\"streetaddress\":\"1345 Washington St\"},\"firstName\":\"John\",\"lastName\":\"Doe\"}",
+                container.getRequestContent());
+    }
 
-	public void testDeserializationWithComplexObjectsShouldReturnExpectedEntityUsingMobileServiceTable() throws Throwable {
+    public void testDeserializationWithComplexObjectsShouldReturnExpectedEntityUsingMobileServiceTable() throws Throwable {
 
-		final String tableName = "MyTableName";
+        final String tableName = "MyTableName";
 
-		final ComplexPersonTestObject person = new ComplexPersonTestObject("John", "Doe", new Address("1345 Washington St", 1313, "US"));
+        final ComplexPersonTestObject person = new ComplexPersonTestObject("John", "Doe", new Address("1345 Washington St", 1313, "US"));
 
-		MobileServiceClient client = null;
-		try {
-			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
+        MobileServiceClient client = null;
+        try {
+            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
 
-		client = client.withFilter(new ServiceFilter() {
+        client = client.withFilter(new ServiceFilter() {
 
-			@Override
-			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+            @Override
+            public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				// Create a mock response simulating an error
-				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-				response.setStatus(new StatusLineMock(404));
-				response.setContent("{\"address\":{\"zipcode\":1313,\"country\":\"US\",\"streetaddress\":\"1345 Washington St\"},\"firstName\":\"John\",\"lastName\":\"Doe\"}");
+                // Create a mock response simulating an error
+                ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+                response.setStatus(new StatusLineMock(404));
+                response.setContent("{\"address\":{\"zipcode\":1313,\"country\":\"US\",\"streetaddress\":\"1345 Washington St\"},\"firstName\":\"John\",\"lastName\":\"Doe\"}");
 
-				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+                final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-				resultFuture.set(response);
+                resultFuture.set(response);
 
-				return resultFuture;
-			}
-		});
+                return resultFuture;
+            }
+        });
 
-		MobileServiceTable<ComplexPersonTestObject> table = client.getTable(tableName, ComplexPersonTestObject.class);
+        MobileServiceTable<ComplexPersonTestObject> table = client.getTable(tableName, ComplexPersonTestObject.class);
 
-		client.registerDeserializer(Address.class, new JsonDeserializer<Address>() {
+        client.registerDeserializer(Address.class, new JsonDeserializer<Address>() {
 
-			@Override
-			public Address deserialize(JsonElement arg0, Type arg1, JsonDeserializationContext arg2) throws JsonParseException {
+            @Override
+            public Address deserialize(JsonElement arg0, Type arg1, JsonDeserializationContext arg2) throws JsonParseException {
 
-				Address a = new Address(arg0.getAsJsonObject().get("streetaddress").getAsString(), arg0.getAsJsonObject().get("zipcode").getAsInt(), arg0
-						.getAsJsonObject().get("country").getAsString());
+                Address a = new Address(arg0.getAsJsonObject().get("streetaddress").getAsString(), arg0.getAsJsonObject().get("zipcode").getAsInt(), arg0
+                        .getAsJsonObject().get("country").getAsString());
 
-				return a;
-			}
-		});
+                return a;
+            }
+        });
 
-		ComplexPersonTestObject p = table.insert(person).get();
+        ComplexPersonTestObject p = table.insert(person).get();
 
-		// Asserts
-		Address expectedAddress = person.getAddress();
+        // Asserts
+        Address expectedAddress = person.getAddress();
 
-		assertNotNull("Person should not be null", p);
-		Address a = p.getAddress();
-		assertNotNull("Address should not be null", a);
-		assertEquals(expectedAddress.getCountry(), a.getCountry());
-		assertEquals(expectedAddress.getStreetAddress(), a.getStreetAddress());
-		assertEquals(expectedAddress.getZipCode(), a.getZipCode());
-	}
+        assertNotNull("Person should not be null", p);
+        Address a = p.getAddress();
+        assertNotNull("Address should not be null", a);
+        assertEquals(expectedAddress.getCountry(), a.getCountry());
+        assertEquals(expectedAddress.getStreetAddress(), a.getStreetAddress());
+        assertEquals(expectedAddress.getZipCode(), a.getZipCode());
+    }
 
 }

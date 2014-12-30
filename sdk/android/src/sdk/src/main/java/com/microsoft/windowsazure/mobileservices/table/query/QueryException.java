@@ -24,30 +24,27 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices.table.query;
 
 public class QueryException extends RuntimeException {
-	/**
-	 * UID used for serialization
-	 */
-	private static final long serialVersionUID = 1663849623026648136L;
+    /**
+     * UID used for serialization
+     */
+    private static final long serialVersionUID = 1663849623026648136L;
 
-	/**
-	 * Creates a new QueryException with a detail message and a cause
-	 * 
-	 * @param detail
-	 *            The detail message
-	 * @param throwable
-	 *            The exception cause
-	 */
-	public QueryException(String detail, Throwable throwable) {
-		super(detail, throwable);
-	}
+    /**
+     * Creates a new QueryException with a detail message and a cause
+     *
+     * @param detail    The detail message
+     * @param throwable The exception cause
+     */
+    public QueryException(String detail, Throwable throwable) {
+        super(detail, throwable);
+    }
 
-	/**
-	 * Creates a new QueryException with a detail message
-	 * 
-	 * @param detail
-	 *            The detail message
-	 */
-	public QueryException(String detail) {
-		super(detail);
-	}
+    /**
+     * Creates a new QueryException with a detail message
+     *
+     * @param detail The detail message
+     */
+    public QueryException(String detail) {
+        super(detail);
+    }
 }

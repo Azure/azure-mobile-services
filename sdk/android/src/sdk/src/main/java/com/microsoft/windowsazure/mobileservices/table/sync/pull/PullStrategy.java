@@ -1,16 +1,9 @@
 package com.microsoft.windowsazure.mobileservices.table.sync.pull;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemColumns;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
-import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 /**
  * Created by marianosanchez on 11/3/14.
@@ -49,7 +42,7 @@ public class PullStrategy {
 
 
             if (query.getOrderBy().size() == 0) {
-               this.query.orderBy(MobileServiceSystemColumns.Id, QueryOrder.Ascending);
+                this.query.orderBy(MobileServiceSystemColumns.Id, QueryOrder.Ascending);
             }
         }
     }

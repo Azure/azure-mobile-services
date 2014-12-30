@@ -27,29 +27,29 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
 public class MultipleRequestFilter implements ServiceFilter {
 
-	private int mNumberOfRequests;
+    private int mNumberOfRequests;
 
-	public MultipleRequestFilter(int numberOfRequests) {
-		mNumberOfRequests = numberOfRequests;
-	}
+    public MultipleRequestFilter(int numberOfRequests) {
+        mNumberOfRequests = numberOfRequests;
+    }
 
-	@Override
-	public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
-		for (int i = 0; i < mNumberOfRequests; i++) {
+    @Override
+    public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+        for (int i = 0; i < mNumberOfRequests; i++) {
 
-			final boolean doCallback = i == mNumberOfRequests - 1;
+            final boolean doCallback = i == mNumberOfRequests - 1;
 
-			if (doCallback) {
-				return nextServiceFilterCallback.onNext(request);
-			} else {
-				try {
-					nextServiceFilterCallback.onNext(request).get();
-				} catch (Exception e) {
-				}
-			}
-		}
+            if (doCallback) {
+                return nextServiceFilterCallback.onNext(request);
+            } else {
+                try {
+                    nextServiceFilterCallback.onNext(request).get();
+                } catch (Exception e) {
+                }
+            }
+        }
 
-		return null;
-	}
+        return null;
+    }
 
 }

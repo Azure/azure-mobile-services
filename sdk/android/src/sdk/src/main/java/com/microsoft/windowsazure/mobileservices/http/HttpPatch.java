@@ -23,21 +23,21 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.http;
 
-import java.net.URI;
-
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+
+import java.net.URI;
 
 public class HttpPatch extends HttpEntityEnclosingRequestBase {
 
-	public static final String METHOD_NAME = "PATCH";
+    public static final String METHOD_NAME = "PATCH";
 
-	public HttpPatch(String url) {
-		super();
-		this.setURI(URI.create(url));
-	}
+    public HttpPatch(String url) {
+        super();
+        this.setURI(URI.create(url));
+    }
 
-	@Override
-	public String getMethod() {
-		return METHOD_NAME;
-	}
+    @Override
+    public String getMethod() {
+        return METHOD_NAME;
+    }
 }

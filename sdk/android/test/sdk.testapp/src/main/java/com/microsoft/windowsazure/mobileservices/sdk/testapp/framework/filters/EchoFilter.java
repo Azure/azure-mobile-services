@@ -27,15 +27,15 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
 public class EchoFilter implements ServiceFilter {
 
-	@Override
-	public ListenableFuture<ServiceFilterResponse>  handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
-		ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-		response.setContent(request.getRawContent());
-		response.setStatus(new StatusLineMock(200));
+    @Override
+    public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+        ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+        response.setContent(request.getRawContent());
+        response.setStatus(new StatusLineMock(200));
 
-		ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
-		return nextServiceFilterCallback.onNext(requestMock);
-		
-		//return nextServiceFilterCallback.onNext(request);
-	}
+        ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
+        return nextServiceFilterCallback.onNext(requestMock);
+
+        //return nextServiceFilterCallback.onNext(request);
+    }
 }

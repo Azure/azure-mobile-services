@@ -24,8 +24,8 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices.table.sync.synchandler;
 
 import com.google.gson.JsonObject;
-import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.RemoteTableOperationProcessor;
+import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushCompletionResult;
 
 /**
@@ -33,21 +33,21 @@ import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePu
  */
 public class SimpleSyncHandler implements MobileServiceSyncHandler {
 
-	@Override
-	public JsonObject executeTableOperation(RemoteTableOperationProcessor processor, TableOperation operation) throws MobileServiceSyncHandlerException {
-		try {
-			return operation.accept(processor);
-		} catch (Throwable e) {
-			throw new MobileServiceSyncHandlerException(e);
-		}
-	}
+    @Override
+    public JsonObject executeTableOperation(RemoteTableOperationProcessor processor, TableOperation operation) throws MobileServiceSyncHandlerException {
+        try {
+            return operation.accept(processor);
+        } catch (Throwable e) {
+            throw new MobileServiceSyncHandlerException(e);
+        }
+    }
 
-	@Override
-	public void onPushComplete(MobileServicePushCompletionResult pushCompletionResult) throws MobileServiceSyncHandlerException {
-		if (pushCompletionResult.getOperationErrors() != null && pushCompletionResult.getOperationErrors().size() > 0) {
-			throw new MobileServiceSyncHandlerException("There were unhandled operation errors.");
-		}
-		
-		return;
-	}
+    @Override
+    public void onPushComplete(MobileServicePushCompletionResult pushCompletionResult) throws MobileServiceSyncHandlerException {
+        if (pushCompletionResult.getOperationErrors() != null && pushCompletionResult.getOperationErrors().size() > 0) {
+            throw new MobileServiceSyncHandlerException("There were unhandled operation errors.");
+        }
+
+        return;
+    }
 }

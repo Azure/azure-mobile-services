@@ -30,67 +30,65 @@ import java.util.List;
  * Class that represents a function call query node
  */
 class FunctionCallNode implements QueryNode {
-	private FunctionCallKind mFunctionCallKind;
+    private FunctionCallKind mFunctionCallKind;
 
-	private List<QueryNode> mArguments;
+    private List<QueryNode> mArguments;
 
-	/**
-	 * Constructor for FunctionCallNode
-	 * 
-	 * @param functionCallKind
-	 *            The kind of function call
-	 */
-	FunctionCallNode(FunctionCallKind functionCallKind) {
-		this.mFunctionCallKind = functionCallKind;
-		this.mArguments = new ArrayList<QueryNode>();
-	}
+    /**
+     * Constructor for FunctionCallNode
+     *
+     * @param functionCallKind The kind of function call
+     */
+    FunctionCallNode(FunctionCallKind functionCallKind) {
+        this.mFunctionCallKind = functionCallKind;
+        this.mArguments = new ArrayList<QueryNode>();
+    }
 
-	@Override
-	public QueryNode deepClone() {
-		FunctionCallNode clone = new FunctionCallNode(this.mFunctionCallKind);
+    @Override
+    public QueryNode deepClone() {
+        FunctionCallNode clone = new FunctionCallNode(this.mFunctionCallKind);
 
-		if (this.mArguments != null) {
-			clone.mArguments = new ArrayList<QueryNode>();
+        if (this.mArguments != null) {
+            clone.mArguments = new ArrayList<QueryNode>();
 
-			for (QueryNode queryNode : this.mArguments) {
-				clone.mArguments.add(queryNode.deepClone());
-			}
-		}
+            for (QueryNode queryNode : this.mArguments) {
+                clone.mArguments.add(queryNode.deepClone());
+            }
+        }
 
-		return clone;
-	}
+        return clone;
+    }
 
-	@Override
-	public QueryNodeKind getKind() {
-		return QueryNodeKind.FunctionCall;
-	}
+    @Override
+    public QueryNodeKind getKind() {
+        return QueryNodeKind.FunctionCall;
+    }
 
-	@Override
-	public <T> T accept(QueryNodeVisitor<T> visitor) {
-		return visitor.visit(this);
-	}
+    @Override
+    public <T> T accept(QueryNodeVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
 
-	/**
-	 * Gets the function call kind
-	 */
-	public FunctionCallKind getFunctionCallKind() {
-		return this.mFunctionCallKind;
-	}
+    /**
+     * Gets the function call kind
+     */
+    public FunctionCallKind getFunctionCallKind() {
+        return this.mFunctionCallKind;
+    }
 
-	/**
-	 * Gets the list of arguments
-	 */
-	public List<QueryNode> getArguments() {
-		return this.mArguments;
-	}
+    /**
+     * Gets the list of arguments
+     */
+    public List<QueryNode> getArguments() {
+        return this.mArguments;
+    }
 
-	/**
-	 * Adds and argument to the exiting list
-	 * 
-	 * @param argument
-	 *            The argument to add
-	 */
-	public void addArgument(QueryNode argument) {
-		this.mArguments.add(argument);
-	}
+    /**
+     * Adds and argument to the exiting list
+     *
+     * @param argument The argument to add
+     */
+    public void addArgument(QueryNode argument) {
+        this.mArguments.add(argument);
+    }
 }
