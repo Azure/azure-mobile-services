@@ -63,6 +63,14 @@ public class ServiceFilterResponseMock implements ServiceFilterResponse {
         }
     }
 
+    public void setContent(String content) {
+        if (content != null) {
+            this.content = content.getBytes();
+        } else {
+            this.content = null;
+        }
+    }
+
     public void setContent(byte[] content) {
         this.content = content;
     }
@@ -74,14 +82,6 @@ public class ServiceFilterResponseMock implements ServiceFilterResponse {
 
     public void setStatus(StatusLine status) {
         this.status = status;
-    }
-
-    public void setContent(String content) {
-        if (content != null) {
-            this.content = content.getBytes();
-        } else {
-            this.content = null;
-        }
     }
 
     @Override

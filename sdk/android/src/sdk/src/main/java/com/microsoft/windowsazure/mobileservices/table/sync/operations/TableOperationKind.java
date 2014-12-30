@@ -57,9 +57,9 @@ public enum TableOperationKind {
     }
     private final int mValue;
 
-	private TableOperationKind(int value) {
-		this.mValue = value;
-	}
+    private TableOperationKind(int value) {
+        this.mValue = value;
+    }
 
     /**
      * Return the TableOperationKind with the provided int value
