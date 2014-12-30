@@ -29,13 +29,13 @@ public class IncrementalPullStrategy extends PullStrategy {
     private Date maxUpdatedAt;
     private String lastElementId;
     private Date deltaToken;
-    private String queryKey;
+    private String queryId;
     private Query originalQuery;
 
-    public IncrementalPullStrategy(Query query, String queryKey, PullCursor cursor, MobileServiceLocalStore localStore) {
+    public IncrementalPullStrategy(Query query, String queryId, PullCursor cursor, MobileServiceLocalStore localStore) {
         super(query, cursor);
         this.mStore = localStore;
-        this.queryKey = queryKey;
+        this.queryId = queryId;
     }
 
     public static void initializeStore(MobileServiceLocalStore store) throws MobileServiceLocalStoreException {
@@ -58,7 +58,7 @@ public class IncrementalPullStrategy extends PullStrategy {
             results = mStore.read(
                     QueryOperations.tableName(INCREMENTAL_PULL_STRATEGY_TABLE)
                             .field("id")
-                            .eq(query.getTableName() + "_" + queryKey));
+                            .eq(query.getTableName() + "_" + queryId));
 
             if (this.query.getTop() == 0) {
                 this.query.top(defaultTop);
@@ -116,13 +116,9 @@ public class IncrementalPullStrategy extends PullStrategy {
 
             deltaToken = maxUpdatedAt;
 
-            // reset the cursor because deltatoken has changed
             this.cursor.reset();
 
-            //if (this.supportSkip)
-            //{
             this.query.skip(0);
-            //}
 
             setupQuery(maxUpdatedAt, lastElementId);
 
@@ -136,7 +132,7 @@ public class IncrementalPullStrategy extends PullStrategy {
 
         JsonObject updatedElement = new JsonObject();
 
-        updatedElement.addProperty("id", query.getTableName() + "_" + queryKey);
+        updatedElement.addProperty("id", query.getTableName() + "_" + queryId);
         updatedElement.addProperty("maxupdateddate", lastElementUpdatedAt);
 
         try {

@@ -60,7 +60,6 @@ public enum MobileServicePushStatus {
      */
     InternalError(Integer.MAX_VALUE);
     private static final Map<Integer, MobileServicePushStatus> mValuesMap;
-
     static {
         mValuesMap = new HashMap<Integer, MobileServicePushStatus>(4);
         mValuesMap.put(0, MobileServicePushStatus.Complete);
@@ -69,12 +68,11 @@ public enum MobileServicePushStatus {
         mValuesMap.put(3, MobileServicePushStatus.CancelledByLocalStoreError);
         mValuesMap.put(Integer.MAX_VALUE, MobileServicePushStatus.InternalError);
     }
-
     private final int mValue;
 
-    private MobileServicePushStatus(int value) {
-        this.mValue = value;
-    }
+	private MobileServicePushStatus(int value) {
+		this.mValue = value;
+	}
 
     /**
      * Return the MobileServicePushStatus with the provided int value

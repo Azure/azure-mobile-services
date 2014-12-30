@@ -102,9 +102,9 @@ public class QueryODataWriter {
                 if (value == null)
                     value = "null";
 
-                sb.append(QueryNodeODataWriter.percentEncode(key, "!$'()*+,;:@")); // customName
+                sb.append(QueryNodeODataWriter.percentEncode(key, "!$'()*,;:@")); // customName
                 sb.append("=");
-                sb.append(QueryNodeODataWriter.percentEncode(value, "!$'()*+,;=:@")); // customValue
+                sb.append(QueryNodeODataWriter.percentEncode(value, "!$'()*,;=:@")); // customValue
             }
         }
 
@@ -119,7 +119,7 @@ public class QueryODataWriter {
                     sb.append(",");
                 }
 
-                sb.append(QueryNodeODataWriter.percentEncode(field, "!$&'()*+,;=:@")); // odataIdentifier
+                sb.append(QueryNodeODataWriter.percentEncode(field, "!$&'()*,;=:@")); // odataIdentifier
             }
         }
 

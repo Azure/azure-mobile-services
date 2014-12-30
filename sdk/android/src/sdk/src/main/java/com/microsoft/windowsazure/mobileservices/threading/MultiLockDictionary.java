@@ -36,7 +36,6 @@ import java.util.concurrent.locks.ReentrantLock;
 public class MultiLockDictionary<T> {
     private Map<T, MultiLock<T>> mMap;
     private Object sync;
-
     /**
      * Constructor for MultiLockDictionary
      */

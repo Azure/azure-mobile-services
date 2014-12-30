@@ -70,7 +70,7 @@ public class MobileServiceJsonSyncTable {
      * @param query an optional query to filter results
      * @return A ListenableFuture that is done when results have been pulled.
      */
-    public ListenableFuture<Void> pull(final Query query, final String queryKey) {
+    public ListenableFuture<Void> pull(final Query query, final String queryId) {
         final MobileServiceJsonSyncTable thisTable = this;
         final SettableFuture<Void> result = SettableFuture.create();
 
@@ -79,7 +79,7 @@ public class MobileServiceJsonSyncTable {
             @Override
             public void run() {
                 try {
-                    thisTable.mClient.getSyncContext().pull(thisTable.mName, query, queryKey);
+                    thisTable.mClient.getSyncContext().pull(thisTable.mName, query, queryId);
 
                     result.set(null);
                 } catch (Throwable throwable) {
