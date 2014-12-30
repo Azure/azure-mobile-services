@@ -69,7 +69,9 @@ import java.util.concurrent.ExecutionException;
 
 public class OfflineTests extends TestGroup {
 
-	protected static final String OFFLINE_TABLE_NAME = "offlineTest.db";
+    protected static final String OFFLINE_TABLE_NAME = "offlineTest.db";
+    protected static final String OFFLINE_TABLE_NOVERSION_NAME = "offlineNoVersionTest.db";
+    protected static final String INCREMENTAL_PULL_STRATEGY_TABLE = "__incrementalPullData";
 
     public OfflineTests() {
         super("Offline tests");

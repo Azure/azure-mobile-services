@@ -2,19 +2,19 @@
 Copyright (c) Microsoft Open Technologies, Inc.
 All Rights Reserved
 Apache 2.0 License
- 
+
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
- 
+
      http://www.apache.org/licenses/LICENSE-2.0
- 
+
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
- 
+
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
 
@@ -69,139 +69,119 @@ public class OperationQueue {
     private OperationQueue(MobileServiceLocalStore store) {
         this.mStore = store;
 
-		@Override
-		public String getId() {
-			return this.mOperation.getId();
-		}
+        this.mQueue = new LinkedList<OperationQueueItem>();
+        this.mBookmarkQueue = new LinkedList<BookmarkQueueItem>();
 
-		@Override
-		public TableOperationKind getKind() {
-			return this.mOperation.getKind();
-		}
+        this.mIdOperationMap = new HashMap<String, OperationQueueItem>();
+        this.mTableCountMap = new HashMap<String, Integer>();
 
-		@Override
-		public String getTableName() {
-			return this.mOperation.getTableName();
-		}
+        this.mLoadedAt = new Date();
+        this.mSequence = 0;
 
-		@Override
-		public String getItemId() {
-			return this.mOperation.getItemId();
-		}
+        this.mSyncLock = new ReentrantReadWriteLock(true);
+    }
 
-		@Override
-		public Date getCreatedAt() {
-			return this.mOperation.getCreatedAt();
-		}
+    /**
+     * Initializes requirements on the local store
+     *
+     * @param store the local store
+     * @throws MobileServiceLocalStoreException
+     */
+    public static void initializeStore(MobileServiceLocalStore store) throws MobileServiceLocalStoreException {
+        Map<String, ColumnDataType> columns = new HashMap<String, ColumnDataType>();
+        columns.put("id", ColumnDataType.String);
+        columns.put("kind", ColumnDataType.Number);
+        columns.put("tablename", ColumnDataType.String);
+        columns.put("itemid", ColumnDataType.String);
+        columns.put("__createdat", ColumnDataType.Date);
+        columns.put("__queueloadedat", ColumnDataType.Date);
+        columns.put("sequence", ColumnDataType.Number);
 
-		private TableOperation getOperation() {
-			return this.mOperation;
-		}
+        store.defineTable(OPERATION_QUEUE_TABLE, columns);
+    }
 
-		private Date getQueueLoadedAt() {
-			return this.mQueueLoadedAt;
-		}
+    /**
+     * Loads the queue of table operations from the local store
+     *
+     * @param store the local store
+     * @return the queue of table operations
+     * @throws java.text.ParseException
+     * @throws MobileServiceLocalStoreException
+     */
+    public static OperationQueue load(MobileServiceLocalStore store) throws ParseException, MobileServiceLocalStoreException {
+        OperationQueue opQueue = new OperationQueue(store);
 
-		private long getSequence() {
-			return this.mSequence;
-		}
+        JsonElement operations = store.read(QueryOperations.tableName(OPERATION_QUEUE_TABLE).orderBy("__queueLoadedAt", QueryOrder.Ascending)
+                .orderBy("sequence", QueryOrder.Ascending));
 
-		private boolean isCancelled() {
-			return this.mCancelled;
-		}
+        if (operations.isJsonArray()) {
+            JsonArray array = (JsonArray) operations;
 
-		private void cancel() {
-			this.mCancelled = true;
-		}
+            for (JsonElement element : array) {
+                if (element.isJsonObject()) {
+                    OperationQueueItem opQueueItem = deserialize((JsonObject) element);
+                    opQueue.mQueue.add(opQueueItem);
 
-		@Override
-		public <T> T accept(TableOperationVisitor<T> visitor) throws Throwable {
-			return this.mOperation.accept(visitor);
-		}
-	}
+                    // '/' is a reserved character that cannot be used on string
+                    // ids.
+                    // We use it to build a unique compound string from
+                    // tableName and itemId
+                    String tableItemId = opQueueItem.getTableName() + "/" + opQueueItem.getItemId();
 
-	private static class BookmarkQueueItem {
-		private Date mQueueLoadedAt;
-		private long mSequence;
-		private boolean mCancelled;
+                    opQueue.mIdOperationMap.put(tableItemId, opQueueItem);
 
-		private BookmarkQueueItem(Date queueLoadedAt, long sequence) {
-			this.mQueueLoadedAt = queueLoadedAt;
-			this.mSequence = sequence;
-			this.mCancelled = false;
-		}
-	}
+                    Integer tableCount = opQueue.mTableCountMap.get(opQueueItem.getTableName());
 
-	/**
-	 * Class that represents a push sync bookmark, and table operations within
-	 * it
-	 */
-	public static class Bookmark {
-		private OperationQueue mOpQueue;
-		private BookmarkQueueItem mBookmarkQueueItem;
+                    if (tableCount != null) {
+                        opQueue.mTableCountMap.put(opQueueItem.getTableName(), tableCount + 1);
+                    } else {
+                        opQueue.mTableCountMap.put(opQueueItem.getTableName(), 1);
+                    }
+                }
+            }
+        }
 
-		private Bookmark(OperationQueue opQueue, BookmarkQueueItem bookmarkQueueItem) {
-			this.mOpQueue = opQueue;
-			this.mBookmarkQueueItem = bookmarkQueueItem;
-		}
+        return opQueue;
+    }
 
-		/**
-		 * Dequeue the next bookmarked table operation
-		 * 
-		 * @return the table operation
-		 * @throws MobileServiceLocalStoreException
-		 */
-		public TableOperation dequeue() throws MobileServiceLocalStoreException {
-			return this.mOpQueue.dequeueBookmarked(this.mBookmarkQueueItem);
-		}
+    private static JsonObject serialize(OperationQueueItem opQueueItem) throws ParseException {
+        JsonObject element = new JsonObject();
 
-		/**
-		 * Peek the next bookmarked table operation
-		 * 
-		 * @return the table operation
-		 */
-		public TableOperation peek() {
-			return this.mOpQueue.peekBookmarked(this.mBookmarkQueueItem);
-		}
+        element.addProperty("id", opQueueItem.getId());
+        element.addProperty("kind", opQueueItem.getKind().getValue());
+        element.addProperty("tablename", opQueueItem.getTableName());
+        element.addProperty("itemid", opQueueItem.getItemId());
+        element.addProperty("__createdat", DateSerializer.serialize(opQueueItem.getCreatedAt()));
+        element.addProperty("__queueloadedat", DateSerializer.serialize(opQueueItem.getQueueLoadedAt()));
+        element.addProperty("sequence", opQueueItem.getSequence());
 
-		/**
-		 * Returns true if the bookmark is the first and current in the queue
-		 */
-		public boolean isCurrentBookmark() {
-			return this.mOpQueue.isCurrentBookmark(this.mBookmarkQueueItem);
-		}
+        return element;
+    }
 
-		/**
-		 * Returns true if the bookmark is canceled
-		 */
-		public boolean isCancelled() {
-			return this.mBookmarkQueueItem.mCancelled;
-		}
-	}
+    private static OperationQueueItem deserialize(JsonObject element) throws ParseException {
+        String id = element.get("id").getAsString();
+        int kind = element.get("kind").getAsInt();
+        String tableName = element.get("tablename").getAsString();
+        String itemId = element.get("itemid").getAsString();
+        Date createdAt = DateSerializer.deserialize(element.get("__createdat").getAsString());
+        Date queueLoadedAt = DateSerializer.deserialize(element.get("__queueloadedat").getAsString());
+        long sequence = element.get("sequence").getAsLong();
 
-	private MobileServiceLocalStore mStore;
-	private Queue<OperationQueueItem> mQueue;
-	private Queue<BookmarkQueueItem> mBookmarkQueue;
-	private Map<String, OperationQueueItem> mIdOperationMap;
-	private Map<String, Integer> mTableCountMap;
-	private Date mLoadedAt;
-	private long mSequence;
-	private ReadWriteLock mSyncLock;
+        TableOperation operation = null;
+        switch (kind) {
+            case 0:
+                operation = InsertOperation.create(id, tableName, itemId, createdAt);
+                break;
+            case 1:
+                operation = UpdateOperation.create(id, tableName, itemId, createdAt);
+                break;
+            case 2:
+                operation = DeleteOperation.create(id, tableName, itemId, createdAt);
+                break;
+        }
 
-	private OperationQueue(MobileServiceLocalStore store) {
-		this.mStore = store;
-
-		this.mQueue = new LinkedList<OperationQueueItem>();
-		this.mBookmarkQueue = new LinkedList<BookmarkQueueItem>();
-
-		this.mIdOperationMap = new HashMap<String, OperationQueueItem>();
-		this.mTableCountMap = new HashMap<String, Integer>();
-
-		this.mLoadedAt = new Date();
-		this.mSequence = 0;
-
-		this.mSyncLock = new ReentrantReadWriteLock(true);
-	}
+        return new OperationQueueItem(operation, queueLoadedAt, sequence);
+    }
 
     /**
      * Enqueue a new table operation
