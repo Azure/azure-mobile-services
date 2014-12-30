@@ -1,6 +1,9 @@
 package com.microsoft.windowsazure.mobileservices.table.sync.pull;
 
+import com.google.gson.JsonArray;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemColumns;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
+import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
 
 /**
  * Created by marianosanchez on 11/3/14.
@@ -15,6 +18,7 @@ public class PullStrategy {
     PullCursor cursor;
 
     public PullStrategy(Query query, PullCursor cursor) {
+
         this.query = query;
         this.supportSkip = true; //query.getSkip() > 0;
         this.supportTop = true; //query.getTop() > 0;
@@ -35,23 +39,27 @@ public class PullStrategy {
             } else {
                 this.query.top(Math.min(this.query.getTop(), defaultTop));
             }
+
+
+            if (query.getOrderBy().size() == 0) {
+                this.query.orderBy(MobileServiceSystemColumns.Id, QueryOrder.Ascending);
+            }
         }
     }
 
-    public void onResultsProcessed() {
+    public void onResultsProcessed(JsonArray elements) {
         return;
     }
 
-    public void setUpdateAt() {
-        return;
-    }
-
-    public boolean moveToNextPage() {
+    public boolean moveToNextPage(int lastElementCount) {
 
         if (!this.supportSkip)
             return false;
 
         if (cursor.getComplete())
+            return false;
+
+        if (lastElementCount < this.query.getTop())
             return false;
 
         // then we continue downloading the changes using skip and top
@@ -61,7 +69,7 @@ public class PullStrategy {
         return true;
     }
 
-    void reduceTop() {
+    protected void reduceTop() {
         if (!this.supportTop)
             return;
 
@@ -71,5 +79,9 @@ public class PullStrategy {
 
     public void pullComplete() {
         return;
+    }
+
+    public Query getLastQuery() {
+        return this.query;
     }
 }

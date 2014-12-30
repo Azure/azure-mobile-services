@@ -68,11 +68,12 @@ public class MobileServiceSyncTable<E> {
     /**
      * Performs a query against the remote table and stores results.
      *
-     * @param query an optional query to filter results
+     * @param query    an optional query to filter results
+     * @param queryKey key to identify the query
      * @return A ListenableFuture that is done when results have been pulled.
      */
-    public ListenableFuture<Void> pull(Query query) {
-        ListenableFuture<Void> pull = this.mInternalTable.pull(query);
+    public ListenableFuture<Void> pull(Query query, String queryKey) {
+        ListenableFuture<Void> pull = this.mInternalTable.pull(query, queryKey);
 
         final SettableFuture<Void> result = SettableFuture.create();
 
@@ -90,6 +91,16 @@ public class MobileServiceSyncTable<E> {
         });
 
         return result;
+    }
+
+    /**
+     * Performs a query against the remote table and stores results.
+     *
+     * @param query an optional query to filter results
+     * @return A ListenableFuture that is done when results have been pulled.
+     */
+    public ListenableFuture<Void> pull(Query query) {
+        return pull(query, null);
     }
 
     /**

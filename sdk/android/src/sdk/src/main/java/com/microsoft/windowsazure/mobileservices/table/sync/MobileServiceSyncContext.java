@@ -48,6 +48,7 @@ import com.microsoft.windowsazure.mobileservices.table.sync.operations.RemoteTab
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationError;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.UpdateOperation;
+import com.microsoft.windowsazure.mobileservices.table.sync.pull.IncrementalPullStrategy;
 import com.microsoft.windowsazure.mobileservices.table.sync.pull.PullCursor;
 import com.microsoft.windowsazure.mobileservices.table.sync.pull.PullStrategy;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushCompletionResult;
@@ -303,7 +304,7 @@ public class MobileServiceSyncContext {
      * @param tableName the remote table name
      * @param query     an optional query to filter results
      */
-    void pull(String tableName, Query query) throws Throwable {
+    void pull(String tableName, Query query, String queryKey) throws Throwable {
         this.mInitLock.readLock().lock();
 
         try {
@@ -333,7 +334,7 @@ public class MobileServiceSyncContext {
                         if (pendingTable > 0) {
                             pushFuture = push();
                         } else {
-                            processPull(invTableName, query);
+                            processPull(invTableName, query, queryKey);
                         }
                     } finally {
                         this.mTableLockMap.unLockWrite(multiRWLock);
@@ -492,6 +493,8 @@ public class MobileServiceSyncContext {
 
                         OperationQueue.initializeStore(this.mStore);
                         OperationErrorList.initializeStore(this.mStore);
+                        IncrementalPullStrategy.initializeStore(this.mStore);
+
                         initializeStore(this.mStore);
 
                         this.mStore.initialize();
@@ -570,7 +573,7 @@ public class MobileServiceSyncContext {
         }
     }
 
-    private void processPull(String tableName, Query query) throws Throwable {
+    private void processPull(String tableName, Query query, String queryKey) throws Throwable {
 
         try {
 
@@ -585,22 +588,27 @@ public class MobileServiceSyncContext {
                 query = query.deepClone();
             }
 
-            if (query.getTop() == 0) {
-                query.includeInlineCount();
-            }
-
             query.includeDeleted();
+            query.includeInlineCount();
 
             PullCursor cursor = new PullCursor(query);
-            PullStrategy strategy = new PullStrategy(query, cursor);
+            PullStrategy strategy;
+
+            if (queryKey != null) {
+                strategy = new IncrementalPullStrategy(query, queryKey, cursor, this.mStore);
+            } else {
+                strategy = new PullStrategy(query, cursor);
+            }
 
             strategy.initialize();
 
-            JsonArray elements = null;
+			boolean allProcessed = false;
 
-            do {
+			while (!allProcessed) {
+				query.top(top);
+				query.skip(skip);
 
-                JsonElement result = table.execute(query).get();
+                JsonElement result = table.execute(strategy.getLastQuery()).get();
 
                 if (result != null) {
 
@@ -625,10 +633,11 @@ public class MobileServiceSyncContext {
 
                     processElements(tableName, elements, cursor);
 
+                    strategy.onResultsProcessed(elements);
                 }
 
             }
-            while (strategy.moveToNextPage());
+            while (strategy.moveToNextPage(elements.size()));
 
         } catch (ExecutionException e) {
             throw e.getCause();

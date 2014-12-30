@@ -242,6 +242,16 @@ public class QueryOperations {
     /**
      * Greater than or equal comparison operator.
      *
+     * @param stringValue
+     * @return Query
+     */
+    public static Query ge(String stringValue) {
+        return ge(QueryOperations.val(stringValue));
+    }
+
+    /**
+     * Greater than or equal comparison operator.
+     *
      * @param numberValue
      * @return Query
      */

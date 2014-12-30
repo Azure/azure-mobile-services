@@ -90,15 +90,15 @@ public class ResultsContainer {
         return peopleResult;
     }
 
+    public void setPeopleResult(List<PersonTestObject> peopleResult) {
+        this.peopleResult = peopleResult;
+    }
+
     public void setPeopleResult(PersonTestObject[] peopleResult) {
         this.peopleResult = new ArrayList<PersonTestObject>();
         for (PersonTestObject person : peopleResult) {
             this.peopleResult.add(person);
         }
-    }
-
-    public void setPeopleResult(List<PersonTestObject> peopleResult) {
-        this.peopleResult = peopleResult;
     }
 
     public int getCount() {
@@ -201,12 +201,12 @@ public class ResultsContainer {
         return exception;
     }
 
-    public void setException(Exception exception) {
-        this.exception = exception;
-    }
-
     public void setException(Throwable exception) {
         this.exception = (Exception) exception;
+    }
+
+    public void setException(Exception exception) {
+        this.exception = exception;
     }
 
     public JsonElement getJsonResult() {
