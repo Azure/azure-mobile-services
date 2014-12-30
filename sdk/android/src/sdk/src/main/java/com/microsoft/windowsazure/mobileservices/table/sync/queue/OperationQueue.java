@@ -65,6 +65,7 @@ public class OperationQueue {
     private Date mLoadedAt;
     private long mSequence;
     private ReadWriteLock mSyncLock;
+
     private OperationQueue(MobileServiceLocalStore store) {
         this.mStore = store;
 

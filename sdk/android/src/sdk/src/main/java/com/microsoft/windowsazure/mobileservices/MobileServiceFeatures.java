@@ -73,9 +73,11 @@ public enum MobileServiceFeatures {
      */
     OpportunisticConcurrency("OC");
     private final static MobileServiceFeatures[] AllFeatures;
+
     static {
         AllFeatures = MobileServiceFeatures.class.getEnumConstants();
     }
+
     private String value;
 
     /**
