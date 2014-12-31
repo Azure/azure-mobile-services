@@ -24,6 +24,7 @@ import android.test.InstrumentationTestCase;
 import com.google.common.base.Function;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
@@ -36,6 +37,7 @@ import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.S
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.StatusLineMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.mocks.MobileServiceLocalStoreMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.mocks.MobileServiceSyncHandlerMock;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.helpers.EncodingUtilities;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.CustomFunctionTwoParameters;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.IdPropertyTestClasses.StringIdType;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
@@ -51,9 +53,13 @@ import org.apache.http.Header;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.ExecutionException;
 
 public class MobileServiceSyncTableTests extends InstrumentationTestCase {
@@ -354,7 +360,13 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
-        client = client.withFilter(getTestFilter(serviceFilterContainer, "[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"// remote
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        String updatedAt = sdf.format(new Date());
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer,
+                "{\"count\":\"2\",\"results\":[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt + "\"},{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt + "\"}]}"// remote
                 // item
         ));
 
@@ -367,8 +379,128 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         table.pull(query).get();
 
-        assertEquals(serviceFilterContainer.Url,
-                "http://myapp.com/tables/stringidtype?$filter=String+eq+%28%27world%27%29&$top=3&$skip=5&$orderby=Id+desc&__includeDeleted=true&__systemproperties=*&$select=String");
+        assertEquals(
+                serviceFilterContainer.Url,
+                EncodingUtilities
+                        .percentEncodeSpaces(
+                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20('world')&$inlinecount=allpages&$top=3&$skip=5&$orderby=Id%20desc&__includeDeleted=true&__systemproperties=*&$select=String"));
+    }
+
+    public void testPullSuccedsNoTopNoOrderBy() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
+
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        String updatedAt = sdf.format(new Date());
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer,
+                "{\"count\":\"2\",\"results\":[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt + "\"},{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt + "\"}]}"// remote
+                // item
+        ));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        Query query = QueryOperations.tableName(table.getName()).field("String").eq("world").orderBy("Id", QueryOrder.Descending)
+                .includeInlineCount().select("String");
+
+        table.pull(query).get();
+
+        assertEquals(
+                serviceFilterContainer.Url,
+                EncodingUtilities
+                        .percentEncodeSpaces(
+                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20('world')&$inlinecount=allpages&$top=50&$orderby=Id%20desc&__includeDeleted=true&__systemproperties=*&$select=String"));
+    }
+
+    public void testIncrementalPullSucceds() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
+
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        String queryKey = "QueryKey";
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        String updatedAt1 = sdf.format(new Date());
+        String updatedAt2 = sdf.format(new Date());
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer,
+                "{\"count\":\"4\",\"results\":[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt1 + "\"},{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt1 + "\"}]}",
+                "[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt2 + "\"},{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt2 + "\"}]"
+                // remote
+                // item
+        ));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        Query query = QueryOperations.tableName(table.getName()).top(2);
+
+        table.pull(query, "QueryKey").get();
+
+        assertEquals(
+                serviceFilterContainer.Requests.get(0).Url,
+                EncodingUtilities
+                        .percentEncodeSpaces(
+                                "http://myapp.com/tables/stringidtype?$inlinecount=allpages&$top=2&$orderby=__updatedAt%20asc,id%20asc&__includeDeleted=true&__systemproperties=*"));
+
+        assertEquals(
+                serviceFilterContainer.Requests.get(1).Url,
+                EncodingUtilities
+                        .percentEncodeSpaces(
+                                "http://myapp.com/tables/stringidtype?$filter=__updatedAt%20gt%20(datetime'" + updatedAt1 +
+                                        "')%20or%20(__updatedAt%20ge%20(datetime'" + updatedAt1 +
+                                        "')%20and%20id%20gt%20('def'))&$top=2&$orderby=__updatedAt%20asc,id%20asc&__includeDeleted=true&__systemproperties=*"));
+    }
+
+    public void testIncrementalPullSaveLastUpdatedAtDate() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
+
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        String queryKey = "QueryKey";
+        String incrementalPullStrategyTable = "__incrementalPullData";
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        String updatedAt1 = sdf.format(new Date());
+        String updatedAt2 = sdf.format(new Date());
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer,
+                "{\"count\":\"4\",\"results\":[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt1 + "\"},{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt1 + "\"}]}",
+                "[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt2 + "\"},{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt2 + "\"}]"
+                // remote
+                // item
+        ));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        Query query = QueryOperations.tableName(table.getName()).top(2);
+
+        table.pull(query, queryKey).get();
+
+        LinkedHashMap<String, JsonObject> tableContent = store.Tables.get(incrementalPullStrategyTable);
+
+        JsonElement result = tableContent.get(table.getName() + "_" + queryKey);
+
+        String stringMaxUpdatedDate = result.getAsJsonObject()
+                .get("maxupdateddate").getAsString();
+
+        assertEquals(updatedAt2, stringMaxUpdatedDate);
     }
 
     public void testPurgeDoesNotThrowExceptionWhenThereIsNoOperationInTable() throws MalformedURLException, InterruptedException, ExecutionException {
@@ -1137,6 +1269,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
                 ServiceFilterRequestData serviceFilterRequestData = new ServiceFilterRequestData();
                 serviceFilterRequestData.Headers = request.getHeaders();
                 serviceFilterRequestData.Content = request.getContent();
+                serviceFilterRequestData.Url = request.getUrl();
 
                 serviceFilterContainer.Url = request.getUrl();
                 serviceFilterContainer.Requests.add(serviceFilterRequestData);
@@ -1178,6 +1311,8 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         public Header[] Headers;
 
         public String Content;
+
+        public String Url;
 
         public int Count;
 

@@ -17,34 +17,11 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+package com.microsoft.windowsazure.mobileservices.sdk.testapp.test.helpers;
 
-/**
- * QueryNode.java
- */
-package com.microsoft.windowsazure.mobileservices.table.query;
+public class EncodingUtilities {
 
-/**
- * Interface of a query node used to represent a row filter expression.
- */
-public interface QueryNode {
-    /**
-     * Deep clone the QueryNode instance
-     *
-     * @return A cloned instance of the QueryNode
-     */
-    QueryNode deepClone();
-
-    /**
-     * Gets the kind of the query node.
-     */
-    QueryNodeKind getKind();
-
-    /**
-     * Accept a MobileServiceQueryNodeVisitor that walks a tree of QueryNode.
-     *
-     * @param visitor An implementation of the visitor interface.
-     * @return An object whose type is determined by the type parameter of the
-     * visitor.
-     */
-    <T> T accept(QueryNodeVisitor<T> visitor);
+    public static String percentEncodeSpaces(String value) {
+        return value.replace(" ", "%20");
+    }
 }

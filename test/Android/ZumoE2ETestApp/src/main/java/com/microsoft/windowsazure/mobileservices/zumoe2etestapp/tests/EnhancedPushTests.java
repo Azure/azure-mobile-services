@@ -623,7 +623,7 @@ public class EnhancedPushTests extends TestGroup {
 
                     this.log("OnCompleted: " + jsonObject.toString());
                     TestExecutionCallback nativeUnregisterTestExecutionCallback = getNativeUnregisterTestExecutionCallback(client, tag, payload, callback);
-                    GCMMessageManager.instance.waitForPushMessage(5000, GCMMessageHelper.getPushCallback(this, payload, nativeUnregisterTestExecutionCallback));
+                    GCMMessageManager.instance.waitForPushMessage(15000, GCMMessageHelper.getPushCallback(this, payload, nativeUnregisterTestExecutionCallback));
 
                 } catch (Exception e) {
                     callback.onTestComplete(this, createResultFromException(e));
@@ -670,7 +670,7 @@ public class EnhancedPushTests extends TestGroup {
                     log("OnCompleted: " + jsonObject.toString());
                     TestExecutionCallback nativeUnregisterTestExecutionCallback = getTemplateUnregisterTestExecutionCallback(client, tag, templateName,
                             template, templateNotification, callback);
-                    GCMMessageManager.instance.waitForPushMessage(5000,
+                    GCMMessageManager.instance.waitForPushMessage(15000,
                             GCMMessageHelper.getPushCallback(this, expectedPayload, nativeUnregisterTestExecutionCallback));
 
                 } catch (Exception e) {
@@ -720,7 +720,7 @@ public class EnhancedPushTests extends TestGroup {
                     if ("".equals(registrationId)) {
                         GCMRegistrar.register(mainActivity, mainActivity.getGCMSenderId());
                         log("Called GCMRegistrar.register");
-                        GCMMessageManager.instance.waitForRegistrationMessage(5000,
+                        GCMMessageManager.instance.waitForRegistrationMessage(15000,
                                 GCMMessageHelper.getRegistrationCallBack(this, callback, EnhancedPushTests.class));
                     } else {
                         TestResult testResult = new TestResult();
@@ -791,7 +791,7 @@ public class EnhancedPushTests extends TestGroup {
                     JsonObject jsonObject = table.insert(item).get();
 
                     test.log("OnCompleted: " + jsonObject.toString());
-                    GCMMessageManager.instance.waitForPushMessage(5000, GCMMessageHelper.getNegativePushCallback(test, callback));
+                    GCMMessageManager.instance.waitForPushMessage(15000, GCMMessageHelper.getNegativePushCallback(test, callback));
                 } catch (Exception exception) {
                     callback.onTestComplete(test, test.createResultFromException(exception));
                     // return;
@@ -854,7 +854,7 @@ public class EnhancedPushTests extends TestGroup {
 
                     JsonObject jsonObject = table.insert(item).get();
                     test.log("OnCompleted: " + jsonObject.toString());
-                    GCMMessageManager.instance.waitForPushMessage(5000, GCMMessageHelper.getNegativePushCallback(test, callback));
+                    GCMMessageManager.instance.waitForPushMessage(10000, GCMMessageHelper.getNegativePushCallback(test, callback));
                 } catch (Exception exception) {
                     callback.onTestComplete(test, test.createResultFromException(exception));
                     // return;
@@ -1203,7 +1203,7 @@ public class EnhancedPushTests extends TestGroup {
 
                     this.log("OnCompleted: " + jsonObject.toString());
                     TestExecutionCallback nativeUnregisterTestExecutionCallback = getNativeUnregisterTestExecutionCallback(client, tag, payload, callback);
-                    GCMMessageManager.instance.waitForPushMessage(5000, GCMMessageHelper.getPushCallback(this, payload, nativeUnregisterTestExecutionCallback));
+                    GCMMessageManager.instance.waitForPushMessage(15000, GCMMessageHelper.getPushCallback(this, payload, nativeUnregisterTestExecutionCallback));
 
                 } catch (Exception e) {
                     callback.onTestComplete(this, createResultFromException(e));

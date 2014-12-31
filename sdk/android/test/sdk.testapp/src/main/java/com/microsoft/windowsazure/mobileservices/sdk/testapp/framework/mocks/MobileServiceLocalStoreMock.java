@@ -66,7 +66,14 @@ public class MobileServiceLocalStoreMock implements MobileServiceLocalStore {
         if (readAsyncFunc != null) {
             result = readAsyncFunc.apply(query);
         } else {
-            result = new JsonParser().parse(ReadResponses.peek());
+
+            String value = ReadResponses.peek();
+
+            if (value == null) {
+                return null;
+            }
+
+            result = new JsonParser().parse(value);
         }
 
         return result;

@@ -322,6 +322,12 @@ public final class ExecutableQuery<E> implements Query {
     }
 
     @Override
+    public ExecutableQuery<E> ge(String stringValue) {
+        this.mQuery.ge(stringValue);
+        return this;
+    }
+
+    @Override
     public ExecutableQuery<E> ge(Query otherQuery) {
         this.mQuery.ge(otherQuery);
         return this;
@@ -384,6 +390,12 @@ public final class ExecutableQuery<E> implements Query {
     @Override
     public ExecutableQuery<E> gt(Date dateValue) {
         this.mQuery.gt(dateValue);
+        return this;
+    }
+
+    @Override
+    public ExecutableQuery<E> gt(String stringValue) {
+        this.mQuery.gt(stringValue);
         return this;
     }
 

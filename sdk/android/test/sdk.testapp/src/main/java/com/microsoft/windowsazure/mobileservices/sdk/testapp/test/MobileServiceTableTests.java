@@ -36,6 +36,7 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterRequestMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterResponseMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.StatusLineMock;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.helpers.EncodingUtilities;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.IdPropertyTestClasses.IdPropertyMultipleIdsTestObject;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.IdPropertyTestClasses.IdPropertyWithDifferentIdPropertyCasing;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.IdPropertyTestClasses.IdPropertyWithGsonAnnotation;
@@ -58,7 +59,6 @@ import org.apache.http.ProtocolVersion;
 import org.apache.http.StatusLine;
 
 import java.net.MalformedURLException;
-import java.net.URLEncoder;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
@@ -2535,15 +2535,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
             Assert.assertTrue("Opperation should have succeded", false);
         }
         // Asserts
-        assertEquals(queryUrl(tableName) + "?$filter=" + urlencode("fieldName eq (1)"), container.getRequestUrl());
-    }
-
-    private String urlencode(String s) {
-        try {
-            return URLEncoder.encode(s, "utf-8");
-        } catch (Exception e) {
-            return null;
-        }
+        assertEquals(queryUrl(tableName) + EncodingUtilities.percentEncodeSpaces("?$filter=fieldName eq (1)"), container.getRequestUrl());
     }
 
     private String queryUrl(String tableName) {
@@ -2738,7 +2730,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         }
 
         // Asserts
-        assertEquals(queryUrl(tableName) + "?$orderby=" + urlencode("myField asc"), container.getRequestUrl());
+        assertEquals(queryUrl(tableName) + EncodingUtilities.percentEncodeSpaces("?$orderby=myField asc"), container.getRequestUrl());
     }
 
     public void testQueryShouldIncludeProjection() throws Throwable {
@@ -2786,6 +2778,6 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         }
 
         // Asserts
-        assertEquals(queryUrl(tableName) + "?$select=" + urlencode("myField,otherField"), container.getRequestUrl());
+        assertEquals(queryUrl(tableName) + "?$select=myField,otherField", container.getRequestUrl());
     }
 }

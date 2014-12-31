@@ -2,19 +2,19 @@
 Copyright (c) Microsoft Open Technologies, Inc.
 All Rights Reserved
 Apache 2.0 License
- 
+
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
- 
+
      http://www.apache.org/licenses/LICENSE-2.0
- 
+
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
- 
+
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests;
@@ -24,11 +24,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+import com.microsoft.windowsazure.mobileservices.MobileServiceList;
 import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceAuthenticationProvider;
 import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServicePreconditionFailedExceptionJson;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
@@ -52,6 +54,8 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestRe
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestStatus;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.Util;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -59,11 +63,15 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
+import java.util.TimeZone;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 public class OfflineTests extends TestGroup {
 
     protected static final String OFFLINE_TABLE_NAME = "offlineTest.db";
+    protected static final String OFFLINE_TABLE_NOVERSION_NAME = "offlineNoVersionTest.db";
+    protected static final String INCREMENTAL_PULL_STRATEGY_TABLE = "__incrementalPullData";
 
     public OfflineTests() {
         super("Offline tests");
@@ -85,6 +93,14 @@ public class OfflineTests extends TestGroup {
 
         this.addTest(createSyncTestForAuthenticatedTable(true));
         this.addTest(LoginTests.createLogoutTest());
+
+        this.addTest(createOfflineIncrementalSyncTest(null, false, false));
+
+        this.addTest(createOfflineIncrementalSyncTest("incrementalQuery", false, false));
+        this.addTest(createOfflineIncrementalSyncTest("incrementalQuery", false, true));
+        this.addTest(createOfflineIncrementalSyncTest("incrementalQuery", true, false));
+        this.addTest(createOfflineIncrementalSyncTest("incrementalQuery", true, true));
+
     }
 
     private TestCase createBasicTest(String name) {
@@ -643,6 +659,159 @@ public class OfflineTests extends TestGroup {
         return test;
     }
 
+    private TestCase createOfflineIncrementalSyncTest(final String queryKey, final boolean cleanStore, final boolean complexQuery) {
+
+        final String tableName = "offlinereadyitemnoversion";
+
+        final TestCase test = new TestCase() {
+
+            @Override
+            protected void executeTest(MobileServiceClient offlineReadyClient, final TestExecutionCallback callback) {
+
+                TestCase testCase = this;
+                TestResult result = new TestResult();
+                result.setStatus(TestStatus.Passed);
+                result.setTestCase(testCase);
+                try {
+
+                    SQLiteLocalStore localStore = new SQLiteLocalStore(offlineReadyClient.getContext(), OFFLINE_TABLE_NOVERSION_NAME, null, 1);
+
+                    log("Defined the table on the local store");
+
+                    Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
+                    tableDefinition.put("id", ColumnDataType.String);
+                    tableDefinition.put("name", ColumnDataType.String);
+                    tableDefinition.put("age", ColumnDataType.Number);
+                    tableDefinition.put("float", ColumnDataType.Number);
+                    tableDefinition.put("date", ColumnDataType.Date);
+                    tableDefinition.put("bool", ColumnDataType.Boolean);
+
+                    log("Initialized the store and sync context");
+
+                    localStore.defineTable(tableName, tableDefinition);
+
+                    offlineReadyClient.getSyncContext().initialize(localStore, new SimpleSyncHandler()).get();
+
+                    MobileServiceSyncTable<OfflineReadyItemNoVersion> localTable = offlineReadyClient.getSyncTable(tableName, OfflineReadyItemNoVersion.class);
+
+                    MobileServiceJsonTable remoteTable = offlineReadyClient.getTable(tableName);
+
+                    offlineReadyClient.getSyncContext().initialize(localStore, new SimpleSyncHandler()).get();
+
+
+                    if (cleanStore) {
+                        localStore.delete(INCREMENTAL_PULL_STRATEGY_TABLE, tableName + "_" + queryKey);
+                    } else {
+
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+                        String maxUpdatedDate = sdf.format(new Date());
+
+                        log("Update last date to now to avoid obtain old records from another tests");
+
+                        JsonObject updatedElement = new JsonObject();
+
+                        updatedElement.addProperty("id", tableName + "_" + queryKey);
+                        updatedElement.addProperty("maxUpdatedDate", maxUpdatedDate);
+
+                        localStore.upsert(INCREMENTAL_PULL_STRATEGY_TABLE, updatedElement);
+                    }
+
+                    localTable.purge(null).get();
+
+                    log("Removed all items from the local table");
+
+                    List<OfflineReadyItemNoVersion> mOfflineReadyItemsNoVersion = new ArrayList<OfflineReadyItemNoVersion>();
+
+                    Random rand = new Random();
+
+                    int elementsCount = rand.nextInt((100 - 50) + 1) + 50;
+
+                    String testFilter = UUID.randomUUID().toString();
+
+                    for (int i = 0; i < elementsCount; i++) {
+
+                        OfflineReadyItemNoVersion item = new OfflineReadyItemNoVersion(new Random(), UUID.randomUUID().toString());
+                        item.setName(testFilter);
+
+                        mOfflineReadyItemsNoVersion.add(item);
+                    }
+
+                    AllOfflineReadyItemsNoVersion allOfflineReadyItemsNoVersion = new AllOfflineReadyItemsNoVersion();
+
+                    allOfflineReadyItemsNoVersion.setOfflineReadyItems(mOfflineReadyItemsNoVersion);
+
+                    remoteTable.insert(offlineReadyClient.getGsonBuilder()
+                            .create().toJsonTree(allOfflineReadyItemsNoVersion).getAsJsonObject()).get();
+
+                    //Pause for 20 seconds to ensure the massive insert
+                    Thread.sleep(20000);
+
+                    log("Inserted New Items on table");
+
+                    //if (complexQuery) {
+                    Query pullQuery =
+                            QueryOperations
+                                    .tableName(tableName)
+                                    .field("name").eq(testFilter);
+                    //}
+
+                    localTable.pull(pullQuery, queryKey).get();
+
+                    log("Pull new Elements");
+
+                    MobileServiceList<OfflineReadyItemNoVersion> localElements = localTable
+                            .read(null).get();
+
+                    if (localElements.size() != elementsCount) {
+                        log("Error, elements count should be the same.  Actual " + localElements.size() + " - Expected " + elementsCount);
+                        result.setStatus(TestStatus.Failed);
+                        callback.onTestComplete(this, result);
+                        return;
+                    }
+
+                    log("Elements count are the same");
+
+                    log("Done");
+
+                    callback.onTestComplete(this, result);
+
+                } catch (Exception e) {
+                    callback.onTestComplete(this, createResultFromException(e));
+                    return;
+                }
+            }
+
+            ;
+        };
+
+        String testName = "Offline - Incremental Sync";
+
+        if (queryKey == null) {
+            testName += "  - Simple Pull";
+        } else {
+            testName += "  - Incremental Pull";
+        }
+
+        if (cleanStore) {
+            testName += "  - Clear Store";
+        } else {
+            testName += "  - Maintain Store";
+        }
+
+        if (complexQuery) {
+            testName += "  - Complex Query";
+        } else {
+            testName += "  - Simple Query";
+        }
+
+        test.setName(testName);
+
+        return test;
+    }
+
+
     private TestCase createClearStoreTest() {
         final TestCase test = new TestCase() {
 
@@ -927,6 +1096,12 @@ class OfflineReadyItemNoVersion {
         this.mFlag = rndGen.nextInt(2) == 0;
     }
 
+    public OfflineReadyItemNoVersion(Random rndGen, String id) {
+        this(rndGen);
+
+        this.id = id;
+    }
+
     public String getId() {
         return id;
     }
@@ -1007,3 +1182,46 @@ class OfflineReadyItemNoVersion {
                 mFloatingNumber, Util.dateToString(mDate), mFlag);
     }
 }
+
+class AllOfflineReadyItemsNoVersion {
+    private int id;
+
+    @SerializedName("status")
+    private String mStatus;
+
+    @SerializedName("offlinereadyitems")
+    private OfflineReadyItemNoVersion[] mOfflineReadyItemsNoVersion;
+
+    public AllOfflineReadyItemsNoVersion() {
+        mOfflineReadyItemsNoVersion = new OfflineReadyItemNoVersion[0];
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getStatus() {
+        return mStatus;
+    }
+
+    public void setStatus(String status) {
+        mStatus = status;
+    }
+
+    public OfflineReadyItemNoVersion[] getOfflineReadyItems() {
+        return mOfflineReadyItemsNoVersion;
+    }
+
+    public void setOfflineReadyItems(List<OfflineReadyItemNoVersion> offlineReadyItemsNoVersion) {
+        mOfflineReadyItemsNoVersion = offlineReadyItemsNoVersion.toArray(mOfflineReadyItemsNoVersion);
+    }
+
+    public void setOfflineReadyItems(OfflineReadyItemNoVersion[] offlineReadyItemsNoVersion) {
+        mOfflineReadyItemsNoVersion = offlineReadyItemsNoVersion;
+    }
+}
+

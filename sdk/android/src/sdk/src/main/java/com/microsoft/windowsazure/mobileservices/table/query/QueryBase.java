@@ -334,6 +334,12 @@ class QueryBase implements Query {
     }
 
     @Override
+    public Query ge(String stringValue) {
+        QueryOperations.join(this, QueryOperations.ge(stringValue));
+        return this;
+    }
+
+    @Override
     public Query ge(Query otherQuery) {
         QueryOperations.join(this, QueryOperations.ge(otherQuery));
         return this;
@@ -396,6 +402,12 @@ class QueryBase implements Query {
     @Override
     public Query gt(Date dateValue) {
         QueryOperations.join(this, QueryOperations.gt(QueryOperations.val(dateValue)));
+        return this;
+    }
+
+    @Override
+    public Query gt(String stringValue) {
+        QueryOperations.join(this, QueryOperations.gt(QueryOperations.val(stringValue)));
         return this;
     }
 

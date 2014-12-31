@@ -280,6 +280,13 @@ public interface Query {
     /**
      * Greater than or equal comparison operator.
      *
+     * @return Query
+     */
+    Query ge(String stringValue);
+
+    /**
+     * Greater than or equal comparison operator.
+     *
      * @param otherQuery
      * @return Query
      */
@@ -362,6 +369,14 @@ public interface Query {
      * @return Query
      */
     Query gt(Date dateValue);
+
+    /**
+     * Greater than comparison operator.
+     *
+     * @param stringValue
+     * @return Query
+     */
+    Query gt(String stringValue);
 
     /**
      * Less than comparison operator.

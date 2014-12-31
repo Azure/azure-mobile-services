@@ -323,6 +323,12 @@ public final class ExecutableJsonQuery implements Query {
     }
 
     @Override
+    public ExecutableJsonQuery ge(String stringValue) {
+        this.mQuery.ge(stringValue);
+        return this;
+    }
+
+    @Override
     public ExecutableJsonQuery ge(Query otherQuery) {
         this.mQuery.ge(otherQuery);
         return this;
@@ -385,6 +391,12 @@ public final class ExecutableJsonQuery implements Query {
     @Override
     public ExecutableJsonQuery gt(Date dateValue) {
         this.mQuery.gt(dateValue);
+        return this;
+    }
+
+    @Override
+    public ExecutableJsonQuery gt(String stringValue) {
+        this.mQuery.gt(stringValue);
         return this;
     }
 

@@ -2,19 +2,19 @@
 Copyright (c) Microsoft Open Technologies, Inc.
 All Rights Reserved
 Apache 2.0 License
- 
+
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
- 
+
      http://www.apache.org/licenses/LICENSE-2.0
- 
+
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
- 
+
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
 
@@ -48,6 +48,9 @@ import com.microsoft.windowsazure.mobileservices.table.sync.operations.RemoteTab
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationError;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.UpdateOperation;
+import com.microsoft.windowsazure.mobileservices.table.sync.pull.IncrementalPullStrategy;
+import com.microsoft.windowsazure.mobileservices.table.sync.pull.PullCursor;
+import com.microsoft.windowsazure.mobileservices.table.sync.pull.PullStrategy;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushCompletionResult;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushFailedException;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushStatus;
@@ -301,7 +304,7 @@ public class MobileServiceSyncContext {
      * @param tableName the remote table name
      * @param query     an optional query to filter results
      */
-    void pull(String tableName, Query query) throws Throwable {
+    void pull(String tableName, Query query, String queryId) throws Throwable {
         this.mInitLock.readLock().lock();
 
         try {
@@ -331,7 +334,7 @@ public class MobileServiceSyncContext {
                         if (pendingTable > 0) {
                             pushFuture = push();
                         } else {
-                            processPull(invTableName, query);
+                            processPull(invTableName, query, queryId);
                         }
                     } finally {
                         this.mTableLockMap.unLockWrite(multiRWLock);
@@ -490,6 +493,8 @@ public class MobileServiceSyncContext {
 
                         OperationQueue.initializeStore(this.mStore);
                         OperationErrorList.initializeStore(this.mStore);
+                        IncrementalPullStrategy.initializeStore(this.mStore);
+
                         initializeStore(this.mStore);
 
                         this.mStore.initialize();
@@ -568,8 +573,10 @@ public class MobileServiceSyncContext {
         }
     }
 
-    private void processPull(String tableName, Query query) throws Throwable {
+    private void processPull(String tableName, Query query, String queryId) throws Throwable {
+
         try {
+
             MobileServiceJsonTable table = this.mClient.getTable(tableName);
             table.setSystemProperties(EnumSet.allOf(MobileServiceSystemProperty.class));
 
@@ -581,93 +588,98 @@ public class MobileServiceSyncContext {
                 query = query.deepClone();
             }
 
-            int originalTop = query.getTop();
-            int top = originalTop;
-            int skip = query.getSkip();
-            long count = -1;
+            query.includeDeleted();
+            query.includeInlineCount();
 
-            if (originalTop <= 0 || originalTop > 1000) {
-                query = query.includeInlineCount();
-                top = 1000;
+            PullCursor cursor = new PullCursor(query);
+            PullStrategy strategy;
+
+            if (queryId != null) {
+                strategy = new IncrementalPullStrategy(query, queryId, cursor, this.mStore);
             } else {
-                query = query.removeInlineCount();
+                strategy = new PullStrategy(query, cursor);
             }
 
-            query.includeDeleted();
+            strategy.initialize();
 
-            boolean allProcessed = false;
+            JsonArray elements = null;
 
-            while (!allProcessed) {
-                query.top(top);
-                query.skip(skip);
+            do {
 
-                JsonElement result = table.execute(query).get();
+                JsonElement result = table.execute(strategy.getLastQuery()).get();
 
                 if (result != null) {
-                    JsonArray elements = null;
 
                     if (result.isJsonObject()) {
                         JsonObject jsonObject = result.getAsJsonObject();
 
+                        //Set the total count to the cursor
                         if (jsonObject.has("count")) {
-                            count = jsonObject.get("count").getAsLong();
+                            int count = jsonObject.get("count").getAsInt();
+                            cursor.setRemaining(count);
+
+                            query.removeInlineCount();
                         }
 
                         if (jsonObject.has("results") && jsonObject.get("results").isJsonArray()) {
                             elements = jsonObject.get("results").getAsJsonArray();
-                            count -= elements.size();
                         }
 
-                        query.removeInlineCount();
                     } else if (result.isJsonArray()) {
                         elements = result.getAsJsonArray();
                     }
 
-                    if (elements != null) {
+                    processElements(tableName, elements, cursor);
 
-                        List<JsonObject> updatedJsonObjects = new ArrayList<JsonObject>();
-                        List<String> deletedIds = new ArrayList<String>();
-
-
-                        for (JsonElement element : elements) {
-
-                            JsonObject jsonObject = element.getAsJsonObject();
-                            JsonElement elementId = jsonObject.get(MobileServiceSystemColumns.Id);
-
-                            if (elementId == null) {
-                                continue;
-                            }
-
-                            if (isDeleted(jsonObject)) {
-                                deletedIds.add(elementId.getAsString());
-                            } else {
-                                updatedJsonObjects.add(jsonObject);
-                            }
-                        }
-
-                        if (deletedIds.size() > 0) {
-                            this.mStore.delete(tableName,
-                                    deletedIds.toArray(new String[deletedIds.size()]));
-                        }
-
-                        if (updatedJsonObjects.size() > 0) {
-                            this.mStore.upsert(tableName,
-                                    updatedJsonObjects.toArray(new JsonObject[updatedJsonObjects.size()]));
-                        }
-
-                        originalTop -= elements.size();
-                        top = originalTop > 1000 ? 1000 : originalTop;
-                        skip += elements.size();
-                        count -= elements.size();
-                    }
-
-                    if (count <= 0) {
-                        allProcessed = true;
-                    }
+                    strategy.onResultsProcessed(elements);
                 }
+
             }
+            while (strategy.moveToNextPage(elements.size()));
+
         } catch (ExecutionException e) {
             throw e.getCause();
+        } catch (RuntimeException e) {
+            throw e.getCause();
+        }
+    }
+
+    private void processElements(String tableName, JsonArray elements, PullCursor cursor) throws Throwable {
+        if (elements != null) {
+
+            List<JsonObject> updatedJsonObjects = new ArrayList<JsonObject>();
+            List<String> deletedIds = new ArrayList<String>();
+
+
+            for (JsonElement element : elements) {
+
+                if (!cursor.onNext()) {
+                    break;
+                }
+
+                JsonObject jsonObject = element.getAsJsonObject();
+                JsonElement elementId = jsonObject.get(MobileServiceSystemColumns.Id);
+
+                if (elementId == null) {
+                    continue;
+                }
+
+                if (isDeleted(jsonObject)) {
+                    deletedIds.add(elementId.getAsString());
+                } else {
+                    updatedJsonObjects.add(jsonObject);
+                }
+            }
+
+            if (deletedIds.size() > 0) {
+                this.mStore.delete(tableName,
+                        deletedIds.toArray(new String[deletedIds.size()]));
+            }
+
+            if (updatedJsonObjects.size() > 0) {
+                this.mStore.upsert(tableName,
+                        updatedJsonObjects.toArray(new JsonObject[updatedJsonObjects.size()]));
+            }
         }
     }
 
