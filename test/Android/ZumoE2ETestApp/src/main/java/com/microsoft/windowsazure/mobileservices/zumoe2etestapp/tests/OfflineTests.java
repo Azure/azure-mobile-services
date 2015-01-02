@@ -80,6 +80,8 @@ public class OfflineTests extends TestGroup {
 
         this.addTest(createBasicTest("Basic Test"));
 
+        this.addTest(createLocallyDeleteAlreadyDeletedElementTest());
+
         this.addTest(createSyncConflictTest(false));
         this.addTest(createSyncConflictTest(true));
 
@@ -292,6 +294,141 @@ public class OfflineTests extends TestGroup {
 
         return test;
     }
+
+    private TestCase createLocallyDeleteAlreadyDeletedElementTest() {
+
+        final String tableName = "offlineReady";
+
+        final TestCase test = new TestCase() {
+
+            @Override
+            protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
+
+                try {
+
+                    TestCase testCase = this;
+                    TestResult result = new TestResult();
+                    result.setStatus(TestStatus.Passed);
+                    result.setTestCase(testCase);
+
+                    ServiceFilterWithRequestCount serviceFilter = new ServiceFilterWithRequestCount();
+
+                    int requestsSentToServer = 0;
+
+                    client = client.withFilter(serviceFilter);
+
+                    SQLiteLocalStore localStore = new SQLiteLocalStore(client.getContext(), OFFLINE_TABLE_NAME, null, 1);
+
+                    SimpleSyncHandler handler = new SimpleSyncHandler();
+                    MobileServiceSyncContext syncContext = client.getSyncContext();
+
+                    syncContext.initialize(localStore, handler).get();
+
+                    log("Defined the table on the local store");
+
+                    Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
+                    tableDefinition.put("id", ColumnDataType.String);
+                    tableDefinition.put("name", ColumnDataType.String);
+                    tableDefinition.put("age", ColumnDataType.Number);
+                    tableDefinition.put("float", ColumnDataType.Number);
+                    tableDefinition.put("date", ColumnDataType.Date);
+                    tableDefinition.put("bool", ColumnDataType.Boolean);
+                    tableDefinition.put("__version", ColumnDataType.String);
+
+                    log("Initialized the store and sync context");
+
+                    localStore.defineTable(tableName, tableDefinition);
+
+                    client.getSyncContext().initialize(localStore, new SimpleSyncHandler()).get();
+
+                    MobileServiceSyncTable<OfflineReadyItem> localTable = client.getSyncTable(tableName, OfflineReadyItem.class);
+
+                    MobileServiceTable<OfflineReadyItem> remoteTable = client.getTable(tableName, OfflineReadyItem.class);
+
+                    OfflineReadyItem item = new OfflineReadyItem(new Random());
+
+                    log("Inserted the item to the local store:" + item);
+
+                    item = localTable.insert(item).get();
+
+                    log("Validating that the item is not in the server table");
+
+                    try {
+                        requestsSentToServer++;
+                        remoteTable.lookUp(item.getId()).get();
+                        log("Error, item is present in the server");
+                        // return false;
+                    } catch (ExecutionException ex) {
+                        log("Ok, item is not in the server:" + ex.getMessage());
+                    }
+
+                    if (!validateRequestCount(this, serviceFilter.requestCount, requestsSentToServer)) {
+                        result.setStatus(TestStatus.Failed);
+                        callback.onTestComplete(this, result);
+                    }
+
+                    log("Pushing changes to the server");
+                    client.getSyncContext().push().get();
+                    requestsSentToServer++;
+
+                    if (!validateRequestCount(this, serviceFilter.requestCount, requestsSentToServer)) {
+                        result.setStatus(TestStatus.Failed);
+                        callback.onTestComplete(this, result);
+                    }
+
+                    log("Push done; now verifying that item is in the server");
+
+                    OfflineReadyItem serverItem = remoteTable.lookUp(item.getId()).get();
+                    requestsSentToServer++;
+
+                    log("Retrieved item from server:" + serverItem);
+
+                    if (serverItem.equals(item)) {
+                        log("Items are the same");
+                    } else {
+                        log("Items are different. Local: " + item + "; remote: " + serverItem);
+                        result.setStatus(TestStatus.Failed);
+                        callback.onTestComplete(this, result);
+                        return;
+                    }
+
+                    log("Delete the remote item");
+
+                    remoteTable.delete(serverItem).get();
+
+                    log("Delete the local item");
+
+                    localTable.delete(item).get();
+
+                    log("Item has been deleted");
+
+                    log("Pushing the new changes to the server");
+                    client.getSyncContext().push().get();
+                    requestsSentToServer += 2;
+
+                    if (!validateRequestCount(this, serviceFilter.requestCount, requestsSentToServer)) {
+                        result.setStatus(TestStatus.Failed);
+                        callback.onTestComplete(this, result);
+                    }
+
+                    log("Done");
+
+                    callback.onTestComplete(this, result);
+
+                } catch (Exception e) {
+                    callback.onTestComplete(this, createResultFromException(e));
+                    return;
+                }
+            }
+
+            ;
+        };
+
+        test.setName("Locally delete an already deleted element Test");
+
+        return test;
+    }
+
 
     private TestCase createSyncConflictTest(final boolean autoResolve) {
 
@@ -1216,12 +1353,12 @@ class AllOfflineReadyItemsNoVersion {
         return mOfflineReadyItemsNoVersion;
     }
 
-    public void setOfflineReadyItems(List<OfflineReadyItemNoVersion> offlineReadyItemsNoVersion) {
-        mOfflineReadyItemsNoVersion = offlineReadyItemsNoVersion.toArray(mOfflineReadyItemsNoVersion);
-    }
-
     public void setOfflineReadyItems(OfflineReadyItemNoVersion[] offlineReadyItemsNoVersion) {
         mOfflineReadyItemsNoVersion = offlineReadyItemsNoVersion;
+    }
+
+    public void setOfflineReadyItems(List<OfflineReadyItemNoVersion> offlineReadyItemsNoVersion) {
+        mOfflineReadyItemsNoVersion = offlineReadyItemsNoVersion.toArray(mOfflineReadyItemsNoVersion);
     }
 }
 

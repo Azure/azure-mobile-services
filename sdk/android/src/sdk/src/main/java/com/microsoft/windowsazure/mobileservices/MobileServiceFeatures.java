@@ -78,15 +78,15 @@ public enum MobileServiceFeatures {
     }
     private String value;
 
-	/**
-	 * Constructor
-	 *
-	 * @param value the code associated with the feature which will
-	 * be sent to the server in the features header
-	 */
-	MobileServiceFeatures(String value) {
-		this.value = value;
-	}
+    /**
+     * Constructor
+     *
+     * @param value the code associated with the feature which will
+     *              be sent to the server in the features header
+     */
+    MobileServiceFeatures(String value) {
+        this.value = value;
+    }
 
     /**
      * Returns a comma-separated list of feature codes which can be sent to

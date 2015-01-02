@@ -70,9 +70,9 @@ public enum MobileServicePushStatus {
     }
     private final int mValue;
 
-	private MobileServicePushStatus(int value) {
-		this.mValue = value;
-	}
+    private MobileServicePushStatus(int value) {
+        this.mValue = value;
+    }
 
     /**
      * Return the MobileServicePushStatus with the provided int value
