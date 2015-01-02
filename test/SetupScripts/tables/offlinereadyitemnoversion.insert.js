@@ -26,7 +26,7 @@ function populateTable(table, request, items) {
                 }
             });
         }
-        else {
+        else if (index == items.length){
             request.respond(201, { id: 1, status: 'Table is populated' });
         }
     };

@@ -850,9 +850,11 @@ public class OfflineTests extends TestGroup {
                         JsonObject updatedElement = new JsonObject();
 
                         updatedElement.addProperty("id", tableName + "_" + queryKey);
-                        updatedElement.addProperty("maxUpdatedDate", maxUpdatedDate);
+                        updatedElement.addProperty("maxupdateddate", maxUpdatedDate);
 
                         localStore.upsert(INCREMENTAL_PULL_STRATEGY_TABLE, updatedElement);
+
+                        log(maxUpdatedDate);
                     }
 
                     localTable.purge(null).get();
@@ -883,7 +885,7 @@ public class OfflineTests extends TestGroup {
                             .create().toJsonTree(allOfflineReadyItemsNoVersion).getAsJsonObject()).get();
 
                     //Pause for 30 seconds to ensure the massive insert
-                    //Thread.sleep(120000);
+                    //Thread.sleep(30000);
 
                     log("Inserted New Items on table");
 
