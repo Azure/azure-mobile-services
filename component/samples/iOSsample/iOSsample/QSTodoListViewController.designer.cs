@@ -4,21 +4,21 @@
 // actions made in the Xcode designer. If it is removed, they will be lost.
 // Manual changes to this file may not be handled correctly.
 //
-using MonoTouch.Foundation;
+using Foundation;
 
 namespace iOSsample
 {
-	[Register ("QSTodoListViewController")]
+	[Foundation.Register("QSTodoListViewController")]
 	partial class QSTodoListViewController
 	{
-		[Outlet]
-		MonoTouch.UIKit.UIActivityIndicatorView activityIndicator { get; set; }
+		[Foundation.Outlet]
+		UIKit.UIActivityIndicatorView activityIndicator { get; set; }
 
-		[Outlet]
-		MonoTouch.UIKit.UITextField itemText { get; set; }
+		[Foundation.Outlet]
+		UIKit.UITextField itemText { get; set; }
 
-		[Action ("OnAdd:")]
-		partial void OnAdd (MonoTouch.Foundation.NSObject sender);
+		[Foundation.Action("OnAdd:")]
+		partial void OnAdd (Foundation.NSObject sender);
 		
 		void ReleaseDesignerOutlets ()
 		{

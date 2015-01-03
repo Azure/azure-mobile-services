@@ -1,7 +1,7 @@
 using System;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using MonoTouch.Dialog;
-using MonoTouch.UIKit;
+using UIKit;
 
 namespace MicrosoftWindowsAzureMobileiOSTest
 {

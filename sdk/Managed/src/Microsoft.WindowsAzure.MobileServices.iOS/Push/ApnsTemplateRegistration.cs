@@ -6,8 +6,13 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
-using MonoTouch.Foundation;
 using Newtonsoft.Json;
+
+#if __UNIFIED__
+using Foundation;
+#else
+using MonoTouch.Foundation;
+#endif
 
 namespace Microsoft.WindowsAzure.MobileServices
 {

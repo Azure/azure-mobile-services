@@ -9,7 +9,12 @@ namespace Microsoft.WindowsAzure.MobileServices
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+
+    #if __UNIFIED__
+    using Foundation;
+    #else
     using MonoTouch.Foundation;
+    #endif
 
     /// <summary>
     /// Define a class help to create/update/delete notification registrations
