@@ -838,23 +838,6 @@ public class OfflineTests extends TestGroup {
 
                     if (cleanStore) {
                         localStore.delete(INCREMENTAL_PULL_STRATEGY_TABLE, tableName + "_" + queryKey);
-                    } else {
-
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-                        String maxUpdatedDate = sdf.format(new Date());
-
-                        log("Update last date to now to avoid obtain old records from another tests");
-
-                        JsonObject updatedElement = new JsonObject();
-
-                        updatedElement.addProperty("id", tableName + "_" + queryKey);
-                        updatedElement.addProperty("maxupdateddate", maxUpdatedDate);
-
-                        localStore.upsert(INCREMENTAL_PULL_STRATEGY_TABLE, updatedElement);
-
-                        log(maxUpdatedDate);
                     }
 
                     localTable.purge(null).get();
@@ -883,9 +866,6 @@ public class OfflineTests extends TestGroup {
 
                     remoteTable.insert(offlineReadyClient.getGsonBuilder()
                             .create().toJsonTree(allOfflineReadyItemsNoVersion).getAsJsonObject()).get();
-
-                    //Pause for 30 seconds to ensure the massive insert
-                    //Thread.sleep(30000);
 
                     log("Inserted New Items on table");
 
