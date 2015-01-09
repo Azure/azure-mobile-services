@@ -63,7 +63,6 @@
     if (self.isCancelled) {
         NSError *error = [self errorWithDescription:@"Purge cancelled" code:MSPullAbortedUnknown];
         [self callCompletionIfError:error];
-        [self completeOperation];
     }
     
     return self.isCancelled;
