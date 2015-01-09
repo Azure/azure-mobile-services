@@ -12,8 +12,10 @@
 #import "MSQueryInternal.h"
 #import "MSQueuePushOperation.h"
 #import "MSQueuePullOperation.h"
+#import "MSQueuePurgeOperation.h"
 #import "MSNaiveISODateFormatter.h"
 #import "MSDateOffset.h"
+#import "MSTableConfigValue.h"
 
 @implementation MSSyncContext {
     dispatch_queue_t writeOperationQueue;
@@ -82,9 +84,9 @@ static NSOperationQueue *pushQueue_;
 {
     // TODO: Allow users to cancel operations
     MSQueuePushOperation *push = [[MSQueuePushOperation alloc] initWithSyncContext:self
-                                                                         dispatchQueue:writeOperationQueue
-                                                                            completion:completion];
-        
+                                                                     dispatchQueue:writeOperationQueue
+                                                                        completion:completion];
+    
     [pushQueue_ addOperation:push];
 }
 
@@ -407,13 +409,13 @@ static NSOperationQueue *pushQueue_;
         else {
             // TODO: Allow users to cancel operations
             MSQueuePullOperation *pull = [[MSQueuePullOperation alloc] initWithSyncContext:self
-                                                                                         query:query
-                                                                                       queryId:queryId
-                                                                                 dispatchQueue:writeOperationQueue
-                                                                                 callbackQueue:self.callbackQueue
-                                                                                    completion:completion];
-
-                
+                                                                                     query:query
+                                                                                   queryId:queryId
+                                                                             dispatchQueue:writeOperationQueue
+                                                                             callbackQueue:self.callbackQueue
+                                                                                completion:completion];
+            
+            
             [pushQueue_ addOperation:pull];
         }
     });
@@ -424,26 +426,27 @@ static NSOperationQueue *pushQueue_;
 /// Otherwise clear the local table of all macthing records
 - (void) purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion
 {
-    // purge needs exclusive access to the storage layer
-    dispatch_async(writeOperationQueue, ^{
-        // Check if our table is dirty, if so, cancel the purge action
-        NSArray *tableOps = [self.operationQueue getOperationsForTable:query.syncTable.name item:nil];
-        
-        NSError *error;
-        if (tableOps.count > 0) {
-            error = [self errorWithDescription:@"The table cannot be purged because it has pending operations"
-                                  andErrorCode:MSPurgeAbortedPendingChanges];
-        } else {
-            // We can safely delete all items on this table (no pending operations)
-            [self.dataSource deleteUsingQuery:query orError:&error];
-        }
-        
-        if (completion) {
-            [self.callbackQueue addOperationWithBlock:^{
-                completion(error);
-            }];
-        }
-    });
+    MSQueuePurgeOperation *purge = [[MSQueuePurgeOperation alloc] initPurgeWithSyncContext:self
+                                                                                     query:query
+                                                                                     force:NO
+                                                                             dispatchQueue:writeOperationQueue
+                                                                             callbackQueue:self.callbackQueue
+                                                                                completion:completion];
+    [pushQueue_ addOperation:purge];
+}
+
+/// Purges all data, pending operations, operation errors, and metadata for the
+/// MSSyncTable from the local store.
+-(void) forcePurgeWithTable:(MSSyncTable *)syncTable completion:(MSSyncBlock)completion
+{
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:syncTable];
+    MSQueuePurgeOperation *purge = [[MSQueuePurgeOperation alloc] initPurgeWithSyncContext:self
+                                                                                     query:query
+                                                                                     force:YES
+                                                                             dispatchQueue:writeOperationQueue
+                                                                             callbackQueue:self.callbackQueue
+                                                                                completion:completion];
+    [pushQueue_ addOperation:purge];
 }
 
 + (BOOL) dictionary:(NSDictionary *)dictionary containsCaseInsensitiveKey:(NSString *)key

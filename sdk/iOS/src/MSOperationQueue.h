@@ -44,4 +44,7 @@
 /// Removes the lock on the operation
 - (BOOL) unlockOperation:(MSTableOperation *)operation;
 
+/// Returns true if the operation is locked; otherwise, false
+- (BOOL) isLocked:(MSTableOperation *)operation;
+
 @end
