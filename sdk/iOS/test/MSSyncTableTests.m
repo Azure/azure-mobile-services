@@ -529,6 +529,90 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
+-(void) testInsertThenInsertSameItem
+{
+    NSString *insertResponse = @"{\"id\":\"one\", \"text\":\"first item\"}";
+    MSMultiRequestTestFilter *testFilter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[@200] data:@[insertResponse] appendEmptyRequest:@NO];
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
+
+    NSDictionary *item = @{ @"id": @"one", @"text": @"first item" };
+    [todoTable insert:item completion:^(NSDictionary *i, NSError *error) {
+        XCTAssertNil(error);
+        // push it to clear out pending operations
+        [todoTable.client.syncContext pushWithCompletion:^(NSError *error) {
+            done = YES;
+        }];
+    }];
+    
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    done = NO;
+    
+    [todoTable insert:item completion:^(NSDictionary *i, NSError *error) {
+        XCTAssertNotNil(error);
+        XCTAssertEqual(error.code, MSSyncTableInvalidAction);
+        done = YES;
+    }];
+    
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+-(void) testInsertWithReadError
+{
+    NSString *insertResponse = @"{\"id\":\"one\", \"text\":\"first item\"}";
+    MSMultiRequestTestFilter *testFilter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[@200] data:@[insertResponse] appendEmptyRequest:@NO];
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
+    
+    offline.errorOnReadTableWithItemIdOrError = YES;
+    NSDictionary *item = @{ @"id": @"one", @"text": @"first item" };
+
+    // insert without any items; should give an error
+    [todoTable insert:item completion:^(NSDictionary *i, NSError *error) {
+        XCTAssertNotNil(error);
+        XCTAssertEqual(error.code, 1);
+        XCTAssertEqual(offline.upsertCalls, 0);
+        XCTAssertEqual(offline.readTableCalls, 1);
+        done = YES;
+    }];
+    
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    done = NO;
+    
+    offline.errorOnReadTableWithItemIdOrError = NO;
+    [offline resetCounts];
+    
+    // now insert so we end up with an item in the local store
+    [todoTable insert:item completion:^(NSDictionary *i, NSError *error) {
+        XCTAssertNil(error);
+        XCTAssertEqual(offline.upsertCalls, 2); // one for the item, one for the operation
+        XCTAssertEqual(offline.readTableCalls, 1);
+        // push it to clear out pending operations
+        [todoTable.client.syncContext pushWithCompletion:^(NSError *error) {
+            done = YES;
+        }];
+    }];
+    
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    done = NO;
+    
+    offline.errorOnReadTableWithItemIdOrError = YES;
+    [offline resetCounts];
+    
+    // now this should error as well with our read error.
+    [todoTable insert:item completion:^(NSDictionary *i, NSError *error) {
+        XCTAssertNotNil(error);
+        XCTAssertEqual(error.code, 1);
+        XCTAssertEqual(offline.upsertCalls, 0);
+        XCTAssertEqual(offline.readTableCalls, 1);
+        done = YES;
+    }];
+    
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
 
 #pragma mark Update Tests
 
