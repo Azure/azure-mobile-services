@@ -104,6 +104,10 @@
 /// any are found the purge will be cancelled and an error returned.
 -(void)purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion;
 
+/// Purges all data, pending operations, operation errors, and metadata for the
+/// MSSyncTable from the local cache.
+-(void)forcePurgeWithCompletion:(MSSyncBlock)completion;
+
 /// @}
 
 @end

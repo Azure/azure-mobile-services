@@ -18,7 +18,6 @@
 
 @interface MSQueuePullOperation()
 
-@property (nonatomic, strong)   NSError *error;
 @property (nonatomic, weak)     dispatch_queue_t dispatchQueue;
 @property (nonatomic, weak)     NSOperationQueue *callbackQueue;
 @property (nonatomic, weak)     MSSyncContext *syncContext;
@@ -73,7 +72,12 @@
 -(BOOL) checkIsCanceled
 {
     if (self.isCancelled) {
-        self.error = [self errorWithDescription:@"Pull cancelled" code:MSPullAbortedUnknown];
+        NSError *error = [self errorWithDescription:@"Pull cancelled" code:MSPullAbortedUnknown];
+        if (self.completion) {
+            [self.callbackQueue addOperationWithBlock:^{
+                self.completion(error);
+            }];
+        }
         [self completeOperation];
     }
     

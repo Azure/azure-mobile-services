@@ -61,7 +61,6 @@
 
 -(void)pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion
 {
-    // we may manipulate the query so we make a copy to preserve the user's version
     [self.client.syncContext pullWithQuery:query queryId:queryId completion:completion];
 }
 
@@ -75,6 +74,13 @@
     } else {
         [self.client.syncContext purgeWithQuery:query completion:completion];
     }
+}
+
+/// Purges all data, pending operations, operation errors, and metadata for the
+/// MSSyncTable from the local store.
+-(void)forcePurgeWithCompletion:(MSSyncBlock)completion
+{
+    [self.client.syncContext forcePurgeWithTable:self completion:completion];
 }
 
 #pragma mark * Public Read Methods

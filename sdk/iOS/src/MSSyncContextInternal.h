@@ -29,6 +29,8 @@
 
 -(void) purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion;
 
+-(void) forcePurgeWithTable:(MSSyncTable *)syncTable completion:(MSSyncBlock)completion;
+
 
 #pragma mark * Operation Helpers
 
