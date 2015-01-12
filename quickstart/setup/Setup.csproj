@@ -256,6 +256,10 @@
       <Value>$(JSSDKVersion)</Value>
       <Visible>false</Visible>
     </T4ParameterValues>
+    <T4ParameterValues Include="StoreSDKVersion">
+      <Value>$(StoreSDKVersion)</Value>
+      <Visible>false</Visible>
+    </T4ParameterValues>    
   </ItemGroup>
   <PropertyGroup>
     <TransformOutOfDateOnly>false</TransformOutOfDateOnly>
