@@ -155,10 +155,20 @@ static NSOperationQueue *pushQueue_;
         // Update local store and then the operation queue
         if (error == nil) {
             switch (action) {
-                case MSTableOperationInsert:
-                    [self.dataSource upsertItems:[NSArray arrayWithObject:itemToSave] table:table orError:&error];
+                case MSTableOperationInsert: {
+                    // Check to see if this item already exists
+                    NSString *itemId = item[MSSystemColumnId];
+                    NSDictionary *result = [self syncTable:table readWithId:itemId orError:&error];
+                    if (error == nil) {
+                        if (result == nil) {
+                            [self.dataSource upsertItems:[NSArray arrayWithObject:itemToSave] table:table orError:&error];
+                        }
+                        else {
+                            error = [self errorWithDescription:@"This item already exists." andErrorCode:MSSyncTableInvalidAction];
+                        }
+                    }
                     break;
-                    
+                }
                 case MSTableOperationUpdate:
                     [self.dataSource upsertItems:[NSArray arrayWithObject:itemToSave] table:table orError:&error];
                     break;
