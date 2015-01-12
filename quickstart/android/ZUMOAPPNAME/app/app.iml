@@ -83,8 +83,8 @@
     </content>
     <orderEntry type="jdk" jdkName="Android API 20 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" exported="" name="azure-mobile-services-android-sdk-2.0.2-beta" level="project" />
     <orderEntry type="library" exported="" name="gson-2.3" level="project" />
-    <orderEntry type="library" exported="" name="azure-mobile-services-android-sdk-2.0-beta" level="project" />
     <orderEntry type="library" exported="" name="guava-18.0" level="project" />
   </component>
 </module>

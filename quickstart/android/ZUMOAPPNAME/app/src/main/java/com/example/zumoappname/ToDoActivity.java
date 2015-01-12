@@ -129,20 +129,6 @@ public class ToDoActivity extends Activity {
         // Set the item as completed and update it in the table
         item.setComplete(true);
 
-        /*
-		mToDoTable.update(item, new TableOperationCallback<ToDoItem>() {
-
-			public void onCompleted(ToDoItem entity, Exception exception, ServiceFilterResponse response) {
-				if (exception == null) {
-					if (entity.isComplete()) {
-						mAdapter.remove(entity);
-					}
-				} else {
-					createAndShowDialog(exception, "Error");
-				}
-			}
-
-		});*/
 
         new AsyncTask<Void, Void, Void>(){
             @Override
@@ -183,23 +169,6 @@ public class ToDoActivity extends Activity {
         item.setText(mTextNewToDo.getText().toString());
         item.setComplete(false);
 
-        /*
-		// Insert the new item
-		mToDoTable.insert(item, new TableOperationCallback<ToDoItem>() {
-
-			public void onCompleted(ToDoItem entity, Exception exception, ServiceFilterResponse response) {
-				
-				if (exception == null) {
-					if (!entity.isComplete()) {
-						mAdapter.add(entity);
-					}
-				} else {
-					createAndShowDialog(exception, "Error");
-				}
-
-			}
-		});
-		*/
         // Insert the new item
         new AsyncTask<Void, Void, Void>(){
             @Override
@@ -260,23 +229,6 @@ public class ToDoActivity extends Activity {
             }
         }.execute();
 
-        /*
-		mToDoTable.where().field("complete").eq(val(false)).execute(new TableQueryCallback<ToDoItem>() {
-
-			public void onCompleted(List<ToDoItem> result, int count, Exception exception, ServiceFilterResponse response) {
-				if (exception == null) {
-					mAdapter.clear();
-
-					for (ToDoItem item : result) {
-						mAdapter.add(item);
-					}
-
-				} else {
-					createAndShowDialog(exception, "Error");
-				}
-			}
-		});
-		*/
     }
 
     /**
