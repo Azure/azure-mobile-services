@@ -12,6 +12,12 @@ icons:
   - azure-mobile-services_128x128.png
 libraries:
   ios: 
+    - ..\..\bin\Signed\Release\Managed\iOS-Classic\Microsoft.WindowsAzure.Mobile.dll
+    - ..\..\bin\Signed\Release\Managed\iOS-Classic\Microsoft.WindowsAzure.Mobile.Ext.dll    
+    - ..\..\bin\Signed\Release\Managed\iOS-Classic\Newtonsoft.Json.dll    
+    - ..\..\bin\Signed\Release\Managed\iOS-Classic\System.Net.Http.Extensions.dll
+    - ..\..\bin\Signed\Release\Managed\iOS-Classic\System.Net.Http.Primitives.dll
+  ios-unified: 
     - ..\..\bin\Signed\Release\Managed\iOS\Microsoft.WindowsAzure.Mobile.dll
     - ..\..\bin\Signed\Release\Managed\iOS\Microsoft.WindowsAzure.Mobile.Ext.dll    
     - ..\..\bin\Signed\Release\Managed\iOS\Newtonsoft.Json.dll    
@@ -29,7 +35,7 @@ libraries:
 samples:
   - name: Android Sample
     path: samples\androidsample\androidsample.sln
-  - name: iOS Sample
+  - name: iOS Unified API Sample
     path: samples\iOSsample\iOSsample.sln
 screenshots:
   - screenshots/WAMS-New.PNG

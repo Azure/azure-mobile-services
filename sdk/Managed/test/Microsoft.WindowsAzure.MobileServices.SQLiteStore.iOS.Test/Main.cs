@@ -1,4 +1,4 @@
-﻿using MonoTouch.UIKit;
+﻿using UIKit;
 
 namespace Microsoft.WindowsAzure.Mobile.SQLiteStore.iOS.Test
 {

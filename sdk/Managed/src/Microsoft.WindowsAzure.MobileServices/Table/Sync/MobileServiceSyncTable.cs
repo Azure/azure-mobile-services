@@ -15,7 +15,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
     internal class MobileServiceSyncTable : IMobileServiceSyncTable
     {
-        private static readonly Regex queryIdRegex = new Regex("^[a-zA-Z][a-zA-Z0-9_-]{0,24}$");
+        private static readonly Regex queryIdRegex = new Regex("^[^|]{0,50}$");
         private MobileServiceSyncContext syncContext;
 
         public MobileServiceClient MobileServiceClient { get; private set; }

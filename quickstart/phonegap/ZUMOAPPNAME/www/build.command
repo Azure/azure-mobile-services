@@ -2,13 +2,12 @@
 # Installs the required plugins and builds the platforms supported when
 # using OSX.
 
-# Plugins required for authentication
-phonegap local plugin add org.apache.cordova.inappbrowser
+phonegap local plugin add com.microsoft.azure-mobile-services
 
 # Plugins required for push notifications
 # phonegap local plugin add org.apache.cordova.device
 # phonegap local plugin add https://github.com/phonegap-build/PushPlugin.git
 
-# Now build supported platforms on OSX
+# Now build supported platforms
 phonegap local build android
 phonegap local build ios

@@ -20,6 +20,7 @@ module.exports = function(grunt) {
         'src/External/esprima/esprima.js'
       ],
       web: [
+        'src/Push/Push.Web.js',
         'src/Platforms/Platform.Web.js',
         'src/Generated/MobileServices.Core.js',
         'src/Transports/*.js',
@@ -28,7 +29,7 @@ module.exports = function(grunt) {
         'src/Utilities/Promises.js'
       ],
       winjs: [
-        'src/Push/Push.js',
+        'src/Push/Push.WinJS.js',
         'src/LoginUis/WebAuthBroker.js',
         'src/Platforms/Platform.WinJS.js',
       ],
@@ -43,7 +44,7 @@ module.exports = function(grunt) {
       ],
     },    
     jshint: {
-        all: ['Gruntfile.js', 'src/**/*.js', '!src/External/**/*.js', '!src/Generated/*.js', 'test/**/*.js', '!test/**/bin/**', '!**/MobileServices.*.js',]
+        all: ['Gruntfile.js', 'src/**/*.js', '!src/External/**/*.js', '!src/Generated/*.js', 'test/**/*.js', '!test/**/bin/**', '!**/MobileServices.*.js']
     },    
     concat: {
       options: {

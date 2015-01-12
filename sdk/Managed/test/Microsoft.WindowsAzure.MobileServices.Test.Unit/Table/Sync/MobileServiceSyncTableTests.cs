@@ -10,18 +10,18 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync
         [TestMethod]
         public void ValidateQueryId_Throws_OnInvalidId()
         {
-            var testCases = new[] { "-myitems", "_myitems", "|myitems", "s|myitems", "asdf@#$!@" };
+            var testCases = new[] { "|myitems", "s|myitems", "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz" };
             foreach (var queryId in testCases)
             {
                 var ex = AssertEx.Throws<ArgumentException>(() => MobileServiceSyncTable.ValidateQueryId(queryId));
-                Assert.AreEqual(ex.Message, "The query id must start with a letter and can contain only letters, digits, hyphen or underscore.");
+                Assert.AreEqual(ex.Message, "The query id must not contain pipe character and should be less than 50 characters in length.");
             }
         }
 
         [TestMethod]
         public void ValidateQueryId_Succeeds_OnValidId()
         {
-            var testCases = new[] { "myitems1", "myItems_yourItems1", "my-items123" };
+            var testCases = new[] { "myitems1", "myItems_yourItems1", "my-items123", "-myitems", "_myitems", "asdf@#$!/:^" };
             foreach (var queryId in testCases)
             {
                 MobileServiceSyncTable.ValidateQueryId(queryId);

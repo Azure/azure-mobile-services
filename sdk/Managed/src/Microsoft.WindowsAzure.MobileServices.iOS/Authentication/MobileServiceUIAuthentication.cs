@@ -2,9 +2,15 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Threading.Tasks;
+using Xamarin.Auth._MobileServices;
+#if __UNIFIED__
+using Foundation;
+using UIKit;
+using NSAction = System.Action;
+#else
 using MonoTouch.Foundation;
 using MonoTouch.UIKit;
-using Xamarin.Auth._MobileServices;
+#endif
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
