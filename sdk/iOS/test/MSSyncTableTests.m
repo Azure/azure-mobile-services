@@ -1665,14 +1665,17 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     [offline upsertItems:@[deltaToken.serialize] table:offline.configTableName orError:&storageError];
     [offline upsertItems:@[@{ @"id": @"A"}] table:TodoTableNoVersion orError:&storageError];
     [todoTable insert:@{ @"id": @"B"} completion:^(NSDictionary *item, NSError *error) {
-        MSSyncContextReadResult *result = [offline readWithQuery:query orError:&storageError];
         XCTAssertNil(storageError);
-        XCTAssertEqual(result.items.count, 2);
-        [offline upsertItems:@[@{ @"id": @"A", @"operationId":[NSNumber numberWithInt:operationId++]}] table:offline.errorTableName orError:&storageError];
-        done = YES;
+        [todoTable insert:@{ @"id": @"C"} completion:^(NSDictionary *item, NSError *error) {
+            MSSyncContextReadResult *result = [offline readWithQuery:query orError:&storageError];
+            XCTAssertNil(storageError);
+            XCTAssertEqual(result.items.count, 3);
+            [offline upsertItems:@[@{ @"id": @"A", @"operationId":[NSNumber numberWithInt:operationId++]}] table:offline.errorTableName orError:&storageError];
+            done = YES;
+        }];
     }];
     
-    // at this point we have 1 deltaToken, 2 todo items, 1 operation, and 1 operation error
+    // at this point we have 1 deltaToken, 3 todo items, 2 operations, and 1 operation error
     
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     done = NO;
@@ -1681,8 +1684,8 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
         NSError *storageError;
         XCTAssertNil(error, @"Unexpected error: %@", error.description);
         
-        XCTAssertEqual(offline.deleteCalls, 4);
-        XCTAssertEqual(offline.deletedItems, 5);
+        XCTAssertEqual(offline.deleteCalls, 6);
+        XCTAssertEqual(offline.deletedItems, 7);
         XCTAssertEqual(filteredClient.syncContext.pendingOperationsCount, 0);
         
         // Verify item is missing as well

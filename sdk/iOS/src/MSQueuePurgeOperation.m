@@ -142,7 +142,7 @@
         }
         [self.syncContext.operationQueue removeOperation:tableOps[i] orError:error];
         
-        if (error) {
+        if (error && *error) {
             break;
         }
     }
