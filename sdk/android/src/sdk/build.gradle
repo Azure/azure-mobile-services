@@ -1,5 +1,9 @@
 apply plugin: 'com.android.library'
 
+ext {
+    PUBLISH_ARTIFACT_ID = 'azure-mobile-services-android-sdk'
+}
+
 android {
     compileSdkVersion 19
     buildToolsVersion "19.1.0"
@@ -28,3 +32,5 @@ dependencies {
     compile 'com.google.code.gson:gson:2.3'
     compile 'com.google.guava:guava:18.0'
 }
+
+apply from : '../../android-libraries.gradle'

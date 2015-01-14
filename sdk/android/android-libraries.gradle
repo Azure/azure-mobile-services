@@ -1,0 +1,55 @@
+apply plugin: 'maven'
+
+def myProject = project
+
+// step 2
+uploadArchives {
+    repositories.mavenDeployer {
+        pom.groupId = myProject.group
+        pom.artifactId = PUBLISH_ARTIFACT_ID
+        pom.version = myProject.version
+        repository (
+                url: 'https://api.bintray.com/maven/azuremobileservices/SDK/Mobile-Services-Android-SDK'
+        ) {
+            authentication(
+                    userName: 'username',
+                    password: 'key'
+            )
+        }
+    }
+}
+
+task clearJar(type: Delete) {
+    delete 'build/release/' + PUBLISH_ARTIFACT_ID + '-' + myProject.version + '.jar'
+}
+
+// step 1
+task makeJar(type: Copy) {
+    from('build/intermediates/bundles/release/')
+    into('build/release/')
+    include('classes.jar')
+    rename ('classes.jar', PUBLISH_ARTIFACT_ID + '-' +  myProject.version + '.jar')
+}
+
+makeJar.dependsOn(clearJar, build)
+
+task androidJavadocs(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+    classifier = 'javadoc'
+    from androidJavadocs.destinationDir
+}
+
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
+artifacts {
+    archives androidSourcesJar
+    archives androidJavadocsJar
+    archives file : file('build/release/' + PUBLISH_ARTIFACT_ID + '-' + myProject.version + '.jar')
+}
