@@ -678,7 +678,7 @@ public class MobileServiceSyncContext {
 
             if (updatedJsonObjects.size() > 0) {
                 this.mStore.upsert(tableName,
-                        updatedJsonObjects.toArray(new JsonObject[updatedJsonObjects.size()]));
+                        updatedJsonObjects.toArray(new JsonObject[updatedJsonObjects.size()]), true);
             }
         }
     }
@@ -795,9 +795,10 @@ public class MobileServiceSyncContext {
 
             pushCompletionResult.setOperationErrors(this.mOpErrorList.getAll());
 
+            this.mOpErrorList.clear();
+
             this.mHandler.onPushComplete(pushCompletionResult);
 
-            this.mOpErrorList.clear();
         } catch (Throwable internalError) {
             pushCompletionResult.setStatus(MobileServicePushStatus.InternalError);
             pushCompletionResult.setInternalError(internalError);
@@ -827,7 +828,7 @@ public class MobileServiceSyncContext {
         JsonObject result = this.mHandler.executeTableOperation(new RemoteTableOperationProcessor(this.mClient, item), operation);
 
         if (result != null) {
-            this.mStore.upsert(operation.getTableName(), result);
+            this.mStore.upsert(operation.getTableName(), result, true);
         }
     }
 

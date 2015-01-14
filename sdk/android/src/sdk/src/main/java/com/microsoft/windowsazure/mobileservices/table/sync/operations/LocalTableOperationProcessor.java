@@ -49,13 +49,13 @@ public class LocalTableOperationProcessor implements TableOperationVisitor<Void>
 
     @Override
     public Void visit(InsertOperation operation) throws Throwable {
-        this.mStore.upsert(operation.getTableName(), this.mItem);
+        this.mStore.upsert(operation.getTableName(), this.mItem, false);
         return null;
     }
 
     @Override
     public Void visit(UpdateOperation operation) throws Throwable {
-        this.mStore.upsert(operation.getTableName(), this.mItem);
+        this.mStore.upsert(operation.getTableName(), this.mItem, false);
         return null;
     }
 
@@ -74,7 +74,7 @@ public class LocalTableOperationProcessor implements TableOperationVisitor<Void>
         item.addProperty("itemid", operation.getItemId());
         item.add("clientitem", backedUpItem);
 
-        this.mStore.upsert(this.mItemBackupTable, item);
+        this.mStore.upsert(this.mItemBackupTable, item, false);
         this.mStore.delete(operation.getTableName(), operation.getItemId());
 
         return null;

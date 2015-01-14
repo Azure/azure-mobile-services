@@ -95,7 +95,7 @@ public class MobileServiceLocalStoreMock implements MobileServiceLocalStore {
     }
 
     @Override
-    public void upsert(String tableName, JsonObject item) throws MobileServiceLocalStoreException {
+    public void upsert(String tableName, JsonObject item, boolean fromServer) throws MobileServiceLocalStoreException {
 
         Map<String, JsonObject> table = GetTable(tableName);
 
@@ -105,7 +105,7 @@ public class MobileServiceLocalStoreMock implements MobileServiceLocalStore {
     }
 
     @Override
-    public void upsert(String tableName, JsonObject[] items) throws MobileServiceLocalStoreException {
+    public void upsert(String tableName, JsonObject[] items, boolean fromServer) throws MobileServiceLocalStoreException {
 
         Map<String, JsonObject> table = GetTable(tableName);
 

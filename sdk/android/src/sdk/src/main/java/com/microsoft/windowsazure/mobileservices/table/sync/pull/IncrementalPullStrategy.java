@@ -136,7 +136,7 @@ public class IncrementalPullStrategy extends PullStrategy {
         updatedElement.addProperty("maxupdateddate", lastElementUpdatedAt);
 
         try {
-            mStore.upsert(INCREMENTAL_PULL_STRATEGY_TABLE, updatedElement);
+            mStore.upsert(INCREMENTAL_PULL_STRATEGY_TABLE, updatedElement, false);
         } catch (MobileServiceLocalStoreException e) {
             throw new RuntimeException(e);
         }

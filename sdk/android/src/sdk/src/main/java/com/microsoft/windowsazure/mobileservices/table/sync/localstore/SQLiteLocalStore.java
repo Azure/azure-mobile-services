@@ -51,7 +51,7 @@ import java.util.Map.Entry;
  * Implements MobileServiceLocalStore backed by an SQLite DB
  */
 public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceLocalStore {
-    private Map<String, Map<String, ColumnDataType>> mTables;
+    private Map<String, Map<String, ColumnDataInfo>> mTables;
 
     /**
      * Constructor for SQLiteLocalStore
@@ -67,7 +67,7 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
      */
     public SQLiteLocalStore(Context context, String name, CursorFactory factory, int version) {
         super(context, name, factory, version);
-        this.mTables = new HashMap<String, Map<String, ColumnDataType>>();
+        this.mTables = new HashMap<String, Map<String, ColumnDataInfo>>();
     }
 
     /**
@@ -87,7 +87,7 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public SQLiteLocalStore(Context context, String name, CursorFactory factory, int version, DatabaseErrorHandler errorHandler) {
         super(context, name, factory, version, errorHandler);
-        this.mTables = new HashMap<String, Map<String, ColumnDataType>>();
+        this.mTables = new HashMap<String, Map<String, ColumnDataInfo>>();
     }
 
     @Override
@@ -96,7 +96,7 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
             SQLiteDatabase db = this.getWritableDatabase();
             db.close();
 
-            for (Entry<String, Map<String, ColumnDataType>> entry : this.mTables.entrySet()) {
+            for (Entry<String, Map<String, ColumnDataInfo>> entry : this.mTables.entrySet()) {
                 createTableFromObject(entry.getKey(), entry.getValue());
             }
         } catch (Throwable t) {
@@ -109,8 +109,8 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
         try {
             String invTableName = normalizeTableName(tableName);
 
-            Map<String, ColumnDataType> table = this.mTables.containsKey(invTableName) ? this.mTables.get(invTableName) : new HashMap<String, ColumnDataType>();
-            table.put("id", ColumnDataType.String);
+            Map<String, ColumnDataInfo> table = this.mTables.containsKey(invTableName) ? this.mTables.get(invTableName) : new HashMap<String, ColumnDataInfo>();
+            table.put("id", new ColumnDataInfo(ColumnDataType.String, "id"));
 
             for (String colName : columns.keySet()) {
                 ColumnDataType colDataType = columns.get(colName);
@@ -119,7 +119,7 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
                 validateReservedProperties(colDataType, invColumnName);
 
                 if (!invColumnName.equals("id")) {
-                    table.put(invColumnName, colDataType);
+                    table.put(invColumnName, new ColumnDataInfo(colDataType, colName));
                 }
             }
 
@@ -137,7 +137,7 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 
             String invTableName = normalizeTableName(query.getTableName());
 
-            Map<String, ColumnDataType> table = this.mTables.get(invTableName);
+            Map<String, ColumnDataInfo> table = this.mTables.get(invTableName);
 
             String[] columns = getColumns(query, table);
 
@@ -204,7 +204,7 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
             JsonObject result = null;
             String invTableName = normalizeTableName(tableName);
 
-            Map<String, ColumnDataType> table = this.mTables.get(invTableName);
+            Map<String, ColumnDataInfo> table = this.mTables.get(invTableName);
 
             SQLiteDatabase db = this.getWritableDatabase();
 
@@ -233,13 +233,13 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
     }
 
     @Override
-    public void upsert(String tableName, JsonObject item) throws MobileServiceLocalStoreException {
+    public void upsert(String tableName, JsonObject item, boolean fromServer) throws MobileServiceLocalStoreException {
         try {
 
             JsonObject[] items = new JsonObject[1];
             items[0] = item;
 
-            upsert(tableName, items);
+            upsert(tableName, items, fromServer);
 
         } catch (Throwable t) {
             throw new MobileServiceLocalStoreException(t);
@@ -247,11 +247,11 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
     }
 
     @Override
-    public void upsert(String tableName, JsonObject[] items) throws MobileServiceLocalStoreException {
+    public void upsert(String tableName, JsonObject[] items, boolean fromServer) throws MobileServiceLocalStoreException {
         try {
             String invTableName = normalizeTableName(tableName);
 
-            Statement statement = generateUpsertStatement(invTableName, items);
+            Statement statement = generateUpsertStatement(invTableName, items, fromServer);
 
             SQLiteDatabase db = this.getWritableDatabase();
 
@@ -410,12 +410,14 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
         }
     }
 
-    private JsonObject parseRow(Cursor cursor, Map<String, ColumnDataType> table) {
+    private JsonObject parseRow(Cursor cursor, Map<String, ColumnDataInfo> table) {
         JsonObject result = new JsonObject();
 
-        for (Entry<String, ColumnDataType> column : table.entrySet()) {
+        for (Entry<String, ColumnDataInfo> column : table.entrySet()) {
             String columnName = column.getKey();
-            ColumnDataType columnDataType = column.getValue();
+            String originalColumnName = column.getValue().getOriginalName();
+
+            ColumnDataType columnDataType = column.getValue().getColumnDataType();
             int columnIndex = cursor.getColumnIndex(columnName);
 
             if (columnIndex != -1) {
@@ -423,23 +425,23 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
                 switch (columnDataType) {
                     case Boolean:
                         boolean booleanValue = cursor.getInt(columnIndex) > 0 ? true : false;
-                        result.addProperty(columnName, booleanValue);
+                        result.addProperty(originalColumnName, booleanValue);
                         break;
                     case Number:
                         double doubleValue = cursor.getDouble(columnIndex);
-                        result.addProperty(columnName, doubleValue);
+                        result.addProperty(originalColumnName, doubleValue);
                         break;
                     case String:
                         String stringValue = cursor.getString(columnIndex);
-                        result.addProperty(columnName, stringValue);
+                        result.addProperty(originalColumnName, stringValue);
                         break;
                     case Date:
                         String dateValue = cursor.getString(columnIndex);
-                        result.addProperty(columnName, dateValue);
+                        result.addProperty(originalColumnName, dateValue);
                         break;
                     case Other:
                         JsonElement otherValue = new JsonParser().parse(cursor.getString(columnIndex));
-                        result.add(columnName, otherValue);
+                        result.add(originalColumnName, otherValue);
                         break;
                 }
             }
@@ -448,7 +450,7 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
         return result;
     }
 
-    private Statement generateUpsertStatement(String tableName, JsonObject[] items) {
+    private Statement generateUpsertStatement(String tableName, JsonObject[] items, boolean fromServer) {
         Statement result = new Statement();
 
         String invTableName = normalizeTableName(tableName);
@@ -463,13 +465,17 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 
         JsonObject firstItem = items[0];
 
-        Map<String, ColumnDataType> tableDefinition = mTables.get(invTableName);
+        Map<String, ColumnDataInfo> tableDefinition = mTables.get(invTableName);
 
         List<Object> parameters = new ArrayList<Object>(firstItem.entrySet().size());
 
         for (Entry<String, JsonElement> property : firstItem.entrySet()) {
 
-            if (isSystemProperty(property.getKey()) && !tableDefinition.containsKey(property.getKey())) {
+            //if (isSystemProperty(property.getKey()) && !tableDefinition.containsKey(property.getKey())) {
+            //    continue;
+            //}
+
+            if (fromServer && !tableDefinition.containsKey(property.getKey().toLowerCase())) {
                 continue;
             }
 
@@ -487,7 +493,7 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 
         for (JsonObject item : items) {
             sql.append(prefix);
-            appendInsertValuesSql(sql, parameters, tableDefinition, item);
+            appendInsertValuesSql(sql, parameters, tableDefinition, item, fromServer);
             prefix = ",";
         }
 
@@ -498,13 +504,13 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
     }
 
     private void appendInsertValuesSql(StringBuilder sql, List<Object> parameters,
-                                       Map<String, ColumnDataType> tableDefinition, JsonObject item) {
+                                       Map<String, ColumnDataInfo> tableDefinition, JsonObject item, boolean fromServer) {
         sql.append("(");
         int colCount = 0;
 
         for (Entry<String, JsonElement> property : item.entrySet()) {
 
-            if (isSystemProperty(property.getKey()) && !tableDefinition.containsKey(property.getKey())) {
+            if (fromServer && !tableDefinition.containsKey(normalizeColumnName(property.getKey()))) {
                 continue;
             }
 
@@ -532,12 +538,13 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 
             sql.append(paramName);
             colCount++;
+
         }
 
         sql.append(")");
     }
 
-    private String[] getColumns(Query query, Map<String, ColumnDataType> table) {
+    private String[] getColumns(Query query, Map<String, ColumnDataInfo> table) {
         String[] columns = table.keySet().toArray(new String[0]);
 
         List<String> projection = query.getProjection();
@@ -564,7 +571,7 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
         return whereClause;
     }
 
-    private void createTableFromObject(String invTableName, Map<String, ColumnDataType> table) {
+    private void createTableFromObject(String invTableName, Map<String, ColumnDataInfo> table) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         String tblSql = String.format("CREATE TABLE IF NOT EXISTS \"%s\" (\"id\" TEXT PRIMARY KEY);", invTableName);
@@ -593,9 +600,9 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 
         Map<String, ColumnDataType> newColumns = new HashMap<String, ColumnDataType>();
 
-        for (Entry<String, ColumnDataType> column : table.entrySet()) {
+        for (Entry<String, ColumnDataInfo> column : table.entrySet()) {
             if (!invColumnNames.contains(column.getKey())) {
-                newColumns.put(column.getKey(), column.getValue());
+                newColumns.put(column.getKey(), column.getValue().getColumnDataType());
             }
         }
 
