@@ -12,8 +12,8 @@ uploadArchives {
                 url: 'https://api.bintray.com/maven/azuremobileservices/SDK/Mobile-Services-Android-SDK'
         ) {
             authentication(
-                    userName: 'username',
-                    password: 'key'
+                    userName: 'yuaxu',
+                    password: 'a7954536c3f8733e67a5159f672bcbdfbfb26e20'
             )
         }
     }
