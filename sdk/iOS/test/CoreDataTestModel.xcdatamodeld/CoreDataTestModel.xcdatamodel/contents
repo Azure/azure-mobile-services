@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="6252" systemVersion="13F34" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="6254" systemVersion="14C81f" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
     <entity name="ColumnTypes" syncable="YES">
         <attribute name="binary" optional="YES" attributeType="Binary" syncable="YES"/>
         <attribute name="boolean" optional="YES" attributeType="Boolean" syncable="YES"/>
@@ -42,7 +42,7 @@
         <attribute name="table" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="tableKind" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
     </entity>
-    <entity name="TodoItem" syncable="YES">
+    <entity name="TodoItem" representedClassName="TodoItem" syncable="YES">
         <attribute name="id" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="ms_version" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="sort" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
@@ -58,7 +58,7 @@
         <element name="MS_TableConfig" positionX="160" positionY="192" width="128" height="118"/>
         <element name="MS_TableOperationErrors" positionX="153" positionY="-189" width="128" height="103"/>
         <element name="MS_TableOperations" positionX="-63" positionY="-189" width="128" height="118"/>
-        <element name="TodoItem" positionX="-324" positionY="-45" width="128" height="103"/>
+        <element name="TodoItem" positionX="-324" positionY="-45" width="128" height="105"/>
         <element name="TodoNoVersion" positionX="-234" positionY="-126" width="128" height="73"/>
     </elements>
 </model>

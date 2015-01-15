@@ -7,11 +7,14 @@
 #import "MSCoreDataStore.h"
 #import "MSCoreDataStore+TestHelper.h"
 #import "MSJSONSerializer.h"
+#import "TodoItem.h"
 
 @interface MSCoreDataStoreTests : XCTestCase {
     BOOL done;
 }
 @property (nonatomic, strong) MSCoreDataStore *store;
+@property (nonatomic, strong) NSManagedObjectContext *context;
+
 @end
 
 @implementation MSCoreDataStoreTests
@@ -20,7 +23,8 @@
 {
     NSLog(@"%@ setUp", self.name);
     
-    self.store = [[MSCoreDataStore alloc] initWithManagedObjectContext:[MSCoreDataStore inMemoryManagedObjectContext]];
+    self.context = [MSCoreDataStore inMemoryManagedObjectContext];
+    self.store = [[MSCoreDataStore alloc] initWithManagedObjectContext:self.context];
     XCTAssertNotNil(self.store, @"In memory store could not be created");
     
     done = NO;
@@ -454,6 +458,31 @@
 
     properties = [self.store systemPropetiesForTable:@"TodoItemNoVersion"];
     XCTAssertEqual(properties, MSSystemPropertyNone);
+}
+
+-(void)testObjectConversion
+{
+    [self populateTestData];
+    
+    NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"TodoItem"];
+    request.predicate = [NSPredicate predicateWithFormat:@"id == %@", @"A"];
+    NSArray *results = [self.context executeFetchRequest:request error:nil];
+    
+    TodoItem *toDoItemObject = results[0];
+    // Confirm we are using an internal version column
+    XCTAssertEqualObjects(toDoItemObject.ms_version, @"APPLE");
+    
+    NSDictionary *todoItemDictionary = [MSCoreDataStore tableItemFromManagedObject:toDoItemObject];
+
+    XCTAssertNotNil(todoItemDictionary);
+    XCTAssertEqual(todoItemDictionary.count, 4);
+    XCTAssertEqualObjects(todoItemDictionary[MSSystemColumnId], @"A");
+    // Confirm version was remapped
+    XCTAssertNil(todoItemDictionary[@"ms_version"]);
+    XCTAssertEqualObjects(todoItemDictionary[MSSystemColumnVersion], @"APPLE");
+    XCTAssertEqualObjects(todoItemDictionary[@"text"], @"test1");
+    
+    XCTAssertEqualObjects(todoItemDictionary[@"sort"], @10);
 }
 
 - (void) populateTestData

@@ -77,6 +77,27 @@ NSString *const StoreDeleted = @"ms_deleted";
     return [results firstObject];
 }
 
++(NSDictionary *) tableItemFromManagedObject:(NSManagedObject *)object
+{
+    NSArray *attributes = [object.entity.attributesByName allKeys];
+    NSMutableDictionary *serverItem = [[object dictionaryWithValuesForKeys:attributes] mutableCopy];
+
+    // Find all system columns in the item
+    NSSet *systemColumnNames = [serverItem keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
+        NSString *columnName = (NSString *)key;
+        return [columnName hasPrefix:StoreSystemColumnPrefix];
+    }];
+    
+    // Now translate every system column from ms_x to __x
+    for (NSString *columnName in systemColumnNames) {
+        NSString *adjustedName = [MSCoreDataStore externalNameForStoreColumnName:columnName];
+        serverItem[adjustedName] = serverItem[columnName];
+        [serverItem removeObjectForKey:columnName];
+    }
+    
+    return serverItem;
+}
+
 /// Helper function to convert a server (external) item to only contain the appropriate keys for storage
 /// in core data tables. This means we need to change system columns (prefix: __) to use ms_, and remove
 /// any retrieved columns from the user's schema that aren't in the local store's schema
