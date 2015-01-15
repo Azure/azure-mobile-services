@@ -795,9 +795,10 @@ public class MobileServiceSyncContext {
 
             pushCompletionResult.setOperationErrors(this.mOpErrorList.getAll());
 
+            this.mOpErrorList.clear();
+
             this.mHandler.onPushComplete(pushCompletionResult);
 
-            this.mOpErrorList.clear();
         } catch (Throwable internalError) {
             pushCompletionResult.setStatus(MobileServicePushStatus.InternalError);
             pushCompletionResult.setInternalError(internalError);
