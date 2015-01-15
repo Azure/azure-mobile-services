@@ -34,6 +34,7 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceList;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.serialization.JsonEntityParser;
+import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileServiceLocalStoreException;
 
 import java.util.List;
 
@@ -217,11 +218,13 @@ public class MobileServiceSyncTable<E> {
     public ListenableFuture<E> insert(E item) {
         final SettableFuture<E> future = SettableFuture.create();
 
-        JsonObject json = mClient.getGsonBuilder().create().toJsonTree(item).getAsJsonObject();
+        final JsonObject json = mClient.getGsonBuilder().create().toJsonTree(item).getAsJsonObject();
 
-        ListenableFuture<JsonObject> internalFuture = mInternalTable.insert(json);
+        String itemId = json.get("id").getAsString();
 
-        Futures.addCallback(internalFuture, new FutureCallback<JsonObject>() {
+        ListenableFuture<JsonObject> lookUpInternalFuture = mInternalTable.lookUp(itemId);
+
+        Futures.addCallback(lookUpInternalFuture, new FutureCallback<JsonObject>() {
             @Override
             public void onFailure(Throwable throwable) {
                 future.setException(throwable);
@@ -229,7 +232,25 @@ public class MobileServiceSyncTable<E> {
 
             @Override
             public void onSuccess(JsonObject result) {
-                future.set(parseResults(result).get(0));
+
+                if (result != null) {
+                    future.setException(new MobileServiceLocalStoreException("An insert operation on the item is already in the queue."));
+                }
+
+                ListenableFuture<JsonObject> internalFuture = mInternalTable.insert(json);
+
+                Futures.addCallback(internalFuture, new FutureCallback<JsonObject>() {
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                        future.setException(throwable);
+                    }
+
+                    @Override
+                    public void onSuccess(JsonObject result) {
+                        future.set(parseResults(result).get(0));
+                    }
+                });
+
             }
         });
 
