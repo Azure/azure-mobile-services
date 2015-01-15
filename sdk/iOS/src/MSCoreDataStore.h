@@ -25,4 +25,14 @@
 
 /// @}
 
+#pragma mark * Helper functions
+
+/// @{name Working with the table APIs
+
+/// Converts a managed object from the core data layer back into a dictionary with the
+/// properties expected when using a MSTable or MSSyncTable
++(NSDictionary *) tableItemFromManagedObject:(NSManagedObject *)object;
+
+/// @}
+
 @end
