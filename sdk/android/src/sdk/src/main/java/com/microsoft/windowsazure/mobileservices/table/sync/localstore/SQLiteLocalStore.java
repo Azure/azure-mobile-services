@@ -253,6 +253,9 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 
             Statement statement = generateUpsertStatement(invTableName, items, fromServer);
 
+            if (fromServer && statement.sql == "")
+                return;
+
             SQLiteDatabase db = this.getWritableDatabase();
 
             try {
@@ -469,6 +472,8 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 
         List<Object> parameters = new ArrayList<Object>(firstItem.entrySet().size());
 
+        int columnsOnStatement = 0;
+
         for (Entry<String, JsonElement> property : firstItem.entrySet()) {
 
             //if (isSystemProperty(property.getKey()) && !tableDefinition.containsKey(property.getKey())) {
@@ -485,6 +490,15 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
             sql.append(invColumnName);
             sql.append("\"");
             delimiter = ",";
+
+            columnsOnStatement++;
+        }
+
+        if (columnsOnStatement == 0){
+            result.sql = "";
+            result.parameters = parameters;
+
+            return result;
         }
 
         sql.append(") VALUES ");

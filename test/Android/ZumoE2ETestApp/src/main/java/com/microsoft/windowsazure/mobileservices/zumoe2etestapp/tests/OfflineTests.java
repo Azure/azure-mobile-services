@@ -144,7 +144,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("id", ColumnDataType.String);
                     tableDefinition.put("name", ColumnDataType.String);
                     tableDefinition.put("age", ColumnDataType.Number);
-                    tableDefinition.put("float", ColumnDataType.Number);
+                    tableDefinition.put("floatNumber", ColumnDataType.Number);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
                     tableDefinition.put("__version", ColumnDataType.String);
@@ -518,7 +518,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("id", ColumnDataType.String);
                     tableDefinition.put("name", ColumnDataType.String);
                     tableDefinition.put("age", ColumnDataType.Number);
-                    tableDefinition.put("float", ColumnDataType.Number);
+                    tableDefinition.put("floatNumber", ColumnDataType.Number);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
                     tableDefinition.put("__version", ColumnDataType.String);
@@ -643,7 +643,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("id", ColumnDataType.String);
                     tableDefinition.put("name", ColumnDataType.String);
                     tableDefinition.put("age", ColumnDataType.Number);
-                    tableDefinition.put("float", ColumnDataType.Number);
+                    tableDefinition.put("floatNumber", ColumnDataType.Number);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
                     tableDefinition.put("__version", ColumnDataType.String);
@@ -1453,7 +1453,7 @@ class OfflineReadyItem {
     private String mName;
     @SerializedName("age")
     private int mAge;
-    @SerializedName("float")
+    @SerializedName("floatNumber")
     private double mFloatingNumber;
     @SerializedName("date")
     private Date mDate;

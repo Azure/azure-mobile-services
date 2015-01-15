@@ -252,6 +252,27 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
         SQLiteLocalStore store = new SQLiteLocalStore(this.getContext(), TestDbName, null, 1);
 
         Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
+        tableDefinition.put("dob", ColumnDataType.Date);
+
+        store.defineTable(TestTable, tableDefinition);
+        store.initialize();
+
+        try {
+
+            JsonObject item = new JsonObject();
+            item.addProperty("notDefined", "okok");
+
+            store.upsert(TestTable, item, true);
+
+        } catch (Exception ex) {
+            assertNull(ex);
+        }
+    }
+
+    public void testUpsertNoThrowsWhenOnColumnIsItemIsDefinedAndAnotherColumnInItemIsNotDefinedAndItIsFromServer() throws MobileServiceLocalStoreException {
+        SQLiteLocalStore store = new SQLiteLocalStore(this.getContext(), TestDbName, null, 1);
+
+        Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
         tableDefinition.put("id", ColumnDataType.String);
         tableDefinition.put("dob", ColumnDataType.Date);
 
@@ -265,17 +286,35 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
             item.addProperty("notDefined", "okok");
 
             store.upsert(TestTable, item, true);
+
+        } catch (Exception ex) {
+            assertNull(ex);
+        }
+    }
+
+    public void testUpsertThrowsWhenColumnInItemIsNotDefinedAndItIsLocal() throws MobileServiceLocalStoreException {
+        SQLiteLocalStore store = new SQLiteLocalStore(this.getContext(), TestDbName, null, 1);
+
+        Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
+        tableDefinition.put("dob", ColumnDataType.Date);
+
+        store.defineTable(TestTable, tableDefinition);
+        store.initialize();
+
+        try {
+
+            JsonObject item = new JsonObject();
+            item.addProperty("notDefined", "okok");
+
+            store.upsert(TestTable, item, false);
         } catch (Exception ex) {
             assertTrue(ex instanceof MobileServiceLocalStoreException);
             assertTrue(ex.getCause().getMessage().contains(
                     "table todo has no column named notdefined (code 1): , while compiling: INSERT OR REPLACE INTO \"todo\" (\"notdefined\") VALUES (@p0)"));
-
         }
-
-
     }
 
-    public void testUpsertThrowsWhenColumnInItemIsNotDefinedAndItIsLocal() throws MobileServiceLocalStoreException {
+    public void testUpsertNoThrowsWhenOnColumnIsItemIsDefinedAndAnotherColumnInItemIsNotDefinedAndItIsLocal() throws MobileServiceLocalStoreException {
         SQLiteLocalStore store = new SQLiteLocalStore(this.getContext(), TestDbName, null, 1);
 
         Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
