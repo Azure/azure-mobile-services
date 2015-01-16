@@ -711,7 +711,6 @@ public class OfflineTests extends TestGroup {
         return test;
     }
 
-
     private TestCase createSyncConflictTest(final boolean autoResolve) {
 
         final String tableName = "offlineReady";

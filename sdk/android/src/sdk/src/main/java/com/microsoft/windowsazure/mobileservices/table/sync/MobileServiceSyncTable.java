@@ -220,41 +220,45 @@ public class MobileServiceSyncTable<E> {
 
         final JsonObject json = mClient.getGsonBuilder().create().toJsonTree(item).getAsJsonObject();
 
-        String itemId = json.get("id").getAsString();
+        JsonElement idJsonObject = json.get("id");
 
-        ListenableFuture<JsonObject> lookUpInternalFuture = mInternalTable.lookUp(itemId);
+        if (idJsonObject != null && !idJsonObject.isJsonNull()) {
+            String itemId = idJsonObject.getAsString();
 
-        Futures.addCallback(lookUpInternalFuture, new FutureCallback<JsonObject>() {
+            ListenableFuture<JsonObject> lookUpInternalFuture = mInternalTable.lookUp(itemId);
+
+            Futures.addCallback(lookUpInternalFuture, new FutureCallback<JsonObject>() {
+                @Override
+                public void onFailure(Throwable throwable) {
+                    future.setException(throwable);
+                }
+
+                @Override
+                public void onSuccess(JsonObject result) {
+                    insertInternal(json, future);
+                }
+            });
+        } else {
+            insertInternal(json, future);
+        }
+
+        return future;
+    }
+
+    private void insertInternal(JsonObject json, final SettableFuture<E> finalFuture) {
+        ListenableFuture<JsonObject> internalFuture = mInternalTable.insert(json);
+
+        Futures.addCallback(internalFuture, new FutureCallback<JsonObject>() {
             @Override
             public void onFailure(Throwable throwable) {
-                future.setException(throwable);
+                finalFuture.setException(throwable);
             }
 
             @Override
             public void onSuccess(JsonObject result) {
-
-                if (result != null) {
-                    future.setException(new MobileServiceLocalStoreException("An insert operation on the item is already in the queue."));
-                }
-
-                ListenableFuture<JsonObject> internalFuture = mInternalTable.insert(json);
-
-                Futures.addCallback(internalFuture, new FutureCallback<JsonObject>() {
-                    @Override
-                    public void onFailure(Throwable throwable) {
-                        future.setException(throwable);
-                    }
-
-                    @Override
-                    public void onSuccess(JsonObject result) {
-                        future.set(parseResults(result).get(0));
-                    }
-                });
-
+                finalFuture.set(parseResults(result).get(0));
             }
         });
-
-        return future;
     }
 
     /**
