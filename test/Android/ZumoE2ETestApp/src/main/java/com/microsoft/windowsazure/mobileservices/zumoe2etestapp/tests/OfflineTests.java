@@ -39,6 +39,7 @@ import com.microsoft.windowsazure.mobileservices.table.serialization.JsonEntityP
 import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncContext;
 import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncTable;
 import com.microsoft.windowsazure.mobileservices.table.sync.localstore.ColumnDataType;
+import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileServiceLocalStoreException;
 import com.microsoft.windowsazure.mobileservices.table.sync.localstore.SQLiteLocalStore;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.RemoteTableOperationProcessor;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperation;
@@ -85,6 +86,8 @@ public class OfflineTests extends TestGroup {
         this.addTest(createBasicTest("Basic Test"));
 
         this.addTest(createLocallyDeleteAlreadyDeletedElementTest());
+
+        this.addTest(createInsertDuplicatedElementTest());
 
         this.addTest(createSyncConflictTest(false));
         this.addTest(createSyncConflictTest(true));
@@ -617,6 +620,96 @@ public class OfflineTests extends TestGroup {
         return test;
     }
 
+    private TestCase createInsertDuplicatedElementTest() {
+
+        final String tableName = "offlineReady";
+
+        final TestCase test = new TestCase() {
+
+            @Override
+            protected void executeTest(MobileServiceClient offlineReadyClient, final TestExecutionCallback callback) {
+
+                TestCase testCase = this;
+                TestResult result = new TestResult();
+                result.setStatus(TestStatus.Passed);
+                result.setTestCase(testCase);
+                try {
+
+                    SQLiteLocalStore localStore = new SQLiteLocalStore(offlineReadyClient.getContext(), OFFLINE_TABLE_NAME, null, 1);
+
+                    log("Defined the table on the local store");
+
+                    Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
+                    tableDefinition.put("id", ColumnDataType.String);
+                    tableDefinition.put("name", ColumnDataType.String);
+                    tableDefinition.put("age", ColumnDataType.Number);
+                    tableDefinition.put("floatNumber", ColumnDataType.Number);
+                    tableDefinition.put("date", ColumnDataType.Date);
+                    tableDefinition.put("bool", ColumnDataType.Boolean);
+                    tableDefinition.put("__version", ColumnDataType.String);
+
+                    log("Initialized the store and sync context");
+
+                    localStore.defineTable(tableName, tableDefinition);
+
+                    offlineReadyClient.getSyncContext().initialize(localStore, new SimpleSyncHandler()).get();
+
+                    MobileServiceSyncTable<OfflineReadyItem> localTable = offlineReadyClient.getSyncTable(tableName, OfflineReadyItem.class);
+
+                    MobileServiceTable<OfflineReadyItem> remoteTable = offlineReadyClient.getTable(tableName, OfflineReadyItem.class);
+
+                    localTable.purge(null).get();
+
+                    log("Removed all items from the local table");
+
+                    OfflineReadyItem item = new OfflineReadyItem(new Random());
+
+                    item = remoteTable.insert(item).get();
+
+                    log("Inserted the item to the remote store:" + item);
+
+                    Query pullQuery = QueryOperations.tableName(tableName).field("id").eq(item.getId());
+
+                    localTable.pull(pullQuery).get();
+
+                    log("Pull changes from server");
+
+
+                    try {
+                        item = localTable.insert(item).get();
+                    } catch (Exception ex) {
+
+                        MobileServiceLocalStoreException mslse = (MobileServiceLocalStoreException) ex.getCause();
+
+                        if (mslse == null) {
+                            log("Expected exception was not thrown.");
+                            result.setStatus(TestStatus.Failed);
+                            callback.onTestComplete(this, result);
+                        }
+                        log("Expected exception was thrown.");
+                    }
+
+                    log("Cleaning up");
+                    localTable.delete(item).get();
+                    log("Local table cleaned up. Now sync'ing once more");
+                    offlineReadyClient.getSyncContext().push().get();
+                    log("Done");
+
+                    callback.onTestComplete(this, result);
+
+                } catch (Exception e) {
+                    callback.onTestComplete(this, createResultFromException(e));
+                    return;
+                }
+            }
+
+            ;
+        };
+
+        test.setName("Offline - Insert duplicated element Test");
+
+        return test;
+    }
 
     private TestCase createSyncConflictTest(final boolean autoResolve) {
 
@@ -1467,6 +1560,7 @@ class OfflineReadyItem {
     }
 
     public OfflineReadyItem(Random rndGen) {
+        this.id = java.util.UUID.randomUUID().toString();
         this.mName = "";// rndGen.nextLong();
         this.mAge = rndGen.nextInt();
         this.mFloatingNumber = rndGen.nextInt() * rndGen.nextDouble();
@@ -1583,6 +1677,7 @@ class OfflineReadyItemNoVersion {
     }
 
     public OfflineReadyItemNoVersion(Random rndGen) {
+        this.id = java.util.UUID.randomUUID().toString();
         this.mName = "";// rndGen.nextLong();
         this.mAge = rndGen.nextInt();
         this.mFloatingNumber = rndGen.nextInt() * rndGen.nextDouble();
