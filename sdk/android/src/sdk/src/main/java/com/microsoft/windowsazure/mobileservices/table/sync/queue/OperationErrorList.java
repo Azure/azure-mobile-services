@@ -80,6 +80,7 @@ public class OperationErrorList {
         columns.put("statuscode", ColumnDataType.Number);
         columns.put("serverresponse", ColumnDataType.String);
         columns.put("serveritem", ColumnDataType.Other);
+        columns.put("operationkind", ColumnDataType.String);
         columns.put("__createdat", ColumnDataType.Date);
 
         store.defineTable(OPERATION_ERROR_TABLE, columns);
@@ -170,7 +171,7 @@ public class OperationErrorList {
         this.mSyncLock.writeLock().lock();
 
         try {
-            this.mStore.upsert(OPERATION_ERROR_TABLE, serialize(operationError));
+            this.mStore.upsert(OPERATION_ERROR_TABLE, serialize(operationError), false);
 
             this.mList.add(operationError);
         } finally {

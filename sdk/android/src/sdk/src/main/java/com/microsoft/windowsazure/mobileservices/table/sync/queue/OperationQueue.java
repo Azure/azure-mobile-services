@@ -326,7 +326,7 @@ public class OperationQueue {
     private void enqueueOperation(TableOperation operation) throws ParseException, MobileServiceLocalStoreException {
         OperationQueueItem opQueueItem = new OperationQueueItem(operation, this.mLoadedAt, this.mSequence++);
 
-        this.mStore.upsert(OPERATION_QUEUE_TABLE, serialize(opQueueItem));
+        this.mStore.upsert(OPERATION_QUEUE_TABLE, serialize(opQueueItem), false);
 
         this.mQueue.add(opQueueItem);
 
