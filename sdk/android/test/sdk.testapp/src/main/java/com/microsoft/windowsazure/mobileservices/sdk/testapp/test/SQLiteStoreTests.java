@@ -239,7 +239,7 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
         CustomFunctionOneParameter<SQLiteLocalStore, Void> storeAction = new CustomFunctionOneParameter<SQLiteLocalStore, Void>() {
             public Void apply(SQLiteLocalStore store) throws MobileServiceLocalStoreException {
 
-                store.upsert("asdf", new JsonObject());
+                store.upsert("asdf", new JsonObject(), false);
 
                 return null;
             }
@@ -248,7 +248,28 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
         testStoreThrowOnUninitialized(storeAction);
     }
 
-    public void testUpsertThrowsWhenColumnInItemIsNotDefinedAndItIsLocal() throws MobileServiceLocalStoreException {
+    public void testUpsertNoThrowsWhenColumnInItemIsNotDefinedAndItIsFromServer() throws MobileServiceLocalStoreException {
+        SQLiteLocalStore store = new SQLiteLocalStore(this.getContext(), TestDbName, null, 1);
+
+        Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
+        tableDefinition.put("dob", ColumnDataType.Date);
+
+        store.defineTable(TestTable, tableDefinition);
+        store.initialize();
+
+        try {
+
+            JsonObject item = new JsonObject();
+            item.addProperty("notDefined", "okok");
+
+            store.upsert(TestTable, item, true);
+
+        } catch (Exception ex) {
+            assertNull(ex);
+        }
+    }
+
+    public void testUpsertNoThrowsWhenOnColumnIsItemIsDefinedAndAnotherColumnInItemIsNotDefinedAndItIsFromServer() throws MobileServiceLocalStoreException {
         SQLiteLocalStore store = new SQLiteLocalStore(this.getContext(), TestDbName, null, 1);
 
         Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
@@ -261,14 +282,59 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
         try {
 
             JsonObject item = new JsonObject();
+            item.addProperty("id", "1");
             item.addProperty("notDefined", "okok");
 
-            store.upsert(TestTable, item);
+            store.upsert(TestTable, item, true);
+
+        } catch (Exception ex) {
+            assertNull(ex);
+        }
+    }
+
+    public void testUpsertThrowsWhenColumnInItemIsNotDefinedAndItIsLocal() throws MobileServiceLocalStoreException {
+        SQLiteLocalStore store = new SQLiteLocalStore(this.getContext(), TestDbName, null, 1);
+
+        Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
+        tableDefinition.put("dob", ColumnDataType.Date);
+
+        store.defineTable(TestTable, tableDefinition);
+        store.initialize();
+
+        try {
+
+            JsonObject item = new JsonObject();
+            item.addProperty("notDefined", "okok");
+
+            store.upsert(TestTable, item, false);
         } catch (Exception ex) {
             assertTrue(ex instanceof MobileServiceLocalStoreException);
             assertTrue(ex.getCause().getMessage().contains(
                     "table todo has no column named notdefined (code 1): , while compiling: INSERT OR REPLACE INTO \"todo\" (\"notdefined\") VALUES (@p0)"));
+        }
+    }
 
+    public void testUpsertNoThrowsWhenOnColumnIsItemIsDefinedAndAnotherColumnInItemIsNotDefinedAndItIsLocal() throws MobileServiceLocalStoreException {
+        SQLiteLocalStore store = new SQLiteLocalStore(this.getContext(), TestDbName, null, 1);
+
+        Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
+        tableDefinition.put("id", ColumnDataType.String);
+        tableDefinition.put("dob", ColumnDataType.Date);
+
+        store.defineTable(TestTable, tableDefinition);
+        store.initialize();
+
+        try {
+
+            JsonObject item = new JsonObject();
+            item.addProperty("id", "1");
+            item.addProperty("notDefined", "okok");
+
+            store.upsert(TestTable, item, false);
+        } catch (Exception ex) {
+            assertTrue(ex instanceof MobileServiceLocalStoreException);
+            assertTrue(ex.getCause().getMessage().contains(
+                    "table todo has no column named notdefined (code 1): , while compiling: INSERT OR REPLACE INTO \"todo\" (\"id\",\"notdefined\") VALUES (@p0,@p1)"));
         }
     }
 
@@ -302,7 +368,7 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
         inserted.addProperty("friends", (String) null);
         inserted.addProperty("__version", (String) null);
 
-        store.upsert(TestTable, inserted);
+        store.upsert(TestTable, inserted, false);
 
         JsonObject read = store.lookup(TestTable, "abc");
 
@@ -324,7 +390,7 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
         inserted.addProperty("__createdAt", new Date().toString());
 
         // insert a row and make sure it is inserted
-        store.upsert(TestTable, inserted);
+        store.upsert(TestTable, inserted, false);
 
         long count = SQLiteStoreTestsUtilities.countRows(this.getContext(), TestDbName, TestTable);
         assertEquals(count, 1L);
@@ -344,13 +410,13 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
         inserted.addProperty("__createdAt", new Date().toString());
 
         // insert a row and make sure it is inserted
-        store.upsert(TestTable, inserted);
+        store.upsert(TestTable, inserted, false);
 
         JsonObject updated = new JsonObject();
         updated.addProperty("id", "abc");
         updated.addProperty("__createdAt", new Date().toString());
 
-        store.upsert(TestTable, updated);
+        store.upsert(TestTable, updated, false);
 
         long count = SQLiteStoreTestsUtilities.countRows(this.getContext(), TestDbName, TestTable);
         assertEquals(count, 1L);
@@ -386,7 +452,7 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
         originalItem.addProperty("friends", "");
 
         // first add an item
-        store.upsert(TestTable, originalItem);
+        store.upsert(TestTable, originalItem, false);
 
         // read the item back
         JsonObject itemRead = store.lookup(TestTable, "abc");
@@ -398,7 +464,7 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
         originalItem.addProperty("double", 111.222d);
 
         // upsert the item
-        store.upsert(TestTable, originalItem);
+        store.upsert(TestTable, originalItem, false);
 
         // read the updated item
         JsonObject updatedItem = store.lookup(TestTable, "abc");

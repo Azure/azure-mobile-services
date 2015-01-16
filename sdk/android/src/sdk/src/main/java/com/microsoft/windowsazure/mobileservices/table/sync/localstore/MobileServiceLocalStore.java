@@ -71,18 +71,20 @@ public interface MobileServiceLocalStore {
      *
      * @param tableName the local table name
      * @param item      the item to be inserted
+     * @param fromServer
      * @throws MobileServiceLocalStoreException
      */
-    void upsert(String tableName, JsonObject item) throws MobileServiceLocalStoreException;
+    void upsert(String tableName, JsonObject item, boolean fromServer) throws MobileServiceLocalStoreException;
 
     /**
      * Insert or Update a list of items in the local store.
      *
      * @param tableName the local table name
      * @param items     the list of items to be inserted
+     * @param fromServer
      * @throws MobileServiceLocalStoreException
      */
-    void upsert(String tableName, JsonObject[] items) throws MobileServiceLocalStoreException;
+    void upsert(String tableName, JsonObject[] items, boolean fromServer) throws MobileServiceLocalStoreException;
 
     /**
      * Delete an item from the local store.
