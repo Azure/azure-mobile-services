@@ -71,7 +71,7 @@ public interface MobileServiceLocalStore {
      *
      * @param tableName the local table name
      * @param item      the item to be inserted
-     * @param fromServer
+     * @param fromServer true if the call is made based on data coming from the server e.g. in a pull operation; false if the call is made by the client such as insert or update calls on an IMobileServiceSyncTable.
      * @throws MobileServiceLocalStoreException
      */
     void upsert(String tableName, JsonObject item, boolean fromServer) throws MobileServiceLocalStoreException;
@@ -81,7 +81,7 @@ public interface MobileServiceLocalStore {
      *
      * @param tableName the local table name
      * @param items     the list of items to be inserted
-     * @param fromServer 
+     * @param fromServer true if the call is made based on data coming from the server e.g. in a pull operation; false if the call is made by the client such as insert or update calls on an IMobileServiceSyncTable.
      * @throws MobileServiceLocalStoreException
      */
     void upsert(String tableName, JsonObject[] items, boolean fromServer) throws MobileServiceLocalStoreException;
