@@ -273,24 +273,39 @@ NSString* encodeToPercentEscapeString(NSString *string) {
     for (NSString* key in [queryParameters allKeys]) {
         NSString *name = [key description];
         
+        
         // Get the paremeter name and value
         id value = [queryParameters objectForKey:key];
         if ([value isKindOfClass:[NSArray class]]) {
             for (id arrayValue in value) {
-                [MSURLBuilder appendParameterName:name andValue:[arrayValue description] toQueryString:queryString];
+                [MSURLBuilder appendParameterName:name andValue:arrayValue toQueryString:queryString];
             }
         } else {
-            [MSURLBuilder appendParameterName:name andValue:[value description] toQueryString:queryString];
+            [MSURLBuilder appendParameterName:name andValue:value toQueryString:queryString];
         }
     }
     
     return queryString;
 }
 
-+(void) appendParameterName:(NSString *)name andValue:(NSString *)value toQueryString:(NSMutableString *)queryString
++(void) appendParameterName:(NSString *)name andValue:(id)value toQueryString:(NSMutableString *)queryString
 {
+    NSString *valueAsString;
+    if ([value isKindOfClass:[NSNumber class]]) {
+        const char *cType = [value objCType];
+        
+        // 64-bit [NSNumber numberWithBool:] returns 'c' (char) and doesn't match the BOOL encode of 'B'
+        if (strcmp(@encode(BOOL), cType) == 0 || strcmp(@encode(char), cType) == 0) {
+            valueAsString = [value boolValue] ? @"true" : @"false";
+        } else {
+            valueAsString = [value description];
+        }
+    } else {
+        valueAsString = [value description];
+    }
+    
     // URL Encode the parameter name and the value
-    NSString *encodedValue = encodeToPercentEscapeString(value);
+    NSString *encodedValue = encodeToPercentEscapeString(valueAsString);
     NSString *encodedName = encodeToPercentEscapeString(name);
 
     if (queryString.length > 0) {

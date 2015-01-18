@@ -149,11 +149,13 @@
     query.parameters = @{
         @"key1": @"someValue",
         @"key2": @"14",
+        @"key3": @YES,
+        @"key4": @NO
     };
 
     NSArray *result = [[query.description componentsSeparatedByString:@"&"]
                        sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
-    NSArray *expected = @[@"key1=someValue", @"key2=14"];
+    NSArray *expected = @[@"key1=someValue", @"key2=14", @"key3=true", @"key4=false"];
     
     XCTAssertTrue([result isEqualToArray:expected],
                  @"Query string was: %@",
