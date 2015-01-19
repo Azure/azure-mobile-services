@@ -532,7 +532,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
 -(void) testInsertThenInsertSameItem
 {
     NSString *insertResponse = @"{\"id\":\"one\", \"text\":\"first item\"}";
-    MSMultiRequestTestFilter *testFilter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[@200] data:@[insertResponse] appendEmptyRequest:@NO];
+    MSMultiRequestTestFilter *testFilter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[@200] data:@[insertResponse] appendEmptyRequest:NO];
     
     MSClient *filteredClient = [client clientWithFilter:testFilter];
     MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
@@ -561,7 +561,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
 -(void) testInsertWithReadError
 {
     NSString *insertResponse = @"{\"id\":\"one\", \"text\":\"first item\"}";
-    MSMultiRequestTestFilter *testFilter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[@200] data:@[insertResponse] appendEmptyRequest:@NO];
+    MSMultiRequestTestFilter *testFilter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[@200] data:@[insertResponse] appendEmptyRequest:NO];
     
     MSClient *filteredClient = [client clientWithFilter:testFilter];
     MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
@@ -927,11 +927,14 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     NSURLRequest *firstRequest = (NSURLRequest *)filter.actualRequests[0];
     NSURLRequest *secondRequest = (NSURLRequest *)filter.actualRequests[1];
     
-    XCTAssertEqualObjects(firstRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?__includeDeleted=1&__systemProperties=__deleted,__version");
-    XCTAssertEqualObjects(secondRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?$skip=2&__includeDeleted=1&__systemProperties=__deleted,__version");
+    XCTAssertEqualObjects(firstRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?__includeDeleted=true&__systemProperties=__deleted,__version");
+
+    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted,__version", @"$skip=2"];
+    XCTAssertTrue([self checkURL:secondRequest.URL withPath:@"/tables/TodoItem" andQuery:expectedSecondResult],
+                  @"Invalid URL: %@", secondRequest.URL.absoluteString);
 }
 
--(void) testPullWithSystemPropeties
+-(void) testPullWithoutVersion
 {
     NSString* stringData = @"[{\"id\": \"one\", \"text\":\"first item\"},{\"id\": \"two\", \"text\":\"second item\"}]";
     MSMultiRequestTestFilter *filter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[@200] data:@[stringData] appendEmptyRequest:YES];
@@ -954,14 +957,17 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     NSURLRequest *firstRequest = (NSURLRequest *)filter.actualRequests[0];
     NSURLRequest *secondRequest = (NSURLRequest *)filter.actualRequests[1];
     
-    XCTAssertEqualObjects(firstRequest.URL.absoluteString, @"https://someUrl/tables/TodoNoVersion?__includeDeleted=1&__systemProperties=__deleted");
-    XCTAssertEqualObjects(secondRequest.URL.absoluteString, @"https://someUrl/tables/TodoNoVersion?$skip=2&__includeDeleted=1&__systemProperties=__deleted");
+    XCTAssertEqualObjects(firstRequest.URL.absoluteString, @"https://someUrl/tables/TodoNoVersion?__includeDeleted=true&__systemProperties=__deleted");
+    
+    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$skip=2"];
+    XCTAssertTrue([self checkURL:secondRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedSecondResult],
+                  @"Invalid URL: %@", secondRequest.URL.absoluteString);
 }
 
 -(void) testPullSuccessWithDeleted
 {
     NSString* stringData = @"[{\"id\": \"one\", \"text\":\"first item\", \"__deleted\":false},{\"id\": \"two\", \"text\":\"second item\", \"__deleted\":true}, {\"id\": \"three\", \"text\":\"third item\", \"__deleted\":null}]";
-    MSMultiRequestTestFilter *testFilter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[@200] data:@[stringData] appendEmptyRequest:@YES];
+    MSMultiRequestTestFilter *testFilter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[@200] data:@[stringData] appendEmptyRequest:YES];
     
     MSClient *filteredClient = [client clientWithFilter:testFilter];
     MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
@@ -980,15 +986,18 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     
     NSURLRequest *firstRequest = testFilter.actualRequests[0];
     NSURLRequest *secondRequest = testFilter.actualRequests[1];
-    XCTAssertEqualObjects(firstRequest.URL.absoluteString, @"https://someUrl/tables/TodoNoVersion?__includeDeleted=1&__systemProperties=__deleted");
-    XCTAssertEqualObjects(secondRequest.URL.absoluteString, @"https://someUrl/tables/TodoNoVersion?$skip=3&__includeDeleted=1&__systemProperties=__deleted");
+    XCTAssertEqualObjects(firstRequest.URL.absoluteString, @"https://someUrl/tables/TodoNoVersion?__includeDeleted=true&__systemProperties=__deleted");
+    
+    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$skip=3"];
+    XCTAssertTrue([self checkURL:secondRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedSecondResult],
+                  @"Invalid URL: %@", secondRequest.URL.absoluteString);
 }
 
 -(void) testPullWithPushSuccess
 {
     NSString *insertResponse = @"{\"id\": \"one\", \"text\":\"first item\"}";
     NSString *pullResponse = @"[{\"id\": \"one\", \"text\":\"first item\"},{\"id\": \"two\", \"text\":\"second item\"}]";
-    MSMultiRequestTestFilter *testFilter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[@200,@200] data:@[insertResponse,pullResponse] appendEmptyRequest:@YES];
+    MSMultiRequestTestFilter *testFilter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[@200,@200] data:@[insertResponse,pullResponse] appendEmptyRequest:YES];
     
     MSClient *filteredClient = [client clientWithFilter:testFilter];
     MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
@@ -1014,8 +1023,11 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     NSURLRequest *firstPullRequest = testFilter.actualRequests[1];
     NSURLRequest *secondPullRequest = testFilter.actualRequests[2];
     XCTAssertEqualObjects(insertRequest.URL.absoluteString, @"https://someUrl/tables/TodoNoVersion?__systemProperties=__version");
-    XCTAssertEqualObjects(firstPullRequest.URL.absoluteString, @"https://someUrl/tables/TodoNoVersion?__includeDeleted=1&__systemProperties=__deleted");
-    XCTAssertEqualObjects(secondPullRequest.URL.absoluteString, @"https://someUrl/tables/TodoNoVersion?$skip=2&__includeDeleted=1&__systemProperties=__deleted");
+    XCTAssertEqualObjects(firstPullRequest.URL.absoluteString, @"https://someUrl/tables/TodoNoVersion?__includeDeleted=true&__systemProperties=__deleted");
+    
+    NSArray *expectedSecondPullResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$skip=2"];
+    XCTAssertTrue([self checkURL:secondPullRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedSecondPullResult],
+                  @"Invalid URL: %@", secondPullRequest.URL.absoluteString);
 }
 
 -(void) testPullAddsProperFeaturesHeader
@@ -1051,7 +1063,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
 -(void) testPullWithCustomParameters
 {
     NSString* stringData = @"[{\"id\": \"one\", \"text\":\"first item\"},{\"id\": \"two\", \"text\":\"second item\"}]";
-    MSMultiRequestTestFilter *testFilter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[@200] data:@[stringData] appendEmptyRequest:@YES];
+    MSMultiRequestTestFilter *testFilter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[@200] data:@[stringData] appendEmptyRequest:YES];
     
     offline.upsertCalls = 0;
     
@@ -1071,8 +1083,11 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     
     NSURLRequest *firstRequest = testFilter.actualRequests[0];
     NSURLRequest *secondRequest = testFilter.actualRequests[1];
-    XCTAssertEqualObjects(firstRequest.URL.absoluteString, @"https://someUrl/tables/TodoNoVersion?mykey=myvalue&__includeDeleted=1&__systemProperties=__deleted");
-    XCTAssertEqualObjects(secondRequest.URL.absoluteString, @"https://someUrl/tables/TodoNoVersion?$skip=2&mykey=myvalue&__includeDeleted=1&__systemProperties=__deleted");
+    XCTAssertEqualObjects(firstRequest.URL.absoluteString, @"https://someUrl/tables/TodoNoVersion?mykey=myvalue&__includeDeleted=true&__systemProperties=__deleted");
+    
+    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$skip=2", @"mykey=myvalue"];
+    XCTAssertTrue([self checkURL:secondRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedSecondResult],
+                  @"Invalid URL: %@", secondRequest.URL.absoluteString);
 }
 
 -(void) testPullWithSystemPropertiesFails
@@ -1155,8 +1170,9 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     MSClient *filteredClient = [client clientWithFilter:filter];
     MSSyncTable *todoTable = [filteredClient syncTableWithName:@"TodoItem"];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
-    // verifies that we allow __includeDeleted=YES
-    query.parameters = @{@"__includeDeleted":@YES};
+    // TODO: look at if we want to reenable this
+    // Verifies that we allow __includeDeleted=YES
+    // query.parameters = @{@"__includeDeleted":@YES};
     
     [todoTable pullWithQuery:query queryId:@"test_1" completion:^(NSError *error) {
         XCTAssertNil(error, @"Error found: %@", error.description);
@@ -1178,10 +1194,35 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     NSURLRequest *firstRequest = (NSURLRequest *)filter.actualRequests[0];
     NSURLRequest *secondRequest = (NSURLRequest *)filter.actualRequests[1];
     NSURLRequest *thirdRequest = (NSURLRequest *)filter.actualRequests[2];
+
+    NSArray *expectedfirstRequestQuery = @[@"__includeDeleted=true",
+                                           @"__systemProperties=__updatedAt,__deleted,__version",
+                                           @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')",
+                                           @"$orderby=__updatedAt%20asc"];
+    XCTAssertTrue([self checkURL:firstRequest.URL
+                        withPath:@"/tables/TodoItem"
+                        andQuery:expectedfirstRequestQuery],
+                  @"Invalue URL: %@", firstRequest.URL.absoluteString);
     
-    XCTAssertEqualObjects(firstRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')&__includeDeleted=1&$orderby=__updatedAt%20asc&__systemProperties=__updatedAt,__deleted,__version");
-    XCTAssertEqualObjects(secondRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-03T15%3A44%3A29.000Z')&__includeDeleted=1&$orderby=__updatedAt%20asc&__systemProperties=__updatedAt,__deleted,__version");
-    XCTAssertEqualObjects(thirdRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-04T16%3A44%3A59.000Z')&__includeDeleted=1&$orderby=__updatedAt%20asc&__systemProperties=__updatedAt,__deleted,__version");
+    NSArray *expectedSecondRequestQuery = @[@"__includeDeleted=true",
+                                            @"__systemProperties=__updatedAt,__deleted,__version",
+                                            @"$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-03T15%3A44%3A29.000Z')",
+                                            @"$orderby=__updatedAt%20asc"];
+    XCTAssertTrue([self checkURL:secondRequest.URL
+                        withPath:@"/tables/TodoItem"
+                        andQuery:expectedSecondRequestQuery],
+                  @"Invalue URL: %@", secondRequest.URL.absoluteString);
+
+    
+    NSArray *expectedThirdRequestQuery = @[@"__includeDeleted=true",
+                                            @"__systemProperties=__updatedAt,__deleted,__version",
+                                            @"$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-04T16%3A44%3A59.000Z')",
+                                            @"$orderby=__updatedAt%20asc"];
+    XCTAssertTrue([self checkURL:thirdRequest.URL
+                        withPath:@"/tables/TodoItem"
+                        andQuery:expectedThirdRequestQuery],
+                  @"Invalue URL: %@", thirdRequest.URL.absoluteString);
+    
     
     // now try again and make sure we start with the same deltaToken
     [offline resetCounts];
@@ -1200,8 +1241,15 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     XCTAssertEqual(4, filter.actualRequests.count);
     
     NSURLRequest *fourthRequest = (NSURLRequest *)filter.actualRequests[3];
-    
-    XCTAssertEqualObjects(fourthRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-04T16%3A44%3A59.000Z')&__includeDeleted=1&$orderby=__updatedAt%20asc&__systemProperties=__updatedAt,__deleted,__version");
+
+    NSArray *expectedFourthRequestQuery = @[@"__includeDeleted=true",
+                                           @"__systemProperties=__updatedAt,__deleted,__version",
+                                           @"$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-04T16%3A44%3A59.000Z')",
+                                           @"$orderby=__updatedAt%20asc"];
+    XCTAssertTrue([self checkURL:fourthRequest.URL
+                        withPath:@"/tables/TodoItem"
+                        andQuery:expectedFourthRequestQuery],
+                  @"Invalue URL: %@", fourthRequest.URL.absoluteString);
 }
 
 -(void) testIncrementalPullWithSkipFails
@@ -1227,8 +1275,13 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     XCTAssertEqual(1, filter.actualRequests.count);
     
     NSURLRequest *firstRequest = (NSURLRequest *)filter.actualRequests[0];
-    
-    XCTAssertEqualObjects(firstRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?$skip=10&__includeDeleted=1&__systemProperties=__deleted,__version");
+    NSArray *expectedFirstRequestQuery = @[@"__includeDeleted=true",
+                                            @"__systemProperties=__deleted,__version",
+                                            @"$skip=10"];
+    XCTAssertTrue([self checkURL:firstRequest.URL
+                        withPath:@"/tables/TodoItem"
+                        andQuery:expectedFirstRequestQuery],
+                  @"Invalue URL: %@", firstRequest.URL.absoluteString);
     
     [offline resetCounts];
     // with queryId, this should produce an error
@@ -1271,7 +1324,13 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     
     NSURLRequest *firstRequest = (NSURLRequest *)filter.actualRequests[0];
     
-    XCTAssertEqualObjects(firstRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?__includeDeleted=1&$orderby=id%20desc&__systemProperties=__deleted,__version");
+    NSArray *expectedFirstRequestQuery = @[@"__includeDeleted=true",
+                                           @"__systemProperties=__deleted,__version",
+                                           @"$orderby=id%20desc"];
+    XCTAssertTrue([self checkURL:firstRequest.URL
+                        withPath:@"/tables/TodoItem"
+                        andQuery:expectedFirstRequestQuery],
+                  @"Invalue URL: %@", firstRequest.URL.absoluteString);
     
     [offline resetCounts];
     // with queryId, this should produce an error
@@ -1362,9 +1421,36 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     NSURLRequest *secondPullRequest = (NSURLRequest *)filter.actualRequests[0];
     NSURLRequest *thirdPullRequest = (NSURLRequest *)filter.actualRequests[1];
     
-    XCTAssertEqualObjects(firstPullRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')&$orderby=__updatedAt%20asc&__includeDeleted=1&$top=50&__systemProperties=__updatedAt,__deleted,__version");
-    XCTAssertEqualObjects(secondPullRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-03T15%3A44%3A29.000Z')&$orderby=__updatedAt%20asc&__includeDeleted=1&$top=50&__systemProperties=__updatedAt,__deleted,__version");
-    XCTAssertEqualObjects(thirdPullRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-07T15%3A44%3A28.000Z')&$orderby=__updatedAt%20asc&__includeDeleted=1&$top=50&__systemProperties=__updatedAt,__deleted,__version");
+    NSArray *expectedFirstPullRequestQuery = @[@"__includeDeleted=true",
+                                               @"__systemProperties=__updatedAt,__deleted,__version",
+                                               @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')",
+                                               @"$orderby=__updatedAt%20asc",
+                                               @"$top=50"];
+    XCTAssertTrue([self checkURL:firstPullRequest.URL
+                        withPath:@"/tables/TodoItem"
+                        andQuery:expectedFirstPullRequestQuery],
+                  @"Invalue URL: %@", firstPullRequest.URL.absoluteString);
+
+    NSArray *expectedSecondPullRequestQuery = @[@"__includeDeleted=true",
+                                               @"__systemProperties=__updatedAt,__deleted,__version",
+                                               @"$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-03T15%3A44%3A29.000Z')",
+                                               @"$orderby=__updatedAt%20asc",
+                                               @"$top=50"];
+    XCTAssertTrue([self checkURL:secondPullRequest.URL
+                        withPath:@"/tables/TodoItem"
+                        andQuery:expectedSecondPullRequestQuery],
+                  @"Invalue URL: %@", secondPullRequest.URL.absoluteString);
+    
+
+    NSArray *expectedThirdPullRequestQuery = @[@"__includeDeleted=true",
+                                                @"__systemProperties=__updatedAt,__deleted,__version",
+                                                @"$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-07T15%3A44%3A28.000Z')",
+                                                @"$orderby=__updatedAt%20asc",
+                                                @"$top=50"];
+    XCTAssertTrue([self checkURL:thirdPullRequest.URL
+                        withPath:@"/tables/TodoItem"
+                        andQuery:expectedThirdPullRequestQuery],
+                  @"Invalue URL: %@", thirdPullRequest.URL.absoluteString);
     
     XCTAssertEqual(client.syncContext.pendingOperationsCount, 1);
 }
@@ -1424,8 +1510,29 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     NSURLRequest *thirdPullRequest = (NSURLRequest *)filter.actualRequests[2];
     
     XCTAssertEqualObjects(insertRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?__systemProperties=__version");
-    XCTAssertEqualObjects(firstPullRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')&__includeDeleted=1&$orderby=__updatedAt%20asc&__systemProperties=__updatedAt,__deleted,__version");    XCTAssertEqualObjects(secondPullRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-03T15%3A44%3A29.000Z')&__includeDeleted=1&$orderby=__updatedAt%20asc&__systemProperties=__updatedAt,__deleted,__version");
-    XCTAssertEqualObjects(thirdPullRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-07T15%3A44%3A28.000Z')&__includeDeleted=1&$orderby=__updatedAt%20asc&__systemProperties=__updatedAt,__deleted,__version");
+    NSArray *expectedfirstPullRequest = @[@"__includeDeleted=true",
+                                       @"__systemProperties=__updatedAt,__deleted,__version",
+                                       @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')",
+                                       @"$orderby=__updatedAt%20asc"];
+
+    XCTAssertTrue([self checkURL:firstPullRequest.URL withPath:@"/tables/TodoItem" andQuery:expectedfirstPullRequest],
+                  @"Invalid URL: %@", firstPullRequest.URL.absoluteString);
+
+    
+    NSArray *expectedSecondPullRequest = @[@"__includeDeleted=true",
+                                       @"__systemProperties=__updatedAt,__deleted,__version",
+                                       @"$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-03T15%3A44%3A29.000Z')",
+                                       @"$orderby=__updatedAt%20asc"];
+    XCTAssertTrue([self checkURL:secondPullRequest.URL withPath:@"/tables/TodoItem" andQuery:expectedSecondPullRequest],
+                  @"Invalid URL: %@", secondPullRequest.URL.absoluteString);
+
+    NSArray *expectedThirdPullRequest = @[@"__includeDeleted=true",
+                                           @"__systemProperties=__updatedAt,__deleted,__version",
+                                           @"$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-07T15%3A44%3A28.000Z')",
+                                           @"$orderby=__updatedAt%20asc"];
+    XCTAssertTrue([self checkURL:thirdPullRequest.URL withPath:@"/tables/TodoItem" andQuery:expectedThirdPullRequest],
+                  @"Invalid URL: %@", thirdPullRequest.URL.absoluteString);
+    
     
     XCTAssertEqual(client.syncContext.pendingOperationsCount, 1);
 }
@@ -1465,14 +1572,54 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     NSURLRequest *sixthRequest = (NSURLRequest *)filter.actualRequests[5];
     
     XCTAssertEqual(6, filter.actualRequests.count);
+
+    NSArray *expectedFirstRequest = @[@"__includeDeleted=true",
+                                          @"__systemProperties=__updatedAt,__deleted,__version",
+                                          @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')",
+                                          @"$orderby=__updatedAt%20asc"];
+    XCTAssertTrue([self checkURL:firstRequest.URL withPath:@"/tables/TodoItem" andQuery:expectedFirstRequest],
+                  @"Invalid URL: %@", firstRequest.URL.absoluteString);
     
-    XCTAssertEqualObjects(firstRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')&__includeDeleted=1&$orderby=__updatedAt%20asc&__systemProperties=__updatedAt,__deleted,__version");
-    XCTAssertEqualObjects(secondRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?$filter=(__updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z')&__includeDeleted=1&$orderby=__updatedAt%20asc&__systemProperties=__updatedAt,__deleted,__version");
+    NSArray *expectedSecondRequest = @[@"__includeDeleted=true",
+                                      @"__systemProperties=__updatedAt,__deleted,__version",
+                                      @"$filter=(__updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z')",
+                                      @"$orderby=__updatedAt%20asc"];
+    XCTAssertTrue([self checkURL:secondRequest.URL withPath:@"/tables/TodoItem" andQuery:expectedSecondRequest],
+                  @"Invalid URL: %@", secondRequest.URL.absoluteString);
+    
     // TODO: why does the ordering of $orderby and __includeDeleted change here?
-    XCTAssertEqualObjects(thirdRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?$skip=2&$filter=(__updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z')&$orderby=__updatedAt%20asc&__includeDeleted=1&__systemProperties=__updatedAt,__deleted,__version");
-    XCTAssertEqualObjects(fourthRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?$skip=4&$filter=(__updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z')&$orderby=__updatedAt%20asc&__includeDeleted=1&__systemProperties=__updatedAt,__deleted,__version");
-    XCTAssertEqualObjects(fifthRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?$filter=(__updatedAt%20ge%20datetimeoffset'2000-01-02T00%3A00%3A00.000Z')&__includeDeleted=1&$orderby=__updatedAt%20asc&__systemProperties=__updatedAt,__deleted,__version");
-    XCTAssertEqualObjects(sixthRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?$skip=1&$filter=(__updatedAt%20ge%20datetimeoffset'2000-01-02T00%3A00%3A00.000Z')&$orderby=__updatedAt%20asc&__includeDeleted=1&__systemProperties=__updatedAt,__deleted,__version");
+    NSArray *expectedThirdRequest = @[@"__includeDeleted=true",
+                                          @"__systemProperties=__updatedAt,__deleted,__version",
+                                          @"$filter=(__updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z')",
+                                          @"$orderby=__updatedAt%20asc",
+                                          @"$skip=2"];
+    XCTAssertTrue([self checkURL:thirdRequest.URL withPath:@"/tables/TodoItem" andQuery:expectedThirdRequest],
+                  @"Invalid URL: %@", thirdRequest.URL.absoluteString);
+
+    // TODO: why does the ordering of $orderby and __includeDeleted change here?
+    NSArray *expectedFourthRequest = @[@"__includeDeleted=true",
+                                      @"__systemProperties=__updatedAt,__deleted,__version",
+                                      @"$filter=(__updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z')",
+                                      @"$orderby=__updatedAt%20asc",
+                                      @"$skip=4"];
+    XCTAssertTrue([self checkURL:fourthRequest.URL withPath:@"/tables/TodoItem" andQuery:expectedFourthRequest],
+                  @"Invalid URL: %@", fourthRequest.URL.absoluteString);
+    
+    NSArray *expectedFifthRequest = @[@"__includeDeleted=true",
+                                       @"__systemProperties=__updatedAt,__deleted,__version",
+                                       @"$filter=(__updatedAt%20ge%20datetimeoffset'2000-01-02T00%3A00%3A00.000Z')",
+                                       @"$orderby=__updatedAt%20asc"];
+    XCTAssertTrue([self checkURL:fifthRequest.URL withPath:@"/tables/TodoItem" andQuery:expectedFifthRequest],
+                  @"Invalid URL: %@", fifthRequest.URL.absoluteString);
+
+    NSArray *expectedSixthRequest = @[@"__includeDeleted=true",
+                                      @"__systemProperties=__updatedAt,__deleted,__version",
+                                      @"$filter=(__updatedAt%20ge%20datetimeoffset'2000-01-02T00%3A00%3A00.000Z')",
+                                      @"$orderby=__updatedAt%20asc",
+                                      @"$skip=1"];
+    
+    XCTAssertTrue([self checkURL:sixthRequest.URL withPath:@"/tables/TodoItem" andQuery:expectedSixthRequest],
+                  @"Invalid URL: %@", sixthRequest.URL.absoluteString);
 }
 
 -(void) testIncrementalPullAppendsFilter
@@ -1500,9 +1647,29 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     NSURLRequest *secondRequest = (NSURLRequest *)filter.actualRequests[1];
     NSURLRequest *thirdRequest = (NSURLRequest *)filter.actualRequests[2];
     
-    XCTAssertEqualObjects(firstRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?$filter=((text%20eq%20'MATCH')%20and%20(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z'))&__includeDeleted=1&$orderby=__updatedAt%20asc&__systemProperties=__updatedAt,__deleted,__version");
-    XCTAssertEqualObjects(secondRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?$filter=((text%20eq%20'MATCH')%20and%20(__updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z'))&__includeDeleted=1&$orderby=__updatedAt%20asc&__systemProperties=__updatedAt,__deleted,__version");
-    XCTAssertEqualObjects(thirdRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?$skip=1&$filter=((text%20eq%20'MATCH')%20and%20(__updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z'))&$orderby=__updatedAt%20asc&__includeDeleted=1&__systemProperties=__updatedAt,__deleted,__version");
+    NSArray *expectedFirstRequest = @[@"__includeDeleted=true",
+                                      @"__systemProperties=__updatedAt,__deleted,__version",
+                                      @"$filter=((text%20eq%20'MATCH')%20and%20(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z'))",
+                                      @"$orderby=__updatedAt%20asc"];
+    XCTAssertTrue([self checkURL:firstRequest.URL withPath:@"/tables/TodoItem" andQuery:expectedFirstRequest],
+                  @"Invalid URL: %@", firstRequest.URL.absoluteString);
+
+    NSArray *expectedSecondRequest = @[@"__includeDeleted=true",
+                                      @"__systemProperties=__updatedAt,__deleted,__version",
+                                      @"$filter=((text%20eq%20'MATCH')%20and%20(__updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z'))",
+                                      @"$orderby=__updatedAt%20asc"];
+    XCTAssertTrue([self checkURL:secondRequest.URL withPath:@"/tables/TodoItem" andQuery:expectedSecondRequest],
+                  @"Invalid URL: %@", secondRequest.URL.absoluteString);
+    
+
+    NSArray *expectedThirdRequest = @[@"__includeDeleted=true",
+                                       @"__systemProperties=__updatedAt,__deleted,__version",
+                                       @"$filter=((text%20eq%20'MATCH')%20and%20(__updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z'))",
+                                       @"$orderby=__updatedAt%20asc",
+                                       @"$skip=1"];
+    XCTAssertTrue([self checkURL:thirdRequest.URL withPath:@"/tables/TodoItem" andQuery:expectedThirdRequest],
+                  @"Invalid URL: %@", thirdRequest.URL.absoluteString);
+
 }
 
 -(void) testDeltaTokenFailureAbortsPullOperation
@@ -1806,6 +1973,18 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     };
     
     return done;
+}
+
+-(BOOL) checkURL:(NSURL *)url withPath:(NSString *)path andQuery:(NSArray *)query
+{
+    if (![url.path isEqualToString:path]) {
+        return NO;
+    }
+    
+    NSArray *actualQuery = [[url.query componentsSeparatedByString:@"&"]
+                                  sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    
+    return [actualQuery isEqualToArray:query];
 }
 
 #pragma mark * deltaToken Test Helper Method

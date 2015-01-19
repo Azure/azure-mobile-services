@@ -343,14 +343,8 @@ static NSOperationQueue *pushQueue_;
     }
     
     if (!error && isDeletedParams.count > 0) {
-        // if there are any __includeDeleted params set to NO we want to throw because we would overwrite them
-        for (NSNumber *value in isDeletedParams.allValues) {
-            if (!value.boolValue) {
-                error = [self errorWithDescription:@"The '__includeDeleted' parameter value must be YES if used for pullWithQuery:"
-                                      andErrorCode:MSInvalidParameter];
-                break;
-            }
-        }
+        error = [self errorWithDescription:@"The '__includeDeleted' parameter is always true in pullWithQuery: and its value may not be overridden."
+                              andErrorCode:MSInvalidParameter];
     }
     
     // Return error if possible, return on calling
@@ -370,10 +364,10 @@ static NSOperationQueue *pushQueue_;
     
     // add __includeDeleted
     if (!queryCopy.parameters) {
-        queryCopy.parameters = @{@"__includeDeleted" : @YES};
+        queryCopy.parameters = @{@"__includeDeleted" : @"true"};
     } else {
         NSMutableDictionary *mutableParameters = [queryCopy.parameters mutableCopy];
-        [mutableParameters setObject:@YES forKey:@"__includeDeleted"];
+        [mutableParameters setObject:@"true" forKey:@"__includeDeleted"];
         queryCopy.parameters = mutableParameters;
     }
     
