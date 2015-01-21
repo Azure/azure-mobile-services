@@ -72,7 +72,6 @@ import java.util.concurrent.ExecutionException;
 public class OfflineTests extends TestGroup {
 
     protected static final String OFFLINE_TABLE_NAME = "offlineTest.db";
-    protected static final String OFFLINE_TABLE_NOVERSION_NAME = "offlineNoVersionTest.db";
     protected static final String INCREMENTAL_PULL_STRATEGY_TABLE = "__incrementalPullData";
 
     public OfflineTests() {
@@ -147,7 +146,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("id", ColumnDataType.String);
                     tableDefinition.put("name", ColumnDataType.String);
                     tableDefinition.put("age", ColumnDataType.Number);
-                    tableDefinition.put("floatNumber", ColumnDataType.Number);
+                    tableDefinition.put("float", ColumnDataType.Number);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
                     tableDefinition.put("__version", ColumnDataType.String);
@@ -521,7 +520,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("id", ColumnDataType.String);
                     tableDefinition.put("name", ColumnDataType.String);
                     tableDefinition.put("age", ColumnDataType.Number);
-                    tableDefinition.put("floatNumber", ColumnDataType.Number);
+                    tableDefinition.put("float", ColumnDataType.Number);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
                     tableDefinition.put("__version", ColumnDataType.String);
@@ -643,7 +642,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("id", ColumnDataType.String);
                     tableDefinition.put("name", ColumnDataType.String);
                     tableDefinition.put("age", ColumnDataType.Number);
-                    tableDefinition.put("floatNumber", ColumnDataType.Number);
+                    tableDefinition.put("float", ColumnDataType.Number);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
                     tableDefinition.put("__version", ColumnDataType.String);
@@ -736,7 +735,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("id", ColumnDataType.String);
                     tableDefinition.put("name", ColumnDataType.String);
                     tableDefinition.put("age", ColumnDataType.Number);
-                    tableDefinition.put("floatNumber", ColumnDataType.Number);
+                    tableDefinition.put("float", ColumnDataType.Number);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
                     tableDefinition.put("__version", ColumnDataType.String);
@@ -1080,7 +1079,7 @@ public class OfflineTests extends TestGroup {
 
     private TestCase createOfflineIncrementalSyncTest(final String queryKey, final boolean cleanStore, final boolean complexQuery) {
 
-        final String tableName = "offlinereadyitemnoversion";
+        final String tableName = "offlineReady";
 
         final TestCase test = new TestCase() {
 
@@ -1093,7 +1092,7 @@ public class OfflineTests extends TestGroup {
                 result.setTestCase(testCase);
                 try {
 
-                    SQLiteLocalStore localStore = new SQLiteLocalStore(offlineReadyClient.getContext(), OFFLINE_TABLE_NOVERSION_NAME, null, 1);
+                    SQLiteLocalStore localStore = new SQLiteLocalStore(offlineReadyClient.getContext(), OFFLINE_TABLE_NAME, null, 1);
 
                     log("Defined the table on the local store");
 
@@ -1546,7 +1545,7 @@ class OfflineReadyItem {
     private String mName;
     @SerializedName("age")
     private int mAge;
-    @SerializedName("floatNumber")
+    @SerializedName("float")
     private double mFloatingNumber;
     @SerializedName("date")
     private Date mDate;
