@@ -55,7 +55,8 @@ static NSString *const inlineCountAllPage = @"allpages";
         if (table.systemProperties & MSSystemPropertyVersion) {
             [properties addObject:MSSystemColumnVersion];
         }
-        value = [properties componentsJoinedByString:@","];
+        // Join the properties with "%2C" which is URL Friendly
+        value = [properties componentsJoinedByString:@"%2C"];
     }
     
     return [MSURLBuilder URLByAppendingQueryString:[@"__systemProperties=" stringByAppendingString:value] toURL:url];
