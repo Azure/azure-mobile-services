@@ -13,6 +13,7 @@
 - (id) initWithSyncContext:(MSSyncContext *)syncContext
                      query:(MSQuery *)query
                    queryId:(NSString *)queryId
+                maxRecords:(NSInteger)maxRecords
              dispatchQueue:(dispatch_queue_t)dispatchQueue
              callbackQueue:(NSOperationQueue *)callbackQueue
                 completion:(MSSyncBlock)completion;

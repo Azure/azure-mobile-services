@@ -21,6 +21,8 @@
     dispatch_queue_t writeOperationQueue;
 }
 
+NSInteger const defaultFetchLimit = 50;
+
 static NSOperationQueue *pushQueue_;
 
 @synthesize delegate = delegate_;
@@ -324,8 +326,8 @@ static NSOperationQueue *pushQueue_;
         error = [self errorWithDescription: @"Use of orderBy is not supported when a queryId is specified"
                               andErrorCode:MSInvalidParameter];
     }
-    else if (queryId && queryCopy.fetchOffset > 0) {
-        error = [self errorWithDescription: @"Use of fetchOffset is not supported when a queryId is specified"
+    else if (queryId && (queryCopy.fetchOffset >= 0 || queryCopy.fetchLimit >= 0)) {
+        error = [self errorWithDescription: @"Properties fetchOffset and fetchLimit are not supported when queryId is specified"
                               andErrorCode:MSInvalidParameter];
     }
     else if ([MSSyncContext dictionary:queryCopy.parameters containsCaseInsensitiveKey:@"__systemproperties"]) {
@@ -379,17 +381,20 @@ static NSOperationQueue *pushQueue_;
         queryCopy.orderBy = [NSArray arrayWithObject:orderByUpdatedAt];
     }
     
+    // For a Pull we treat fetchLimit as the total records we should pull by paging. If there is no fetchLimit, we pull everything.
+    // We enforce a page size of 50.
+    NSInteger maxRecords = query.fetchLimit >= 0 ? query.fetchLimit : NSIntegerMax;
+    queryCopy.fetchLimit = MIN(maxRecords, defaultFetchLimit);
+    
     // Begin the actual pull request
-    [self pullWithQueryInternal:queryCopy queryId:queryId completion:completion];
+    [self pullWithQueryInternal:queryCopy queryId:queryId maxRecords:maxRecords completion:completion];
 }
 
 /// Basic pull logic is:
 ///  Check if our table has pending operations, if so, push
 ///    If push fails, return error, else repeat while we have pending operations
-///  Read from server and get the new results
-///  If our table became dirty while we read from the server, start over
-///  Else save our data into the local store
-- (void) pullWithQueryInternal:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion
+///  Read from server using an MSQueuePullOperation
+- (void) pullWithQueryInternal:(MSQuery *)query queryId:(NSString *)queryId maxRecords:(NSInteger)maxRecords completion:(MSSyncBlock)completion
 {
     dispatch_async(writeOperationQueue, ^{
         // Before we can pull from the remote, we need to make sure out table doesn't having pending operations
@@ -405,7 +410,7 @@ static NSOperationQueue *pushQueue_;
                 }
                 else {
                     // Check again if we have new pending ops while we synced, and repeat as needed
-                    [self pullWithQueryInternal:query queryId:queryId completion:completion];
+                    [self pullWithQueryInternal:query queryId:queryId maxRecords:maxRecords completion:completion];
                 }
             }];
             return;
@@ -415,6 +420,7 @@ static NSOperationQueue *pushQueue_;
             MSQueuePullOperation *pull = [[MSQueuePullOperation alloc] initWithSyncContext:self
                                                                                      query:query
                                                                                    queryId:queryId
+                                                                                maxRecords:maxRecords
                                                                              dispatchQueue:writeOperationQueue
                                                                              callbackQueue:self.callbackQueue
                                                                                 completion:completion];

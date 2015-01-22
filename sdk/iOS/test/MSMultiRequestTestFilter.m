@@ -18,6 +18,17 @@
     return self;
 }
 
++(NSString *) testDataWithItemCount:(int)itemCount startId:(int)start
+{
+    NSMutableString *string = [NSMutableString stringWithString:@"["];
+    for (int i = start; i < start + itemCount; i++)
+    {
+        [string appendFormat:@"{\"id\": \"%d\"},", i];
+    }
+    [string appendString:@"]"];
+    return string;
+}
+
 +(MSMultiRequestTestFilter *) testFilterWithStatusCodes:(NSArray *)statusCodes data:(NSArray *)data appendEmptyRequest:(BOOL)appendEmptyRequest {
     MSMultiRequestTestFilter *multiFilter = [MSMultiRequestTestFilter new];
     NSMutableArray *filters = [NSMutableArray new];
@@ -39,6 +50,7 @@
         __block NSURLRequest *actualRequest = [NSURLRequest new];
         filter.onInspectRequest = ^(NSURLRequest *request) {
             actualRequest = request;
+            NSLog(@"%@", request.URL.absoluteString);
             [requests addObject:actualRequest];
             return request;
         };
