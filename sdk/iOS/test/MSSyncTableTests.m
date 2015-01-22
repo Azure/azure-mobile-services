@@ -929,11 +929,11 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     NSURLRequest *firstRequest = (NSURLRequest *)filter.actualRequests[0];
     NSURLRequest *secondRequest = (NSURLRequest *)filter.actualRequests[1];
     
-    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted,__version", @"$top=50", @"$skip=0"];
+    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted%2C__version", @"$top=50", @"$skip=0"];
     XCTAssertTrue([self checkURL:firstRequest.URL withPath:@"/tables/TodoItem" andQuery:expectedFirstResult],
                   @"Invalid URL: %@", firstRequest.URL.absoluteString);
 
-    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted,__version", @"$top=50", @"$skip=2"];
+    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted%2C__version", @"$top=50", @"$skip=2"];
     XCTAssertTrue([self checkURL:secondRequest.URL withPath:@"/tables/TodoItem" andQuery:expectedSecondResult],
                   @"Invalid URL: %@", secondRequest.URL.absoluteString);
 }
@@ -1122,7 +1122,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     MSClient *filteredClient = [client clientWithFilter:testFilter];
     MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
-    query.parameters = @{@"__systemProperties": @"__createdAt,__somethingRandom"};
+    query.parameters = @{@"__systemProperties": @"__createdAt%2C__somethingRandom"};
     
     [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
         XCTAssertNotNil(error);
@@ -1513,7 +1513,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     NSURLRequest *thirdRequest = (NSURLRequest *)filter.actualRequests[2];
 
     NSArray *expectedfirstRequestQuery = @[@"__includeDeleted=true",
-                                           @"__systemProperties=__updatedAt,__deleted,__version",
+                                           @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                            @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')",
                                            @"$orderby=__updatedAt%20asc",
                                            @"$skip=0",
@@ -1524,7 +1524,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
                   @"Invalue URL: %@", firstRequest.URL.absoluteString);
     
     NSArray *expectedSecondRequestQuery = @[@"__includeDeleted=true",
-                                            @"__systemProperties=__updatedAt,__deleted,__version",
+                                            @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                             @"$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-03T15%3A44%3A29.000Z')",
                                             @"$orderby=__updatedAt%20asc",
                                             @"$skip=0",
@@ -1536,7 +1536,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
 
     
     NSArray *expectedThirdRequestQuery = @[@"__includeDeleted=true",
-                                           @"__systemProperties=__updatedAt,__deleted,__version",
+                                           @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                            @"$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-04T16%3A44%3A59.000Z')",
                                            @"$orderby=__updatedAt%20asc",
                                            @"$skip=0",
@@ -1566,7 +1566,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     NSURLRequest *fourthRequest = (NSURLRequest *)filter.actualRequests[3];
 
     NSArray *expectedFourthRequestQuery = @[@"__includeDeleted=true",
-                                            @"__systemProperties=__updatedAt,__deleted,__version",
+                                            @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                             @"$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-04T16%3A44%3A59.000Z')",
                                             @"$orderby=__updatedAt%20asc",
                                             @"$skip=0",
@@ -1603,7 +1603,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     NSURLRequest *firstRequest = (NSURLRequest *)filter.actualRequests[0];
     
     NSArray *expectedFirstRequestQuery = @[@"__includeDeleted=true",
-                                           @"__systemProperties=__deleted,__version",
+                                           @"__systemProperties=__deleted%2C__version",
                                            @"$orderby=id%20desc",
                                            @"$skip=0",
                                            @"$top=50"];
@@ -1700,7 +1700,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     NSURLRequest *thirdPullRequest = (NSURLRequest *)filter.actualRequests[1];
     
     NSArray *expectedFirstPullRequestQuery = @[@"__includeDeleted=true",
-                                               @"__systemProperties=__updatedAt,__deleted,__version",
+                                               @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                                @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')",
                                                @"$orderby=__updatedAt%20asc",
                                                @"$top=50",
@@ -1711,7 +1711,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
                   @"Invalue URL: %@", firstPullRequest.URL.absoluteString);
 
     NSArray *expectedSecondPullRequestQuery = @[@"__includeDeleted=true",
-                                                @"__systemProperties=__updatedAt,__deleted,__version",
+                                                @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                                 @"$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-03T15%3A44%3A29.000Z')",
                                                 @"$orderby=__updatedAt%20asc",
                                                 @"$top=50",
@@ -1723,7 +1723,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     
 
     NSArray *expectedThirdPullRequestQuery = @[@"__includeDeleted=true",
-                                               @"__systemProperties=__updatedAt,__deleted,__version",
+                                               @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                                @"$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-07T15%3A44%3A28.000Z')",
                                                @"$orderby=__updatedAt%20asc",
                                                @"$top=50",
@@ -1792,7 +1792,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     
     XCTAssertEqualObjects(insertRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?__systemProperties=__version");
     NSArray *expectedfirstPullRequest = @[@"__includeDeleted=true",
-                                          @"__systemProperties=__updatedAt,__deleted,__version",
+                                          @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                           @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')",
                                           @"$orderby=__updatedAt%20asc",
                                           @"$top=50",
@@ -1803,7 +1803,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
 
     
     NSArray *expectedSecondPullRequest = @[@"__includeDeleted=true",
-                                           @"__systemProperties=__updatedAt,__deleted,__version",
+                                           @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                            @"$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-03T15%3A44%3A29.000Z')",
                                            @"$orderby=__updatedAt%20asc",
                                            @"$top=50",
@@ -1812,7 +1812,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
                   @"Invalid URL: %@", secondPullRequest.URL.absoluteString);
 
     NSArray *expectedThirdPullRequest = @[@"__includeDeleted=true",
-                                          @"__systemProperties=__updatedAt,__deleted,__version",
+                                          @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                           @"$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-07T15%3A44%3A28.000Z')",
                                           @"$orderby=__updatedAt%20asc",
                                           @"$top=50",
@@ -1861,7 +1861,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     XCTAssertEqual(6, filter.actualRequests.count);
 
     NSArray *expectedFirstRequest = @[@"__includeDeleted=true",
-                                      @"__systemProperties=__updatedAt,__deleted,__version",
+                                      @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                       @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')",
                                       @"$orderby=__updatedAt%20asc",
                                       @"$top=50",
@@ -1870,7 +1870,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
                   @"Invalid URL: %@", firstRequest.URL.absoluteString);
     
     NSArray *expectedSecondRequest = @[@"__includeDeleted=true",
-                                       @"__systemProperties=__updatedAt,__deleted,__version",
+                                       @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                        @"$filter=(__updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z')",
                                        @"$orderby=__updatedAt%20asc",
                                        @"$top=50",
@@ -1880,7 +1880,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     
     // TODO: why does the ordering of $orderby and __includeDeleted change here?
     NSArray *expectedThirdRequest = @[@"__includeDeleted=true",
-                                      @"__systemProperties=__updatedAt,__deleted,__version",
+                                      @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                       @"$filter=(__updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z')",
                                       @"$orderby=__updatedAt%20asc",
                                       @"$skip=2",
@@ -1890,7 +1890,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
 
     // TODO: why does the ordering of $orderby and __includeDeleted change here?
     NSArray *expectedFourthRequest = @[@"__includeDeleted=true",
-                                       @"__systemProperties=__updatedAt,__deleted,__version",
+                                       @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                        @"$filter=(__updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z')",
                                        @"$orderby=__updatedAt%20asc",
                                        @"$skip=4",
@@ -1899,7 +1899,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
                   @"Invalid URL: %@", fourthRequest.URL.absoluteString);
     
     NSArray *expectedFifthRequest = @[@"__includeDeleted=true",
-                                      @"__systemProperties=__updatedAt,__deleted,__version",
+                                      @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                       @"$filter=(__updatedAt%20ge%20datetimeoffset'2000-01-02T00%3A00%3A00.000Z')",
                                       @"$orderby=__updatedAt%20asc",
                                       @"$top=50",
@@ -1908,7 +1908,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
                   @"Invalid URL: %@", fifthRequest.URL.absoluteString);
 
     NSArray *expectedSixthRequest = @[@"__includeDeleted=true",
-                                      @"__systemProperties=__updatedAt,__deleted,__version",
+                                      @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                       @"$filter=(__updatedAt%20ge%20datetimeoffset'2000-01-02T00%3A00%3A00.000Z')",
                                       @"$orderby=__updatedAt%20asc",
                                       @"$skip=1",
@@ -1944,7 +1944,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     NSURLRequest *thirdRequest = (NSURLRequest *)filter.actualRequests[2];
     
     NSArray *expectedFirstRequest = @[@"__includeDeleted=true",
-                                      @"__systemProperties=__updatedAt,__deleted,__version",
+                                      @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                       @"$filter=((text%20eq%20'MATCH')%20and%20(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z'))",
                                       @"$orderby=__updatedAt%20asc",
                                       @"$top=50",
@@ -1953,7 +1953,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
                   @"Invalid URL: %@", firstRequest.URL.absoluteString);
 
     NSArray *expectedSecondRequest = @[@"__includeDeleted=true",
-                                       @"__systemProperties=__updatedAt,__deleted,__version",
+                                       @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                        @"$filter=((text%20eq%20'MATCH')%20and%20(__updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z'))",
                                        @"$orderby=__updatedAt%20asc",
                                        @"$top=50",
@@ -1963,7 +1963,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     
 
     NSArray *expectedThirdRequest = @[@"__includeDeleted=true",
-                                      @"__systemProperties=__updatedAt,__deleted,__version",
+                                      @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                       @"$filter=((text%20eq%20'MATCH')%20and%20(__updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z'))",
                                       @"$orderby=__updatedAt%20asc",
                                       @"$skip=1",
