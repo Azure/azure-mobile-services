@@ -176,9 +176,9 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
      *
      * @param nextLink The next link with the page information
      */
-    public ListenableFuture<MobileServiceList<E>> executeNextLink(String nextLink) {
+    public ListenableFuture<MobileServiceList<E>> execute(String nextLink) {
         final SettableFuture<MobileServiceList<E>> future = SettableFuture.create();
-        ListenableFuture<JsonElement> internalFuture = mInternalTable.executeNextLink(nextLink);
+        ListenableFuture<JsonElement> internalFuture = mInternalTable.execute(nextLink);
         Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
             @Override
             public void onFailure(Throwable exc) {

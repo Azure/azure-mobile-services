@@ -165,7 +165,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
      *
      * @param nextLink The Next Link to make the request
      */
-    public ListenableFuture<JsonElement> executeNextLink(final String nextLink) {
+    public ListenableFuture<JsonElement> execute(final String nextLink) {
         final SettableFuture<JsonElement> future = SettableFuture.create();
 
         return executeUrlQuery(nextLink, mFeatures.clone());

@@ -560,8 +560,8 @@ public class OfflineTests extends TestGroup {
                     MobileServiceList<PersonItem> personItems = remoteTable.execute(query).get();
 
                     while(personItems.getNextLink() != null) {
-
-                        personItems = remoteTable.executeNextLink(personItems.getNextLink()).get();
+                        log("Querying " + personItems.getNextLink());
+                        personItems = remoteTable.execute(personItems.getNextLink()).get();
                     }
 
                     log("Done");
