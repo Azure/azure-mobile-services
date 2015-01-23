@@ -30,13 +30,23 @@ public class MobileServiceList<E> extends ArrayList<E> {
 
     private static final long serialVersionUID = 5772338570723574845L;
     private int mTotalCount;
+    private String mNextLink;
 
     public MobileServiceList(Collection<? extends E> collection, int totalCount) {
         super(collection);
         mTotalCount = totalCount;
     }
 
+    public MobileServiceList(Collection<? extends E> collection, int totalCount, String nextLink) {
+        this(collection, totalCount);
+        mNextLink = nextLink;
+    }
+
     public int getTotalCount() {
         return mTotalCount;
+    }
+
+    public String getNextLink() {
+        return mNextLink;
     }
 }

@@ -81,7 +81,8 @@ public class OfflineTests extends TestGroup {
 
         this.addTest(createClearStoreTest());
 
-        //this.addTest(issue536());
+        this.addTest(issue536());
+        this.addTest(issue417());
 
         this.addTest(createBasicTest("Basic Test"));
 
@@ -482,6 +483,101 @@ public class OfflineTests extends TestGroup {
         };
 
         test.setName("issue536");
+
+        return test;
+    }
+
+    private TestCase issue417() {
+
+        final String tableName = "Person";
+
+        final TestCase test = new TestCase() {
+
+            @Override
+            protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
+
+                try {
+
+                    TestCase testCase = this;
+                    TestResult result = new TestResult();
+                    result.setStatus(TestStatus.Passed);
+                    result.setTestCase(testCase);
+
+                    ServiceFilterWithRequestCount serviceFilter = new ServiceFilterWithRequestCount();
+
+                    int requestsSentToServer = 0;
+
+                    client = client.withFilter(serviceFilter);
+
+                    SQLiteLocalStore localStore = new SQLiteLocalStore(client.getContext(), OFFLINE_TABLE_NAME, null, 1);
+
+                    SimpleSyncHandler handler = new SimpleSyncHandler();
+                    MobileServiceSyncContext syncContext = client.getSyncContext();
+
+                    syncContext.initialize(localStore, handler).get();
+
+                    log("Defined the table on the local store");
+
+                    Map<String, ColumnDataType> instaTableDefinition = new HashMap<String, ColumnDataType>();
+                    instaTableDefinition.put("id", ColumnDataType.String);
+                    instaTableDefinition.put("name", ColumnDataType.String);
+                    instaTableDefinition.put("age", ColumnDataType.Integer);
+
+                    log("Initialized the store and sync context");
+
+                    localStore.defineTable(tableName, instaTableDefinition);
+
+                    client.getSyncContext().initialize(localStore, new SimpleSyncHandler()).get();
+
+                    MobileServiceSyncTable<PersonItem> localTable = client.getSyncTable(tableName, PersonItem.class);
+
+                    MobileServiceTable<PersonItem> remoteTable = client.getTable(tableName, PersonItem.class);
+
+                    String testFilter = UUID.randomUUID().toString();
+
+                    /*for(int i = 0; i < 50; i++) {
+                        PersonItem item = new PersonItem(new Random(), "partition");
+
+                        log("Inserted the item to the local store:" + item);
+
+                        item.setName(testFilter);
+                        localTable.insert(item).get();
+
+                    }
+
+                    log("Pushing changes to the server");
+                    client.getSyncContext().push().get();
+                    log("Push done; now verifying that item is in the server");
+*/
+
+                    Query query =
+                            QueryOperations
+                                    .tableName(tableName)
+                                    //.field("name").eq(testFilter)
+                                    .top(5);
+
+
+                    MobileServiceList<PersonItem> personItems = remoteTable.execute(query).get();
+
+                    while(personItems.getNextLink() != null) {
+
+                        personItems = remoteTable.executeNextLink(personItems.getNextLink()).get();
+                    }
+
+                    log("Done");
+
+                    callback.onTestComplete(this, result);
+
+                } catch (Exception e) {
+                    callback.onTestComplete(this, createResultFromException(e));
+                    return;
+                }
+            }
+
+            ;
+        };
+
+        test.setName("issue417");
 
         return test;
     }
@@ -1540,6 +1636,76 @@ class InstaItem {
     }
 }
 
+class PersonItem {
+
+    @SerializedName("id")
+    private String id;
+    @SerializedName("name")
+    private String mName;
+    @SerializedName("age")
+    private int mAge;
+
+    public PersonItem() {
+        id = "0";
+    }
+
+
+    public PersonItem(Random rndGen, String partition) {
+
+        this.id = partition + "," + UUID.randomUUID().toString();
+        this.mName = Integer.toString(rndGen.nextInt(2));
+        this.mAge = rndGen.nextInt(99);
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return mName;
+    }
+
+    public void setName(String mName) {
+        this.mName = mName;
+    }
+
+    public int getAge() {
+        return mAge;
+    }
+
+    public void setAge(int mAge) {
+        this.mAge = mAge;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null)
+            return false;
+
+        if (!(o instanceof InstaItem))
+            return false;
+
+        PersonItem m = (PersonItem) o;
+
+        if (!Util.compare(mName, m.getName()))
+            return false;
+        if (!Util.compare(mAge, m.getAge()))
+            return false;
+
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return String.format(Locale.getDefault(), "PersonItem[Id={0},Name={1},Age={2}]",
+                id, mName, mAge);
+    }
+}
 
 class OfflineReadyItem {
 

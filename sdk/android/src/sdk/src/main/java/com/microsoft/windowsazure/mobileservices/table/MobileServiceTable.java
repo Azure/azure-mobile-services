@@ -164,26 +164,78 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 
             @Override
             public void onSuccess(JsonElement result) {
-                try {
-                    if (result.isJsonObject()) {
-                        JsonObject jsonObject = result.getAsJsonObject();
-
-                        int count = jsonObject.get("count").getAsInt();
-                        JsonElement elements = jsonObject.get("results");
-
-                        List<E> list = parseResults(elements);
-                        future.set(new MobileServiceList<E>(list, count));
-                    } else {
-                        List<E> list = parseResults(result);
-                        future.set(new MobileServiceList<E>(list, list.size()));
-                    }
-                } catch (Exception e) {
-                    future.setException(e);
-                }
+                processQueryResults(result, future);
             }
         });
 
         return future;
+    }
+
+    /**
+     * Executes a Next Link to retrieve all the table rows
+     *
+     * @param nextLink The next link with the page information
+     */
+    public ListenableFuture<MobileServiceList<E>> executeNextLink(String nextLink) {
+        final SettableFuture<MobileServiceList<E>> future = SettableFuture.create();
+        ListenableFuture<JsonElement> internalFuture = mInternalTable.executeNextLink(nextLink);
+        Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
+            @Override
+            public void onFailure(Throwable exc) {
+                future.setException(exc);
+            }
+
+            @Override
+            public void onSuccess(JsonElement result) {
+                processQueryResults(result, future);
+            }
+        });
+
+        return future;
+    }
+
+    /**
+     * Process the Results of the Query
+     *
+     * @param result The Json element with the information
+     * @param future The future with the callbacks
+     */
+    private void processQueryResults(JsonElement result, SettableFuture<MobileServiceList<E>> future) {
+        try {
+            if (result.isJsonObject()) {
+                JsonObject jsonObject = result.getAsJsonObject();
+
+                int count = 0;
+                String nextLink = null;
+
+                if (jsonObject.has("count")) {
+                    count = jsonObject.get("count").getAsInt();
+                }
+
+                if (jsonObject.has("nextLink")) {
+                    nextLink = jsonObject.get("nextLink").getAsString();
+                }
+
+                JsonElement elements = jsonObject.get("results");
+
+                List<E> list = parseResults(elements);
+
+                MobileServiceList<E> futureResult;
+
+                if (nextLink != null){
+                    futureResult = new MobileServiceList<E>(list, count, nextLink);
+                } else {
+                    futureResult = new MobileServiceList<E>(list, count);
+                }
+
+                future.set(futureResult);
+            } else {
+                List<E> list = parseResults(result);
+                future.set(new MobileServiceList<E>(list, list.size()));
+            }
+        } catch (Exception e) {
+            future.setException(e);
+        }
     }
 
     /**

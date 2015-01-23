@@ -30,6 +30,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -125,7 +126,6 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
      * Retrieves a set of rows from the table using a query
      *
      * @param query The query used to retrieve the rows
-     * @throws MobileServiceException
      */
     public ListenableFuture<JsonElement> execute(final Query query) {
         final SettableFuture<JsonElement> future = SettableFuture.create();
@@ -157,6 +157,29 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
             }
         }
 
+        return executeUrlQuery(url, features);
+    }
+
+    /**
+     * Retrieves a set of rows using the Next Link Url (Continuation Token)
+     *
+     * @param nextLink The Next Link to make the request
+     */
+    public ListenableFuture<JsonElement> executeNextLink(final String nextLink) {
+        final SettableFuture<JsonElement> future = SettableFuture.create();
+
+        return executeUrlQuery(nextLink, mFeatures.clone());
+    }
+
+    /**
+     * Make the request to the mobile service witht the query URL
+     *
+     * @param url The query url
+     * @param features The features used in the request
+     */
+    private ListenableFuture<JsonElement> executeUrlQuery(final String url, EnumSet<MobileServiceFeatures> features) {
+        final SettableFuture<JsonElement> future = SettableFuture.create();
+
         ListenableFuture<Pair<JsonElement, ServiceFilterResponse>> internalFuture = executeGetRecords(url, features);
 
         Futures.addCallback(internalFuture, new FutureCallback<Pair<JsonElement, ServiceFilterResponse>>() {
@@ -167,13 +190,30 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 
             @Override
             public void onSuccess(Pair<JsonElement, ServiceFilterResponse> result) {
-                future.set(result.first);
+
+                String nextLinkHeaderValue = getHeaderValue(result.second.getHeaders(), "Link");
+
+                if (nextLinkHeaderValue != null){
+
+                    JsonObject jsonResult = new JsonObject();
+
+                    String nextLink = nextLinkHeaderValue.replace("; rel=next", "");
+
+                    jsonResult.addProperty("nextLink", nextLink);
+                    jsonResult.add("results", result.first);
+
+                    future.set(jsonResult);
+
+                }
+                else {
+                    future.set(result.first);
+                }
             }
         });
 
         return future;
     }
-
+    
     /**
      * Retrieves a set of rows from the table using a query
      *
@@ -833,6 +873,22 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
         }.executeTask();
 
         return future;
+    }
+
+    private String getHeaderValue(Header[] headers, String headerName){
+
+        if (headers == null) {
+            return null;
+        }
+
+        for(Header header : headers){
+
+            if (header.getName().equals(headerName)) {
+                return header.getValue();
+            }
+        }
+
+        return null;
     }
 
     /**
