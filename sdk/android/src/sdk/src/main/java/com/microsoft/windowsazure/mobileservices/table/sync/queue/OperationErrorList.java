@@ -77,7 +77,7 @@ public class OperationErrorList {
         columns.put("itemid", ColumnDataType.String);
         columns.put("clientitem", ColumnDataType.Other);
         columns.put("errormessage", ColumnDataType.String);
-        columns.put("statuscode", ColumnDataType.Number);
+        columns.put("statuscode", ColumnDataType.Real);
         columns.put("serverresponse", ColumnDataType.String);
         columns.put("serveritem", ColumnDataType.Other);
         columns.put("operationkind", ColumnDataType.String);

@@ -430,9 +430,13 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
                         boolean booleanValue = cursor.getInt(columnIndex) > 0 ? true : false;
                         result.addProperty(originalColumnName, booleanValue);
                         break;
-                    case Number:
+                    case Real:
                         double doubleValue = cursor.getDouble(columnIndex);
                         result.addProperty(originalColumnName, doubleValue);
+                        break;
+                    case Integer:
+                        int intValue = cursor.getInt(columnIndex);
+                        result.addProperty(originalColumnName, intValue);
                         break;
                     case String:
                         String stringValue = cursor.getString(columnIndex);
@@ -629,8 +633,11 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
                 case Boolean:
                     type = "INTEGER";
                     break;
-                case Number:
+                case Real:
                     type = "REAL";
+                    break;
+                case Integer:
+                    type = "INTEGER";
                     break;
                 case String:
                     type = "TEXT";

@@ -348,8 +348,8 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
         Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
         tableDefinition.put("id", ColumnDataType.String);
         tableDefinition.put("dob", ColumnDataType.Date);
-        tableDefinition.put("age", ColumnDataType.Number);
-        tableDefinition.put("weight", ColumnDataType.Number);
+        tableDefinition.put("age", ColumnDataType.Integer);
+        tableDefinition.put("weight", ColumnDataType.Real);
         tableDefinition.put("code", ColumnDataType.String);
         tableDefinition.put("options", ColumnDataType.String);
         tableDefinition.put("friends", ColumnDataType.String);
@@ -430,8 +430,8 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
         Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
         tableDefinition.put("id", ColumnDataType.String);
         tableDefinition.put("bool", ColumnDataType.Boolean);
-        tableDefinition.put("int", ColumnDataType.Number);
-        tableDefinition.put("double", ColumnDataType.Number);
+        tableDefinition.put("int", ColumnDataType.Integer);
+        tableDefinition.put("double", ColumnDataType.Real);
         tableDefinition.put("date", ColumnDataType.String);
         tableDefinition.put("guid", ColumnDataType.String);
         tableDefinition.put("options", ColumnDataType.String);

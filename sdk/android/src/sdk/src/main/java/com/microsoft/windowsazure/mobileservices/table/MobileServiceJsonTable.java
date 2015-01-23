@@ -475,11 +475,16 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 
             @Override
             public void onSuccess(Pair<JsonObject, ServiceFilterResponse> result) {
-                JsonObject patchedJson = patchOriginalEntityWithResponseEntity(element, result.first);
 
-                updateVersionFromETag(result.second, patchedJson);
+                if (result == null) {
+                    future.set(null);
+                } else {
+                    JsonObject patchedJson = patchOriginalEntityWithResponseEntity(element, result.first);
 
-                future.set(patchedJson);
+                    updateVersionFromETag(result.second, patchedJson);
+
+                    future.set(patchedJson);
+                }
             }
         });
 
@@ -774,8 +779,13 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
             public void onSuccess(ServiceFilterResponse result) {
                 String content = null;
                 content = result.getContent();
-                JsonObject newEntityJson = new JsonParser().parse(content).getAsJsonObject();
-                future.set(Pair.create(newEntityJson, result));
+
+                if (content == null) {
+                    future.set(null);
+                } else {
+                    JsonObject newEntityJson = new JsonParser().parse(content).getAsJsonObject();
+                    future.set(Pair.create(newEntityJson, result));
+                }
             }
         });
 

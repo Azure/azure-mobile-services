@@ -575,8 +575,8 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
         SQLiteLocalStore store = new SQLiteLocalStore(this.getContext(), TestDbName, null, 1);
 
         Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
-        tableDefinition.put("val", ColumnDataType.Number);
-        tableDefinition.put("expected", ColumnDataType.Number);
+        tableDefinition.put("val", ColumnDataType.Real);
+        tableDefinition.put("expected", ColumnDataType.Real);
 
         store.defineTable(MathTestTable, tableDefinition);
 
@@ -597,8 +597,8 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 
         Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
         tableDefinition.put("col1", ColumnDataType.String);
-        tableDefinition.put("col2", ColumnDataType.Number);
-        tableDefinition.put("col3", ColumnDataType.Number);
+        tableDefinition.put("col2", ColumnDataType.Real);
+        tableDefinition.put("col3", ColumnDataType.Real);
         tableDefinition.put("col4", ColumnDataType.Date);
         tableDefinition.put("col5", ColumnDataType.Boolean);
 

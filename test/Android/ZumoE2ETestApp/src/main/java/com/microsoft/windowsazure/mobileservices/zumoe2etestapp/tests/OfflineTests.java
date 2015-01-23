@@ -20,6 +20,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.SerializedName;
@@ -145,8 +146,8 @@ public class OfflineTests extends TestGroup {
                     Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
                     tableDefinition.put("id", ColumnDataType.String);
                     tableDefinition.put("name", ColumnDataType.String);
-                    tableDefinition.put("age", ColumnDataType.Number);
-                    tableDefinition.put("float", ColumnDataType.Number);
+                    tableDefinition.put("age", ColumnDataType.Integer);
+                    tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
                     tableDefinition.put("__version", ColumnDataType.String);
@@ -519,8 +520,8 @@ public class OfflineTests extends TestGroup {
                     Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
                     tableDefinition.put("id", ColumnDataType.String);
                     tableDefinition.put("name", ColumnDataType.String);
-                    tableDefinition.put("age", ColumnDataType.Number);
-                    tableDefinition.put("float", ColumnDataType.Number);
+                    tableDefinition.put("age", ColumnDataType.Integer);
+                    tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
                     tableDefinition.put("__version", ColumnDataType.String);
@@ -641,8 +642,8 @@ public class OfflineTests extends TestGroup {
                     Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
                     tableDefinition.put("id", ColumnDataType.String);
                     tableDefinition.put("name", ColumnDataType.String);
-                    tableDefinition.put("age", ColumnDataType.Number);
-                    tableDefinition.put("float", ColumnDataType.Number);
+                    tableDefinition.put("age", ColumnDataType.Integer);
+                    tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
                     tableDefinition.put("__version", ColumnDataType.String);
@@ -734,8 +735,8 @@ public class OfflineTests extends TestGroup {
                     Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
                     tableDefinition.put("id", ColumnDataType.String);
                     tableDefinition.put("name", ColumnDataType.String);
-                    tableDefinition.put("age", ColumnDataType.Number);
-                    tableDefinition.put("float", ColumnDataType.Number);
+                    tableDefinition.put("age", ColumnDataType.Integer);
+                    tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
                     tableDefinition.put("__version", ColumnDataType.String);
@@ -876,8 +877,8 @@ public class OfflineTests extends TestGroup {
                     Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
                     tableDefinition.put("id", ColumnDataType.String);
                     tableDefinition.put("name", ColumnDataType.String);
-                    tableDefinition.put("age", ColumnDataType.Number);
-                    tableDefinition.put("float", ColumnDataType.Number);
+                    tableDefinition.put("age", ColumnDataType.Integer);
+                    tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
 
@@ -1009,8 +1010,8 @@ public class OfflineTests extends TestGroup {
                     Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
                     tableDefinition.put("id", ColumnDataType.String);
                     tableDefinition.put("name", ColumnDataType.String);
-                    tableDefinition.put("age", ColumnDataType.Number);
-                    tableDefinition.put("float", ColumnDataType.Number);
+                    tableDefinition.put("age", ColumnDataType.Integer);
+                    tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
 
@@ -1099,8 +1100,8 @@ public class OfflineTests extends TestGroup {
                     Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
                     tableDefinition.put("id", ColumnDataType.String);
                     tableDefinition.put("name", ColumnDataType.String);
-                    tableDefinition.put("age", ColumnDataType.Number);
-                    tableDefinition.put("float", ColumnDataType.Number);
+                    tableDefinition.put("age", ColumnDataType.Integer);
+                    tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
 
@@ -1115,7 +1116,6 @@ public class OfflineTests extends TestGroup {
                     MobileServiceJsonTable remoteTable = offlineReadyClient.getTable(tableName);
 
                     offlineReadyClient.getSyncContext().initialize(localStore, new SimpleSyncHandler()).get();
-
 
                     if (cleanStore) {
                         localStore.delete(INCREMENTAL_PULL_STRATEGY_TABLE, tableName + "_" + queryKey);
@@ -1133,20 +1133,24 @@ public class OfflineTests extends TestGroup {
 
                     String testFilter = UUID.randomUUID().toString();
 
+                    Gson gsonBuilder = offlineReadyClient.getGsonBuilder().create();
+
                     for (int i = 0; i < elementsCount; i++) {
 
                         OfflineReadyItemNoVersion item = new OfflineReadyItemNoVersion(new Random(), UUID.randomUUID().toString());
                         item.setName(testFilter);
 
-                        mOfflineReadyItemsNoVersion.add(item);
+                        remoteTable.insert(gsonBuilder.toJsonTree(item).getAsJsonObject()).get();
+
+                        //mOfflineReadyItemsNoVersion.add(item);
                     }
 
-                    AllOfflineReadyItemsNoVersion allOfflineReadyItemsNoVersion = new AllOfflineReadyItemsNoVersion();
+                    //AllOfflineReadyItemsNoVersion allOfflineReadyItemsNoVersion = new AllOfflineReadyItemsNoVersion();
 
-                    allOfflineReadyItemsNoVersion.setOfflineReadyItems(mOfflineReadyItemsNoVersion);
+                    //allOfflineReadyItemsNoVersion.setOfflineReadyItems(mOfflineReadyItemsNoVersion);
 
-                    remoteTable.insert(offlineReadyClient.getGsonBuilder()
-                            .create().toJsonTree(allOfflineReadyItemsNoVersion).getAsJsonObject()).get();
+                    //remoteTable.insert(offlineReadyClient.getGsonBuilder()
+                    //        .create().toJsonTree(allOfflineReadyItemsNoVersion).getAsJsonObject()).get();
 
                     log("Inserted New Items on table");
 
@@ -1561,7 +1565,7 @@ class OfflineReadyItem {
     public OfflineReadyItem(Random rndGen) {
         this.id = java.util.UUID.randomUUID().toString();
         this.mName = "";// rndGen.nextLong();
-        this.mAge = rndGen.nextInt();
+        this.mAge = 20;//rndGen.nextInt();
         this.mFloatingNumber = rndGen.nextInt() * rndGen.nextDouble();
         this.mDate = new Date();
         this.mFlag = rndGen.nextInt(2) == 0;
@@ -1774,9 +1778,6 @@ class OfflineReadyItemNoVersion {
 class AllOfflineReadyItemsNoVersion {
     private int id;
 
-    @SerializedName("status")
-    private String mStatus;
-
     @SerializedName("offlinereadyitems")
     private OfflineReadyItemNoVersion[] mOfflineReadyItemsNoVersion;
 
@@ -1790,14 +1791,6 @@ class AllOfflineReadyItemsNoVersion {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public String getStatus() {
-        return mStatus;
-    }
-
-    public void setStatus(String status) {
-        mStatus = status;
     }
 
     public OfflineReadyItemNoVersion[] getOfflineReadyItems() {
