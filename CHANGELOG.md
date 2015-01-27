@@ -1,6 +1,15 @@
 # Azure Mobile Services Change Log
 
-### Version 2.0
+### Version 2.0.0 beta2
+**iOS SDK**
+- Added support for incremental sync
+- Added support for query parameters in pull operations
+- Fixed issue with login controller completing before animation completes
+- Added a method for force purge of local data
+- Added a helper method to return an NSDictionary from an NSManagedObject
+- Fixed issue with the __includeDeleted flag sending the wrong value
+
+### Version 2.0.0 beta1
 **iOS SDK**
 - Added support for following link headers returned from the .NET backend
 - **[Breaking]** Changed MSReadQueryBlock to return MSQueryResult instead of items and totalCount
