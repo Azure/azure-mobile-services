@@ -81,8 +81,8 @@ public class OfflineTests extends TestGroup {
 
         this.addTest(createClearStoreTest());
 
-        this.addTest(issue536());
-        this.addTest(issue417());
+        //this.addTest(issue536());
+        //this.addTest(issue417());
 
         this.addTest(createBasicTest("Basic Test"));
 
@@ -1238,15 +1238,7 @@ public class OfflineTests extends TestGroup {
 
                         remoteTable.insert(gsonBuilder.toJsonTree(item).getAsJsonObject()).get();
 
-                        //mOfflineReadyItemsNoVersion.add(item);
                     }
-
-                    //AllOfflineReadyItemsNoVersion allOfflineReadyItemsNoVersion = new AllOfflineReadyItemsNoVersion();
-
-                    //allOfflineReadyItemsNoVersion.setOfflineReadyItems(mOfflineReadyItemsNoVersion);
-
-                    //remoteTable.insert(offlineReadyClient.getGsonBuilder()
-                    //        .create().toJsonTree(allOfflineReadyItemsNoVersion).getAsJsonObject()).get();
 
                     log("Inserted New Items on table");
 
