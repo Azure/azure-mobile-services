@@ -29,6 +29,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
+import com.microsoft.windowsazure.mobileservices.MobileServiceList;
 import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
@@ -51,12 +52,16 @@ import com.microsoft.windowsazure.mobileservices.table.TableJsonOperationCallbac
 import com.microsoft.windowsazure.mobileservices.table.TableJsonQueryCallback;
 import com.microsoft.windowsazure.mobileservices.table.TableOperationCallback;
 import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
+import com.microsoft.windowsazure.mobileservices.table.query.Query;
+import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
 
 import junit.framework.Assert;
 
+import org.apache.http.Header;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.StatusLine;
+import org.apache.http.message.BasicHeader;
 
 import java.net.MalformedURLException;
 import java.util.List;
@@ -2779,5 +2784,142 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
         // Asserts
         assertEquals(queryUrl(tableName) + "?$select=myField,otherField", container.getRequestUrl());
+    }
+
+
+    public void testMobileServiceTableQueryWithContinuationTokenOnHeader() throws  Throwable {
+
+        // Container to store callback's results and do the asserts.
+        final ResultsContainer container = new ResultsContainer();
+
+        final String tableName = "MyTableName";
+        final String nextLink = "\"https://issue536.azure-mobile.net/tables/Person?$top=5&$select=Name,Age,PartitionKey,RowKey,Timestamp,ETag&NextPartitionKey=1!12!cGFydGl0aW9u&NextRowKey=1!48!MDg3NGQ1NTktZjhlNi00OTc0LTkyOTctNjc5MWZkMzkyZTdk";
+        final String nextLinkContinuation = "; rel=next";
+
+        MobileServiceClient client = null;
+
+        try {
+            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        // Add a filter to handle the request and create a new json
+        // object with an id defined
+        client = client.withFilter(new ServiceFilter() {
+
+            @Override
+            public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+
+                container.setRequestUrl(request.getUrl());
+                // call onResponse with the mocked response
+
+                final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+
+                ServiceFilterResponseMock responseMock = new ServiceFilterResponseMock();
+
+                Header[] responseHeaders = new Header[1];
+
+                Header responseHeader =  new BasicHeader("Link", nextLink + nextLinkContinuation);
+
+                responseHeaders[0] = responseHeader;
+
+                responseMock.setHeaders(responseHeaders);
+
+                resultFuture.set(responseMock);
+
+                return resultFuture;
+            }
+        });
+
+
+        // Create get the MobileService table
+        MobileServiceTable<PersonTestObject> msTable = client.getTable(PersonTestObject.class);
+
+        Query query =
+                QueryOperations
+                        .tableName(tableName)
+                        .top(5);
+
+        MobileServiceList<PersonTestObject> results = null;
+
+        try {
+            // Call the execute method
+            results = msTable.execute(query).get();
+
+            Assert.assertTrue("Operation should have succeded", true);
+        } catch (Exception exception) {
+            Assert.assertTrue("Operation should have succeded", false);
+        }
+
+        Assert.assertEquals(results.getNextLink(), nextLink);
+    }
+
+    public void testMobileServiceJsonTableQueryWithContinuationTokenOnHeader() throws  Throwable {
+
+        // Container to store callback's results and do the asserts.
+        final ResultsContainer container = new ResultsContainer();
+
+        final String tableName = "MyTableName";
+        final String nextLink = "\"https://issue536.azure-mobile.net/tables/Person?$top=5&$select=Name,Age,PartitionKey,RowKey,Timestamp,ETag&NextPartitionKey=1!12!cGFydGl0aW9u&NextRowKey=1!48!MDg3NGQ1NTktZjhlNi00OTc0LTkyOTctNjc5MWZkMzkyZTdk";
+        final String nextLinkContinuation = "; rel=next";
+
+        MobileServiceClient client = null;
+
+        try {
+            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        // Add a filter to handle the request and create a new json
+        // object with an id defined
+        client = client.withFilter(new ServiceFilter() {
+
+            @Override
+            public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+
+                container.setRequestUrl(request.getUrl());
+                // call onResponse with the mocked response
+
+                final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+
+                ServiceFilterResponseMock responseMock = new ServiceFilterResponseMock();
+
+                Header[] responseHeaders = new Header[1];
+
+                Header responseHeader =  new BasicHeader("Link", nextLink + nextLinkContinuation);
+
+                responseHeaders[0] = responseHeader;
+
+                responseMock.setHeaders(responseHeaders);
+
+                resultFuture.set(responseMock);
+
+                return resultFuture;
+            }
+        });
+
+
+        // Create get the MobileService table
+        MobileServiceJsonTable msTable = client.getTable(tableName);
+
+        Query query =
+                QueryOperations
+                        .tableName(tableName)
+                        .top(5);
+
+        JsonElement results = null;
+
+        try {
+            // Call the execute method
+            results = msTable.execute(query).get();
+
+            Assert.assertTrue("Operation should have succeded", true);
+        } catch (Exception exception) {
+            Assert.assertTrue("Operation should have succeded", false);
+        }
+
+        Assert.assertEquals(results.getAsJsonObject().get("nextLink").getAsString(), nextLink);
     }
 }

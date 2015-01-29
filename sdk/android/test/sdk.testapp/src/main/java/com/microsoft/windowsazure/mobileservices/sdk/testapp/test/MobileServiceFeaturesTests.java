@@ -694,7 +694,7 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
             tableDefinition.put("id", ColumnDataType.String);
             tableDefinition.put("firstName", ColumnDataType.String);
             tableDefinition.put("lastName", ColumnDataType.String);
-            tableDefinition.put("age", ColumnDataType.Number);
+            tableDefinition.put("age", ColumnDataType.Integer);
             store.defineTable("Person", tableDefinition);
 
             client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
@@ -807,7 +807,7 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
             tableDefinition.put("id", ColumnDataType.String);
             tableDefinition.put("firstName", ColumnDataType.String);
             tableDefinition.put("lastName", ColumnDataType.String);
-            tableDefinition.put("age", ColumnDataType.Number);
+            tableDefinition.put("age", ColumnDataType.Integer);
             store.defineTable("Person", tableDefinition);
 
             client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();

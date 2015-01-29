@@ -495,7 +495,7 @@ public class UpdateDeleteTests extends TestGroup {
                     Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
                     tableDefinition.put("id", ColumnDataType.String);
                     tableDefinition.put("name", ColumnDataType.String);
-                    tableDefinition.put("number", ColumnDataType.Number);
+                    tableDefinition.put("number", ColumnDataType.Real);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
                     tableDefinition.put("date1", ColumnDataType.Date);
                     tableDefinition.put("__createdAt", ColumnDataType.Date);
