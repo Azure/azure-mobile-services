@@ -3,7 +3,9 @@ package com.microsoft.windowsazure.mobileservices.table.sync.pull;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemColumns;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProperty;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
@@ -14,6 +16,7 @@ import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileSer
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
@@ -31,11 +34,13 @@ public class IncrementalPullStrategy extends PullStrategy {
     private Date deltaToken;
     private String queryId;
     private Query originalQuery;
+    private MobileServiceJsonTable table;
 
-    public IncrementalPullStrategy(Query query, String queryId,  MobileServiceLocalStore localStore) {
-        super(query);
+    public IncrementalPullStrategy(Query query, String queryId, MobileServiceLocalStore localStore, MobileServiceJsonTable table) {
+        super(query, table);
         this.mStore = localStore;
         this.queryId = queryId;
+        this.table = table;
     }
 
     public static void initializeStore(MobileServiceLocalStore store) throws MobileServiceLocalStoreException {
@@ -52,6 +57,9 @@ public class IncrementalPullStrategy extends PullStrategy {
         JsonElement results = null;
 
         try {
+
+            table.setSystemProperties(EnumSet.noneOf(MobileServiceSystemProperty.class));
+            table.setSystemProperties(EnumSet.of(MobileServiceSystemProperty.Deleted, MobileServiceSystemProperty.UpdatedAt));
 
             originalQuery = query;
 
@@ -82,7 +90,7 @@ public class IncrementalPullStrategy extends PullStrategy {
 
             this.query.skip(-1);
 
-            cursor = new PullCursor(query);
+            cursor = new PullCursor(query.getTop(), 0);
 
             setupQuery(maxUpdatedAt, null);
 

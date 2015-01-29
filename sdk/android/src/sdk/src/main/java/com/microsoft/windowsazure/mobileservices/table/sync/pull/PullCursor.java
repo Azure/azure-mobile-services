@@ -12,10 +12,10 @@ public class PullCursor {
     int initialSkip;
     int remaining;
 
-    public PullCursor(Query query) {
+    public PullCursor(int remaining, int skip) {
 
-        this.remaining = query.getTop();
-        this.initialSkip = query.getSkip();
+        this.remaining = remaining;
+        this.initialSkip = skip;
     }
 
     public int getPosition() {

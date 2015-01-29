@@ -579,10 +579,6 @@ public class MobileServiceSyncContext {
 
             MobileServiceJsonTable table = this.mClient.getTable(tableName);
 
-            table.setSystemProperties(EnumSet.noneOf(MobileServiceSystemProperty.class));
-
-            table.setSystemProperties(EnumSet.of(MobileServiceSystemProperty.Deleted));
-
             table.addFeature(MobileServiceFeatures.Offline);
 
             if (query == null) {
@@ -598,9 +594,9 @@ public class MobileServiceSyncContext {
             PullStrategy strategy;
 
             if (queryId != null) {
-                strategy = new IncrementalPullStrategy(query, queryId, this.mStore);
+                strategy = new IncrementalPullStrategy(query, queryId, this.mStore, table);
             } else {
-                strategy = new PullStrategy(query);
+                strategy = new PullStrategy(query, table);
             }
 
             strategy.initialize();
