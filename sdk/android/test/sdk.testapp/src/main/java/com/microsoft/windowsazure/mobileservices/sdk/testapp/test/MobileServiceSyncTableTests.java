@@ -386,6 +386,39 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
                                 "http://myapp.com/tables/stringidtype?$filter=String%20eq%20('world')&$inlinecount=allpages&$top=3&$skip=5&$orderby=Id%20desc&__includeDeleted=true&__systemproperties=*&$select=String"));
     }
 
+    public void testPullNoSkipSucceds() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
+
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        String updatedAt = sdf.format(new Date());
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer,
+                "{\"count\":\"2\",\"results\":[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt + "\"},{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt + "\"}]}"// remote
+                // item
+        ));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        Query query = QueryOperations.tableName(table.getName()).top(3).field("String").eq("world").orderBy("Id", QueryOrder.Descending)
+                .includeInlineCount().select("String");
+
+        table.pull(query).get();
+
+        assertEquals(
+                serviceFilterContainer.Url,
+                EncodingUtilities
+                        .percentEncodeSpaces(
+                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20('world')&$inlinecount=allpages&$top=3&$skip=0&$orderby=Id%20desc&__includeDeleted=true&__systemproperties=*&$select=String"));
+    }
+
     public void testPullSuccedsNoTopNoOrderBy() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
 
         MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
@@ -416,7 +449,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
                 serviceFilterContainer.Url,
                 EncodingUtilities
                         .percentEncodeSpaces(
-                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20('world')&$inlinecount=allpages&$top=50&$orderby=Id%20desc&__includeDeleted=true&__systemproperties=*&$select=String"));
+                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20('world')&$inlinecount=allpages&$top=50&$skip=0&$orderby=Id%20desc&__includeDeleted=true&__systemproperties=*&$select=String"));
     }
 
     public void testIncrementalPullSucceds() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {

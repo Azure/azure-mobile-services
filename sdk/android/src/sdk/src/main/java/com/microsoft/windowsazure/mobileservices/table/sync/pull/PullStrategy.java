@@ -33,6 +33,10 @@ public class PullStrategy {
         if (query.getOrderBy().size() == 0) {
             this.query.orderBy(MobileServiceSystemColumns.Id, QueryOrder.Ascending);
         }
+
+        if (this.query.getSkip() < 0) {
+            this.query.skip(0);
+        }
     }
 
     public void onResultsProcessed(JsonArray elements) {

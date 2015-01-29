@@ -80,6 +80,8 @@ public class IncrementalPullStrategy extends PullStrategy {
                 }
             }
 
+            this.query.skip(-1);
+
             setupQuery(maxUpdatedAt, null);
 
         } catch (MobileServiceLocalStoreException e) {
@@ -118,7 +120,7 @@ public class IncrementalPullStrategy extends PullStrategy {
 
             this.cursor.reset();
 
-            this.query.skip(0);
+            this.query.skip(-1);
 
             setupQuery(maxUpdatedAt, lastElementId);
 
