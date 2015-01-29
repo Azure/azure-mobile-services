@@ -578,7 +578,10 @@ public class MobileServiceSyncContext {
         try {
 
             MobileServiceJsonTable table = this.mClient.getTable(tableName);
-            table.setSystemProperties(EnumSet.allOf(MobileServiceSystemProperty.class));
+
+            table.setSystemProperties(EnumSet.noneOf(MobileServiceSystemProperty.class));
+
+            table.setSystemProperties(EnumSet.of(MobileServiceSystemProperty.Deleted));
 
             table.addFeature(MobileServiceFeatures.Offline);
 
@@ -590,6 +593,8 @@ public class MobileServiceSyncContext {
 
             query.includeDeleted();
             query.includeInlineCount();
+
+            query.removeProjection();
 
             PullCursor cursor = new PullCursor(query);
             PullStrategy strategy;

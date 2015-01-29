@@ -227,6 +227,13 @@ public final class ExecutableJsonQuery implements Query {
     }
 
     @Override
+    public ExecutableJsonQuery removeProjection() {
+        this.mQuery.removeProjection();
+
+        return this;
+    }
+    
+    @Override
     public ExecutableJsonQuery select(String... fields) {
         this.mQuery.select(fields);
         return this;

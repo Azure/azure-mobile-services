@@ -164,6 +164,13 @@ public interface Query {
     Query removeDeleted();
 
     /**
+     * Remove the projection on the query
+     *
+     * @return Query
+     */
+    Query removeProjection();
+
+    /**
      * Specifies the fields to retrieve
      *
      * @param fields Names of the fields to retrieve

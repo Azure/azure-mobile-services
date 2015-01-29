@@ -234,6 +234,13 @@ class QueryBase implements Query {
     }
 
     @Override
+    public Query removeProjection() {
+        this.mProjection = null;
+
+        return this;
+    }
+
+    @Override
     public Query select(String... fields) {
         this.mProjection = new ArrayList<String>();
         for (String field : fields) {
