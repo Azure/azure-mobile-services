@@ -15,7 +15,6 @@ public class PullCursor {
     public PullCursor(Query query) {
 
         this.remaining = query.getTop();
-
         this.initialSkip = query.getSkip();
     }
 

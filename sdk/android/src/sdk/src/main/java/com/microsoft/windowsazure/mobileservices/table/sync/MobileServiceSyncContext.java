@@ -595,17 +595,17 @@ public class MobileServiceSyncContext {
             query.includeInlineCount();
 
             query.removeProjection();
-
-            PullCursor cursor = new PullCursor(query);
             PullStrategy strategy;
 
             if (queryId != null) {
-                strategy = new IncrementalPullStrategy(query, queryId, cursor, this.mStore);
+                strategy = new IncrementalPullStrategy(query, queryId, this.mStore);
             } else {
-                strategy = new PullStrategy(query, cursor);
+                strategy = new PullStrategy(query);
             }
 
             strategy.initialize();
+
+            PullCursor cursor = strategy.getCursor();
 
             JsonArray elements = null;
 

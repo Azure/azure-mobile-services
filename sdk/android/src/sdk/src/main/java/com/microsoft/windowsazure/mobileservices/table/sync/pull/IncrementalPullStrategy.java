@@ -32,8 +32,8 @@ public class IncrementalPullStrategy extends PullStrategy {
     private String queryId;
     private Query originalQuery;
 
-    public IncrementalPullStrategy(Query query, String queryId, PullCursor cursor, MobileServiceLocalStore localStore) {
-        super(query, cursor);
+    public IncrementalPullStrategy(Query query, String queryId,  MobileServiceLocalStore localStore) {
+        super(query);
         this.mStore = localStore;
         this.queryId = queryId;
     }
@@ -81,6 +81,8 @@ public class IncrementalPullStrategy extends PullStrategy {
             }
 
             this.query.skip(-1);
+
+            cursor = new PullCursor(query);
 
             setupQuery(maxUpdatedAt, null);
 
