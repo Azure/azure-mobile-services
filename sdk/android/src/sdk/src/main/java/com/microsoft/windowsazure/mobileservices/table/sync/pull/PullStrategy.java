@@ -17,29 +17,30 @@ public class PullStrategy {
     int defaultTop = 50;
 
     Query query;
-    PullCursor cursor;
     MobileServiceJsonTable table;
+    int totalRead; // used to track how many we have read so far since the last delta
+
     public PullStrategy(Query query, MobileServiceJsonTable table) {
 
         this.query = query;
         this.table = table;
     }
 
-    public PullCursor getCursor() {
-        return cursor;
-    }
-
     public void initialize() {
 
         table.setSystemProperties(EnumSet.noneOf(MobileServiceSystemProperty.class));
-        table.setSystemProperties(EnumSet.of(MobileServiceSystemProperty.Deleted, MobileServiceSystemProperty.UpdatedAt));
+
+        table.setSystemProperties(EnumSet.of(MobileServiceSystemProperty.Version, MobileServiceSystemProperty.Deleted));
+
+        query.includeDeleted();
+        query.removeInlineCount();
+        query.removeProjection();
 
         if (this.query.getTop() == 0) {
             this.query.top(defaultTop);
         } else {
             this.query.top(Math.min(this.query.getTop(), defaultTop));
         }
-
 
         if (query.getOrderBy().size() == 0) {
             this.query.orderBy(MobileServiceSystemColumns.Id, QueryOrder.Ascending);
@@ -48,8 +49,6 @@ public class PullStrategy {
         if (this.query.getSkip() < 0) {
             this.query.skip(0);
         }
-
-        cursor = new PullCursor(query.getTop(), query.getSkip());
     }
 
     public void onResultsProcessed(JsonArray elements) {
@@ -58,20 +57,15 @@ public class PullStrategy {
 
     public boolean moveToNextPage(int lastElementCount) {
 
-        if (cursor.getComplete())
+        totalRead += lastElementCount;
+
+        if (lastElementCount == 0)
             return false;
 
-        if (lastElementCount < this.query.getTop())
-            return false;
 
-        this.query.skip(this.cursor.getPosition());
-        this.reduceTop();
+        this.query.skip(totalRead);
 
         return true;
-    }
-
-    protected void reduceTop() {
-        this.query.top(Math.min(this.query.getTop(), cursor.getRemaining()));
     }
 
     public Query getLastQuery() {

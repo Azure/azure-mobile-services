@@ -59,7 +59,11 @@ public class IncrementalPullStrategy extends PullStrategy {
         try {
 
             table.setSystemProperties(EnumSet.noneOf(MobileServiceSystemProperty.class));
-            table.setSystemProperties(EnumSet.of(MobileServiceSystemProperty.Deleted, MobileServiceSystemProperty.UpdatedAt));
+            table.setSystemProperties(EnumSet.of(MobileServiceSystemProperty.Version, MobileServiceSystemProperty.Deleted, MobileServiceSystemProperty.UpdatedAt));
+
+            query.includeDeleted();
+            query.removeInlineCount();
+            query.removeProjection();
 
             originalQuery = query;
 
@@ -67,12 +71,6 @@ public class IncrementalPullStrategy extends PullStrategy {
                     QueryOperations.tableName(INCREMENTAL_PULL_STRATEGY_TABLE)
                             .field("id")
                             .eq(query.getTableName() + "_" + queryId));
-
-            if (this.query.getTop() == 0) {
-                this.query.top(defaultTop);
-            } else {
-                this.query.top(Math.min(this.query.getTop(), defaultTop));
-            }
 
             if (results != null) {
 
@@ -89,8 +87,7 @@ public class IncrementalPullStrategy extends PullStrategy {
             }
 
             this.query.skip(-1);
-
-            cursor = new PullCursor(query.getTop(), 0);
+            this.query.top(defaultTop);
 
             setupQuery(maxUpdatedAt, null);
 
@@ -120,15 +117,10 @@ public class IncrementalPullStrategy extends PullStrategy {
 
         if (deltaToken == null || maxUpdatedAt.after(deltaToken)) {
 
-            if (lastElementCount < this.query.getTop())
-                return false;
-
-            if (cursor.getComplete())
+            if (lastElementCount == 0)
                 return false;
 
             deltaToken = maxUpdatedAt;
-
-            this.cursor.reset();
 
             this.query.skip(-1);
 
@@ -183,7 +175,7 @@ public class IncrementalPullStrategy extends PullStrategy {
             }
         }
 
-        this.reduceTop();
+        this.query.top(defaultTop);
 
         this.query.getOrderBy().clear();
 

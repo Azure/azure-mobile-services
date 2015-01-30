@@ -552,7 +552,7 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
     public void testTypedSyncTablePullFeatureHeader() {
         // Both typed and untyped sync tables are treated as untyped
         // in the offline implementation
-        testSyncTableOperationsFeatureHeader(new OfflineTableTestOperation() {
+        testSyncTablePullOperationsFeatureHeader(new OfflineTableTestOperation() {
 
             @Override
             public void executeOperation(MobileServiceClient client, MobileServiceSyncTable<PersonTestObjectWithStringId> typedTable,
@@ -566,7 +566,7 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
     public void testJsonSyncTablePullFeatureHeader() {
         // Both typed and untyped sync tables are treated as untyped
         // in the offline implementation
-        testSyncTableOperationsFeatureHeader(new OfflineTableTestOperation() {
+        testSyncTablePullOperationsFeatureHeader(new OfflineTableTestOperation() {
 
             @Override
             public void executeOperation(MobileServiceClient client, MobileServiceSyncTable<PersonTestObjectWithStringId> typedTable,
@@ -651,6 +651,8 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
             e.printStackTrace();
         }
 
+        boolean fistPullPage = false;
+
         MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
         // Add a new filter to the client
         client = client.withFilter(new ServiceFilter() {
@@ -676,11 +678,98 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
                 } else {
                     ServiceFilterResponseMock response = new ServiceFilterResponseMock();
                     Uri requestUri = Uri.parse(request.getUrl());
-                    String content = "{\"id\":\"the-id\",\"firstName\":\"John\",\"lastName\":\"Doe\",\"age\":33}";
-                    if (request.getMethod().equalsIgnoreCase("GET") && requestUri.getPathSegments().size() == 2) {
-                        // GET which should return an array of results
-                        content = "[" + content + "]";
+
+                    String content = "[]";
+
+                    //if (fistPullPage) {
+                        content = "{\"id\":\"the-id\",\"firstName\":\"John\",\"lastName\":\"Doe\",\"age\":33}";
+
+                        if (request.getMethod().equalsIgnoreCase("GET") && requestUri.getPathSegments().size() == 2) {
+                            // GET which should return an array of results
+                            content = "[" + content + "]";
+                        }
+
+                        //fistPullPage = false;
+                    //}
+
+                    response.setContent(content);
+                    resultFuture.set(response);
+                }
+
+                return resultFuture;
+            }
+        });
+
+        try {
+            Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
+            tableDefinition.put("id", ColumnDataType.String);
+            tableDefinition.put("firstName", ColumnDataType.String);
+            tableDefinition.put("lastName", ColumnDataType.String);
+            tableDefinition.put("age", ColumnDataType.Integer);
+            store.defineTable("Person", tableDefinition);
+
+            client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+            MobileServiceSyncTable<PersonTestObjectWithStringId> typedTable = client.getSyncTable(PersonTestObjectWithStringId.class);
+            MobileServiceJsonSyncTable jsonTable = client.getSyncTable("Person");
+            operation.executeOperation(client, typedTable, jsonTable);
+        } catch (Exception exception) {
+            Throwable ex = exception;
+            while (ex instanceof ExecutionException || ex instanceof MobileServiceException) {
+                ex = ex.getCause();
+            }
+            fail(ex.getMessage());
+        }
+    }
+
+    private void testSyncTablePullOperationsFeatureHeader(OfflineTableTestOperation operation, final String expectedFeaturesHeader) {
+        MobileServiceClient client = null;
+        try {
+            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        // Add a new filter to the client
+        client = client.withFilter(new ServiceFilter() {
+
+            @Override
+            public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+
+                boolean isFirstPage = request.getUrl().contains("$skip=0");
+
+                final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+                String featuresHeaderName = "X-ZUMO-FEATURES";
+
+                Header[] headers = request.getHeaders();
+                String features = null;
+                for (int i = 0; i < headers.length; i++) {
+                    if (headers[i].getName() == featuresHeaderName) {
+                        features = headers[i].getValue();
                     }
+                }
+
+                if (features == null) {
+                    resultFuture.setException(new Exception("No " + featuresHeaderName + " header on API call"));
+                } else if (!features.equals(expectedFeaturesHeader)) {
+                    resultFuture.setException(new Exception("Incorrect features header; expected " + expectedFeaturesHeader + ", actual " + features));
+                } else {
+                    ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+                    Uri requestUri = Uri.parse(request.getUrl());
+
+                    String content = "[]";
+
+                    if (isFirstPage) {
+                        content = "{\"id\":\"the-id\",\"firstName\":\"John\",\"lastName\":\"Doe\",\"age\":33}";
+
+                        if (request.getMethod().equalsIgnoreCase("GET") && requestUri.getPathSegments().size() == 2) {
+                            // GET which should return an array of results
+                            content = "[" + content + "]";
+                        }
+
+                    }
+
                     response.setContent(content);
                     resultFuture.set(response);
                 }
