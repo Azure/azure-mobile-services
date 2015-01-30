@@ -1073,6 +1073,36 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     XCTAssertTrue([self waitForTest:30.0], @"Test timed out.");
 }
 
+-(void) testIncrementalPullAddsProperFeaturesHeader
+{
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:@"[]"];
+    __block NSURLRequest *actualRequest = nil;
+    
+    testFilter.onInspectRequest = ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
+    offline.upsertCalls = 0;
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"TodoItem"];
+    MSQuery *query = [todoTable query];
+    
+    [todoTable pullWithQuery:query queryId:@"something" completion:^(NSError *error) {
+        XCTAssertNil(error, @"Unexpected error: %@", error.description);
+        XCTAssertNotNil(actualRequest);
+        
+        NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
+        XCTAssertNotNil(featuresHeader, @"actualHeader should not have been nil.");
+        NSString *expectedFeatures = @"TQ,OL,IP";
+        XCTAssertTrue([featuresHeader isEqualToString:expectedFeatures], @"Header value (%@) was not as expected (%@)", featuresHeader, expectedFeatures);
+        
+        done = YES;
+    }];
+    
+    XCTAssertTrue([self waitForTest:30.0], @"Test timed out.");
+}
+
 -(void) testPullWithCustomParameters
 {
     NSString* stringData = @"[{\"id\": \"one\", \"text\":\"first item\"},{\"id\": \"two\", \"text\":\"second item\"}]";

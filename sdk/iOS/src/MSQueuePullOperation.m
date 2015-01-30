@@ -142,8 +142,14 @@
         return;
     }
     
+    MSFeatures features = MSFeatureOffline;
+    
+    if (self.queryId) {
+        features |= MSFeatureIncrementalPull;
+    }
+    
     // Read from server
-    [self.query readInternalWithFeatures:MSFeatureOffline completion:^(MSQueryResult *result, NSError *error) {
+    [self.query readInternalWithFeatures:features completion:^(MSQueryResult *result, NSError *error) {
         if ([self checkIsCanceled]) {
             return;
         }

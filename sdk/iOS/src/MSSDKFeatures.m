@@ -15,6 +15,7 @@ NSString *const MSFeatureCodeTableReadRaw = @"TR";
 NSString *const MSFeatureCodeOpportunisticConcurrency = @"OC";
 NSString *const MSFeatureCodeOffline = @"OL";
 NSString *const MSFeatureCodeReadWithLinkHeader = @"LH";
+NSString *const MSFeatureCodeIncrementalPull = @"IP";
 
 @implementation MSSDKFeatures
 
@@ -45,6 +46,9 @@ NSString *const MSFeatureCodeReadWithLinkHeader = @"LH";
     }
     if (features & MSFeatureReadWithLinkHeader) {
         [allFeatures addObject:MSFeatureCodeReadWithLinkHeader];
+    }
+    if (features & MSFeatureIncrementalPull) {
+        [allFeatures addObject:MSFeatureCodeIncrementalPull];
     }
 
     return [allFeatures componentsJoinedByString:@","];
