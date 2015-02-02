@@ -36,7 +36,10 @@ typedef NS_OPTIONS(NSUInteger, MSFeatures) {
     MSFeatureOffline                  = 1 << 6,
     
     // Table read with absolute url as queryString parameter
-    MSFeatureReadWithLinkHeader       = 1 << 7
+    MSFeatureReadWithLinkHeader       = 1 << 7,
+    
+    // Table read is using incremental pull
+    MSFeatureIncrementalPull          = 1 << 8
 };
 
 extern NSString *const MSFeaturesHeaderName;
@@ -48,6 +51,8 @@ extern NSString *const MSFeatureCodeTableReadQuery;
 extern NSString *const MSFeatureCodeTableReadRaw;
 extern NSString *const MSFeatureCodeOpportunisticConcurrency;
 extern NSString *const MSFeatureCodeOffline;
+extern NSString *const MSFeatureCodeIncrementalPull;
+
 
 // The |MSSDKFeatures| class defines methods to convert between the
 // |MSFeatures| enumeration and the value to be sent in HTTP requests
