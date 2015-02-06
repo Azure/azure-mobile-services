@@ -71,7 +71,7 @@ class QueryBase implements Query {
     /**
      * Rows to skip
      */
-    private int mSkip = 0;
+    private int mSkip = -1;
 
     private String mTableName = "";
 
@@ -198,7 +198,7 @@ class QueryBase implements Query {
 
     @Override
     public Query skip(int skip) {
-        if (skip > 0) {
+        if (skip >= 0) {
             this.mSkip = skip;
         }
 

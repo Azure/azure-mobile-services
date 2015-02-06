@@ -15,10 +15,13 @@ public class PullStrategy {
     Query query;
     PullCursor cursor;
 
-    public PullStrategy(Query query, PullCursor cursor) {
+    public PullStrategy(Query query) {
 
         this.query = query;
-        this.cursor = cursor;
+    }
+
+    public PullCursor getCursor() {
+        return cursor;
     }
 
     public void initialize() {
@@ -33,6 +36,12 @@ public class PullStrategy {
         if (query.getOrderBy().size() == 0) {
             this.query.orderBy(MobileServiceSystemColumns.Id, QueryOrder.Ascending);
         }
+
+        if (this.query.getSkip() < 0) {
+            this.query.skip(0);
+        }
+
+        cursor = new PullCursor(query);
     }
 
     public void onResultsProcessed(JsonArray elements) {
