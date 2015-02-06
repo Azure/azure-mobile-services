@@ -323,7 +323,7 @@ public class LoginManager {
 
         DisplayMetrics displaymetrics = new DisplayMetrics();
         ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-        int webViewHeight = displaymetrics.heightPixels;
+        int webViewHeight = displaymetrics.heightPixels - 100;
 
         wv.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, webViewHeight));
 
