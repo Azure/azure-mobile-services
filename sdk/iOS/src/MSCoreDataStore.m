@@ -21,7 +21,8 @@ NSString *const StoreDeleted = @"ms_deleted";
 {
     self = [super init];
     if (self) {
-        self.context = context;
+        _handlesSyncTableOperations = YES;
+        _context = context;
     }
     return self;
 }

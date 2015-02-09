@@ -56,6 +56,10 @@ typedef void (^MSSyncPushCompletionBlock)(void);
 /// Provides the name of the table to track configuration data
 - (NSString *) configTableName;
 
+/// Indicates if the items passed to a sync table call should be saved by the SDK, if disabled, the local store will only
+/// recieve upserts/deletes for data calls originating from the server (pulls & pushes) plus the state tracking on the operation queue.
+- (BOOL) handlesSyncTableOperations;
+
 /// @}
 
 /// @name Fetching and Retrieving Data
@@ -65,16 +69,16 @@ typedef void (^MSSyncPushCompletionBlock)(void);
 - (MSSyncContextReadResult *) readWithQuery:(MSQuery *)query orError:(NSError **)error;
 
 /// Should retrieve a single item from the local store or nil if item with the given ID does not exist.
--(NSDictionary *) readTable:(NSString *)table withItemId:(NSString *)itemId orError:(NSError **)error;
+- (NSDictionary *) readTable:(NSString *)table withItemId:(NSString *)itemId orError:(NSError **)error;
 
 /// Should insert/update the given item in the local store as appropriate
--(BOOL) upsertItems:(NSArray *)item table:(NSString *)table orError:(NSError **)error;
+- (BOOL) upsertItems:(NSArray *)item table:(NSString *)table orError:(NSError **)error;
 
 /// Should remove the provided item from the local store
--(BOOL) deleteItemsWithIds:(NSArray *)items table:(NSString *)table orError:(NSError **)error;
+- (BOOL) deleteItemsWithIds:(NSArray *)items table:(NSString *)table orError:(NSError **)error;
 
 /// Should remove all entries from the specified table in the local store
--(BOOL) deleteUsingQuery:(MSQuery *)query orError:(NSError **)error;
+- (BOOL) deleteUsingQuery:(MSQuery *)query orError:(NSError **)error;
 
 /// @}
 

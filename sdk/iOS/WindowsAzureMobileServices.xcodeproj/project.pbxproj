@@ -64,6 +64,8 @@
 		A28224B0192ACEAE00EF8743 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A28224AF192ACEAE00EF8743 /* CoreData.framework */; };
 		A28224B3192ACFB700EF8743 /* CoreDataTestModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = A28224B1192ACFB700EF8743 /* CoreDataTestModel.xcdatamodeld */; };
 		A28224B4192AD00E00EF8743 /* CoreDataTestModel.xcdatamodeld in Resources */ = {isa = PBXBuildFile; fileRef = A28224B1192ACFB700EF8743 /* CoreDataTestModel.xcdatamodeld */; };
+		A28DD6361A83FDEA00F1A1C5 /* MSManagedObjectObserver.h in Headers */ = {isa = PBXBuildFile; fileRef = A28DD6341A83FDEA00F1A1C5 /* MSManagedObjectObserver.h */; };
+		A28DD6371A83FDEA00F1A1C5 /* MSManagedObjectObserver.m in Sources */ = {isa = PBXBuildFile; fileRef = A28DD6351A83FDEA00F1A1C5 /* MSManagedObjectObserver.m */; };
 		A295B2B3192AB2040067562E /* MSCoreDataStoreTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A295B2B2192AB2040067562E /* MSCoreDataStoreTests.m */; };
 		A29F44A31953CBF30063C0C1 /* MSCoreDataStore+TestHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = A29F44A21953CBF30063C0C1 /* MSCoreDataStore+TestHelper.m */; };
 		A2ACD540192322C50012B1ED /* MSCoreDataStore.h in Headers */ = {isa = PBXBuildFile; fileRef = A2ACD53E192322C50012B1ED /* MSCoreDataStore.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -220,6 +222,8 @@
 		A281900318BB2FF5001B14E7 /* MSTableOperationError.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSTableOperationError.m; sourceTree = "<group>"; };
 		A28224AF192ACEAE00EF8743 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		A28224B2192ACFB700EF8743 /* CoreDataTestModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CoreDataTestModel.xcdatamodel; sourceTree = "<group>"; };
+		A28DD6341A83FDEA00F1A1C5 /* MSManagedObjectObserver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSManagedObjectObserver.h; sourceTree = "<group>"; };
+		A28DD6351A83FDEA00F1A1C5 /* MSManagedObjectObserver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSManagedObjectObserver.m; sourceTree = "<group>"; };
 		A295B2B2192AB2040067562E /* MSCoreDataStoreTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSCoreDataStoreTests.m; sourceTree = "<group>"; };
 		A29F44A11953CBF30063C0C1 /* MSCoreDataStore+TestHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MSCoreDataStore+TestHelper.h"; sourceTree = "<group>"; };
 		A29F44A21953CBF30063C0C1 /* MSCoreDataStore+TestHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "MSCoreDataStore+TestHelper.m"; sourceTree = "<group>"; };
@@ -408,6 +412,8 @@
 			children = (
 				A2ACD53E192322C50012B1ED /* MSCoreDataStore.h */,
 				A2ACD53F192322C50012B1ED /* MSCoreDataStore.m */,
+				A28DD6341A83FDEA00F1A1C5 /* MSManagedObjectObserver.h */,
+				A28DD6351A83FDEA00F1A1C5 /* MSManagedObjectObserver.m */,
 			);
 			name = CoreData;
 			sourceTree = "<group>";
@@ -656,6 +662,7 @@
 				E8E3790E161F769D00C13F00 /* MSClient.h in Headers */,
 				E8E37911161F769D00C13F00 /* MSTable.h in Headers */,
 				A24701B7196896F500385DA2 /* MSLocalStorage.h in Headers */,
+				A28DD6361A83FDEA00F1A1C5 /* MSManagedObjectObserver.h in Headers */,
 				A24701BD196896F500385DA2 /* MSPushRequest.h in Headers */,
 				E8E37910161F769D00C13F00 /* MSQuery.h in Headers */,
 				A258890F18A19D0B00962F9A /* MSTableOperation.h in Headers */,
@@ -855,6 +862,7 @@
 				E8F33B2A16166837002DD7C6 /* MSJSONSerializer.m in Sources */,
 				E8F33B2F1616684F002DD7C6 /* MSPredicateTranslator.m in Sources */,
 				A258891018A19D0B00962F9A /* MSTableOperation.m in Sources */,
+				A28DD6371A83FDEA00F1A1C5 /* MSManagedObjectObserver.m in Sources */,
 				A258891718A19D0B00962F9A /* MSSyncTable.m in Sources */,
 				E87BB01F161A446C008053F9 /* MSURLBuilder.m in Sources */,
 				E8EA24BD161CFC5300BE055D /* MSNaiveISODateFormatter.m in Sources */,

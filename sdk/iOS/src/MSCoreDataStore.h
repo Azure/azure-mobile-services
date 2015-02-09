@@ -15,6 +15,12 @@
 /// and all tables contain a ms_version column
 @interface MSCoreDataStore : NSObject <MSSyncContextDataSource>
 
+/// Disables the store from recieving information about the items passed into all sync table
+/// calls (insert, delete, update). If set, the application is responsible for already having
+/// saved the item in the persisten store. This flag is intended to be used when application
+/// code is working directly with NSManagedObjects.
+@property (nonatomic) BOOL handlesSyncTableOperations;
+
 #pragma  mark * Public Static Constructor Methods
 
 /// @name Initializing the MSClient Object
@@ -32,6 +38,13 @@
 /// Converts a managed object from the core data layer back into a dictionary with the
 /// properties expected when using a MSTable or MSSyncTable
 +(NSDictionary *) tableItemFromManagedObject:(NSManagedObject *)object;
+
+/// @}
+
+/// @{name Working with multiple ManagedObjectContext
+
+/// Function to subscribe a given context to all MOC saves. These will be used to generate sync table
+/// calls.
 
 /// @}
 
