@@ -77,6 +77,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -204,10 +205,20 @@ public class MobileServiceClient {
      * Authentication Provider
      *
      * @param provider The provider used for the authentication process
-     * @param callback Callback to invoke when the authentication process finishes
      */
     public ListenableFuture<MobileServiceUser> login(MobileServiceAuthenticationProvider provider) {
         return login(provider.toString());
+    }
+
+    /**
+     * Invokes an interactive authentication process using the specified
+     * Authentication Provider
+     *
+     * @param provider The provider used for the authentication process
+     * @param parameters Aditional parameters for the authentication process
+     */
+    public ListenableFuture<MobileServiceUser> login(MobileServiceAuthenticationProvider provider, HashMap<String, String> parameters) {
+        return login(provider.toString(), parameters);
     }
 
     /**
@@ -223,6 +234,21 @@ public class MobileServiceClient {
         login(provider.toString(), callback);
     }
 
+
+    /**
+     * Invokes an interactive authentication process using the specified
+     * Authentication Provider
+     *
+     * @param provider The provider used for the authentication process
+     * @param parameters Aditional parameters for the authentication process
+     * @param callback Callback to invoke when the authentication process finishes
+     * @deprecated use {@link login( com.microsoft.windowsazure.mobileservices.authentication.MobileServiceAuthenticationProvider
+     * provider)} instead
+     */
+    public void login(MobileServiceAuthenticationProvider provider, HashMap<String, String> parameters, UserAuthenticationCallback callback) {
+        login(provider.toString(), parameters, callback);
+    }
+
     /**
      * Invokes an interactive authentication process using the specified
      * Authentication Provider
@@ -230,11 +256,22 @@ public class MobileServiceClient {
      * @param provider The provider used for the authentication process
      */
     public ListenableFuture<MobileServiceUser> login(String provider) {
+        return login(provider, (HashMap<String, String>) null);
+    }
+
+    /**
+     * Invokes an interactive authentication process using the specified
+     * Authentication Provider
+     *
+     * @param provider The provider used for the authentication process
+     * @param parameters Aditional parameters for the authentication process
+     */
+    public ListenableFuture<MobileServiceUser> login(String provider, HashMap<String, String> parameters) {
         mLoginInProgress = true;
 
         final SettableFuture<MobileServiceUser> resultFuture = SettableFuture.create();
 
-        ListenableFuture<MobileServiceUser> future = mLoginManager.authenticate(provider, mContext);
+        ListenableFuture<MobileServiceUser> future = mLoginManager.authenticate(provider, mContext, parameters);
 
         Futures.addCallback(future, new FutureCallback<MobileServiceUser>() {
             @Override
@@ -265,7 +302,20 @@ public class MobileServiceClient {
      * @deprecated use {@link login(String provider)} instead
      */
     public void login(String provider, final UserAuthenticationCallback callback) {
-        ListenableFuture<MobileServiceUser> loginFuture = login(provider);
+        login(provider, (HashMap<String, String>) null, callback);
+    }
+
+    /**
+     * Invokes an interactive authentication process using the specified
+     * Authentication Provider
+     *
+     * @param provider The provider used for the authentication process
+     * @param parameters Aditional parameters for the authentication process
+     * @param callback Callback to invoke when the authentication process finishes
+     * @deprecated use {@link login(String provider)} instead
+     */
+    public void login(String provider, HashMap<String, String> parameters, final UserAuthenticationCallback callback) {
+        ListenableFuture<MobileServiceUser> loginFuture = login(provider, parameters);
 
         Futures.addCallback(loginFuture, new FutureCallback<MobileServiceUser>() {
             @Override
@@ -302,13 +352,43 @@ public class MobileServiceClient {
      *
      * @param provider   The provider used for the authentication process
      * @param oAuthToken A Json object representing the oAuth token used for
+     * @param parameters Aditional parameters for the authentication process
+     *                   authentication
+     */
+    public ListenableFuture<MobileServiceUser> login(MobileServiceAuthenticationProvider provider, JsonObject oAuthToken, HashMap<String, String> parameters) {
+        return login(provider.toString(), oAuthToken, parameters);
+    }
+
+    /**
+     * Invokes Microsoft Azure Mobile Service authentication using a
+     * provider-specific oAuth token
+     *
+     * @param provider   The provider used for the authentication process
+     * @param oAuthToken A Json object representing the oAuth token used for
      *                   authentication
      * @param callback   Callback to invoke when the authentication process finishes
      * @deprecated use {@link login( com.microsoft.windowsazure.mobileservices.authentication.MobileServiceAuthenticationProvider
      * provider, com.google.gson.JsonObject oAuthToken)} instead
      */
     public void login(MobileServiceAuthenticationProvider provider, JsonObject oAuthToken, UserAuthenticationCallback callback) {
-        login(provider.toString(), oAuthToken, callback);
+        login(provider, oAuthToken, null, callback);
+    }
+
+
+    /**
+     * Invokes Microsoft Azure Mobile Service authentication using a
+     * provider-specific oAuth token
+     *
+     * @param provider   The provider used for the authentication process
+     * @param oAuthToken A Json object representing the oAuth token used for
+     *                   authentication
+     * @param parameters Aditional parameters for the authentication process
+     * @param callback   Callback to invoke when the authentication process finishes
+     * @deprecated use {@link login( com.microsoft.windowsazure.mobileservices.authentication.MobileServiceAuthenticationProvider
+     * provider, com.google.gson.JsonObject oAuthToken)} instead
+     */
+    public void login(MobileServiceAuthenticationProvider provider, JsonObject oAuthToken, HashMap<String, String> parameters, UserAuthenticationCallback callback) {
+        login(provider.toString(), oAuthToken, parameters, callback);
     }
 
     /**
@@ -334,16 +414,50 @@ public class MobileServiceClient {
      * @param provider   The provider used for the authentication process
      * @param oAuthToken A Json object representing the oAuth token used for
      *                   authentication
+     * @param parameters Aditional parameters for the authentication process
+     */
+    public ListenableFuture<MobileServiceUser> login(String provider, JsonObject oAuthToken, HashMap<String, String> parameters) {
+        if (oAuthToken == null) {
+            throw new IllegalArgumentException("oAuthToken cannot be null");
+        }
+
+        return login(provider, oAuthToken.toString(), parameters);
+    }
+
+    /**
+     * Invokes Microsoft Azure Mobile Service authentication using a
+     * provider-specific oAuth token
+     *
+     * @param provider   The provider used for the authentication process
+     * @param oAuthToken A Json object representing the oAuth token used for
+     *                   authentication
      * @param callback   Callback to invoke when the authentication process finishes
      * @deprecated use {@link login(String provider, com.google.gson.JsonObject oAuthToken)}
      * instead
      */
     public void login(String provider, JsonObject oAuthToken, UserAuthenticationCallback callback) {
+        login(provider, oAuthToken.toString(), null, callback);
+    }
+
+
+    /**
+     * Invokes Microsoft Azure Mobile Service authentication using a
+     * provider-specific oAuth token
+     *
+     * @param provider   The provider used for the authentication process
+     * @param oAuthToken A Json object representing the oAuth token used for
+     *                   authentication
+     * @param parameters Aditional parameters for the authentication process
+     * @param callback   Callback to invoke when the authentication process finishes
+     * @deprecated use {@link login(String provider, com.google.gson.JsonObject oAuthToken)}
+     * instead
+     */
+    public void login(String provider, JsonObject oAuthToken, HashMap<String, String> parameters, UserAuthenticationCallback callback) {
         if (oAuthToken == null) {
             throw new IllegalArgumentException("oAuthToken cannot be null");
         }
 
-        login(provider, oAuthToken.toString(), callback);
+        login(provider, oAuthToken.toString(), parameters, callback);
     }
 
     /**
@@ -354,7 +468,19 @@ public class MobileServiceClient {
      * @param oAuthToken The oAuth token used for authentication
      */
     public ListenableFuture<MobileServiceUser> login(MobileServiceAuthenticationProvider provider, String oAuthToken) {
-        return login(provider.toString(), oAuthToken);
+        return login(provider, oAuthToken, (HashMap<String, String>) null);
+    }
+
+    /**
+     * Invokes Microsoft Azure Mobile Service authentication using a
+     * provider-specific oAuth token
+     *
+     * @param provider   The provider used for the authentication process
+     * @param oAuthToken The oAuth token used for authentication
+     * @param parameters Aditional parameters for the authentication process
+     */
+    public ListenableFuture<MobileServiceUser> login(MobileServiceAuthenticationProvider provider, String oAuthToken, HashMap<String, String> parameters) {
+        return login(provider.toString(), oAuthToken, parameters);
     }
 
     /**
@@ -368,7 +494,22 @@ public class MobileServiceClient {
      * provider, String oAuthToken)} instead
      */
     public void login(MobileServiceAuthenticationProvider provider, String oAuthToken, UserAuthenticationCallback callback) {
-        login(provider.toString(), oAuthToken, callback);
+        login(provider, oAuthToken, null, callback);
+    }
+
+    /**
+     * Invokes Microsoft Azure Mobile Service authentication using a
+     * provider-specific oAuth token
+     *
+     * @param provider   The provider used for the authentication process
+     * @param oAuthToken The oAuth token used for authentication
+     * @param parameters Aditional parameters for the authentication process
+     * @param callback   Callback to invoke when the authentication process finishes
+     * @deprecated use {@link login( com.microsoft.windowsazure.mobileservices.authentication.MobileServiceAuthenticationProvider
+     * provider, String oAuthToken)} instead
+     */
+    public void login(MobileServiceAuthenticationProvider provider, String oAuthToken, HashMap<String, String> parameters, UserAuthenticationCallback callback) {
+        login(provider.toString(), oAuthToken, parameters, callback);
     }
 
     /**
@@ -379,6 +520,17 @@ public class MobileServiceClient {
      * @param oAuthToken The oAuth token used for authentication
      */
     public ListenableFuture<MobileServiceUser> login(String provider, String oAuthToken) {
+        return login(provider, oAuthToken, (HashMap<String, String>) null);
+    }
+
+    /**
+     * Invokes Microsoft Azure Mobile Service authentication using a
+     * provider-specific oAuth token
+     *
+     * @param provider   The provider used for the authentication process
+     * @param oAuthToken The oAuth token used for authentication
+     */
+    public ListenableFuture<MobileServiceUser> login(String provider, String oAuthToken, HashMap<String, String> parameters) {
         if (oAuthToken == null) {
             throw new IllegalArgumentException("oAuthToken cannot be null");
         }
@@ -387,7 +539,7 @@ public class MobileServiceClient {
 
         mLoginInProgress = true;
 
-        ListenableFuture<MobileServiceUser> future = mLoginManager.authenticate(provider, oAuthToken);
+        ListenableFuture<MobileServiceUser> future = mLoginManager.authenticate(provider, oAuthToken, parameters);
 
         Futures.addCallback(future, new FutureCallback<MobileServiceUser>() {
             @Override
@@ -419,7 +571,21 @@ public class MobileServiceClient {
      * @deprecated use {@link login(String provider, String oAuthToken)} instead
      */
     public void login(String provider, String oAuthToken, final UserAuthenticationCallback callback) {
-        ListenableFuture<MobileServiceUser> loginFuture = login(provider, oAuthToken);
+        login(provider, oAuthToken, null, callback);
+    }
+
+    /**
+     * Invokes Microsoft Azure Mobile Service authentication using a
+     * provider-specific oAuth token
+     *
+     * @param provider   The provider used for the authentication process
+     * @param oAuthToken The oAuth token used for authentication
+     * @param parameters Aditional parameters for the authentication process
+     * @param callback   Callback to invoke when the authentication process finishes
+     * @deprecated use {@link login(String provider, String oAuthToken)} instead
+     */
+    public void login(String provider, String oAuthToken, HashMap<String, String> parameters, final UserAuthenticationCallback callback) {
+        ListenableFuture<MobileServiceUser> loginFuture = login(provider, oAuthToken, parameters);
 
         Futures.addCallback(loginFuture, new FutureCallback<MobileServiceUser>() {
             @Override

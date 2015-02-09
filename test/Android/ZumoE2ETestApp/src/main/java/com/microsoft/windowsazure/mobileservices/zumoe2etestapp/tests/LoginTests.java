@@ -39,6 +39,7 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestSt
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
@@ -124,7 +125,7 @@ public class LoginTests extends TestGroup {
                     final Random rndGen = new Random(seed);
 
                     boolean useEnumOverload = rndGen.nextBoolean();
-                    if (useEnumOverload) {
+                    if (true) {
                         log("Calling the overload MobileServiceClient.login(MobileServiceAuthenticationProvider, UserAuthenticationCallback)");
 
                         TestResult result = new TestResult();
@@ -132,7 +133,14 @@ public class LoginTests extends TestGroup {
 
                         try {
 
-                            MobileServiceUser user = client.login(provider).get();
+                            HashMap<String, String> parameters = null;
+                            if (provider == MobileServiceAuthenticationProvider.Facebook) {
+                                parameters = new HashMap<>();
+
+                                parameters.put("display", "popup");
+                            }
+
+                            MobileServiceUser user = client.login(provider, parameters).get();
                             userName = user.getUserId();
 
                         } catch (Exception exception) {
