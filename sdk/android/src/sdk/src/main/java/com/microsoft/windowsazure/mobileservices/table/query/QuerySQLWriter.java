@@ -110,7 +110,7 @@ public class QuerySQLWriter {
         String result = null;
 
         int limit = query != null ? query.getTop() : 0;
-        int offset = query != null ? query.getSkip() : 0;
+        int offset = query != null ? (query.getSkip() >= 0 ? query.getSkip() : 0) : 0;
 
         if (limit > 0 || offset > 0) {
             result = String.valueOf(offset) + "," + String.valueOf(limit);

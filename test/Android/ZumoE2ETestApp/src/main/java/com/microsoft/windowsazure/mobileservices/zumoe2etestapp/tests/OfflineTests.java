@@ -841,8 +841,6 @@ public class OfflineTests extends TestGroup {
 
                     localStore.defineTable(tableName, tableDefinition);
 
-                    //offlineReadyClient.getSyncContext().initialize(localStore, new SimpleSyncHandler()).get();
-
                     MobileServiceSyncTable<OfflineReadyItem> localTable = offlineReadyClient.getSyncTable(tableName, OfflineReadyItem.class);
 
                     MobileServiceTable<OfflineReadyItem> remoteTable = offlineReadyClient.getTable(tableName, OfflineReadyItem.class);
@@ -864,11 +862,7 @@ public class OfflineTests extends TestGroup {
 
                     log("Inserted the item to the local store:" + item);
 
-                    Query pullQuery = QueryOperations.tableName(tableName).field("id").eq(item.getId());// "$filter=id eq '"
-                    // +
-                    // item.Id
-                    // +
-                    // "'";
+                    Query pullQuery = QueryOperations.tableName(tableName).field("id").eq(item.getId());
 
                     localTable.pull(pullQuery).get();
 

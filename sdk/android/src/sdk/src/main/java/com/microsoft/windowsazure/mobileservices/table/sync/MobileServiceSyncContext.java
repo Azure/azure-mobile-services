@@ -578,7 +578,6 @@ public class MobileServiceSyncContext {
         try {
 
             MobileServiceJsonTable table = this.mClient.getTable(tableName);
-            table.setSystemProperties(EnumSet.allOf(MobileServiceSystemProperty.class));
 
             table.addFeature(MobileServiceFeatures.Offline);
 
@@ -588,16 +587,12 @@ public class MobileServiceSyncContext {
                 query = query.deepClone();
             }
 
-            query.includeDeleted();
-            query.includeInlineCount();
-
-            PullCursor cursor = new PullCursor(query);
             PullStrategy strategy;
 
             if (queryId != null) {
-                strategy = new IncrementalPullStrategy(query, queryId, cursor, this.mStore);
+                strategy = new IncrementalPullStrategy(query, queryId, this.mStore, table);
             } else {
-                strategy = new PullStrategy(query, cursor);
+                strategy = new PullStrategy(query, table);
             }
 
             strategy.initialize();
@@ -613,14 +608,6 @@ public class MobileServiceSyncContext {
                     if (result.isJsonObject()) {
                         JsonObject jsonObject = result.getAsJsonObject();
 
-                        //Set the total count to the cursor
-                        if (jsonObject.has("count")) {
-                            int count = jsonObject.get("count").getAsInt();
-                            cursor.setRemaining(count);
-
-                            query.removeInlineCount();
-                        }
-
                         if (jsonObject.has("results") && jsonObject.get("results").isJsonArray()) {
                             elements = jsonObject.get("results").getAsJsonArray();
                         }
@@ -629,7 +616,7 @@ public class MobileServiceSyncContext {
                         elements = result.getAsJsonArray();
                     }
 
-                    processElements(tableName, elements, cursor);
+                    processElements(tableName, elements);
 
                     strategy.onResultsProcessed(elements);
                 }
@@ -644,7 +631,7 @@ public class MobileServiceSyncContext {
         }
     }
 
-    private void processElements(String tableName, JsonArray elements, PullCursor cursor) throws Throwable {
+    private void processElements(String tableName, JsonArray elements) throws Throwable {
         if (elements != null) {
 
             List<JsonObject> updatedJsonObjects = new ArrayList<JsonObject>();
@@ -652,10 +639,6 @@ public class MobileServiceSyncContext {
 
 
             for (JsonElement element : elements) {
-
-                if (!cursor.onNext()) {
-                    break;
-                }
 
                 JsonObject jsonObject = element.getAsJsonObject();
                 JsonElement elementId = jsonObject.get(MobileServiceSystemColumns.Id);

@@ -63,7 +63,8 @@ public class QueryODataWriter {
                 sb.append(query.getTop());
             }
 
-            if (query.getSkip() > 0) {
+            //Allow Skip=0 to work around a SQL ordering issue #571
+            if (query.getSkip() >= 0) {
                 sb.append("&$skip=");
                 sb.append(query.getSkip());
             }

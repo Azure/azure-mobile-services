@@ -3,7 +3,9 @@ package com.microsoft.windowsazure.mobileservices.table.sync.pull;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemColumns;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProperty;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
@@ -14,6 +16,7 @@ import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileSer
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
@@ -31,11 +34,13 @@ public class IncrementalPullStrategy extends PullStrategy {
     private Date deltaToken;
     private String queryId;
     private Query originalQuery;
+    private MobileServiceJsonTable table;
 
-    public IncrementalPullStrategy(Query query, String queryId, PullCursor cursor, MobileServiceLocalStore localStore) {
-        super(query, cursor);
+    public IncrementalPullStrategy(Query query, String queryId, MobileServiceLocalStore localStore, MobileServiceJsonTable table) {
+        super(query, table);
         this.mStore = localStore;
         this.queryId = queryId;
+        this.table = table;
     }
 
     public static void initializeStore(MobileServiceLocalStore store) throws MobileServiceLocalStoreException {
@@ -53,18 +58,19 @@ public class IncrementalPullStrategy extends PullStrategy {
 
         try {
 
+            table.setSystemProperties(EnumSet.noneOf(MobileServiceSystemProperty.class));
+            table.setSystemProperties(EnumSet.of(MobileServiceSystemProperty.Version, MobileServiceSystemProperty.Deleted, MobileServiceSystemProperty.UpdatedAt));
+
+            query.includeDeleted();
+            query.removeInlineCount();
+            query.removeProjection();
+
             originalQuery = query;
 
             results = mStore.read(
                     QueryOperations.tableName(INCREMENTAL_PULL_STRATEGY_TABLE)
                             .field("id")
                             .eq(query.getTableName() + "_" + queryId));
-
-            if (this.query.getTop() == 0) {
-                this.query.top(defaultTop);
-            } else {
-                this.query.top(Math.min(this.query.getTop(), defaultTop));
-            }
 
             if (results != null) {
 
@@ -79,6 +85,9 @@ public class IncrementalPullStrategy extends PullStrategy {
                     deltaToken = maxUpdatedAt = getDateFromString(stringMaxUpdatedDate);
                 }
             }
+
+            this.query.skip(-1);
+            this.query.top(defaultTop);
 
             setupQuery(maxUpdatedAt, null);
 
@@ -108,17 +117,12 @@ public class IncrementalPullStrategy extends PullStrategy {
 
         if (deltaToken == null || maxUpdatedAt.after(deltaToken)) {
 
-            if (lastElementCount < this.query.getTop())
-                return false;
-
-            if (cursor.getComplete())
+            if (lastElementCount == 0)
                 return false;
 
             deltaToken = maxUpdatedAt;
 
-            this.cursor.reset();
-
-            this.query.skip(0);
+            this.query.skip(-1);
 
             setupQuery(maxUpdatedAt, lastElementId);
 
@@ -171,7 +175,7 @@ public class IncrementalPullStrategy extends PullStrategy {
             }
         }
 
-        this.reduceTop();
+        this.query.top(defaultTop);
 
         this.query.getOrderBy().clear();
 
