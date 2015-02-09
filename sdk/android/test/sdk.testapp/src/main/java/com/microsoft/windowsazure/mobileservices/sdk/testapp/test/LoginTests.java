@@ -42,6 +42,7 @@ import org.apache.http.ProtocolVersion;
 import org.apache.http.StatusLine;
 
 import java.net.MalformedURLException;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 
@@ -118,6 +119,74 @@ public class LoginTests extends InstrumentationTestCase {
 
         // Assert
         String expectedURL = appUrl + "login/" + provider.toString().toLowerCase(Locale.getDefault());
+        assertEquals(expectedURL, result.getRequestUrl());
+    }
+
+    public void testLoginOperationWithParameter() throws Throwable {
+        testLoginOperationWithParameter(MobileServiceAuthenticationProvider.Facebook);
+        testLoginOperationWithParameter(MobileServiceAuthenticationProvider.Twitter);
+        testLoginOperationWithParameter(MobileServiceAuthenticationProvider.MicrosoftAccount);
+        testLoginOperationWithParameter(MobileServiceAuthenticationProvider.Google);
+
+        testLoginOperationWithParameter("FaCeBoOk");
+        testLoginOperationWithParameter("twitter");
+        testLoginOperationWithParameter("MicrosoftAccount");
+        testLoginOperationWithParameter("GOOGLE");
+    }
+
+    private void testLoginOperationWithParameter(final Object provider) throws Throwable {
+        final ResultsContainer result = new ResultsContainer();
+
+        // Create client
+        MobileServiceClient client = null;
+        try {
+            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        } catch (MalformedURLException e) {
+        }
+
+        // Add a new filter to the client
+        client = client.withFilter(new ServiceFilter() {
+
+            @Override
+            public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+
+                result.setRequestUrl(request.getUrl());
+
+                ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+                response.setContent("{authenticationToken:'123abc', user:{userId:'123456'}}");
+
+                final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+
+                resultFuture.set(response);
+
+                return resultFuture;
+            }
+        });
+
+
+        HashMap<String, String> parameters = new HashMap<>();
+
+        parameters.put("p1", "p1value");
+        parameters.put("p2", "p2value");
+
+
+        String parameterQueryString = "?p2=p2value&p1=p1value";
+
+        try {
+            MobileServiceUser user;
+
+            if (provider.getClass().equals(MobileServiceAuthenticationProvider.class)) {
+                client.login((MobileServiceAuthenticationProvider) provider, "{myToken:123}", parameters).get();
+            } else {
+                client.login((String) provider, "{myToken:123}", parameters).get();
+            }
+
+        } catch (Exception exception) {
+            Assert.fail();
+        }
+
+        // Assert
+        String expectedURL = appUrl + "login/" + provider.toString().toLowerCase(Locale.getDefault()) + parameterQueryString;
         assertEquals(expectedURL, result.getRequestUrl());
     }
 

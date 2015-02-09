@@ -58,7 +58,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.protocol.HTTP;
 
 import java.net.URLDecoder;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Class for handling Login operations with Authentication Providers and Microsoft
@@ -119,9 +121,21 @@ public class LoginManager {
      *
      * @param provider The provider used for the authentication process
      * @param context  The context used to create the authentication dialog
-     * @param callback Callback to invoke when the authentication process finishes
      */
     public ListenableFuture<MobileServiceUser> authenticate(String provider, Context context) {
+
+        return authenticate(provider, context, (HashMap<String, String>) null);
+    }
+
+    /**
+     * Invokes an interactive authentication process using the specified
+     * Authentication Provider
+     *
+     * @param provider The provider used for the authentication process
+     * @param context  The context used to create the authentication dialog
+     * @param parameters Aditional parameters for the authentication process
+     */
+    public ListenableFuture<MobileServiceUser> authenticate(String provider, Context context, HashMap<String, String> parameters) {
         final SettableFuture<MobileServiceUser> future = SettableFuture.create();
 
         if (context == null) {
@@ -133,7 +147,7 @@ public class LoginManager {
         }
 
         // Create login URL
-        String startUrl = mClient.getAppUrl().toString() + LoginManager.START_URL + normalizeProvider(provider);
+        String startUrl = mClient.getAppUrl().toString() + LoginManager.START_URL + normalizeProvider(provider) + normalizeParameters(parameters);
         // Create the expected end URL
         String endUrl = mClient.getAppUrl().toString() + LoginManager.END_URL;
 
@@ -174,8 +188,21 @@ public class LoginManager {
      * @param callback Callback to invoke when the authentication process finishes
      */
     public void authenticate(String provider, Context context, final UserAuthenticationCallback callback) {
+        authenticate(provider, context, null, callback);
+    }
 
-        ListenableFuture<MobileServiceUser> authenticateFuture = authenticate(provider, context);
+    /**
+     * Invokes an interactive authentication process using the specified
+     * Authentication Provider
+     *
+     * @param provider The provider used for the authentication process
+     * @param context  The context used to create the authentication dialog
+     * @param callback Callback to invoke when the authentication process finishes
+     * @param parameters Aditional parameters for the authentication process
+     */
+    public void authenticate(String provider, Context context, HashMap<String, String> parameters, final UserAuthenticationCallback callback) {
+
+        ListenableFuture<MobileServiceUser> authenticateFuture = authenticate(provider, context, parameters);
 
         Futures.addCallback(authenticateFuture, new FutureCallback<MobileServiceUser>() {
             @Override
@@ -200,18 +227,30 @@ public class LoginManager {
      *
      * @param provider   The provider used for the authentication process
      * @param oAuthToken The oAuth token used for authentication
-     * @param callback   Callback to invoke when the authentication process finishes
+     * @param parameters Aditional parameters for the authentication process
      */
 
-    public ListenableFuture<MobileServiceUser> authenticate(String provider, String oAuthToken) {
+    public ListenableFuture<MobileServiceUser> authenticate(String provider, String oAuthToken, HashMap<String, String> parameters) {
         if (oAuthToken == null || oAuthToken.trim() == "") {
             throw new IllegalArgumentException("oAuthToken can not be null or empty");
         }
 
         // Create the login URL
-        String url = mClient.getAppUrl().toString() + LoginManager.START_URL + normalizeProvider(provider);
+        String url = mClient.getAppUrl().toString() + LoginManager.START_URL + normalizeProvider(provider) + normalizeParameters(parameters);
 
         return authenticateWithToken(oAuthToken, url);
+    }
+
+    /**
+     * Invokes Microsoft Azure Mobile Service authentication using a
+     * provider-specific oAuth token
+     *
+     * @param provider   The provider used for the authentication process
+     * @param oAuthToken The oAuth token used for authentication
+     */
+
+    public ListenableFuture<MobileServiceUser> authenticate(String provider, String oAuthToken) {
+        return authenticate(provider, oAuthToken, (HashMap<String, String>) null);
     }
 
     /**
@@ -223,7 +262,20 @@ public class LoginManager {
      * @param callback   Callback to invoke when the authentication process finishes
      */
     public void authenticate(String provider, String oAuthToken, final UserAuthenticationCallback callback) {
-        ListenableFuture<MobileServiceUser> authenticateFuture = authenticate(provider, oAuthToken);
+        authenticate(provider, oAuthToken, null, callback);
+    }
+
+    /**
+     * Invokes Microsoft Azure Mobile Service authentication using a
+     * provider-specific oAuth token
+     *
+     * @param provider   The provider used for the authentication process
+     * @param oAuthToken The oAuth token used for authentication
+     * @param parameters Aditional parameters for the authentication process
+     * @param callback   Callback to invoke when the authentication process finishes
+     */
+    public void authenticate(String provider, String oAuthToken, HashMap<String, String> parameters, final UserAuthenticationCallback callback) {
+        ListenableFuture<MobileServiceUser> authenticateFuture = authenticate(provider, oAuthToken, parameters);
 
         Futures.addCallback(authenticateFuture, new FutureCallback<MobileServiceUser>() {
             @Override
@@ -264,9 +316,34 @@ public class LoginManager {
     }
 
     /**
+     * Normalizes the parameters to add it to the Url
+     *
+     * @param parameters list of the parameters.
+     * @return the parameters to add to the url.
+     */
+    private String normalizeParameters(HashMap<String, String> parameters) {
+
+        String result = "";
+
+        if (parameters != null && parameters.size() > 0) {
+            for (Map.Entry<String, String> parameter : parameters.entrySet()) {
+
+                if (result == "") {
+                    result = "?";
+                } else {
+                    result += "&";
+                }
+
+                result += parameter.getKey() + "=" + parameter.getValue();
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Creates the UI for the interactive authentication process
      *
-     * @param provider The provider used for the authentication process
      * @param startUrl The initial URL for the authentication process
      * @param endUrl   The final URL for the authentication process
      * @param context  The context used to create the authentication dialog
@@ -286,7 +363,6 @@ public class LoginManager {
     /**
      * Creates the UI for the interactive authentication process
      *
-     * @param provider The provider used for the authentication process
      * @param startUrl The initial URL for the authentication process
      * @param endUrl   The final URL for the authentication process
      * @param context  The context used to create the authentication dialog
@@ -365,6 +441,7 @@ public class LoginManager {
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 // If the URL of the started page matches with the final URL
                 // format, the login process finished
+
                 if (isFinalUrl(url)) {
                     if (externalCallback != null) {
                         externalCallback.onCompleted(url, null);
@@ -457,7 +534,6 @@ public class LoginManager {
      *
      * @param token    The token used for authentication
      * @param url      The URL used for the authentication process
-     * @param callback Callback to invoke when the authentication process finishes
      */
     private ListenableFuture<MobileServiceUser> authenticateWithToken(String token, String url) {
         final SettableFuture<MobileServiceUser> future = SettableFuture.create();
@@ -519,7 +595,6 @@ public class LoginManager {
          * Method to call if the operation finishes successfully
          *
          * @param url The final login URL
-         * @param e   An exception representing the error, in case there was one
          */
         void onCompleted(String url, Exception exception);
     }
