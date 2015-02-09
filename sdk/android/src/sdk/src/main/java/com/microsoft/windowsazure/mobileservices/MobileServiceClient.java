@@ -1201,12 +1201,20 @@ public class MobileServiceClient {
         Futures.addCallback(internalFuture, new FutureCallback<ServiceFilterResponse>() {
             @Override
             public void onFailure(Throwable e) {
-                future.setException(e);
+               future.setException(e);
             }
 
             @Override
             public void onSuccess(ServiceFilterResponse response) {
+
                 String content = response.getContent();
+
+                if (content == null) {
+                    future.set(null);
+
+                    return;
+                }
+
                 JsonElement json = new JsonParser().parse(content);
                 future.set(json);
             }

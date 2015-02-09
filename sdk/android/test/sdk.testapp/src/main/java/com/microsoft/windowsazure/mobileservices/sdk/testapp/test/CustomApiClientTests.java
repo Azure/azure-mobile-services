@@ -35,6 +35,8 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.EchoFilter;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.NullResponseContentFilter;
+import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.NullResponseFilter;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.HttpMetaEchoFilter;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterRequestMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterResponseMock;
@@ -643,6 +645,48 @@ public class CustomApiClientTests extends InstrumentationTestCase {
         } catch (Exception exception) {
             fail(exception.getMessage());
         }
+    }
+
+    public void testInvokeNullResponseObject() {
+        final JsonObject content = new JsonObject();
+
+        try {
+            MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = client.withFilter(new NullResponseFilter());
+
+            JsonElement response = client.invokeApi("myApi", content, "POST", null).get();
+
+        } catch (Exception exception) {
+            if (!(exception.getCause() instanceof MobileServiceException)) {
+                fail(exception.getMessage());
+            }
+
+            return;
+        }
+
+        fail("Exception expected");
+
+    }
+
+    public void testInvokeNullResponseContentObject() {
+        final JsonObject content = new JsonObject();
+
+        try {
+            MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = client.withFilter(new NullResponseContentFilter());
+
+            JsonElement response = client.invokeApi("myApi", content, "POST", null).get();
+
+            if (response != null) {
+                fail("Expected Null Response");
+            }
+
+        } catch (Exception exception) {
+            fail(exception.getMessage());
+
+            return;
+        }
+
     }
 
     public void testInvokeMethodEcho() throws Throwable {
