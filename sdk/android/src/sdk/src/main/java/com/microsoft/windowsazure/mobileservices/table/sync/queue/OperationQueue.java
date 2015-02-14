@@ -89,12 +89,12 @@ public class OperationQueue {
     public static void initializeStore(MobileServiceLocalStore store) throws MobileServiceLocalStoreException {
         Map<String, ColumnDataType> columns = new HashMap<String, ColumnDataType>();
         columns.put("id", ColumnDataType.String);
-        columns.put("kind", ColumnDataType.Number);
+        columns.put("kind", ColumnDataType.Real);
         columns.put("tablename", ColumnDataType.String);
         columns.put("itemid", ColumnDataType.String);
         columns.put("__createdat", ColumnDataType.Date);
         columns.put("__queueloadedat", ColumnDataType.Date);
-        columns.put("sequence", ColumnDataType.Number);
+        columns.put("sequence", ColumnDataType.Real);
 
         store.defineTable(OPERATION_QUEUE_TABLE, columns);
     }
@@ -326,7 +326,7 @@ public class OperationQueue {
     private void enqueueOperation(TableOperation operation) throws ParseException, MobileServiceLocalStoreException {
         OperationQueueItem opQueueItem = new OperationQueueItem(operation, this.mLoadedAt, this.mSequence++);
 
-        this.mStore.upsert(OPERATION_QUEUE_TABLE, serialize(opQueueItem));
+        this.mStore.upsert(OPERATION_QUEUE_TABLE, serialize(opQueueItem), false);
 
         this.mQueue.add(opQueueItem);
 

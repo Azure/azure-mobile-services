@@ -27,5 +27,5 @@ package com.microsoft.windowsazure.mobileservices.table.sync.localstore;
  * Enumeration of available column data types.
  */
 public enum ColumnDataType {
-    Boolean, Number, String, Date, Other
+    Boolean, Integer, Real, String, Date, Other
 }

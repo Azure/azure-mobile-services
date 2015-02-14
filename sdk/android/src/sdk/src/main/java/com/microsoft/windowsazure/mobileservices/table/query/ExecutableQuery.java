@@ -226,6 +226,13 @@ public final class ExecutableQuery<E> implements Query {
     }
 
     @Override
+    public ExecutableQuery<E> removeProjection() {
+        this.mQuery.removeProjection();
+
+        return this;
+    }
+
+    @Override
     public ExecutableQuery<E> select(String... fields) {
         this.mQuery.select(fields);
         return this;

@@ -184,7 +184,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
-        client = client.withFilter(getTestFilter(serviceFilterContainer, "{\"id\":\"abc\",\"String\":\"Hey\"}", "[{\"id\":\"def\",\"String\":\"World\"}]"));
+        client = client.withFilter(getTestFilter(serviceFilterContainer, false, "{\"id\":\"abc\",\"String\":\"Hey\"}", "[{\"id\":\"def\",\"String\":\"World\"}]"));
 
         client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
 
@@ -207,7 +207,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         // 1
         // from
         // local
-        assertEquals(serviceFilterContainer.Requests.size(), 2);
+        assertEquals(serviceFilterContainer.Requests.size(), 3);
     }
 
     public void testPullDoesNotTriggerPushWhenThereIsNoOperationInTable() throws InterruptedException, ExecutionException, MalformedURLException {
@@ -219,7 +219,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
-        client = client.withFilter(getTestFilter(serviceFilterContainer, "{\"id\":\"abc\",\"String\":\"Hey\"}",
+        client = client.withFilter(getTestFilter(serviceFilterContainer, false, "{\"id\":\"abc\",\"String\":\"Hey\"}",
                 "[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"));
 
         client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
@@ -258,7 +258,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         // 2
         // pulled
         // items
-        assertEquals(serviceFilterContainer.Requests.size(), 2); // 1 for push
+        assertEquals(serviceFilterContainer.Requests.size(), 3); // 1 for push
         // and 1 for
         // pull
         assertEquals(store.Tables.get(table2.getName().toLowerCase(Locale.getDefault())).size(), 1); // this
@@ -278,7 +278,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
-        client = client.withFilter(getTestFilter(serviceFilterContainer, "{\"id\":\"abc\",\"String\":\"Hey\"}", // for
+        client = client.withFilter(getTestFilter(serviceFilterContainer, false, "{\"id\":\"abc\",\"String\":\"Hey\"}", // for
                 // insert
                 "[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]" // remote
                 // item
@@ -301,8 +301,8 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         // this should trigger a push
         table1.pull(null).get();
 
-        assertEquals(serviceFilterContainer.Requests.size(), 2); // 1 for push
-        // and 1 for
+        assertEquals(serviceFilterContainer.Requests.size(), 3); // 1 for push
+        // and 2 for
         // pull
         assertEquals(store.Tables.get(table1.getName().toLowerCase(Locale.getDefault())).size(), 2); // table
         // is
@@ -365,7 +365,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         String updatedAt = sdf.format(new Date());
 
-        client = client.withFilter(getTestFilter(serviceFilterContainer,
+        client = client.withFilter(getTestFilter(serviceFilterContainer, false,
                 "{\"count\":\"2\",\"results\":[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt + "\"},{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt + "\"}]}"// remote
                 // item
         ));
@@ -380,10 +380,43 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         table.pull(query).get();
 
         assertEquals(
-                serviceFilterContainer.Url,
+                serviceFilterContainer.Requests.get(0).Url,
                 EncodingUtilities
                         .percentEncodeSpaces(
-                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20('world')&$inlinecount=allpages&$top=3&$skip=5&$orderby=Id%20desc&__includeDeleted=true&__systemproperties=*&$select=String"));
+                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20('world')&$top=3&$skip=5&$orderby=Id%20desc&__includeDeleted=true&__systemproperties=__version,__deleted"));
+    }
+
+    public void testPullNoSkipSucceds() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
+
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        String updatedAt = sdf.format(new Date());
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, false,
+                "{\"count\":\"2\",\"results\":[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt + "\"},{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt + "\"}]}"// remote
+                // item
+        ));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        Query query = QueryOperations.tableName(table.getName()).top(3).field("String").eq("world").orderBy("Id", QueryOrder.Descending)
+                .includeInlineCount().select("String");
+
+        table.pull(query).get();
+
+        assertEquals(
+                serviceFilterContainer.Requests.get(0).Url,
+                EncodingUtilities
+                        .percentEncodeSpaces(
+                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20('world')&$top=3&$skip=0&$orderby=Id%20desc&__includeDeleted=true&__systemproperties=__version,__deleted"));
     }
 
     public void testPullSuccedsNoTopNoOrderBy() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
@@ -398,7 +431,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         String updatedAt = sdf.format(new Date());
 
-        client = client.withFilter(getTestFilter(serviceFilterContainer,
+        client = client.withFilter(getTestFilter(serviceFilterContainer, false,
                 "{\"count\":\"2\",\"results\":[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt + "\"},{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt + "\"}]}"// remote
                 // item
         ));
@@ -413,10 +446,10 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         table.pull(query).get();
 
         assertEquals(
-                serviceFilterContainer.Url,
+                serviceFilterContainer.Requests.get(0).Url,
                 EncodingUtilities
                         .percentEncodeSpaces(
-                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20('world')&$inlinecount=allpages&$top=50&$orderby=Id%20desc&__includeDeleted=true&__systemproperties=*&$select=String"));
+                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20('world')&$top=50&$skip=0&$orderby=Id%20desc&__includeDeleted=true&__systemproperties=__version,__deleted"));
     }
 
     public void testIncrementalPullSucceds() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
@@ -433,7 +466,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         String updatedAt1 = sdf.format(new Date());
         String updatedAt2 = sdf.format(new Date());
 
-        client = client.withFilter(getTestFilter(serviceFilterContainer,
+        client = client.withFilter(getTestFilter(serviceFilterContainer, false,
                 "{\"count\":\"4\",\"results\":[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt1 + "\"},{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt1 + "\"}]}",
                 "[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt2 + "\"},{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt2 + "\"}]"
                 // remote
@@ -452,7 +485,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
                 serviceFilterContainer.Requests.get(0).Url,
                 EncodingUtilities
                         .percentEncodeSpaces(
-                                "http://myapp.com/tables/stringidtype?$inlinecount=allpages&$top=2&$orderby=__updatedAt%20asc,id%20asc&__includeDeleted=true&__systemproperties=*"));
+                                "http://myapp.com/tables/stringidtype?$top=50&$orderby=__updatedAt%20asc,id%20asc&__includeDeleted=true&__systemproperties=__updatedAt,__version,__deleted"));
 
         assertEquals(
                 serviceFilterContainer.Requests.get(1).Url,
@@ -460,7 +493,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
                         .percentEncodeSpaces(
                                 "http://myapp.com/tables/stringidtype?$filter=__updatedAt%20gt%20(datetime'" + updatedAt1 +
                                         "')%20or%20(__updatedAt%20ge%20(datetime'" + updatedAt1 +
-                                        "')%20and%20id%20gt%20('def'))&$top=2&$orderby=__updatedAt%20asc,id%20asc&__includeDeleted=true&__systemproperties=*"));
+                                        "')%20and%20id%20gt%20('def'))&$top=50&$orderby=__updatedAt%20asc,id%20asc&__includeDeleted=true&__systemproperties=__updatedAt,__version,__deleted"));
     }
 
     public void testIncrementalPullSaveLastUpdatedAtDate() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
@@ -478,7 +511,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         String updatedAt1 = sdf.format(new Date());
         String updatedAt2 = sdf.format(new Date());
 
-        client = client.withFilter(getTestFilter(serviceFilterContainer,
+        client = client.withFilter(getTestFilter(serviceFilterContainer, false,
                 "{\"count\":\"4\",\"results\":[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt1 + "\"},{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt1 + "\"}]}",
                 "[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt2 + "\"},{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt2 + "\"}]"
                 // remote
@@ -1230,7 +1263,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
     // Test Filter
     private ServiceFilter getTestFilter(ServiceFilterContainer serviceFilterContainer, Function<ServiceFilterRequest, Void> onHandleRequest, String... content) {
-        return getTestFilter(serviceFilterContainer, 200, onHandleRequest, content);
+        return getTestFilter(serviceFilterContainer, 200, onHandleRequest, true, content);
     }
 
     // Test Filter
@@ -1239,13 +1272,19 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
     }
 
     // Test Filter
+    private ServiceFilter getTestFilter(ServiceFilterContainer serviceFilterContainer, final boolean getLastContentAsDefault, String... content) {
+        return getTestFilter(serviceFilterContainer, 200, null, getLastContentAsDefault, content);
+    }
+
+
+    // Test Filter
     private ServiceFilter getTestFilter(ServiceFilterContainer serviceFilterContainer, int statusCode, String... content) {
-        return getTestFilter(serviceFilterContainer, statusCode, null, content);
+        return getTestFilter(serviceFilterContainer, statusCode, null, true, content);
     }
 
     // Test Filter
     private ServiceFilter getTestFilter(final ServiceFilterContainer serviceFilterContainer, final int statusCode,
-                                        final Function<ServiceFilterRequest, Void> onHandleRequest, final String... contents) {
+                                        final Function<ServiceFilterRequest, Void> onHandleRequest, final boolean getLastContentAsDefault, final String... contents) {
 
         return new ServiceFilter() {
 
@@ -1261,7 +1300,12 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
                 if (contents.length > serviceFilterContainer.Requests.size()) {
                     content = contents[serviceFilterContainer.Requests.size()];
                 } else {
-                    content = contents[contents.length - 1];
+                    if (getLastContentAsDefault) {
+                        content = contents[contents.length - 1];
+                    }
+                    else {
+                        content = "[]";
+                    }
                 }
 
                 response.setContent(content);

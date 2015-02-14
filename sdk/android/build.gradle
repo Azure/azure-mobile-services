@@ -16,4 +16,9 @@ allprojects {
     repositories {
         jcenter()
     }
+
+    apply plugin: 'idea'
+
+    group = 'com.microsoft.azure'
+    version = '2.0-beta'
 }
