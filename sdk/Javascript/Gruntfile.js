@@ -24,7 +24,9 @@ module.exports = function(grunt) {
         'src/Platforms/Platform.Web.js',
         'src/Generated/MobileServices.Core.js',
         'src/Transports/*.js',
-        'src/LoginUis/*.js',
+        'src/LoginUis/BrowserPopup.js',
+        'src/LoginUis/CordovaPopup.js',
+        'src/LoginUis/WebAuthBroker.js',
         'src/Utilities/PostMessageExchange.js',
         'src/Utilities/Promises.js'
       ],
@@ -33,7 +35,9 @@ module.exports = function(grunt) {
         'src/Platforms/Platform.Web.js',
         'src/Generated/MobileServices.Core.js',
         'src/Transports/*.js',
-        'src/LoginUis/*.js',
+        'src/LoginUis/MozBrowserPopup.js',
+        'src/LoginUis/CordovaPopup.js',
+        'src/LoginUis/WebAuthBroker.js',
         'src/Utilities/PostMessageExchange.js',
         'src/Utilities/Promises.js'
       ],
@@ -113,6 +117,10 @@ module.exports = function(grunt) {
       web: {
         src: 'src/Generated/MobileServices.Web.js',
         dest: 'src/Generated/MobileServices.Web.min.js'
+      },
+      fxos: {
+        src: 'src/Generated/MobileServices.FxOS.js',
+        dest: 'src/Generated/MobileServices.FxOS.min.js'
       },
       winjs: {
         src: 'src/Generated/MobileServices.js',
