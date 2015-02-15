@@ -1,10 +1,15 @@
-﻿
+﻿// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
+
+var PostMessageExchange = require('PostMessageExchange');
+
 exports.supportsCurrentRuntime = function () {
     /// <summary>
     /// Determines whether or not this login UI is usable in the current runtime.
     /// </summary>
-
-    return isWebAuthBrokerAvailable();
+    return true;
 };
 
 exports.login = function (startUri, endUri, callback) {
@@ -12,107 +17,100 @@ exports.login = function (startUri, endUri, callback) {
     /// Displays the login UI and calls back on completion
     /// </summary>
 
-    // Define shortcuts for namespaces
-    var windowsWebAuthBroker = Windows.Security.Authentication.Web.WebAuthenticationBroker;
-    var noneWebAuthOptions = Windows.Security.Authentication.Web.WebAuthenticationOptions.none;
-    var successWebAuthStatus = Windows.Security.Authentication.Web.WebAuthenticationStatus.success;
-    var activationKindWebAuthContinuation = Windows.ApplicationModel.Activation.ActivationKind.webAuthenticationBrokerContinuation;
+    // Tell the runtime which form of completion signal we are looking for,
+    // and which origin should be allowed to receive the result (note that this
+    // is validated against whitelist on the server; we are only supplying this
+    // origin to indicate *which* of the whitelisted origins to use).
+    var completionOrigin = PostMessageExchange.getOriginRoot(window.location.href),
+        runtimeOrigin = PostMessageExchange.getOriginRoot(startUri),
+        // IE does not support popup->opener postMessage calls, so we have to
+        // route the message via an iframe
+        useIntermediateIframe = window.navigator.userAgent.indexOf("MSIE") >= 0 || window.navigator.userAgent.indexOf("Trident") >= 0,
+        intermediateIframe = useIntermediateIframe && createIntermediateIframeForLogin(runtimeOrigin, completionOrigin),
+        completionType = useIntermediateIframe ? "iframe" : "postMessage";
 
-    var webAuthBrokerSuccessCallback = null;
-    var webAuthBrokerErrorCallback = null;
-    var webAuthBrokerContinuationCallback = null;
+    startUri += startUri.indexOf('?') == -1 ? '?' : '&';
+    startUri += "completion_type=" + completionType + "&completion_origin=" + encodeURIComponent(completionOrigin);
 
-
-    // define callbacks for WebAuthenticationBroker
-    webAuthBrokerSuccessCallback = function (result) {
-        var error = null;
-        var token = null;
-
-        if (result.responseStatus !== successWebAuthStatus) {
-            error = result;
-        }
-        else {
-            var callbackEndUri = result.responseData;
-            var tokenAsJson = null;
-            var i = callbackEndUri.indexOf('#token=');
-            if (i > 0) {
-                tokenAsJson = decodeURIComponent(callbackEndUri.substring(i + 7));
-            }
-            else {
-                i = callbackEndUri.indexOf('#error=');
-                if (i > 0) {
-                    error = decodeURIComponent(callbackEndUri.substring(i + 7));
-                }
-            }
-
-            if (tokenAsJson !== null) {
-                try {
-                    token = JSON.parse(tokenAsJson);
-                }
-                catch (e) {
-                    error = e;
-                }
-            }
-        }
-
-        callback(error, token);
-    };
-    webAuthBrokerErrorCallback = function (error) {
+    // Browsers don't allow postMessage to a file:// URL (except by setting origin to "*", which is unacceptable)
+    // so abort the process early with an explanation in that case.
+    if (!(completionOrigin && (completionOrigin.indexOf("http:") === 0 || completionOrigin.indexOf("https:") === 0))) {
+        var error = "Login is only supported from http:// or https:// URLs. Please host your page in a web server.";
         callback(error, null);
-    };
-    // Continuation callback is used when we're running on WindowsPhone which uses 
-    // AuthenticateAndContinue method instead of AuthenticateAsync, which uses different async model
-    // Continuation callback need to be assigned to Application's 'activated' event.
-    webAuthBrokerContinuationCallback = function (activationArgs) {
-        if (activationArgs.detail.kind === activationKindWebAuthContinuation) {
-            var result = activationArgs.detail.webAuthenticationResult;
-            if (result.responseStatus == successWebAuthStatus) {
-                webAuthBrokerSuccessCallback(result);
-            } else {
-                webAuthBrokerErrorCallback(result);
-            }
-            WinJS.Application.removeEventListener('activated', webAuthBrokerContinuationCallback);
-        }
-    };
-
-    if (endUri) {
-        var windowsStartUri = new Windows.Foundation.Uri(startUri);
-        var windowsEndUri = new Windows.Foundation.Uri(endUri);
-
-        // If authenticateAndContinue method is available, we should use it instead of authenticateAsync
-        if (windowsWebAuthBroker.authenticateAndContinue) {
-            WinJS.Application.addEventListener('activated', webAuthBrokerContinuationCallback, true);
-            windowsWebAuthBroker.authenticateAndContinue(windowsStartUri, windowsEndUri);
-        } else {
-            windowsWebAuthBroker.authenticateAsync(noneWebAuthOptions, windowsStartUri, windowsEndUri)
-                                .done(webAuthBrokerSuccessCallback, webAuthBrokerErrorCallback);
-        }
-    } else {
-        // If no endURI was given, then we'll use the single sign-on overload of the 
-        // windowsWebAuthBroker. Single sign-on requires that the application's Package SID 
-        // be registered with the Microsoft Azure Mobile Service, but it provides a better 
-        // experience as HTTP cookies are supported so that users do not have to
-        // login in everytime the application is launched.
-        var redirectUri = windowsWebAuthBroker.getCurrentApplicationCallbackUri().absoluteUri;
-        var startUriWithRedirect = startUri + "?sso_end_uri=" + encodeURIComponent(redirectUri);
-        var windowsStartUriWithRedirect = new Windows.Foundation.Uri(startUriWithRedirect);
-
-        // If authenticateAndContinue method is available, we should use it instead of authenticateAsync
-        if (windowsWebAuthBroker.authenticateAndContinue) {
-            WinJS.Application.addEventListener('activated', webAuthBrokerContinuationCallback, true);
-            windowsWebAuthBroker.authenticateAndContinue(windowsStartUriWithRedirect);
-        } else {
-            windowsWebAuthBroker.authenticateAsync(noneWebAuthOptions, windowsStartUriWithRedirect)
-                                .done(webAuthBrokerSuccessCallback, webAuthBrokerErrorCallback);
-        }
+        return;
     }
+
+    var loginWindow = window.open(startUri, "_blank", "location=no"),
+        complete = function(errorValue, oauthValue) {
+            // Clean up event handlers, windows, frames, ...
+            window.clearInterval(checkForWindowClosedInterval);
+            loginWindow.close();
+            if (window.removeEventListener) {
+                window.removeEventListener("message", handlePostMessage);
+            } else {
+                // For IE8
+                window.detachEvent("onmessage", handlePostMessage);
+            }
+            if (intermediateIframe) {
+                intermediateIframe.parentNode.removeChild(intermediateIframe);
+            }
+            
+            // Finally, notify the caller
+            callback(errorValue, oauthValue);
+        },
+        handlePostMessage = function(evt) {
+            // Validate source
+            var expectedSource = useIntermediateIframe ? intermediateIframe.contentWindow : loginWindow;
+            if (evt.source !== expectedSource) {
+                return;
+            }
+
+            // Parse message
+            var envelope;
+            try {
+                envelope = JSON.parse(evt.data);
+            } catch(ex) {
+                // Not JSON - it's not for us. Ignore it and keep waiting for the next message.
+                return;
+            }
+
+            // Process message only if it's for us
+            if (envelope && envelope.type === "LoginCompleted" && (envelope.oauth || envelope.error)) {
+                complete(envelope.error, envelope.oauth);
+            }
+        },
+        checkForWindowClosedInterval = window.setInterval(function() {
+            // We can't directly catch any "onclose" event from the popup because it's usually on a different
+            // origin, but in all the mainstream browsers we can poll for changes to its "closed" property
+            if (loginWindow && loginWindow.closed === true) {
+                complete("canceled", null);
+            }
+        }, 250);
+
+    if (window.addEventListener) {
+        window.addEventListener("message", handlePostMessage, false);
+    } else {
+        // For IE8
+        window.attachEvent("onmessage", handlePostMessage);
+    }
+    
+    // Permit cancellation, e.g., if the app tries to login again while the popup is still open
+    return {
+        cancelCallback: function () {
+            complete("canceled", null);
+            return true; // Affirm that it was cancelled
+        }
+    };
 };
 
-function isWebAuthBrokerAvailable() {
-    // If running on windows8/8.1 or Windows Phone returns true, otherwise false
-    return !!(window.Windows &&
-        window.Windows.Security &&
-        window.Windows.Security.Authentication &&
-        window.Windows.Security.Authentication.Web &&
-        window.Windows.Security.Authentication.Web.WebAuthenticationBroker);
+function createIntermediateIframeForLogin(runtimeOrigin, completionOrigin) {
+    var frame = document.createElement("iframe");
+    frame.name = "zumo-login-receiver"; // loginviaiframe.html specifically looks for this name
+    frame.src = runtimeOrigin +
+        "/crossdomain/loginreceiver?completion_origin=" + encodeURIComponent(completionOrigin);
+    frame.setAttribute("width", 0);
+    frame.setAttribute("height", 0);
+    frame.style.display = "none";
+    document.body.appendChild(frame);
+    return frame;
 }
