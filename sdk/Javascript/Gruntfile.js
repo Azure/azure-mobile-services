@@ -24,20 +24,16 @@ module.exports = function(grunt) {
         'src/Platforms/Platform.Web.js',
         'src/Generated/MobileServices.Core.js',
         'src/Transports/*.js',
-        'src/LoginUis/BrowserPopup.js',
-        'src/LoginUis/CordovaPopup.js',
-        'src/LoginUis/WebAuthBroker.js',
+        'src/LoginUis/*.js',
         'src/Utilities/PostMessageExchange.js',
         'src/Utilities/Promises.js'
       ],
       fxos: [
         'src/Push/Push.Web.js',
-        'src/Platforms/Platform.Web.js',
+        'src/Platforms/Platform.FxOS.js',
         'src/Generated/MobileServices.Core.js',
         'src/Transports/*.js',
-        'src/LoginUis/MozBrowserPopup.js',
-        'src/LoginUis/CordovaPopup.js',
-        'src/LoginUis/WebAuthBroker.js',
+        'src/LoginUis/*.js',
         'src/Utilities/PostMessageExchange.js',
         'src/Utilities/Promises.js'
       ],
