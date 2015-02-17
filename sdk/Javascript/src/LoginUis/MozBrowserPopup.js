@@ -23,7 +23,7 @@ exports.login = function (startUri, endUri, callback) {
     // origin to indicate *which* of the whitelisted origins to use).
     // Browsers don't allow postMessage to a file:// URL (except by setting origin to "*", which is unacceptable)
     // so abort the process early with an explanation in that case.
-
+    var completionOrigin = PostMessageExchange.getOriginRoot(window.location.href);
     if (!(completionOrigin && (completionOrigin.indexOf("http:") === 0 || completionOrigin.indexOf("https:") === 0 || completionOrigin.indexOf("app:") === 0))) {
         var error = "Login is only supported from http:// or https:// URLs. Please host your page in a web server.";
         callback(error, null);
