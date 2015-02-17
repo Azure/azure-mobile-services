@@ -24,7 +24,7 @@ exports.login = function (startUri, endUri, callback) {
     // Browsers don't allow postMessage to a file:// URL (except by setting origin to "*", which is unacceptable)
     // so abort the process early with an explanation in that case.
 
-    if (!(completionOrigin && (completionOrigin.indexOf("http:") === 0 || completionOrigin.indexOf("https:") === 0))) {
+    if (!(completionOrigin && (completionOrigin.indexOf("http:") === 0 || completionOrigin.indexOf("https:") === 0 || completionOrigin.indexOf("app:") === 0))) {
         var error = "Login is only supported from http:// or https:// URLs. Please host your page in a web server.";
         callback(error, null);
         return;
