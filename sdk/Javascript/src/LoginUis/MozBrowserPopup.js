@@ -29,17 +29,27 @@ exports.login = function (startUri, endUri, callback) {
         callback(error, null);
         return;
     }
-
-    var loginBrowser = document.createElement("iframe"),
+    var loginFrame = document.createElement("div"),
+        loginTitle = document.createElement("p"),
+        loginCloseBtn = document.createElement("a"),
+        loginBrowser = document.createElement("iframe"),
         complete = function(errorValue, oauthValue) {
             // Clean up event handlers, windows, frames, ...
-            loginBrowser.parentNode.removeChild(loginBrowser);
+            loginFrame.parentNode.removeChild(loginFrame);
             // Finally, notify the caller
             callback(errorValue, oauthValue);
         };
+    loginFrame.style = "position:absolute; width:100%; height:100%; left: 0; top: 0; background: white; display: flex; flex-direction: column;";
+    loginTitle.textContent = "Login";
+    loginTitle.style = "background:rgb(237,112,23); color: white; padding: 5px 10px";
+    loginCloseBtn.innerHTML = "&times";
+    loginCloseBtn.style = "text-decoration: none; color: white; float:right;";
+    loginCloseBtn.addEventListener("click", function(){
+        complete("canceled", null);
+    });
     loginBrowser.setAttribute("mozbrowser","");
     loginBrowser.setAttribute("remote","");
-    loginBrowser.style = "position:absolute; width:100%; height:100%;";
+    loginBrowser.style = "width:100%; flex: 1; border:none;";
     loginBrowser.src = startUri;
     loginBrowser.addEventListener("mozbrowserlocationchange", function(evt){
         var location = evt.detail;
@@ -56,7 +66,10 @@ exports.login = function (startUri, endUri, callback) {
             complete(null, token);
         }
     });
-    document.body.appendChild(loginBrowser);
+    document.body.appendChild(loginFrame);
+    loginFrame.appendChild(loginTitle);
+    loginFrame.appendChild(loginBrowser);
+    loginTitle.appendChild(loginCloseBtn);
 
     // Permit cancellation, e.g., if the app tries to login again while the popup is still open
     return {
