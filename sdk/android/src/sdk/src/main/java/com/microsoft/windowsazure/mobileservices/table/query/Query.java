@@ -199,7 +199,7 @@ public interface Query {
     /**
      * Specifies a boolean value
      *
-     * @param number The boolean value to use
+     * @param val The boolean value to use
      * @return Query
      */
     Query val(boolean val);
@@ -207,7 +207,7 @@ public interface Query {
     /**
      * Specifies a string value
      *
-     * @param number The string value to use
+     * @param s The string value to use
      * @return Query
      */
     Query val(String s);
@@ -215,7 +215,7 @@ public interface Query {
     /**
      * Specifies a date value
      *
-     * @param number The date value to use
+     * @param date The date value to use
      * @return Query
      */
     Query val(Date date);
@@ -576,7 +576,7 @@ public interface Query {
     /**
      * Multiply operator.
      *
-     * @param otherQuery
+     * @param val
      * @return Query
      */
     Query mul(Number val);
@@ -876,7 +876,7 @@ public interface Query {
     /**
      * Whether the string parameter occurs in the field
      *
-     * @param str2  String to search
+     * @param str String to search
      * @param field Field to search in
      * @return Query
      */
@@ -917,7 +917,7 @@ public interface Query {
      * parameter value or -1 otherwise.
      *
      * @param field Field to search in
-     * @param str   Value to search for
+     * @param needle Value to search for
      * @return Query
      */
     Query indexOf(String field, String needle);
