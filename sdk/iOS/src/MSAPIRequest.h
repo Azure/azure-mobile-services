@@ -3,7 +3,7 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSClientInternal.h"
+#import "MSClient.h"
 #import "MSSerializer.h"
 
 

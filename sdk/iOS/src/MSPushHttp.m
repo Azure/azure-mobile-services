@@ -4,7 +4,7 @@
 
 #import "MSPushRequest.h"
 #import "MSPushHttp.h"
-#import "MSClient.h"
+#import "MSClientInternal.h"
 
 @interface MSPushHttp ()
 @property (nonatomic, weak, readonly) MSClient *client;

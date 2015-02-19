@@ -5,6 +5,7 @@
 #import "MSTableConnection.h"
 #import "MSSerializer.h"
 #import "MSQueryResult.h"
+#import "MSClientInternal.h"
 
 // next link is the format "http://contoso.com; rel=next"
 static NSString *const nextLinkPattern = @"^(.*?);\\s*rel\\s*=\\s*(\\w+)\\s*"; // $1; rel = $2
