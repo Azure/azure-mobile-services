@@ -5,6 +5,7 @@
 #import "MSAPIRequest.h"
 #import "MSURLBuilder.h"
 #import "MSSDKFeatures.h"
+#import "MSClientInternal.h"
 
 #pragma mark * MSAPIRequest Implementation
 
