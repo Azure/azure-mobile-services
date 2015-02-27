@@ -450,13 +450,13 @@
 
 -(void)testSystemProperties
 {
-    MSSystemProperties properties = [self.store systemPropetiesForTable:@"ManySystemColumns"];
+    MSSystemProperties properties = [self.store systemPropertiesForTable:@"ManySystemColumns"];
     XCTAssertEqual(properties, MSSystemPropertyCreatedAt | MSSystemPropertyUpdatedAt | MSSystemPropertyVersion | MSSystemPropertyDeleted);
 
-    properties = [self.store systemPropetiesForTable:@"TodoItem"];
+    properties = [self.store systemPropertiesForTable:@"TodoItem"];
     XCTAssertEqual(properties, MSSystemPropertyVersion);
 
-    properties = [self.store systemPropetiesForTable:@"TodoItemNoVersion"];
+    properties = [self.store systemPropertiesForTable:@"TodoItemNoVersion"];
     XCTAssertEqual(properties, MSSystemPropertyNone);
 }
 

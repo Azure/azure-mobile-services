@@ -79,8 +79,8 @@
     MSTable *table = [self.client tableWithName:self.tableName];
     table.features = MSFeatureOffline;
     
-    if ([self.dataSource respondsToSelector:@selector(systemPropetiesForTable:)]) {
-        table.systemProperties = [self.dataSource systemPropetiesForTable:self.tableName];
+    if ([self.dataSource respondsToSelector:@selector(systemPropertiesForTable:)]) {
+        table.systemProperties = [self.dataSource systemPropertiesForTable:self.tableName];
     } else {
         table.systemProperties = MSSystemPropertyVersion;
     }
