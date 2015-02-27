@@ -23,12 +23,14 @@ import android.content.Context;
 import android.test.InstrumentationTestCase;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.helpers.SQLiteStoreTestsUtilities;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.CustomFunctionOneParameter;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
+import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
 import com.microsoft.windowsazure.mobileservices.table.sync.localstore.ColumnDataType;
 import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileServiceLocalStoreException;
 import com.microsoft.windowsazure.mobileservices.table.sync.localstore.SQLiteLocalStore;
@@ -263,6 +265,48 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
             item.addProperty("notDefined", "okok");
 
             store.upsert(TestTable, item, true);
+
+        } catch (Exception ex) {
+            assertNull(ex);
+        }
+    }
+
+    public void testUpsertSuportForMoreThan999Parameters() throws MobileServiceLocalStoreException {
+        SQLiteLocalStore store = new SQLiteLocalStore(this.getContext(), TestDbName, null, 1);
+
+        Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
+        tableDefinition.put("id", ColumnDataType.String);
+        tableDefinition.put("id_value", ColumnDataType.Integer);
+        tableDefinition.put("value", ColumnDataType.String);
+
+        store.defineTable("Test999Parameters", tableDefinition);
+        store.initialize();
+
+        try {
+
+            int jsonObjectsCount = 3000;
+
+            JsonObject[] items = new JsonObject[3000];
+
+            for(int i=0; i < jsonObjectsCount; i++){
+                JsonObject item = new JsonObject();
+                item.addProperty("id", String.valueOf(i));
+                item.addProperty("id_value", i);
+                item.addProperty("value", "value_" + String.valueOf(i));
+
+                items[i] = item;
+            }
+
+            store.upsert("Test999Parameters", items, true);
+
+            Query q = QueryOperations.tableName("Test999Parameters")
+                    .orderBy("id_value", QueryOrder.Ascending);
+
+            JsonArray result = store.read(q).getAsJsonArray();
+
+            assertEquals(jsonObjectsCount, result.size());
+            assertEquals(0, result.get(0).getAsJsonObject().get("id_value").getAsInt());
+            assertEquals(jsonObjectsCount - 1, result.get(jsonObjectsCount -1).getAsJsonObject().get("id_value").getAsInt());
 
         } catch (Exception ex) {
             assertNull(ex);

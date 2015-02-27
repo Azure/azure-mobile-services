@@ -251,18 +251,47 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
         try {
             String invTableName = normalizeTableName(tableName);
 
-            Statement statement = generateUpsertStatement(invTableName, items, fromServer);
+            int itemsCount = items.length;
 
-            if (fromServer && statement.sql == "")
-                return;
+            int tableColumnsSize = mTables.get(invTableName).entrySet().size();
+            int maxSize = 999;
 
-            SQLiteDatabase db = this.getWritableDatabase();
+            int pageSize = maxSize / tableColumnsSize;
 
-            try {
-                db.execSQL(statement.sql, statement.parameters.toArray());
-            } finally {
-                db.close();
+            int pageCounts = (itemsCount / pageSize) + 1;
+
+            int pendingItems = itemsCount;
+
+            for (int i=0; i < pageCounts; i++) {
+
+                int localPageSize = pageSize;
+
+                if (pendingItems < pageSize) {
+                    localPageSize = pendingItems;
+                }
+
+                JsonObject[] pageItems = new JsonObject[localPageSize];
+
+                for(int j=0; j < localPageSize; j++) {
+                    pageItems[j] = items[(i * pageSize) + j];
+                }
+
+                Statement statement = generateUpsertStatement(invTableName, pageItems, fromServer);
+
+                if (fromServer && statement.sql == "")
+                    return;
+
+                SQLiteDatabase db = this.getWritableDatabase();
+
+                try {
+                    db.execSQL(statement.sql, statement.parameters.toArray());
+                } finally {
+                    db.close();
+                }
+
+                pendingItems -= pageSize;
             }
+
         } catch (Throwable t) {
             throw new MobileServiceLocalStoreException(t);
         }
