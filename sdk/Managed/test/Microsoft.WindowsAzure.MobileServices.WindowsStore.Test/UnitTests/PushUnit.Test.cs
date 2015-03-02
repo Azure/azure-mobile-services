@@ -6,6 +6,7 @@ using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MobileServices.Test.UnitTests;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -18,8 +19,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         readonly IPushTestUtility pushTestUtility;
         const string DefaultChannelUri =
             "https://bn1.notify.windows.com/?token=AgYAAADs42685sa5PFCEy82eYpuG8WCPB098AWHnwR8kNRQLwUwf%2f9p%2fy0r82m4hxrLSQ%2bfl5aNlSk99E4jrhEatfsWgyutFzqQxHcLk0Xun3mufO2G%2fb2b%2ftjQjCjVcBESjWvY%3d";
-        const string DefaultServiceUri = "http://www.test.com";
-        const string InstallationsPath = "/push/installations";
+        const string DefaultServiceUri = MobileAppUriValidator.DummyMobileApp;
+        const string InstallationsPath = "push/installations";
 
         public PushUnit()
         {
@@ -66,7 +67,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             string installationRegistration = JsonConvert.SerializeObject(this.pushTestUtility.GetInstallation(mobileClient.GetPush().InstallationId, false));
             var hijack = TestHttpDelegatingHandler.CreateTestHttpHandler(expectedUri, HttpMethod.Put, null, HttpStatusCode.OK, expectedRequestContent: installationRegistration);
 
-            mobileClient = new MobileServiceClient(DefaultServiceUri, null, hijack);
+            mobileClient = new MobileServiceClient(DefaultServiceUri, hijack);
             await mobileClient.GetPush().RegisterAsync(DefaultChannelUri);
         }
 
@@ -85,7 +86,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             MobileServiceClient mobileClient = new MobileServiceClient(DefaultServiceUri);
             var expectedUri = string.Format("{0}{1}/{2}", DefaultServiceUri, InstallationsPath, mobileClient.GetPush().InstallationId);
             var hijack = TestHttpDelegatingHandler.CreateTestHttpHandler(expectedUri, HttpMethod.Put, null, HttpStatusCode.BadRequest);
-            mobileClient = new MobileServiceClient(DefaultServiceUri, null, hijack);
+            mobileClient = new MobileServiceClient(DefaultServiceUri, hijack);
             var exception = await AssertEx.Throws<MobileServiceInvalidOperationException>(
           () => mobileClient.GetPush().RegisterAsync(DefaultChannelUri));
             Assert.AreEqual(exception.Response.StatusCode, HttpStatusCode.BadRequest);
@@ -101,7 +102,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             string installationRegistration = JsonConvert.SerializeObject(this.pushTestUtility.GetInstallation(mobileClient.GetPush().InstallationId, true));
             var hijack = TestHttpDelegatingHandler.CreateTestHttpHandler(expectedUri, HttpMethod.Put, null, HttpStatusCode.OK, expectedRequestContent: installationRegistration);
 
-            mobileClient = new MobileServiceClient(DefaultServiceUri, null, hijack);
+            mobileClient = new MobileServiceClient(DefaultServiceUri, hijack);
             await mobileClient.GetPush().RegisterAsync(DefaultChannelUri, templates);
         }
 
@@ -112,7 +113,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var expectedUri = string.Format("{0}{1}/{2}", DefaultServiceUri, InstallationsPath, mobileClient.GetPush().InstallationId);
             JObject templates = this.pushTestUtility.GetTemplates();
             var hijack = TestHttpDelegatingHandler.CreateTestHttpHandler(expectedUri, HttpMethod.Put, null, HttpStatusCode.BadRequest);
-            mobileClient = new MobileServiceClient(DefaultServiceUri, null, hijack);
+            mobileClient = new MobileServiceClient(DefaultServiceUri, hijack);
             var exception = await AssertEx.Throws<MobileServiceInvalidOperationException>(
           () => mobileClient.GetPush().RegisterAsync(DefaultChannelUri, templates));
             Assert.AreEqual(exception.Response.StatusCode, HttpStatusCode.BadRequest);

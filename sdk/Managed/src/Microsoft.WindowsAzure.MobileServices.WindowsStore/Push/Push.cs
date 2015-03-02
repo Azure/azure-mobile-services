@@ -43,7 +43,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 tileId = PrimaryChannelId;
             }
 
-            string name = string.Format("{0}-PushContainer-{1}-{2}", Package.Current.Id.Name, client.ApplicationUri.Host, tileId);
+            string name = string.Format("{0}-PushContainer-{1}-{2}", Package.Current.Id.Name, client.MobileAppUri.Host, tileId);
             var storageManager = new LocalStorageManager(name);
             this.PushHttpClient = new PushHttpClient(client);
             this.RegistrationManager = new RegistrationManager(this.PushHttpClient, storageManager);

@@ -33,7 +33,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("client");
             }
 
-            var storageManager = new LocalStorageManager(client.ApplicationUri.Host);
+            var storageManager = new LocalStorageManager(client.MobileAppUri.Host);
             this.PushHttpClient = new PushHttpClient(client);
             this.RegistrationManager = new RegistrationManager(this.PushHttpClient, storageManager);
             this.Client = client;

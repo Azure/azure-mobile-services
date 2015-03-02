@@ -102,7 +102,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             string installationRegistration = JsonConvert.SerializeObject(this.pushTestUtility.GetInstallation(mobileClient.GetPush().InstallationId, false, ApnsRegistration.ParseDeviceToken(this.originalNSData)));
             var hijack = TestHttpDelegatingHandler.CreateTestHttpHandler(expectedUri, HttpMethod.Put, null, HttpStatusCode.OK, expectedRequestContent: installationRegistration);
 
-            mobileClient = new MobileServiceClient(DefaultServiceUri, null, hijack);
+            mobileClient = new MobileServiceClient(DefaultServiceUri, hijack);
             await mobileClient.GetPush().RegisterAsync(this.originalNSData);
         }
 
@@ -122,7 +122,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             MobileServiceClient mobileClient = new MobileServiceClient(DefaultServiceUri);
             var expectedUri = string.Format("{0}{1}/{2}", DefaultServiceUri, InstallationsPath, mobileClient.GetPush().InstallationId);
             var hijack = TestHttpDelegatingHandler.CreateTestHttpHandler(expectedUri, HttpMethod.Put, null, HttpStatusCode.BadRequest);
-            mobileClient = new MobileServiceClient(DefaultServiceUri, null, hijack);
+            mobileClient = new MobileServiceClient(DefaultServiceUri, hijack);
             var exception = await AssertEx.Throws<MobileServiceInvalidOperationException>(
           () => mobileClient.GetPush().RegisterAsync(this.originalNSData));
             Assert.AreEqual(exception.Response.StatusCode, HttpStatusCode.BadRequest);
@@ -138,7 +138,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             string installationRegistration = JsonConvert.SerializeObject(this.pushTestUtility.GetInstallation(mobileClient.GetPush().InstallationId, true, ApnsRegistration.ParseDeviceToken(this.originalNSData)));
             var hijack = TestHttpDelegatingHandler.CreateTestHttpHandler(expectedUri, HttpMethod.Put, null, HttpStatusCode.OK, expectedRequestContent: installationRegistration);
 
-            mobileClient = new MobileServiceClient(DefaultServiceUri, null, hijack);
+            mobileClient = new MobileServiceClient(DefaultServiceUri, hijack);
             await mobileClient.GetPush().RegisterAsync(this.originalNSData, templates);
         }
 
@@ -149,7 +149,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var expectedUri = string.Format("{0}{1}/{2}", DefaultServiceUri, InstallationsPath, mobileClient.GetPush().InstallationId);
             JObject templates = this.pushTestUtility.GetTemplates();
             var hijack = TestHttpDelegatingHandler.CreateTestHttpHandler(expectedUri, HttpMethod.Put, null, HttpStatusCode.BadRequest);
-            mobileClient = new MobileServiceClient(DefaultServiceUri, null, hijack);
+            mobileClient = new MobileServiceClient(DefaultServiceUri, hijack);
             var exception = await AssertEx.Throws<MobileServiceInvalidOperationException>(
           () => mobileClient.GetPush().RegisterAsync(this.originalNSData, templates));
             Assert.AreEqual(exception.Response.StatusCode, HttpStatusCode.BadRequest);
