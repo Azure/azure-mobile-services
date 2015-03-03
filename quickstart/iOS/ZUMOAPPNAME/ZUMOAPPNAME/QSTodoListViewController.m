@@ -28,7 +28,7 @@
 
 // Private properties
 @property (strong, nonatomic) QSTodoService *todoService;
-@property (nonatomic, retain) NSFetchedResultsController *fetchedResultsController;
+@property (strong, nonatomic) NSFetchedResultsController *fetchedResultsController;
 
 @end
 
@@ -117,8 +117,9 @@
 {
     // Find item that was commited for editing (completed)
     NSManagedObject *item = [self.fetchedResultsController objectAtIndexPath:indexPath];
-    // TODO: map values to what we expect in SDK
-    NSDictionary *dict = @{ MSSystemColumnId:[item valueForKey:@"id"], MSSystemColumnVersion:[item valueForKey:@"ms_version"] };
+    
+    // map to a dictionary to pass to Mobile Services SDK
+    NSDictionary *dict = [MSCoreDataStore tableItemFromManagedObject:item];
     
     // Change the appearance to look greyed out until we remove the item
     UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
@@ -195,14 +196,14 @@
 
 - (IBAction)onAdd:(id)sender
 {
-    if (_itemText.text.length  == 0)
+    if (self.itemText.text.length  == 0)
     {
         return;
     }
     
-    NSDictionary *item = @{ @"text" : _itemText.text, @"complete" : @NO };
+    NSDictionary *item = @{ @"text" : self.itemText.text, @"complete" : @NO };
     [self.todoService addItem:item completion:nil];
-    _itemText.text = @"";
+    self.itemText.text = @"";
 }
 
 
