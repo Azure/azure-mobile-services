@@ -14,17 +14,16 @@
 // limitations under the License.
 //
 
-#import "QSTodoService.h"
 #import <WindowsAzureMobileServices/WindowsAzureMobileServices.h>
-
+#import "QSTodoService.h"
+#import "QSAppDelegate.h"
 
 #pragma mark * Private interace
 
 
-@interface QSTodoService() <MSFilter>
+@interface QSTodoService()
 
-@property (nonatomic, strong)   MSTable *table;
-@property (nonatomic)           NSInteger busyCount;
+@property (nonatomic, strong)   MSSyncTable *syncTable;
 
 @end
 
@@ -33,8 +32,6 @@
 
 
 @implementation QSTodoService
-
-@synthesize items;
 
 
 + (QSTodoService *)defaultService
@@ -55,104 +52,83 @@
     
     if (self)
     {
-        // Initialize the Mobile Service client with your URL and key
-        MSClient *client = [MSClient clientWithApplicationURLString:@"ZUMOAPPURL"
-                                                     applicationKey:@"ZUMOAPPKEY"];
+        // Initialize the Mobile Service client with your URL and key   
+        self.client = [MSClient clientWithApplicationURLString:@"ZUMOAPPURL"
+                                                applicationKey:@"ZUMOAPPKEY"];
+    
+        QSAppDelegate *delegate = (QSAppDelegate *)[[UIApplication sharedApplication] delegate];
+        NSManagedObjectContext *context = delegate.managedObjectContext;
+        MSCoreDataStore *store = [[MSCoreDataStore alloc] initWithManagedObjectContext:context];
         
-        // Add a Mobile Service filter to enable the busy indicator
-        self.client = [client clientWithFilter:self];
+        self.client.syncContext = [[MSSyncContext alloc] initWithDelegate:nil dataSource:store callback:nil];
         
-        // Create an MSTable instance to allow us to work with the TodoItem table
-        self.table = [_client tableWithName:@"TodoItem"];
-        
-        self.items = [[NSMutableArray alloc] init];
-        self.busyCount = 0;
+        // Create an MSSyncTable instance to allow us to work with the TodoItem table
+        self.syncTable = [_client syncTableWithName:@"TodoItem"];
     }
     
     return self;
 }
 
-- (void)refreshDataOnSuccess:(QSCompletionBlock)completion
-{
-    // Create a predicate that finds items where complete is false
-    NSPredicate * predicate = [NSPredicate predicateWithFormat:@"complete == NO"];
-    
-    // Query the TodoItem table and update the items property with the results from the service
-    [self.table readWithPredicate:predicate completion:^(NSArray *results, NSInteger totalCount, NSError *error)
-    {
-        [self logErrorIfNotNil:error];
-        
-        items = [results mutableCopy];
-        
-        // Let the caller know that we finished
-        completion();
-    }];
-    
-}
-
--(void)addItem:(NSDictionary *)item completion:(QSCompletionWithIndexBlock)completion
+-(void)addItem:(NSDictionary *)item completion:(QSCompletionBlock)completion
 {
     // Insert the item into the TodoItem table and add to the items array on completion
-    [self.table insert:item completion:^(NSDictionary *result, NSError *error)
+    [self.syncTable insert:item completion:^(NSDictionary *result, NSError *error)
     {
         [self logErrorIfNotNil:error];
-        
-        NSUInteger index = [items count];
-        [(NSMutableArray *)items insertObject:result atIndex:index];
-        
-        // Let the caller know that we finished
-        completion(index);
+    
+        [self syncData: ^{
+            // Let the caller know that we finished
+            if (completion != nil) {
+                dispatch_async(dispatch_get_main_queue(), completion);
+            }
+        }];
     }];
 }
 
--(void)completeItem:(NSDictionary *)item completion:(QSCompletionWithIndexBlock)completion
+-(void)completeItem:(NSDictionary *)item completion:(QSCompletionBlock)completion
 {
-    // Cast the public items property to the mutable type (it was created as mutable)
-    NSMutableArray *mutableItems = (NSMutableArray *) items;
-    
     // Set the item to be complete (we need a mutable copy)
     NSMutableDictionary *mutable = [item mutableCopy];
     [mutable setObject:@YES forKey:@"complete"];
     
-    // Replace the original in the items array
-    NSUInteger index = [items indexOfObjectIdenticalTo:item];
-    [mutableItems replaceObjectAtIndex:index withObject:mutable];
-    
     // Update the item in the TodoItem table and remove from the items array on completion
-    [self.table update:mutable completion:^(NSDictionary *item, NSError *error) {
-        
+    [self.syncTable update:mutable completion:^(NSError *error)
+    {
         [self logErrorIfNotNil:error];
         
-        NSUInteger index = [items indexOfObjectIdenticalTo:mutable];
-        if (index != NSNotFound)
-        {
-            [mutableItems removeObjectAtIndex:index];
-        }
-        
-        // Let the caller know that we have finished
-        completion(index);
+        [self syncData: ^{
+            // Let the caller know that we finished
+            if (completion != nil) {
+                dispatch_async(dispatch_get_main_queue(), completion);
+            }
+        }];
     }];
 }
 
-- (void)busy:(BOOL)busy
+-(void)syncData:(QSCompletionBlock)completion
 {
-    // assumes always executes on UI thread
-    if (busy)
-    {
-        if (self.busyCount == 0 && self.busyUpdate != nil)
-        {
-            self.busyUpdate(YES);
+    // push all changes in the sync context, then pull new data
+    [self.client.syncContext pushWithCompletion:^(NSError *error) {
+        [self logErrorIfNotNil:error];
+        [self pullData:completion];
+    }];
+}
+
+-(void)pullData:(QSCompletionBlock)completion
+{
+    MSQuery *query = [self.syncTable query];
+    
+    // Pulls data from the remote server into the local table.
+    // We're pulling all items and filtering in the view
+    // query ID is used for incremental sync
+    [self.syncTable pullWithQuery:query queryId:@"allTodoItems" completion:^(NSError *error) {
+        [self logErrorIfNotNil:error];
+        
+        // Let the caller know that we have finished
+        if (completion != nil) {
+            dispatch_async(dispatch_get_main_queue(), completion);
         }
-        self.busyCount++;
-    }
-    else
-    {
-        if (self.busyCount == 1 && self.busyUpdate != nil)
-        {
-            self.busyUpdate(FALSE);
-        }
-        self.busyCount--;
-    }
+    }];
 }
 
 - (void)logErrorIfNotNil:(NSError *) error
@@ -161,26 +137,6 @@
     {
         NSLog(@"ERROR %@", error);
     }
-}
-
-
-#pragma mark * MSFilter methods
-
-
-- (void)handleRequest:(NSURLRequest *)request
-                 next:(MSFilterNextBlock)next
-             response:(MSFilterResponseBlock)response
-{
-    // A wrapped response block that decrements the busy counter
-    MSFilterResponseBlock wrappedResponse = ^(NSHTTPURLResponse *innerResponse, NSData *data, NSError *error)
-    {
-        [self busy:NO];
-        response(innerResponse, data, error);
-    };
-    
-    // Increment the busy counter before sending the request
-    [self busy:YES];
-    next(request, wrappedResponse);
 }
 
 @end
