@@ -141,7 +141,7 @@ namespace ZumoE2ETestApp.Tests
 
                 await localTable.PurgeAsync();
                 test.AddLog("Purged the local table");
-                await localTable.PullAsync(localTable.Where(i => i.Id == item.Id));
+                await localTable.PullAsync(null, localTable.Where(i => i.Id == item.Id));
                 test.AddLog("Pulled the data into the local table");
                 List<OfflineReadyItemNoVersion> serverItems = await localTable.ToListAsync();
                 test.AddLog("Retrieved items from the local table");
@@ -675,7 +675,7 @@ namespace ZumoE2ETestApp.Tests
                 test.AddLog("Inserted the item to the remote store:", item);
 
                 var pullQuery = "$filter=id eq '" + item.Id + "'";
-                await localTable.PullAsync(pullQuery);
+                await localTable.PullAsync(null, pullQuery);
 
                 test.AddLog("Changing the item on the server");
                 item.Age++;
@@ -692,7 +692,7 @@ namespace ZumoE2ETestApp.Tests
                 bool testResult = true;
                 try
                 {
-                    await localTable.PullAsync(pullQuery);
+                    await localTable.PullAsync(null, pullQuery);
                     if (!autoResolve)
                     {
                         test.AddLog("Error, pull (push) should have caused a conflict, but none happened.");

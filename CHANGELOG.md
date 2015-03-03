@@ -1,5 +1,16 @@
 # Azure Mobile Services Change Log
 
+### Version 1.3.1
+**Managed SDK**
+- Update to latest version of sqlite pcl [ce1aa67](https://github.com/Azure/azure-mobile-services/commit/ce1aa67)
+- Fix iOS classic compilation issues [316a57a](https://github.com/Azure/azure-mobile-services/commit/316a57a)
+- Update Xamarin unified support for Xamarin.iOS 8.6
+[da537b1](https://github.com/Azure/azure-mobile-services/commit/da537b1)
+- Xamarin.iOS Unified API Support [d778c60](https://github.com/Azure/azure-mobile-services/commit/d778c60)
+- Relax queryId restrictions #521 [offline] 
+[3e2f645](https://github.com/Azure/azure-mobile-services/commit/3e2f645)
+- Work around for resource missing error on windows phone [offline]
+
 ### Version 2.0.0 beta2
 **iOS SDK**
 - Added support for incremental sync
@@ -10,6 +21,7 @@
 - Fixed issue with the __includeDeleted flag sending the wrong value
 
 ### Version 2.0.0 beta1
+
 **iOS SDK**
 - Added support for following link headers returned from the .NET backend
 - **[Breaking]** Changed MSReadQueryBlock to return MSQueryResult instead of items and totalCount
