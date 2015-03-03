@@ -28,13 +28,16 @@
     NSLog(@"%@ setUp", self.name);
     
     // These functional tests requires a working Windows Mobile Azure Service
-    // with a table named "todoItem". Simply enter the application URL and
-    // application key for the Windows Mobile Azure Service below.
+    // with a table named "todoItem". Enter the application URL and application
+    // key for the Windows Mobile Azure Service in the settings.plist file.
+    
+    NSString *path = [[NSBundle  bundleForClass:[self class]] pathForResource:@"settings" ofType:@"plist"];
+    NSDictionary *settings = [[NSDictionary alloc] initWithContentsOfFile:path];
     
     client = [MSClient
-                clientWithApplicationURLString:@"<Microsoft Azure Mobile Service App URL>"
-                applicationKey:@"<Application Key>"];
-    
+              clientWithApplicationURLString:[settings objectForKey:@"TestAppUrl"]
+              applicationKey:[settings objectForKey:@"TestAppApplicationKey"]];
+
     XCTAssertTrue([client.applicationURL.description hasPrefix:@"https://"], @"The functional tests are currently disabled.");
 
     self.continueAfterFailure = YES;
@@ -126,7 +129,7 @@
     NSDictionary *item3 = @{ @"text":@"ItemB", @"complete": @(NO) };
     NSArray *items = @[item1,item2, item3];
 
-    id query7AfterQuery6 = ^(NSArray *items, NSInteger totalCount, NSError *error) {
+    id query7AfterQuery6 = ^(MSQueryResult *result, NSError *error) {
         
         // Check for an error
         if (error) {
@@ -134,13 +137,13 @@
             done = YES;
         }
         
-        XCTAssertTrue(items.count == 2, @"items.count was: %lu", (unsigned long)items.count);
-        XCTAssertTrue(totalCount == 3, @"totalCount was: %ld", (long)totalCount);
+        XCTAssertTrue(result.items.count == 2, @"items.count was: %lu", (unsigned long)result.items.count);
+        XCTAssertTrue(result.totalCount == 3, @"totalCount was: %ld", (long)result.totalCount);
         
         [todoTable deleteAllItemsWithCompletion:^(NSError *error) { done = YES; }];
     };
     
-    id query6AfterQuery5 = ^(NSArray *items, NSInteger totalCount, NSError *error) {
+    id query6AfterQuery5 = ^(MSQueryResult *result, NSError *error) {
         
         // Check for an error
         if (error) {
@@ -148,8 +151,8 @@
             done = YES;
         }
         
-        XCTAssertTrue(items.count == 2, @"items.count was: %lu", (unsigned long)items.count);
-        XCTAssertTrue(totalCount == 3, @"totalCount was: %ld", (long)totalCount);
+        XCTAssertTrue(result.items.count == 2, @"items.count was: %lu", (unsigned long)result.items.count);
+        XCTAssertTrue(result.totalCount == 3, @"totalCount was: %ld", (long)result.totalCount);
         
         MSQuery *query = [todoTable query];
         query.fetchOffset = 1;
@@ -157,7 +160,7 @@
         [query readWithCompletion:query7AfterQuery6];
     };
     
-    id query5AfterQuery4 = ^(NSArray *items, NSInteger totalCount, NSError *error) {
+    id query5AfterQuery4 = ^(MSQueryResult *result, NSError *error) {
         
         // Check for an error
         if (error) {
@@ -165,8 +168,8 @@
             done = YES;
         }
         
-        XCTAssertTrue(items.count == 3, @"items.count was: %lu", (unsigned long)items.count);
-        XCTAssertTrue(totalCount == -1, @"totalCount was: %ld", (long)totalCount);
+        XCTAssertTrue(result.items.count == 3, @"items.count was: %lu", (unsigned long)result.items.count);
+        XCTAssertTrue(result.totalCount == -1, @"totalCount was: %ld", (long)result.totalCount);
         
         [todoTable readWithQueryString:@"$top=2&$inlinecount=allpages"
                             completion:query6AfterQuery5];
@@ -185,7 +188,7 @@
         [todoTable readWithQueryString:nil completion:query5AfterQuery4];
     };
     
-    id query3AfterQuery2 = ^(NSArray *items, NSInteger totalCount, NSError *error) {
+    id query3AfterQuery2 = ^(MSQueryResult *result, NSError *error) {
         
         // Check for an error
         if (error) {
@@ -193,14 +196,14 @@
             done = YES;
         }
         
-        XCTAssertTrue(items.count == 1, @"items.count was: %lu", (unsigned long)items.count);
-        XCTAssertTrue(totalCount == -1, @"totalCount was: %ld", (long)totalCount);
+        XCTAssertTrue(result.items.count == 1, @"items.count was: %lu", (unsigned long)result.items.count);
+        XCTAssertTrue(result.totalCount == -1, @"totalCount was: %ld", (long)result.totalCount);
         
-        [todoTable readWithId:[items[0] valueForKey:@"id"]
+        [todoTable readWithId:[result.items[0] valueForKey:@"id"]
                     completion:query4AfterQuery3];
     };
     
-    id query2AfterQuery1 = ^(NSArray *items, NSInteger totalCount, NSError *error) {
+    id query2AfterQuery1 = ^(MSQueryResult *result, NSError *error) {
         
         // Check for an error
         if (error) {
@@ -208,8 +211,8 @@
             done = YES;
         }
         
-        XCTAssertTrue(items.count == 2, @"items.count was: %lu", (unsigned long)items.count);
-        XCTAssertTrue(totalCount == -1, @"totalCount was: %ld", (long)totalCount);
+        XCTAssertTrue(result.items.count == 2, @"items.count was: %lu", (unsigned long)result.items.count);
+        XCTAssertTrue(result.totalCount == -1, @"totalCount was: %ld", (long)result.totalCount);
         
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"text ENDSWITH 'B' AND complete == TRUE"];
         [todoTable readWithPredicate:predicate completion:query3AfterQuery2];
@@ -389,12 +392,11 @@
         XCTAssertNil(error, @"error from insert should have been nil.");
         
         // Now try to query the item and make sure we don't error
-        [todoTable readWithPredicate:predicate completion:^(NSArray *items,
-                                                    NSInteger totalCount,
+        [todoTable readWithPredicate:predicate completion:^(MSQueryResult *result,
                                                     NSError *error) {
             
-            XCTAssertNotNil(items, @"items should not have been nil.");
-            XCTAssertTrue([items count] > 0, @"items should have matched something.");
+            XCTAssertNotNil(result.items, @"items should not have been nil.");
+            XCTAssertTrue([result.items count] > 0, @"items should have matched something.");
             XCTAssertNil(error, @"error from query should have been nil.");
             
             // Now delete the inserted item so as not to corrupt future tests
@@ -416,9 +418,9 @@
     
     MSQuery *query = [todoTable query];
     query.parameters = @{@"encodeMe$?": @"No really $#%& encode me!"};
-    [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+    [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
         
-        XCTAssertNotNil(items, @"items should not have been nil.");
+        XCTAssertNotNil(result.items, @"items should not have been nil.");
         XCTAssertNil(error, @"error from query was: %@", error.localizedDescription);
         
         done = YES;
@@ -484,6 +486,7 @@
         XCTAssertNotNil(error, @"error should not have been nil.");
         XCTAssertTrue(error.domain == MSErrorDomain,
                      @"error domain should have been MSErrorDomain.");
+        NSLog([NSString stringWithFormat:@"%ld",error.code]);
         XCTAssertTrue(error.code == MSErrorMessageErrorCode,
                      @"error code should have been MSErrorMessageErrorCode.");
         

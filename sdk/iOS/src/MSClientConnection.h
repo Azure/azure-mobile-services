@@ -3,7 +3,7 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSClientInternal.h"
+#import "MSClient.h"
 #import "MSSerializer.h"
 
 
@@ -18,7 +18,7 @@ typedef void (^MSResponseBlock)(NSHTTPURLResponse *response,
                                 NSError *error);
 
 
-#pragma  mark * MSClient Public Interface
+#pragma mark * MSClientConnection Public Interface
 
 
 // The |MSClientConnection| class sends an HTTP request asynchronously and

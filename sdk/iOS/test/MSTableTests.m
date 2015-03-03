@@ -7,13 +7,15 @@
 #import "MSTestFilter.h"
 #import "MSQuery.h"
 #import "MSTable+MSTableTestUtilities.h"
+#import "MSSDKFeatures.h"
 
 @interface MSTableTests : XCTestCase {
     MSClient *client;
-        BOOL done;
+    BOOL done;
 }
 
 @end
+
 
 @implementation MSTableTests
 
@@ -843,11 +845,18 @@
     testFilter.ignoreNextFilter = YES;
     testFilter.dataToUse = data;
     
+    testFilter.onInspectRequest = ^(NSURLRequest *request) {
+        NSString *ifMatchHeader = request.allHTTPHeaderFields[@"If-Match"];
+        XCTAssertEqualObjects(ifMatchHeader, @"\"123\"", @"Unexpected header");
+        return request;
+    };
+    
+    
     MSClient *filteredClient = [client clientWithFilter:testFilter];
     MSTable *todoTable = [filteredClient tableWithName:@"NoSuchTable"];
     
     // Create the item
-    id item = @{ @"id":@"120", @"name":@"test name" };
+    id item = @{ @"id":@"120", MSSystemColumnVersion:@"123", @"name":@"test name" };
     
     // Test deletion of the item
     [todoTable delete:item completion:^(id itemId, NSError *error) {
@@ -1298,6 +1307,99 @@
 }
 
 
+#pragma mark * UndeleteItem Method Tests
+
+
+-(void) testUnDeleteItemWithStringId
+{
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:@"{\"id\":\"an id\",\"String\":\"Hey\"}"];
+
+    __block NSURLRequest *actualRequest;
+    testFilter.onInspectRequest =  ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSTable *todoTable = [filteredClient tableWithName:@"NoSuchTable"];
+    
+    // Create the item
+    id item = @{ @"id":@"ID-ABC", @"name":@"test name" };
+    
+    // Insert the item
+    [todoTable undelete:item completion:^(NSDictionary *item, NSError *error) {
+        XCTAssertEqualObjects(actualRequest.HTTPMethod, @"POST", @"Expected undelete to send a POST, not %@", actualRequest.HTTPMethod);
+        XCTAssertEqualObjects(actualRequest.URL.absoluteString, @"https://someUrl/tables/NoSuchTable/ID-ABC", @"Unexpected URL");
+        
+        XCTAssertNil(error, @"error should have been nil.");
+        
+        XCTAssertNotNil(item, @"item should not have  been nil.");
+        XCTAssertEqualObjects(item[@"id"], @"an id", @"item id should have come from server.");
+        
+        done = YES;
+    }];
+    
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+-(void) testUnDeleteItemWithParametersWithStringId
+{
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:@"{\"id\":\"an id\",\"String\":\"Hey\", \"__version\":\"def\"}"];
+    
+    __block NSURLRequest *actualRequest;
+    testFilter.onInspectRequest =  ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSTable *todoTable = [filteredClient tableWithName:@"NoSuchTable"];
+    
+    // Create the item
+    id item = @{ @"id":@"ID-ABC", @"name":@"test name", MSSystemColumnVersion: @"abc" };
+    
+    // Insert the item
+    [todoTable undelete:item parameters:@{@"extra-extra": @"read-all-about-it"} completion:^(NSDictionary *item, NSError *error) {
+        XCTAssertEqualObjects(actualRequest.HTTPMethod, @"POST", @"Expected undelete to send a POST, not %@", actualRequest.HTTPMethod);
+        XCTAssertEqualObjects(actualRequest.URL.absoluteString, @"https://someUrl/tables/NoSuchTable/ID-ABC?extra-extra=read-all-about-it", @"Unexpected URL");
+        XCTAssertEqualObjects(actualRequest.allHTTPHeaderFields[@"If-Match"], @"\"abc\"", @"Missing if-match header");
+                                          
+        XCTAssertNil(error, @"error should have been nil.");
+        
+        XCTAssertNotNil(item, @"item should not have  been nil.");
+        XCTAssertEqualObjects(item[@"id"], @"an id", @"item id should have come from server.");
+        
+        done = YES;
+    }];
+    
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+
+-(void) testUnDeleteItemWithNoItemId
+{
+    MSTable *todoTable = [client tableWithName:@"todoItem"];
+    
+    // Create the item
+    NSDictionary *item = @{ @"text":@"Write unit tests!", @"complete": @(NO) };
+    
+    // Update the item
+    [todoTable undelete:item completion:^(NSDictionary *item, NSError *error) {
+        XCTAssertNil(item, @"item should have been nil.");
+        
+        XCTAssertNotNil(error, @"error should not have been nil.");
+        XCTAssertEqualObjects(error.domain, MSErrorDomain);
+        XCTAssertEqual(error.code, MSMissingItemIdWithRequest);
+        NSString *description = error.userInfo[NSLocalizedDescriptionKey];
+        XCTAssertEqualObjects(description, @"The item provided did not have an id.");
+        
+        done = YES;
+    }];
+    
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+
 #pragma mark * ReadWithId Method Tests
 
 
@@ -1564,7 +1666,7 @@
     MSQuery *query = [todoTable queryWithPredicate:predicate];
     
     // query
-    [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+    [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
         
         XCTAssertNil(contentType, @"Content-Type should not have been set.");
         
@@ -1848,6 +1950,79 @@
     return result;
 }
 
+- (void) testReadWithQueryString_ReturnsLinkHeader_IfPresent
+{
+    [self verifyLinkHeaderOnRead:@"https://contoso.com; rel=next" expectedLink:@"https://contoso.com"];
+    [self verifyLinkHeaderOnRead:@"http://contoso.com; rel=next" expectedLink:@"http://contoso.com"];
+}
+
+- (void) testReadWithQueryString_ReturnsNil_IfNotPresent
+{
+    [self verifyLinkHeaderOnRead:@"" expectedLink:nil];
+}
+
+- (void) testReadWithQueryString_ReturnsNil_IfWrongFormat
+{
+    [self verifyLinkHeaderOnRead:@"http://contoso.com" expectedLink:nil];
+}
+
+- (void) testReadWithQueryString_ReturnsNil_IfRelIsNotNext
+{
+    [self verifyLinkHeaderOnRead:@"http://contoso.com; rel=prev" expectedLink:nil];
+}
+
+- (void) verifyLinkHeaderOnRead: (NSString *) actualLink  expectedLink: (NSString *) expectedLink {
+    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
+                                   initWithURL:nil
+                                   statusCode:200
+                                   HTTPVersion:nil
+                                   headerFields:@{@"Link": actualLink}];
+    testFilter.responseToUse = response;
+    testFilter.ignoreNextFilter = YES;
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSTable *todoTable = [filteredClient tableWithName:@"someTable"];
+    testFilter.dataToUse = [@"[]" dataUsingEncoding:NSUTF8StringEncoding];
+    [todoTable readWithQueryString:@"$filter=1 eq 2" completion:^(MSQueryResult *result, NSError *error) {
+        XCTAssertNil(error);
+        if (expectedLink == nil) {
+            XCTAssertNil(result.nextLink);
+        }
+        else {
+            XCTAssertEqualObjects(result.nextLink, expectedLink);
+        }
+        done = YES;
+    }];
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+- (void) testReadWithQueryString_FollowsTheLink_IfQueryIsUri
+{
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data: @"[]"];
+    
+    __block NSURLRequest *actualRequest = nil;
+    testFilter.onInspectRequest =  ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSTable *todoTable = [filteredClient tableWithName:@"someTable"];
+    
+    [todoTable readWithQueryString:@"https://contoso.com?$filter=a%20eq%20c" completion:^(MSQueryResult *result, NSError *error) {
+        XCTAssertNil(error);
+        XCTAssertEqual(result.items.count, 0);
+        done = YES;
+    }];
+    
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    
+    XCTAssertEqualObjects(actualRequest.URL.absoluteString, @"https://contoso.com?$filter=a%20eq%20c");
+    NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
+    XCTAssertEqualObjects(featuresHeader, @"TR,LH");
+}
+
 -(void) testTableOperationSystemPropertiesQueryStringIsCorrect
 {
     __block NSURLRequest *actualRequest = nil;
@@ -1940,14 +2115,14 @@
         // Query
         
         done = NO;
-        [todoTable readWithQueryString:@"$filter=id eq 5" completion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+        [todoTable readWithQueryString:@"$filter=id eq 5" completion:^(MSQueryResult *result, NSError *error) {
             XCTAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
             done = YES;
         }];
         XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 
         done = NO;
-        [todoTable readWithQueryString:@"$select=id,String" completion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+        [todoTable readWithQueryString:@"$select=id,String" completion:^(MSQueryResult *result, NSError *error) {
             XCTAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
             done = YES;
         }];
@@ -2053,7 +2228,7 @@
         // Query
         
         done = NO;
-        [todoTable readWithQueryString:@"$filter=id%20eq%205&__systemproperties=__createdAt" completion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+        [todoTable readWithQueryString:@"$filter=id%20eq%205&__systemproperties=__createdAt" completion:^(MSQueryResult *result, NSError *error) {
             NSString *url = [[actualRequest URL] query];
             XCTAssertEqualObjects(@"$filter=id%20eq%205&__systemproperties=__createdAt", url, @"Incorrect query: %@", url);
             done = YES;
@@ -2061,13 +2236,233 @@
         XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
         
         done = NO;
-        [todoTable readWithQueryString:@"$select=id,String&__systemProperties=__CreatedAt" completion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+        [todoTable readWithQueryString:@"$select=id,String&__systemProperties=__CreatedAt" completion:^(MSQueryResult *result, NSError *error) {
             NSString *url = [[actualRequest URL] query];
             XCTAssertEqualObjects(@"$select=id,String&__systemProperties=__CreatedAt", url, @"Incorrect query: %@", url);
             done = YES;
         }];
         XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     }
+}
+
+
+#pragma mark * Telemetry Features Header Tests
+
+-(void) testQueryAddsProperFeaturesHeader {
+    __block NSURLRequest *actualRequest = nil;
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:@"[]"];
+    testFilter.onInspectRequest = ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
+
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSTable *todoTable = [filteredClient tableWithName:@"NoSuchTable"];
+
+    // Read with raw query
+    [todoTable readWithQueryString:@"$filter=a eq 1" completion:^(MSQueryResult *result, NSError *error) {
+        XCTAssertNotNil(actualRequest);
+        XCTAssertNil(error);
+
+        NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
+        XCTAssertNotNil(featuresHeader);
+        XCTAssertTrue([featuresHeader isEqualToString:MSFeatureCodeTableReadRaw], @"Header value (%@) was not as expected (%@)", featuresHeader, MSFeatureCodeTableReadRaw);
+
+        done = YES;
+    }];
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    actualRequest = nil;
+    done = NO;
+
+    // Read with predicate
+    [todoTable readWithPredicate:[NSPredicate predicateWithFormat:@"a = 1"] completion:^(MSQueryResult *result, NSError *error) {
+        XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+        XCTAssertNil(error, @"error should have been nil.");
+
+        NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
+        XCTAssertNotNil(featuresHeader, @"actualHeader should not have been nil.");
+        XCTAssertTrue([featuresHeader isEqualToString:MSFeatureCodeTableReadQuery], @"Header value (%@) was not as expected (%@)", featuresHeader, MSFeatureCodeTableReadQuery);
+
+        done = YES;
+    }];
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    actualRequest = nil;
+    done = NO;
+
+    // Read with query
+    MSQuery *query = [todoTable query];
+    query.fetchLimit = 10;
+    query.fetchOffset = 10;
+    [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
+        XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+        XCTAssertNil(error, @"error should have been nil.");
+
+        NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
+        XCTAssertNotNil(featuresHeader, @"actualHeader should not have been nil.");
+        XCTAssertTrue([featuresHeader isEqualToString:MSFeatureCodeTableReadQuery], @"Header value (%@) was not as expected (%@)", featuresHeader, MSFeatureCodeTableReadQuery);
+
+        done = YES;
+    }];
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+-(void) testInsertUpdateDeleteAddsProperFeaturesHeader {
+    __block NSURLRequest *actualRequest = nil;
+    NSString* response = @"{\"id\": \"A\", \"name\":\"test name\", \"__version\":\"ABC\"}";
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:response];
+    testFilter.onInspectRequest = ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
+
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSTable *todoTable = [filteredClient tableWithName:@"NoSuchTable"];
+    todoTable.systemProperties = MSSystemPropertyVersion;
+
+    // Create the item
+    id item = @{ @"id":@"the-id", @"name":@"test name" };
+
+    // Insert without parameters does not have features header
+    [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
+        XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+        XCTAssertNil(error, @"error should have been nil.");
+        XCTAssertNil([actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName], @"Unexpected features header");
+
+        done = YES;
+    }];
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    actualRequest = nil;
+    done = NO;
+
+    // Insert with parameters has appropriate features header
+    [todoTable insert:item parameters:@{@"a":@"b"} completion:^(NSDictionary *item, NSError *error) {
+        XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+        XCTAssertNil(error, @"error should have been nil.");
+
+        NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
+        XCTAssertNotNil(featuresHeader, @"actualHeader should not have been nil.");
+        XCTAssertTrue([featuresHeader isEqualToString:MSFeatureCodeQueryParameters], @"Header value (%@) was not as expected (%@)", featuresHeader, MSFeatureCodeQueryParameters);
+
+        done = YES;
+    }];
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    actualRequest = nil;
+    done = NO;
+
+    // Update with no __version or parameters has no features header
+    [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
+        XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+        XCTAssertNil(error, @"error should have been nil.");
+
+        XCTAssertNil([actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName], @"Unexpected features header");
+
+        done = YES;
+    }];
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    actualRequest = nil;
+    done = NO;
+
+    // Update with __version has OC features header
+    NSDictionary *itemWithVersion = @{@"id":@"the-id",@"name":@"value",@"__version":@"abc"};
+    [todoTable update:itemWithVersion completion:^(NSDictionary *item, NSError *error) {
+        XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+        XCTAssertNil(error, @"error should have been nil.");
+
+        NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
+        XCTAssertNotNil(featuresHeader, @"actualHeader should not have been nil.");
+        XCTAssertTrue([featuresHeader isEqualToString:MSFeatureCodeOpportunisticConcurrency], @"Header value (%@) was not as expected (%@)", featuresHeader, MSFeatureCodeOpportunisticConcurrency);
+
+        done = YES;
+    }];
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    actualRequest = nil;
+    done = NO;
+
+    // Update with parameters has appropriate features header
+    [todoTable update:itemWithVersion parameters:@{@"a":@"b"} completion:^(NSDictionary *item, NSError *error) {
+        XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+        XCTAssertNil(error, @"error should have been nil.");
+
+        NSString *expectedHeader = [MSSDKFeatures httpHeaderForFeatures:MSFeatureOpportunisticConcurrency | MSFeatureQueryParameters];
+        NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
+        XCTAssertNotNil(featuresHeader, @"actualHeader should not have been nil.");
+        XCTAssertTrue([featuresHeader isEqualToString:expectedHeader], @"Header value (%@) was not as expected (%@)", featuresHeader, expectedHeader);
+
+        done = YES;
+    }];
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    actualRequest = nil;
+    done = NO;
+
+    // Delete with no __version or parameters has no features header
+    [todoTable delete:item completion:^(id itemId, NSError *error) {
+        XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+        XCTAssertNil(error, @"error should have been nil.");
+
+        XCTAssertNil([actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName], @"Unexpected features header");
+
+        done = YES;
+    }];
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    actualRequest = nil;
+    done = NO;
+
+    // Delete with __version has OC features header
+    [todoTable delete:itemWithVersion completion:^(id itemId, NSError *error) {
+        XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+        XCTAssertNil(error, @"error should have been nil.");
+
+        NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
+        XCTAssertNotNil(featuresHeader, @"actualHeader should not have been nil.");
+        XCTAssertTrue([featuresHeader isEqualToString:MSFeatureCodeOpportunisticConcurrency], @"Header value (%@) was not as expected (%@)", featuresHeader, MSFeatureCodeOpportunisticConcurrency);
+
+        done = YES;
+    }];
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    actualRequest = nil;
+    done = NO;
+
+    // Delete with parameters has appropriate features header
+    [todoTable delete:itemWithVersion parameters:@{@"a":@"b"} completion:^(id itemId, NSError *error) {
+        XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+        XCTAssertNil(error, @"error should have been nil.");
+
+        NSString *expectedHeader = [MSSDKFeatures httpHeaderForFeatures:MSFeatureOpportunisticConcurrency | MSFeatureQueryParameters];
+        NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
+        XCTAssertNotNil(featuresHeader, @"actualHeader should not have been nil.");
+        XCTAssertTrue([featuresHeader isEqualToString:expectedHeader], @"Header value (%@) was not as expected (%@)", featuresHeader, expectedHeader);
+
+        done = YES;
+    }];
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    actualRequest = nil;
+    done = NO;
+
+    // Delete with id with no parameters has no features header
+    [todoTable deleteWithId:@"the-id" completion:^(id itemId, NSError *error) {
+        XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+        XCTAssertNil(error, @"error should have been nil.");
+
+        XCTAssertNil([actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName], @"Unexpected features header");
+
+        done = YES;
+    }];
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    actualRequest = nil;
+    done = NO;
+
+    // Delete with parameters has appropriate features header
+    [todoTable deleteWithId:@"the-id" parameters:@{@"a":@"b"} completion:^(id itemId, NSError *error) {
+        XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+        XCTAssertNil(error, @"error should have been nil.");
+
+        NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
+        XCTAssertNotNil(featuresHeader, @"actualHeader should not have been nil.");
+        XCTAssertTrue([featuresHeader isEqualToString:MSFeatureCodeQueryParameters], @"Header value (%@) was not as expected (%@)", featuresHeader, MSFeatureCodeQueryParameters);
+
+        done = YES;
+    }];
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 

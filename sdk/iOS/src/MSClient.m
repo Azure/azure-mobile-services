@@ -10,10 +10,11 @@
 #import "MSAPIRequest.h"
 #import "MSAPIConnection.h"
 #import "MSJSONSerializer.h"
+#import "MSSyncContextInternal.h"
+#import "MSSyncTable.h"
 #import "MSPush.h"
 
 #pragma mark * MSClient Private Interface
-
 
 @interface MSClient ()
 
@@ -36,6 +37,14 @@
 @synthesize currentUser = currentUser_;
 @synthesize login = login_;
 @synthesize serializer = serializer_;
+@synthesize syncContext = syncContext_;
+- (void) setSyncContext:(MSSyncContext *)syncContext
+{
+    syncContext_ = syncContext;
+    if (syncContext) {
+        syncContext_.client = self;    
+    }
+}
 
 @synthesize installId = installId_;
 -(NSString *) installId
@@ -127,6 +136,9 @@
     // Create a deep copy of the client (except for the filters)
     MSClient *newClient = [self copy];
     
+    // Filter clients should inherit the same sync context
+    newClient.syncContext = self.syncContext;
+    
     // Either copy or create a new filters array
     NSMutableArray *filters = [self.filters mutableCopy];
     if (!filters) {
@@ -183,7 +195,6 @@
 
 #pragma mark * Public Table Constructor Methods
 
-
 -(MSTable *) tableWithName:(NSString *)tableName
 {
     return [[MSTable alloc] initWithName:tableName client:self];
@@ -194,6 +205,10 @@
     return [self tableWithName:tableName];
 }
 
+-(MSSyncTable *) syncTableWithName:(NSString *)tableName
+{
+    return [[MSSyncTable alloc] initWithName:tableName client:self];
+}
 
 #pragma mark * Public invokeAPI Methods
 

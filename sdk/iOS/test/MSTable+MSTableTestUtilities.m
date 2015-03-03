@@ -9,12 +9,12 @@
 -(void) deleteAllItemsWithCompletion:(void (^)(NSError *error))completion;
 {
     __block MSReadQueryBlock readCompletion;
-    readCompletion = ^(NSArray *items, NSInteger totalCount, NSError *error) {
+    readCompletion = ^(MSQueryResult *result, NSError *error) {
         if (error) {
             completion(error);
         }
-        else if(items.count > 0){
-            [self deleteItems:items completion:completion];
+        else if(result.items.count > 0){
+            [self deleteItems:result.items completion:completion];
         }
         else {
             completion(nil);
@@ -220,6 +220,8 @@
              @"__systemProperties=__version,__createdAt,__updatedAt",
              @"__systemProperties=__version,__updatedAt",
              @"__systemProperties=__version,__updatedAt, __createdAt",
+             @"__systemProperties=__version,__updatedAt, __createdAt, __deleted",
+             @"__systemProperties=__deleted",
              
              // Trailing commas, extra commas
              @"__systemProperties=__createdAt,",

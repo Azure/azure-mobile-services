@@ -19,12 +19,13 @@
 		03D1004716EC58300005A1A9 /* QSTodoListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 03D1004616EC58300005A1A9 /* QSTodoListViewController.m */; };
 		03D1004A16EC58490005A1A9 /* QSTodoService.m in Sources */ = {isa = PBXBuildFile; fileRef = 03D1004916EC58490005A1A9 /* QSTodoService.m */; };
 		03D1004D16EC5A680005A1A9 /* MainStoryboard_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 03D1004B16EC5A680005A1A9 /* MainStoryboard_iPhone.storyboard */; };
-		03D1004E16EC5A680005A1A9 /* MainStoryboard_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 03D1004C16EC5A680005A1A9 /* MainStoryboard_iPad.storyboard */; };
-		03D1006016EC63620005A1A9 /* WindowsAzureMobileServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 03D1005F16EC63620005A1A9 /* WindowsAzureMobileServices.framework */; };
 		03D1006516ED41D20005A1A9 /* connected57.png in Resources */ = {isa = PBXBuildFile; fileRef = 03D1006116ED41D20005A1A9 /* connected57.png */; };
 		03D1006616ED41D20005A1A9 /* connected72.png in Resources */ = {isa = PBXBuildFile; fileRef = 03D1006216ED41D20005A1A9 /* connected72.png */; };
 		03D1006716ED41D20005A1A9 /* connected114.png in Resources */ = {isa = PBXBuildFile; fileRef = 03D1006316ED41D20005A1A9 /* connected114.png */; };
 		03D1006816ED41D20005A1A9 /* connected144.png in Resources */ = {isa = PBXBuildFile; fileRef = 03D1006416ED41D20005A1A9 /* connected144.png */; };
+		689C609F1A5F3F4D00E96D29 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 689C609E1A5F3F4D00E96D29 /* CoreData.framework */; };
+		689C60A41A5F4D1B00E96D29 /* QSTodoDataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 689C60A21A5F4D1B00E96D29 /* QSTodoDataModel.xcdatamodeld */; };
+		68C7C4421A5F3ED900AD97AE /* WindowsAzureMobileServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 68C7C4411A5F3ED900AD97AE /* WindowsAzureMobileServices.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -46,12 +47,13 @@
 		03D1004816EC58490005A1A9 /* QSTodoService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QSTodoService.h; sourceTree = "<group>"; };
 		03D1004916EC58490005A1A9 /* QSTodoService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QSTodoService.m; sourceTree = "<group>"; };
 		03D1004B16EC5A680005A1A9 /* MainStoryboard_iPhone.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = MainStoryboard_iPhone.storyboard; sourceTree = "<group>"; };
-		03D1004C16EC5A680005A1A9 /* MainStoryboard_iPad.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = MainStoryboard_iPad.storyboard; sourceTree = "<group>"; };
-		03D1005F16EC63620005A1A9 /* WindowsAzureMobileServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = WindowsAzureMobileServices.framework; sourceTree = "<group>"; };
 		03D1006116ED41D20005A1A9 /* connected57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = connected57.png; sourceTree = "<group>"; };
 		03D1006216ED41D20005A1A9 /* connected72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = connected72.png; sourceTree = "<group>"; };
 		03D1006316ED41D20005A1A9 /* connected114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = connected114.png; sourceTree = "<group>"; };
 		03D1006416ED41D20005A1A9 /* connected144.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = connected144.png; sourceTree = "<group>"; };
+		689C609E1A5F3F4D00E96D29 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		689C60A31A5F4D1B00E96D29 /* QSTodoDataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = QSTodoDataModel.xcdatamodel; sourceTree = "<group>"; };
+		68C7C4411A5F3ED900AD97AE /* WindowsAzureMobileServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = WindowsAzureMobileServices.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,10 +61,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				689C609F1A5F3F4D00E96D29 /* CoreData.framework in Frameworks */,
 				03D1001E16EC579A0005A1A9 /* UIKit.framework in Frameworks */,
 				03D1002016EC579A0005A1A9 /* Foundation.framework in Frameworks */,
+				68C7C4421A5F3ED900AD97AE /* WindowsAzureMobileServices.framework in Frameworks */,
 				03D1002216EC579A0005A1A9 /* CoreGraphics.framework in Frameworks */,
-				03D1006016EC63620005A1A9 /* WindowsAzureMobileServices.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -89,7 +92,8 @@
 		03D1001C16EC579A0005A1A9 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				03D1005F16EC63620005A1A9 /* WindowsAzureMobileServices.framework */,
+				689C609E1A5F3F4D00E96D29 /* CoreData.framework */,
+				68C7C4411A5F3ED900AD97AE /* WindowsAzureMobileServices.framework */,
 				03D1001D16EC579A0005A1A9 /* UIKit.framework */,
 				03D1001F16EC579A0005A1A9 /* Foundation.framework */,
 				03D1002116EC579A0005A1A9 /* CoreGraphics.framework */,
@@ -100,12 +104,12 @@
 		03D1002316EC579A0005A1A9 /* ZUMOAPPNAME */ = {
 			isa = PBXGroup;
 			children = (
+				689C60A21A5F4D1B00E96D29 /* QSTodoDataModel.xcdatamodeld */,
 				03D1004816EC58490005A1A9 /* QSTodoService.h */,
 				03D1004916EC58490005A1A9 /* QSTodoService.m */,
 				03D1004516EC58300005A1A9 /* QSTodoListViewController.h */,
 				03D1004616EC58300005A1A9 /* QSTodoListViewController.m */,
 				03D1004B16EC5A680005A1A9 /* MainStoryboard_iPhone.storyboard */,
-				03D1004C16EC5A680005A1A9 /* MainStoryboard_iPad.storyboard */,
 				03D1002C16EC579A0005A1A9 /* QSAppDelegate.h */,
 				03D1002D16EC579A0005A1A9 /* QSAppDelegate.m */,
 				03D1002416EC579A0005A1A9 /* Supporting Files */,
@@ -188,7 +192,6 @@
 				03D1003216EC579A0005A1A9 /* Default@2x.png in Resources */,
 				03D1003416EC579A0005A1A9 /* Default-568h@2x.png in Resources */,
 				03D1004D16EC5A680005A1A9 /* MainStoryboard_iPhone.storyboard in Resources */,
-				03D1004E16EC5A680005A1A9 /* MainStoryboard_iPad.storyboard in Resources */,
 				03D1006516ED41D20005A1A9 /* connected57.png in Resources */,
 				03D1006616ED41D20005A1A9 /* connected72.png in Resources */,
 				03D1006716ED41D20005A1A9 /* connected114.png in Resources */,
@@ -207,6 +210,7 @@
 				03D1002E16EC579A0005A1A9 /* QSAppDelegate.m in Sources */,
 				03D1004716EC58300005A1A9 /* QSTodoListViewController.m in Sources */,
 				03D1004A16EC58490005A1A9 /* QSTodoService.m in Sources */,
+				689C60A41A5F4D1B00E96D29 /* QSTodoDataModel.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -249,7 +253,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -274,7 +278,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -287,13 +291,15 @@
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)\"",
+					"$(SRCROOT)",
+					"$(PROJECT_DIR)",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "ZUMOAPPNAME/ZUMOAPPNAME-Prefix.pch";
 				INFOPLIST_FILE = "ZUMOAPPNAME/ZUMOAPPNAME-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -303,13 +309,15 @@
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)\"",
+					"$(SRCROOT)",
+					"$(PROJECT_DIR)",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "ZUMOAPPNAME/ZUMOAPPNAME-Prefix.pch";
 				INFOPLIST_FILE = "ZUMOAPPNAME/ZUMOAPPNAME-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -336,6 +344,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		689C60A21A5F4D1B00E96D29 /* QSTodoDataModel.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				689C60A31A5F4D1B00E96D29 /* QSTodoDataModel.xcdatamodel */,
+			);
+			currentVersion = 689C60A31A5F4D1B00E96D29 /* QSTodoDataModel.xcdatamodel */;
+			path = QSTodoDataModel.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 03D1001216EC579A0005A1A9 /* Project object */;
 }
