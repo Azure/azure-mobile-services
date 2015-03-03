@@ -159,7 +159,7 @@ NSString *const StoreDeleted = @"ms_deleted";
 
 #pragma mark - MSSyncContextDataSource
 
--(NSUInteger) systemPropetiesForTable:(NSString *)table
+-(NSUInteger) systemPropertiesForTable:(NSString *)table
 {
     MSSystemProperties properties = MSSystemPropertyNone;
     NSEntityDescription *entity = [NSEntityDescription entityForName:table

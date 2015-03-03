@@ -358,8 +358,8 @@ static NSOperationQueue *pushQueue_;
     }
     
     // Get the required system properties from the Store
-    if ([self.dataSource respondsToSelector:@selector(systemPropetiesForTable:)]) {
-        queryCopy.table.systemProperties = [self.dataSource systemPropetiesForTable:queryCopy.table.name];
+    if ([self.dataSource respondsToSelector:@selector(systemPropertiesForTable:)]) {
+        queryCopy.table.systemProperties = [self.dataSource systemPropertiesForTable:queryCopy.table.name];
     } else {
         queryCopy.table.systemProperties = MSSystemPropertyVersion;
     }

@@ -85,7 +85,7 @@ typedef void (^MSSyncPushCompletionBlock)(void);
 
 /// Returns the MSSystemProperties that should be stored locally (example: __createdAt, __updatedAt)
 /// If not implemented, the default of __version will be asked for from the server
--(NSUInteger) systemPropetiesForTable:(NSString *)table;
+-(NSUInteger) systemPropertiesForTable:(NSString *)table;
 
 /// @}
 
