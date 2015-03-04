@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A2696A83194A443A00E26C03 /* WindowsAzureMobileServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2D9CBE61943CB680017F096 /* WindowsAzureMobileServices.framework */; };
+		A25E6DC21AA6969A008C556F /* WindowsAzureMobileServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A25E6DC11AA6969A008C556F /* WindowsAzureMobileServices.framework */; };
 		A2D9CBC41943C2540017F096 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2D9CBC31943C2540017F096 /* AppDelegate.swift */; };
 		A2D9CBCC1943C2540017F096 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A2D9CBCA1943C2540017F096 /* Main.storyboard */; };
 		A2D9CBCE1943C2540017F096 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2D9CBCD1943C2540017F096 /* Images.xcassets */; };
@@ -16,13 +16,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A25E6DC11AA6969A008C556F /* WindowsAzureMobileServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = WindowsAzureMobileServices.framework; sourceTree = "<group>"; };
 		A2D9CBBE1943C2540017F096 /* ZUMOAPPNAME.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ZUMOAPPNAME.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A2D9CBC21943C2540017F096 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A2D9CBC31943C2540017F096 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A2D9CBCB1943C2540017F096 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		A2D9CBCD1943C2540017F096 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		A2D9CBE31943C39D0017F096 /* ToDoTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ToDoTableViewController.swift; sourceTree = "<group>"; };
-		A2D9CBE61943CB680017F096 /* WindowsAzureMobileServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = WindowsAzureMobileServices.framework; sourceTree = "<group>"; };
 		A2D9CBE81943D1340017F096 /* ZUMOAPPNAME-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ZUMOAPPNAME-Bridging-Header.h"; sourceTree = "<group>"; };
 		A2E767C5194594DC00869113 /* ToDoItemViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ToDoItemViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -32,7 +32,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A2696A83194A443A00E26C03 /* WindowsAzureMobileServices.framework in Frameworks */,
+				A25E6DC21AA6969A008C556F /* WindowsAzureMobileServices.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -81,7 +81,7 @@
 		A2D9CBE51943CB520017F096 /* frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				A2D9CBE61943CB680017F096 /* WindowsAzureMobileServices.framework */,
+				A25E6DC11AA6969A008C556F /* WindowsAzureMobileServices.framework */,
 			);
 			name = frameworks;
 			path = ..;
