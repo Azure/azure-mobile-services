@@ -39,7 +39,7 @@ class ToDoTableViewController: UITableViewController, ToDoItemDelegate {
         
         UIApplication.sharedApplication().networkActivityIndicatorVisible = true
         self.table!.readWithPredicate(predicate) {
-            result, totalCount, error  in
+            result, error  in
             
             UIApplication.sharedApplication().networkActivityIndicatorVisible = false
             if error != nil {
@@ -47,8 +47,8 @@ class ToDoTableViewController: UITableViewController, ToDoItemDelegate {
                 return
             }
             
-            self.records = result as [NSDictionary]
-            println("Information: retrieved %d records", result.count)
+            self.records = result.items as [NSDictionary]
+            println("Information: retrieved %d records", result.items.count)
             
             self.tableView.reloadData()
             self.refreshControl?.endRefreshing()
@@ -108,8 +108,8 @@ class ToDoTableViewController: UITableViewController, ToDoItemDelegate {
         let cell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier, forIndexPath: indexPath) as UITableViewCell
         let item = self.records[indexPath.row]
         
-        cell.textLabel.text = item["text"] as? String
-        cell.textLabel.textColor = UIColor.blackColor()
+        cell.textLabel!.text = (item["text"] as String)
+        cell.textLabel!.textColor = UIColor.blackColor()
         
         return cell
     }
