@@ -184,7 +184,7 @@ public class MobileServiceConnection {
             request.addHeader(X_ZUMO_AUTH_HEADER, user.getAuthenticationToken());
         }
 
-        if (Build.VERSION.RELEASE != null) {
+        if (SDK_VERSION != null) {
             request.addHeader(X_ZUMO_VERSION_HEADER, SDK_VERSION);
         }
         // Set the User Agent header
