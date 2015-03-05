@@ -54,7 +54,7 @@ public class MobileServiceJsonSyncTable {
     public MobileServiceJsonSyncTable(String name, MobileServiceClient client) {
         this.mName = name;
         this.mClient = client;
-        this.mFeatures = EnumSet.noneOf(MobileServiceFeatures.class);
+        this.mFeatures = EnumSet.of(MobileServiceFeatures.Offline);
     }
 
     /**

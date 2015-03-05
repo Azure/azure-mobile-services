@@ -2,19 +2,19 @@
 Copyright (c) Microsoft Open Technologies, Inc.
 All Rights Reserved
 Apache 2.0 License
- 
+
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
- 
+
      http://www.apache.org/licenses/LICENSE-2.0
- 
+
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
- 
+
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
 
@@ -61,6 +61,12 @@ public class MobileServiceConnection {
      * Request header to indicate the Mobile Service user authentication token
      */
     private static final String X_ZUMO_AUTH_HEADER = "X-ZUMO-AUTH";
+
+    /**
+     * Name of the zumo version header.
+     */
+    private static final String X_ZUMO_VERSION_HEADER = "X-ZUMO-VERSION";
+
     /**
      * Header value to represent GZIP content-encoding
      */
@@ -68,7 +74,7 @@ public class MobileServiceConnection {
     /**
      * Current SDK version
      */
-    private static final String SDK_VERSION = "1.0.10814.0";
+    private static final String SDK_VERSION = "2.0.2-Beta";
     /**
      * The MobileServiceClient used for communication with the Mobile Service
      */
@@ -178,6 +184,9 @@ public class MobileServiceConnection {
             request.addHeader(X_ZUMO_AUTH_HEADER, user.getAuthenticationToken());
         }
 
+        if (Build.VERSION.RELEASE != null) {
+            request.addHeader(X_ZUMO_VERSION_HEADER, SDK_VERSION);
+        }
         // Set the User Agent header
         request.addHeader(HTTP.USER_AGENT, getUserAgent());
 
