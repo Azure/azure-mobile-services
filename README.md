@@ -20,7 +20,10 @@ To get the source code of our SDKs and samples via **git** just type:
 
 ## Change log
 
-see [Change Log](CHANGELOG.md)
+- [iOS SDK](CHANGELOG.ios.md)
+- [Managed SDK](CHANGELOG.managed.md)
+- [Android SDK](CHANGELOG.android.md)
+- [JavaScript SDK](CHANGELOG.javascript.md)
 
 ## Managed Windows 8 and Windows Phone 8 Client SDK
 
