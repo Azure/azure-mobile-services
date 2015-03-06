@@ -293,7 +293,8 @@
 {
     MSClient *client = [[MSClient allocWithZone:zone]
                             initWithApplicationURL:self.applicationURL
-                                applicationKey:self.applicationKey];
+                                        gatewayURL:self.gatewayURL
+                                    applicationKey:self.applicationKey];
                                                                             
     client.currentUser = [self.currentUser copyWithZone:zone];
     client.filters = [self.filters copyWithZone:zone];
