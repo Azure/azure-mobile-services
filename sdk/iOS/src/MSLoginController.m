@@ -155,7 +155,11 @@
     if (!loginView) {
         
         // Ensure we are using HTTPS
-        NSURL *baseUrl = self.client.applicationURL;
+        NSURL *baseUrl = self.client.gatewayURL;
+        if (!baseUrl) {
+            baseUrl = self.client.applicationURL;
+        }
+        
         if ([[baseUrl.scheme lowercaseString] isEqualToString:@("http")])
         {
             NSString *baseUrlString = baseUrl.absoluteURL.absoluteString;

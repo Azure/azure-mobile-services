@@ -14,15 +14,17 @@
 #import "MSSyncTable.h"
 #import "MSPush.h"
 
+
 #pragma mark * MSClient Private Interface
+
 
 @interface MSClient ()
 
 // Public readonly, private readwrite properties
-@property (nonatomic, strong, readwrite)         NSArray *filters;
+@property (nonatomic, strong, readwrite) NSArray *filters;
 
 // Private properties
-@property (nonatomic, strong, readonly)         MSLogin *login;
+@property (nonatomic, strong, readonly) MSLogin *login;
 
 @end
 
@@ -32,17 +34,11 @@
 
 @implementation MSClient
 
-@synthesize applicationURL = applicationURL_;
-@synthesize applicationKey = applicationKey_;
-@synthesize currentUser = currentUser_;
-@synthesize login = login_;
-@synthesize serializer = serializer_;
-@synthesize syncContext = syncContext_;
 - (void) setSyncContext:(MSSyncContext *)syncContext
 {
-    syncContext_ = syncContext;
+    _syncContext = syncContext;
     if (syncContext) {
-        syncContext_.client = self;    
+        _syncContext.client = self;
     }
 }
 
@@ -72,61 +68,87 @@
 +(MSClient *) clientWithApplicationURLString:(NSString *)urlString
 {
     return [MSClient clientWithApplicationURLString:urlString
-                                 applicationKey:nil];
+                                   gatewayURLString:nil
+                                     applicationKey:nil];
 }
 
 +(MSClient *) clientWithApplicationURLString:(NSString *)urlString
                            applicationKey:(NSString *)key
 {
-    // NSURL will be nil for non-percent escaped url strings so we have to
-    // percent escape here
-    NSString  *urlStringEncoded =
-    [urlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    
-    NSURL *url = [NSURL URLWithString:urlStringEncoded];
-    return [MSClient clientWithApplicationURL:url applicationKey:key];
+    return [MSClient clientWithApplicationURLString:urlString
+                                   gatewayURLString:nil
+                                     applicationKey:key];
 }
 
-+(MSClient *) clientWithApplicationURLString:(NSString *)urlString
-                          withApplicationKey:(NSString *)key
+
++(MSClient *) clientWithApplicationURLString:(NSString *)applicationUrlString
+                            gatewayURLString:(NSString *)gatewayUrlString
+                              applicationKey:(NSString *)key
 {
-    return [MSClient clientWithApplicationURLString:urlString
-                                     applicationKey:key];
+    // NSURL will be nil for non-percent escaped url strings so we have to
+    // percent escape here
+    NSString *appUrlStringEncoded = [applicationUrlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    NSString *gatewayUrlStringEncoded = [gatewayUrlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    
+    NSURL *url = [NSURL URLWithString:appUrlStringEncoded];
+    NSURL *gatewayUrl = [NSURL URLWithString:gatewayUrlStringEncoded];
+    
+    return [MSClient clientWithApplicationURL:url gatewayURL:gatewayUrl applicationKey:key];
+    
 }
 
 +(MSClient *) clientWithApplicationURL:(NSURL *)url
 {
-    return [MSClient clientWithApplicationURL:url applicationKey:nil];
+    return [[MSClient alloc] initWithApplicationURL:url
+                                         gatewayURL:nil
+                                     applicationKey:nil];
 }
 
 +(MSClient *) clientWithApplicationURL:(NSURL *)url
                     applicationKey:(NSString *)key
 {
-    return [[MSClient alloc] initWithApplicationURL:url applicationKey:key];    
+    return [[MSClient alloc] initWithApplicationURL:url
+                                         gatewayURL:nil
+                                     applicationKey:key];
 }
 
++(MSClient *) clientWithApplicationURL:(NSURL *)applicationUrl
+                            gatewayURL:(NSURL *)gatewayUrl
+                        applicationKey:(NSString *)key
+{
+    return [[MSClient alloc] initWithApplicationURL:applicationUrl
+                                         gatewayURL:gatewayUrl
+                                     applicationKey:key];
+}
 
 #pragma mark * Public Initializer Methods
 
 
 -(id) initWithApplicationURL:(NSURL *)url
 {
-    return [self initWithApplicationURL:url applicationKey:nil];
+    return [self initWithApplicationURL:url gatewayURL:nil applicationKey:nil];
 }
 
 -(id) initWithApplicationURL:(NSURL *)url applicationKey:(NSString *)key
 {
+    return [self initWithApplicationURL:url gatewayURL:nil applicationKey:key];
+}
+
+-(id)initWithApplicationURL:(NSURL *)applicationUrl
+                 gatewayURL:(NSURL *)gatewayUrl
+             applicationKey:(NSString *)key
+{
     self = [super init];
     if(self)
     {
-        applicationURL_ = url;
-        applicationKey_ = [key copy];
-        login_ = [[MSLogin alloc] initWithClient:self];
+        _applicationURL = applicationUrl;
+        _gatewayURL = gatewayUrl;
+        _applicationKey = [key copy];
+        _login = [[MSLogin alloc] initWithClient:self];
         _push = [[MSPush alloc] initWithClient:self];
     }
     return self;
 }
-
 
 #pragma mark * Public Filter Methods
 
