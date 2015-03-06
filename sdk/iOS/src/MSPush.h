@@ -26,6 +26,9 @@
 /// @name Working with Registrations
 /// @{
 
+/// Gets the installation Id used to register the device with Notification Hubs.
+@property (nonatomic, readonly) NSString *installationId;
+
 /// Register for notifications with given a deviceToken.
 -(void)registerDeviceToken:(NSData *)deviceToken completion:(MSCompletionBlock)completion;
 

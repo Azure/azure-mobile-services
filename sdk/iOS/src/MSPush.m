@@ -24,6 +24,11 @@
     return self;
 }
 
+- (NSString *)installationId
+{
+    return self.client.installId;
+}
+
 #pragma mark * Registration Methods
 - (void) registerDeviceToken:(NSData *)deviceToken completion:(MSCompletionBlock)completion
 {
