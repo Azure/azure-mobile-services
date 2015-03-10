@@ -220,11 +220,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             string channelUri = ApnsRegistration.ParseDeviceToken(deviceToken);
             JObject installation = new JObject();
-            installation[InstallationProperties.PUSHCHANNEL] = channelUri;
-            installation[InstallationProperties.PLATFORM] = Platform.Instance.PushUtility.GetPlatform();
+            installation[PushInstallationProperties.PUSHCHANNEL] = channelUri;
+            installation[PushInstallationProperties.PLATFORM] = Platform.Instance.PushUtility.GetPlatform();
             if (templates != null)
             {
-                installation[InstallationProperties.TEMPLATES] = templates;
+                installation[PushInstallationProperties.TEMPLATES] = templates;
             }
             return this.PushHttpClient.CreateOrUpdateInstallationAsync(installation);
         }
@@ -326,18 +326,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         public Task<List<Registration>> ListRegistrationsAsync(NSData deviceToken)
         {
             return this.RegistrationManager.ListRegistrationsAsync(ApnsRegistration.ParseDeviceToken(deviceToken));
-        }
-
-        private JObject GetInstallation(string channelUri)
-        {
-            if (string.IsNullOrWhiteSpace(channelUri))
-            {
-                throw new ArgumentNullException("channelUri");
-            }
-            JObject installation = new JObject();
-            installation[InstallationProperties.PUSHCHANNEL] = channelUri;
-            installation[InstallationProperties.PLATFORM] = Platform.Instance.PushUtility.GetPlatform();
-            return installation;
         }
     }
 }

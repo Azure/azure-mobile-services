@@ -4,7 +4,7 @@
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
-    static class InstallationProperties
+    static class PushInstallationProperties
     {
         internal const string INSTALLATIONID = "installationId";
         internal const string PUSHCHANNEL = "pushChannel";

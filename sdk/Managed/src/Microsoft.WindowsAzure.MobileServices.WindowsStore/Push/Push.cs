@@ -207,15 +207,15 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("channelUri");
             }
             JObject installation = new JObject();
-            installation[InstallationProperties.PUSHCHANNEL] = channelUri;
-            installation[InstallationProperties.PLATFORM] = Platform.Instance.PushUtility.GetPlatform();
+            installation[PushInstallationProperties.PUSHCHANNEL] = channelUri;
+            installation[PushInstallationProperties.PLATFORM] = Platform.Instance.PushUtility.GetPlatform();
             if (templates != null)
             {
-                installation[InstallationProperties.TEMPLATES] = templates;
+                installation[PushInstallationProperties.TEMPLATES] = templates;
             }
             if (secondaryTiles != null)
             {
-                installation[InstallationProperties.SECONDARYTILES] = secondaryTiles;
+                installation[PushInstallationProperties.SECONDARYTILES] = secondaryTiles;
             }
             return this.PushHttpClient.CreateOrUpdateInstallationAsync(installation);
         }

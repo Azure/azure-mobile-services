@@ -93,11 +93,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public JObject GetInstallation(string installationId, bool includeTemplates = false, string defaultChannelUri = null)
         {
             JObject installation = new JObject();
-            installation[InstallationProperties.PUSHCHANNEL] = defaultChannelUri ?? ApnsRegistration.ParseDeviceToken(DefaultDeviceToken);
-            installation[InstallationProperties.PLATFORM] = Platform.Instance.PushUtility.GetPlatform();
+            installation[PushInstallationProperties.PUSHCHANNEL] = defaultChannelUri ?? ApnsRegistration.ParseDeviceToken(DefaultDeviceToken);
+            installation[PushInstallationProperties.PLATFORM] = Platform.Instance.PushUtility.GetPlatform();
             if (includeTemplates)
             {
-                installation[InstallationProperties.TEMPLATES] = GetTemplates();
+                installation[PushInstallationProperties.TEMPLATES] = GetTemplates();
             }
             return installation;
         }
