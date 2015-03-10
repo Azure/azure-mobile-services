@@ -9,6 +9,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Newtonsoft.Json.Linq;
 
     #if __UNIFIED__
     using Foundation;
@@ -22,6 +23,8 @@ namespace Microsoft.WindowsAzure.MobileServices
     public sealed class Push
     {
         internal readonly IRegistrationManager RegistrationManager;
+        internal readonly PushHttpClient PushHttpClient;
+        private MobileServiceClient Client { get; set; }
 
         internal Push(MobileServiceClient client)
         {
@@ -29,10 +32,11 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 throw new ArgumentNullException("client");
             }
-            
+
             var storageManager = new LocalStorageManager(client.ApplicationUri.Host);
-            var pushHttpClient = new PushHttpClient(client);
-            this.RegistrationManager = new RegistrationManager(pushHttpClient, storageManager);
+            this.PushHttpClient = new PushHttpClient(client);
+            this.RegistrationManager = new RegistrationManager(this.PushHttpClient, storageManager);
+            this.Client = client;
         }
 
         internal Push(IRegistrationManager registrationManager)
@@ -43,6 +47,17 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             this.RegistrationManager = registrationManager;
+        }
+
+        /// <summary>
+        /// Gets the installation Id used to register the device with Notification Hubs
+        /// </summary>
+        public string InstallationId
+        {
+            get
+            {
+                return this.Client.applicationInstallationId;
+            }
         }
 
         /// <summary>
@@ -97,7 +112,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             var registration = new ApnsRegistration(deviceToken, tags);
             return this.RegistrationManager.RegisterAsync(registration);
-        } 
+        }
 
         /// <summary>
         /// PLEASE USE NSData overload of this method!! Register a particular deviceToken with a template
@@ -186,6 +201,35 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
+        /// Register an Installation with particular deviceToken
+        /// </summary>
+        /// <param name="channelUri">The channelUri to register</param>
+        /// <returns>Task that completes when registration is complete</returns>
+        public Task RegisterAsync(NSData deviceToken)
+        {
+            return this.RegisterAsync(deviceToken, null);
+        }
+
+        /// <summary>
+        /// Register an Installation with particular deviceToken and templates
+        /// </summary>
+        /// <param name="channelUri">The channelUri to register</param>
+        /// <param name="templates">JSON with one more templates to register</param>
+        /// <returns>Task that completes when registration is complete</returns>
+        public Task RegisterAsync(NSData deviceToken, JObject templates)
+        {
+            string channelUri = ApnsRegistration.ParseDeviceToken(deviceToken);
+            JObject installation = new JObject();
+            installation[InstallationProperties.PUSHCHANNEL] = channelUri;
+            installation[InstallationProperties.PLATFORM] = Platform.Instance.PushUtility.GetPlatform();
+            if (templates != null)
+            {
+                installation[InstallationProperties.TEMPLATES] = templates;
+            }
+            return this.PushHttpClient.CreateOrUpdateInstallationAsync(installation);
+        }
+
+        /// <summary>
         /// Unregister any registrations previously registered from this device
         /// </summary>
         /// <returns>Task that completes when unregister is complete</returns>
@@ -235,6 +279,15 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
+        /// Unregister any installations for a particular app
+        /// </summary>
+        /// <returns>Task that completes when unregister is complete</returns>
+        public Task UnregisterAsync()
+        {
+            return this.PushHttpClient.DeleteInstallationAsync();
+        }
+
+        /// <summary>
         /// Register for notifications
         /// </summary>
         /// <param name="registration">The object defining the registration</param>
@@ -273,6 +326,18 @@ namespace Microsoft.WindowsAzure.MobileServices
         public Task<List<Registration>> ListRegistrationsAsync(NSData deviceToken)
         {
             return this.RegistrationManager.ListRegistrationsAsync(ApnsRegistration.ParseDeviceToken(deviceToken));
+        }
+
+        private JObject GetInstallation(string channelUri)
+        {
+            if (string.IsNullOrWhiteSpace(channelUri))
+            {
+                throw new ArgumentNullException("channelUri");
+            }
+            JObject installation = new JObject();
+            installation[InstallationProperties.PUSHCHANNEL] = channelUri;
+            installation[InstallationProperties.PLATFORM] = Platform.Instance.PushUtility.GetPlatform();
+            return installation;
         }
     }
 }

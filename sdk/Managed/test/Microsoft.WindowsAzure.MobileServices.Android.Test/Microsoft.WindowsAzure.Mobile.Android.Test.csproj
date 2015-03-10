@@ -69,9 +69,6 @@
     <Compile Include="TestDescription.cs" />
     <Compile Include="TestListener.cs" />
     <Compile Include="TestActivity.cs" />
-    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore.Test\Functional\PushFunctional.Test.cs">
-      <Link>Functional\PushFunctional.Test.cs</Link>
-    </Compile>
     <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore.Test\TestPlatform\CurrentTestPlatform.cs">
       <Link>TestPlatform\CurrentTestPlatform.cs</Link>
     </Compile>
@@ -116,6 +113,7 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <Import Project="..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />
   <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">

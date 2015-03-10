@@ -4,13 +4,15 @@
 
 using System;
 using System.Net.Http;
-
+using System.Linq;
 using Newtonsoft.Json;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Newtonsoft.Json.Linq;
+    using System.Net;
 
     internal sealed class PushHttpClient
     {
@@ -33,6 +35,11 @@ namespace Microsoft.WindowsAzure.MobileServices
             return this.client.HttpClient.RequestAsync(HttpMethod.Delete, string.Format("/push/registrations/{0}", Uri.EscapeUriString(registrationId)), this.client.CurrentUser, ensureResponseContent: false);
         }
 
+        public Task DeleteInstallationAsync()
+        {
+            return this.client.HttpClient.RequestAsync(HttpMethod.Delete, string.Format("/push/installations/{0}", Uri.EscapeUriString(this.client.applicationInstallationId)), this.client.CurrentUser, ensureResponseContent: false);
+        }
+
         public async Task<string> CreateRegistrationIdAsync()
         {
             var response = await this.client.HttpClient.RequestAsync(HttpMethod.Post, "/push/registrationids", this.client.CurrentUser, null, null);
@@ -49,9 +56,14 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             var content = JsonConvert.SerializeObject(registration);
             await this.client.HttpClient.RequestAsync(HttpMethod.Put, string.Format("/push/registrations/{0}", Uri.EscapeUriString(regId)), this.client.CurrentUser, content, ensureResponseContent: false);
-            
+
             // Ensure local storage is updated properly
             registration.RegistrationId = regId;
         }
-    }    
+
+        public Task CreateOrUpdateInstallationAsync(JObject installation)
+        {
+            return this.client.HttpClient.RequestAsync(HttpMethod.Put, string.Format("/push/installations/{0}", Uri.EscapeUriString(this.client.applicationInstallationId)), this.client.CurrentUser, installation.ToString(), ensureResponseContent: false);
+        }
+    }
 }
