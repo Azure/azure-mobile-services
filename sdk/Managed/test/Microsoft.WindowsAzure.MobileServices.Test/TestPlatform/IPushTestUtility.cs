@@ -3,6 +3,7 @@
 // ----------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
@@ -33,5 +34,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         string GetListTemplateRegistrationResponse();
 
         string GetListMixedRegistrationResponse();
+
+        JObject GetInstallation(string installationId, bool includeTemplates = false, string defaultChannelUri = null);
+        
+        JObject GetTemplates();
     }
 }

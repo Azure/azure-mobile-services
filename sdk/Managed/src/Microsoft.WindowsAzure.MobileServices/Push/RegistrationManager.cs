@@ -14,7 +14,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// </summary>
     internal class RegistrationManager : IRegistrationManager
     {
-        internal readonly PushHttpClient PushHttpClient;        
+        internal readonly PushHttpClient PushHttpClient;
 
         public RegistrationManager(PushHttpClient pushHttpClient, ILocalStorageManager storageManager)
         {
@@ -70,7 +70,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             // recreate registration id if we encountered a previously expired registrationId
             await this.CreateRegistrationIdAsync(registration);
             await this.UpsertRegistration(registration);
-        }        
+        }
 
         public async Task UnregisterAsync(string registrationName)
         {
