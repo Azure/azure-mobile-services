@@ -44,12 +44,12 @@ import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileSer
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.DeleteOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.InsertOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.LocalTableOperationProcessor;
+import com.microsoft.windowsazure.mobileservices.table.sync.operations.MobileServiceTableOperationState;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.RemoteTableOperationProcessor;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationError;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.UpdateOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.pull.IncrementalPullStrategy;
-import com.microsoft.windowsazure.mobileservices.table.sync.pull.PullCursor;
 import com.microsoft.windowsazure.mobileservices.table.sync.pull.PullStrategy;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushCompletionResult;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushFailedException;
@@ -66,7 +66,6 @@ import com.microsoft.windowsazure.mobileservices.threading.MultiReadWriteLockDic
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -738,17 +737,24 @@ public class MobileServiceSyncContext {
                         pushOperation(operation);
                     } catch (MobileServiceLocalStoreException localStoreException) {
                         pushCompletionResult.setStatus(MobileServicePushStatus.CancelledByLocalStoreError);
+
+                        operation.setOperationState(MobileServiceTableOperationState.Failed);
                         break;
                     } catch (MobileServiceSyncHandlerException syncHandlerException) {
                         MobileServicePushStatus cancelReason = getPushCancelReason(syncHandlerException);
 
                         if (cancelReason != null) {
                             pushCompletionResult.setStatus(cancelReason);
+
+                            operation.setOperationState(MobileServiceTableOperationState.Failed);
                             break;
                         } else {
                             this.mOpErrorList.add(getTableOperationError(operation, syncHandlerException));
                         }
                     }
+
+                    operation.setOperationState(MobileServiceTableOperationState.Failed);
+
                     // '/' is a reserved character that cannot be used on string
                     // ids.
                     // We use it to build a unique compound string from
@@ -807,6 +813,8 @@ public class MobileServiceSyncContext {
                 item = backedUpItem.get("clientitem").isJsonObject() ? backedUpItem.getAsJsonObject("clientitem") : null;
             }
         }
+
+        operation.setOperationState(MobileServiceTableOperationState.Attempted);
 
         JsonObject result = this.mHandler.executeTableOperation(new RemoteTableOperationProcessor(this.mClient, item), operation);
 

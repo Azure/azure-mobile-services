@@ -34,6 +34,7 @@ import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileSer
 import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileServiceLocalStoreException;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.DeleteOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.InsertOperation;
+import com.microsoft.windowsazure.mobileservices.table.sync.operations.MobileServiceTableOperationState;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationCollapser;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationKind;
@@ -200,21 +201,24 @@ public class OperationQueue {
             if (this.mIdOperationMap.containsKey(tableItemId)) {
                 OperationQueueItem prevOpQueueItem = this.mIdOperationMap.get(tableItemId);
                 TableOperation prevOperation = prevOpQueueItem.getOperation();
-                TableOperation collapsedOperation = prevOperation.accept(new TableOperationCollapser(operation));
 
-                if (collapsedOperation == null || collapsedOperation == operation) {
-                    prevOpQueueItem.cancel();
+                if (prevOperation.getOperationState() != MobileServiceTableOperationState.Failed) {
+                    TableOperation collapsedOperation = prevOperation.accept(new TableOperationCollapser(operation));
 
-                    removeOperationQueueItem(prevOpQueueItem);
+                    if (collapsedOperation == null || collapsedOperation == operation) {
+                        prevOpQueueItem.cancel();
 
-                    if (collapsedOperation == operation) {
-                        enqueueOperation(operation);
+                        removeOperationQueueItem(prevOpQueueItem);
+
+                        if (collapsedOperation == operation) {
+                            enqueueOperation(operation);
+                        }
                     }
-                }
 
-                dequeueCancelledOperations();
-            } else {
-                enqueueOperation(operation);
+                    dequeueCancelledOperations();
+                } else {
+                    enqueueOperation(operation);
+                }
             }
         } finally {
             this.mSyncLock.writeLock().unlock();
@@ -460,6 +464,7 @@ public class OperationQueue {
             this.mQueueLoadedAt = queueLoadedAt;
             this.mSequence = sequence;
             this.mCancelled = false;
+            this.mOperation.setOperationState(MobileServiceTableOperationState.Attempted);
         }
 
         @Override
@@ -510,6 +515,26 @@ public class OperationQueue {
         @Override
         public <T> T accept(TableOperationVisitor<T> visitor) throws Throwable {
             return this.mOperation.accept(visitor);
+        }
+
+        /**
+         * Gets the operation state
+         *
+         * @return The operation state
+         */
+        @Override
+        public MobileServiceTableOperationState getOperationState() {
+            return this.mOperation.getOperationState();
+        }
+
+        /**
+         * Sets the operation state
+         *
+         * @param state the Operation State
+         */
+        @Override
+        public void setOperationState(MobileServiceTableOperationState state) {
+            this.mOperation.setOperationState(state);
         }
     }
 

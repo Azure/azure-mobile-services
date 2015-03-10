@@ -74,4 +74,19 @@ public interface TableOperation {
      * @throws Throwable
      */
     <T> T accept(TableOperationVisitor<T> visitor) throws Throwable;
+
+    /**
+     * Gets the operation state
+     *
+     * @return The operation state
+     */
+    MobileServiceTableOperationState getOperationState();
+
+    /**
+     * Sets the operation state
+     *
+     * @param state the Operation State
+     */
+    void setOperationState(MobileServiceTableOperationState state);
+
 }
