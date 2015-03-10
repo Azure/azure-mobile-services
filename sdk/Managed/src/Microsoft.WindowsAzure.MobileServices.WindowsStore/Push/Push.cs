@@ -11,6 +11,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Newtonsoft.Json.Linq;
     using Windows.Data.Xml.Dom;
 
     /// <summary>
@@ -19,6 +20,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     public sealed class Push
     {
         internal readonly RegistrationManager RegistrationManager;
+        internal readonly PushHttpClient PushHttpClient;
 
         private const string PrimaryChannelId = "$Primary";
 
@@ -43,8 +45,8 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             string name = string.Format("{0}-PushContainer-{1}-{2}", Package.Current.Id.Name, client.ApplicationUri.Host, tileId);
             var storageManager = new LocalStorageManager(name);
-            var pushHttpClient = new PushHttpClient(client);
-            this.RegistrationManager = new RegistrationManager(pushHttpClient, storageManager);
+            this.PushHttpClient = new PushHttpClient(client);
+            this.RegistrationManager = new RegistrationManager(this.PushHttpClient, storageManager);
 
             this.SecondaryTiles = tiles ?? new SecondaryTilesList(this);
         }
@@ -58,6 +60,17 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Access this member with an indexer to access secondary tile registrations. Example: <code>push.SecondaryTiles["tileName"].RegisterNativeAsync("mychannelUri");</code>
         /// </summary>
         public IDictionary<string, Push> SecondaryTiles { get; set; }
+
+        /// <summary>
+        /// Gets the installation Id used to register the device with Notification Hubs
+        /// </summary>
+        public string InstallationId
+        {
+            get
+            {
+                return this.Client.applicationInstallationId;
+            }
+        }
 
         private MobileServiceClient Client { get; set; }
 
@@ -160,6 +173,54 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
+        /// Register an Installation with particular channelUri
+        /// </summary>
+        /// <param name="channelUri">The channelUri to register</param>
+        /// <returns>Task that completes when registration is complete</returns>
+        public Task RegisterAsync(string channelUri)
+        {
+            return this.RegisterAsync(channelUri, null, null);
+        }
+
+        /// <summary>
+        /// Register an Installation with particular channelUri and templates
+        /// </summary>
+        /// <param name="channelUri">The channelUri to register</param>
+        /// <param name="templates">JSON with one more templates to register</param>
+        /// <returns>Task that completes when registration is complete</returns>
+        public Task RegisterAsync(string channelUri, JObject templates)
+        {
+            return this.RegisterAsync(channelUri, templates, null);
+        }
+
+        /// <summary>
+        /// Register an Installation with particular channelUri, templates and secondaryTiles
+        /// </summary>
+        /// <param name="channelUri">The channelUri to register</param>
+        /// <param name="templates">JSON with one more templates to register</param>
+        /// <param name="secondaryTiles">JSON with one more templates to register secondaryTiles</param>
+        /// <returns>Task that completes when registration is complete</returns>
+        public Task RegisterAsync(string channelUri, JObject templates, JObject secondaryTiles)
+        {
+            if (string.IsNullOrWhiteSpace(channelUri))
+            {
+                throw new ArgumentNullException("channelUri");
+            }
+            JObject installation = new JObject();
+            installation[PushInstallationProperties.PUSHCHANNEL] = channelUri;
+            installation[PushInstallationProperties.PLATFORM] = Platform.Instance.PushUtility.GetPlatform();
+            if (templates != null)
+            {
+                installation[PushInstallationProperties.TEMPLATES] = templates;
+            }
+            if (secondaryTiles != null)
+            {
+                installation[PushInstallationProperties.SECONDARYTILES] = secondaryTiles;
+            }
+            return this.PushHttpClient.CreateOrUpdateInstallationAsync(installation);
+        }
+
+        /// <summary>
         /// Unregister any registrations previously registered from this device
         /// </summary>
         /// <returns>Task that completes when unregister is complete</returns>
@@ -191,6 +252,15 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             return this.RegistrationManager.DeleteRegistrationsForChannelAsync(channelUri);
+        }
+
+        /// <summary>
+        /// Unregister any installations previously registered from this device
+        /// </summary>
+        /// <returns>Task that completes when unregister is complete</returns>
+        public Task UnregisterAsync()
+        {
+            return this.PushHttpClient.DeleteInstallationAsync();
         }
 
         /// <summary>
@@ -234,7 +304,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             internal SecondaryTilesList(Push parent)
             {
                 this.parent = parent;
-            }                        
+            }
 
             public ICollection<string> Keys
             {
@@ -293,7 +363,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             public bool ContainsKey(string tileId)
             {
                 return this.hubForTiles.ContainsKey(tileId);
-            }            
+            }
 
             public bool Remove(string tileId)
             {
@@ -304,7 +374,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             public bool TryGetValue(string tileId, out Push value)
             {
                 return this.hubForTiles.TryGetValue(tileId, out value);
-            }            
+            }
 
             public void Add(KeyValuePair<string, Push> item)
             {
@@ -327,7 +397,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 {
                     array[arrayIndex++] = new KeyValuePair<string, Push>(item.Key, item.Value);
                 }
-            }            
+            }
 
             public bool Remove(KeyValuePair<string, Push> item)
             {

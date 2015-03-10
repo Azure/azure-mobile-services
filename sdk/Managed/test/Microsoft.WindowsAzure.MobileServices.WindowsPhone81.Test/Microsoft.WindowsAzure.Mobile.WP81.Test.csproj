@@ -100,9 +100,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore.Test\Functional\PushFunctional.Test.cs">
-      <Link>Functional\PushFunctional.Test.cs</Link>
-    </Compile>
     <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore.Test\TestPlatform\CurrentTestPlatform.cs">
       <Link>TestPlatform\CurrentTestPlatform.cs</Link>
     </Compile>

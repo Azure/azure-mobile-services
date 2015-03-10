@@ -2,13 +2,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MobileServices.TestFramework;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.Test
 {
@@ -87,7 +86,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public Registration GetNewNativeRegistration(string deviceId, IEnumerable<string> tags)
         {
             return new WnsRegistration(deviceId, tags);
-        }        
+        }
 
         public Registration GetNewTemplateRegistration(string deviceId, string bodyTemplate, string templateName)
         {
@@ -108,6 +107,30 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             return "[{\"registrationId\":\"7313155627197174428-6522078074300559092-1\",\"tags\":[\"fooWns\",\"barWns\",\"4de2605e-fd09-4875-a897-c8c4c0a51682\"],\"deviceId\":\"http://channelUri.com/a b\"}, " +
             "{\"registrationId\":\"7313155627197174428-6522078074300559092-1\",\"tags\":[\"fooWns\",\"barWns\",\"4de2605e-fd09-4875-a897-c8c4c0a51682\"],\"deviceId\":\"http://channelUri.com/a b\",\"templateBody\":\"cool template body\",\"templateName\":\"cool name\"}]";
+        }
+
+        public JObject GetInstallation(string installationId, bool includeTemplates = false, string defaultChannelUri = null)
+        {
+            JObject installation = new JObject();
+            installation[PushInstallationProperties.PUSHCHANNEL] = defaultChannelUri ?? DefaultChannelUri;
+            installation[PushInstallationProperties.PLATFORM] = Platform.Instance.PushUtility.GetPlatform();
+            if (includeTemplates)
+            {
+                installation[PushInstallationProperties.TEMPLATES] = GetTemplates();
+            }
+            return installation;
+        }
+
+        public JObject GetTemplates()
+        {
+            JObject templateHeaders = new JObject();
+            templateHeaders["X-WNS-Type"] = "wns/toast";
+            JObject temptlateBody = new JObject();
+            temptlateBody["body"] = BodyTemplate;
+            temptlateBody["headers"] = templateHeaders;
+            JObject templates = new JObject();
+            templates[DefaultToastTemplateName] = temptlateBody;
+            return templates;
         }
     }
 }
