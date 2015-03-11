@@ -21,7 +21,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
 
         private void TestInitialize()
         {
-            string appUrl = "http://www.test.com/";
+            string appUrl = MobileAppUriValidator.DummyMobileApp;
             string appKey = "secret...";
             this.hijack = new TestHttpHandler();
             this.hijack.SetResponseContent(String.Empty);
@@ -29,7 +29,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
             var originalFactory = MobileServiceHttpClient.DefaultHandlerFactory;
             MobileServiceHttpClient.DefaultHandlerFactory = () => this.hijack;
 
-            this.client = new MobileServiceClient(new Uri(appUrl), appKey, hijack);
+            this.client = new MobileServiceClient(appUrl, MobileAppUriValidator.DummyGateway, appKey, hijack);
 
             MobileServiceHttpClient.DefaultHandlerFactory = originalFactory;
         }
@@ -41,19 +41,19 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
             {
                 { "display", "popup" },
                 { "scope", "email,birthday" }
-            }, "http://www.test.com/login/microsoftaccount?display=popup&scope=email%2Cbirthday");
+            }, "http://www.testgateway.com/login/microsoftaccount?display=popup&scope=email%2Cbirthday");
         }
 
         [TestMethod]
         public void StartUri_WithNullParameters()
         {
-            TestStartUriForParameters(null, "http://www.test.com/login/microsoftaccount");
+            TestStartUriForParameters(null, "http://www.testgateway.com/login/microsoftaccount");
         }
 
         [TestMethod]
         public void StartUri_WithEmptyParameters()
         {
-            TestStartUriForParameters(new Dictionary<string, string>(), "http://www.test.com/login/microsoftaccount");
+            TestStartUriForParameters(new Dictionary<string, string>(), "http://www.testgateway.com/login/microsoftaccount");
         }
 
         private void TestStartUriForParameters(Dictionary<string, string> parameters, string uri)
@@ -70,19 +70,19 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
             {
                 { "display", "popup" },
                 { "scope", "email,birthday" }
-            }, "http://www.test.com/login/microsoftaccount?display=popup&scope=email%2Cbirthday");
+            }, "http://www.testgateway.com/login/microsoftaccount?display=popup&scope=email%2Cbirthday");
         }
 
         [AsyncTestMethod]
         public Task LoginAsync_WithNullParameterss()
         {
-            return TestLoginAsyncForParameters(null, "http://www.test.com/login/microsoftaccount");
+            return TestLoginAsyncForParameters(null, "http://www.testgateway.com/login/microsoftaccount");
         }
 
         [AsyncTestMethod]
         public Task LoginAsync_WithEmptyParameterss()
         {
-            return TestLoginAsyncForParameters(new Dictionary<string, string>(), "http://www.test.com/login/microsoftaccount");
+            return TestLoginAsyncForParameters(new Dictionary<string, string>(), "http://www.testgateway.com/login/microsoftaccount");
         }
 
         private async Task TestLoginAsyncForParameters(Dictionary<string, string> parameters, string uri)

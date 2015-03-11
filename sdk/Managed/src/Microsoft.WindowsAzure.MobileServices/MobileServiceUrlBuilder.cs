@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
@@ -14,6 +15,22 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// </summary>
     internal static class MobileServiceUrlBuilder
     {
+        #region Constants
+
+        /// <summary>
+        /// Delimiter following the scheme in a URI.
+        /// </summary>
+        private const string SchemeDelimiter = "://";
+        
+        /// <summary>
+        /// A constant variable that defines the character '/'.
+        /// </summary>
+        private const char Slash = '/';
+
+        #endregion
+
+        #region Methods
+
         /// <summary>
         /// Converts a dictionary of string key-value pairs into a URI query string.
         /// </summary>
@@ -114,9 +131,40 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             return string.Format(CultureInfo.InvariantCulture,
-                                 "{0}/{1}",
-                                 path1.TrimEnd('/'),
-                                 path2.TrimStart('/'));
+                                 "{0}{1}{2}",
+                                 path1.TrimEnd(Slash),
+                                 Slash,
+                                 path2.TrimStart(Slash));
         }
+
+        /// <summary>
+        /// Appends a slash ('/') to <paramref name="uri"/> if it is missing a trailing slash.
+        /// </summary>
+        /// <param name="uri">
+        /// URI to add a trailing slash to.
+        /// </param>
+        /// <returns>
+        /// Uri with a slash appended to <paramref name="uri"/> if it is missing one.
+        /// Else, <paramref name="uri"/> is returned unchanged.
+        /// </returns>
+        /// <remarks>
+        /// No validation of the uri is performed.
+        /// </remarks>
+        public static string AddTrailingSlash(string uri)
+        {
+            if (uri == null)
+            {
+                throw new ArgumentNullException("uri");
+            }
+
+            if (!uri.EndsWith(Slash.ToString()))
+            {
+                uri = uri + Slash;
+            }
+
+            return uri;
+        }
+
+        #endregion
     }
 }

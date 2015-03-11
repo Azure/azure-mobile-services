@@ -26,7 +26,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             this.Client = client;
             
-            var storageManager = new LocalStorageManager(client.ApplicationUri.Host);
+            var storageManager = new LocalStorageManager(client.MobileAppUri.Host);
             var pushHttpClient = new PushHttpClient(client);
             this.RegistrationManager = new RegistrationManager(pushHttpClient, storageManager);
         }

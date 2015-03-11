@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.WindowsAzure.MobileServices.Test.UnitTests;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 
 namespace Microsoft.WindowsAzure.MobileServices.Test
@@ -15,17 +16,17 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             {
                 new 
                 {
-                    ServiceUri = "http://www.test.com", 
+                    ServiceUri = MobileAppUriValidator.DummyMobileApp, 
                     Query = "/about?$filter=a eq b&$orderby=c", 
                     Absolute = false,
-                    Result = "http://www.test.com/about?$filter=a eq b&$orderby=c"
+                    Result = "http://www.testgateway.com/about?$filter=a eq b&$orderby=c"
                 },
                 new 
                 {
-                    ServiceUri = "http://www.test.com/", 
-                    Query = "http://www.test.com/about?$filter=a eq b&$orderby=c", 
+                    ServiceUri = MobileAppUriValidator.DummyMobileApp, 
+                    Query = "http://www.testgateway.com/about?$filter=a eq b&$orderby=c", 
                     Absolute = true,
-                    Result = "http://www.test.com/about?$filter=a eq b&$orderby=c"
+                    Result = "http://www.testgateway.com/about?$filter=a eq b&$orderby=c"
                 }
             };
 
@@ -46,15 +47,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             {
                 new 
                 {
-                    ServiceUri = "http://www.test.com", 
+                    ServiceUri = MobileAppUriValidator.DummyMobileApp, 
                     Query = "about?$filter=a eq b&$orderby=c", 
-                    Result = "http://www.test.com/about?$filter=a eq b&$orderby=c"
+                    Result = "http://www.testgateway.com/about?$filter=a eq b&$orderby=c"
                 },
                 new 
                 {
-                    ServiceUri = "http://www.test.com/", 
+                    ServiceUri = MobileAppUriValidator.DummyMobileApp, 
                     Query = "$filter=a eq b&$orderby=c", 
-                    Result = "http://www.test.com/about?$filter=a eq b&$orderby=c"
+                    Result = "http://www.testgateway.com/about?$filter=a eq b&$orderby=c"
                 }
             };
 
