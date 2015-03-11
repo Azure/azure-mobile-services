@@ -403,15 +403,18 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 
                 int zumoInstallationHeaderIndex = -1;
                 int zumoAppHeaderIndex = -1;
+                int zumoVersionHeader = -1;
                 int userAgentHeaderIndex = -1;
                 int acceptHeaderIndex = -1;
                 int acceptEncodingHeaderIndex = -1;
 
                 String installationHeader = "X-ZUMO-INSTALLATION-ID";
                 String appHeader = "X-ZUMO-APPLICATION";
+                String versionHeader = "X-ZUMO-VERSION";
                 String userAgentHeader = HTTP.USER_AGENT;
                 String acceptHeader = "Accept";
                 String acceptEncodingHeader = "Accept-Encoding";
+                String versionNumber = "2.0.2";
 
                 Header[] headers = request.getHeaders();
                 for (int i = 0; i < headers.length; i++) {
@@ -419,6 +422,8 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
                         zumoInstallationHeaderIndex = i;
                     } else if (headers[i].getName() == appHeader) {
                         zumoAppHeaderIndex = i;
+                    } else if (headers[i].getName() == versionHeader) {
+                        zumoVersionHeader = i;
                     } else if (headers[i].getName() == userAgentHeader) {
                         userAgentHeaderIndex = i;
                     } else if (headers[i].getName() == acceptHeader) {
@@ -436,6 +441,10 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
                     resultFuture.setException(new Exception("zumoAppHeaderIndex == -1"));
                     return resultFuture;
                 }
+                if (zumoVersionHeader == -1) {
+                    resultFuture.setException(new Exception("zumoVersionHeader == -1"));
+                    return resultFuture;
+                }
                 if (userAgentHeaderIndex == -1) {
                     resultFuture.setException(new Exception("userAgentHeaderIndex == -1"));
                     return resultFuture;
@@ -450,7 +459,7 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
                 }
 
                 String expectedUserAgent = String.format("ZUMO/%s (lang=%s; os=%s; os_version=%s; arch=%s; version=%s)", "1.0", "Java", "Android",
-                        Build.VERSION.RELEASE, Build.CPU_ABI, "1.0.10814.0");
+                        Build.VERSION.RELEASE, Build.CPU_ABI, versionNumber);
 
                 if (headers[zumoInstallationHeaderIndex].getValue() == null) {
                     resultFuture.setException(new Exception("headers[zumoInstallationHeaderIndex] == null"));
@@ -462,8 +471,18 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
                     return resultFuture;
                 }
 
+                if (!expectedAppKey.equals(headers[zumoAppHeaderIndex].getValue())) {
+                    resultFuture.setException(new Exception("expectedAppKey != headers[zumoAppHeaderIndex]"));
+                    return resultFuture;
+                }
+
                 if (!expectedUserAgent.equals(headers[userAgentHeaderIndex].getValue())) {
                     resultFuture.setException(new Exception("expectedUserAgent != headers[userAgentHeaderIndex]"));
+                    return resultFuture;
+                }
+
+                if (!versionNumber.equals(headers[zumoVersionHeader].getValue())) {
+                    resultFuture.setException(new Exception(versionNumber + "!= headers[zumoVersionHeader]"));
                     return resultFuture;
                 }
 
