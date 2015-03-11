@@ -50,7 +50,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// Gets the installation Id used to register the device with Notification Hubs
+        /// Installation Id used to register the device with Notification Hubs
         /// </summary>
         public string InstallationId
         {
@@ -203,7 +203,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Register an Installation with particular deviceToken
         /// </summary>
-        /// <param name="channelUri">The channelUri to register</param>
+        /// <param name="deviceToken">The deviceToken to register</param>
         /// <returns>Task that completes when registration is complete</returns>
         public Task RegisterAsync(NSData deviceToken)
         {
@@ -213,7 +213,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Register an Installation with particular deviceToken and templates
         /// </summary>
-        /// <param name="channelUri">The channelUri to register</param>
+        /// <param name="deviceToken">The deviceToken to register</param>
         /// <param name="templates">JSON with one more templates to register</param>
         /// <returns>Task that completes when registration is complete</returns>
         public Task RegisterAsync(NSData deviceToken, JObject templates)
