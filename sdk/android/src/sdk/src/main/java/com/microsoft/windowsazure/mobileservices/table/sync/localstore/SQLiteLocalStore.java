@@ -52,8 +52,8 @@ import java.util.Map.Entry;
  */
 public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceLocalStore {
     private Map<String, Map<String, ColumnDataInfo>> mTables;
-	private int mConcurrencyCount;
-	private Object mConcurrencyLock;
+    private int mConcurrencyCount;
+    private Object mConcurrencyLock;
 
     /**
      * Constructor for SQLiteLocalStore
@@ -70,8 +70,8 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
     public SQLiteLocalStore(Context context, String name, CursorFactory factory, int version) {
         super(context, name, factory, version);
         this.mTables = new HashMap<String, Map<String, ColumnDataInfo>>();
-		this.mConcurrencyCount = 0;
-		this.mConcurrencyLock = new Object();
+        this.mConcurrencyCount = 0;
+        this.mConcurrencyLock = new Object();
     }
 
     /**
@@ -96,7 +96,7 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 
     @Override
     public void initialize() throws MobileServiceLocalStoreException {
-		SQLiteDatabase db = this.getWritableDatabaseSynchronized();
+        SQLiteDatabase db = this.getWritableDatabaseSynchronized();
         try {
             for (Entry<String, Map<String, ColumnDataInfo>> entry : this.mTables.entrySet()) {
                 createTableFromObject(db, entry.getKey(), entry.getValue());
@@ -104,8 +104,8 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
         } catch (Throwable t) {
             throw new MobileServiceLocalStoreException(t);
         } finally {
-			this.closeDatabaseSynchronized(db);
-		}
+            this.closeDatabaseSynchronized(db);
+        }
     }
 
     @Override
@@ -153,7 +153,7 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 
             Integer inlineCount = null;
 
-			SQLiteDatabase db = this.getWritableDatabaseSynchronized();
+            SQLiteDatabase db = this.getWritableDatabaseSynchronized();
 
             try {
                 Cursor cursor = null;
@@ -184,7 +184,7 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
                     }
                 }
             } finally {
-				this.closeDatabaseSynchronized(db);
+                this.closeDatabaseSynchronized(db);
             }
 
             if (query.hasInlineCount()) {
@@ -211,7 +211,7 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
             Map<String, ColumnDataInfo> table = this.mTables.get(invTableName);
 
             SQLiteDatabase db = this.getWritableDatabaseSynchronized();
-			
+            
             try {
                 Cursor cursor = null;
 
@@ -686,22 +686,22 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
             db.execSQL(createSql);
         }
     }
-	
-	private SQLiteDatabase getWritableDatabaseSynchronized() {
-		synchronized (mConcurrencyLock) {
-			mConcurrencyCount++;
-			return getWritableDatabase();
-		}
-	}
-	
-	private void closeDatabaseSynchronized(SQLiteDatabase db) {
-		synchronized (mConcurrencyLock) {
-			mConcurrencyCount--;
-			if (mConcurrencyCount == 0) {
-				db.close();
-			}
-		}
-	}
+    
+    private SQLiteDatabase getWritableDatabaseSynchronized() {
+        synchronized (mConcurrencyLock) {
+            mConcurrencyCount++;
+            return getWritableDatabase();
+        }
+    }
+    
+    private void closeDatabaseSynchronized(SQLiteDatabase db) {
+        synchronized (mConcurrencyLock) {
+            mConcurrencyCount--;
+            if (mConcurrencyCount == 0) {
+                db.close();
+            }
+        }
+    }
 
     private static class Statement {
         private String sql;
