@@ -182,6 +182,10 @@ extern NSString *const MSErrorPushResultKey;
 /// Indicates that the login operation failed because an invalid token was used.
 #define MSLoginInvalidToken                     -1505
 
+/// Indicates that the login operation failed because the gateway URL in the client
+/// was invalid.
+#define MSLoginInvalidURL                       -1506
+
 /// Indicates that a required parameter for push operation was not provided
 #define MSPushRequiredParameter                 -1600
 
