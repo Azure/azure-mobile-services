@@ -50,6 +50,11 @@ class InsertOperationCollapser implements TableOperationVisitor<TableOperation> 
 
     @Override
     public TableOperation visit(DeleteOperation newOperation) {
-        return null;
+
+        if (mExistingOperation.getOperationState() != MobileServiceTableOperationState.Failed) {
+            return null;
+        }
+
+        return newOperation;
     }
 }

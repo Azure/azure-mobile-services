@@ -44,7 +44,10 @@ import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
 import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceJsonSyncTable;
+import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncContext;
 import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncTable;
+import com.microsoft.windowsazure.mobileservices.table.sync.operations.MobileServiceTableOperationState;
+import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushFailedException;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushStatus;
 import com.microsoft.windowsazure.mobileservices.table.sync.synchandler.SimpleSyncHandler;
@@ -52,6 +55,7 @@ import com.microsoft.windowsazure.mobileservices.table.sync.synchandler.SimpleSy
 import org.apache.http.Header;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -719,6 +723,43 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         assertEquals(client.getSyncContext().getPendingOperations(), 1);
 
         table.delete(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 0);
+
+        client.getSyncContext().push().get();
+
+        assertEquals(client.getSyncContext().getPendingOperations(), 0);
+    }
+
+    public void testDeleteNoCancelsAllWhenFailedInsertIsInQueue() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+
+        MobileServiceClient client = null;
+
+        client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, "[{\"id\":\"abc\",\"String\":\"Hey\"}]"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.insert(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        TableOperation insertOperation = client.getSyncContext().getOperationQueue().element();
+
+        insertOperation.setOperationState(MobileServiceTableOperationState.Failed);
+
+        table.delete(item).get();
+
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
         client.getSyncContext().push().get();
 
         assertEquals(client.getSyncContext().getPendingOperations(), 0);

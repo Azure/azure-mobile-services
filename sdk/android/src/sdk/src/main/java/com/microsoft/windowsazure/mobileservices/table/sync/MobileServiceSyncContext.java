@@ -242,6 +242,10 @@ public class MobileServiceSyncContext {
         return result;
     }
 
+    public OperationQueue getOperationQueue() {
+        return this.mOpQueue;
+    }
+
     /**
      * Initializes the sync context.
      *

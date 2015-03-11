@@ -202,24 +202,23 @@ public class OperationQueue {
                 OperationQueueItem prevOpQueueItem = this.mIdOperationMap.get(tableItemId);
                 TableOperation prevOperation = prevOpQueueItem.getOperation();
 
-                if (prevOperation.getOperationState() != MobileServiceTableOperationState.Failed) {
-                    TableOperation collapsedOperation = prevOperation.accept(new TableOperationCollapser(operation));
+                TableOperation collapsedOperation = prevOperation.accept(new TableOperationCollapser(operation));
 
-                    if (collapsedOperation == null || collapsedOperation == operation) {
-                        prevOpQueueItem.cancel();
+                if (collapsedOperation == null || collapsedOperation == operation) {
+                    prevOpQueueItem.cancel();
 
-                        removeOperationQueueItem(prevOpQueueItem);
+                    removeOperationQueueItem(prevOpQueueItem);
 
-                        if (collapsedOperation == operation) {
-                            enqueueOperation(operation);
-                        }
+                    if (collapsedOperation == operation) {
+                        enqueueOperation(operation);
                     }
-
-                    dequeueCancelledOperations();
-                } else {
-                    enqueueOperation(operation);
                 }
+
+                dequeueCancelledOperations();
+            } else {
+                enqueueOperation(operation);
             }
+
         } finally {
             this.mSyncLock.writeLock().unlock();
         }
@@ -259,6 +258,21 @@ public class OperationQueue {
 
         try {
             return this.mQueue.peek() != null ? this.mQueue.peek().getOperation() : null;
+        } finally {
+            this.mSyncLock.readLock().unlock();
+        }
+    }
+
+    /**
+     * Get the next table operation
+     *
+     * @return the table operation
+     */
+    public TableOperation element() {
+        this.mSyncLock.readLock().lock();
+
+        try {
+            return this.mQueue.element() != null ? this.mQueue.element().getOperation() : null;
         } finally {
             this.mSyncLock.readLock().unlock();
         }
