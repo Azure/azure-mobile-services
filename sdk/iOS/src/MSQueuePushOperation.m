@@ -225,6 +225,43 @@
                                               internalError:storeError];
                 }
             }
+            else {
+                // Operation was successful, but another operation is pending.
+                // To be able to complete the subsequent operation, the version
+                // field needs to be updated to the latest version we just got
+                // from the server.
+                NSError* storeError;
+                
+                // Get the item from the local store, which contains updates that haven't yet been pushed to the server.
+                NSDictionary* storeItem = [self.syncContext.dataSource readTable:operation.tableName
+                                                                      withItemId:operation.itemId
+                                                                         orError:&storeError];
+                if (storeError) {
+                    NSString *errorMessage = [NSString stringWithFormat:@"Unable to read item '%@' from table '%@'",
+                                              operation.itemId, operation.tableName];
+                    
+                    self.error = [self errorWithDescription:errorMessage
+                                                       code:MSPushAbortedDataSource
+                                              internalError:storeError];
+                }
+                else {
+                    // Update the version of the item to the lates version we've seen from the server
+                    NSString* newVersion = [item objectForKey:MSSystemColumnVersion];
+                    [storeItem setValue:newVersion forKey:MSSystemColumnVersion];
+                    
+                    [self.syncContext.dataSource upsertItems:[NSArray arrayWithObject:storeItem]
+                                                                                table:operation.tableName
+                                                                              orError:&storeError];
+                    if (storeError) {
+                        NSString *errorMessage = [NSString stringWithFormat:@"Unable to upsert item '%@' into table '%@'",
+                                                  operation.itemId, operation.tableName];
+                        
+                        self.error = [self errorWithDescription:errorMessage
+                                                           code:MSPushAbortedDataSource
+                                                  internalError:storeError];
+                    }
+                }
+            }
         }
         
         if (self.error) {
