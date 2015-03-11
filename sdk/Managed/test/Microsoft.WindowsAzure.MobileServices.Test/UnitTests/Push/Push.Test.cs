@@ -19,9 +19,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     public class PushTest : TestBase
     {
         const string DefaultChannelUri = "http://channelUri.com/a b";
-        const string DefaultServiceUri = Shri.DefaultMobileApp;
-        const string RegistrationsPath = "/push/registrations";
-        const string InstallationsPath = "/push/installations";
+        const string DefaultServiceUri = MobileAppUriValidator.DummyMobileApp;
+        const string RegistrationsPath = "push/registrations";
+        const string InstallationsPath = "push/installations";
         const string DefaultRegistrationId = "7313155627197174428-6522078074300559092-1";
 
         readonly IPushUtility pushUtility;
