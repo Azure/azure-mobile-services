@@ -39,6 +39,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 public class SQLiteStoreTests extends InstrumentationTestCase {
 
@@ -465,6 +466,67 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
         long count = SQLiteStoreTestsUtilities.countRows(this.getContext(), TestDbName, TestTable);
         assertEquals(count, 1L);
     }
+	
+	private class OffThreadInsert implements Runnable {
+		private SQLiteLocalStore mStore;
+		private String mObjectId;
+		private CountDownLatch mBlocker;
+		private boolean mSuccess;
+		
+		public OffThreadInsert(CountDownLatch blocker, SQLiteLocalStore store, String objectId) {
+			mStore = store;
+			mObjectId = objectId;
+			mBlocker = blocker;
+			mSuccess = false;
+		}
+		
+		@Override
+		public void run() {
+			try {
+				JsonObject inserted = new JsonObject();
+				inserted.addProperty("id", mObjectId);
+				inserted.addProperty("__createdAt", new Date().toString());
+			
+				mBlocker.await();
+				mStore.upsert(TestTable, inserted, false);
+				mSuccess = true;
+			} catch (Throwable t) {
+				mSuccess = false;
+			}
+		}
+		
+		public boolean succeeded() {
+			return mSuccess;
+		}
+	}
+	
+	public void testSimultaneousOperations() throws MobileServiceLocalStoreException, InterruptedException {
+		prepareTodoTable();
+		SQLiteLocalStore store = new SQLiteLocalStore(this.getContext(), TestDbName, null, 1);
+		
+		defineTestTable(store);
+        store.initialize();
+		
+		CountDownLatch threadBlocker = new CountDownLatch(1);
+		Thread[] threads = new Thread[5];
+		OffThreadInsert[] runnables = new OffThreadInsert[5];
+		
+		for (int i = 0; i < threads.length; i++) {
+			runnables[i] = new OffThreadInsert(threadBlocker, store, "object"+i);
+			threads[i] = new Thread(runnables[i]);
+			threads[i].start();
+		}
+		
+		threadBlocker.countDown();
+		
+		for (int i = 0; i < threads.length; i++) {
+			threads[i].join();
+			assertTrue(runnables[i].succeeded());
+		}
+		
+		long count = SQLiteStoreTestsUtilities.countRows(this.getContext(), TestDbName, TestTable);
+        assertEquals(count, (long)threads.length);
+	}
 
     public void testUpsertThenLookupThenUpsertThenDeleteThenLookup() throws MobileServiceLocalStoreException {
         SQLiteStoreTestsUtilities.dropTestTable(this.getContext(), TestDbName, TestTable);
