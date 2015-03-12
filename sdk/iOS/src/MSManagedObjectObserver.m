@@ -52,12 +52,19 @@
 	}
 }
 
+/// Checks the entity has the ms_version attribute to signal it should
+/// be synchronised to the mobile service
+- (BOOL)entityHasRemoteStoreAttributes:(NSManagedObject *)managedObject
+{
+	return (managedObject.entity.attributesByName[StoreVersion] != nil);
+}
+
 - (void)handleDidSaveNotification:(NSNotification *)notification
 {
 	NSSet *insertedObjects = notification.userInfo[NSInsertedObjectsKey];
 	for (NSManagedObject *insertedObject in insertedObjects)
 	{
-		if (insertedObject.entity.attributesByName[StoreVersion] == nil) {
+		if ([self entityHasRemoteStoreAttributes:insertedObject] == FALSE) {
 			// Only apply table operations on entities we expect to be managed by the mobile service
 			continue;
 		}
@@ -75,10 +82,10 @@
 		}];
 	}
 	
-	NSSet *updatedObjects = notification.userInfo[NSInsertedObjectsKey];
+	NSSet *updatedObjects = notification.userInfo[NSUpdatedObjectsKey];
 	for (NSManagedObject *updatedObject in updatedObjects)
 	{
-		if (updatedObject.entity.attributesByName[StoreVersion] == nil) {
+		if ([self entityHasRemoteStoreAttributes:updatedObject] == FALSE) {
 			// Only apply table operations on entities we expect to be managed by the mobile service
 			continue;
 		}
@@ -96,10 +103,10 @@
 		}];
 	}
 	
-	NSSet *deletedObjects = notification.userInfo[NSInsertedObjectsKey];
+	NSSet *deletedObjects = notification.userInfo[NSDeletedObjectsKey];
 	for (NSManagedObject *deletedObject in deletedObjects)
 	{
-		if (deletedObject.entity.attributesByName[StoreVersion] == nil) {
+		if ([self entityHasRemoteStoreAttributes:deletedObject] == FALSE) {
 			// Only apply table operations on entities we expect to be managed by the mobile service
 			continue;
 		}
