@@ -64,7 +64,7 @@
 	NSSet *insertedObjects = notification.userInfo[NSInsertedObjectsKey];
 	for (NSManagedObject *insertedObject in insertedObjects)
 	{
-		if ([self entityHasRemoteStoreAttributes:insertedObject] == FALSE) {
+		if (![self entityHasRemoteStoreAttributes:insertedObject]) {
 			// Only apply table operations on entities we expect to be managed by the mobile service
 			continue;
 		}
@@ -85,7 +85,7 @@
 	NSSet *updatedObjects = notification.userInfo[NSUpdatedObjectsKey];
 	for (NSManagedObject *updatedObject in updatedObjects)
 	{
-		if ([self entityHasRemoteStoreAttributes:updatedObject] == FALSE) {
+		if (![self entityHasRemoteStoreAttributes:updatedObject]) {
 			// Only apply table operations on entities we expect to be managed by the mobile service
 			continue;
 		}
@@ -106,7 +106,7 @@
 	NSSet *deletedObjects = notification.userInfo[NSDeletedObjectsKey];
 	for (NSManagedObject *deletedObject in deletedObjects)
 	{
-		if ([self entityHasRemoteStoreAttributes:deletedObject] == FALSE) {
+		if (![self entityHasRemoteStoreAttributes:deletedObject]) {
 			// Only apply table operations on entities we expect to be managed by the mobile service
 			continue;
 		}
