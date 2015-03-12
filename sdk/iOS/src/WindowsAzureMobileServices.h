@@ -19,6 +19,7 @@
 #import "MSCoreDataStore.h"
 #import "MSPush.h"
 #import "MSDateOffset.h"
+#import "MSManagedObjectObserver.h"
 
 #define WindowsAzureMobileServicesSdkMajorVersion 2
 #define WindowsAzureMobileServicesSdkMinorVersion 0

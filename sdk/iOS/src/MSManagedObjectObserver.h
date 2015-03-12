@@ -7,12 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "MSClient.h"
+
+@class MSClient;
 
 @interface MSManagedObjectObserver : NSObject
 
-- (id) initWithClient:(MSClient *)client;
-
-- (id) initWithClient:(MSClient *)client contextsToObserver:(NSArray *)contexts;
+- (instancetype) initWithClient:(MSClient *)client;
 
 @end
