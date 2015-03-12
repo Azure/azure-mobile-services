@@ -201,6 +201,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         /// <param name="mobileAppUri">
         /// Absolute URI of the Microsoft Azure Mobile App.
+        /// </param>
         /// <param name="applicationKey">
         /// The application key for the Microsoft Azure Mobile App.
         /// </param> 
