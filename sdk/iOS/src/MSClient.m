@@ -275,6 +275,8 @@
                                                                             
     client.currentUser = [self.currentUser copyWithZone:zone];
     client.filters = [self.filters copyWithZone:zone];
+	
+	client.syncContext = [[MSSyncContext alloc] initWithDelegate:self.syncContext.delegate dataSource:self.syncContext.dataSource callback:self.syncContext.callbackQueue];
 
     return client;
 }

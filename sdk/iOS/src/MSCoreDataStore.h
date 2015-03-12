@@ -6,6 +6,8 @@
 #import <WindowsAzureMobileServices/WindowsAzureMobileServices.h>
 #import <CoreData/CoreData.h>
 
+extern NSString *const StoreVersion;
+
 /// The MSCoreDataStore class is for use when using the offline capabilities
 /// of mobile services. This class is a local store which manages records and sync
 /// logic using CoreData.
@@ -14,6 +16,9 @@
 /// MS_TableOperationErrors: Columns: id (string), properties (binary data)
 /// and all tables contain a ms_version column
 @interface MSCoreDataStore : NSObject <MSSyncContextDataSource>
+
+/// The NSManagedObjectContext that is associated with this data store
+@property (readonly, nonatomic, strong) NSManagedObjectContext *context;
 
 /// Disables the store from recieving information about the items passed into all sync table
 /// calls (insert, delete, update). If set, the application is responsible for already having
