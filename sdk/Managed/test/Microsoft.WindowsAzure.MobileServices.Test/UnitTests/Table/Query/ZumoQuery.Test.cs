@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.WindowsAzure.MobileServices.Query;
+using Microsoft.WindowsAzure.MobileServices.Test.UnitTests;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using Newtonsoft.Json;
 
@@ -94,7 +95,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     {
         private MobileServiceTableQueryDescription Compile<T, U>(Func<IMobileServiceTable<T>, IMobileServiceTableQuery<U>> getQuery)
         {
-            IMobileServiceClient service = new MobileServiceClient("http://www.test.com");
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
             IMobileServiceTable<T> table = service.GetTable<T>();
             IMobileServiceTableQuery<U> query = getQuery(table);
             MobileServiceTableQueryProvider provider = new MobileServiceTableQueryProvider();
@@ -260,7 +261,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var userParmeters1 = new Dictionary<string, string>() { { "state", "PA" } };
             var userParmeters2 = new Dictionary<string, string>() { { "country", "USA" } };
 
-            IMobileServiceClient service = new MobileServiceClient("http://www.test.com");
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
             IMobileServiceTable<Product> t = service.GetTable<Product>();
 
             IMobileServiceTableQuery<Product> originalQuery = from p in t select p;

@@ -84,7 +84,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         public static Task<MobileServiceUser> LoginAsync(this IMobileServiceClient client, string provider, IDictionary<string, string> parameters)
         {
             MobileServiceUIAuthentication auth = new MobileServiceUIAuthentication(client, provider, parameters);
-
             return auth.LoginAsync();
         }
 

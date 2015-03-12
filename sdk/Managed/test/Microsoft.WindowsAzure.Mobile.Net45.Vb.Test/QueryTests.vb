@@ -7,7 +7,7 @@ Imports Newtonsoft.Json
 <TestClass()> Public Class QueryTests
 
     Friend Shared Function Compile(Of T, U)(ByVal getQuery As Func(Of IMobileServiceTable(Of T), IMobileServiceTableQuery(Of U))) As MobileServiceTableQueryDescription
-        Dim client = New MobileServiceClient("http://www.test.com")
+        Dim client = New MobileServiceClient("http://www.testgateway.com/testmobileapp/")
         Dim table As IMobileServiceTable(Of T) = client.GetTable(Of T)()
         Dim query As IMobileServiceTableQuery(Of U) = getQuery(table)
         Dim provider As MobileServiceTableQueryProvider = New MobileServiceTableQueryProvider()
@@ -139,7 +139,7 @@ Imports Newtonsoft.Json
         Dim userParameters2 = New Dictionary(Of String, String)
         userParameters2.Add("country", "USA")
 
-        Dim service = New MobileServiceClient("http://www.test.com")
+        Dim service = New MobileServiceClient("http://www.testgateway.com/testmobileapp/")
         Dim table = service.GetTable(Of Product)()
 
         Dim query = (From p In table Select p).WithParameters(userParameters1).Skip(2).WithParameters(userParameters2)

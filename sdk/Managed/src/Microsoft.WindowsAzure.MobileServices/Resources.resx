@@ -138,6 +138,9 @@
   <data name="MobileServicesAuthentication_LoginAlreadyInProgress" xml:space="preserve">
     <value>Cannot start a login operation because login is already in progress.</value>
   </data>
+  <data name="MobileServicesAuthentication_MobileServiceClientDefinesNoGateway" xml:space="preserve">
+    <value>Cannot work with a MobileServiceClient that does not specify a gateway URI.</value>
+  </data>
   <data name="IAuthenticationBroker_LoginFailed" xml:space="preserve">
     <value>Login failed: {0}</value>
   </data>
@@ -209,6 +212,9 @@
   </data>
   <data name="ExpressionUtility_ProjectionNotSupportedOnWindowsPhone75" xml:space="preserve">
     <value>The Linq IQueryable Select() operation is not supported on the Windows Phone 7.5 platform.</value>
+  </data>
+  <data name="MobileServiceClient_NotAnAbsoluteURI" xml:space="preserve">
+    <value>{0} is not an absolute URI.</value>
   </data>
   <data name="MobileServiceClient_NoResponseContent" xml:space="preserve">
     <value>The server did not provide a response with the expected content.</value>

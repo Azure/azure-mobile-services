@@ -42,8 +42,11 @@ typedef void (^MSAPIDataBlock)(NSData *result,
 /// @name Properties
 /// @{
 
-/// The URL of the Microsoft Azure Mobile Service associated with the client.
-@property (nonatomic, strong, readonly)     NSURL *applicationURL;
+/// The URL of the Microsoft Azure Mobile App
+@property (nonatomic, strong, readonly) NSURL *applicationURL;
+
+/// The URL of the gateway associated with the mobile app
+@property (nonatomic, strong, readonly) NSURL *gatewayURL;
 
 /// The application key for the Microsoft Azure Mobile Service associated with
 /// the client if one was provided in the creation of the client and nil
@@ -51,13 +54,13 @@ typedef void (^MSAPIDataBlock)(NSData *result,
 /// made to the Microsoft Azure Mobile Service, allowing the client to perform
 /// all actions on the Microsoft Azure Mobile Service that require application-key
 /// level permissions.
-@property (nonatomic, copy, readonly)     NSString *applicationKey;
+@property (nonatomic, copy, readonly) NSString *applicationKey;
 
 /// A collection of MSFilter instances to apply to use with the requests and
 /// responses sent and received by the client. The property is readonly and the
 /// array is not-mutable. To apply a filter to a client, use the withFilter:
 /// method.
-@property (nonatomic, strong, readonly)         NSArray *filters;
+@property (nonatomic, strong, readonly) NSArray *filters;
 
 /// A sync context that defines how offline data is synced and allows for manually
 /// syncing data on demand
@@ -66,7 +69,7 @@ typedef void (^MSAPIDataBlock)(NSData *result,
 /// @name Registering and unregistering for push notifications
 
 /// The property to use for registering and unregistering for notifications via *MSPush*.
-@property (nonatomic, strong, readonly)     MSPush *push;
+@property (nonatomic, strong, readonly) MSPush *push;
 
 /// @}
 
@@ -76,7 +79,7 @@ typedef void (^MSAPIDataBlock)(NSData *result,
 /// The currently logged in user. While the currentUser property can be set
 /// directly, the login* and logout methods are more convenient and
 /// recommended for non-testing use.
-@property (nonatomic, strong)               MSUser *currentUser;
+@property (nonatomic, strong) MSUser *currentUser;
 
 /// @}
 
@@ -93,12 +96,12 @@ typedef void (^MSAPIDataBlock)(NSData *result,
 +(MSClient *)clientWithApplicationURLString:(NSString *)urlString
                          applicationKey:(NSString *)key;
 
-/// Old method to create a client with the given URL and application key for the
-/// Microsoft Azure Mobile Service. This has been deprecated. Use
-/// clientWithApplicationURLString:applicationKey:
-/// @deprecated
-+(MSClient *)clientWithApplicationURLString:(NSString *)urlString
-                         withApplicationKey:(NSString *)key __deprecated;
+/// Creates a client with the given URL and application key for the Microsoft Azure
+/// Mobile Service.
++(MSClient *)clientWithApplicationURLString:(NSString *)applicationUrlString
+                           gatewayURLString:(NSString *)gatewayUrlString
+                             applicationKey:(NSString *)key;
+
 
 /// Creates a client with the given URL for the Microsoft Azure Mobile Service.
 +(MSClient *)clientWithApplicationURL:(NSURL *)url;
@@ -108,6 +111,13 @@ typedef void (^MSAPIDataBlock)(NSData *result,
 +(MSClient *)clientWithApplicationURL:(NSURL *)url
                        applicationKey:(NSString *)key;
 
+/// Creates a client with the given URL and application key for the Microsoft Azure
+/// Mobile Service.
++(MSClient *)clientWithApplicationURL:(NSURL *)applicationUrl
+                           gatewayURL:(NSURL *)gatewayUrl
+                       applicationKey:(NSString *)key;
+
+
 #pragma  mark * Public Initializer Methods
 
 /// Initializes a client with the given URL for the Microsoft Azure Mobile Service.
@@ -116,6 +126,13 @@ typedef void (^MSAPIDataBlock)(NSData *result,
 /// Initializes a client with the given URL and application key for the Windows
 /// Azure Mobile Service.
 -(id)initWithApplicationURL:(NSURL *)url applicationKey:(NSString *)key;
+
+/// Initializes a client with the given URL and application key for the Windows
+/// Azure Mobile Service.
+-(id)initWithApplicationURL:(NSURL *)applicationUrl
+                 gatewayURL:(NSURL *)gatewayUrl
+             applicationKey:(NSString *)key;
+
 
 #pragma mark * Public Filter Methods
 

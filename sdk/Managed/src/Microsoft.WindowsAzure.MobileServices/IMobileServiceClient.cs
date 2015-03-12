@@ -23,10 +23,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         string ApplicationKey { get; }
 
         /// <summary>
-        /// Gets the Uri to the Mobile Services application that is provided by
-        /// the call to MobileServiceClient(...).
+        /// Absolute URI of the Microsoft Azure Mobile App.
         /// </summary>
-        Uri ApplicationUri { get; }
+        Uri MobileAppUri { get; }
+
+        /// <summary>
+        /// Absolute URI of the Azure App Service Gateway.
+        /// </summary>
+        Uri GatewayUri { get; }
 
         /// <summary>
         /// The current authenticated user provided after a successful call to
