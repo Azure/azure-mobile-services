@@ -107,6 +107,21 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.StartsWith(hijack.Request.RequestUri.ToString(), mobileAppUriValidator.TableBaseUri);
         }
 
+        [TestMethod]
+        public void DoesNotRewireSingleWiredDelegatingHandler()
+        {
+            string appUrl = MobileAppUriValidator.DummyMobileApp;
+            string appKey = "secret...";
+
+            TestHttpHandler innerHandler = new TestHttpHandler();
+            DelegatingHandler wiredHandler = new TestHttpHandler();
+            wiredHandler.InnerHandler = innerHandler;
+
+            IMobileServiceClient service = new MobileServiceClient(appUrl, applicationKey: appKey, handlers: wiredHandler);
+
+            Assert.AreEqual(wiredHandler.InnerHandler, innerHandler, "The prewired handler passed in should not have been rewired");
+        }
+
         [AsyncTestMethod]
         public async Task MultipleHttpHandlerConstructor()
         {
