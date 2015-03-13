@@ -96,6 +96,7 @@ public class OperationQueue {
         columns.put("__createdat", ColumnDataType.Date);
         columns.put("__queueloadedat", ColumnDataType.Date);
         columns.put("sequence", ColumnDataType.Real);
+        columns.put("state", ColumnDataType.Real);
 
         store.defineTable(OPERATION_QUEUE_TABLE, columns);
     }
@@ -154,6 +155,7 @@ public class OperationQueue {
         element.addProperty("__createdat", DateSerializer.serialize(opQueueItem.getCreatedAt()));
         element.addProperty("__queueloadedat", DateSerializer.serialize(opQueueItem.getQueueLoadedAt()));
         element.addProperty("sequence", opQueueItem.getSequence());
+        element.addProperty("state", opQueueItem.getOperationState().getValue());
 
         return element;
     }
@@ -166,6 +168,7 @@ public class OperationQueue {
         Date createdAt = DateSerializer.deserialize(element.get("__createdat").getAsString());
         Date queueLoadedAt = DateSerializer.deserialize(element.get("__queueloadedat").getAsString());
         long sequence = element.get("sequence").getAsLong();
+        int state = element.get("state").getAsInt();
 
         TableOperation operation = null;
         switch (kind) {
@@ -180,6 +183,8 @@ public class OperationQueue {
                 break;
         }
 
+        operation.setOperationState(MobileServiceTableOperationState.parse(state));
+
         return new OperationQueueItem(operation, queueLoadedAt, sequence);
     }
 
@@ -193,6 +198,12 @@ public class OperationQueue {
         this.mSyncLock.writeLock().lock();
 
         try {
+
+            //If an operation state is already seted, keep it to support requee failed operations
+            if (operation.getOperationState() == null) {
+                operation.setOperationState(MobileServiceTableOperationState.Pending);
+            }
+
             // '/' is a reserved character that cannot be used on string ids.
             // We use it to build a unique compound string from tableName and
             // itemId
@@ -243,6 +254,18 @@ public class OperationQueue {
             }
 
             return result;
+        } finally {
+            this.mSyncLock.writeLock().unlock();
+        }
+    }
+
+    public OperationQueue removeOperationFromQueue(String operationId) throws ParseException, MobileServiceLocalStoreException {
+        this.mSyncLock.writeLock().lock();
+
+        try {
+            this.mStore.delete(OPERATION_QUEUE_TABLE, operationId);
+
+            return OperationQueue.load(this.mStore);
         } finally {
             this.mSyncLock.writeLock().unlock();
         }
@@ -368,6 +391,7 @@ public class OperationQueue {
         this.mQueue.poll();
 
         removeOperationQueueItem(opQueueItem);
+
         dequeueCancelledOperations();
 
         return opQueueItem.getOperation();
@@ -478,7 +502,6 @@ public class OperationQueue {
             this.mQueueLoadedAt = queueLoadedAt;
             this.mSequence = sequence;
             this.mCancelled = false;
-            this.mOperation.setOperationState(MobileServiceTableOperationState.Attempted);
         }
 
         @Override

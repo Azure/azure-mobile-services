@@ -34,7 +34,6 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceFeatures;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceExceptionBase;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemColumns;
-import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProperty;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
@@ -65,6 +64,7 @@ import com.microsoft.windowsazure.mobileservices.threading.MultiReadWriteLockDic
 import com.microsoft.windowsazure.mobileservices.threading.MultiReadWriteLockDictionary.MultiReadWriteLock;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -211,6 +211,16 @@ public class MobileServiceSyncContext {
     }
 
     /**
+     * Remove operations that contains errors from the queue
+     * @param tableOperationError
+     * @throws ParseException
+     * @throws MobileServiceLocalStoreException
+     */
+    public void removeTableOperation(TableOperationError tableOperationError) throws ParseException, MobileServiceLocalStoreException {
+        this.mOpQueue = this.mOpQueue.removeOperationFromQueue(tableOperationError.getOperationId());
+    }
+
+    /**
      * Returns the number of pending operations that are not yet pushed to
      * remote tables.
      *
@@ -240,10 +250,6 @@ public class MobileServiceSyncContext {
         }
 
         return result;
-    }
-
-    public OperationQueue getOperationQueue() {
-        return this.mOpQueue;
     }
 
     /**
@@ -445,6 +451,7 @@ public class MobileServiceSyncContext {
         String invTableName = tableName != null ? tableName.trim().toLowerCase(Locale.getDefault()) : null;
 
         InsertOperation operation = new InsertOperation(invTableName, itemId);
+
         processOperation(operation, item);
     }
 
@@ -730,6 +737,8 @@ public class MobileServiceSyncContext {
     private void pushOperations(Bookmark bookmark) throws MobileServicePushFailedException {
         MobileServicePushCompletionResult pushCompletionResult = new MobileServicePushCompletionResult();
 
+        List<TableOperation> failedOperations = new ArrayList<>();
+
         try {
             LockProtectedOperation lockedOp = peekAndLock(bookmark);
 
@@ -747,17 +756,16 @@ public class MobileServiceSyncContext {
                     } catch (MobileServiceSyncHandlerException syncHandlerException) {
                         MobileServicePushStatus cancelReason = getPushCancelReason(syncHandlerException);
 
+                        operation.setOperationState(MobileServiceTableOperationState.Failed);
+
                         if (cancelReason != null) {
                             pushCompletionResult.setStatus(cancelReason);
-
-                            operation.setOperationState(MobileServiceTableOperationState.Failed);
                             break;
                         } else {
                             this.mOpErrorList.add(getTableOperationError(operation, syncHandlerException));
+                            failedOperations.add(operation);
                         }
                     }
-
-                    operation.setOperationState(MobileServiceTableOperationState.Failed);
 
                     // '/' is a reserved character that cannot be used on string
                     // ids.
@@ -769,6 +777,7 @@ public class MobileServiceSyncContext {
                     this.mStore.delete(ITEM_BACKUP_TABLE, tableItemId);
 
                     bookmark.dequeue();
+
                 } finally {
                     try {
                         this.mIdLockMap.unLock(lockedOp.getIdLock());
@@ -798,11 +807,27 @@ public class MobileServiceSyncContext {
         }
 
         if (pushCompletionResult.getStatus() != MobileServicePushStatus.Complete) {
+            if (failedOperations.size() > 0) {
+                //Reload Queue with pending error operations
+                this.mOpLock.writeLock().lock();
+
+                try {
+                    for (TableOperation failedOperation : failedOperations) {
+                        this.mOpQueue.enqueue(failedOperation);
+                    }
+                } catch (Throwable throwable) {
+                } finally {
+                    this.mOpLock.writeLock().unlock();
+                }
+            }
             throw new MobileServicePushFailedException(pushCompletionResult);
         }
     }
 
     private void pushOperation(TableOperation operation) throws MobileServiceLocalStoreException, MobileServiceSyncHandlerException {
+
+        operation.setOperationState(MobileServiceTableOperationState.Attempted);
+
         JsonObject item = this.mStore.lookup(operation.getTableName(), operation.getItemId());
 
         if (item == null) {
@@ -817,8 +842,6 @@ public class MobileServiceSyncContext {
                 item = backedUpItem.get("clientitem").isJsonObject() ? backedUpItem.getAsJsonObject("clientitem") : null;
             }
         }
-
-        operation.setOperationState(MobileServiceTableOperationState.Attempted);
 
         JsonObject result = this.mHandler.executeTableOperation(new RemoteTableOperationProcessor(this.mClient, item), operation);
 
@@ -913,7 +936,7 @@ public class MobileServiceSyncContext {
             serverItem = mspfEx.getValue();
         }
 
-        return new TableOperationError(operation.getKind(), operation.getTableName(), operation.getItemId(), clientItem, throwable.getMessage(), statusCode,
+        return new TableOperationError(operation.getId(), operation.getKind(), operation.getTableName(), operation.getItemId(), clientItem, throwable.getMessage(), statusCode,
                 serverResponse, serverItem);
     }
 

@@ -47,7 +47,6 @@ public class UpdateOperation implements TableOperation {
         this.mTableName = tableName;
         this.mItemId = itemId;
         this.mCreatedAt = new Date();
-        this.operationState = MobileServiceTableOperationState.Attempted;
     }
 
     /**
