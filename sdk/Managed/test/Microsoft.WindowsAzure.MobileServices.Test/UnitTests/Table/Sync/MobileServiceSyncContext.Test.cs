@@ -246,6 +246,136 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             await service.SyncContext.PushAsync();
         }
 
+        class LocalStoreWithDelay : MobileServiceLocalStoreMock
+        {
+            private int _lookupDelayInMilliseconds = 0;
+
+            public override async Task<JObject> LookupAsync(string tableName, string id)
+            {
+                if (0 != _lookupDelayInMilliseconds)
+                {
+                    // releases this thread and causes this lookup to take longer
+                    await Task.Delay(_lookupDelayInMilliseconds);
+                }
+
+                return await base.LookupAsync(tableName, id);
+            }
+
+            /// <summary>
+            /// Tells this mock to yield and to delay for the given number of milliseconds before proceeding with the LookupAsync().
+            /// </summary>
+            /// <param name="delayInMilliseconds">The delay in milliseconds.</param>
+            internal void SetLookupDelay(int delayInMilliseconds)
+            {
+                _lookupDelayInMilliseconds = delayInMilliseconds;
+            }
+        }
+
+        [AsyncTestMethod]
+        public async Task PushAsync_Succeeds_WithPendingOperations_AndOpQueueIsConsistent()
+        {
+            // Essentially async ManualResetEvents
+            SemaphoreSlim untilPendingOpsCreated = new SemaphoreSlim(0, 1);
+            SemaphoreSlim untilAboutToExecuteOp = new SemaphoreSlim(0, 1);
+
+            int pushState = 0;
+
+            var handler = new MobileServiceSyncHandlerMock();
+
+            handler.TableOperationAction = async op =>
+            {
+                try
+                {
+                    untilAboutToExecuteOp.Release();
+                    await untilPendingOpsCreated.WaitAsync();
+
+                    JObject result = await op.ExecuteAsync();
+
+                    if (0 == pushState)
+                    {
+                        Assert.AreEqual(MobileServiceTableOperationKind.Insert, op.Kind);
+                        Assert.AreEqual(0, op.Item.Value<int>("value"));
+                    }
+                    else
+                    {
+                        Assert.AreEqual(MobileServiceTableOperationKind.Update, op.Kind);
+                        Assert.AreEqual(2, op.Item.Value<int>("value")); // We shouldn't see the value == 1, since it should have been collapsed
+                    }
+
+                    // We don't care what the server actually returned, as long as there was no exception raised in our Push logic
+                    return result;
+                }
+                catch (Exception ex)
+                {
+                    Assert.Fail("Things are bad: " + ex.Message);
+                }
+
+                return null;
+            };
+
+            var hijack = new TestHttpHandler();
+
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            LocalStoreWithDelay mockLocalStore = new LocalStoreWithDelay();
+            await service.SyncContext.InitializeAsync(mockLocalStore, handler);
+
+            JObject item = null;
+
+            // Add the initial operation and perform a push
+            IMobileServiceSyncTable table = service.GetSyncTable("someTable");
+
+            string responseContent = @"{ ""id"": ""abc"", ""value"": ""0"", ""__version"": ""v0"" }"; // Whatever is fine, since we won't use it or look at it
+
+            // Do this Insert/Push/Update+Update/Push cycle several times fast to try to hit any race conditions that would cause an error
+            for (int id = 0; id < 10; id++)
+            {
+                hijack.SetResponseContent(responseContent);
+                string idStr = "id" + id; // Generate a new Id each time in case the mock objects ever care that we insert an item that already exists
+
+                // The Operations and PushAction don't necessarily clone the JObject, so we need a fresh one for each operation or else we'll change
+                // the in-memory representation of the JObject stored in all operations, as well as in the "batch" the PushAction owns. This is problematic.
+                item = new JObject() { { "id", idStr }, { "value", 0 } };
+                await table.InsertAsync(item);
+
+                Task pushComplete = service.SyncContext.PushAsync();
+
+                // Make sure the PushAction has actually called into our SyncHandler, otherwise the two UpdateOperations could collapse onto it, and
+                // there won't necessarily even be a second PushAction
+                await untilAboutToExecuteOp.WaitAsync();
+
+                // Add some more operations while that push is in flight. Since these operations affect the same item in someTable, the operations
+                // will be stuck awaiting the PushAction since it locks on the row.
+                item = new JObject() { { "id", idStr }, { "value", 1 } };
+                Task updateOnce = table.UpdateAsync(item);
+
+                item = new JObject() { { "id", idStr }, { "value", 2 } };
+                Task updateTwice = table.UpdateAsync(item);
+
+                // Before we let the push finish, let's inject a delay that will cause it to take a long time deleting the operation from the queue.
+                // This will give the other operations, if there's an unaddressed race condition, a chance to wreak havoc on the op queue.
+                mockLocalStore.SetLookupDelay(500);
+
+                // Let the first push finish
+                untilPendingOpsCreated.Release();
+                await pushComplete;
+
+                mockLocalStore.SetLookupDelay(0);
+
+                await updateOnce;
+                await updateTwice;
+
+                // Push again, but now the operation condensed from the two updates should be executed remotely
+                pushState = (pushState + 1) % 2;
+                hijack.SetResponseContent(responseContent);
+                pushComplete = service.SyncContext.PushAsync();
+                await untilAboutToExecuteOp.WaitAsync(); // not strictly necessary other than to keep the semaphore count at 0
+                untilPendingOpsCreated.Release();
+
+                await pushComplete;
+                pushState = (pushState + 1) % 2;
+            }
+        }
+
         [AsyncTestMethod]
         public async Task CancelAndUpdateItemAsync_UpsertsTheItemInLocalStore_AndDeletesTheOperationAndError()
         {
