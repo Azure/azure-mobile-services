@@ -29,7 +29,7 @@ module.exports = function(grunt) {
         'src/Utilities/Promises.js'
       ],
       fxos: [
-        'src/Push/Push.Web.js',
+        'src/Push/Push.FxOS.js',
         'src/Platforms/Platform.FxOS.js',
         'src/Generated/MobileServices.Core.js',
         'src/Transports/*.js',
