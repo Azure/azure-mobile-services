@@ -23,6 +23,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
+import com.microsoft.windowsazure.mobileservices.table.DateTimeOffset;
 import com.microsoft.windowsazure.mobileservices.table.serialization.DateSerializer;
 
 import java.io.UnsupportedEncodingException;
@@ -47,7 +48,11 @@ class QueryNodeODataWriter implements QueryNodeVisitor<QueryNode> {
     }
 
     private static String process(Date date) {
-        return "datetimeoffset'" + DateSerializer.serialize(date) + "'";
+        return "datetime'" + DateSerializer.serialize(date) + "'";
+    }
+
+    private static String process(DateTimeOffset dateTimeOffset) {
+        return "datetimeoffset'" + DateSerializer.serialize(dateTimeOffset) + "'";
     }
 
     /**
@@ -128,7 +133,9 @@ class QueryNodeODataWriter implements QueryNodeVisitor<QueryNode> {
 
         if (value instanceof String) {
             constant = process((String) value);
-        } else if (value instanceof Date) {
+        } else if (value instanceof DateTimeOffset) {
+            constant = process((DateTimeOffset) value);
+        }else if (value instanceof Date) {
             constant = process((Date) value);
         }
 

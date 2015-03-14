@@ -24,6 +24,7 @@ import android.test.InstrumentationTestCase;
 import com.google.gson.GsonBuilder;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.helpers.EncodingUtilities;
+import com.microsoft.windowsazure.mobileservices.table.DateTimeOffset;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryODataWriter;
@@ -336,6 +337,31 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
+
+    public void testDateTimeOffset() throws Throwable {
+
+        // Create query
+
+        Query query = table.where().field("birthdate").eq().val(new DateTimeOffset(getUTCDate(1986, 6, 30, 0, 0, 0)));
+
+        // Assert
+        String expectedFilters = "birthdate eq datetimeoffset'1986-06-30T00:00:00.000Z'";
+        expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
+
+        // Create query
+
+        query = table.where().field("birthdate").eq(new DateTimeOffset(getUTCDate(1986, 6, 30, 0, 0, 0)));
+
+        // Assert
+        expectedFilters = "birthdate eq (datetimeoffset'1986-06-30T00:00:00.000Z')";
+        expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
+    }
+
+
 
     public void testAnd() throws Throwable {
 

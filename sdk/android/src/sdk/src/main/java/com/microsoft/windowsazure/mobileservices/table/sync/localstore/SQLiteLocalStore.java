@@ -431,12 +431,12 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
             throw new IllegalArgumentException("System column \"id\" must be ColumnDataType.String.");
         } else if (invColumnName.equals("__version") && colDataType != ColumnDataType.String) {
             throw new IllegalArgumentException("System column \"__version\" must be ColumnDataType.String.");
-        } else if (invColumnName.equals("__createdat") && colDataType != ColumnDataType.Date) {
-            throw new IllegalArgumentException("System column \"__createdat\" must be ColumnDataType.Date.");
-        } else if (invColumnName.equals("__updatedat") && colDataType != ColumnDataType.Date) {
-            throw new IllegalArgumentException("System column \"__updatedat\" must be ColumnDataType.Date.");
-        } else if (invColumnName.equals("__queueloadedat") && colDataType != ColumnDataType.Date) {
-            throw new IllegalArgumentException("System column \"__queueloadedat\" must be ColumnDataType.Date.");
+        } else if (invColumnName.equals("__createdat") && colDataType != ColumnDataType.DateTimeOffset) {
+            throw new IllegalArgumentException("System column \"__createdat\" must be ColumnDataType.DateTimeOffset.");
+        } else if (invColumnName.equals("__updatedat") && colDataType != ColumnDataType.DateTimeOffset) {
+            throw new IllegalArgumentException("System column \"__updatedat\" must be ColumnDataType.DateTimeOffset.");
+        } else if (invColumnName.equals("__queueloadedat") && colDataType != ColumnDataType.DateTimeOffset) {
+            throw new IllegalArgumentException("System column \"__queueloadedat\" must be ColumnDataType.DateTimeOffset.");
         } else if (invColumnName.equals("__deleted") && colDataType != ColumnDataType.Boolean) {
             throw new IllegalArgumentException("System column \"__deleted\" must be ColumnDataType.Boolean.");
         }
@@ -474,6 +474,10 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
                     case Date:
                         String dateValue = cursor.getString(columnIndex);
                         result.addProperty(originalColumnName, dateValue);
+                        break;
+                    case DateTimeOffset:
+                        String dateTimeOffsetValue = cursor.getString(columnIndex);
+                        result.addProperty(originalColumnName, dateTimeOffsetValue);
                         break;
                     case Other:
                         JsonElement otherValue = new JsonParser().parse(cursor.getString(columnIndex));
@@ -672,6 +676,9 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
                     type = "TEXT";
                     break;
                 case Date:
+                    type = "TEXT";
+                    break;
+                case DateTimeOffset:
                     type = "TEXT";
                     break;
                 case Other:
