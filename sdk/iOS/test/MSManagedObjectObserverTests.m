@@ -173,4 +173,58 @@
 	}];
 }
 
+- (void)testObservingInsertResultingInError
+{
+	XCTestExpectation *expectation = [self expectationWithDescription:@"Table operation observed"];
+	
+	__block int saveCount = 0;
+	
+	[self startObservingContextWithObservationCompletion:^(MSTableOperationTypes operationType, NSDictionary *item, NSError *error) {
+		
+		saveCount++;
+		
+		// We only want to test the second save which should cause the error
+		if (saveCount > 1)
+		{
+			XCTAssertNotNil(error, @"Should have an error on second item insert causing duplicate id");
+			
+			[expectation fulfill];
+		}
+	}];
+	
+	[self insertTestItem];
+	
+	// Second insert with duplicate id should cause error
+	[self insertTestItem];
+	
+	[self waitForExpectationsWithTimeout:3 handler:^(NSError *error) {
+		if (error != nil)
+		{
+			XCTFail(@"Expectation for observer save failed");
+		}
+	}];
+}
+
+- (void)testNoInsertWhenMsVersionAttributeDoesntExist
+{
+	[self startObservingContextWithObservationCompletion:^(MSTableOperationTypes operationType, NSDictionary *item, NSError *error) {
+		XCTFail(@"Should not observe any changes for insert in this entity");
+	}];
+	
+	NSManagedObjectContext *todoNoVersion = [NSEntityDescription insertNewObjectForEntityForName:@"TodoNoVersion" inManagedObjectContext:self.context];
+	[todoNoVersion setValue:@"ABC" forKey:@"id"];
+	[todoNoVersion setValue:@"Test text" forKey:@"text"];
+	
+	[self.context save:nil];
+	
+	// As no insert observations will be observed, lets sleep for a bit and ensure no
+	// operations have been inserted
+	sleep(2);
+	
+	NSFetchRequest *tableOperationsRequest = [NSFetchRequest fetchRequestWithEntityName:@"MS_TableOperations"];
+	NSArray *tableOperations = [self.context executeFetchRequest:tableOperationsRequest error:nil];
+	
+	XCTAssertEqual(tableOperations.count, 0, @"Should have no operations pending");
+}
+
 @end

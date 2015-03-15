@@ -18,6 +18,10 @@ typedef void (^MSManagedObjectObserverCompletionBlock)(MSTableOperationTypes ope
 - (instancetype) initWithClient:(MSClient *)client;
 
 /// Block to be called on each operation that will is inserted into MS_TableOperations
+///
+/// If not implemented or not dealing with errors and errors occur during these operations
+/// the local store and associated messages to the mobile services API will be left
+/// in a bad state.
 @property (nonatomic, copy) MSManagedObjectObserverCompletionBlock observerActionCompleted;
 
 @end
