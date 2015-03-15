@@ -74,10 +74,9 @@
 		
 		MSSyncTable *syncTable = [self.client syncTableWithName:tableName];
 		[syncTable insert:tableItem completion:^(NSDictionary *item, NSError *error) {
-			if (error != nil) {
-				NSLog(@"Error inserting %@ into %@ table with error: %@", tableItem, tableName, error);
-			} else {
-				NSLog(@"Successfully inserted %@ into %@", tableItem, tableName);
+			if (self.observerActionCompleted != nil)
+			{
+				self.observerActionCompleted(MSTableOperationInsert, tableItem, error);
 			}
 		}];
 	}
@@ -95,10 +94,9 @@
 		
 		MSSyncTable *syncTable = [self.client syncTableWithName:tableName];
 		[syncTable update:tableItem completion:^(NSError *error) {
-			if (error != nil) {
-				NSLog(@"Error updating %@ into %@ table with error: %@", tableItem, tableName, error);
-			}else {
-				NSLog(@"Successfully updated %@ into %@", tableItem, tableName);
+			if (self.observerActionCompleted != nil)
+			{
+				self.observerActionCompleted(MSTableOperationUpdate, tableItem, error);
 			}
 		}];
 	}
@@ -116,10 +114,9 @@
 		
 		MSSyncTable *syncTable = [self.client syncTableWithName:tableName];
 		[syncTable delete:tableItem completion:^(NSError *error) {
-			if (error != nil) {
-				NSLog(@"Error deleting %@ from %@ table with error: %@", tableItem, tableName, error);
-			}else {
-				NSLog(@"Successfully deleted %@ from %@", tableItem, tableName);
+			if (self.observerActionCompleted != nil)
+			{
+				self.observerActionCompleted(MSTableOperationDelete, tableItem, error);
 			}
 		}];
 	}
