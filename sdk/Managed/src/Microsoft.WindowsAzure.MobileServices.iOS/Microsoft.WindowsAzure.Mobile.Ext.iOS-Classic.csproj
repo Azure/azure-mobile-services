@@ -147,8 +147,6 @@
     <Compile Include="Platform\PlatformInformation.cs" />
     <Compile Include="Push\Push.cs" />
     <Compile Include="Platform\PushUtility.cs" />
-    <Compile Include="Push\ApnsRegistration.cs" />
-    <Compile Include="Push\ApnsTemplateRegistration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

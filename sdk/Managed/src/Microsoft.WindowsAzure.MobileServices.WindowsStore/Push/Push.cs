@@ -19,7 +19,6 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// </summary>
     public sealed class Push
     {
-        internal readonly RegistrationManager RegistrationManager;
         internal readonly PushHttpClient PushHttpClient;
 
         private const string PrimaryChannelId = "$Primary";
@@ -43,10 +42,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 tileId = PrimaryChannelId;
             }
 
-            string name = string.Format("{0}-PushContainer-{1}-{2}", Package.Current.Id.Name, client.MobileAppUri.Host, tileId);
-            var storageManager = new LocalStorageManager(name);
             this.PushHttpClient = new PushHttpClient(client);
-            this.RegistrationManager = new RegistrationManager(this.PushHttpClient, storageManager);
 
             this.SecondaryTiles = tiles ?? new SecondaryTilesList(this);
         }
@@ -62,7 +58,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         public IDictionary<string, Push> SecondaryTiles { get; set; }
 
         /// <summary>
-        /// Gets the installation Id used to register the device with Notification Hubs
+        /// Installation Id used to register the device with Notification Hubs
         /// </summary>
         public string InstallationId
         {
@@ -73,104 +69,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         private MobileServiceClient Client { get; set; }
-
-        /// <summary>
-        /// Register a particular channelUri
-        /// </summary>
-        /// <param name="channelUri">The channelUri to register</param>
-        /// <returns>Task that completes when registration is complete</returns>
-        public Task RegisterNativeAsync(string channelUri)
-        {
-            return this.RegisterNativeAsync(channelUri, null);
-        }
-
-        /// <summary>
-        /// Register a particular channelUri
-        /// </summary>
-        /// <param name="channelUri">The channelUri to register</param>
-        /// <param name="tags">The tags to register to receive notifications from</param>
-        /// <returns>Task that completes when registration is complete</returns>
-        public Task RegisterNativeAsync(string channelUri, IEnumerable<string> tags)
-        {
-            if (string.IsNullOrWhiteSpace(channelUri))
-            {
-                throw new ArgumentNullException("channelUri");
-            }
-
-            var registration = new WnsRegistration(channelUri, tags);
-            return this.RegistrationManager.RegisterAsync(registration);
-        }
-
-        /// <summary>
-        /// Register a particular channelUri with a template
-        /// </summary>
-        /// <param name="channelUri">The channelUri to register</param>
-        /// <param name="xmlTemplate">The XmlDocument defining the template</param>
-        /// <param name="templateName">The template name</param>
-        /// <returns>Task that completes when registration is complete</returns>
-        public Task RegisterTemplateAsync(string channelUri, XmlDocument xmlTemplate, string templateName)
-        {
-            return this.RegisterTemplateAsync(channelUri, xmlTemplate, templateName, tags: null);
-        }
-
-        /// <summary>
-        /// Register a particular channelUri with a template
-        /// </summary>
-        /// <param name="channelUri">The channelUri to register</param>
-        /// <param name="xmlTemplate">The XmlDocument defining the template</param>
-        /// <param name="templateName">The template name</param>
-        /// <param name="tags">The tags to register to receive notifications from</param>
-        /// <returns>Task that completes when registration is complete</returns>        
-        public Task RegisterTemplateAsync(string channelUri, XmlDocument xmlTemplate, string templateName, IEnumerable<string> tags)
-        {
-            if (xmlTemplate == null)
-            {
-                throw new ArgumentNullException("xmlTemplate");
-            }
-
-            return this.RegisterTemplateAsync(channelUri, xmlTemplate.GetXml(), templateName, tags);
-        }
-
-        /// <summary>
-        /// Register a particular channelUri with a template
-        /// </summary>
-        /// <param name="channelUri">The channelUri to register</param>
-        /// <param name="xmlTemplate">The string defining the template</param>
-        /// <param name="templateName">The template name</param>
-        /// <returns>Task that completes when registration is complete</returns>
-        public Task RegisterTemplateAsync(string channelUri, string xmlTemplate, string templateName)
-        {
-            return this.RegisterTemplateAsync(channelUri, xmlTemplate, templateName, null);
-        }
-
-        /// <summary>
-        /// Register a particular channelUri with a template
-        /// </summary>
-        /// <param name="channelUri">The channelUri to register</param>
-        /// <param name="xmlTemplate">The string defining the template</param>
-        /// <param name="templateName">The template name</param>
-        /// <param name="tags">The tags to register to receive notifications from</param>
-        /// <returns>Task that completes when registration is complete</returns>
-        public Task RegisterTemplateAsync(string channelUri, string xmlTemplate, string templateName, IEnumerable<string> tags)
-        {
-            if (string.IsNullOrWhiteSpace(channelUri))
-            {
-                throw new ArgumentNullException("channelUri");
-            }
-
-            if (string.IsNullOrWhiteSpace(xmlTemplate))
-            {
-                throw new ArgumentNullException("xmlTemplate");
-            }
-
-            if (string.IsNullOrWhiteSpace(templateName))
-            {
-                throw new ArgumentNullException("templateName");
-            }
-
-            var registration = new WnsTemplateRegistration(channelUri, xmlTemplate, templateName, tags);
-            return this.RegistrationManager.RegisterAsync(registration);
-        }
 
         /// <summary>
         /// Register an Installation with particular channelUri
@@ -221,76 +119,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// Unregister any registrations previously registered from this device
-        /// </summary>
-        /// <returns>Task that completes when unregister is complete</returns>
-        public Task UnregisterNativeAsync()
-        {
-            return this.UnregisterTemplateAsync(Registration.NativeRegistrationName);
-        }
-
-        /// <summary>
-        /// Unregister any registrations with given templateName registered from this device
-        /// </summary>
-        /// <param name="templateName">The template name</param>
-        /// <returns>Task that completes when unregister is complete</returns>
-        public Task UnregisterTemplateAsync(string templateName)
-        {
-            return this.RegistrationManager.UnregisterAsync(templateName);
-        }
-
-        /// <summary>
-        /// Unregister any registrations with given channelUri
-        /// </summary>
-        /// <param name="channelUri">The channel Uri</param>
-        /// <returns>Task that completes when unregister is complete</returns>
-        public Task UnregisterAllAsync(string channelUri)
-        {
-            if (string.IsNullOrWhiteSpace(channelUri))
-            {
-                throw new ArgumentNullException("channelUri");
-            }
-
-            return this.RegistrationManager.DeleteRegistrationsForChannelAsync(channelUri);
-        }
-
-        /// <summary>
         /// Unregister any installations previously registered from this device
         /// </summary>
         /// <returns>Task that completes when unregister is complete</returns>
         public Task UnregisterAsync()
         {
             return this.PushHttpClient.DeleteInstallationAsync();
-        }
-
-        /// <summary>
-        /// Register for notifications
-        /// </summary>
-        /// <param name="registration">The object defining the registration</param>
-        /// <returns>Task that will complete when the registration is completed</returns>
-        public Task RegisterAsync(Registration registration)
-        {
-            if (registration == null)
-            {
-                throw new ArgumentNullException("registration");
-            }
-
-            if (string.IsNullOrWhiteSpace(registration.PushHandle))
-            {
-                throw new ArgumentNullException("registration.ChannelUri");
-            }
-
-            return this.RegistrationManager.RegisterAsync(registration);
-        }
-
-        /// <summary>
-        /// DEBUG-ONLY: List the registrations made with the service for a channelUri
-        /// </summary>
-        /// <param name="channelUri">The channelUri to check for</param>
-        /// <returns>List of registrations</returns>
-        public Task<List<Registration>> ListRegistrationsAsync(string channelUri)
-        {
-            return this.RegistrationManager.ListRegistrationsAsync(channelUri);
         }
 
         /// <summary>

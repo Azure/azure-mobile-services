@@ -62,8 +62,6 @@
       <Link>ExpressionUtility\VisitorHelper.cs</Link>
     </Compile>
     <Compile Include="Push\Push.cs" />
-    <Compile Include="Push\MpnsRegistration.cs" />
-    <Compile Include="Push\MpnsTemplateRegistration.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.WindowsAzure.MobileServices\Microsoft.WindowsAzure.Mobile.csproj">
