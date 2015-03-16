@@ -625,7 +625,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             HttpMessageHandler pipeline = handlers.LastOrDefault() ?? DefaultHandlerFactory();
             DelegatingHandler dHandler = pipeline as DelegatingHandler;
-            if (dHandler != null)
+            if (dHandler != null && dHandler.InnerHandler == null)
             {
                 dHandler.InnerHandler = DefaultHandlerFactory();
                 pipeline = dHandler;
