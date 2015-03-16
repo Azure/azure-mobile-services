@@ -28,68 +28,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             return DefaultChannelUri.Replace('A', 'B');
         }
 
-        public Registration GetTemplateRegistrationForToast()
-        {
-            var channel = GetPushHandle();
-            return new GcmTemplateRegistration(channel, BodyTemplate, DefaultToastTemplateName, DefaultTags);
-        }
-
-        public void ValidateTemplateRegistration(Registration registration)
-        {
-            var gcmTemplateRegistration = (GcmTemplateRegistration)registration;
-            Assert.AreEqual(gcmTemplateRegistration.BodyTemplate, BodyTemplate);
-
-            foreach (string tag in DefaultTags)
-            {
-                Assert.IsTrue(registration.Tags.Contains(tag));
-            }
-
-            Assert.AreEqual(gcmTemplateRegistration.Name, DefaultToastTemplateName);
-            Assert.AreEqual(gcmTemplateRegistration.TemplateName, DefaultToastTemplateName);
-        }
-
-        public void ValidateTemplateRegistrationBeforeRegister(Registration registration)
-        {
-            ValidateTemplateRegistration(registration);
-            Assert.AreEqual(registration.Tags.Count(), DefaultTags.Length);
-            Assert.IsNull(registration.RegistrationId);
-        }
-
-        public void ValidateTemplateRegistrationAfterRegister(Registration registration, string zumoInstallationId)
-        {
-            ValidateTemplateRegistration(registration);
-            Assert.IsNotNull(registration.RegistrationId);
-            // TODO: Uncomment when .Net Runtime implements installationID
-            //Assert.IsTrue(registration.Tags.Contains(zumoInstallationId));
-            Assert.AreEqual(registration.Tags.Count(), DefaultTags.Length + 1);
-        }
-
-        public Registration GetNewNativeRegistration(string deviceId, IEnumerable<string> tags)
-        {
-            return new GcmRegistration(deviceId, tags);
-        }
-
-        public Registration GetNewTemplateRegistration(string deviceId, string bodyTemplate, string templateName)
-        {
-            return new GcmTemplateRegistration(deviceId, bodyTemplate, templateName);
-        }
-
-        public string GetListNativeRegistrationResponse()
-        {
-            return "[{\"registrationId\":\"7313155627197174428-6522078074300559092-1\",\"tags\":[\"fooWns\",\"barWns\",\"4de2605e-fd09-4875-a897-c8c4c0a51682\"],\"deviceId\":\"http://channelUri.com/a b\"}]";
-        }
-
-        public string GetListTemplateRegistrationResponse()
-        {
-            return "[{\"registrationId\":\"7313155627197174428-6522078074300559092-1\",\"tags\":[\"fooWns\",\"barWns\",\"4de2605e-fd09-4875-a897-c8c4c0a51682\"],\"deviceId\":\"http://channelUri.com/a b\",\"templateBody\":\"cool template body\",\"templateName\":\"cool name\"}]";
-        }
-
-        public string GetListMixedRegistrationResponse()
-        {
-            return "[{\"registrationId\":\"7313155627197174428-6522078074300559092-1\",\"tags\":[\"fooWns\",\"barWns\",\"4de2605e-fd09-4875-a897-c8c4c0a51682\"],\"deviceId\":\"http://channelUri.com/a b\"}, " +
-            "{\"registrationId\":\"7313155627197174428-6522078074300559092-1\",\"tags\":[\"fooWns\",\"barWns\",\"4de2605e-fd09-4875-a897-c8c4c0a51682\"],\"deviceId\":\"http://channelUri.com/a b\",\"templateBody\":\"cool template body\",\"templateName\":\"cool name\"}]";
-        }
-
         public JObject GetInstallation(string installationId, bool includeTemplates = false, string defaultChannelUri = null)
         {
             JObject installation = new JObject();
