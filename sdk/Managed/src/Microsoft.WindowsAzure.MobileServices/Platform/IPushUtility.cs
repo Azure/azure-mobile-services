@@ -13,22 +13,6 @@ namespace Microsoft.WindowsAzure.MobileServices
     public interface IPushUtility
     {
         /// <summary>
-        /// Return a new, strongly typed native registration instance
-        /// </summary>        
-        /// <returns>
-        /// An object to JSON deserialize into
-        /// </returns>
-        Registration GetNewNativeRegistration();
-
-        /// <summary>
-        /// Return a new, strongly typed template registration instance
-        /// </summary>        
-        /// <returns>
-        /// An object to JSON deserialize into
-        /// </returns>
-        Registration GetNewTemplateRegistration();
-
-        /// <summary>
         /// Return the string describing the notification platform
         /// </summary>        
         /// <returns>
