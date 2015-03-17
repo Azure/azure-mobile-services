@@ -220,6 +220,70 @@ public class MobileServiceSyncContext {
         this.mOpQueue = this.mOpQueue.removeOperationFromQueue(tableOperationError.getOperationId());
     }
 
+    public void cancelAndUpdateItem(TableOperationError tableOperationError) throws ParseException, MobileServiceLocalStoreException {
+
+        MultiReadWriteLock<String> tableLock = null;
+        MultiLock<String> idLock = null;
+
+        try {
+
+            this.mOpLock.writeLock().lock();
+
+            String tableItemId = tableOperationError.getTableName() + "/" + tableOperationError.getItemId();
+
+            tableLock = this.mTableLockMap.lockRead(tableOperationError.getTableName());
+
+            idLock = this.mIdLockMap.lock(tableItemId);
+
+            this.mStore.upsert(tableOperationError.getTableName(), tableOperationError.getServerItem(), true);
+
+            removeTableOperation(tableOperationError);
+
+        } finally {
+            try {
+                this.mOpLock.writeLock().unlock();
+            } finally {
+                try {
+                    this.mIdLockMap.unLock(idLock);
+                } finally {
+                    this.mTableLockMap.unLockRead(tableLock);
+                }
+            }
+        }
+    }
+
+    public void cancelAndDiscardItem(TableOperationError tableOperationError) throws ParseException, MobileServiceLocalStoreException {
+        MultiReadWriteLock<String> tableLock = null;
+        MultiLock<String> idLock = null;
+
+        try {
+            this.mOpLock.writeLock().lock();
+
+            String tableItemId = tableOperationError.getTableName() + "/" + tableOperationError.getItemId();
+
+            tableLock = this.mTableLockMap.lockRead(tableOperationError.getTableName());
+
+            idLock = this.mIdLockMap.lock(tableItemId);
+
+            String itemId = tableOperationError.getItemId();
+
+            this.mStore.delete(tableOperationError.getTableName(), itemId);
+
+            removeTableOperation(tableOperationError);
+
+        } finally {
+            try {
+                this.mOpLock.writeLock().unlock();
+            } finally {
+                try {
+                    this.mIdLockMap.unLock(idLock);
+                } finally {
+                    this.mTableLockMap.unLockRead(tableLock);
+                }
+            }
+        }
+    }
+
     /**
      * Returns the number of pending operations that are not yet pushed to
      * remote tables.
@@ -933,6 +997,9 @@ public class MobileServiceSyncContext {
 
         if (throwable instanceof MobileServiceExceptionBase) {
             MobileServiceExceptionBase mspfEx = (MobileServiceExceptionBase) throwable;
+            serverItem = mspfEx.getValue();
+        } else if (throwable.getCause() != null & throwable.getCause() instanceof MobileServiceExceptionBase) {
+            MobileServiceExceptionBase mspfEx = (MobileServiceExceptionBase) throwable.getCause();
             serverItem = mspfEx.getValue();
         }
 
