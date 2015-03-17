@@ -16,25 +16,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         string GetPushHandle();
 
         string GetUpdatedPushHandle();        
-
-        Registration GetTemplateRegistrationForToast();        
-
-        void ValidateTemplateRegistration(Registration registration);        
-
-        void ValidateTemplateRegistrationBeforeRegister(Registration registration);        
-
-        void ValidateTemplateRegistrationAfterRegister(Registration registration, string zumoInstallationId);        
-
-        Registration GetNewNativeRegistration(string deviceId, IEnumerable<string> tags);        
-
-        Registration GetNewTemplateRegistration(string deviceId, string bodyTemplate, string templateName);
-
-        string GetListNativeRegistrationResponse();
-
-        string GetListTemplateRegistrationResponse();
-
-        string GetListMixedRegistrationResponse();
-
+        
         JObject GetInstallation(string installationId, bool includeTemplates = false, string defaultChannelUri = null);
         
         JObject GetTemplates();

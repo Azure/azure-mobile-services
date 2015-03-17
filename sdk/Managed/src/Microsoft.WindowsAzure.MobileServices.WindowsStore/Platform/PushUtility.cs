@@ -24,16 +24,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
         }
 
-        public Registration GetNewNativeRegistration()
-        {
-            return new WnsRegistration();
-        }
-
-        public Registration GetNewTemplateRegistration()
-        {
-            return new WnsTemplateRegistration();
-        }
-
         public string GetPlatform()
         {
             return "wns";

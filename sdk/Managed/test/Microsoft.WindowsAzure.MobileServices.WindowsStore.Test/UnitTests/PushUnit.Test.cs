@@ -27,37 +27,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             this.pushTestUtility = TestPlatform.Instance.PushTestUtility;
         }
 
-        [TestMethod]
-        public void InvalidBodyTemplateIfNotXml()
-        {
-            try
-            {
-                var registration = new WnsTemplateRegistration("uri", "junkBodyTemplate", "testName");
-                Assert.Fail("Expected templateBody that is not XML to throw ArgumentException");
-            }
-            catch
-            {
-                // PASSES
-            }
-        }
-
-        [TestMethod]
-        public void InvalidBodyTemplateIfImproperXml()
-        {
-            try
-            {
-                var registration = new WnsTemplateRegistration(
-                    "uri",
-                    "<foo><visual><binding template=\"ToastText01\"><text id=\"1\">$(message)</text></binding></visual></foo>",
-                    "testName");
-                Assert.Fail("Expected templateBody with unexpected first XML node to throw ArgumentException");
-            }
-            catch
-            {
-                // PASSES
-            }
-        }
-
         [AsyncTestMethod]
         public async Task RegisterAsync_ChannelUri()
         {
