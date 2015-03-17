@@ -11,8 +11,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
     /// </summary>
     public class MobileAppUriValidator
     {
-        #region Constants/Fields
-
         /// <summary>
         /// URI for a dummy mobile app.
         /// </summary>
@@ -38,9 +36,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
         /// </summary>
         private readonly IMobileServiceClient _mobileServiceClient;
 
-        #endregion
-
-        #region Constructor(s)
         /// <summary>
         /// Constructor
         /// </summary>
@@ -51,10 +46,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
         {
             this._mobileServiceClient = mobileServiceClient;
         }
-
-        #endregion
-
-        #region Properties
 
         /// <summary>
         /// The base URI of all table URIs.
@@ -71,10 +62,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
         {
             get { return _mobileServiceClient.MobileAppUri.AbsoluteUri + ApiComponentInUri; }
         }
-
-        #endregion
-
-        #region Public methods
 
         /// <summary>
         /// Get the table URI from the specified relative URI of the table.
@@ -93,7 +80,5 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
 
             return apiUri.AbsolutePath;
         }
-
-        #endregion
     }
 }
