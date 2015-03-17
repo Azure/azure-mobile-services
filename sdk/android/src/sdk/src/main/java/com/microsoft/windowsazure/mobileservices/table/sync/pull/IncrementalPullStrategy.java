@@ -161,10 +161,14 @@ public class IncrementalPullStrategy extends PullStrategy {
                 this.query = query.and();
             }
 
-            this.query = query.field(MobileServiceSystemColumns.UpdatedAt)
-                    .gt(this.maxUpdatedAt);
-
             if (lastItemId != null) {
+
+                Query notEqualsLastId = QueryOperations.field(MobileServiceSystemColumns.Id)
+                        .ne(lastItemId);
+
+                this.query = query.field(MobileServiceSystemColumns.UpdatedAt)
+                        .gt(this.maxUpdatedAt)
+                        .and(notEqualsLastId);
 
                 Query maxUpdatedAndIdFilter = QueryOperations.field(MobileServiceSystemColumns.UpdatedAt)
                         .ge(maxUpdatedAt)
@@ -172,7 +176,14 @@ public class IncrementalPullStrategy extends PullStrategy {
                         .field(MobileServiceSystemColumns.Id)
                         .gt(lastItemId);
 
+
+                this.query.and(notEqualsLastId);
+
                 this.query.or(maxUpdatedAndIdFilter);
+            } else {
+
+                this.query = query.field(MobileServiceSystemColumns.UpdatedAt)
+                        .gt(this.maxUpdatedAt);
             }
         }
 

@@ -489,7 +489,6 @@ public class UpdateDeleteTests extends TestGroup {
 
                     syncContext.initialize(localStore, handler).get();
 
-
                     log("Defined the table on the local store");
 
                     Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
@@ -498,8 +497,8 @@ public class UpdateDeleteTests extends TestGroup {
                     tableDefinition.put("number", ColumnDataType.Real);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
                     tableDefinition.put("date1", ColumnDataType.Date);
-                    tableDefinition.put("__createdAt", ColumnDataType.Date);
-                    tableDefinition.put("__updatedAt", ColumnDataType.Date);
+                    tableDefinition.put("__createdAt", ColumnDataType.DateTimeOffset);
+                    tableDefinition.put("__updatedAt", ColumnDataType.DateTimeOffset);
                     tableDefinition.put("__version", ColumnDataType.String);
                     tableDefinition.put("__deleted", ColumnDataType.Boolean);
 
