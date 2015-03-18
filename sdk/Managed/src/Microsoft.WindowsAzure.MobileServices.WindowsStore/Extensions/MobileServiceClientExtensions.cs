@@ -96,7 +96,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// The <see cref="Push"/> object used for registering for notifications.
         /// </returns>
-        public static Push GetPush(this MobileServiceClient client)
+        public static Push GetPush(this IMobileServiceClient client)
         {
             return new Push(client);
         }
