@@ -19,8 +19,6 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// </summary>
     public class MobileServiceClient : IMobileServiceClient, IDisposable
     {
-        #region Constants
-
         /// <summary>
         /// Name of the config setting that stores the installation ID.
         /// </summary>
@@ -31,10 +29,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// installation ID.
         /// </summary>
         private const string ConfigureAsyncApplicationIdKey = "applicationInstallationId";
-
-        #endregion
-
-        #region Instance/Static Fields
 
         private static HttpMethod defaultHttpMethod = HttpMethod.Post;
 
@@ -48,10 +42,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// provide telemetry data.
         /// </summary>
         internal string applicationInstallationId;
-
-        #endregion
-
-        #region Properties
 
         /// <summary>
         /// Absolute URI of the Microsoft Azure Mobile App.
@@ -119,10 +109,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Gets the <see cref="MobileServiceHttpClient"/> associated with the Authentication endpoint.
         /// </summary>
         internal MobileServiceHttpClient AuthenticationHttpClient { get; private set; }
-
-        #endregion
-
-        #region Constructor(s)
 
         /// <summary>
         /// Initializes a new instance of the MobileServiceClient class.
@@ -287,10 +273,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         protected MobileServiceClient()
         {
         }
-
-        #endregion
-
-        #region Methods
 
         /// <summary>
         /// Returns a <see cref="IMobileServiceTable"/> instance, which provides 
@@ -749,7 +731,5 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             return installationId;
         }
-
-        #endregion
     }
 }
