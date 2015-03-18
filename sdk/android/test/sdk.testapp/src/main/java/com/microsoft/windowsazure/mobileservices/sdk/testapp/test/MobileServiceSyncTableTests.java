@@ -40,6 +40,7 @@ import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.mocks.Mob
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.helpers.EncodingUtilities;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.CustomFunctionTwoParameters;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.IdPropertyTestClasses.StringIdType;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceExceptionBase;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
@@ -48,6 +49,7 @@ import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncCon
 import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncTable;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.MobileServiceTableOperationState;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperation;
+import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationError;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushFailedException;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushStatus;
 import com.microsoft.windowsazure.mobileservices.table.sync.synchandler.SimpleSyncHandler;
@@ -728,6 +730,197 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         client.getSyncContext().push().get();
 
         assertEquals(client.getSyncContext().getPendingOperations(), 0);
+    }
+
+    public void testRemoveTableOperation() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw new Exception();
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.insert(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+            MobileServicePushFailedException mspfe = (MobileServicePushFailedException) ex.getCause();
+
+            assertEquals(mspfe.getPushCompletionResult().getStatus(), MobileServicePushStatus.InternalError);
+            assertEquals(mspfe.getPushCompletionResult().getOperationErrors().size(), 1);
+            assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+            TableOperationError tableOperationError =mspfe.getPushCompletionResult().getOperationErrors().get(0);
+
+            client.getSyncContext().removeTableOperation(tableOperationError);
+
+            assertEquals(client.getSyncContext().getPendingOperations(), 0);
+
+            return;
+        }
+
+        assertTrue(false);
+    }
+
+    public void testCancelAndDiscardItem() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw new Exception();
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.insert(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+            MobileServicePushFailedException mspfe = (MobileServicePushFailedException) ex.getCause();
+
+            assertEquals(mspfe.getPushCompletionResult().getStatus(), MobileServicePushStatus.InternalError);
+            assertEquals(mspfe.getPushCompletionResult().getOperationErrors().size(), 1);
+            assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+            TableOperationError tableOperationError =mspfe.getPushCompletionResult().getOperationErrors().get(0);
+
+            client.getSyncContext().cancelAndDiscardItem(tableOperationError);
+
+            assertEquals(client.getSyncContext().getPendingOperations(), 0);
+
+            StringIdType result = table.lookUp(item.Id).get();
+
+            assertEquals(null, result);
+
+            return;
+        }
+
+        assertTrue(false);
+    }
+
+    public void testCancelAndUpdateItem() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        final JsonObject serverItem = new JsonObject();
+        serverItem.addProperty("id", "abc");
+        serverItem.addProperty("String", "fooo");
+
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw new MobileServiceExceptionBase(new MobileServiceException(new Exception()), serverItem);
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.insert(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+            MobileServicePushFailedException mspfe = (MobileServicePushFailedException) ex.getCause();
+
+            assertEquals(mspfe.getPushCompletionResult().getStatus(), MobileServicePushStatus.InternalError);
+            assertEquals(mspfe.getPushCompletionResult().getOperationErrors().size(), 1);
+            assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+            TableOperationError tableOperationError =mspfe.getPushCompletionResult().getOperationErrors().get(0);
+
+            client.getSyncContext().cancelAndUpdateItem(tableOperationError);
+
+            assertEquals(client.getSyncContext().getPendingOperations(), 0);
+
+            StringIdType result = table.lookUp(item.Id).get();
+
+            assertEquals(item.Id, result.Id);
+            assertEquals("fooo", result.String);
+
+            return;
+        }
+
+        assertTrue(false);
     }
 
     public void testPushAbortOnNewtorkError() throws Throwable {
