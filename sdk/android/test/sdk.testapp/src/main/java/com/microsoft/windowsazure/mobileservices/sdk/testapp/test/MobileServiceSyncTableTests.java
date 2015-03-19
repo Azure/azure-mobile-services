@@ -45,10 +45,7 @@ import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
 import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceJsonSyncTable;
-import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncContext;
 import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncTable;
-import com.microsoft.windowsazure.mobileservices.table.sync.operations.MobileServiceTableOperationState;
-import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationError;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushFailedException;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushStatus;
@@ -57,7 +54,6 @@ import com.microsoft.windowsazure.mobileservices.table.sync.synchandler.SimpleSy
 import org.apache.http.Header;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -730,65 +726,6 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         client.getSyncContext().push().get();
 
         assertEquals(client.getSyncContext().getPendingOperations(), 0);
-    }
-
-    public void testRemoveTableOperation() throws Throwable {
-        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
-        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
-        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
-
-        thrownExceptionFlag.Thrown = true;
-
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-
-        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
-            public Void apply(ServiceFilterRequest request) {
-                try {
-                    if (thrownExceptionFlag.Thrown) {
-                        throw new Exception();
-                    }
-                } catch (Exception e) {
-                    serviceFilterContainer.Exception = e;
-                }
-
-                return null;
-            }
-        };
-
-        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
-
-        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
-
-        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
-
-        StringIdType item = new StringIdType();
-
-        item.Id = "abc";
-        item.String = "what?";
-
-        table.insert(item).get();
-        assertEquals(client.getSyncContext().getPendingOperations(), 1);
-
-        try {
-            client.getSyncContext().push().get();
-        }
-        catch(Exception ex) {
-            MobileServicePushFailedException mspfe = (MobileServicePushFailedException) ex.getCause();
-
-            assertEquals(mspfe.getPushCompletionResult().getStatus(), MobileServicePushStatus.InternalError);
-            assertEquals(mspfe.getPushCompletionResult().getOperationErrors().size(), 1);
-            assertEquals(client.getSyncContext().getPendingOperations(), 1);
-
-            TableOperationError tableOperationError =mspfe.getPushCompletionResult().getOperationErrors().get(0);
-
-            client.getSyncContext().removeTableOperation(tableOperationError);
-
-            assertEquals(client.getSyncContext().getPendingOperations(), 0);
-
-            return;
-        }
-
-        assertTrue(false);
     }
 
     public void testCancelAndDiscardItem() throws Throwable {

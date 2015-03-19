@@ -216,10 +216,16 @@ public class MobileServiceSyncContext {
      * @throws ParseException
      * @throws MobileServiceLocalStoreException
      */
-    public void removeTableOperation(TableOperationError tableOperationError) throws ParseException, MobileServiceLocalStoreException {
+    private void removeTableOperation(TableOperationError tableOperationError) throws ParseException, MobileServiceLocalStoreException {
         this.mOpQueue = this.mOpQueue.removeOperationFromQueue(tableOperationError.getOperationId());
     }
 
+    /**
+     * Cancel operation and update local item with server
+     * @param tableOperationError
+     * @throws ParseException
+     * @throws MobileServiceLocalStoreException
+     */
     public void cancelAndUpdateItem(TableOperationError tableOperationError) throws ParseException, MobileServiceLocalStoreException {
 
         MultiReadWriteLock<String> tableLock = null;
@@ -252,6 +258,12 @@ public class MobileServiceSyncContext {
         }
     }
 
+    /**
+     * Cancel operation an Discard local item
+     * @param tableOperationError
+     * @throws ParseException
+     * @throws MobileServiceLocalStoreException
+     */
     public void cancelAndDiscardItem(TableOperationError tableOperationError) throws ParseException, MobileServiceLocalStoreException {
         MultiReadWriteLock<String> tableLock = null;
         MultiLock<String> idLock = null;
