@@ -353,60 +353,6 @@ public class MobileServiceSyncTable<E> {
         return future;
     }
 
-    /**
-     * Looks up a row in the table.
-     *
-     * @param id The id of the row
-     */
-    public ListenableFuture<E> tryAgain(TableOperationError operationError) {
-
-        Gson gson = mClient.getGsonBuilder().create();
-        E typedElement = JsonEntityParser.parseResults(operationError.getClientItem(), gson, mClazz).get(0);
-
-        switch (operationError.getOperationKind()) {
-            case Insert:
-                return this.insert(typedElement);
-            case Update:
-                final SettableFuture<E> finalUpdateFuture = SettableFuture.create();
-
-                ListenableFuture<Void> internalUpdateFuture = this.update(typedElement);
-
-                Futures.addCallback(internalUpdateFuture, new FutureCallback<Void>() {
-                    @Override
-                    public void onFailure(Throwable throwable) {
-                        finalUpdateFuture.setException(throwable);
-                    }
-
-                    @Override
-                    public void onSuccess(Void result) {
-                        finalUpdateFuture.set(null);
-                    }
-                });
-
-                return finalUpdateFuture;
-            case Delete:
-                final SettableFuture<E> finalDeleteFuture = SettableFuture.create();
-
-                ListenableFuture<Void> internalDeleteFuture = this.update(typedElement);
-
-                Futures.addCallback(internalDeleteFuture, new FutureCallback<Void>() {
-                    @Override
-                    public void onFailure(Throwable throwable) {
-                        finalDeleteFuture.setException(throwable);
-                    }
-
-                    @Override
-                    public void onSuccess(Void result) {
-                        finalDeleteFuture.set(null);
-                    }
-                });
-
-                return finalDeleteFuture;
-        }
-
-        return null;
-    }
-
     private List<E> parseResults(JsonElement results) {
         Gson gson = mClient.getGsonBuilder().create();
         return JsonEntityParser.parseResults(results, gson, mClazz);

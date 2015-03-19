@@ -216,7 +216,7 @@ public class MobileServiceSyncContext {
      * @throws ParseException
      * @throws MobileServiceLocalStoreException
      */
-    public void removeTableOperation(TableOperationError tableOperationError) throws ParseException, MobileServiceLocalStoreException {
+    private void removeTableOperation(TableOperationError tableOperationError) throws ParseException, MobileServiceLocalStoreException {
         this.mOpQueue = this.mOpQueue.removeOperationFromQueue(tableOperationError.getOperationId());
     }
 
