@@ -44,6 +44,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         IMobileServiceSyncContext SyncContext { get; }
 
         /// <summary>
+        /// Returns the application's installation id.
+        /// </summary>
+        String InstallationId { get; }
+
+        /// <summary>
         /// Returns a <see cref="IMobileServiceTable"/> instance, which provides 
         /// untyped data operations for that table.
         /// </summary>

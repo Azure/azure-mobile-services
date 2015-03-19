@@ -23,16 +23,22 @@ namespace Microsoft.WindowsAzure.MobileServices
     public sealed class Push
     {
         internal readonly PushHttpClient PushHttpClient;
-        private MobileServiceClient Client { get; set; }
+        private IMobileServiceClient Client { get; set; }
 
-        internal Push(MobileServiceClient client)
+        internal Push(IMobileServiceClient client)
         {
             if (client == null)
             {
                 throw new ArgumentNullException("client");
             }
 
-            this.PushHttpClient = new PushHttpClient(client);
+            MobileServiceClient internalClient = (MobileServiceClient)client;
+            if (internalClient == null)
+            {
+                throw new ArgumentException("Client must be a MobileServiceClient object");
+            }
+
+            this.PushHttpClient = new PushHttpClient(internalClient);
             this.Client = client;
         }
 
@@ -43,7 +49,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             get
             {
-                return this.Client.applicationInstallationId;
+                return this.Client.InstallationId;
             }
         }
 

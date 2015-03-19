@@ -23,12 +23,12 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         private const string PrimaryChannelId = "$Primary";
 
-        internal Push(MobileServiceClient client)
+        internal Push(IMobileServiceClient client)
             : this(client, string.Empty, null)
         {
         }
 
-        private Push(MobileServiceClient client, string tileId, SecondaryTilesList tiles)
+        private Push(IMobileServiceClient client, string tileId, SecondaryTilesList tiles)
         {
             if (client == null)
             {
@@ -42,7 +42,12 @@ namespace Microsoft.WindowsAzure.MobileServices
                 tileId = PrimaryChannelId;
             }
 
-            this.PushHttpClient = new PushHttpClient(client);
+            MobileServiceClient internalClient = (MobileServiceClient)client;
+            if (internalClient == null)
+            {
+                throw new ArgumentException("Client must be a MobileServiceClient object");
+            }
+            this.PushHttpClient = new PushHttpClient(internalClient);
 
             this.SecondaryTiles = tiles ?? new SecondaryTilesList(this);
         }
@@ -64,11 +69,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             get
             {
-                return this.Client.applicationInstallationId;
+                return this.Client.InstallationId;
             }
         }
 
-        private MobileServiceClient Client { get; set; }
+        private IMobileServiceClient Client { get; set; }
 
         /// <summary>
         /// Register an Installation with particular channelUri

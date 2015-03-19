@@ -38,12 +38,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         private static readonly HttpMessageHandler[] EmptyHttpMessageHandlers = new HttpMessageHandler[0];
 
         /// <summary>
-        /// The id used to identify this installation of the application to 
-        /// provide telemetry data.
-        /// </summary>
-        internal string applicationInstallationId;
-
-        /// <summary>
         /// Absolute URI of the Microsoft Azure Mobile App.
         /// </summary>
         public Uri MobileAppUri { get; private set; }
@@ -64,6 +58,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// MobileServiceClient.Login().
         /// </summary>
         public MobileServiceUser CurrentUser { get; set; }
+
+        /// <summary>
+        /// The id used to identify this installation of the application to 
+        /// provide telemetry data.
+        /// </summary>
+        public string InstallationId { get; private set; }
 
         /// <summary>
         /// Gets or sets the settings used for serialization.
@@ -253,14 +253,14 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             this.ApplicationKey = applicationKey;
-            this.applicationInstallationId = GetApplicationInstallationId();
+            this.InstallationId = GetApplicationInstallationId();
             
             handlers = handlers ?? EmptyHttpMessageHandlers;
-            this.MobileAppHttpClient = new MobileServiceHttpClient(handlers, this.MobileAppUri, this.applicationInstallationId, this.ApplicationKey);
+            this.MobileAppHttpClient = new MobileServiceHttpClient(handlers, this.MobileAppUri, this.InstallationId, this.ApplicationKey);
 
             if (this.GatewayUri != null)
             {
-                this.AuthenticationHttpClient = new MobileServiceHttpClient(handlers, this.GatewayUri, this.applicationInstallationId, this.ApplicationKey);
+                this.AuthenticationHttpClient = new MobileServiceHttpClient(handlers, this.GatewayUri, this.InstallationId, this.ApplicationKey);
             }
 
             this.Serializer = new MobileServiceSerializer();

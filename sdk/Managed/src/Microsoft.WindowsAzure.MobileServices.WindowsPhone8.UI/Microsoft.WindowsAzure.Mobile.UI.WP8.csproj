@@ -48,9 +48,7 @@
     <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Authentication\MobileServiceUIAuthentication.cs">
       <Link>Authentication\MobileServiceUIAuthentication.cs</Link>
     </Compile>
-    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Extensions\MobileServiceClientExtensions.cs">
-      <Link>Extensions\MobileServiceClientExtensions.cs</Link>
-    </Compile>
+    <Compile Include="Extensions\MobileServiceClientExtensions.cs" />
     <Compile Include="LoginPage.xaml.cs">
       <DependentUpon>LoginPage.xaml</DependentUpon>
     </Compile>
