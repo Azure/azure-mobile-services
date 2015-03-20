@@ -80,6 +80,11 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
         testQuery(query, 6);
     }
 
+    public void testQueryDateTimeOffsetBeforeEpoch() throws MobileServiceException, MobileServiceLocalStoreException {
+        Query query = QueryOperations.tableName(TestTable).field("col6").gt(epoch);
+        testQuery(query, 6);
+    }
+
     public void testQueryWithTop() throws MobileServiceLocalStoreException {
         Query query = QueryOperations.tableName(TestTable).top(5);
         testQuery(query, 5);
@@ -386,6 +391,7 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
         item1.addProperty("col3", 234f);
         item1.addProperty("col4", DateSerializer.serialize(cal1.getTime()));
         item1.addProperty("col5", false);
+        item1.addProperty("col6", DateSerializer.serialize(cal1.getTime()));
         result.add(item1);
 
         Calendar cal2 = Calendar.getInstance();
@@ -399,6 +405,7 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
         item2.addProperty("col3", 9867.12);
         item2.addProperty("col4", DateSerializer.serialize(cal2.getTime()));
         item2.addProperty("col5", true);
+        item2.addProperty("col6", DateSerializer.serialize(cal2.getTime()));
         result.add(item2);
 
         Calendar cal3 = Calendar.getInstance();
@@ -412,6 +419,7 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
         item3.addProperty("col3", 11f);
         item3.addProperty("col4", DateSerializer.serialize(cal3.getTime()));
         item3.addProperty("col5", false);
+        item3.addProperty("col6", DateSerializer.serialize(cal3.getTime()));
         result.add(item3);
 
         Calendar cal4 = Calendar.getInstance();
@@ -425,6 +433,7 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
         item4.addProperty("col3", 23908.99);
         item4.addProperty("col4", DateSerializer.serialize(cal4.getTime()));
         item4.addProperty("col5", true);
+        item4.addProperty("col6", DateSerializer.serialize(cal4.getTime()));
         result.add(item4);
 
         Calendar cal5 = Calendar.getInstance();
@@ -438,6 +447,7 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
         item5.addProperty("col3", 678.932);
         item5.addProperty("col4", DateSerializer.serialize(cal5.getTime()));
         item5.addProperty("col5", true);
+        item5.addProperty("col6", DateSerializer.serialize(cal5.getTime()));
         result.add(item5);
 
         Calendar cal6 = Calendar.getInstance();
@@ -451,6 +461,7 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
         item6.addProperty("col3", 521f);
         item6.addProperty("col4", DateSerializer.serialize(cal6.getTime()));
         item6.addProperty("col5", true);
+        item6.addProperty("col6", DateSerializer.serialize(cal6.getTime()));
         result.add(item6);
 
         return result.toArray(new JsonObject[0]);
@@ -601,6 +612,7 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
         tableDefinition.put("col3", ColumnDataType.Real);
         tableDefinition.put("col4", ColumnDataType.Date);
         tableDefinition.put("col5", ColumnDataType.Boolean);
+        tableDefinition.put("col6", ColumnDataType.DateTimeOffset);
 
         store.defineTable(TestTable, tableDefinition);
 

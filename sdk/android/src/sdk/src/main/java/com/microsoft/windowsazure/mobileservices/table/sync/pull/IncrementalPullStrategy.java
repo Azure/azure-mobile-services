@@ -3,6 +3,7 @@ package com.microsoft.windowsazure.mobileservices.table.sync.pull;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.microsoft.windowsazure.mobileservices.table.DateTimeOffset;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemColumns;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProperty;
@@ -29,9 +30,9 @@ public class IncrementalPullStrategy extends PullStrategy {
     private static final String INCREMENTAL_PULL_STRATEGY_TABLE = "__incrementalPullData";
 
     private MobileServiceLocalStore mStore;
-    private Date maxUpdatedAt;
+    private DateTimeOffset maxUpdatedAt;
     private String lastElementId;
-    private Date deltaToken;
+    private DateTimeOffset deltaToken;
     private String queryId;
     private Query originalQuery;
     private MobileServiceJsonTable table;
@@ -146,7 +147,7 @@ public class IncrementalPullStrategy extends PullStrategy {
         }
     }
 
-    private void setupQuery(Date maxUpdatedAt, String lastItemId) {
+    private void setupQuery(DateTimeOffset maxUpdatedAt, String lastItemId) {
 
         this.query = originalQuery.deepClone();
 
@@ -160,10 +161,14 @@ public class IncrementalPullStrategy extends PullStrategy {
                 this.query = query.and();
             }
 
-            this.query = query.field(MobileServiceSystemColumns.UpdatedAt)
-                    .gt(this.maxUpdatedAt);
-
             if (lastItemId != null) {
+
+                Query notEqualsLastId = QueryOperations.field(MobileServiceSystemColumns.Id)
+                        .ne(lastItemId);
+
+                this.query = query.field(MobileServiceSystemColumns.UpdatedAt)
+                        .gt(this.maxUpdatedAt)
+                        .and(notEqualsLastId);
 
                 Query maxUpdatedAndIdFilter = QueryOperations.field(MobileServiceSystemColumns.UpdatedAt)
                         .ge(maxUpdatedAt)
@@ -171,7 +176,14 @@ public class IncrementalPullStrategy extends PullStrategy {
                         .field(MobileServiceSystemColumns.Id)
                         .gt(lastItemId);
 
+
+                this.query.and(notEqualsLastId);
+
                 this.query.or(maxUpdatedAndIdFilter);
+            } else {
+
+                this.query = query.field(MobileServiceSystemColumns.UpdatedAt)
+                        .gt(this.maxUpdatedAt);
             }
         }
 
@@ -183,7 +195,7 @@ public class IncrementalPullStrategy extends PullStrategy {
         this.query.orderBy(MobileServiceSystemColumns.Id, QueryOrder.Ascending);
     }
 
-    private Date getDateFromString(String stringValue) {
+    private DateTimeOffset getDateFromString(String stringValue) {
 
         if (stringValue == null) {
             return null;
@@ -193,7 +205,7 @@ public class IncrementalPullStrategy extends PullStrategy {
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         try {
-            return sdf.parse(stringValue);
+            return new DateTimeOffset(sdf.parse(stringValue));
         } catch (ParseException e) {
             return null;
         }

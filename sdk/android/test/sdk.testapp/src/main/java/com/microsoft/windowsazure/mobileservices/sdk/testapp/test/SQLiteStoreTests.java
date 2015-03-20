@@ -64,7 +64,7 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
 
         Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
         tableDefinition.put("id", ColumnDataType.String);
-        tableDefinition.put("__createdAt", ColumnDataType.Date);
+        tableDefinition.put("__createdAt", ColumnDataType.DateTimeOffset);
 
         store.defineTable(TestTable, tableDefinition);
 
@@ -558,7 +558,7 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
     public void defineTestTable(SQLiteLocalStore store) throws MobileServiceLocalStoreException {
         Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
         tableDefinition.put("id", ColumnDataType.String);
-        tableDefinition.put("__createdat", ColumnDataType.Date);
+        tableDefinition.put("__createdat", ColumnDataType.DateTimeOffset);
 
         store.defineTable(TestTable, tableDefinition);
     }
