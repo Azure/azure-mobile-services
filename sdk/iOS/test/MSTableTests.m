@@ -71,18 +71,10 @@
 
 -(void) testInsertItem
 {
-    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    XCTestExpectation *testExpectation = [self expectationWithDescription:@"Insert: Success"];
     
-    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
-                                   initWithURL:nil
-                                   statusCode:200
-                                   HTTPVersion:nil headerFields:nil];
-    NSString* stringData = @"{\"id\": 120, \"name\":\"test name\"}";
-    NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
-    
-    testFilter.responseToUse = response;
-    testFilter.dataToUse = data;
-    testFilter.ignoreNextFilter = YES;
+    NSString *stringData = @"{\"id\": 120, \"name\":\"test name\"}";
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:stringData];
     
     MSClient *filteredClient = [client clientWithFilter:testFilter];
     MSTable *todoTable = [filteredClient tableWithName:@"NoSuchTable"];
@@ -92,44 +84,43 @@
     
     // Insert the item
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
-        XCTAssertNotNil(item, @"item should not have  been nil.");
-        XCTAssertNil(error, @"error should have been nil.");
-        XCTAssertTrue([[item valueForKey:@"name"] isEqualToString:@"test name"],
-                     @"item should have been inserted.");
+        XCTAssertNil(error);
+        XCTAssertNotNil(item);
+        XCTAssertEqualObjects(item[@"name"], @"test name", @"item should have been inserted.");
+        XCTAssertEqualObjects(item[@"id"], @120);
         
-        done = YES;
+        [testExpectation fulfill];
     }];
-    
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 -(void) testInsertItemWithNilItem
 {
+    XCTestExpectation *testExpectation = [self expectationWithDescription:@"Insert: Nil Item"];
+    
     MSTable *todoTable = [client tableWithName:@"todoItem"];
     
     // Insert the item
     [todoTable insert:nil completion:^(NSDictionary *item, NSError *error) {
-    
-        XCTAssertNil(item, @"item should have been nil.");
-        
-        XCTAssertNotNil(error, @"error should not have been nil.");
-        XCTAssertTrue(error.domain == MSErrorDomain,
-                     @"error domain should have been MSErrorDomain.");
-        XCTAssertTrue(error.code == MSExpectedItemWithRequest,
-                     @"error code should have been MSExpectedItemWithRequest.");
+        XCTAssertNil(item);
+        XCTAssertNotNil(error);
+        XCTAssertEqual(error.domain, MSErrorDomain, @"error domain should have been MSErrorDomain.");
+        XCTAssertEqual(error.code, MSExpectedItemWithRequest, @"error code should have been MSExpectedItemWithRequest.");
         
         NSString *description = error.localizedDescription;
-        XCTAssertTrue([description isEqualToString:@"No item was provided."],
-                     @"description was: %@", description);
+        XCTAssertEqualObjects(description, @"No item was provided.", @"description was: %@", description);
         
-        done = YES;
+        [testExpectation fulfill];
     }];
     
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 -(void) testInsertItemWithInvalidItem
 {
+    XCTestExpectation *testExpectation = [self expectationWithDescription:@"Insert: Invalid Item"];
+    
     MSTable *todoTable = [client tableWithName:@"NoSuchTable"];
     
     // Create the item
@@ -137,39 +128,26 @@
     
     // Insert the item
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
-    
-        XCTAssertNil(item, @"item should have been nil.");
-        
-        XCTAssertNotNil(error, @"error should not have been nil.");
-        XCTAssertTrue(error.domain == MSErrorDomain,
-                     @"error domain should have been MSErrorDomain.");
-        XCTAssertTrue(error.code == MSInvalidItemWithRequest,
-                     @"error code should have been MSInvalidItemWithRequest.");
+        XCTAssertNil(item);
+        XCTAssertNotNil(error);
+        XCTAssertEqual(error.domain, MSErrorDomain, @"error domain should have been MSErrorDomain.");
+        XCTAssertEqual(error.code, MSInvalidItemWithRequest, @"error code should have been MSInvalidItemWithRequest.");
         
         NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
-        XCTAssertTrue([description isEqualToString:@"The item provided was not valid."],
-                     @"description was: %@", description);
+        XCTAssertEqualObjects(description, @"The item provided was not valid.", @"description was: %@", description);
         
-        done = YES;
+        [testExpectation fulfill];
     }];
     
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 -(void) testInsertItemWithIdZero
 {
-    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    XCTestExpectation *testExpectation = [self expectationWithDescription:@"Insert: Id is 0"];
     
-    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
-                                   initWithURL:nil
-                                   statusCode:200
-                                   HTTPVersion:nil headerFields:nil];
     NSString* stringData = @"{\"id\": 120, \"name\":\"test name\"}";
-    NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
-    
-    testFilter.responseToUse = response;
-    testFilter.dataToUse = data;
-    testFilter.ignoreNextFilter = YES;
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:stringData];
     
     MSClient *filteredClient = [client clientWithFilter:testFilter];
     MSTable *todoTable = [filteredClient tableWithName:@"NoSuchTable"];
@@ -179,29 +157,21 @@
     
     // Insert the item
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
-        XCTAssertNotNil(item, @"item should not have  been nil.");
-        XCTAssertNil(error, @"error should have been nil.");
+        XCTAssertNotNil(item,);
+        XCTAssertNil(error);
         
-        done = YES;
+        [testExpectation fulfill];
     }];
     
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 -(void) testInsertItemWithStringId
 {
-    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    XCTestExpectation *testExpectation = [self expectationWithDescription:@"Insert: String Id"];
     
-    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
-                                   initWithURL:nil
-                                   statusCode:200
-                                   HTTPVersion:nil headerFields:nil];
     NSString* stringData = @"{\"id\": \"120\", \"name\":\"test name\"}";
-    NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
-    
-    testFilter.responseToUse = response;
-    testFilter.dataToUse = data;
-    testFilter.ignoreNextFilter = YES;
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:stringData];
     
     MSClient *filteredClient = [client clientWithFilter:testFilter];
     MSTable *todoTable = [filteredClient tableWithName:@"NoSuchTable"];
@@ -211,29 +181,21 @@
     
     // Insert the item
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
-        XCTAssertNotNil(item, @"item should not have  been nil.");
-        XCTAssertNil(error, @"error should have been nil.");
+        XCTAssertNotNil(item);
+        XCTAssertNil(error);
         
-        done = YES;
+        [testExpectation fulfill];
     }];
     
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 -(void) testInsertItemWithNullId
 {
-    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    XCTestExpectation *testExpectation = [self expectationWithDescription:@"Insert: Null Id"];
     
-    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
-                                   initWithURL:nil
-                                   statusCode:200
-                                   HTTPVersion:nil headerFields:nil];
     NSString* stringData = @"{\"id\": \"120\", \"name\":\"test name\"}";
-    NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
-    
-    testFilter.responseToUse = response;
-    testFilter.dataToUse = data;
-    testFilter.ignoreNextFilter = YES;
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:stringData];
     
     MSClient *filteredClient = [client clientWithFilter:testFilter];
     MSTable *todoTable = [filteredClient tableWithName:@"NoSuchTable"];
@@ -243,29 +205,21 @@
     
     // Insert the item
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
-        XCTAssertNotNil(item, @"item should not have  been nil.");
-        XCTAssertNil(error, @"error should have been nil.");
+        XCTAssertNotNil(item);
+        XCTAssertNil(error);
         
-        done = YES;
+        [testExpectation fulfill];
     }];
     
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 -(void) testInsertItemWithEmptyStringId
 {
-    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    XCTestExpectation *testExpectation = [self expectationWithDescription:@"Insert: Empty String Id"];
     
-    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
-                                   initWithURL:nil
-                                   statusCode:200
-                                   HTTPVersion:nil headerFields:nil];
     NSString* stringData = @"{\"id\": \"120\", \"name\":\"test name\"}";
-    NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
-    
-    testFilter.responseToUse = response;
-    testFilter.dataToUse = data;
-    testFilter.ignoreNextFilter = YES;
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:stringData];
     
     MSClient *filteredClient = [client clientWithFilter:testFilter];
     MSTable *todoTable = [filteredClient tableWithName:@"NoSuchTable"];
@@ -275,26 +229,22 @@
     
     // Insert the item
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
-        XCTAssertNotNil(item, @"item should not have  been nil.");
-        XCTAssertNil(error, @"error should have been nil.");
+        XCTAssertNotNil(item);
+        XCTAssertNil(error);
         
-        done = YES;
+        [testExpectation fulfill];
     }];
     
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 -(void) testInsertHasContentType
 {
-    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
-    __block NSString *contentType = nil;
+    XCTestExpectation *testExpectation = [self expectationWithDescription:@"Insert: Content Type"];
     
-    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
-                                   initWithURL:nil
-                                   statusCode:400
-                                   HTTPVersion:nil headerFields:nil];
-    testFilter.responseToUse = response;
-    testFilter.ignoreNextFilter = YES;
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:400];
+    
+    __block NSString *contentType = nil;
     testFilter.onInspectRequest =  ^(NSURLRequest *request) {
         contentType = [request valueForHTTPHeaderField:@"Content-Type"];
         return request;
@@ -308,19 +258,19 @@
     
     // insert the item
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
-        
         XCTAssertNotNil(contentType, @"Content-Type should not have been nil.");
         
-        done = YES;
+        [testExpectation fulfill];
     }];
     
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 -(void) testInsertStripsSystemProperties
 {
-    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    NSString* stringData = @"{\"id\": \"A\", \"name\":\"test name\", \"__version\":\"ABC\", \"__createdAt\":\"12-01-01\",\"__unknown\":123}";
     
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:stringData];
     MSInspectRequestBlock inspectBlock = ^NSURLRequest *(NSURLRequest *request) {
          testFilter.responseToUse = [[NSHTTPURLResponse alloc]
                                     initWithURL:request.URL
@@ -329,12 +279,6 @@
         
         return request;
     };
-    
-    NSString* stringData = @"{\"id\": \"A\", \"name\":\"test name\", \"__version\":\"ABC\", \"__createdAt\":\"12-01-01\",\"__unknown\":123}";
-    NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
-    
-    testFilter.dataToUse = data;
-    testFilter.ignoreNextFilter = YES;
     testFilter.onInspectRequest =  [inspectBlock copy];
     
     MSClient *filteredClient = [client clientWithFilter:testFilter];
@@ -344,6 +288,7 @@
     id item = @{ @"name":@"test name" };
     
     // Insert the item
+    XCTestExpectation *testExpectation1 = [self expectationWithDescription:@"Insert: No properties"];
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
         XCTAssertNil(error);
         XCTAssertNotNil(item);
@@ -352,12 +297,11 @@
         XCTAssertNil(item[MSSystemColumnCreatedAt]);
         XCTAssertNil(item[@"__unknown"]);
 
-        done = YES;
+        [testExpectation1 fulfill];
     }];
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");    
-    done = NO;
     
     // Allow some through table enum
+    XCTestExpectation *testExpectation2 = [self expectationWithDescription:@"Insert: Created & Version"];
     todoTable.systemProperties = MSSystemPropertyCreatedAt | MSSystemPropertyVersion;
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
         XCTAssertNil(error);
@@ -367,12 +311,11 @@
         XCTAssertNotNil(item[MSSystemColumnCreatedAt]);
         XCTAssertNil(item[@"__unknown"]);
         
-        done = YES;
+        [testExpectation2 fulfill];
     }];
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-    done = NO;
     
     // Allow all now
+    XCTestExpectation *testExpectation3 = [self expectationWithDescription:@"Insert: All"];
     todoTable.systemProperties = MSSystemPropertyAll;
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
         XCTAssertNil(error);
@@ -382,12 +325,11 @@
         XCTAssertNotNil(item[MSSystemColumnCreatedAt]);
         XCTAssertNotNil(item[@"__unknown"]);
         
-        done = YES;
+        [testExpectation3 fulfill];
     }];
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-    done = NO;
     
     // Now using the querystring instead
+    XCTestExpectation *testExpectation4 = [self expectationWithDescription:@"Insert: Keep Created By Querystring"];
     todoTable.systemProperties = MSSystemPropertyNone;
     [todoTable insert:item
            parameters:@{@"__systemProperties":MSSystemColumnCreatedAt}
@@ -399,10 +341,11 @@
         XCTAssertNotNil(item[MSSystemColumnCreatedAt]);
         XCTAssertNil(item[@"__unknown"]);
         
-        done = YES;
+        [testExpectation4 fulfill];
     }];
     
     // And check int Ids keep them all still
+    XCTestExpectation *testExpectation5 = [self expectationWithDescription:@"Insert: Int Ids Keep All"];
     stringData = @"{\"id\": 123, \"name\":\"test name\", \"__version\":\"ABC\", \"__createdAt\":\"12-01-01\",\"__unknown\":123}";
     testFilter.dataToUse = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
@@ -413,10 +356,10 @@
         XCTAssertNotNil(item[MSSystemColumnCreatedAt]);
         XCTAssertNotNil(item[@"__unknown"]);
 
-        done = YES;
+        [testExpectation5 fulfill];
     }];
     
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 
