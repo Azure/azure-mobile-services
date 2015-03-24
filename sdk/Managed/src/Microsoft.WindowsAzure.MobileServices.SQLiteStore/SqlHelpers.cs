@@ -98,7 +98,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 return SqlColumnType.Text;
             }
 
-            throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, WindowsAzure.MobileServices.SQLiteStore.Properties.Resources.SQLiteStore_ValueTypeNotSupported, type.Name));
+            throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "Value of type '{0}' is not supported.", type.Name));
         }
 
         public static string GetStoreType(JTokenType type, bool allowNull)
@@ -131,7 +131,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                     {
                         return null;
                     }
-                    throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, WindowsAzure.MobileServices.SQLiteStore.Properties.Resources.SQLiteStore_JTokenNotSupported, type));
+                    throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "Property of type '{0}' is not supported.", type));
                 case JTokenType.Comment:
                 case JTokenType.Constructor:
                 case JTokenType.None:
@@ -139,7 +139,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 case JTokenType.Raw:
                 case JTokenType.Undefined:
                 default:
-                    throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, WindowsAzure.MobileServices.SQLiteStore.Properties.Resources.SQLiteStore_JTokenNotSupported, type));
+                    throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "Property of type '{0}' is not supported.", type));
             }
         }
 
@@ -282,7 +282,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         {
             if (!IsValidIdentifier(identifier))
             {
-                throw new ArgumentException(string.Format(Properties.Resources.SQLiteStore_InvalidIdentifier, identifier), "identifier");
+                throw new ArgumentException(string.Format("'{0}' is not a valid identifier. Identifiers must be under 128 characters in length, start with a letter or underscore, and can contain only alpha-numeric and underscore characters.", identifier), "identifier");
             }
         }
 
