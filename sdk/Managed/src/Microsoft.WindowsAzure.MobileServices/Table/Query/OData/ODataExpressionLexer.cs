@@ -62,7 +62,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                         this.AdvanceToNextOccuranceOf(quote);
                         if (this.textPos == this.textLen)
                         {
-                            this.ParseError(Resources.ODataExpressionParser_UnterminatedStringLiteral, this.textPos);
+                            this.ParseError("The specified odata query has unterminated string literal.", this.textPos);
                         }
                         this.NextChar();
                     }
@@ -126,7 +126,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                         t = QueryTokenKind.End;
                         break;
                     }
-                    this.ParseError(Resources.ODataExpressionParser_SyntaxError, this.textPos);
+                    this.ParseError("The specified odata query has syntax errors.", this.textPos);
                     break;
             }
             this.Token.Kind = t;
@@ -142,7 +142,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         {
             if (!Char.IsDigit(this.CurrentChar))
             {
-                this.ParseError(Resources.ODataExpressionParser_DigitExpected, this.textPos);
+                this.ParseError("Digit expected.", this.textPos);
             }
         }
 

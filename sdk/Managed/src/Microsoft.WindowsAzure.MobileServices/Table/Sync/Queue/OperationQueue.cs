@@ -133,7 +133,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
             catch (Exception ex)
             {
-                throw new MobileServiceLocalStoreException(Resources.SyncStore_FailedToDeleteOperation, ex);
+                throw new MobileServiceLocalStoreException("Failed to delete operation from the local store.", ex);
             }
         }
 
@@ -145,7 +145,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
             catch (Exception ex)
             {
-                throw new MobileServiceLocalStoreException(Resources.SyncStore_FailedToUpdateOperation, ex);
+                throw new MobileServiceLocalStoreException("Failed to update operation in the local store.", ex);
             }
         }
 

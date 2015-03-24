@@ -32,7 +32,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         {
             if (this.Query.Filter != null || !this.force)
             {
-                throw new InvalidOperationException(Resources.SyncContext_PurgeOnDirtyTable);
+                throw new InvalidOperationException("The table cannot be purged because it has pending operations.");
             }
 
             var delOperationsQuery = new MobileServiceTableQueryDescription(MobileServiceLocalSystemTables.OperationQueue);

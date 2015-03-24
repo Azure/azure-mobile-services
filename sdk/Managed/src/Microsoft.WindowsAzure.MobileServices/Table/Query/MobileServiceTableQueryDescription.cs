@@ -253,7 +253,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                         includeTotalCount = "allpages".Equals(value);
                         break;
                     default:
-                        throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, Resources.MobileServiceTableQueryDescription_UnrecognizedQueryParameter, key), "query");
+                        throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unrecognized query parameter '{0}'.", key), "query");
                 }
             }
 

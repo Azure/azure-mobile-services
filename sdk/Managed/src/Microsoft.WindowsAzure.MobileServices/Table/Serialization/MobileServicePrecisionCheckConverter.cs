@@ -76,7 +76,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             throw new NotSupportedException(
                 string.Format(CultureInfo.InvariantCulture,
-                            Resources.MobileServicePrecisionCheckConverter_ReadNotSupported,
+                            "The {0} does not support reading JSON.",
                             typeof(MobileServicePrecisionCheckConverter).Name));
         }
 
@@ -138,7 +138,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 throw new InvalidOperationException(
                     string.Format(CultureInfo.InvariantCulture,
-                                  Resources.MobileServiceContractResolver_NumberOutOfRange,
+                                  "The value {0} for member {1} is outside the valid range for numeric columns.",
                                   value,
                                   writer.Path));
             }

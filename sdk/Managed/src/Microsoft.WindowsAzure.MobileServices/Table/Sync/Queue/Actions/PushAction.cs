@@ -80,7 +80,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             catch (Exception ex)
             {
 
-                batch.OtherErrors.Add(new MobileServiceLocalStoreException(Resources.SyncStore_FailedToLoadError, ex));
+                batch.OtherErrors.Add(new MobileServiceLocalStoreException("Failed to read errors from the local store.", ex));
             }
             return batchStatus;
         }
@@ -199,7 +199,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             // save the result if ExecuteTableOperation did not throw
             if (error == null && result.IsValidItem() && operation.CanWriteResultToStore)
             {
-                await TryStoreOperation(() => this.Store.UpsertAsync(operation.TableName, result, fromServer: true), batch, Resources.SyncStore_FailedToUpsertItem);
+                await TryStoreOperation(() => this.Store.UpsertAsync(operation.TableName, result, fromServer: true), batch, "Failed to update the item in the local store.");
             }
             else if (error != null)
             {
@@ -235,7 +235,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         private async Task TryUpdateOperationState(MobileServiceTableOperation operation, MobileServiceTableOperationState state, OperationBatch batch)
         {
             operation.State = state;
-            await TryStoreOperation(() => this.OperationQueue.UpdateAsync(operation), batch, Resources.SyncStore_FailedToUpdateOperation);
+            await TryStoreOperation(() => this.OperationQueue.UpdateAsync(operation), batch, "Failed to update operation in the local store.");
         }
 
         private async Task LoadOperationItem(MobileServiceTableOperation operation, OperationBatch batch)
@@ -246,7 +246,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 await TryStoreOperation(async () =>
                 {
                     operation.Item = await this.Store.LookupAsync(operation.TableName, operation.ItemId) as JObject;
-                }, batch, Resources.SyncStore_FailedToReadItem);
+                }, batch, "Failed to read the item from local store.");
             }
         }
 

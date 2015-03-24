@@ -81,7 +81,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                     break;
                 default:
                     throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture,
-                                                                  Resources.FilterBuildingExpressionVisitor_UnsupportedInWhereExpression,
+                                                                  "'{0}' is not supported in a 'Where' Mobile Services query expression.",
                                                                   nodeIn.OperatorKind));
             }
 

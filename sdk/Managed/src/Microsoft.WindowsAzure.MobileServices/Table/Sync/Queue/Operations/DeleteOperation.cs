@@ -54,7 +54,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             Debug.Assert(newOperation.ItemId == this.ItemId);
 
             // we don't allow any more operations on object that has already been deleted
-            throw new InvalidOperationException(Resources.SyncContext_DeletePending);
+            throw new InvalidOperationException("A delete operation on the item is already in the queue.");
         }
 
         public override void Collapse(MobileServiceTableOperation other)

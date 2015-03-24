@@ -98,7 +98,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                 {
                     string responseStr = response != null ? response.ToString() : "null";
                     throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture,
-                                                                      Resources.MobileServiceTable_ExpectedArray,
+                                                                      "Could not get an array from response {0}.",
                                                                       responseStr));
                 }
                 else if (result.Values == null)

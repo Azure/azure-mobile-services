@@ -74,12 +74,12 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             if (templateName.Equals(Registration.NativeRegistrationName))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, Resources.Push_ConflictWithReservedName, Registration.NativeRegistrationName));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Template name conflicts with reserved name '{0}'.", Registration.NativeRegistrationName));
             }
 
             if (templateName.Contains(":") || templateName.Contains(";"))
             {
-                throw new ArgumentException(Resources.Push_InvalidTemplateName);
+                throw new ArgumentException("Template name cannot contain ';' or ':'.");
             }
 
             if (string.IsNullOrWhiteSpace(bodyTemplate))
@@ -110,7 +110,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 }
                 catch (Exception e)
                 {
-                    throw new ArgumentException(Resources.Push_BodyTemplateMustBeXml, "bodyTemplate", e);
+                    throw new ArgumentException("Valid XML is required for any template without a raw header.", "bodyTemplate", e);
                 }
 
                 var payloadType = WnsTemplateRegistration.DetectBodyType(xmlDocument);
@@ -156,7 +156,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 !Enum.TryParse(template.FirstChild.NodeName, true, out registrationType))
             {
                 // First node of the body template should be toast/tile/badge
-                throw new ArgumentException(Resources.Push_NotSupportedXMLFormatAsBodyTemplateWin8);
+                throw new ArgumentException("The bodyTemplate is not in accepted XML format. The first node of the bodyTemplate should be Badge/Tile/Toast, except for the wns/raw template, which needs to be an valid XML.");
             }
 
             return "wns/" + template.FirstChild.NodeName.ToLowerInvariant();

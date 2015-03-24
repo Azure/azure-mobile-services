@@ -51,7 +51,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             if (pendingLoginTask == null)
             {
-                throw new InvalidOperationException(Resources.IAuthenticationBroker_NoLoginInProgress);
+                throw new InvalidOperationException("Authentication has not been started.");
             }
 
             if (result.ResponseStatus != WebAuthenticationStatus.Success)
@@ -59,12 +59,12 @@ namespace Microsoft.WindowsAzure.MobileServices
                 string message;
                 if (result.ResponseStatus == WebAuthenticationStatus.UserCancel)
                 {
-                    message = Resources.IAuthenticationBroker_AuthenticationCanceled;
+                    message = "Authentication was cancelled by the user.";
                 }
                 else
                 {
                     message = string.Format(CultureInfo.InvariantCulture,
-                                            Resources.IAuthenticationBroker_AuthenticationFailed,
+                                            "Authentication failed with HTTP response code {0}.",
                                             result.ResponseErrorDetail);
                 }
                 pendingLoginTask.SetException(new InvalidOperationException(message));                
@@ -106,7 +106,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             if (pendingLoginTask != null)
             {
-                throw new InvalidOperationException(Resources.IAuthenticationBroker_LoginInProgress);
+                throw new InvalidOperationException("Authentication is already in progress.");
             }
 
             pendingLoginTask = new TaskCompletionSource<string>();
@@ -156,12 +156,12 @@ namespace Microsoft.WindowsAzure.MobileServices
                 string errorString = GetSubStringAfterMatch(responseData, "#error=");
                 if (string.IsNullOrEmpty(errorString))
                 {
-                    message = Resources.IAuthenticationBroker_InvalidLoginResponse;
+                    message = "Invalid format of the authentication response.";
                 }
                 else
                 {
                     message = string.Format(CultureInfo.InvariantCulture,
-                                            Resources.IAuthenticationBroker_LoginFailed,
+                                            "Login failed: {0}",
                                             errorString);
                 }
 

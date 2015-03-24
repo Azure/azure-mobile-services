@@ -46,7 +46,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                         throw new ArgumentException(
                             string.Format(
                                 CultureInfo.InvariantCulture,
-                                Resources.MobileServiceTableUrlBuilder_InvalidParameterBeginsWithDollarSign,
+                                "{0} is an invalid user-defined query string parameter. User-defined query string parameters must not begin with a \'$\'.",
                                 parameter.Key),
                             "parameters");
                     }

@@ -83,7 +83,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
             var newOperation = new DeleteOperation("test", MobileServiceTableKind.Table, "abc");
             this.operation.State = MobileServiceTableOperationState.Attempted;
             var ex = AssertEx.Throws<InvalidOperationException>(() => this.operation.Validate(newOperation));
-            Assert.AreEqual("The item is in inconsistent state in the local store. Please complete the pending sync by calling PushAsync()before deleting the item.", ex.Message);
+            Assert.AreEqual("The item is in inconsistent state in the local store. Please complete the pending sync by calling PushAsync() before deleting the item.", ex.Message);
         }
 
         [TestMethod]
