@@ -84,7 +84,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             throw new InvalidOperationException(
                 string.Format(CultureInfo.InvariantCulture,
-                              Resources.Platform_AssemblyNotFound,
+                              "A Microsoft Azure Mobile Services assembly for the current platform was not found. Ensure that the current project references both {0} and the following platform-specific assembly: {1}.",
                             portable.Name,
                             PlatformAssemblyName));
         }

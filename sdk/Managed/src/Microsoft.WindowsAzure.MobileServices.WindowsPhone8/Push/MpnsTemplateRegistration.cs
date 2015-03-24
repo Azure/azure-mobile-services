@@ -86,12 +86,12 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             if (templateName.Equals(MpnsRegistration.NativeRegistrationName))
             {
-                throw new ArgumentException(Resources.Push_ConflictWithReservedName);
+                throw new ArgumentException("Template name conflicts with reserved name '{0}'.");
             }
 
             if (templateName.Contains(":") || templateName.Contains(";"))
             {
-                throw new ArgumentException(Resources.Push_InvalidTemplateName);
+                throw new ArgumentException("Template name cannot contain ';' or ':'.");
             }
 
             this.TemplateName = templateName;
@@ -173,12 +173,12 @@ namespace Microsoft.WindowsAzure.MobileServices
                 }
                 catch (Exception)
                 {
-                    throw new ArgumentException(Resources.Push_BodyTemplateMustBeXml, "bodyTemplate");
+                    throw new ArgumentException("Valid XML is required for any template without a raw header.", "bodyTemplate");
                 }
 
                 if (body == null)
                 {
-                    throw new ArgumentException(Resources.Push_BodyTemplateMustContainElement, "bodyTemplate");
+                    throw new ArgumentException("XML must contain an XML node of Element type.", "bodyTemplate");
                 }
 
                 TemplateRegistrationType registrationType;

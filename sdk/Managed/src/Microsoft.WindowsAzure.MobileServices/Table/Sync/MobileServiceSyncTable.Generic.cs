@@ -89,7 +89,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 throw new InvalidOperationException(
                     string.Format(
                         CultureInfo.InvariantCulture,
-                        Resources.MobileServiceTable_ItemNotFoundInStore));
+                        "Item not found in local store."));
             }
 
             // Deserialize that value back into the current instance

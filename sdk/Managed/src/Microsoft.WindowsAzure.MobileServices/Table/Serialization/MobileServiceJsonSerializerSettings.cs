@@ -65,7 +65,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                     throw new InvalidOperationException(
                         string.Format(
                             CultureInfo.InvariantCulture,
-                            Resources.MobileServiceJsonSerializerSettings_NullOrInvalidContractResolver,
+                            "The member '{0}.ContractResolver' must be set to an instance of the '{1}' class or a class that inherits from the '{1}' class.",
                             this.GetType().FullName,
                             typeof(MobileServiceContractResolver).FullName));
                 }
@@ -80,7 +80,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                     throw new InvalidOperationException(
                         string.Format(
                             CultureInfo.InvariantCulture,
-                            Resources.MobileServiceJsonSerializerSettings_NullOrInvalidContractResolver,
+                            "The member '{0}.ContractResolver' must be set to an instance of the '{1}' class or a class that inherits from the '{1}' class.",
                             this.GetType().FullName,
                             typeof(MobileServiceContractResolver).FullName));
                 }
