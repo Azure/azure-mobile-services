@@ -216,8 +216,17 @@ public class MobileServiceSyncContext {
      * @throws ParseException
      * @throws MobileServiceLocalStoreException
      */
-    private void removeTableOperation(TableOperationError tableOperationError) throws ParseException, MobileServiceLocalStoreException {
-        this.mOpQueue = this.mOpQueue.removeOperationFromQueue(tableOperationError.getOperationId());
+    private void removeTableOperation(TableOperationError tableOperationError) throws Throwable {
+        this.mInitLock.readLock().lock();
+
+        try {
+
+            ensureCorrectlyInitialized();
+
+            this.mOpQueue.removeOperationWithErrorFromQueue(tableOperationError);
+        } finally {
+            this.mInitLock.readLock().unlock();
+        }
     }
 
     /**
@@ -226,12 +235,15 @@ public class MobileServiceSyncContext {
      * @throws ParseException
      * @throws MobileServiceLocalStoreException
      */
-    public void cancelAndUpdateItem(TableOperationError tableOperationError) throws ParseException, MobileServiceLocalStoreException {
+    public void cancelAndUpdateItem(TableOperationError tableOperationError) throws Throwable {
 
         MultiReadWriteLock<String> tableLock = null;
         MultiLock<String> idLock = null;
+        this.mInitLock.readLock().lock();
 
         try {
+
+            ensureCorrectlyInitialized();
 
             this.mOpLock.writeLock().lock();
 
@@ -247,12 +259,16 @@ public class MobileServiceSyncContext {
 
         } finally {
             try {
-                this.mOpLock.writeLock().unlock();
+                this.mInitLock.readLock().unlock();
             } finally {
                 try {
-                    this.mIdLockMap.unLock(idLock);
+                    this.mOpLock.writeLock().unlock();
                 } finally {
-                    this.mTableLockMap.unLockRead(tableLock);
+                    try {
+                        this.mIdLockMap.unLock(idLock);
+                    } finally {
+                        this.mTableLockMap.unLockRead(tableLock);
+                    }
                 }
             }
         }
@@ -264,11 +280,16 @@ public class MobileServiceSyncContext {
      * @throws ParseException
      * @throws MobileServiceLocalStoreException
      */
-    public void cancelAndDiscardItem(TableOperationError tableOperationError) throws ParseException, MobileServiceLocalStoreException {
+    public void cancelAndDiscardItem(TableOperationError tableOperationError) throws Throwable {
         MultiReadWriteLock<String> tableLock = null;
         MultiLock<String> idLock = null;
 
+        this.mInitLock.readLock().lock();
+
         try {
+
+            ensureCorrectlyInitialized();
+
             this.mOpLock.writeLock().lock();
 
             String tableItemId = tableOperationError.getTableName() + "/" + tableOperationError.getItemId();
@@ -285,12 +306,16 @@ public class MobileServiceSyncContext {
 
         } finally {
             try {
-                this.mOpLock.writeLock().unlock();
+                this.mInitLock.readLock().unlock();
             } finally {
                 try {
-                    this.mIdLockMap.unLock(idLock);
+                    this.mOpLock.writeLock().unlock();
                 } finally {
-                    this.mTableLockMap.unLockRead(tableLock);
+                    try {
+                        this.mIdLockMap.unLock(idLock);
+                    } finally {
+                        this.mTableLockMap.unLockRead(tableLock);
+                    }
                 }
             }
         }
