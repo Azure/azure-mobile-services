@@ -85,11 +85,11 @@ public class OfflineTests extends TestGroup {
         this.addTest(createBasicTest("Basic Test"));
         this.addTest(createNoCollapseInsertOnPreviousPushError("No collapse insert on previous push error"));
 
-        //this.addTest(createLocallyDeleteAlreadyDeletedElementTest());
+        this.addTest(createLocallyDeleteAlreadyDeletedElementTest());
 
         this.addTest(createInsertDuplicatedElementTest());
 
-        this.addTest(createDeleteSyncConflict());
+        //this.addTest(createDeleteSyncConflict());
 
         this.addTest(createSyncConflictTest(false));
         this.addTest(createSyncConflictTest(true));
