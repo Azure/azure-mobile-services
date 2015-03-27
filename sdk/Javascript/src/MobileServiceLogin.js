@@ -421,7 +421,7 @@ function loginWithLoginControl(login, provider, useSingleSignOn, parameters, cal
 
     var client = login.getMobileServiceClient();
     var startUri = _.url.combinePathSegments(
-        client.applicationUrl,
+        client.gatewayUrl || client.applicationUrl,
         loginUrl,
         provider);
     var endUri = null;
@@ -434,7 +434,7 @@ function loginWithLoginControl(login, provider, useSingleSignOn, parameters, cal
     // If not single sign-on, then we need to construct a non-null end uri.
     if (!useSingleSignOn) {
         endUri = _.url.combinePathSegments(
-            client.applicationUrl,
+            client.gatewayUrl || client.applicationUrl,
             loginUrl,
             loginDone);
     }

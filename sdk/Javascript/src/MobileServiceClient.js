@@ -27,7 +27,7 @@ var _zumoFeatures = {
 };
 var _zumoFeaturesHeaderName = "X-ZUMO-FEATURES";
 
-function MobileServiceClient(applicationUrl, applicationKey) {
+function MobileServiceClient(applicationUrl, applicationKey, gatewayUrl) {
     /// <summary>
     /// Initializes a new instance of the MobileServiceClient class.
     /// </summary>
@@ -44,6 +44,7 @@ function MobileServiceClient(applicationUrl, applicationKey) {
 
     this.applicationUrl = applicationUrl;
     this.applicationKey = applicationKey || null;
+    this.gatewayUrl = gatewayUrl || null;
 
     var sdkInfo = Platform.getSdkInfo();
     var osInfo = Platform.getOperatingSystemInfo();
