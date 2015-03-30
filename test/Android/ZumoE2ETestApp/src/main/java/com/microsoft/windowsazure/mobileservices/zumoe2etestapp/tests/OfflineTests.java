@@ -1720,9 +1720,6 @@ class ConflictResolvingSyncHandler implements MobileServiceSyncHandler {
     @Override
     public void onPushComplete(MobileServicePushCompletionResult pushCompletionResult) throws MobileServiceSyncHandlerException {
 
-        if (pushCompletionResult.getOperationErrors().size() != 0) {
-            TableOperationError tableOperationError = pushCompletionResult.getOperationErrors().get(0);
-        }
     }
 }
 
