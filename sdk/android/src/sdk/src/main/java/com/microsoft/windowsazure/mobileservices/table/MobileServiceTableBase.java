@@ -419,21 +419,21 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
     /**
      * Deletes an entity from a Mobile Service Table
      *
-     * @param element The entity to delete
+     * @param id The entity id to delete
      */
-    public ListenableFuture<Void> delete(Object element) {
-        return this.delete(element, (List<Pair<String, String>>) null);
+    public ListenableFuture<Void> delete(Integer id) {
+        return this.delete(id, (List<Pair<String, String>>) null);
     }
 
     /**
      * Deletes an entity from a Mobile Service Table
      *
-     * @param element  The entity to delete
+     * @param id  The entity id to delete
      * @param callback Callback to invoke when the operation is completed
      * @deprecated use {@link delete(Object elementOrId)} instead
      */
-    public void delete(Object element, TableDeleteCallback callback) {
-        this.delete(element, null, callback);
+    public void delete(Integer id, TableDeleteCallback callback) {
+        this.delete(id.toString(), null, callback);
     }
 
     /**
@@ -443,8 +443,71 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
      * @param parameters A list of user-defined parameters and values to include in the
      *                   request URI query string
      */
-    public ListenableFuture<Void> delete(Object elementOrId, List<Pair<String, String>> parameters) {
-        validateId(elementOrId);
+    public ListenableFuture<Void> delete(Integer id, List<Pair<String, String>> parameters) {
+        return delete(id.toString(), parameters);
+    }
+
+    /**
+     * Deletes an entity from a Mobile Service Table
+     *
+     * @param id The entity id to delete
+     */
+    public ListenableFuture<Void> delete(Long id) {
+        return this.delete(id, (List<Pair<String, String>>) null);
+    }
+
+    /**
+     * Deletes an entity from a Mobile Service Table
+     *
+     * @param id  The entity id to delete
+     * @param callback Callback to invoke when the operation is completed
+     * @deprecated use {@link delete(Object elementOrId)} instead
+     */
+    public void delete(Long id, TableDeleteCallback callback) {
+        this.delete(id.toString(), null, callback);
+    }
+
+    /**
+     * Deletes an entity from a Mobile Service Table using a given id
+     *
+     * @param id         The id of the entity to delete
+     * @param parameters A list of user-defined parameters and values to include in the
+     *                   request URI query string
+     */
+    public ListenableFuture<Void> delete(Long id, List<Pair<String, String>> parameters) {
+        return delete(id.toString(), parameters);
+    }
+
+    /**
+     * Deletes an entity from a Mobile Service Table
+     *
+     * @param id The entity id to delete
+     */
+    public ListenableFuture<Void> delete(String id) {
+        return this.delete(id, (List<Pair<String, String>>) null);
+    }
+
+    /**
+     * Deletes an entity from a Mobile Service Table
+     *
+     * @param id  The entity id to delete
+     * @param callback Callback to invoke when the operation is completed
+     * @deprecated use {@link delete(Object elementOrId)} instead
+     */
+    public void delete(String id, TableDeleteCallback callback) {
+        this.delete(id, null, callback);
+    }
+
+    /**
+     * Deletes an entity from a Mobile Service Table using a given id
+     *
+     * @param id         The id of the entity to delete
+     * @param parameters A list of user-defined parameters and values to include in the
+     *                   request URI query string
+     */
+    public ListenableFuture<Void> delete(String id, List<Pair<String, String>> parameters) {
+
+        validateId(id);
 
         // Create delete request
         ServiceFilterRequest delete;
@@ -452,7 +515,7 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
         Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
         uriBuilder.path(TABLES_URL);
         uriBuilder.appendPath(mTableName);
-        uriBuilder.appendPath(getObjectId(elementOrId).toString());
+        uriBuilder.appendPath(id);
 
         EnumSet<MobileServiceFeatures> features = mFeatures.clone();
         if (parameters != null && parameters.size() > 0) {
@@ -499,8 +562,8 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
      * @deprecated use {@link delete(Object elementOrId, java.util.List< android.util.Pair<String,
      * String>> parameters)} instead
      */
-    public void delete(Object elementOrId, List<Pair<String, String>> parameters, final TableDeleteCallback callback) {
-        ListenableFuture<Void> deleteFuture = delete(elementOrId, parameters);
+    public void delete(String id, List<Pair<String, String>> parameters, final TableDeleteCallback callback) {
+        ListenableFuture<Void> deleteFuture = delete(id, parameters);
 
         Futures.addCallback(deleteFuture, new FutureCallback<Void>() {
             @Override

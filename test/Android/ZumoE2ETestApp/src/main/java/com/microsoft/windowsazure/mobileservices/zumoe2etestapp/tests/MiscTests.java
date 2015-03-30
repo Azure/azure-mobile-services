@@ -506,7 +506,7 @@ public class MiscTests extends TestGroup {
                         log("delete item " + jsonArray.get(i));
 
                         try {
-                            mTable.delete(jsonArray.get(i)).get();
+                            mTable.delete(jsonArray.get(i).getAsJsonObject()).get();
 
                         } catch (Exception exception2) {
                             createResultFromException(testResult, exception2);

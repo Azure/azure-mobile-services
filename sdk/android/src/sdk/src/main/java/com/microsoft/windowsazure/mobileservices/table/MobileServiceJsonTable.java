@@ -676,6 +676,113 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
     }
 
     /**
+     * Delete an element from a Mobile Service Table
+     *
+     * @param element The JsonObject to delete
+     */
+    public ListenableFuture<Void> delete(JsonObject element) {
+        return this.delete(element, (List<Pair<String, String>>) null);
+    }
+
+    /**
+     * Delete an element from a Mobile Service Table
+     *
+     * @param element  The JsonObject to delete
+     * @param callback Callback to invoke when the operation is completed
+     * @deprecated use {@link update(final JsonObject element)} instead
+     */
+    public void delete(JsonObject element, TableDeleteCallback callback) {
+        this.delete(element, null, callback);
+    }
+
+    /**
+     * Delete an element from a Mobile Service Table
+     *
+     * @param element    The JsonObject to undelete
+     * @param parameters A list of user-defined parameters and values to include in the
+     *                   request URI query string
+     */
+    public ListenableFuture<Void> delete(JsonObject element, List<Pair<String, String>> parameters) {
+
+        validateId(element);
+
+        final SettableFuture<Void> future = SettableFuture.create();
+
+        Object id = null;
+        String version = null;
+
+        try {
+            id = validateId(element);
+        } catch (Exception e) {
+            future.setException(e);
+            return future;
+        }
+
+        if (!isNumericType(id)) {
+            version = getVersionSystemProperty(element);
+        }
+
+        EnumSet<MobileServiceFeatures> features = mFeatures.clone();
+        if (parameters != null && parameters.size() > 0) {
+            features.add(MobileServiceFeatures.AdditionalQueryParameters);
+        }
+
+        parameters = addSystemProperties(mSystemProperties, parameters);
+        List<Pair<String, String>> requestHeaders = null;
+        if (version != null) {
+            requestHeaders = new ArrayList<Pair<String, String>>();
+            requestHeaders.add(new Pair<String, String>("If-Match", getEtagFromValue(version)));
+            features.add(MobileServiceFeatures.OpportunisticConcurrency);
+        }
+
+        ListenableFuture<Pair<JsonObject, ServiceFilterResponse>> internalFuture = this.executeTableOperation(TABLES_URL + mTableName + "/" + id.toString(), null, "DELETE", requestHeaders, parameters, features);
+
+        Futures.addCallback(internalFuture, new FutureCallback<Pair<JsonObject, ServiceFilterResponse>>() {
+            @Override
+            public void onFailure(Throwable exc) {
+                future.setException(exc);
+            }
+
+            @Override
+            public void onSuccess(Pair<JsonObject, ServiceFilterResponse> result) {
+                future.set(null);
+            }
+        });
+
+        return future;
+    }
+
+    /**
+     * Delete an element from a Mobile Service Table
+     *
+     * @param element    The JsonObject to undelete
+     * @param parameters A list of user-defined parameters and values to include in the
+     *                   request URI query string
+     * @param callback   Callback to invoke when the operation is completed
+     * @deprecated use {@link update(final com.google.gson.JsonObject element, java.util.List< android.util.Pair<String,
+     * String>> parameters)} instead
+     */
+    public void delete(final JsonObject element, List<Pair<String, String>> parameters, final TableDeleteCallback callback) {
+        ListenableFuture<Void> deleteFuture = delete(element, parameters);
+
+        Futures.addCallback(deleteFuture, new FutureCallback<Void>() {
+            @Override
+            public void onFailure(Throwable exception) {
+                if (exception instanceof Exception) {
+                    callback.onCompleted((Exception) exception, MobileServiceException.getServiceResponse(exception));
+                } else {
+                    callback.onCompleted(new Exception(exception), MobileServiceException.getServiceResponse(exception));
+                }
+            }
+
+            @Override
+            public void onSuccess(Void v) {
+                callback.onCompleted(null, null);
+            }
+        });
+    }
+
+    /**
      * Undelete an element from a Mobile Service Table
      *
      * @param element The JsonObject to update
@@ -764,9 +871,9 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
      * String>> parameters)} instead
      */
     public void undelete(final JsonObject element, List<Pair<String, String>> parameters, final TableJsonOperationCallback callback) {
-        ListenableFuture<JsonObject> updateFuture = undelete(element, parameters);
+        ListenableFuture<JsonObject> undeleteFuture = undelete(element, parameters);
 
-        Futures.addCallback(updateFuture, new FutureCallback<JsonObject>() {
+        Futures.addCallback(undeleteFuture, new FutureCallback<JsonObject>() {
             @Override
             public void onFailure(Throwable exception) {
                 if (exception instanceof Exception) {

@@ -130,7 +130,7 @@ public class RemoteTableOperationProcessor implements TableOperationVisitor<Json
     @Override
     public JsonObject visit(DeleteOperation operation) throws Throwable {
         MobileServiceJsonTable table = this.getRemoteTable(operation.getTableName());
-        ListenableFuture<Void> future = table.delete(operation.getItemId());
+        ListenableFuture<Void> future = table.delete(this.mItem);
 
         try {
             future.get();
