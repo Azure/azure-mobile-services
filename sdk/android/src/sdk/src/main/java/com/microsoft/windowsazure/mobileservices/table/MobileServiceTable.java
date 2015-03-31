@@ -753,6 +753,93 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
         });
     }
 
+    /**
+     * Delete an element from a Mobile Service Table
+     *
+     * @param element The JsonObject to delete
+     */
+    public ListenableFuture<Void> delete(E element) {
+        return this.delete(element, (List<Pair<String, String>>) null);
+    }
+
+    /**
+     * Delete an element from a Mobile Service Table
+     *
+     * @param element  The JsonObject to delete
+     * @param callback Callback to invoke when the operation is completed
+     * @deprecated use {@link update(final JsonObject element)} instead
+     */
+    public void delete(E element, final TableDeleteCallback callback) {
+        this.delete(element, null, callback);
+    }
+
+    /**
+     * Delete an entity from a Mobile Service Table
+     *
+     * @param element    The entity to Undelete
+     * @param parameters A list of user-defined parameters and values to include in the
+     *                   request URI query string
+     */
+    public ListenableFuture<Void> delete(E element, List<Pair<String, String>> parameters) {
+
+        validateId(element);
+
+        final SettableFuture<Void> future = SettableFuture.create();
+
+        JsonObject json = null;
+
+        try {
+            json = mClient.getGsonBuilder().create().toJsonTree(element).getAsJsonObject();
+        } catch (IllegalArgumentException e) {
+            future.setException(e);
+            return future;
+        }
+
+        ListenableFuture<Void> internalFuture = mInternalTable.delete(json, parameters);
+        Futures.addCallback(internalFuture, new FutureCallback<Void>() {
+            @Override
+            public void onFailure(Throwable exc) {
+                future.setException(transformToTypedException(exc));
+            }
+
+            @Override
+            public void onSuccess(Void v) {
+                future.set(null);
+            }
+        });
+
+        return future;
+    }
+
+    /**
+     * Deletes an entity from a Mobile Service Table using a given id
+     *
+     * @param id         The id of the entity to delete
+     * @param parameters A list of user-defined parameters and values to include in the
+     *                   request URI query string
+     * @param callback   Callback to invoke when the operation is completed
+     * @deprecated use {@link delete(Object elementOrId, java.util.List< android.util.Pair<String,
+     * String>> parameters)} instead
+     */
+    public void delete(final E element, List<Pair<String, String>> parameters, final TableDeleteCallback callback) {
+        ListenableFuture<Void> deleteFuture = delete(element, parameters);
+
+        Futures.addCallback(deleteFuture, new FutureCallback<Void>() {
+            @Override
+            public void onFailure(Throwable exception) {
+                if (exception instanceof Exception) {
+                    callback.onCompleted((Exception) exception, MobileServiceException.getServiceResponse(exception));
+                } else {
+                    callback.onCompleted(new Exception(exception), MobileServiceException.getServiceResponse(exception));
+                }
+            }
+
+            @Override
+            public void onSuccess(Void v) {
+                callback.onCompleted(null, null);
+            }
+        });
+    }
 
     /**
      * Parses the JSON object to a typed list

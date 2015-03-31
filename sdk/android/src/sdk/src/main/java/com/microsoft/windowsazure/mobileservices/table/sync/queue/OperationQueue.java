@@ -34,6 +34,7 @@ import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileSer
 import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileServiceLocalStoreException;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.DeleteOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.InsertOperation;
+import com.microsoft.windowsazure.mobileservices.table.sync.operations.MobileServiceTableOperationState;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationCollapser;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationKind;
@@ -95,6 +96,7 @@ public class OperationQueue {
         columns.put("__createdat", ColumnDataType.Date);
         columns.put("__queueloadedat", ColumnDataType.Date);
         columns.put("sequence", ColumnDataType.Real);
+        columns.put("state", ColumnDataType.Real);
 
         store.defineTable(OPERATION_QUEUE_TABLE, columns);
     }
@@ -153,6 +155,7 @@ public class OperationQueue {
         element.addProperty("__createdat", DateSerializer.serialize(opQueueItem.getCreatedAt()));
         element.addProperty("__queueloadedat", DateSerializer.serialize(opQueueItem.getQueueLoadedAt()));
         element.addProperty("sequence", opQueueItem.getSequence());
+        element.addProperty("state", opQueueItem.getOperationState().getValue());
 
         return element;
     }
@@ -165,6 +168,7 @@ public class OperationQueue {
         Date createdAt = DateSerializer.deserialize(element.get("__createdat").getAsString());
         Date queueLoadedAt = DateSerializer.deserialize(element.get("__queueloadedat").getAsString());
         long sequence = element.get("sequence").getAsLong();
+        int state = element.get("state").getAsInt();
 
         TableOperation operation = null;
         switch (kind) {
@@ -179,6 +183,8 @@ public class OperationQueue {
                 break;
         }
 
+        operation.setOperationState(MobileServiceTableOperationState.parse(state));
+
         return new OperationQueueItem(operation, queueLoadedAt, sequence);
     }
 
@@ -192,6 +198,12 @@ public class OperationQueue {
         this.mSyncLock.writeLock().lock();
 
         try {
+
+            //If an operation state is already seted, keep it to support requee failed operations
+            if (operation.getOperationState() == null) {
+                operation.setOperationState(MobileServiceTableOperationState.Pending);
+            }
+
             // '/' is a reserved character that cannot be used on string ids.
             // We use it to build a unique compound string from tableName and
             // itemId
@@ -200,6 +212,7 @@ public class OperationQueue {
             if (this.mIdOperationMap.containsKey(tableItemId)) {
                 OperationQueueItem prevOpQueueItem = this.mIdOperationMap.get(tableItemId);
                 TableOperation prevOperation = prevOpQueueItem.getOperation();
+
                 TableOperation collapsedOperation = prevOperation.accept(new TableOperationCollapser(operation));
 
                 if (collapsedOperation == null || collapsedOperation == operation) {
@@ -216,6 +229,7 @@ public class OperationQueue {
             } else {
                 enqueueOperation(operation);
             }
+
         } finally {
             this.mSyncLock.writeLock().unlock();
         }
@@ -245,6 +259,18 @@ public class OperationQueue {
         }
     }
 
+    public OperationQueue removeOperationFromQueue(String operationId) throws ParseException, MobileServiceLocalStoreException {
+        this.mSyncLock.writeLock().lock();
+
+        try {
+            this.mStore.delete(OPERATION_QUEUE_TABLE, operationId);
+
+            return OperationQueue.load(this.mStore);
+        } finally {
+            this.mSyncLock.writeLock().unlock();
+        }
+    }
+
     /**
      * Peek the next table operation
      *
@@ -255,6 +281,21 @@ public class OperationQueue {
 
         try {
             return this.mQueue.peek() != null ? this.mQueue.peek().getOperation() : null;
+        } finally {
+            this.mSyncLock.readLock().unlock();
+        }
+    }
+
+    /**
+     * Get the next table operation
+     *
+     * @return the table operation
+     */
+    public TableOperation element() {
+        this.mSyncLock.readLock().lock();
+
+        try {
+            return this.mQueue.element() != null ? this.mQueue.element().getOperation() : null;
         } finally {
             this.mSyncLock.readLock().unlock();
         }
@@ -350,6 +391,7 @@ public class OperationQueue {
         this.mQueue.poll();
 
         removeOperationQueueItem(opQueueItem);
+
         dequeueCancelledOperations();
 
         return opQueueItem.getOperation();
@@ -510,6 +552,26 @@ public class OperationQueue {
         @Override
         public <T> T accept(TableOperationVisitor<T> visitor) throws Throwable {
             return this.mOperation.accept(visitor);
+        }
+
+        /**
+         * Gets the operation state
+         *
+         * @return The operation state
+         */
+        @Override
+        public MobileServiceTableOperationState getOperationState() {
+            return this.mOperation.getOperationState();
+        }
+
+        /**
+         * Sets the operation state
+         *
+         * @param state the Operation State
+         */
+        @Override
+        public void setOperationState(MobileServiceTableOperationState state) {
+            this.mOperation.setOperationState(state);
         }
     }
 

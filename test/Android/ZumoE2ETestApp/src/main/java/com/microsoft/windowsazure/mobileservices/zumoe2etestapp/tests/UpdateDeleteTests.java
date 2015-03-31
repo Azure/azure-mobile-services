@@ -293,8 +293,10 @@ public class UpdateDeleteTests extends TestGroup {
 
                 StringIdRoundTripTableSoftDeleteElement element = new StringIdRoundTripTableSoftDeleteElement(new Random());
 
-                final MobileServiceTable<StringIdRoundTripTableSoftDeleteElement> table =
+                final MobileServiceTable<StringIdRoundTripTableSoftDeleteElement> typedTable =
                         client.getTable(STRING_ID_ROUNDTRIP_SOFT_DELETE_TABLE_NAME, StringIdRoundTripTableSoftDeleteElement.class);
+
+                final MobileServiceJsonTable jsonTable = client.getTable(STRING_ID_ROUNDTRIP_SOFT_DELETE_TABLE_NAME);
 
                 final TestResult result = new TestResult();
                 result.setStatus(TestStatus.Passed);
@@ -306,9 +308,7 @@ public class UpdateDeleteTests extends TestGroup {
 
                 try {
 
-                    StringIdRoundTripTableSoftDeleteElement entity = table.insert(element).get();
-
-                    Object deleteObject;
+                    StringIdRoundTripTableSoftDeleteElement entity = typedTable.insert(element).get();
 
                     if (useFakeId) {
                         log("use fake id");
@@ -320,25 +320,22 @@ public class UpdateDeleteTests extends TestGroup {
                         entity.id = null;
                     }
 
-                    if (typed) {
-                        deleteObject = entity;
-                    } else {
-                        deleteObject = client.getGsonBuilder().create().toJsonTree(entity).getAsJsonObject();
-                    }
-
-
                     log("soft delete");
 
-                    table.delete(deleteObject).get();
+                    if (typed) {
+                        typedTable.delete(entity).get();
+                    } else {
+                        jsonTable.delete(client.getGsonBuilder().create().toJsonTree(entity).getAsJsonObject()).get();
+                    }
 
                     log("verifiying if was soft deleted");
 
                     if (includeSoftDeleteInQueries) {
 
                         ExecutableQuery<StringIdRoundTripTableSoftDeleteElement> query =
-                                table.includeDeleted().field("id").eq(entity.id);
+                                typedTable.includeDeleted().field("id").eq(entity.id);
 
-                        MobileServiceList<StringIdRoundTripTableSoftDeleteElement> results = table.execute(query).get();
+                        MobileServiceList<StringIdRoundTripTableSoftDeleteElement> results = typedTable.execute(query).get();
 
                         if (results.size() != 1) {
                             createResultFromException(result, new ExpectedValueException(1, 0));
@@ -352,7 +349,7 @@ public class UpdateDeleteTests extends TestGroup {
                     } else {
 
                         try {
-                            StringIdRoundTripTableSoftDeleteElement resultElement = table.lookUp(entity.id).get();
+                            StringIdRoundTripTableSoftDeleteElement resultElement = typedTable.lookUp(entity.id).get();
                         } catch (Exception exception) {
 
                             MobileServiceException ex = (MobileServiceException) exception.getCause();
@@ -389,7 +386,9 @@ public class UpdateDeleteTests extends TestGroup {
 
                 StringIdRoundTripTableSoftDeleteElement element = new StringIdRoundTripTableSoftDeleteElement(new Random());
 
-                final MobileServiceTable<StringIdRoundTripTableSoftDeleteElement> table = client.getTable(STRING_ID_ROUNDTRIP_SOFT_DELETE_TABLE_NAME, StringIdRoundTripTableSoftDeleteElement.class);
+                final MobileServiceTable<StringIdRoundTripTableSoftDeleteElement> typedTable = client.getTable(STRING_ID_ROUNDTRIP_SOFT_DELETE_TABLE_NAME, StringIdRoundTripTableSoftDeleteElement.class);
+
+                final MobileServiceJsonTable jsonTable = client.getTable(STRING_ID_ROUNDTRIP_SOFT_DELETE_TABLE_NAME);
 
                 final TestResult result = new TestResult();
                 result.setStatus(TestStatus.Passed);
@@ -401,24 +400,21 @@ public class UpdateDeleteTests extends TestGroup {
 
                 try {
 
-                    StringIdRoundTripTableSoftDeleteElement entity = table.insert(element).get();
-
-                    Object deleteObject;
+                    StringIdRoundTripTableSoftDeleteElement entity = typedTable.insert(element).get();
 
                     if (typed) {
-                        deleteObject = entity;
+                        typedTable.delete(entity).get();
                     } else {
-                        deleteObject = client.getGsonBuilder().create().toJsonTree(entity).getAsJsonObject();
+                        jsonTable.delete(client.getGsonBuilder().create().toJsonTree(entity).getAsJsonObject()).get();
                     }
 
                     log("soft delete");
 
-                    table.delete(deleteObject).get();
 
                     log("verifiying if was soft deleted");
 
                     try {
-                        table.lookUp(entity.id).get();
+                        typedTable.lookUp(entity.id).get();
                     } catch (Exception exception) {
 
                         MobileServiceException ex = (MobileServiceException) exception.getCause();
@@ -432,22 +428,20 @@ public class UpdateDeleteTests extends TestGroup {
 
                     log("undelete element");
 
-                    ExecutableQuery<StringIdRoundTripTableSoftDeleteElement> deletedQuery = table.includeDeleted().field("id").eq(entity.id);
+                    ExecutableQuery<StringIdRoundTripTableSoftDeleteElement> deletedQuery = typedTable.includeDeleted().field("id").eq(entity.id);
 
-                    StringIdRoundTripTableSoftDeleteElement deletedElement = table.execute(deletedQuery).get().get(0);
+                    StringIdRoundTripTableSoftDeleteElement deletedElement = typedTable.execute(deletedQuery).get().get(0);
 
                     if (typed) {
-                        table.undelete(deletedElement).get();
+                        typedTable.undelete(deletedElement).get();
                     } else {
 
                         JsonObject deletedJsonObject = client.getGsonBuilder().create().toJsonTree(deletedElement).getAsJsonObject();
-                        MobileServiceJsonTable jsonTable = client.getTable(STRING_ID_ROUNDTRIP_SOFT_DELETE_TABLE_NAME);
-
                         jsonTable.undelete(deletedJsonObject).get();
                     }
 
                     log("read undeleted element");
-                    StringIdRoundTripTableSoftDeleteElement resultElement = table.lookUp(entity.id).get();
+                    StringIdRoundTripTableSoftDeleteElement resultElement = typedTable.lookUp(entity.id).get();
 
 
                 } catch (Exception exception) {
@@ -512,6 +506,8 @@ public class UpdateDeleteTests extends TestGroup {
 
                     MobileServiceTable<StringIdRoundTripTableSoftDeleteElement> remoteTable = client.getTable(STRING_ID_ROUNDTRIP_SOFT_DELETE_TABLE_NAME, StringIdRoundTripTableSoftDeleteElement.class);
 
+                    MobileServiceJsonTable jsonTable = client.getTable(STRING_ID_ROUNDTRIP_SOFT_DELETE_TABLE_NAME);
+
                     StringIdRoundTripTableSoftDeleteElement element = new StringIdRoundTripTableSoftDeleteElement(new Random());
 
                     log("Inserted the item to the local store:" + element);
@@ -549,14 +545,12 @@ public class UpdateDeleteTests extends TestGroup {
                     Object deleteObject;
 
                     if (typed) {
-                        deleteObject = element;
+                        remoteTable.delete(element).get();
                     } else {
-                        deleteObject = client.getGsonBuilder().create().toJsonTree(element).getAsJsonObject();
+                        jsonTable.delete(client.getGsonBuilder().create().toJsonTree(element).getAsJsonObject()).get();
                     }
 
                     log("Soft delete element on server");
-
-                    remoteTable.delete(deleteObject).get();
 
 
                     log("Verifiying remote item was soft deleted");
@@ -614,14 +608,14 @@ public class UpdateDeleteTests extends TestGroup {
         return testCase;
     }
 
-
     private TestCase createDeleteTest(String name, final boolean typed, final boolean useFakeId, final boolean includeId, Class<?> expectedExceptionClass) {
         TestCase testCase = new TestCase() {
 
             @Override
             protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
                 RoundTripTableElement element = new RoundTripTableElement(new Random());
-                final MobileServiceTable<RoundTripTableElement> table = client.getTable(ROUNDTRIP_TABLE_NAME, RoundTripTableElement.class);
+                final MobileServiceTable<RoundTripTableElement> typedTable = client.getTable(ROUNDTRIP_TABLE_NAME, RoundTripTableElement.class);
+                final MobileServiceJsonTable jsonTable = client.getTable(ROUNDTRIP_TABLE_NAME);
 
                 final TestResult result = new TestResult();
                 result.setStatus(TestStatus.Passed);
@@ -633,9 +627,7 @@ public class UpdateDeleteTests extends TestGroup {
 
                 try {
 
-                    RoundTripTableElement entity = table.insert(element).get();
-
-                    Object deleteObject;
+                    RoundTripTableElement entity = typedTable.insert(element).get();
 
                     if (useFakeId) {
                         log("use fake id");
@@ -647,15 +639,14 @@ public class UpdateDeleteTests extends TestGroup {
                         entity.id = null;
                     }
 
-                    if (typed) {
-                        deleteObject = entity;
-                    } else {
-                        deleteObject = client.getGsonBuilder().create().toJsonTree(entity).getAsJsonObject();
-                    }
-
                     log("delete");
 
-                    table.delete(deleteObject).get();
+                    if (typed) {
+                        typedTable.delete(element).get();
+                    } else {
+                        jsonTable.delete(client.getGsonBuilder().create().toJsonTree(element).getAsJsonObject()).get();
+                    }
+
 
                 } catch (Exception exception) {
                     if (exception != null) {
@@ -908,11 +899,12 @@ public class UpdateDeleteTests extends TestGroup {
             @Override
             protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
                 RoundTripTableElement element = new RoundTripTableElement(new Random());
-                final MobileServiceTable<RoundTripTableElement> table = client.getTable(ROUNDTRIP_TABLE_NAME, RoundTripTableElement.class);
+                final MobileServiceTable<RoundTripTableElement> typedTable = client.getTable(ROUNDTRIP_TABLE_NAME, RoundTripTableElement.class);
+                final MobileServiceJsonTable jsonTable = client.getTable(ROUNDTRIP_TABLE_NAME);
 
                 final TestCase testCase = this;
                 log("insert item");
-                table.insert(element, new TableOperationCallback<RoundTripTableElement>() {
+                typedTable.insert(element, new TableOperationCallback<RoundTripTableElement>() {
 
                     @Override
                     public void onCompleted(RoundTripTableElement entity, Exception exception, ServiceFilterResponse response) {
@@ -934,24 +926,37 @@ public class UpdateDeleteTests extends TestGroup {
                             }
 
                             if (typed) {
-                                deleteObject = entity;
+                                log("delete");
+                                typedTable.delete(entity, new TableDeleteCallback() {
+
+                                    @Override
+                                    public void onCompleted(Exception exception, ServiceFilterResponse response) {
+                                        if (exception != null) {
+                                            createResultFromException(result, exception);
+                                        }
+
+                                        if (callback != null)
+                                            callback.onTestComplete(testCase, result);
+                                    }
+                                });
                             } else {
-                                deleteObject = client.getGsonBuilder().create().toJsonTree(entity).getAsJsonObject();
+                                log("delete");
+                                jsonTable.delete(client.getGsonBuilder().create().toJsonTree(entity).getAsJsonObject(),
+                                        new TableDeleteCallback() {
+
+                                    @Override
+                                    public void onCompleted(Exception exception, ServiceFilterResponse response) {
+                                        if (exception != null) {
+                                            createResultFromException(result, exception);
+                                        }
+
+                                        if (callback != null)
+                                            callback.onTestComplete(testCase, result);
+                                    }
+                                });
                             }
 
-                            log("delete");
-                            table.delete(deleteObject, new TableDeleteCallback() {
 
-                                @Override
-                                public void onCompleted(Exception exception, ServiceFilterResponse response) {
-                                    if (exception != null) {
-                                        createResultFromException(result, exception);
-                                    }
-
-                                    if (callback != null)
-                                        callback.onTestComplete(testCase, result);
-                                }
-                            });
 
                         } else {
                             createResultFromException(result, exception);

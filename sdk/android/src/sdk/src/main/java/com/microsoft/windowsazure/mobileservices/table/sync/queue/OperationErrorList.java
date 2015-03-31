@@ -73,6 +73,7 @@ public class OperationErrorList {
     public static void initializeStore(MobileServiceLocalStore store) throws MobileServiceLocalStoreException {
         Map<String, ColumnDataType> columns = new HashMap<String, ColumnDataType>();
         columns.put("id", ColumnDataType.String);
+        columns.put("operationId", ColumnDataType.String);
         columns.put("tablename", ColumnDataType.String);
         columns.put("itemid", ColumnDataType.String);
         columns.put("clientitem", ColumnDataType.Other);
@@ -117,6 +118,7 @@ public class OperationErrorList {
         JsonObject element = new JsonObject();
 
         element.addProperty("id", operationError.getId());
+        element.addProperty("operationId", operationError.getOperationId());
         element.addProperty("operationkind", operationError.getOperationKind().getValue());
         element.addProperty("tablename", operationError.getTableName());
         element.addProperty("itemid", operationError.getItemId());
@@ -146,6 +148,7 @@ public class OperationErrorList {
 
     private static TableOperationError deserialize(JsonObject element) throws ParseException {
         String id = element.get("id").getAsString();
+        String operationId = element.get("operationId").getAsString();
         int operationKind = element.get("operationkind").getAsInt();
         String tableName = element.get("tablename").getAsString();
         String itemId = element.get("itemid").getAsString();
@@ -156,7 +159,7 @@ public class OperationErrorList {
         JsonObject serverItem = element.get("serveritem") != null ? element.get("serveritem").getAsJsonObject() : null;
         Date createdAt = DateSerializer.deserialize(element.get("__createdat").getAsString());
 
-        return TableOperationError.create(id, TableOperationKind.parse(operationKind), tableName, itemId, clientItem, errorMessage, statusCode, serverResponse,
+        return TableOperationError.create(id, operationId, TableOperationKind.parse(operationKind), tableName, itemId, clientItem, errorMessage, statusCode, serverResponse,
                 serverItem, createdAt);
     }
 

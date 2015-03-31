@@ -33,6 +33,7 @@ import java.util.UUID;
  */
 public class TableOperationError {
     private String mId;
+    private String mOperationId;
     private TableOperationKind mOperationKind;
     private String mTableName;
     private String mItemId;
@@ -55,9 +56,10 @@ public class TableOperationError {
      * @param serverResponse the server response
      * @param serverItem     the server item
      */
-    public TableOperationError(TableOperationKind operationKind, String tableName, String itemId, JsonObject clientItem, String errorMessage,
+    public TableOperationError(String operationId, TableOperationKind operationKind, String tableName, String itemId, JsonObject clientItem, String errorMessage,
                                Integer statusCode, String serverResponse, JsonObject serverItem) {
         this.mId = UUID.randomUUID().toString();
+        this.mOperationId = operationId;
         this.mOperationKind = operationKind;
         this.mTableName = tableName;
         this.mItemId = itemId;
@@ -84,9 +86,9 @@ public class TableOperationError {
      * @param createdAt      the creation date of the table operation error
      * @return the table operation error
      */
-    public static TableOperationError create(String id, TableOperationKind operationKind, String tableName, String itemId, JsonObject clientItem,
+    public static TableOperationError create(String id, String operationId, TableOperationKind operationKind, String tableName, String itemId, JsonObject clientItem,
                                              String errorMessage, Integer statusCode, String serverResponse, JsonObject serverItem, Date createdAt) {
-        TableOperationError operationError = new TableOperationError(operationKind, tableName, itemId, clientItem, errorMessage, statusCode, serverResponse,
+        TableOperationError operationError = new TableOperationError(operationId, operationKind, tableName, itemId, clientItem, errorMessage, statusCode, serverResponse,
                 serverItem);
         operationError.mId = id;
         operationError.mCreatedAt = createdAt;
@@ -98,6 +100,14 @@ public class TableOperationError {
      */
     public String getId() {
         return this.mId;
+    }
+
+
+    /**
+     * Gets the table operation id
+     */
+    public String getOperationId() {
+        return this.mOperationId;
     }
 
     /**

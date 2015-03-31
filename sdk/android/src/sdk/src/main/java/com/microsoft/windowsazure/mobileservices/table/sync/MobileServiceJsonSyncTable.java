@@ -326,7 +326,7 @@ public class MobileServiceJsonSyncTable {
     private void deleteContext(JsonObject item) throws Throwable {
         JsonObject newItem = validateIdOnUpdateOrDelete(item);
 
-        this.mClient.getSyncContext().delete(this.mName, newItem.get("id").getAsString());
+        this.mClient.getSyncContext().delete(this.mName, newItem);
     }
 
     private void deleteContext(String itemId) throws Throwable {

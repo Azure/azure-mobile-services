@@ -35,6 +35,7 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceList;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.serialization.JsonEntityParser;
 import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileServiceLocalStoreException;
+import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationError;
 
 import java.util.List;
 
@@ -235,6 +236,12 @@ public class MobileServiceSyncTable<E> {
 
                 @Override
                 public void onSuccess(JsonObject result) {
+
+                    if (result != null) {
+                        future.set(parseResults(result).get(0));
+                        return;
+                    }
+
                     insertInternal(json, future);
                 }
             });

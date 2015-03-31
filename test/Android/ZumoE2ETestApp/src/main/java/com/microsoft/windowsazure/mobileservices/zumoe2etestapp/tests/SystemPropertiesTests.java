@@ -268,7 +268,7 @@ public class SystemPropertiesTests extends TestGroup {
                             }
 
                             log("Delete element");
-                            delete(table, responseElement1);
+                            delete(table, updateElement);
 
                             result.setStatus(TestStatus.Passed);
                             if (callback != null) {
@@ -484,7 +484,7 @@ public class SystemPropertiesTests extends TestGroup {
                             verifySystemProperties("Update Response", shouldHaveCreatedAt, shouldHaveUpdatedAt, shouldHaveVersion, shouldHaveDeleted, responseElement5);
 
                             log("Delete element");
-                            delete(table, responseElement1);
+                            delete(table, responseElement5);
 
                             result.setStatus(TestStatus.Passed);
                             if (callback != null) {

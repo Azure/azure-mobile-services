@@ -34,6 +34,7 @@ public class InsertOperation implements TableOperation {
     private String mTableName;
     private String mItemId;
     private Date mCreatedAt;
+    private MobileServiceTableOperationState operationState;
 
     /**
      * Constructor for InsertOperation
@@ -92,5 +93,25 @@ public class InsertOperation implements TableOperation {
     @Override
     public <T> T accept(TableOperationVisitor<T> visitor) throws Throwable {
         return visitor.visit(this);
+    }
+
+    /**
+     * Gets the operation state
+     *
+     * @return The operation state
+     */
+    @Override
+    public MobileServiceTableOperationState getOperationState() {
+        return operationState;
+    }
+
+    /**
+     * Sets the operation state
+     *
+     * @param operationState the Operation State
+     */
+    @Override
+    public void setOperationState(MobileServiceTableOperationState operationState) {
+        this.operationState = operationState;
     }
 }

@@ -34,7 +34,6 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceFeatures;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceExceptionBase;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemColumns;
-import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProperty;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
@@ -44,12 +43,12 @@ import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileSer
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.DeleteOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.InsertOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.LocalTableOperationProcessor;
+import com.microsoft.windowsazure.mobileservices.table.sync.operations.MobileServiceTableOperationState;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.RemoteTableOperationProcessor;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationError;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.UpdateOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.pull.IncrementalPullStrategy;
-import com.microsoft.windowsazure.mobileservices.table.sync.pull.PullCursor;
 import com.microsoft.windowsazure.mobileservices.table.sync.pull.PullStrategy;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushCompletionResult;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushFailedException;
@@ -65,8 +64,8 @@ import com.microsoft.windowsazure.mobileservices.threading.MultiReadWriteLockDic
 import com.microsoft.windowsazure.mobileservices.threading.MultiReadWriteLockDictionary.MultiReadWriteLock;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -209,6 +208,16 @@ public class MobileServiceSyncContext {
         } finally {
             this.mInitLock.readLock().unlock();
         }
+    }
+
+    /**
+     * Remove operations that contains errors from the queue
+     * @param tableOperationError
+     * @throws ParseException
+     * @throws MobileServiceLocalStoreException
+     */
+    public void removeTableOperation(TableOperationError tableOperationError) throws ParseException, MobileServiceLocalStoreException {
+        this.mOpQueue = this.mOpQueue.removeOperationFromQueue(tableOperationError.getOperationId());
     }
 
     /**
@@ -442,6 +451,7 @@ public class MobileServiceSyncContext {
         String invTableName = tableName != null ? tableName.trim().toLowerCase(Locale.getDefault()) : null;
 
         InsertOperation operation = new InsertOperation(invTableName, itemId);
+
         processOperation(operation, item);
     }
 
@@ -466,12 +476,27 @@ public class MobileServiceSyncContext {
      * @param tableName the local table name
      * @param itemId    the id of the item to be deleted
      */
+    void delete(String tableName, JsonObject item) throws Throwable {
+        String invTableName = tableName != null ? tableName.trim().toLowerCase(Locale.getDefault()) : null;
+
+        DeleteOperation operation = new DeleteOperation(invTableName, item.get("id").getAsString());
+        processOperation(operation, item);
+    }
+
+    /**
+     * Delete an item from the local table and enqueue the operation to be
+     * synchronized on context push.
+     *
+     * @param tableName the local table name
+     * @param itemId    the id of the item to be deleted
+     */
     void delete(String tableName, String itemId) throws Throwable {
         String invTableName = tableName != null ? tableName.trim().toLowerCase(Locale.getDefault()) : null;
 
         DeleteOperation operation = new DeleteOperation(invTableName, itemId);
         processOperation(operation, null);
     }
+
 
     private void initializeContext(final MobileServiceLocalStore store, final MobileServiceSyncHandler handler) throws Throwable {
         this.mInitLock.writeLock().lock();
@@ -727,6 +752,8 @@ public class MobileServiceSyncContext {
     private void pushOperations(Bookmark bookmark) throws MobileServicePushFailedException {
         MobileServicePushCompletionResult pushCompletionResult = new MobileServicePushCompletionResult();
 
+        List<TableOperation> failedOperations = new ArrayList<>();
+
         try {
             LockProtectedOperation lockedOp = peekAndLock(bookmark);
 
@@ -738,17 +765,23 @@ public class MobileServiceSyncContext {
                         pushOperation(operation);
                     } catch (MobileServiceLocalStoreException localStoreException) {
                         pushCompletionResult.setStatus(MobileServicePushStatus.CancelledByLocalStoreError);
+
+                        operation.setOperationState(MobileServiceTableOperationState.Failed);
                         break;
                     } catch (MobileServiceSyncHandlerException syncHandlerException) {
                         MobileServicePushStatus cancelReason = getPushCancelReason(syncHandlerException);
+
+                        operation.setOperationState(MobileServiceTableOperationState.Failed);
 
                         if (cancelReason != null) {
                             pushCompletionResult.setStatus(cancelReason);
                             break;
                         } else {
                             this.mOpErrorList.add(getTableOperationError(operation, syncHandlerException));
+                            failedOperations.add(operation);
                         }
                     }
+
                     // '/' is a reserved character that cannot be used on string
                     // ids.
                     // We use it to build a unique compound string from
@@ -759,6 +792,7 @@ public class MobileServiceSyncContext {
                     this.mStore.delete(ITEM_BACKUP_TABLE, tableItemId);
 
                     bookmark.dequeue();
+
                 } finally {
                     try {
                         this.mIdLockMap.unLock(lockedOp.getIdLock());
@@ -788,11 +822,27 @@ public class MobileServiceSyncContext {
         }
 
         if (pushCompletionResult.getStatus() != MobileServicePushStatus.Complete) {
+            if (failedOperations.size() > 0) {
+                //Reload Queue with pending error operations
+                this.mOpLock.writeLock().lock();
+
+                try {
+                    for (TableOperation failedOperation : failedOperations) {
+                        this.mOpQueue.enqueue(failedOperation);
+                    }
+                } catch (Throwable throwable) {
+                } finally {
+                    this.mOpLock.writeLock().unlock();
+                }
+            }
             throw new MobileServicePushFailedException(pushCompletionResult);
         }
     }
 
     private void pushOperation(TableOperation operation) throws MobileServiceLocalStoreException, MobileServiceSyncHandlerException {
+
+        operation.setOperationState(MobileServiceTableOperationState.Attempted);
+
         JsonObject item = this.mStore.lookup(operation.getTableName(), operation.getItemId());
 
         if (item == null) {
@@ -901,7 +951,7 @@ public class MobileServiceSyncContext {
             serverItem = mspfEx.getValue();
         }
 
-        return new TableOperationError(operation.getKind(), operation.getTableName(), operation.getItemId(), clientItem, throwable.getMessage(), statusCode,
+        return new TableOperationError(operation.getId(), operation.getKind(), operation.getTableName(), operation.getItemId(), clientItem, throwable.getMessage(), statusCode,
                 serverResponse, serverItem);
     }
 

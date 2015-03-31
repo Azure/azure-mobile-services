@@ -31,6 +31,7 @@ import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.notifications.MobileServicePush;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServicePreconditionFailedExceptionJson;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
@@ -44,6 +45,7 @@ import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileSer
 import com.microsoft.windowsazure.mobileservices.table.sync.localstore.SQLiteLocalStore;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.RemoteTableOperationProcessor;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperation;
+import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationError;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushCompletionResult;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushFailedException;
 import com.microsoft.windowsazure.mobileservices.table.sync.synchandler.MobileServiceSyncHandler;
@@ -85,10 +87,13 @@ public class OfflineTests extends TestGroup {
         //this.addTest(issue417());
 
         this.addTest(createBasicTest("Basic Test"));
+        this.addTest(createNoCollapseInsertOnPreviousPushError("No collapse insert on previous push error"));
 
         this.addTest(createLocallyDeleteAlreadyDeletedElementTest());
 
         this.addTest(createInsertDuplicatedElementTest());
+
+        this.addTest(createDeleteSyncConflict());
 
         this.addTest(createSyncConflictTest(false));
         this.addTest(createSyncConflictTest(true));
@@ -302,6 +307,139 @@ public class OfflineTests extends TestGroup {
 
         return test;
     }
+
+    private TestCase createNoCollapseInsertOnPreviousPushError(String name) {
+
+        final String tableName = "offlineReady2";
+
+        final TestCase test = new TestCase() {
+
+            @Override
+            protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
+
+                try {
+
+                    TestCase testCase = this;
+                    TestResult result = new TestResult();
+                    result.setStatus(TestStatus.Passed);
+                    result.setTestCase(testCase);
+
+                    ServiceFilterWithRequestCount serviceFilter = new ServiceFilterWithRequestCount();
+
+                    int requestsSentToServer = 0;
+
+                    client = client.withFilter(serviceFilter);
+
+                    SQLiteLocalStore localStore = new SQLiteLocalStore(client.getContext(), OFFLINE_TABLE_NAME, null, 1);
+
+                    SimpleSyncHandler handler = new SimpleSyncHandler();
+                    MobileServiceSyncContext syncContext = client.getSyncContext();
+
+                    syncContext.initialize(localStore, handler).get();
+
+                    log("Defined the table on the local store");
+
+                    Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
+                    tableDefinition.put("id", ColumnDataType.String);
+                    tableDefinition.put("name", ColumnDataType.String);
+                    tableDefinition.put("age", ColumnDataType.Integer);
+                    tableDefinition.put("float", ColumnDataType.Real);
+                    tableDefinition.put("date", ColumnDataType.Date);
+                    tableDefinition.put("bool", ColumnDataType.Boolean);
+                    tableDefinition.put("__version", ColumnDataType.String);
+
+                    log("Initialized the store and sync context");
+
+                    localStore.defineTable(tableName, tableDefinition);
+
+                    client.getSyncContext().initialize(localStore, new SimpleSyncHandler()).get();
+
+                    MobileServiceSyncTable<OfflineReadyItem> localTable = client.getSyncTable(tableName, OfflineReadyItem.class);
+
+                    MobileServiceTable<OfflineReadyItem> remoteTable = client.getTable(tableName, OfflineReadyItem.class);
+
+                    OfflineReadyItem item = new OfflineReadyItem(new Random());
+
+                    log("Inserted the item to the local store:" + item);
+
+                    item = localTable.insert(item).get();
+
+                    log("Validating that the item is not in the server table");
+
+                    try {
+                        requestsSentToServer++;
+                        remoteTable.lookUp(item.getId()).get();
+                        log("Error, item is present in the server");
+                        // return false;
+                    } catch (ExecutionException ex) {
+                        log("Ok, item is not in the server:" + ex.getMessage());
+                    }
+
+                    if (!validateRequestCount(this, serviceFilter.requestCount, requestsSentToServer)) {
+                        result.setStatus(TestStatus.Failed);
+                        callback.onTestComplete(this, result);
+                    }
+
+                    if (client.getSyncContext().getPendingOperations() != 1) {
+                        result.setStatus(TestStatus.Failed);
+                        callback.onTestComplete(this, result);
+                    }
+
+                    log("Pushing changes to the server");
+
+                    try {
+                        client.getSyncContext().push().get();
+                    }catch(Exception ex2) {
+
+                        requestsSentToServer += 1;
+
+                        log("Push should throw error");
+
+                        if (client.getSyncContext().getPendingOperations() != 1) {
+                            result.setStatus(TestStatus.Failed);
+                            callback.onTestComplete(this, result);
+                        }
+
+                        log("adding a delete operation that will not collapse");
+                        localTable.delete(item).get();
+
+                        if (client.getSyncContext().getPendingOperations() != 1) {
+                            result.setStatus(TestStatus.Failed);
+                            callback.onTestComplete(this, result);
+                        }
+
+                    }
+
+                    if (!validateRequestCount(this, serviceFilter.requestCount, requestsSentToServer)) {
+                        result.setStatus(TestStatus.Failed);
+                        callback.onTestComplete(this, result);
+                    }
+
+                    log("Cleaning up");
+
+                    client.getContext().deleteDatabase(OFFLINE_TABLE_NAME);
+
+                    log("Done");
+
+                    callback.onTestComplete(this, result);
+
+                } catch (Exception e) {
+                    callback.onTestComplete(this, createResultFromException(e));
+                    return;
+                } catch (Throwable e) {
+                    callback.onTestComplete(this, createResultFromException((Exception)e));
+                    return;
+                }
+            }
+
+            ;
+        };
+
+        test.setName(name);
+
+        return test;
+    }
+
 
     private TestCase issue536() {
 
@@ -807,6 +945,146 @@ public class OfflineTests extends TestGroup {
         return test;
     }
 
+    private TestCase createDeleteSyncConflict() {
+
+        final String tableName = "offlineReady";
+
+        final TestCase test = new TestCase() {
+
+            @Override
+            protected void executeTest(MobileServiceClient offlineReadyClient, final TestExecutionCallback callback) {
+
+                TestCase testCase = this;
+                TestResult result = new TestResult();
+                result.setStatus(TestStatus.Passed);
+                result.setTestCase(testCase);
+                try {
+
+                    SQLiteLocalStore localStore = new SQLiteLocalStore(offlineReadyClient.getContext(), OFFLINE_TABLE_NAME, null, 1);
+
+                    log("Defined the table on the local store");
+
+                    Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
+                    tableDefinition.put("id", ColumnDataType.String);
+                    tableDefinition.put("name", ColumnDataType.String);
+                    tableDefinition.put("age", ColumnDataType.Integer);
+                    tableDefinition.put("float", ColumnDataType.Real);
+                    tableDefinition.put("date", ColumnDataType.Date);
+                    tableDefinition.put("bool", ColumnDataType.Boolean);
+                    tableDefinition.put("__version", ColumnDataType.String);
+
+                    log("Initialized the store and sync context");
+
+                    localStore.defineTable(tableName, tableDefinition);
+
+                    MobileServiceSyncTable<OfflineReadyItem> localTable = offlineReadyClient.getSyncTable(tableName, OfflineReadyItem.class);
+
+                    MobileServiceTable<OfflineReadyItem> remoteTable = offlineReadyClient.getTable(tableName, OfflineReadyItem.class);
+
+                    offlineReadyClient.getSyncContext().initialize(localStore, new SimpleSyncHandler()).get();
+
+                    localTable.purge(null).get();
+                    log("Removed all items from the local table");
+
+                    OfflineReadyItem item = new OfflineReadyItem(new Random());
+
+                    item = localTable.insert(item).get();
+
+                    log("Inserted the item to the local store:" + item);
+
+                    Query pullQuery = QueryOperations.tableName(tableName).field("id").eq(item.getId());
+
+                    localTable.pull(pullQuery).get();
+
+                    log("Changing the item on the server");
+
+                    item.setFlag(!item.getFlag());
+
+                    item = remoteTable.update(item).get();
+
+                    log("Updated the item: " + item);
+
+                    OfflineReadyItem localItem = localTable.lookUp(item.getId()).get();
+                    OfflineReadyItem serverItem = remoteTable.lookUp(item.getId()).get();
+
+                    log("Retrieved the item from the local table, now updating it");
+
+                    localItem.setDate(new Date());
+
+                    localTable.update(localItem).get();
+
+                    log("Updated the item on the local table");
+
+                    localTable.delete(localItem);
+
+                    log("Now trying to pull changes from the server (will trigger a push)");
+
+                    try {
+                        localTable.pull(pullQuery).get();
+                        log("Error, pull (push) should have caused a conflict, but none happened.");
+                        result.setStatus(TestStatus.Failed);
+                        callback.onTestComplete(this, result);
+                        return;
+                    } catch (Exception ex) {
+                        log("Push exception: " + ex);
+                        log("Expected exception was thrown.");
+
+                        MobileServicePushFailedException mspfe = (MobileServicePushFailedException) ex.getCause();
+
+                        if (mspfe == null || mspfe.getPushCompletionResult().getOperationErrors().size() != 1) {
+                            result.setStatus(TestStatus.Failed);
+                            callback.onTestComplete(this, result);
+                            return;
+                        }
+
+                        TableOperationError tableOperationError = mspfe.getPushCompletionResult().getOperationErrors().get(0);
+
+                        try {
+
+                            log("Count pending operations");
+
+                            if (offlineReadyClient.getSyncContext().getPendingOperations() != 1) {
+                                log("Expected 1 pending operations");
+
+                                result.setStatus(TestStatus.Failed);
+                                callback.onTestComplete(this, result);
+                                return;
+                            }
+
+
+                            log("Cleaning operation");
+
+                            offlineReadyClient.getSyncContext().removeTableOperation(tableOperationError);
+
+                        } catch (Throwable throwable) {
+                            result.setStatus(TestStatus.Failed);
+                            callback.onTestComplete(this, result);
+                            return;
+                        }
+                    }
+
+                    log("Cleaning up");
+
+                    localTable.delete(serverItem).get();
+
+                    log("Local table cleaned up. Now sync'ing once more");
+                    offlineReadyClient.getSyncContext().push().get();
+                    log("Done");
+
+                    callback.onTestComplete(this, result);
+
+                } catch (Exception e) {
+                    callback.onTestComplete(this, createResultFromException(e));
+                    return;
+                }
+            }
+        };
+
+        test.setName("Offline - Test delete a locally updated item");
+
+        return test;
+    }
+
     private TestCase createSyncConflictTest(final boolean autoResolve) {
 
         final String tableName = "offlineReady";
@@ -906,6 +1184,9 @@ public class OfflineTests extends TestGroup {
                         }
                     } catch (Exception ex) {
                         log("Push exception: " + ex);
+
+                        MobileServicePushFailedException mspfe = (MobileServicePushFailedException) ex.getCause();
+
                         if (autoResolve) {
                             log("Error, push should have succeeded.");
                             result.setStatus(TestStatus.Failed);
@@ -913,10 +1194,14 @@ public class OfflineTests extends TestGroup {
                             return;
                         } else {
                             log("Expected exception was thrown.");
+
+                            offlineReadyClient.getSyncContext().removeTableOperation(mspfe.getPushCompletionResult().getOperationErrors().get(0));
                         }
                     }
 
                     log("Cleaning up");
+
+                    localTable.update(item).get();
                     localTable.delete(item).get();
 
                     log("Local table cleaned up. Now sync'ing once more");
@@ -1407,6 +1692,9 @@ class ConflictResolvingSyncHandler implements MobileServiceSyncHandler {
                 mergedItem.addProperty("__version", serverVersion);
 
                 test.log("Merged the items, will try to resubmit the operation");
+
+                //client.getSyncContext().removeTableOperation(ex);
+
                 processor.setItem(mergedItem);
             }
         } while (ex != null);
