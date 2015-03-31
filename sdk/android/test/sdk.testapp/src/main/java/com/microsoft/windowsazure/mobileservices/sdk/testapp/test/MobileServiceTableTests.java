@@ -1378,7 +1378,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceJsonTable msTable = client.getTable(tableName);
 
         // Call the delete method sending the entity to delete
-        msTable.delete(person, new TableDeleteCallback() {
+        msTable.delete(client.getGsonBuilder().create().toJsonTree(person).getAsJsonObject(), new TableDeleteCallback() {
 
             @Override
             public void onCompleted(Exception exception, ServiceFilterResponse response) {
@@ -1604,7 +1604,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
         // Call the delete method sending the entity to delete
         try {
-            msTable.delete(person).get();
+            msTable.delete(client.getGsonBuilder().create().toJsonTree(person).getAsJsonObject()).get();
             Assert.assertTrue("Opperation should have succeded", true);
         } catch (Exception exception) {
             Assert.assertTrue("Opperation should have succeded", false);

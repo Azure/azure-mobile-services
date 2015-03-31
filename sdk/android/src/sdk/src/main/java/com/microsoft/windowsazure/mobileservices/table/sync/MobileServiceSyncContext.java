@@ -577,12 +577,27 @@ public class MobileServiceSyncContext {
      * @param tableName the local table name
      * @param itemId    the id of the item to be deleted
      */
+    void delete(String tableName, JsonObject item) throws Throwable {
+        String invTableName = tableName != null ? tableName.trim().toLowerCase(Locale.getDefault()) : null;
+
+        DeleteOperation operation = new DeleteOperation(invTableName, item.get("id").getAsString());
+        processOperation(operation, item);
+    }
+
+    /**
+     * Delete an item from the local table and enqueue the operation to be
+     * synchronized on context push.
+     *
+     * @param tableName the local table name
+     * @param itemId    the id of the item to be deleted
+     */
     void delete(String tableName, String itemId) throws Throwable {
         String invTableName = tableName != null ? tableName.trim().toLowerCase(Locale.getDefault()) : null;
 
         DeleteOperation operation = new DeleteOperation(invTableName, itemId);
         processOperation(operation, null);
     }
+
 
     private void initializeContext(final MobileServiceLocalStore store, final MobileServiceSyncHandler handler) throws Throwable {
         this.mInitLock.writeLock().lock();

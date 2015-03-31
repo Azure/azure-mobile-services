@@ -63,6 +63,9 @@ public class LocalTableOperationProcessor implements TableOperationVisitor<Void>
     public Void visit(DeleteOperation operation) throws Throwable {
         JsonObject backedUpItem = this.mStore.lookup(operation.getTableName(), operation.getItemId());
 
+        if (backedUpItem == null) {
+            backedUpItem = this.mItem;
+        }
         // '/' is a reserved character that cannot be used on string ids.
         // We use it to build a unique compound string from tableName and
         // itemId
