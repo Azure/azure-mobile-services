@@ -480,7 +480,7 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
                         result.addProperty(originalColumnName, dateTimeOffsetValue);
                         break;
                     case Other:
-                        JsonElement otherValue = new JsonParser().parse(cursor.getString(columnIndex));
+                        JsonElement otherValue = parseOtherDataType(cursor.getString(columnIndex));
                         result.add(originalColumnName, otherValue);
                         break;
                 }
@@ -488,6 +488,14 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
         }
 
         return result;
+    }
+
+    private JsonElement parseOtherDataType(String value) {
+        if (value == null) {
+            return null;
+        }
+
+        return new JsonParser().parse(value);
     }
 
     private Statement generateUpsertStatement(String tableName, JsonObject[] items, boolean fromServer) {

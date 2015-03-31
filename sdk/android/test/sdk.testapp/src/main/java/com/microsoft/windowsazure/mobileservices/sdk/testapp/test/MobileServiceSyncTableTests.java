@@ -40,14 +40,13 @@ import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.mocks.Mob
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.helpers.EncodingUtilities;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.CustomFunctionTwoParameters;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.IdPropertyTestClasses.StringIdType;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceExceptionBase;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
 import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceJsonSyncTable;
-import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncContext;
 import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncTable;
-import com.microsoft.windowsazure.mobileservices.table.sync.operations.MobileServiceTableOperationState;
-import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperation;
+import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationError;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushFailedException;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushStatus;
 import com.microsoft.windowsazure.mobileservices.table.sync.synchandler.SimpleSyncHandler;
@@ -55,7 +54,6 @@ import com.microsoft.windowsazure.mobileservices.table.sync.synchandler.SimpleSy
 import org.apache.http.Header;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -730,6 +728,138 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         assertEquals(client.getSyncContext().getPendingOperations(), 0);
     }
 
+    public void testCancelAndDiscardItem() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw new Exception();
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.insert(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+            MobileServicePushFailedException mspfe = (MobileServicePushFailedException) ex.getCause();
+
+            assertEquals(mspfe.getPushCompletionResult().getStatus(), MobileServicePushStatus.InternalError);
+            assertEquals(mspfe.getPushCompletionResult().getOperationErrors().size(), 1);
+            assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+            TableOperationError tableOperationError =mspfe.getPushCompletionResult().getOperationErrors().get(0);
+
+            client.getSyncContext().cancelAndDiscardItem(tableOperationError);
+
+            assertEquals(client.getSyncContext().getPendingOperations(), 0);
+
+            StringIdType result = table.lookUp(item.Id).get();
+
+            assertEquals(null, result);
+
+            return;
+        }
+
+        assertTrue(false);
+    }
+
+    public void testCancelAndUpdateItem() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        final JsonObject serverItem = new JsonObject();
+        serverItem.addProperty("id", "abc");
+        serverItem.addProperty("String", "fooo");
+
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw new MobileServiceExceptionBase(new MobileServiceException(new Exception()), serverItem);
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.insert(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+            MobileServicePushFailedException mspfe = (MobileServicePushFailedException) ex.getCause();
+
+            assertEquals(mspfe.getPushCompletionResult().getStatus(), MobileServicePushStatus.InternalError);
+            assertEquals(mspfe.getPushCompletionResult().getOperationErrors().size(), 1);
+            assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+            TableOperationError tableOperationError =mspfe.getPushCompletionResult().getOperationErrors().get(0);
+
+            client.getSyncContext().cancelAndUpdateItem(tableOperationError);
+
+            assertEquals(client.getSyncContext().getPendingOperations(), 0);
+
+            StringIdType result = table.lookUp(item.Id).get();
+
+            assertEquals(item.Id, result.Id);
+            assertEquals("fooo", result.String);
+
+            return;
+        }
+
+        assertTrue(false);
+    }
+
     public void testPushAbortOnNewtorkError() throws Throwable {
         MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
         final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
@@ -919,6 +1049,183 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         assertTrue(false);
     }
 
+
+    //Test Collapse Login on Operation Error
+
+    public void testInsertThrowsWhenInsertIsInQueueOnNewtorkError() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        final MobileServiceException innerException = new MobileServiceException(new IOException());
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw innerException;
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.insert(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+            try {
+                table.insert(item).get();
+            }
+            catch(Exception ex2) {
+                assertEquals(client.getSyncContext().getPendingOperations(), 1);
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, "POST");
+                assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: An insert operation on the item is already in the queue.");
+
+                return;
+            }
+        }
+
+        assertTrue(false);
+    }
+
+    public void testInsertThrowsWhenInsertIsInQueueOnAuthenticationError() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+        response.setStatus(new StatusLineMock(401));
+
+        final MobileServiceException innerException = new MobileServiceException("", response);
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw innerException;
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.insert(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+            try {
+                table.insert(item).get();
+            }
+            catch(Exception ex2) {
+                assertEquals(client.getSyncContext().getPendingOperations(), 1);
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, "POST");
+                assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: An insert operation on the item is already in the queue.");
+
+                return;
+            }
+        }
+
+        assertTrue(false);
+    }
+
+    public void testInsertThrowsWhenInsertIsInQueueOnOperationError() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw new Exception();
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.insert(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+            try {
+                table.insert(item).get();
+            }
+            catch(Exception ex2) {
+                assertEquals(client.getSyncContext().getPendingOperations(), 1);
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, "POST");
+                assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: An insert operation on the item is already in the queue.");
+
+                return;
+            }
+        }
+
+        assertTrue(false);
+    }
 
     public void testDeleteNoCollapseInsertWhenFailedInsertIsInQueueOnNewtorkError() throws Throwable {
         MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
@@ -1110,6 +1417,1295 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         assertTrue(false);
     }
 
+    public void testUpdateCollapseWhenInsertIsInQueueOnNewtorkError() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+        final String expectedUpdateContent = "{\"String\":\"fooo\",\"id\":\"abc\"}";
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        final MobileServiceException innerException = new MobileServiceException(new IOException());
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw innerException;
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.insert(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+
+            StringIdType itemUpdated = new StringIdType();
+
+            itemUpdated.Id = "abc";
+            itemUpdated.String = "fooo";
+
+            table.update(itemUpdated).get();
+
+            thrownExceptionFlag.Thrown = false;
+
+            client.getSyncContext().push().get();
+
+            assertEquals(client.getSyncContext().getPendingOperations(), 0);
+            assertEquals(serviceFilterContainer.Requests.get(0).Method, "POST");
+            assertEquals(serviceFilterContainer.Requests.get(1).Method, "POST");
+            assertEquals(serviceFilterContainer.Requests.get(1).Content, expectedUpdateContent);
+
+            return;
+        }
+
+        assertTrue(false);
+    }
+
+    public void testUpdateCollapseWhenInsertIsInQueueOnAuthenticationError() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+        final String expectedUpdateContent = "{\"String\":\"fooo\",\"id\":\"abc\"}";
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+        response.setStatus(new StatusLineMock(401));
+
+        final MobileServiceException innerException = new MobileServiceException("", response);
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw innerException;
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.insert(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+
+            StringIdType itemUpdated = new StringIdType();
+
+            itemUpdated.Id = "abc";
+            itemUpdated.String = "fooo";
+
+            table.update(itemUpdated).get();
+
+            thrownExceptionFlag.Thrown = false;
+
+            client.getSyncContext().push().get();
+
+            assertEquals(client.getSyncContext().getPendingOperations(), 0);
+            assertEquals(serviceFilterContainer.Requests.get(0).Method, "POST");
+            assertEquals(serviceFilterContainer.Requests.get(1).Method, "POST");
+            assertEquals(serviceFilterContainer.Requests.get(1).Content, expectedUpdateContent);
+
+            return;
+        }
+
+        assertTrue(false);
+    }
+
+    public void testUpdateCollapseWhenInsertIsInQueueOnOperationError() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+        final String expectedUpdateContent = "{\"String\":\"fooo\",\"id\":\"abc\"}";
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        final MobileServiceException innerException = new MobileServiceException(new IOException());
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw new Exception();
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.insert(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+
+            StringIdType itemUpdated = new StringIdType();
+
+            itemUpdated.Id = "abc";
+            itemUpdated.String = "fooo";
+
+            table.update(itemUpdated).get();
+
+            thrownExceptionFlag.Thrown = false;
+
+            client.getSyncContext().push().get();
+
+            assertEquals(client.getSyncContext().getPendingOperations(), 0);
+            assertEquals(serviceFilterContainer.Requests.get(0).Method, "POST");
+            assertEquals(serviceFilterContainer.Requests.get(1).Method, "POST");
+            assertEquals(serviceFilterContainer.Requests.get(1).Content, expectedUpdateContent);
+
+            return;
+        }
+
+        assertTrue(false);
+    }
+
+    public void testUpdateCollapseWhenUpdateIsInQueueOnNewtorkError() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+        final String expectedUpdateContent = "{\"String\":\"fooo\",\"id\":\"abc\"}";
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        final MobileServiceException innerException = new MobileServiceException(new IOException());
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw innerException;
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.update(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+
+            StringIdType itemUpdated = new StringIdType();
+
+            itemUpdated.Id = "abc";
+            itemUpdated.String = "fooo";
+
+            table.update(itemUpdated).get();
+
+            thrownExceptionFlag.Thrown = false;
+
+            client.getSyncContext().push().get();
+
+            assertEquals(client.getSyncContext().getPendingOperations(), 0);
+            assertEquals(serviceFilterContainer.Requests.get(0).Method, "PATCH");
+            assertEquals(serviceFilterContainer.Requests.get(1).Method, "PATCH");
+            assertEquals(serviceFilterContainer.Requests.get(1).Content, expectedUpdateContent);
+
+            return;
+        }
+
+        assertTrue(false);
+    }
+
+    public void testUpdateCollapseWhenUpdateIsInQueueOnAuthentication() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+        final String expectedUpdateContent = "{\"String\":\"fooo\",\"id\":\"abc\"}";
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+        response.setStatus(new StatusLineMock(401));
+
+        final MobileServiceException innerException = new MobileServiceException("", response);
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw innerException;
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.update(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+
+            StringIdType itemUpdated = new StringIdType();
+
+            itemUpdated.Id = "abc";
+            itemUpdated.String = "fooo";
+
+            table.update(itemUpdated).get();
+
+            thrownExceptionFlag.Thrown = false;
+
+            client.getSyncContext().push().get();
+
+            assertEquals(client.getSyncContext().getPendingOperations(), 0);
+            assertEquals(serviceFilterContainer.Requests.get(0).Method, "PATCH");
+            assertEquals(serviceFilterContainer.Requests.get(1).Method, "PATCH");
+            assertEquals(serviceFilterContainer.Requests.get(1).Content, expectedUpdateContent);
+
+            return;
+        }
+
+        assertTrue(false);
+    }
+
+    public void testUpdateCollapseWhenUpdateIsInQueueOnOperationError() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+        final String expectedUpdateContent = "{\"String\":\"fooo\",\"id\":\"abc\"}";
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw new Exception();
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.update(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+
+            StringIdType itemUpdated = new StringIdType();
+
+            itemUpdated.Id = "abc";
+            itemUpdated.String = "fooo";
+
+            table.update(itemUpdated).get();
+
+            thrownExceptionFlag.Thrown = false;
+
+            client.getSyncContext().push().get();
+
+            assertEquals(client.getSyncContext().getPendingOperations(), 0);
+            assertEquals(serviceFilterContainer.Requests.get(0).Method, "PATCH");
+            assertEquals(serviceFilterContainer.Requests.get(1).Method, "PATCH");
+            assertEquals(serviceFilterContainer.Requests.get(1).Content, expectedUpdateContent);
+
+            return;
+        }
+
+        assertTrue(false);
+    }
+
+    public void testDeleteCollapseUpdateWhenUpdateIsInQueueOnNewtorkError() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        final MobileServiceException innerException = new MobileServiceException(new IOException());
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw innerException;
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.update(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+
+            table.delete(item).get();
+
+            thrownExceptionFlag.Thrown = false;
+
+            client.getSyncContext().push().get();
+
+            assertEquals(client.getSyncContext().getPendingOperations(), 0);
+            assertEquals(serviceFilterContainer.Requests.get(0).Method, "PATCH");
+            assertEquals(serviceFilterContainer.Requests.get(1).Method, "DELETE");
+
+            return;
+        }
+
+        assertTrue(false);
+    }
+
+    public void testDeleteCollapseUpdateWhenUpdateIsInQueueOnAuthenticationError() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+        response.setStatus(new StatusLineMock(401));
+
+        final MobileServiceException innerException = new MobileServiceException("", response);
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw innerException;
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.update(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+
+            table.delete(item).get();
+
+            thrownExceptionFlag.Thrown = false;
+
+            client.getSyncContext().push().get();
+
+            assertEquals(client.getSyncContext().getPendingOperations(), 0);
+            assertEquals(serviceFilterContainer.Requests.get(0).Method, "PATCH");
+            assertEquals(serviceFilterContainer.Requests.get(1).Method, "DELETE");
+
+            return;
+        }
+
+        assertTrue(false);
+    }
+
+    public void testDeleteCollapseUpdateWhenUpdateIsInQueueOnOperationError() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw new Exception();
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.update(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+
+            table.delete(item).get();
+
+            thrownExceptionFlag.Thrown = false;
+
+            client.getSyncContext().push().get();
+
+            assertEquals(client.getSyncContext().getPendingOperations(), 0);
+            assertEquals(serviceFilterContainer.Requests.get(0).Method, "PATCH");
+            assertEquals(serviceFilterContainer.Requests.get(1).Method, "DELETE");
+
+            return;
+        }
+
+        assertTrue(false);
+    }
+
+    public void testInsertThrowsWhenUpdateIsInQueueOnNewtorkError() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        final MobileServiceException innerException = new MobileServiceException(new IOException());
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw innerException;
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.update(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+            try {
+                table.insert(item).get();
+            }
+            catch(Exception ex2) {
+                assertEquals(client.getSyncContext().getPendingOperations(), 1);
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, "PATCH");
+                assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: An update operation on the item is already in the queue.");
+
+                return;
+            }
+        }
+
+        assertTrue(false);
+    }
+
+    public void testInsertThrowsWhenUpdateIsInQueueOnAuthenticationError() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+        response.setStatus(new StatusLineMock(401));
+
+        final MobileServiceException innerException = new MobileServiceException("", response);
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw innerException;
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.update(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+            try {
+                table.insert(item).get();
+            }
+            catch(Exception ex2) {
+                assertEquals(client.getSyncContext().getPendingOperations(), 1);
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, "PATCH");
+                assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: An update operation on the item is already in the queue.");
+
+                return;
+            }
+        }
+
+        assertTrue(false);
+    }
+
+    public void testInsertThrowsWhenUpdateIsInQueueOnOperationError() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw new Exception();
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.update(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+            try {
+                table.insert(item).get();
+            }
+            catch(Exception ex2) {
+                assertEquals(client.getSyncContext().getPendingOperations(), 1);
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, "PATCH");
+                assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: An update operation on the item is already in the queue.");
+
+                return;
+            }
+        }
+
+        assertTrue(false);
+    }
+
+    public void testDeleteThrowsWhenDeleteIsInQueueOnNewtorkError() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        final MobileServiceException innerException = new MobileServiceException(new IOException());
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw innerException;
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.delete(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+            try {
+                table.delete(item).get();
+            }
+            catch(Exception ex2) {
+                assertEquals(client.getSyncContext().getPendingOperations(), 1);
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, "DELETE");
+                assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: A delete operation on the item is already in the queue.");
+
+                return;
+            }
+        }
+
+        assertTrue(false);
+    }
+
+    public void testDeleteThrowsWhenDeleteIsInQueueOnAuthenticationError() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+        response.setStatus(new StatusLineMock(401));
+
+        final MobileServiceException innerException = new MobileServiceException("", response);
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw innerException;
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.delete(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+            try {
+                table.delete(item).get();
+            }
+            catch(Exception ex2) {
+                assertEquals(client.getSyncContext().getPendingOperations(), 1);
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, "DELETE");
+                assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: A delete operation on the item is already in the queue.");
+
+                return;
+            }
+        }
+
+        assertTrue(false);
+    }
+
+    public void testDeleteThrowsWhenDeleteIsInQueueOnOperationError() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw new Exception();
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.delete(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+            try {
+                table.delete(item).get();
+            }
+            catch(Exception ex2) {
+                assertEquals(client.getSyncContext().getPendingOperations(), 1);
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, "DELETE");
+                assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: A delete operation on the item is already in the queue.");
+
+                return;
+            }
+        }
+
+        assertTrue(false);
+    }
+
+    public void testInsertThrowsWhenDeleteIsInQueueOnNewtorkError() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        final MobileServiceException innerException = new MobileServiceException(new IOException());
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw innerException;
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.delete(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+            try {
+                table.insert(item).get();
+            }
+            catch(Exception ex2) {
+                assertEquals(client.getSyncContext().getPendingOperations(), 1);
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, "DELETE");
+                assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: A delete operation on the item is already in the queue.");
+
+                return;
+            }
+        }
+
+        assertTrue(false);
+    }
+
+    public void testInsertThrowsWhenDeleteIsInQueueOnAuthenticationError() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+        response.setStatus(new StatusLineMock(401));
+
+        final MobileServiceException innerException = new MobileServiceException("", response);
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw innerException;
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.delete(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+            try {
+                table.insert(item).get();
+            }
+            catch(Exception ex2) {
+                assertEquals(client.getSyncContext().getPendingOperations(), 1);
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, "DELETE");
+                assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: A delete operation on the item is already in the queue.");
+
+                return;
+            }
+        }
+
+        assertTrue(false);
+    }
+
+    public void testInsertThrowsWhenDeleteIsInQueueOnOperationError() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw new Exception();
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.delete(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+            try {
+                table.insert(item).get();
+            }
+            catch(Exception ex2) {
+                assertEquals(client.getSyncContext().getPendingOperations(), 1);
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, "DELETE");
+                assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: A delete operation on the item is already in the queue.");
+
+                return;
+            }
+        }
+
+        assertTrue(false);
+    }
+
+    public void testUpdateThrowsWhenDeleteIsInQueueOnNewtorkError() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        final MobileServiceException innerException = new MobileServiceException(new IOException());
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw innerException;
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.delete(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+            try {
+                table.update(item).get();
+            }
+            catch(Exception ex2) {
+                assertEquals(client.getSyncContext().getPendingOperations(), 1);
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, "DELETE");
+                assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: A delete operation on the item is already in the queue.");
+
+                return;
+            }
+        }
+
+        assertTrue(false);
+    }
+
+    public void testUpdateThrowsWhenDeleteIsInQueueOnAuthenticationError() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+        response.setStatus(new StatusLineMock(401));
+
+        final MobileServiceException innerException = new MobileServiceException("", response);
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw innerException;
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.delete(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+            try {
+                table.update(item).get();
+            }
+            catch(Exception ex2) {
+                assertEquals(client.getSyncContext().getPendingOperations(), 1);
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, "DELETE");
+                assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: A delete operation on the item is already in the queue.");
+
+                return;
+            }
+        }
+
+        assertTrue(false);
+    }
+
+    public void testUpdateThrowsWhenDeleteIsInQueueOnOperationError() throws Throwable {
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        final ThrownExceptionFlag thrownExceptionFlag = new ThrownExceptionFlag();
+
+        thrownExceptionFlag.Thrown = true;
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
+            public Void apply(ServiceFilterRequest request) {
+                try {
+                    if (thrownExceptionFlag.Thrown) {
+                        throw new Exception();
+                    }
+                } catch (Exception e) {
+                    serviceFilterContainer.Exception = e;
+                }
+
+                return null;
+            }
+        };
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, onHandleRequest, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        StringIdType item = new StringIdType();
+
+        item.Id = "abc";
+        item.String = "what?";
+
+        table.delete(item).get();
+        assertEquals(client.getSyncContext().getPendingOperations(), 1);
+
+        try {
+            client.getSyncContext().push().get();
+        }
+        catch(Exception ex) {
+            try {
+                table.update(item).get();
+            }
+            catch(Exception ex2) {
+                assertEquals(client.getSyncContext().getPendingOperations(), 1);
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, "DELETE");
+                assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: A delete operation on the item is already in the queue.");
+
+                return;
+            }
+        }
+
+        assertTrue(false);
+    }
+
+
+    //Test collapse login
 
     public void testDeleteCancelsUpdateWhenUpdateIsInQueue() throws Throwable {
         CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> firstOperationOnItem1 = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {

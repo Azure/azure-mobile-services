@@ -37,6 +37,7 @@ import com.microsoft.windowsazure.mobileservices.table.sync.operations.InsertOpe
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.MobileServiceTableOperationState;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationCollapser;
+import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationError;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationKind;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationVisitor;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.UpdateOperation;
@@ -259,13 +260,22 @@ public class OperationQueue {
         }
     }
 
-    public OperationQueue removeOperationFromQueue(String operationId) throws ParseException, MobileServiceLocalStoreException {
+    public void removeOperationWithErrorFromQueue(TableOperationError operationError) throws ParseException, MobileServiceLocalStoreException {
         this.mSyncLock.writeLock().lock();
 
         try {
-            this.mStore.delete(OPERATION_QUEUE_TABLE, operationId);
+            String tableItemId = operationError.getTableName() + "/" + operationError.getItemId();
 
-            return OperationQueue.load(this.mStore);
+            if (this.mIdOperationMap.containsKey(tableItemId)) {
+                OperationQueueItem currentOperationQueueItem = this.mIdOperationMap.get(tableItemId);
+
+                currentOperationQueueItem.cancel();
+
+                removeOperationQueueItem(currentOperationQueueItem);
+
+                dequeueCancelledOperations();
+            }
+
         } finally {
             this.mSyncLock.writeLock().unlock();
         }

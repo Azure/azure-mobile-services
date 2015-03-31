@@ -216,8 +216,109 @@ public class MobileServiceSyncContext {
      * @throws ParseException
      * @throws MobileServiceLocalStoreException
      */
-    public void removeTableOperation(TableOperationError tableOperationError) throws ParseException, MobileServiceLocalStoreException {
-        this.mOpQueue = this.mOpQueue.removeOperationFromQueue(tableOperationError.getOperationId());
+    private void removeTableOperation(TableOperationError tableOperationError) throws Throwable {
+        this.mInitLock.readLock().lock();
+
+        try {
+
+            ensureCorrectlyInitialized();
+
+            this.mOpQueue.removeOperationWithErrorFromQueue(tableOperationError);
+        } finally {
+            this.mInitLock.readLock().unlock();
+        }
+    }
+
+    /**
+     * Cancel operation and update local item with server
+     * @param tableOperationError
+     * @throws ParseException
+     * @throws MobileServiceLocalStoreException
+     */
+    public void cancelAndUpdateItem(TableOperationError tableOperationError) throws Throwable {
+
+        MultiReadWriteLock<String> tableLock = null;
+        MultiLock<String> idLock = null;
+        this.mInitLock.readLock().lock();
+
+        try {
+
+            ensureCorrectlyInitialized();
+
+            this.mOpLock.writeLock().lock();
+
+            String tableItemId = tableOperationError.getTableName() + "/" + tableOperationError.getItemId();
+
+            tableLock = this.mTableLockMap.lockRead(tableOperationError.getTableName());
+
+            idLock = this.mIdLockMap.lock(tableItemId);
+
+            this.mStore.upsert(tableOperationError.getTableName(), tableOperationError.getServerItem(), true);
+
+            removeTableOperation(tableOperationError);
+
+        } finally {
+            try {
+                this.mInitLock.readLock().unlock();
+            } finally {
+                try {
+                    this.mOpLock.writeLock().unlock();
+                } finally {
+                    try {
+                        this.mIdLockMap.unLock(idLock);
+                    } finally {
+                        this.mTableLockMap.unLockRead(tableLock);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Cancel operation an Discard local item
+     * @param tableOperationError
+     * @throws ParseException
+     * @throws MobileServiceLocalStoreException
+     */
+    public void cancelAndDiscardItem(TableOperationError tableOperationError) throws Throwable {
+        MultiReadWriteLock<String> tableLock = null;
+        MultiLock<String> idLock = null;
+
+        this.mInitLock.readLock().lock();
+
+        try {
+
+            ensureCorrectlyInitialized();
+
+            this.mOpLock.writeLock().lock();
+
+            String tableItemId = tableOperationError.getTableName() + "/" + tableOperationError.getItemId();
+
+            tableLock = this.mTableLockMap.lockRead(tableOperationError.getTableName());
+
+            idLock = this.mIdLockMap.lock(tableItemId);
+
+            String itemId = tableOperationError.getItemId();
+
+            this.mStore.delete(tableOperationError.getTableName(), itemId);
+
+            removeTableOperation(tableOperationError);
+
+        } finally {
+            try {
+                this.mInitLock.readLock().unlock();
+            } finally {
+                try {
+                    this.mOpLock.writeLock().unlock();
+                } finally {
+                    try {
+                        this.mIdLockMap.unLock(idLock);
+                    } finally {
+                        this.mTableLockMap.unLockRead(tableLock);
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -948,6 +1049,9 @@ public class MobileServiceSyncContext {
 
         if (throwable instanceof MobileServiceExceptionBase) {
             MobileServiceExceptionBase mspfEx = (MobileServiceExceptionBase) throwable;
+            serverItem = mspfEx.getValue();
+        } else if (throwable.getCause() != null & throwable.getCause() instanceof MobileServiceExceptionBase) {
+            MobileServiceExceptionBase mspfEx = (MobileServiceExceptionBase) throwable.getCause();
             serverItem = mspfEx.getValue();
         }
 
