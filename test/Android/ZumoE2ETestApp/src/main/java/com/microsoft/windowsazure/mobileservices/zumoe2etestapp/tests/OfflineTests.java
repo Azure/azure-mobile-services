@@ -1051,10 +1051,15 @@ public class OfflineTests extends TestGroup {
                                 return;
                             }
 
-
                             log("Cleaning operation");
 
-                            offlineReadyClient.getSyncContext().removeTableOperation(tableOperationError);
+                            try {
+                                offlineReadyClient.getSyncContext().cancelAndUpdateItem(tableOperationError);
+                            } catch (Throwable throwable) {
+                                result.setStatus(TestStatus.Failed);
+                                callback.onTestComplete(this, result);
+                                return;
+                            }
 
                         } catch (Throwable throwable) {
                             result.setStatus(TestStatus.Failed);
