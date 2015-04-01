@@ -66,11 +66,15 @@
 /// @name Initializing the MSTableOperationError Object
 /// @{
 
-/// Initializes the table operation error from the provided operation, item, and error objects.
-- (id) initWithOperation:(MSTableOperation *)operation item:(NSDictionary *)item error:(NSError *) error;
+/// Initializes the table operation error from the provided operation, item, error, and context objects.
+- (id) initWithOperation:(MSTableOperation *)operation item:(NSDictionary *)item context:(MSSyncContext *)context error:(NSError *) error;
 
-/// Initializes the table operation error from a serialized representationo of a MSTableOperationError.
-- (id) initWithSerializedItem:(NSDictionary *)item;
+- (id) initWithOperation:(MSTableOperation *)operation item:(NSDictionary *)item error:(NSError *) error __deprecated;
+
+/// Initializes the table operation error from a serialized representation of a MSTableOperationError.
+- (id) initWithSerializedItem:(NSDictionary *)item context:(MSSyncContext *)context;
+
+- (id) initWithSerializedItem:(NSDictionary *)item __deprecated;
 
 ///@}
 

@@ -193,6 +193,7 @@
             else if (!didCondense) {
                 MSTableOperationError *tableError = [[MSTableOperationError alloc] initWithOperation:operation
                                                                                                 item:operation.item
+                                                                                             context:self.syncContext
                                                                                                error:error];
                 
                 NSError *storeError;
@@ -267,7 +268,7 @@
     if (result.items && result.items.count > 0) {
         NSMutableArray *tableErrors = [NSMutableArray new];
         for (NSDictionary *item in result.items) {
-            [tableErrors addObject:[[MSTableOperationError alloc] initWithSerializedItem:item]];
+            [tableErrors addObject:[[MSTableOperationError alloc] initWithSerializedItem:item context:self.syncContext]];
         }
         
         if (self.error == nil) {
