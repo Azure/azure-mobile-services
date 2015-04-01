@@ -15,27 +15,25 @@
 @property (nonatomic, weak) dispatch_queue_t dispatchQueue;
 @property (nonatomic, weak) MSSyncContext *syncContext;
 @property (nonatomic, copy) MSSyncBlock completion;
-
+@property (nonatomic, weak) NSOperationQueue *callbackQueue;
 @property (nonatomic, strong) MSTableOperation* currentOp;
 
 @end
 
 @implementation MSQueuePushOperation
 
-@synthesize error = error_;
-@synthesize dispatchQueue = dispatchQueue_;
-@synthesize syncContext = syncContext_;
-@synthesize completion = completion_;
-
 - (id) initWithSyncContext:(MSSyncContext *)syncContext
-               dispatchQueue:(dispatch_queue_t)dispatchQueue
-                  completion:(MSSyncBlock)completion
+             dispatchQueue:(dispatch_queue_t)dispatchQueue
+             callbackQueue:(NSOperationQueue *)callbackQueue
+                completion:(MSSyncBlock)completion
 {
     self = [super init];
     if (self) {
-        syncContext_ = syncContext;
-        dispatchQueue_ = dispatchQueue;
-        completion_ = [completion copy];
+        _syncContext = syncContext;
+        _dispatchQueue = dispatchQueue;
+        _callbackQueue = callbackQueue;
+        _completion = [completion copy];
+        
     }
     return self;
 }
@@ -146,13 +144,13 @@
     id<MSSyncContextDelegate> syncDelegate = self.syncContext.delegate;
     
     // Let go of the operation queue
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    [self.callbackQueue addOperationWithBlock:^{
         if (syncDelegate && [syncDelegate respondsToSelector:@selector(tableOperation:onComplete:)]) {
             [syncDelegate tableOperation:operation onComplete:postTableOperation];
         } else {
             [operation executeWithCompletion:postTableOperation];
         }
-    });
+    }];
 }
 
 /// Process the returned item/error from a call to a remote table. Update the local store state or cancel
@@ -286,7 +284,7 @@
     
     // Send the final table operation results to the delegate
     id<MSSyncContextDelegate> syncDelegate = self.syncContext.delegate;
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    [self.callbackQueue addOperationWithBlock:^{
         if (syncDelegate && [syncDelegate respondsToSelector:@selector(syncContext:onPushCompleteWithError:completion:)]) {
             [syncDelegate syncContext:self.syncContext onPushCompleteWithError:self.error completion:^{
                 [self processErrors];
@@ -294,7 +292,7 @@
         } else {
             [self processErrors];
         }
-    });
+    }];
 }
 
 /// Analyze the final errors from all the operations, updating the state as appropriate
@@ -325,9 +323,9 @@
     }
     
     if (self.completion) {
-        dispatch_async(self.dispatchQueue, ^{
+        [self.callbackQueue addOperationWithBlock:^{
             self.completion(self.error);
-        });
+        }];
     }
     
     [self completeOperation];
