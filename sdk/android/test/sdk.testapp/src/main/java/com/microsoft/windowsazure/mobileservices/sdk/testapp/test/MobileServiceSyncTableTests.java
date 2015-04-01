@@ -494,7 +494,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
                 EncodingUtilities
                         .percentEncodeSpaces(
                                 "http://myapp.com/tables/stringidtype?$filter=__updatedAt%20gt%20(datetimeoffset'" + updatedAt1 +
-                                        "')%20or%20(__updatedAt%20ge%20(datetimeoffset'" + updatedAt1 +
+                                        "')%20and%20(id%20ne%20('def'))%20and%20(id%20ne%20('def'))%20or%20(__updatedAt%20ge%20(datetimeoffset'" + updatedAt1 +
                                         "')%20and%20id%20gt%20('def'))&$top=50&$orderby=__updatedAt%20asc,id%20asc&__includeDeleted=true&__systemproperties=__updatedAt,__version,__deleted"));
     }
 
