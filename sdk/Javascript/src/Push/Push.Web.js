@@ -37,7 +37,7 @@ function Push(mobileServicesClient) {
             get: function () {
                 if (!this._gcm) {
                     var name = _.format('MS-PushContainer-gcm-{0}', mobileServicesClient.applicationUrl);
-                    this._registrationManager = new RegistrationManager(mobileServicesClient, 'apns', name);
+                    this._registrationManager = new RegistrationManager(mobileServicesClient, 'gcm', name);
                     this._gcm = new gcm(this);
                 }
                 return this._gcm;
