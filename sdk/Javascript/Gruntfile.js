@@ -12,15 +12,12 @@ module.exports = function(grunt) {
         'src/MobileServiceClient.js',
         'src/MobileServiceTable.js',
         'src/MobileServiceLogin.js',
-        'src/Push/RegistrationManager.js',
-        'src/Push/LocalStorageManager.js',
-        'src/Push/PushHttpClient.js',
+        'src/Push/Push.js',
         'src/Utilities/Validate.js',
         'src/External/queryjs/lib/*.js',
         'src/External/esprima/esprima.js'
       ],
       web: [
-        'src/Push/Push.Web.js',
         'src/Platforms/Platform.Web.js',
         'src/Generated/MobileServices.Core.js',
         'src/Transports/*.js',
@@ -29,7 +26,6 @@ module.exports = function(grunt) {
         'src/Utilities/Promises.js'
       ],
       winjs: [
-        'src/Push/Push.WinJS.js',
         'src/LoginUis/WebAuthBroker.js',
         'src/Platforms/Platform.WinJS.js',
       ],
@@ -70,7 +66,7 @@ module.exports = function(grunt) {
         options: {
           footer: '\n\trequire(\'InternalsVisible\');' + footer
         },
-        src: ['src/Require.js', '<%= files.Internals %>', '<%= files.core %>', '<%= files.web %>'],
+        src: ['src/Require.js', 'src/Generated/Resources.js', '<%= files.Internals %>', '<%= files.core %>', '<%= files.web %>'],
         dest: 'src/Generated/MobileServices.Web.Internals.js'
       },
       winjs: {

@@ -90,16 +90,13 @@
     <Content Include="tests\TestFramework.js" />
     <Content Include="tests\TestInterface.js" />
     <Content Include="tests\unit\extensions.js" />
-    <Content Include="tests\unit\localStorageManager.js" />
     <Content Include="tests\unit\mobileServicesClient.js" />
     <Content Include="tests\unit\mobileServicesClient._request.js" />
     <Content Include="tests\unit\mobileServiceTables.js" />
-    <Content Include="tests\unit\pushHttpClient.js" />
-    <Content Include="tests\unit\registrationManager.js" />
+    <Content Include="tests\unit\push.js" />
     <Content Include="tests\unit\validate.js" />
     <Content Include="tests\utilities\constants.js" />
     <Content Include="tests\utilities\TableHelper.js" />
-    <Content Include="tests\winJsOnly\push.js" />
     <None Include="Microsoft.Azure.Zumo.Windows.WinJS.Test_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
@@ -107,6 +104,9 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\framework\Microsoft.WindowsAzure.Mobile.WinJS.TestFramework.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="tests\winJsOnly\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\$(WMSJSProjectDirectory)\Microsoft.VisualStudio.$(WMSJSProject).targets" />
   <!-- Setup our JS Module system -->
