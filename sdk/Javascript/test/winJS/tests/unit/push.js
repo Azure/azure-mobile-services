@@ -1,13 +1,15 @@
 ﻿$testGroup('push',
-    $test('register request URL includes installation ID')
+    $test('register makes PUT HTTP request with URL containing installation ID')
         .checkAsync(function () {
             return client(function (req) {
+                $assert.areEqual(req.type, 'PUT');
                 $assert.areNotEqual(req.url.indexOf(WindowsAzure.MobileServiceClient._applicationInstallationId), -1);
             }).push.register('channelUri');
         }),
-    $test('unregister request URL includes installation ID')
+    $test('unregister makes DELETE HTTP request with URL containing installation ID')
         .checkAsync(function () {
             return client(function (req) {
+                $assert.areEqual(req.type, 'DELETE');
                 $assert.areNotEqual(req.url.indexOf(WindowsAzure.MobileServiceClient._applicationInstallationId), -1);
             }).push.unregister('channelUri');
         }),
