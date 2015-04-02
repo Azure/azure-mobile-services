@@ -362,8 +362,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         {
             return this.ExecuteOperationSafeAsync(operation.ItemId, operation.TableName, async () =>
             {
-                System.Diagnostics.Debug.Assert(MobileServiceTableOperationState.Pending == operation.State);
-
                 MobileServiceTableOperation existing = await this.opQueue.GetOperationByItemIdAsync(operation.TableName, operation.ItemId);
                 if (existing != null)
                 {
@@ -372,17 +370,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
                 try
                 {
-                    if (MobileServiceTableOperationKind.Insert != operation.Kind)
-                    {
-                        // Refresh the item's version, in case it changed while we were awaiting the item lock
-                        var localStoreItem = await this.Store.LookupAsync(operation.TableName, operation.ItemId);
-
-                        if (null != localStoreItem)
-                        {
-                            item[MobileServiceSystemColumns.Version] = localStoreItem[MobileServiceSystemColumns.Version];
-                        }
-                    }
-
                     await operation.ExecuteLocalAsync(this.Store, item); // first execute operation on local store
                 }
                 catch (Exception ex)
