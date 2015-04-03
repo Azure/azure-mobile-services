@@ -22,6 +22,11 @@
 {
     self.upsertCalls++;
     
+    if (self.errorOnUpsertItemsForOperations && table == self.operationTableName) {
+        *error = [NSError errorWithDomain:@"TestError" code:1 userInfo:nil];
+        return NO;
+    }
+    
     if ([super upsertItems:items table:table orError:error]) {
         self.upsertedItems += items.count;
         return YES;

@@ -15,6 +15,7 @@
 
 - (id) initWithSyncContext:(MSSyncContext *)syncContext
              dispatchQueue:(dispatch_queue_t)dispatchQueue
+             callbackQueue:(NSOperationQueue *)callbackQueue
                 completion:(MSSyncBlock)completion;
 
 @end

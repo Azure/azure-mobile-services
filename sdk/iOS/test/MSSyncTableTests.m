@@ -21,6 +21,7 @@
 
 static NSString *const TodoTableNoVersion = @"TodoNoVersion";
 static NSString *const AllColumnTypesTable = @"ColumnTypes";
+static NSString *const SyncContextQueueName = @"Sync Context: Operation Callbacks";
 
 @interface MSSyncTableTests : XCTestCase {
     MSClient *client;
@@ -76,6 +77,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     // Insert the item
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
         XCTAssertNotNil(item[@"id"], @"The item should have an id");
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
         done = YES;
     }];
     
@@ -95,6 +97,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
         XCTAssertNotNil(error, @"error should have been set.");
         XCTAssertTrue(error.localizedDescription, @"The item provided must not have an id.");
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
         done = YES;
     }];
     
@@ -112,6 +115,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
         XCTAssertNotNil(error, @"error should have been set.");
         XCTAssertTrue(error.localizedDescription, @"The item provided was not valid.");
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
         done = YES;
     }];
     
@@ -129,7 +133,8 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     // Insert the item
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
         XCTAssertNotNil(error, @"error should have been set.");
-        //STAssertTrue(error.localizedDescription, @"The item provided was not valid.");
+        XCTAssertEqualObjects(error.localizedDescription, @"Missing required datasource for MSSyncContext");
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
         done = YES;
     }];
     
@@ -177,6 +182,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(insertRanToServer, @"the insert call didn't go to the server");
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
         done = YES;
     }];
     XCTAssertTrue([self waitForTest:2000.1], @"Test timed out.");
@@ -222,6 +228,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(insertRanToServer, @"the insert call didn't go to the server");
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
         done = YES;
     }];
     XCTAssertTrue([self waitForTest:2000.1], @"Test timed out.");
@@ -267,6 +274,8 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
         
         MSTableOperationError *tableError = [pushErrors objectAtIndex:0];
         XCTAssertEqual(tableError.code, MSInvalidItemWithRequest);
+
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
         
         done = YES;
     }];
@@ -334,6 +343,8 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(insertRanToServer, @"the insert call didn't go to the server");
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
+        
         done = YES;
     }];
     XCTAssertTrue([self waitForTest:2000.1], @"Test timed out.");
@@ -395,6 +406,8 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
         
         NSDictionary *actualItem = errorInfo.serverItem;
         XCTAssertNotNil(actualItem, @"Expected server version to be present");
+
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
         
         done = YES;
     }];
@@ -456,6 +469,8 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(callsToServer == 1, @"only one call to server should have been made");
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
+        
         done = YES;
     }];
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
@@ -509,6 +524,8 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(callsToServer == 0, @"no calls to server should have been made");
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
+        
         done = YES;
     }];
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
@@ -523,6 +540,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
         [todoTable insert:itemOne completion:^(NSDictionary *itemTwo, NSError *error) {
             XCTAssertNotNil(error, @"expected an error");
             XCTAssertTrue(error.code == MSSyncTableInvalidAction, @"unexpected error code");
+            XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
             done = YES;
         }];
     }];
@@ -552,6 +570,8 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     [todoTable insert:item completion:^(NSDictionary *i, NSError *error) {
         XCTAssertNotNil(error);
         XCTAssertEqual(error.code, MSSyncTableInvalidAction);
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
+        
         done = YES;
     }];
     
@@ -575,6 +595,8 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
         XCTAssertEqual(error.code, 1);
         XCTAssertEqual(offline.upsertCalls, 0);
         XCTAssertEqual(offline.readTableCalls, 1);
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
+        
         done = YES;
     }];
     
@@ -589,6 +611,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
         XCTAssertNil(error);
         XCTAssertEqual(offline.upsertCalls, 2); // one for the item, one for the operation
         XCTAssertEqual(offline.readTableCalls, 1);
+        
         // push it to clear out pending operations
         [todoTable.client.syncContext pushWithCompletion:^(NSError *error) {
             done = YES;
@@ -607,10 +630,28 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
         XCTAssertEqual(error.code, 1);
         XCTAssertEqual(offline.upsertCalls, 0);
         XCTAssertEqual(offline.readTableCalls, 1);
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
+        
         done = YES;
     }];
     
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+-(void) testInsertWithOperationError {
+    XCTestExpectation *expectation = [self expectationWithDescription:self.name];
+    MSSyncTable *todoTable = [client syncTableWithName:TodoTableNoVersion];
+    
+    // Insert an item
+    offline.errorOnUpsertItemsForOperations = YES;
+    [todoTable insert:@{ @"name":@"test name" } completion:^(NSDictionary *item, NSError *error) {
+        XCTAssertNotNil(error);
+        XCTAssertNil(item);
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 
@@ -641,6 +682,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     done = NO;
     [todoTable update:item completion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
         done = YES;
     }];
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
@@ -649,6 +691,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(updateSentToServer, @"the update call didn't go to the server");
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
         done = YES;
     }];
     XCTAssertTrue([self waitForTest:2000.1], @"Test timed out.");
