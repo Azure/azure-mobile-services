@@ -117,7 +117,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             catch (Exception ex)
             {
 
-                toThrow = new MobileServiceLocalStoreException(Resources.SyncStore_FailedToDeleteError, ex);
+                toThrow = new MobileServiceLocalStoreException("Failed to delete error from the local store.", ex);
             }
 
             if (toThrow != null)

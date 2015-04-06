@@ -10,21 +10,21 @@
 
 @implementation MSSyncTable
 
-@synthesize client = client_;
-@synthesize name = name_;
-
 
 #pragma mark * Public Initializer Methods
 
 
 -(id) initWithName:(NSString *)tableName client:(MSClient *)client;
 {
+    NSAssert(client.syncContext != nil, @"Client must have an initialized MSSyncContext");
+
     self = [super init];
     if (self)
     {
-        client_ = client;
-        name_ = tableName;
+        _client = client;
+        _name = tableName;
     }
+    
     return self;
 }
 

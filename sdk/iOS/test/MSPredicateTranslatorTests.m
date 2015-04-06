@@ -19,7 +19,7 @@
     dateParts.month = 5;
     dateParts.day = 21;
     dateParts.calendar = [[NSCalendar alloc]
-                           initWithCalendarIdentifier:NSGregorianCalendar];
+                           initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
     dateParts.calendar.timeZone = [NSTimeZone timeZoneForSecondsFromGMT:0];
     
     NSDate *date1 = dateParts.date;
@@ -186,7 +186,7 @@
     dateParts.month = 5;
     dateParts.day = 21;
     dateParts.calendar = [[NSCalendar alloc]
-                          initWithCalendarIdentifier:NSGregorianCalendar];
+                          initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
     dateParts.calendar.timeZone = [NSTimeZone timeZoneForSecondsFromGMT:0];
     
     NSDate *date1 = dateParts.date;

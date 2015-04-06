@@ -14,6 +14,7 @@
 }
 @property (nonatomic, strong) MSCoreDataStore *store;
 @property (nonatomic, strong) NSManagedObjectContext *context;
+@property (nonatomic, strong) MSClient *client;
 
 @end
 
@@ -25,6 +26,9 @@
     
     self.context = [MSCoreDataStore inMemoryManagedObjectContext];
     self.store = [[MSCoreDataStore alloc] initWithManagedObjectContext:self.context];
+    self.client = [MSClient clientWithApplicationURLString:@""];
+    self.client.syncContext = [[MSSyncContext alloc] initWithDelegate:nil dataSource:self.store callback:nil];
+    
     XCTAssertNotNil(self.store, @"In memory store could not be created");
     
     done = NO;
@@ -58,7 +62,7 @@
     XCTAssertNotNil(item[MSSystemColumnVersion], @"__version was missing");
     XCTAssertNil(item[@"ms_version"], @"__version was missing");
     
-    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoItem" client:nil];
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoItem" client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
     
     MSSyncContextReadResult *result = [self.store readWithQuery:query orError:&error];
@@ -88,7 +92,7 @@
     XCTAssertEqualObjects(item[@"id"], @"B");
     XCTAssertEqualObjects(item[@"text"], @"test2");
     
-    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoItem" client:nil];
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoItem" client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
     
     MSSyncContextReadResult *result = [self.store readWithQuery:query orError:&error];
@@ -111,7 +115,7 @@
     XCTAssertNil(item[MSSystemColumnVersion]);
     XCTAssertNil(item[@"ms_version"]);
     
-    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoNoVersion" client:nil];
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoNoVersion" client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
     
     MSSyncContextReadResult *result = [self.store readWithQuery:query orError:&error];
@@ -169,7 +173,8 @@
     
     // Repeat for query
     
-    MSSyncTable *manySystemColumns = [[MSSyncTable alloc] initWithName:@"ManySystemColumns" client:nil];
+    MSSyncTable *manySystemColumns = [[MSSyncTable alloc] initWithName:@"ManySystemColumns"
+                                                                client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:manySystemColumns predicate:nil];
     
     MSSyncContextReadResult *result = [self.store readWithQuery:query orError:&error];
@@ -209,7 +214,7 @@
     
     [self populateTestData];
     
-    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoItem" client:nil];
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoItem" client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
     query.predicate = [NSPredicate predicateWithFormat:@"text == 'test3'"];
     
@@ -226,7 +231,7 @@
     
     [self populateTestData];
     
-    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoItem" client:nil];
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoItem" client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
     query.fetchLimit = 1;
     query.includeTotalCount = YES;
@@ -244,7 +249,7 @@
     
     [self populateTestData];
     
-    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoItem" client:nil];
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoItem" client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
     [query orderByAscending:@"sort"];
     
@@ -263,7 +268,7 @@
     
     [self populateTestData];
     
-    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoItem" client:nil];
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoItem" client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
     [query orderByDescending:@"sort"];
     
@@ -282,7 +287,7 @@
     
     [self populateTestData];
     
-    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoItem" client:nil];
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoItem" client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
     query.selectFields = @[@"sort", @"text"];
     
@@ -314,7 +319,8 @@
     XCTAssertNil(error, @"Upsert failed: %@", error.description);
     
     // Now check selecting subset of columns
-    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"ManySystemColumns" client:nil];
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"ManySystemColumns"
+                                                       client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
     query.selectFields = @[@"text", @"__version", @"__meaningOfLife"];
     
@@ -334,7 +340,7 @@
 {
     NSError *error;
 
-    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"NoSuchTable" client:nil];
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"NoSuchTable" client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
     
     MSSyncContextReadResult *result = [self.store readWithQuery:query orError:&error];
@@ -400,7 +406,7 @@
     
     [self populateTestData];
 
-    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoItem" client:nil];
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoItem" client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
     
     [self.store deleteUsingQuery:query orError:&error];
@@ -418,7 +424,7 @@
     
     [self populateTestData];
     
-    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoItem" client:nil];
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoItem" client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
     query.predicate = [NSPredicate predicateWithFormat:@"text == 'test3'"];
     
@@ -438,7 +444,7 @@
 {
     NSError *error;
     
-    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"NoSuchTable" client:nil];
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"NoSuchTable" client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
     query.predicate = [NSPredicate predicateWithFormat:@"text == 'test3'"];
     

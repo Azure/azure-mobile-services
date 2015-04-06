@@ -1,5 +1,9 @@
 # Azure Mobile Services Managed SDK Change Log
 
+### Managed SDK: Version 1.3.2
+- Added workaround for WinRT issue [#658](https://github.com/WindowsAzure/azure-mobile-services/issues/658) by removing localization in SQLiteStore and in the SDK  [6af8b30](https://github.com/Azure/azure-mobile-services/commit/6af8b30) [58c5a44](https://github.com/Azure/azure-mobile-services/commit/58c5a44)
+- Added partial fix for issue [#615](https://github.com/WindowsAzure/azure-mobile-services/issues/615), by removing operations from the queue before releasing the operation's lock. [a28ae32](https://github.com/Azure/azure-mobile-services/commit/a28ae32)
+
 ### Managed SDK: Version 1.3.1
 - Update to latest version of sqlite pcl [ce1aa67](https://github.com/Azure/azure-mobile-services/commit/ce1aa67)
 - Fix iOS classic compilation issues [316a57a](https://github.com/Azure/azure-mobile-services/commit/316a57a)

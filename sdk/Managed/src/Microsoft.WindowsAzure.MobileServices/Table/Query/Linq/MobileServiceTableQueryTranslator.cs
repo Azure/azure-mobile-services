@@ -338,7 +338,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             throw new NotSupportedException(
                 string.Format(
                     CultureInfo.InvariantCulture,
-                    Resources.MobileServiceTableQueryTranslator_MembersOnlyInExpression,
+                    "'{0}' Mobile Services query expressions must consist of members only, not '{1}'.",
                     expression != null && expression.Method != null ? expression.Method.Name : null,
                     deepest != null ? deepest.ToString() : null));
         }
@@ -379,7 +379,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             throw new NotSupportedException(
                 string.Format(
                     CultureInfo.InvariantCulture,
-                    Resources.MobileServiceTableQueryTranslator_UnsupportedExpression,
+                    "Expression '{1}' is not a supported '{0}' Mobile Services query expression.",
                     expression != null && expression.Method != null ? expression.Method : null,
                     deepest != null ? deepest.ToString() : null));
         }
@@ -417,7 +417,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             throw new NotSupportedException(
                 string.Format(
                     CultureInfo.InvariantCulture,
-                    Resources.MobileServiceTableQueryTranslator_SingleIntegerOnly,
+                    "'{0}' Mobile Services query expressions must consist of a single integer, not '{1}'.",
                     expression != null && expression.Method != null ? expression.Method.Name : null,
                     deepest != null ? deepest.ToString() : null));
         }

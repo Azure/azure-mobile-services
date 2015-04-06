@@ -36,8 +36,8 @@ static NSOperationQueue *pushQueue_;
     client_ = client;
     operationQueue_ = [[MSOperationQueue alloc] initWithClient:client_ dataSource:self.dataSource];
     
-    // We don't need to wait for this, and all operation creation goes onto this queue so its guaranteed to
-    // happen only after this is populated.
+    // We don't need to wait for this, and all operation creation goes onto this queue so its
+    // guaranteed to happen only after this is populated.
     dispatch_async(writeOperationQueue, ^{
         self.operationSequence = [self.operationQueue getNextOperationId];
     });
@@ -87,6 +87,7 @@ static NSOperationQueue *pushQueue_;
     // TODO: Allow users to cancel operations
     MSQueuePushOperation *push = [[MSQueuePushOperation alloc] initWithSyncContext:self
                                                                      dispatchQueue:writeOperationQueue
+                                                                     callbackQueue:self.callbackQueue
                                                                         completion:completion];
     
     [pushQueue_ addOperation:push];
@@ -111,8 +112,7 @@ static NSOperationQueue *pushQueue_;
     if (!self.dataSource) {
         error = [self errorWithDescription:@"Missing required datasource for MSSyncContext"
                               andErrorCode:MSSyncContextInvalid];
-    }
-    else {
+    } else {
         // All sync table operations require a valid string Id
         itemId = [self.client.serializer stringIdFromItem:item orError:&error];
         if (error) {
@@ -126,7 +126,9 @@ static NSOperationQueue *pushQueue_;
     
     if (error) {
         if (completion) {
-            completion(nil, error);
+            [self.callbackQueue addOperationWithBlock:^{
+                completion(nil, error);
+            }];
         }
         return;
     }
@@ -163,7 +165,7 @@ static NSOperationQueue *pushQueue_;
                     NSDictionary *result = [self syncTable:table readWithId:itemId orError:&error];
                     if (error == nil) {
                         if (result == nil) {
-                            [self.dataSource upsertItems:[NSArray arrayWithObject:itemToSave] table:table orError:&error];
+                            [self.dataSource upsertItems:@[itemToSave] table:table orError:&error];
                         }
                         else {
                             error = [self errorWithDescription:@"This item already exists." andErrorCode:MSSyncTableInvalidAction];
@@ -172,11 +174,11 @@ static NSOperationQueue *pushQueue_;
                     break;
                 }
                 case MSTableOperationUpdate:
-                    [self.dataSource upsertItems:[NSArray arrayWithObject:itemToSave] table:table orError:&error];
+                    [self.dataSource upsertItems:@[itemToSave] table:table orError:&error];
                     break;
                     
                 case MSTableOperationDelete:
-                    [self.dataSource deleteItemsWithIds:[NSArray arrayWithObject:itemId] table:table orError:&error];
+                    [self.dataSource deleteItemsWithIds:@[itemId] table:table orError:&error];
                     
                     // Capture the deleted item in case the user wants to cancel it or a conflict occur
                     operation.item = item;
@@ -204,18 +206,25 @@ static NSOperationQueue *pushQueue_;
         else if (condenseAction == MSCondenseToDelete) {
             operation.type = MSTableOperationDelete;
             
-            // FUTURE: Look at moving these upserts into the operation queue object
-            [self.dataSource upsertItems:[NSArray arrayWithObject:[operation serialize]]
-                                   table:[self.dataSource operationTableName]
+            // FUTURE: Look at moving this upserts into the operation queue object
+            [self.dataSource upsertItems:@[operation.serialize]
+                                   table:self.dataSource.operationTableName
                                  orError:&error];
             
         } else if (condenseAction != MSCondenseKeep) {
             [self.operationQueue removeOperation:operation orError:&error];
         }
         
+        // FUTURE: If an error occurs in updating the operation queue, we really should undo changes
+        // to the local store if possible
+        
         if (completion) {
             [self.callbackQueue addOperationWithBlock:^{
-                completion(itemToSave, nil);
+                if (error) {
+                    completion(nil, error);
+                } else {
+                    completion(itemToSave, nil);
+                }
             }];
         }
     });
@@ -241,12 +250,16 @@ static NSOperationQueue *pushQueue_;
     MSSyncContextReadResult *result = [self.dataSource readWithQuery:query orError:&error];
     
     if (completion) {
-        if (error) {
-            completion(nil, error);
-        } else {
-            MSQueryResult *queryResult = [[MSQueryResult alloc] initWithItems:result.items totalCount:result.totalCount nextLink:nil];
-            completion(queryResult, nil);
-        }
+        [self.callbackQueue addOperationWithBlock:^{
+            if (error) {
+                completion(nil, error);
+            } else {
+                MSQueryResult *queryResult = [[MSQueryResult alloc] initWithItems:result.items
+                                                                       totalCount:result.totalCount
+                                                                         nextLink:nil];
+                completion(queryResult, nil);
+            }
+        }];
     }
 }
 
@@ -269,13 +282,15 @@ static NSOperationQueue *pushQueue_;
             [itemToSave setValue:version forKey:MSSystemColumnVersion];
         }
         
-        [self.dataSource upsertItems:[NSArray arrayWithObject:itemToSave] table:operation.tableName orError:&error];
+        [self.dataSource upsertItems:@[itemToSave] table:operation.tableName orError:&error];
         if (!error) {
             [self.operationQueue removeOperation:operation orError:&error];
         }
         
         if (completion) {
-            completion(error);
+            [self.callbackQueue addOperationWithBlock:^{
+                completion(error);
+            }];
         }
     });
 }
@@ -290,7 +305,7 @@ static NSOperationQueue *pushQueue_;
         
         // FUTURE: Verify operation hasn't been modified by others
         
-        [self.dataSource deleteItemsWithIds:[NSArray arrayWithObject:operation.itemId]
+        [self.dataSource deleteItemsWithIds:@[operation.itemId]
                                       table:operation.tableName
                                     orError:&error];
         if (!error) {
@@ -352,7 +367,9 @@ static NSOperationQueue *pushQueue_;
     // Return error if possible, return on calling
     if (error) {
         if (completion) {
-            completion(error);
+            [self.callbackQueue addOperationWithBlock:^{
+                completion(error);
+            }];
         }
         return;
     }
@@ -378,7 +395,7 @@ static NSOperationQueue *pushQueue_;
     if (queryId) {
         queryCopy.table.systemProperties |= MSSystemPropertyUpdatedAt;
         NSSortDescriptor *orderByUpdatedAt = [NSSortDescriptor sortDescriptorWithKey:MSSystemColumnUpdatedAt ascending:YES];
-        queryCopy.orderBy = [NSArray arrayWithObject:orderByUpdatedAt];
+        queryCopy.orderBy = @[orderByUpdatedAt];
     }
     
     // For a Pull we treat fetchLimit as the total records we should pull by paging. If there is no fetchLimit, we pull everything.
@@ -405,17 +422,17 @@ static NSOperationQueue *pushQueue_;
                 // Long term we can be smarter and check if our table succeeded
                 if (error) {
                     if (completion) {
-                        completion(error);
+                        [self.callbackQueue addOperationWithBlock:^{
+                            completion(error);
+                        }];
                     }
-                }
-                else {
+                } else {
                     // Check again if we have new pending ops while we synced, and repeat as needed
                     [self pullWithQueryInternal:query queryId:queryId maxRecords:maxRecords completion:completion];
                 }
             }];
             return;
-        }
-        else {
+        } else {
             // TODO: Allow users to cancel operations
             MSQueuePullOperation *pull = [[MSQueuePullOperation alloc] initWithSyncContext:self
                                                                                      query:query
@@ -479,6 +496,7 @@ static NSOperationQueue *pushQueue_;
     }
     return matches;
 }
+
 
 # pragma mark * NSError helpers
 

@@ -30,7 +30,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         {
             if (this.Initialized)
             {
-                throw new InvalidOperationException(Resources.SyncStore_AlreadyInitialized);
+                throw new InvalidOperationException("The store is already initialized.");
             }
 
             MobileServiceLocalSystemTables.DefineAll(this);
@@ -104,7 +104,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         {
             if (!this.Initialized)
             {
-                throw new InvalidOperationException(Resources.SyncStore_NotInitialized);
+                throw new InvalidOperationException("The store must be initialized before it can be used.");
             }
         }
 

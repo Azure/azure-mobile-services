@@ -74,8 +74,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             if (Broker == null)
             {
-                throw new InvalidOperationException(string.Format(
-                    Microsoft.WindowsAzure.MobileServices.Resources.WP8LoginPage_MustBeCalledFromAuthBroker,
+                throw new InvalidOperationException(string.Format("This page must be called from the type '{0}'.",
                     typeof(AuthenticationBroker).FullName));
             }
 

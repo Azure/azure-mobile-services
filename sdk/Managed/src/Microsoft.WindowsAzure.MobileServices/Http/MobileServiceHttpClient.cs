@@ -484,7 +484,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 {
                     message = string.Format(
                         CultureInfo.InvariantCulture,
-                        Resources.MobileServiceClient_ErrorMessage,
+                        "The request could not be completed.  ({0})",
                         response.ReasonPhrase);
                 }
             }
@@ -492,7 +492,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 message = string.Format(
                     CultureInfo.InvariantCulture,
-                    Resources.MobileServiceClient_ErrorMessage,
+                    "The request could not be completed.  ({0})",
                     response.ReasonPhrase);
             }
 
@@ -605,7 +605,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
                 if (contentLength == null || contentLength <= 0)
                 {
-                    throw new MobileServiceInvalidOperationException(Resources.MobileServiceClient_NoResponseContent, request, response);
+                    throw new MobileServiceInvalidOperationException("The server did not provide a response with the expected content.", request, response);
                 }
             }
 
@@ -640,7 +640,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 {
                     throw new ArgumentException(
                         string.Format(
-                        Resources.HttpMessageHandlerExtensions_WrongHandlerType,
+                        "All message handlers except the last must be of the type '{0}'",
                         typeof(DelegatingHandler).Name));
                 }
 

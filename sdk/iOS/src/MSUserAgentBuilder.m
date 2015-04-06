@@ -15,7 +15,7 @@ static NSString *const userAgentValueFormat = @"ZUMO/%@ (lang=%@; os=%@; os_vers
 static NSString *const simulatorModel = @"iOSSimulator";
 static NSString *const unknownValue = @"--";
 static NSString *const sdkVersionFormat = @"%d.%d";
-static NSString *const sdkFileVesionFormat = @"%d.%d.%d.beta2";
+static NSString *const sdkFileVesionFormat = @"%d.%d.%d";
 
 
 #pragma mark * MSUserAgentBuilder Implementation
