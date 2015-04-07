@@ -52,6 +52,8 @@ import java.util.Map.Entry;
  */
 public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceLocalStore {
     private Map<String, Map<String, ColumnDataInfo>> mTables;
+    private int mConcurrencyCount;
+    private Object mConcurrencyLock;
 
     /**
      * Constructor for SQLiteLocalStore
@@ -68,6 +70,8 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
     public SQLiteLocalStore(Context context, String name, CursorFactory factory, int version) {
         super(context, name, factory, version);
         this.mTables = new HashMap<String, Map<String, ColumnDataInfo>>();
+        this.mConcurrencyCount = 0;
+        this.mConcurrencyLock = new Object();
     }
 
     /**
@@ -92,15 +96,15 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 
     @Override
     public void initialize() throws MobileServiceLocalStoreException {
+        SQLiteDatabase db = this.getWritableDatabaseSynchronized();
         try {
-            SQLiteDatabase db = this.getWritableDatabase();
-            db.close();
-
             for (Entry<String, Map<String, ColumnDataInfo>> entry : this.mTables.entrySet()) {
-                createTableFromObject(entry.getKey(), entry.getValue());
+                createTableFromObject(db, entry.getKey(), entry.getValue());
             }
         } catch (Throwable t) {
             throw new MobileServiceLocalStoreException(t);
+        } finally {
+            this.closeDatabaseSynchronized(db);
         }
     }
 
@@ -149,7 +153,7 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 
             Integer inlineCount = null;
 
-            SQLiteDatabase db = this.getWritableDatabase();
+            SQLiteDatabase db = this.getWritableDatabaseSynchronized();
 
             try {
                 Cursor cursor = null;
@@ -180,7 +184,7 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
                     }
                 }
             } finally {
-                db.close();
+                this.closeDatabaseSynchronized(db);
             }
 
             if (query.hasInlineCount()) {
@@ -206,8 +210,8 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 
             Map<String, ColumnDataInfo> table = this.mTables.get(invTableName);
 
-            SQLiteDatabase db = this.getWritableDatabase();
-
+            SQLiteDatabase db = this.getWritableDatabaseSynchronized();
+            
             try {
                 Cursor cursor = null;
 
@@ -223,7 +227,7 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
                     }
                 }
             } finally {
-                db.close();
+                this.closeDatabaseSynchronized(db);
             }
 
             return result;
@@ -281,12 +285,12 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
                 if (fromServer && statement.sql == "")
                     return;
 
-                SQLiteDatabase db = this.getWritableDatabase();
+                SQLiteDatabase db = this.getWritableDatabaseSynchronized();
 
                 try {
                     db.execSQL(statement.sql, statement.parameters.toArray());
                 } finally {
-                    db.close();
+                    this.closeDatabaseSynchronized(db);
                 }
 
                 pendingItems -= pageSize;
@@ -302,12 +306,12 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
         try {
             String invTableName = normalizeTableName(tableName);
 
-            SQLiteDatabase db = this.getWritableDatabase();
+            SQLiteDatabase db = this.getWritableDatabaseSynchronized();
 
             try {
                 db.delete(invTableName, "id = '" + itemId + "'", null);
             } finally {
-                db.close();
+                this.closeDatabaseSynchronized(db);
             }
         } catch (Throwable t) {
             throw new MobileServiceLocalStoreException(t);
@@ -319,14 +323,14 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
         try {
             String invTableName = normalizeTableName(tableName);
 
-            SQLiteDatabase db = this.getWritableDatabase();
+            SQLiteDatabase db = this.getWritableDatabaseSynchronized();
 
             try {
                 for (String itemId : itemsIds) {
                     db.delete(invTableName, "id = '" + itemId + "'", null);
                 }
             } finally {
-                db.close();
+                this.closeDatabaseSynchronized(db);
             }
         } catch (Throwable t) {
             throw new MobileServiceLocalStoreException(t);
@@ -340,12 +344,12 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 
             String whereClause = getWhereClause(query);
 
-            SQLiteDatabase db = this.getWritableDatabase();
+            SQLiteDatabase db = this.getWritableDatabaseSynchronized();
 
             try {
                 db.delete(invTableName, whereClause, null);
             } finally {
-                db.close();
+                this.closeDatabaseSynchronized(db);
             }
         } catch (Throwable t) {
             throw new MobileServiceLocalStoreException(t);
@@ -630,9 +634,7 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
         return whereClause;
     }
 
-    private void createTableFromObject(String invTableName, Map<String, ColumnDataInfo> table) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
+    private void createTableFromObject(SQLiteDatabase db, String invTableName, Map<String, ColumnDataInfo> table) {
         String tblSql = String.format("CREATE TABLE IF NOT EXISTS \"%s\" (\"id\" TEXT PRIMARY KEY);", invTableName);
         db.execSQL(tblSql);
 
@@ -697,6 +699,22 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
             String createSql = String.format("ALTER TABLE \"%s\" ADD COLUMN \"%s\" %s", invTableName, invColumnName, type);
 
             db.execSQL(createSql);
+        }
+    }
+    
+    private SQLiteDatabase getWritableDatabaseSynchronized() {
+        synchronized (mConcurrencyLock) {
+            mConcurrencyCount++;
+            return getWritableDatabase();
+        }
+    }
+    
+    private void closeDatabaseSynchronized(SQLiteDatabase db) {
+        synchronized (mConcurrencyLock) {
+            mConcurrencyCount--;
+            if (mConcurrencyCount == 0) {
+                db.close();
+            }
         }
     }
 
