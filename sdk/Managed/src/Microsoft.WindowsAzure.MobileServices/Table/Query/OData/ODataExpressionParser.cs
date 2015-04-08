@@ -35,7 +35,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         {
             QueryNode expr = this.ParseExpression();
 
-            this.ValidateToken(QueryTokenKind.End, () => Resources.ODataExpressionParser_SyntaxError);
+            this.ValidateToken(QueryTokenKind.End, () => "The specified odata query has syntax errors.");
 
             return expr;
         }
@@ -63,7 +63,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                 }
                 this.lexer.NextToken();
             }
-            this.ValidateToken(QueryTokenKind.End, () => Resources.ODataExpressionParser_SyntaxError);
+            this.ValidateToken(QueryTokenKind.End, () => "The specified odata query has syntax errors.");
             return orderings;
         }
 
@@ -263,7 +263,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             else
             {
                 // if it is a function it should begin with a '('
-                this.ParseError(Resources.ODataExpressionParser_OpenParenExpected.FormatInvariant(errorPos), errorPos);
+                this.ParseError("'(' expected.".FormatInvariant(errorPos), errorPos);
             }
 
             return new FunctionCallNode(functionName, args);
@@ -302,7 +302,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                 case "substring":
                     if (functionArgs.Count != 2 && functionArgs.Count != 3)
                     {
-                        this.ParseError(Resources.ODataExpressionParser_SubstringArgsCount, errorPos);
+                        this.ParseError("Function 'substring' requires 2 or 3 parameters.", errorPos);
                     }
                     break;
             }
@@ -312,19 +312,19 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         {
             if (args.Count != expectedArgCount)
             {
-                var error = Resources.ODataExpressionParser_FunctionArgsCount.FormatInvariant(functionName, expectedArgCount);
+                var error = "Function '{0}' requires {1} parameter(s).".FormatInvariant(functionName, expectedArgCount);
                 throw new MobileServiceODataException(error, this.lexer.Token.Position);
             }
         }
 
         private IList<QueryNode> ParseArgumentList()
         {
-            this.ValidateToken(QueryTokenKind.OpenParen, () => Resources.ODataExpressionParser_OpenParenExpected);
+            this.ValidateToken(QueryTokenKind.OpenParen, () => "'(' expected.");
             this.lexer.NextToken();
 
             IList<QueryNode> args = this.lexer.Token.Kind != QueryTokenKind.CloseParen ? this.ParseArguments() : new List<QueryNode>();
 
-            this.ValidateToken(QueryTokenKind.CloseParen, () => Resources.ODataExpressionParser_CloseParenOrCommaExpected);
+            this.ValidateToken(QueryTokenKind.CloseParen, () => "')' or ',' expected.");
             this.lexer.NextToken();
             return args;
         }
@@ -346,7 +346,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 
         private string GetIdentifier()
         {
-            this.ValidateToken(QueryTokenKind.Identifier, () => Resources.ODataExpressionParser_IdentifierExpected);
+            this.ValidateToken(QueryTokenKind.Identifier, () => "Expected identifier.");
             return this.lexer.Token.Text;
         }
 
@@ -365,20 +365,20 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                 case QueryTokenKind.OpenParen:
                     return this.ParseParenExpression();
                 default:
-                    this.ParseError(Resources.ODataExpressionParser_ExpressionExpected, this.lexer.Token.Position);
+                    this.ParseError("Expression expected.", this.lexer.Token.Position);
                     return null;
             }
         }
 
         private QueryNode ParseIntegerLiteral()
         {
-            this.ValidateToken(QueryTokenKind.IntegerLiteral, () => Resources.ODataExpressionParser_IntegerLiteralExpected);
+            this.ValidateToken(QueryTokenKind.IntegerLiteral, () => "Expected integer literal.");
             var text = this.lexer.Token.Text;
 
             long value;
             if (!Int64.TryParse(text, out value))
             {
-                this.ParseError(Resources.ODataExpressionParser_InvalidRealLiteral.FormatInvariant(text), this.lexer.Token.Position);
+                this.ParseError("The specified odata query has invalid real literal '{0}'.".FormatInvariant(text), this.lexer.Token.Position);
             }
             this.lexer.NextToken();
             if (this.lexer.Token.Text.ToUpper() == "L")
@@ -392,7 +392,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 
         private QueryNode ParseRealLiteral()
         {
-            this.ValidateToken(QueryTokenKind.RealLiteral, () => Resources.ODataExpressionParser_RealLiteralExpected);
+            this.ValidateToken(QueryTokenKind.RealLiteral, () => "Expected real literal.");
             string text = this.lexer.Token.Text;
 
             char last = Char.ToUpper(text[text.Length - 1]);
@@ -430,7 +430,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             }
             if (value == null)
             {
-                this.ParseError(Resources.ODataExpressionParser_InvalidRealLiteral.FormatInvariant(text), this.lexer.Token.Position);
+                this.ParseError("The specified odata query has invalid real literal '{0}'.".FormatInvariant(text), this.lexer.Token.Position);
             }
 
             this.lexer.NextToken();
@@ -439,17 +439,17 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 
         private QueryNode ParseParenExpression()
         {
-            this.ValidateToken(QueryTokenKind.OpenParen, () => Resources.ODataExpressionParser_OpenParenExpected);
+            this.ValidateToken(QueryTokenKind.OpenParen, () => "'(' expected.");
             this.lexer.NextToken();
             QueryNode e = this.ParseExpression();
-            this.ValidateToken(QueryTokenKind.CloseParen, () => Resources.ODataExpressionParser_CloseParenOrOperatorExpected);
+            this.ValidateToken(QueryTokenKind.CloseParen, () => "')' or operator expected");
             this.lexer.NextToken();
             return e;
         }
 
         private QueryNode ParseIdentifier()
         {
-            this.ValidateToken(QueryTokenKind.Identifier, () => Resources.ODataExpressionParser_IdentifierExpected);
+            this.ValidateToken(QueryTokenKind.Identifier, () => "Expected identifier.");
 
             QueryNode value;
             if (keywords.TryGetValue(this.lexer.Token.Text, out value))
@@ -510,7 +510,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 
             if (typeExpression == null)
             {
-                this.ParseError(Resources.ODataExpressionParser_InvalidTypeCreation.FormatInvariant(typeIdentifier), errorPos);
+                this.ParseError("The specified odata query has invalid '{0}' type creation expression.".FormatInvariant(typeIdentifier), errorPos);
             }
 
             return typeExpression;
@@ -518,7 +518,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 
         private ConstantNode ParseStringLiteral()
         {
-            this.ValidateToken(QueryTokenKind.StringLiteral, () => Resources.ODataExpressionParser_StringLiteralExpected);
+            this.ValidateToken(QueryTokenKind.StringLiteral, () => "Expected string literal.");
 
             char quote = this.lexer.Token.Text[0];
             // Unwrap string (remove surrounding quotes) 

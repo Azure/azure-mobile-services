@@ -1126,7 +1126,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(pushException.PushResult.Errors.Count(), 1);
 
             var delException = await ThrowsAsync<InvalidOperationException>(() => table.DeleteAsync(item));
-            Assert.AreEqual(delException.Message, "The item is in inconsistent state in the local store. Please complete the pending sync by calling PushAsync()before deleting the item.");
+            Assert.AreEqual(delException.Message, "The item is in inconsistent state in the local store. Please complete the pending sync by calling PushAsync() before deleting the item.");
 
             // insert still in queue
             Assert.AreEqual(service.SyncContext.PendingOperations, 1L);

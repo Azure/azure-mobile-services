@@ -64,7 +64,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
             if (this.Initialized)
             {
-                throw new InvalidOperationException(Properties.Resources.SQLiteStore_DefineAfterInitialize);
+                throw new InvalidOperationException("Cannot define a table after the store has been initialized.");
             }
 
             // add id if it is not defined
@@ -168,7 +168,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 // otherwise, throw to alert the caller that they have passed an invalid column
                 if (!table.TryGetValue(prop.Name, out column) && !ignoreMissingColumns)
                 {
-                    throw new InvalidOperationException(string.Format(Properties.Resources.SQLiteStore_ColumnNotDefined, prop.Name, tableName));
+                    throw new InvalidOperationException(string.Format("Column with name '{0}' is not defined on the local table '{1}'.", prop.Name, tableName));
                 }
 
                 if (column != null)
@@ -289,7 +289,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             TableDefinition table;
             if (!this.tableMap.TryGetValue(tableName, out table))
             {
-                throw new InvalidOperationException(string.Format(Properties.Resources.SQLiteStore_TableNotDefined, tableName));
+                throw new InvalidOperationException(string.Format("Table with name '{0}' is not defined.", tableName));
             }
             return table;
         }
@@ -409,7 +409,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             int batchSize = MaxParametersPerQuery / parametersCount;
             if (batchSize == 0)
             {
-                throw new InvalidOperationException(string.Format(Properties.Resources.SQLiteStore_TooManyColumns, MaxParametersPerQuery));
+                throw new InvalidOperationException(string.Format("The number of fields per entity in an upsert operation is limited to {0}.", MaxParametersPerQuery));
             }
             return batchSize;
         }
@@ -541,7 +541,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         {
             if (result != SQLiteResult.DONE)
             {
-                throw new SQLiteException(string.Format(Properties.Resources.SQLiteStore_QueryExecutionFailed, result));
+                throw new SQLiteException(string.Format("Query execution failed with result: '{0}'.", result));
             }
         }
 

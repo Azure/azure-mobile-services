@@ -31,11 +31,11 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             var contract = settings.ContractResolver.ResolveContract(typeof(T)) as JsonObjectContract;
             if (contract == null)
             {
-                throw new ArgumentException(Properties.Resources.SQLiteStore_DefineTableTNotAnObject);
+                throw new ArgumentException("The generic type T is not an object.");
             }
             if (contract.DefaultCreator == null)
             {
-                throw new ArgumentException(Properties.Resources.SQLiteStore_DefineTableEmptyCtorNotDefined);
+                throw new ArgumentException("The generic type T does not have parameterless constructor.");
             }
 
             // create an empty object

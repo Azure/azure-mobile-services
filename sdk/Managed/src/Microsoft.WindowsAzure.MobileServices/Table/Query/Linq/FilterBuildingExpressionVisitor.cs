@@ -342,7 +342,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                         throw new NotSupportedException(
                             string.Format(
                                 CultureInfo.InvariantCulture,
-                                Resources.FilterBuildingExpressionVisitor_UnsupportedInWhereExpression,
+                                "'{0}' is not supported in a 'Where' Mobile Services query expression.",
                                 node != null ? node.ToString() : null));
                 }
             }
@@ -386,7 +386,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                         throw new NotSupportedException(
                             string.Format(
                                 CultureInfo.InvariantCulture,
-                                Resources.FilterBuildingExpressionVisitor_OperatorUnsupported,
+                                "The operator '{0}' is not supported in the 'Where' Mobile Services query expression '{1}'.",
                                 expression.NodeType,
                                 expression.ToString()));
                 }
@@ -529,7 +529,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                             throw new NotSupportedException(
                                 string.Format(
                                     CultureInfo.InvariantCulture,
-                                    Resources.FilterBuildingExpressionVisitor_OperatorUnsupported,
+                                    "The operator '{0}' is not supported in the 'Where' Mobile Services query expression '{1}'.",
                                     expression.NodeType,
                                     expression.ToString()));
                     }                    
@@ -736,7 +736,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             throw new NotSupportedException(
                 string.Format(
                     CultureInfo.InvariantCulture,
-                    Resources.FilterBuildingExpressionVisitor_MemberUnsupported,
+                    "The member '{0}' is not supported in the 'Where' Mobile Services query expression '{1}'.",
                     expression != null && expression.Member != null ? expression.Member.Name : null,
                     expression != null ? expression.ToString() : null));
         }
@@ -842,7 +842,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                 throw new NotSupportedException(
                     string.Format(
                         CultureInfo.InvariantCulture,
-                        Resources.FilterBuildingExpressionVisitor_UnsupportedInWhereExpression,
+                        "'{0}' is not supported in a 'Where' Mobile Services query expression.",
                         expression != null ? expression.ToString() : null));
             }
         }
@@ -888,7 +888,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                 throw new NotSupportedException(
                     string.Format(
                         CultureInfo.InvariantCulture,
-                        Resources.FilterBuildingExpressionVisitor_UnsupportedInWhereExpression,
+                        "'{0}' is not supported in a 'Where' Mobile Services query expression.",
                         expression != null ? expression.ToString() : null));
             }
         }

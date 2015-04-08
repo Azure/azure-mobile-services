@@ -21,6 +21,7 @@
 
 static NSString *const TodoTableNoVersion = @"TodoNoVersion";
 static NSString *const AllColumnTypesTable = @"ColumnTypes";
+static NSString *const SyncContextQueueName = @"Sync Context: Operation Callbacks";
 
 @interface MSSyncTableTests : XCTestCase {
     MSClient *client;
@@ -68,41 +69,57 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
 
 -(void) testInsertItemWithNoId
 {
+    XCTestExpectation *expectation = [self expectationWithDescription:self.name];
+    
     MSSyncTable *todoTable = [client syncTableWithName:TodoTableNoVersion];
     
     // Create the item
-    id item = @{ @"name":@"test name" };
+    id item = @{ @"text":@"test name" };
+    __block NSString *itemId;
     
     // Insert the item
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
         XCTAssertNotNil(item[@"id"], @"The item should have an id");
-        done = YES;
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
+        itemId = item[@"id"];
+        
+        [expectation fulfill];
     }];
     
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
+    
+    // Verify the item was in local store
+    NSError *error = nil;
+    NSDictionary *newItem = [offline readTable:TodoTableNoVersion withItemId:itemId orError:&error];
+    XCTAssertNil(error);
+    XCTAssertNotNil(newItem);
+    XCTAssertEqualObjects(newItem[@"text"], item[@"text"]);
 }
 
 -(void) testInsertItemWithInvalidId
 {
-    // TODO: Fix error message when non string ids are used
+    XCTestExpectation *expectation = [self expectationWithDescription:self.name];
     
-    MSSyncTable *todoTable = [client syncTableWithName:TodoTableNoVersion];
+    MSSyncTable __block *todoTable = nil;
+    todoTable = [client syncTableWithName:TodoTableNoVersion];
     
     // Create the item
-    id item = @{ @"id": @12345, @"name":@"test name" };
+    id item = @{ @"id": @12345, @"text":@"test name" };
     
     // Insert the item
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
         XCTAssertNotNil(error, @"error should have been set.");
-        XCTAssertTrue(error.localizedDescription, @"The item provided must not have an id.");
-        done = YES;
+        XCTAssertEqualObjects(error.localizedDescription, @"The item provided did not have a valid id.");
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
+        [expectation fulfill];
     }];
     
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 -(void) testInsertItemWithInvalidItem
 {
+    XCTestExpectation *expectation = [self expectationWithDescription:self.name];
     MSSyncTable *todoTable = [client syncTableWithName:TodoTableNoVersion];
     
     // Create the item
@@ -111,15 +128,18 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     // Insert the item
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
         XCTAssertNotNil(error, @"error should have been set.");
-        XCTAssertTrue(error.localizedDescription, @"The item provided was not valid.");
-        done = YES;
+        XCTAssertEqualObjects(error.localizedDescription, @"The item provided was not valid.");
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
+        [expectation fulfill];
     }];
     
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 - (void) testInsertItemWithoutDatasource
 {
+    XCTestExpectation *expectation = [self expectationWithDescription:self.name];
+    
     MSSyncTable *todoTable = [client syncTableWithName:TodoTableNoVersion];
     client.syncContext.dataSource = nil;
     
@@ -129,29 +149,41 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     // Insert the item
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
         XCTAssertNotNil(error, @"error should have been set.");
-        //STAssertTrue(error.localizedDescription, @"The item provided was not valid.");
-        done = YES;
+        XCTAssertEqualObjects(error.localizedDescription, @"Missing required datasource for MSSyncContext");
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
+        [expectation fulfill];
     }];
     
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
+}
+
+-(void) testInsertIgnoresUnknownColumns
+{
+    XCTestExpectation *expectation = [self expectationWithDescription:self.name];
+    
+    MSSyncTable *todoTable = [client syncTableWithName:TodoTableNoVersion];
+    
+    // Create the item with unknown columns
+    id item = @{ @"fake_column":@"test name", @"anotherone": @3, @"text": @"hello" };
+    
+    // Insert the item and verify no error occurs
+    [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
+        XCTAssertNil(error);
+        
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 -(void) testInsertItemWithValidId
 {
-    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    XCTestExpectation *expectation = [self expectationWithDescription:self.name];
     
-    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
-                                   initWithURL:nil
-                                   statusCode:200
-                                   HTTPVersion:nil headerFields:nil];
     NSString* stringData = @"{\"id\": \"test1\", \"text\":\"test name\"}";
-    NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:stringData];
     
     BOOL __block insertRanToServer = NO;
-    
-    testFilter.responseToUse = response;
-    testFilter.dataToUse = data;
-    testFilter.ignoreNextFilter = YES;
     testFilter.onInspectRequest =  ^(NSURLRequest *request) {
         XCTAssertEqualObjects(request.HTTPMethod, @"POST", @"Incorrect operation (%@) sent to server", request.HTTPMethod);
         insertRanToServer = YES;
@@ -165,29 +197,34 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     NSDictionary *item = @{ @"id": @"test1", @"name":@"test name" };
     
     // Insert the item
-    done = NO;
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
-        done = YES;
+        [expectation fulfill];
     }];
     
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
     
-    done = NO;
+    // Now try sending the pending operation to the server
+    expectation = [self expectationWithDescription:@"Push for Valid Item"];
+    
     [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(insertRanToServer, @"the insert call didn't go to the server");
-        done = YES;
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
+        [expectation fulfill];
     }];
-    XCTAssertTrue([self waitForTest:2000.1], @"Test timed out.");
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 -(void) testInsertWithAllColumnTypes {
-    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200
-                                                                 data:@"{\"id\": \"test1\", \"text\":\"test name\"}"];
-    BOOL __block insertRanToServer = NO;
+    XCTestExpectation *expectation = [self expectationWithDescription:self.name];
     
-    testFilter.ignoreNextFilter = YES;
+    NSString *testData = @"{\"id\": \"test1\", \"text\":\"test name\"}";
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200
+                                                                 data:testData];
+    
+    BOOL __block insertRanToServer = NO;
     testFilter.onInspectRequest =  ^(NSURLRequest *request) {
         XCTAssertEqualObjects(request.HTTPMethod, @"POST", @"Incorrect operation (%@) sent to server", request.HTTPMethod);
         insertRanToServer = YES;
@@ -206,33 +243,47 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
                             @"float": [NSNumber numberWithFloat:3.14],
                             @"decimal": [NSDecimalNumber decimalNumberWithMantissa:6 exponent:2 isNegative:NO],
                             @"double": [NSNumber numberWithDouble:12.12],
-                            @"data": [NSDate dateWithTimeIntervalSinceNow:0],
+                            @"date": [NSDate dateWithTimeIntervalSinceNow:0],
                             };
     
     // Insert the item
-    done = NO;
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
-        done = YES;
+        [expectation fulfill];
     }];
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
     
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    // Verify the item in local store is correct
+    NSError *error = nil;
+    NSDictionary *newItem = [offline readTable:AllColumnTypesTable withItemId:@"simpleId" orError:&error];
+    XCTAssertNil(error);
+    XCTAssertNotNil(newItem);
+    XCTAssertEqualObjects(newItem[@"int16"], item[@"int16"]);
+    XCTAssertEqualObjects(newItem[@"int32"], item[@"int32"]);
+    XCTAssertEqualObjects(newItem[@"int64"], item[@"int64"]);
+    XCTAssertEqualObjects(newItem[@"float"], item[@"float"]);
+    XCTAssertEqualObjects(newItem[@"decimal"], item[@"decimal"]);
+    XCTAssertEqualObjects(newItem[@"double"], item[@"double"]);
+    XCTAssertEqualObjects(newItem[@"date"], item[@"date"]);
     
-    done = NO;
+    // Now push this item to the server
+    expectation = [self expectationWithDescription:@"Push with many column types"];
+    
     [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(insertRanToServer, @"the insert call didn't go to the server");
-        done = YES;
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
+        [expectation fulfill];
     }];
-    XCTAssertTrue([self waitForTest:2000.1], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 -(void) testInsertWithBinaryFail {
+    XCTestExpectation *expectation = [self expectationWithDescription:self.name];
+    
     MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:500];
     
     BOOL __block insertRanToServer = NO;
-    
-    testFilter.ignoreNextFilter = YES;
     testFilter.onInspectRequest =  ^(NSURLRequest *request) {
         insertRanToServer = YES;
         return request;
@@ -247,15 +298,15 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
                             };
     
     // Insert the item
-    done = NO;
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
-        done = YES;
+        [expectation fulfill];
     }];
     
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
     
-    done = NO;
+    // Now verify that the item is invalid for the server to handle
+    expectation = [self expectationWithDescription:@"Push with Binary data in it"];
     [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertFalse(insertRanToServer);
         XCTAssertNotNil(error);
@@ -267,97 +318,79 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
         
         MSTableOperationError *tableError = [pushErrors objectAtIndex:0];
         XCTAssertEqual(tableError.code, MSInvalidItemWithRequest);
+
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
+        [expectation fulfill];
         
-        done = YES;
     }];
-    XCTAssertTrue([self waitForTest:2000.1], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 -(void) testInsertPushInsertPush
 {
-    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
-    
-    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
-                                   initWithURL:nil
-                                   statusCode:200
-                                   HTTPVersion:nil headerFields:nil];
     NSString* stringData = @"{\"id\": \"test1\", \"text\":\"test name\"}";
-    NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
-    
-    BOOL __block insertRanToServer = NO;
-    
-    testFilter.responseToUse = response;
-    testFilter.dataToUse = data;
-    testFilter.ignoreNextFilter = YES;
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:stringData];
+                                
+    NSInteger __block serverCalls = 0;
     testFilter.onInspectRequest =  ^(NSURLRequest *request) {
-        insertRanToServer = YES;
+        serverCalls++;
         return request;
     };
     
     MSClient *filteredClient = [client clientWithFilter:testFilter];
     MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
     
-    // Create the item
+    // Create the first item to insert
+    XCTestExpectation *expectation = [self expectationWithDescription:self.name];
     NSDictionary *item = @{ @"id": @"test1", @"name":@"test name" };
     
-    // Insert the item
-    done = NO;
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
-        done = YES;
+        [expectation fulfill];
     }];
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
     
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-    
-    done = NO;
+    // Now push the first item to the server
+    expectation = [self expectationWithDescription:@"Pushing First Insert"];
     [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
-        XCTAssertTrue(insertRanToServer, @"the insert call didn't go to the server");
-        done = YES;
+        XCTAssertTrue(serverCalls == 1, @"the insert call didn't go to the server");
+        
+        [expectation fulfill];
     }];
-    XCTAssertTrue([self waitForTest:1110.1], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
     
-    // Create the item
+    // Create the a new item and insert it
+    expectation = [self expectationWithDescription:@"Second Insert"];
     item = @{ @"id": @"test2", @"name":@"test name" };
     
-    // Insert the item
-    done = NO;
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
-        done = YES;
+        [expectation fulfill];
     }];
-    
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-    
-    insertRanToServer = NO;
-    done = NO;
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
+
+    // Finally, push the second item to server
+    expectation = [self expectationWithDescription:@"Pushing Second Insert"];
     [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
-        XCTAssertTrue(insertRanToServer, @"the insert call didn't go to the server");
-        done = YES;
+        XCTAssertTrue(serverCalls == 2, @"the insert call didn't go to the server");
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
+        
+        
+        [expectation fulfill];
     }];
-    XCTAssertTrue([self waitForTest:2000.1], @"Test timed out.");
-    
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 -(void) testInsertItemWithValidIdConflict
 {
-    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    NSString* stringData = @"{\"id\": \"test1\", \"text\":\"servers name\", \"__version\":\"1\" }";
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:412 data:stringData];
     
-    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
-                                   initWithURL:nil
-                                   statusCode:412
-                                   HTTPVersion:nil headerFields:nil];
-    NSString* stringData = @"{\"id\": \"test1\", \"text\":\"test name\", \"__version\":\"1\" }";
-    NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
-    
-    BOOL __block insertRanToServer = NO;
-    
-    testFilter.responseToUse = response;
-    testFilter.dataToUse = data;
-    testFilter.ignoreNextFilter = YES;
+    NSInteger __block serverCalls = 0;
     testFilter.onInspectRequest =  ^(NSURLRequest *request) {
-        insertRanToServer = YES;
+        serverCalls++;
         return request;
     };
     
@@ -365,25 +398,26 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
     
     // Create the item
-    NSDictionary *item = @{ @"id": @"test1", @"name":@"test name" };
+    XCTestExpectation *expectation = [self expectationWithDescription:self.name];
+    NSDictionary *item = @{ @"id": @"test1", @"text":@"test name" };
     
-    // Insert the item
-    done = NO;
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
-        done = YES;
+        [expectation fulfill];
     }];
+    XCTAssertEqual(serverCalls, 0);
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
     
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-    
-    done = NO;
+    // Now try to push and trigger a conflict response
+    expectation = [self expectationWithDescription:@"Push with server conflict"];
     [client.syncContext pushWithCompletion:^(NSError *error) {
         // Verify the call went to the server
-        XCTAssertTrue(insertRanToServer, @"the insert call didn't go to the server");
+        XCTAssertEqual(serverCalls, 1, @"the insert call didn't go to the server");
         
         // Verify we got the expected error results
         XCTAssertNotNil(error, @"error should not have been nil.");
         XCTAssertEqual(error.code, [@MSPushCompleteWithErrors integerValue], @"Unexpected error code");
+        
         NSArray *errors = error.userInfo[MSErrorPushResultKey];
         XCTAssertNotNil(errors, @"error should not have been nil.");
         
@@ -391,36 +425,35 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
         MSTableOperationError *errorInfo = errors[0];
         
         XCTAssertEqual(errorInfo.statusCode, [@412 integerValue], @"Unexpected status code");
-        XCTAssertEqual(errorInfo.code, [@MSErrorPreconditionFailed integerValue], @"Unexpected status code");
+        XCTAssertEqual(errorInfo.code, [@MSErrorPreconditionFailed integerValue], @"Unexpected error code");
         
         NSDictionary *actualItem = errorInfo.serverItem;
         XCTAssertNotNil(actualItem, @"Expected server version to be present");
+        XCTAssertEqualObjects(actualItem[@"text"], @"servers name");
+
+        NSDictionary *sentItem = errorInfo.item;
+        XCTAssertNotNil(sentItem, @"Expected local version to be present");
+        XCTAssertEqualObjects(sentItem[@"text"], @"test name");
         
-        done = YES;
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);        
+        
+        [expectation fulfill];
     }];
-    
-    XCTAssertTrue([self waitForTest:330.1], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 -(void) testInsertUpdateCollapseSuccess
 {
-    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
-    
-    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
-                                   initWithURL:nil
-                                   statusCode:200
-                                   HTTPVersion:nil headerFields:nil];
     NSString* stringData = @"{\"id\": \"test1\", \"text\":\"updated name\"}";
-    NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:stringData];
     
     __block NSInteger callsToServer = 0;
-    
-    testFilter.responseToUse = response;
-    testFilter.dataToUse = data;
-    testFilter.ignoreNextFilter = YES;
     testFilter.onInspectRequest =  ^(NSURLRequest *request) {
         callsToServer++;
+        
         XCTAssertEqualObjects(request.HTTPMethod, @"POST", @"Unexpected method: %@", request.HTTPMethod);
+        
+        // Verify the item == the final (post update) value and not the initial insert's value)
         NSString *bodyString = [[NSString alloc] initWithData:request.HTTPBody
                                                      encoding:NSUTF8StringEncoding];
         XCTAssertEqualObjects(bodyString, @"{\"id\":\"test1\",\"text\":\"updated name\"}");
@@ -431,52 +464,42 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     MSClient *filteredClient = [client clientWithFilter:testFilter];
     MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
     
-    // Create the item
+    // Create & insert the item
+    XCTestExpectation *expectation = [self expectationWithDescription:self.name];
     NSDictionary *item = @{ @"id": @"test1", @"text": @"test name" };
-    
-    // Insert the item
-    done = NO;
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
-        done = YES;
+        [expectation fulfill];
     }];
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
     
     // Update the item
-    done = NO;
+    expectation = [self expectationWithDescription:self.name];
     item = @{ @"id": @"test1", @"text": @"updated name" };
     [todoTable update:item completion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
-        done = YES;
+        [expectation fulfill];
     }];
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
     
     // Push queue to server
-    done = NO;
+    expectation = [self expectationWithDescription:self.name];
     [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(callsToServer == 1, @"only one call to server should have been made");
-        done = YES;
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
+        [expectation fulfill];
+        
     }];
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 -(void) testInsertDeleteCollapseSuccess
 {
-    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
-    
-    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
-                                   initWithURL:nil
-                                   statusCode:200
-                                   HTTPVersion:nil headerFields:nil];
-    NSString* stringData = @"{\"id\": \"test1\", \"text\":\"updated name\"}";
-    NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
-    
+    NSString *stringData = @"{\"id\": \"test1\", \"text\":\"updated name\"}";
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:stringData];
+        
     __block NSInteger callsToServer = 0;
-    
-    testFilter.responseToUse = response;
-    testFilter.dataToUse = data;
-    testFilter.ignoreNextFilter = YES;
     testFilter.onInspectRequest =  ^(NSURLRequest *request) {
         callsToServer++;
         return request;
@@ -487,35 +510,36 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     
     // Create the item
     NSDictionary *item = @{ @"id": @"test1", @"name": @"test name" };
-    
-    // Insert the item
-    done = NO;
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Inserting an item"];
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
-        done = YES;
+        [expectation fulfill];
     }];
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
     
-    // Update the item
-    done = NO;
+    // Now delete the item
+    expectation = [self expectationWithDescription:@"Deleting the pending item"];
     [todoTable delete:item completion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
-        done = YES;
+        [expectation fulfill];
     }];
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
     
-    // Push queue to server
-    done = NO;
+    // Push to server (no calls expected)
+    expectation = [self expectationWithDescription:@"Pushing (expecting no items)"];
     [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(callsToServer == 0, @"no calls to server should have been made");
-        done = YES;
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
+        [expectation fulfill];
+        
     }];
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 -(void) testInsertInsertCollapseThrows
 {
+    XCTestExpectation *expectation = [self expectationWithDescription:self.name];
     MSSyncTable *todoTable = [client syncTableWithName:TodoTableNoVersion];
     
     NSDictionary *item = @{ @"name": @"test" };
@@ -523,45 +547,51 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
         [todoTable insert:itemOne completion:^(NSDictionary *itemTwo, NSError *error) {
             XCTAssertNotNil(error, @"expected an error");
             XCTAssertTrue(error.code == MSSyncTableInvalidAction, @"unexpected error code");
-            done = YES;
+            XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
+            
+            [expectation fulfill];
         }];
     }];
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 -(void) testInsertThenInsertSameItem
 {
+    XCTestExpectation *expectation = [self expectationWithDescription:self.name];
+    
     NSString *insertResponse = @"{\"id\":\"one\", \"text\":\"first item\"}";
-    MSMultiRequestTestFilter *testFilter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[@200] data:@[insertResponse] appendEmptyRequest:NO];
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:insertResponse];
     
     MSClient *filteredClient = [client clientWithFilter:testFilter];
     MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
-
+    
     NSDictionary *item = @{ @"id": @"one", @"text": @"first item" };
     [todoTable insert:item completion:^(NSDictionary *i, NSError *error) {
         XCTAssertNil(error);
+        
         // push it to clear out pending operations
         [todoTable.client.syncContext pushWithCompletion:^(NSError *error) {
-            done = YES;
+            [expectation fulfill];
         }];
     }];
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
     
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-    done = NO;
-    
+    expectation = [self expectationWithDescription:@"Second Insert"];
     [todoTable insert:item completion:^(NSDictionary *i, NSError *error) {
         XCTAssertNotNil(error);
         XCTAssertEqual(error.code, MSSyncTableInvalidAction);
-        done = YES;
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
+        
+        
+        [expectation fulfill];
     }];
-    
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 -(void) testInsertWithReadError
 {
     NSString *insertResponse = @"{\"id\":\"one\", \"text\":\"first item\"}";
-    MSMultiRequestTestFilter *testFilter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[@200] data:@[insertResponse] appendEmptyRequest:NO];
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:insertResponse];
     
     MSClient *filteredClient = [client clientWithFilter:testFilter];
     MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
@@ -570,47 +600,70 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     NSDictionary *item = @{ @"id": @"one", @"text": @"first item" };
 
     // insert without any items; should give an error
+    XCTestExpectation *expectation = [self expectationWithDescription:@"InsertError: Item not in table"];
+    
     [todoTable insert:item completion:^(NSDictionary *i, NSError *error) {
         XCTAssertNotNil(error);
         XCTAssertEqual(error.code, 1);
         XCTAssertEqual(offline.upsertCalls, 0);
         XCTAssertEqual(offline.readTableCalls, 1);
-        done = YES;
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
+        
+        [expectation fulfill];
     }];
     
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-    done = NO;
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
     
     offline.errorOnReadTableWithItemIdOrError = NO;
     [offline resetCounts];
+    expectation = [self expectationWithDescription:@"InsertError: Setup Expectation"];
     
     // now insert so we end up with an item in the local store
     [todoTable insert:item completion:^(NSDictionary *i, NSError *error) {
         XCTAssertNil(error);
         XCTAssertEqual(offline.upsertCalls, 2); // one for the item, one for the operation
         XCTAssertEqual(offline.readTableCalls, 1);
+        
         // push it to clear out pending operations
         [todoTable.client.syncContext pushWithCompletion:^(NSError *error) {
-            done = YES;
+            [expectation fulfill];
         }];
     }];
-    
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-    done = NO;
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
     
     offline.errorOnReadTableWithItemIdOrError = YES;
     [offline resetCounts];
-    
+    expectation = [self expectationWithDescription:@"InsertError: Item already in table"];
+
     // now this should error as well with our read error.
     [todoTable insert:item completion:^(NSDictionary *i, NSError *error) {
         XCTAssertNotNil(error);
         XCTAssertEqual(error.code, 1);
         XCTAssertEqual(offline.upsertCalls, 0);
         XCTAssertEqual(offline.readTableCalls, 1);
-        done = YES;
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
+        
+        
+        [expectation fulfill];
     }];
     
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
+}
+
+-(void) testInsertWithOperationError {
+    XCTestExpectation *expectation = [self expectationWithDescription:self.name];
+    MSSyncTable *todoTable = [client syncTableWithName:TodoTableNoVersion];
+    
+    // Insert an item
+    offline.errorOnUpsertItemsForOperations = YES;
+    [todoTable insert:@{ @"name":@"test name" } completion:^(NSDictionary *item, NSError *error) {
+        XCTAssertNotNil(error);
+        XCTAssertNil(item);
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 
@@ -641,6 +694,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     done = NO;
     [todoTable update:item completion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
         done = YES;
     }];
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
@@ -649,6 +703,7 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(updateSentToServer, @"the update call didn't go to the server");
+        XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
         done = YES;
     }];
     XCTAssertTrue([self waitForTest:2000.1], @"Test timed out.");

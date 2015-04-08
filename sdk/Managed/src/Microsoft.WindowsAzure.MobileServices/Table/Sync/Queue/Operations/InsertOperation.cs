@@ -35,13 +35,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
             if (newOperation is InsertOperation)
             {
-                throw new InvalidOperationException(Resources.SyncContext_DuplicateInsert);
+                throw new InvalidOperationException("An insert operation on the item is already in the queue.");
             }
 
             if (newOperation is DeleteOperation && this.State != MobileServiceTableOperationState.Pending)
             {
                 // if insert was attempted then we can't be sure if it went through or not hence we can't collapse delete
-                throw new InvalidOperationException(Resources.SyncContext_InsertAttempted);
+                throw new InvalidOperationException("The item is in inconsistent state in the local store. Please complete the pending sync by calling PushAsync() before deleting the item.");
             }
         }
 
@@ -65,7 +65,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         {
             if (await store.LookupAsync(this.TableName, this.ItemId) != null)
             {
-                throw new MobileServiceLocalStoreException(Resources.SyncContext_DuplicateInsert, null);
+                throw new MobileServiceLocalStoreException("An insert operation on the item is already in the queue.", null);
             }
 
             await store.UpsertAsync(this.TableName, item, fromServer: false);
