@@ -20,8 +20,8 @@
 #import "MSPush.h"
 #import "MSDateOffset.h"
 
-#define WindowsAzureMobileServicesSdkMajorVersion 2
-#define WindowsAzureMobileServicesSdkMinorVersion 1
+#define WindowsAzureMobileServicesSdkMajorVersion 3
+#define WindowsAzureMobileServicesSdkMinorVersion 0
 #define WindowsAzureMobileServicesSdkBuildVersion 0
 
 #endif
