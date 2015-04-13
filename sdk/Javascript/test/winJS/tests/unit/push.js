@@ -3,14 +3,14 @@
         .checkAsync(function () {
             return client(function (req) {
                 $assert.areEqual(req.type, 'PUT');
-                $assert.areNotEqual(req.url.indexOf(WindowsAzure.MobileServiceClient._applicationInstallationId), -1);
-            }).push.register('channelUri');
+                $assert.areNotEqual(req.url.indexOf(encodeURIComponent(WindowsAzure.MobileServiceClient._applicationInstallationId)), -1);
+            }).push.register('wns', 'channelUri');
         }),
     $test('unregister makes DELETE HTTP request with URL containing installation ID')
         .checkAsync(function () {
             return client(function (req) {
                 $assert.areEqual(req.type, 'DELETE');
-                $assert.areNotEqual(req.url.indexOf(WindowsAzure.MobileServiceClient._applicationInstallationId), -1);
+                $assert.areNotEqual(req.url.indexOf(encodeURIComponent(WindowsAzure.MobileServiceClient._applicationInstallationId)), -1);
             }).push.unregister('channelUri');
         }),
     $test('register sets data properties')
@@ -22,7 +22,7 @@
                 $assert.areEqual(data.platform, 'wns');
                 $assert.areEqual(data.templates, 'templates');
                 $assert.areEqual(data.secondaryTiles, 'secondaryTiles');
-            }).push.register('channelUri', 'templates', 'secondaryTiles');
+            }).push.register('wns', 'channelUri', 'templates', 'secondaryTiles');
         })
 );
 
