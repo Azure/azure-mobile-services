@@ -13,7 +13,7 @@ function Push(client, installationId) {
 }
 
 Push.prototype.register = Platform.async(
-    function (channelUri, templates, secondaryTiles, callback) {
+    function (platform, channelUri, templates, secondaryTiles, callback) {
         // in order to support the older callback style completion, we need to check optional parameters
         if (_.isNull(callback) && (typeof templates === 'function')) {
             callback = templates;
@@ -28,7 +28,7 @@ Push.prototype.register = Platform.async(
         var requestContent = {
             installationId: this.installationId,
             pushChannel: channelUri,
-            platform: 'wns',                                                // TODO: support other platforms (gcm, apns)
+            platform: platform,
             templates: templates,
             secondaryTiles: secondaryTiles
         };
