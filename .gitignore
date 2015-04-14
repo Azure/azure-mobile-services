@@ -17,6 +17,7 @@ sdk/android/test/sdk.testapp.tests/libs/gson-2.2.2.jar
 *.ldf
 obj
 *.csproj.user
+*.jsproj.user
 test/ZumoE2EServerApp/Properties/PublishProfiles/
 sdk/Managed/test/Microsoft.WindowsAzure.MobileServices.SQLiteStore.Net45.Test/sqlite3.dll
 StyleCop.Cache
