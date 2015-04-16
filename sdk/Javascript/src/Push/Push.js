@@ -85,8 +85,9 @@ function stringifyTemplateBodies(templates) {
     for (var templateName in templates) {
         if (templates.hasOwnProperty(templateName)) {
             var template = templates[templateName];
-            if (typeof template.body !== 'string')
+            if (typeof template.body !== 'string') {
                 template.body = JSON.stringify(template.body);
+            }
         }
     }
     return templates;
