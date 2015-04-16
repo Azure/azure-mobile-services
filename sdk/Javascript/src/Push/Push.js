@@ -18,7 +18,7 @@ function Push(client, installationId) {
 /// <param name="platform" type="string">
 /// The device platform being used - wns, gcm or apns.
 /// </param>
-/// <param name="channelId" type="string">
+/// <param name="pushChannel" type="string">
 /// The push channel identifier or URI.
 /// </param>
 /// <param name="templates" type="string">
@@ -28,7 +28,7 @@ function Push(client, installationId) {
 /// An object containing template definitions to be used with secondary tiles when using WNS.
 /// </param>
 Push.prototype.register = Platform.async(
-    function (platform, channelId, templates, secondaryTiles, callback) {
+    function (platform, pushChannel, templates, secondaryTiles, callback) {
         Validate.isString(platform, 'platform');
         Validate.notNullOrEmpty(platform, 'platform');
 
@@ -45,31 +45,31 @@ Push.prototype.register = Platform.async(
 
         var requestContent = {
             installationId: this.installationId,
-            pushChannel: channelId,
+            pushChannel: pushChannel,
             platform: platform,
             templates: templates,
             secondaryTiles: secondaryTiles
         };
 
-        executeRequest(this.client, 'PUT', channelId, requestContent, this.installationId, callback);
+        executeRequest(this.client, 'PUT', pushChannel, requestContent, this.installationId, callback);
     }
 );
 
 /// <summary>
 /// Unregister a push channel with the Mobile Apps backend to stop receiving notifications.
 /// </summary>
-/// <param name="channelId" type="string">
+/// <param name="pushChannel" type="string">
 /// The push channel identifier or URI.
 /// </param>
 Push.prototype.unregister = Platform.async(
-    function (channelId, callback) {
-        executeRequest(this.client, 'DELETE', channelId, null, this.installationId, callback);
+    function (pushChannel, callback) {
+        executeRequest(this.client, 'DELETE', pushChannel, null, this.installationId, callback);
     }
 );
 
-function executeRequest(client, method, channelId, content, installationId, callback) {
-    Validate.isString(channelId, 'channelId');
-    Validate.notNullOrEmpty(channelId, 'channelId');
+function executeRequest(client, method, pushChannel, content, installationId, callback) {
+    Validate.isString(pushChannel, 'pushChannel');
+    Validate.notNullOrEmpty(pushChannel, 'pushChannel');
 
     client._request(
         method,
