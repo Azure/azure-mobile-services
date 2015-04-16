@@ -23,6 +23,15 @@
                 $assert.areEqual(data.templates, 'templates');
                 $assert.areEqual(data.secondaryTiles, 'secondaryTiles');
             }).push.register('wns', 'channelUri', 'templates', 'secondaryTiles');
+        }),
+    $test('templates bodies are stringified if not already a string')
+        .checkAsync(function () {
+            var body = { text: 'test' };
+
+            return client(function (req) {
+                var data = JSON.parse(req.data);
+                $assert.areEqual(data.templates.templateName.body, JSON.stringify(body));
+            }).push.register('wns', 'channelUri', { templateName: { body: body } }, 'secondaryTiles');
         })
 );
 

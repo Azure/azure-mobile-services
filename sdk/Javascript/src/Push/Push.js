@@ -47,8 +47,8 @@ Push.prototype.register = Platform.async(
             installationId: this.installationId,
             pushChannel: pushChannel,
             platform: platform,
-            templates: typeof templates === 'string' ? templates : JSON.stringify(templates),
-            secondaryTiles: typeof secondaryTiles === 'string' ? secondaryTiles : JSON.stringify(secondaryTiles)
+            templates: stringifyTemplateBodies(templates),
+            secondaryTiles: stringifyTemplateBodies(secondaryTiles)
         };
 
         executeRequest(this.client, 'PUT', pushChannel, requestContent, this.installationId, callback);
@@ -79,4 +79,15 @@ function executeRequest(client, method, pushChannel, content, installationId, ca
         { 'If-Modified-Since': 'Mon, 27 Mar 1972 00:00:00 GMT' },
         callback
     );
+}
+
+function stringifyTemplateBodies(templates) {
+    for (var templateName in templates) {
+        if (templates.hasOwnProperty(templateName)) {
+            var template = templates[templateName];
+            if (typeof template.body !== 'string')
+                template.body = JSON.stringify(template.body);
+        }
+    }
+    return templates;
 }
