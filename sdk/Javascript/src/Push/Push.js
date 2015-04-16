@@ -47,8 +47,8 @@ Push.prototype.register = Platform.async(
             installationId: this.installationId,
             pushChannel: pushChannel,
             platform: platform,
-            templates: templates,
-            secondaryTiles: secondaryTiles
+            templates: typeof templates === 'string' ? templates : JSON.stringify(templates),
+            secondaryTiles: typeof secondaryTiles === 'string' ? secondaryTiles : JSON.stringify(secondaryTiles)
         };
 
         executeRequest(this.client, 'PUT', pushChannel, requestContent, this.installationId, callback);
