@@ -82,13 +82,16 @@ function executeRequest(client, method, pushChannel, content, installationId, ca
 }
 
 function stringifyTemplateBodies(templates) {
+    var result = {};
     for (var templateName in templates) {
         if (templates.hasOwnProperty(templateName)) {
-            var template = templates[templateName];
+            // clone the template so we are not modifying the original
+            var template = _.extend({}, templates[templateName]);
             if (typeof template.body !== 'string') {
                 template.body = JSON.stringify(template.body);
             }
+            result[templateName] = template;
         }
     }
-    return templates;
+    return result;
 }

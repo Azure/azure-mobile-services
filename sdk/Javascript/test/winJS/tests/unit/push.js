@@ -15,14 +15,15 @@
         }),
     $test('register sets data properties')
         .checkAsync(function () {
+            var templates = { templateName: {} };
             return client(function (req) {
                 var data = JSON.parse(req.data);
                 $assert.areEqual(data.installationId, WindowsAzure.MobileServiceClient._applicationInstallationId);
                 $assert.areEqual(data.pushChannel, 'channelUri');
                 $assert.areEqual(data.platform, 'wns');
-                $assert.areEqual(data.templates, 'templates');
-                $assert.areEqual(data.secondaryTiles, 'secondaryTiles');
-            }).push.register('wns', 'channelUri', 'templates', 'secondaryTiles');
+                $assert.areEqual(JSON.stringify(data.templates), JSON.stringify(templates));
+                $assert.areEqual(JSON.stringify(data.secondaryTiles), JSON.stringify(templates));
+            }).push.register('wns', 'channelUri', templates, templates);
         }),
     $test('templates bodies are stringified if not already a string')
         .checkAsync(function () {
