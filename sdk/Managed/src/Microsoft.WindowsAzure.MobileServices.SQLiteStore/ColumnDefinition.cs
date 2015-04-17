@@ -10,7 +10,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
     /// <summary>
     /// A class that represents the type of column on local store
     /// </summary>
-    internal class ColumnDefinition
+    public class ColumnDefinition
     {
         public string Name { get; private set; }
 
