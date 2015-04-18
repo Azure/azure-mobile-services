@@ -64,7 +64,7 @@
 		A28224B0192ACEAE00EF8743 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A28224AF192ACEAE00EF8743 /* CoreData.framework */; };
 		A28224B3192ACFB700EF8743 /* CoreDataTestModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = A28224B1192ACFB700EF8743 /* CoreDataTestModel.xcdatamodeld */; };
 		A28224B4192AD00E00EF8743 /* CoreDataTestModel.xcdatamodeld in Resources */ = {isa = PBXBuildFile; fileRef = A28224B1192ACFB700EF8743 /* CoreDataTestModel.xcdatamodeld */; };
-		A28DD6361A83FDEA00F1A1C5 /* MSManagedObjectObserver.h in Headers */ = {isa = PBXBuildFile; fileRef = A28DD6341A83FDEA00F1A1C5 /* MSManagedObjectObserver.h */; };
+		A28DD6361A83FDEA00F1A1C5 /* MSManagedObjectObserver.h in Headers */ = {isa = PBXBuildFile; fileRef = A28DD6341A83FDEA00F1A1C5 /* MSManagedObjectObserver.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A28DD6371A83FDEA00F1A1C5 /* MSManagedObjectObserver.m in Sources */ = {isa = PBXBuildFile; fileRef = A28DD6351A83FDEA00F1A1C5 /* MSManagedObjectObserver.m */; };
 		A295B2B3192AB2040067562E /* MSCoreDataStoreTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A295B2B2192AB2040067562E /* MSCoreDataStoreTests.m */; };
 		A29F44A31953CBF30063C0C1 /* MSCoreDataStore+TestHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = A29F44A21953CBF30063C0C1 /* MSCoreDataStore+TestHelper.m */; };
@@ -665,7 +665,6 @@
 				E8E3790E161F769D00C13F00 /* MSClient.h in Headers */,
 				E8E37911161F769D00C13F00 /* MSTable.h in Headers */,
 				A24701B7196896F500385DA2 /* MSLocalStorage.h in Headers */,
-				A28DD6361A83FDEA00F1A1C5 /* MSManagedObjectObserver.h in Headers */,
 				A24701BD196896F500385DA2 /* MSPushRequest.h in Headers */,
 				E8E37910161F769D00C13F00 /* MSQuery.h in Headers */,
 				A258890F18A19D0B00962F9A /* MSTableOperation.h in Headers */,
@@ -676,6 +675,7 @@
 				E8E37913161F769D00C13F00 /* MSFilter.h in Headers */,
 				A2ACD540192322C50012B1ED /* MSCoreDataStore.h in Headers */,
 				CF762EC61A1D366E0018C292 /* MSDateOffset.h in Headers */,
+				A28DD6361A83FDEA00F1A1C5 /* MSManagedObjectObserver.h in Headers */,
 				A24701B9196896F500385DA2 /* MSPush.h in Headers */,
 				870C0C9C199C246700A134DD /* MSSDKFeatures.h in Headers */,
 				E8E3790F161F769D00C13F00 /* MSError.h in Headers */,
