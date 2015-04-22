@@ -68,7 +68,6 @@
     <Content Include="js\TestFrameworkAdapter.js" />
     <Content Include="promiseTests\readme.txt" />
     <Content Include="promiseTests\test-promises.js" />
-    <Content Include="tests\unit\push.js" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -83,6 +82,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
+    <Folder Include="tests\unit\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
