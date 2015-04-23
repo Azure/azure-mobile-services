@@ -822,14 +822,14 @@ public class MobileServiceClient {
 		MobileServiceConnection conn = createConnection();
 		
 		// Create AsyncTask to execute the request and parse the results
-		new RequestAsyncTask(request, conn) {
-			@Override
-			protected void onPostExecute(ServiceFilterResponse response) {
-				if (callback != null) {
-					callback.onResponse(response, mTaskException);
-				}
-			}
-		}.executeTask();	
+		AsyncTaskUtil.addTaskInPool((new RequestAsyncTask(request, conn) {
+            @Override
+            protected void onPostExecute(ServiceFilterResponse response) {
+                if (callback != null) {
+                    callback.onResponse(response, mTaskException);
+                }
+            }
+        }));	
 	}
 
 	/**

@@ -374,26 +374,27 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 	private void executeTableOperation(ServiceFilterRequest request,
 			final TableJsonOperationCallback callback) {
 		// Create AsyncTask to execute the operation
-		new RequestAsyncTask(request, mClient.createConnection()) {
-			@Override
-			protected void onPostExecute(ServiceFilterResponse result) {
-				if (callback != null) {
-					JsonObject newEntityJson = null;
-					if (mTaskException == null && result != null) {
-						String content = null;
-						content = result.getContent();
+		AsyncTaskUtil.addTaskInPool(
+            new RequestAsyncTask(request, mClient.createConnection()) {
+                @Override
+                protected void onPostExecute(ServiceFilterResponse result) {
+                    if (callback != null) {
+                        JsonObject newEntityJson = null;
+                        if (mTaskException == null && result != null) {
+                            String content = null;
+                            content = result.getContent();
 
-						newEntityJson = new JsonParser().parse(content)
-								.getAsJsonObject();
+                            newEntityJson = new JsonParser().parse(content)
+                                    .getAsJsonObject();
 
-						callback.onCompleted(newEntityJson, null, result);
+                            callback.onCompleted(newEntityJson, null, result);
 
-					} else {
-						callback.onCompleted(null, mTaskException, result);
-					}
-				}
-			}
-		}.executeTask();
+                        } else {
+                            callback.onCompleted(null, mTaskException, result);
+                        }
+                    }
+                }
+            });
 	}
 
 	/**
@@ -411,6 +412,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 
 		MobileServiceConnection conn = mClient.createConnection();
 		// Create AsyncTask to execute the request and parse the results
+		AsyncTaskUtil.addTaskInPool(
 		new RequestAsyncTask(request, conn) {
 			@Override
 			protected void onPostExecute(ServiceFilterResponse response) {
@@ -423,6 +425,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 						try {
 							// Parse the results using the given Entity class
 							String content = response.getContent();
+                            AppContext.azureLog.i("Response ----> " + content);
 							JsonElement json = new JsonParser().parse(content);
 
 							if (json.isJsonObject()) {
@@ -441,6 +444,9 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 								results = json;
 							}
 						} catch (Exception e) {
+                            if(response != null) {
+                                AppContext.azureLog.i("Error reponse ----> " + response.getContent().toString());
+                            }
 							callback.onCompleted(
 									null,
 									0,
@@ -453,11 +459,12 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 						callback.onCompleted(results, count, null, response);
 
 					} else {
+                        AppContext.azureLog.i("Error Task ----> No response");
 						callback.onCompleted(null, 0, mTaskException, response);
 					}
 				}
 			}
-		}.executeTask();
+		});
 	}
 	
 	/**
