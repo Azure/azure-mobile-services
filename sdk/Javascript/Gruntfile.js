@@ -28,6 +28,15 @@ module.exports = function(grunt) {
         'src/Utilities/PostMessageExchange.js',
         'src/Utilities/Promises.js'
       ],
+      fxos: [
+        'src/Push/Push.FxOS.js',
+        'src/Platforms/Platform.FxOS.js',
+        'src/Generated/MobileServices.Core.js',
+        'src/Transports/*.js',
+        'src/LoginUis/*.js',
+        'src/Utilities/PostMessageExchange.js',
+        'src/Utilities/Promises.js'
+      ],
       winjs: [
         'src/Push/Push.WinJS.js',
         'src/LoginUis/WebAuthBroker.js',
@@ -66,6 +75,10 @@ module.exports = function(grunt) {
         src: ['src/Require.js', 'src/Generated/Resources.js', '<%= files.core %>', '<%= files.web %>'],
         dest: 'src/Generated/MobileServices.Web.js'
       },
+      fxos: {
+          src: ['src/Require.js', 'src/Generated/Resources.js', '<%= files.core %>', '<%= files.fxos %>'],
+          dest: 'src/Generated/MobileServices.FxOS.js'
+      },
       webinternals: {
         options: {
           footer: '\n\trequire(\'InternalsVisible\');' + footer
@@ -100,6 +113,10 @@ module.exports = function(grunt) {
       web: {
         src: 'src/Generated/MobileServices.Web.js',
         dest: 'src/Generated/MobileServices.Web.min.js'
+      },
+      fxos: {
+        src: 'src/Generated/MobileServices.FxOS.js',
+        dest: 'src/Generated/MobileServices.FxOS.min.js'
       },
       winjs: {
         src: 'src/Generated/MobileServices.js',
