@@ -91,11 +91,11 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 
     // Insert Tests
 
-    public void testInsertDoesNotRemoveSystemPropertiesWhenIdIsString() throws Throwable {
+    public void testInsertRemoveSystemPropertiesWhenIdIsString() throws Throwable {
         String[] systemProperties = SystemPropertiesTestData.ValidSystemProperties;
 
         for (String systemProperty : systemProperties) {
-            insertDoesNotRemovePropertyWhenIdIsString(systemProperty);
+            insertRemovePropertyWhenIdIsString(systemProperty);
         }
     }
 
@@ -104,6 +104,63 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 
         for (String nonSystemProperty : nonSystemProperties) {
             insertDoesNotRemovePropertyWhenIdIsString(nonSystemProperty);
+        }
+    }
+
+    private void insertRemovePropertyWhenIdIsString(final String property) throws Throwable {
+        final String tableName = "MyTableName";
+
+        final String jsonTestSystemProperty = property.replace("\\", "\\\\").replace("\"", "\\\"");
+        final String responseContent = "{\"id\":\"an id\",\"String\":\"Hey\"}";
+
+        MobileServiceClient client = null;
+
+        try {
+            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        // Add a filter to handle the request and create a new json
+        // object with an id defined
+        client = client.withFilter(getTestFilter(responseContent));
+
+        client = client.withFilter(new ServiceFilter() {
+            @Override
+            public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+                String content = request.getContent();
+                JsonObject obj = new JsonParser().parse(content).getAsJsonObject();
+
+                Map<String, JsonElement> properties = new TreeMap<String, JsonElement>(String.CASE_INSENSITIVE_ORDER);
+
+                for (Entry<String, JsonElement> entry : obj.entrySet()) {
+                    properties.put(entry.getKey(), entry.getValue());
+                }
+
+                assertTrue(properties.containsKey("id"));
+                assertTrue(properties.containsKey("String"));
+                assertFalse(properties.containsKey(property));
+
+                return nextServiceFilterCallback.onNext(request);
+            }
+        });
+
+        // Create get the MobileService table
+        MobileServiceJsonTable msTable = client.getTable(tableName);
+
+        JsonObject obj = new JsonParser().parse("{\"id\":\"an id\",\"String\":\"what\",\"" + jsonTestSystemProperty + "\":\"a value\"}").getAsJsonObject();
+
+        try {
+            // Call the insert method
+            JsonObject jsonObject = msTable.insert(obj).get();
+
+            // Asserts
+            if (jsonObject == null) {
+                fail("Expected result");
+            }
+
+        } catch (Exception exception) {
+            fail(exception.getMessage());
         }
     }
 

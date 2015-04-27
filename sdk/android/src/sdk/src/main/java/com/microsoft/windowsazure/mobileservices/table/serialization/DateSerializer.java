@@ -51,21 +51,41 @@ public class DateSerializer implements JsonSerializer<Date>, JsonDeserializer<Da
      * Deserializes an ISO-8601 formatted date
      */
     public static Date deserialize(String strVal) throws ParseException {
-        // Change Z to +00:00 to adapt the string to a format
-        // that can be parsed in Java
-        String s = strVal.replace("Z", "+00:00");
-        try {
-            // Remove the ":" character to adapt the string to a
-            // format
-            // that can be parsed in Java
-            s = s.substring(0, 26) + s.substring(27);
-        } catch (IndexOutOfBoundsException e) {
-            throw new JsonParseException("Invalid length");
-        }
+
+        String s = strVal;
 
         // Parse the well-formatted date string
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSSZ");
         dateFormat.setTimeZone(TimeZone.getDefault());
+
+        try {
+
+            String[] splittedByDot = strVal.split("\\.");
+
+            if (splittedByDot.length == 1) {
+                //We need to add the miliseconds
+                s = s.replace("Z", ".000Z");
+            } else {
+
+                String miliseconds = splittedByDot[splittedByDot.length - 1].replace("Z", "");
+
+                if (miliseconds.length() == 1) {
+                    miliseconds = "00" + miliseconds;
+                } else if (miliseconds.length() == 2) {
+                    miliseconds = "0" + miliseconds;
+                }
+
+                s = splittedByDot[0] + "." + miliseconds + "Z";
+            }
+
+            // Change Z to +0000 to adapt the string to a format
+            // that can be parsed in Java
+            s = s.replace("Z", "+0000");
+
+        } catch (IndexOutOfBoundsException e) {
+            throw new JsonParseException("Invalid length");
+        }
+
         Date date = dateFormat.parse(s);
 
         return date;

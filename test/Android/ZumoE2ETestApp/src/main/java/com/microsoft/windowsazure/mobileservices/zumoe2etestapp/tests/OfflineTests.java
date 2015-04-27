@@ -31,7 +31,6 @@ import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
-import com.microsoft.windowsazure.mobileservices.notifications.MobileServicePush;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServicePreconditionFailedExceptionJson;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
@@ -389,7 +388,7 @@ public class OfflineTests extends TestGroup {
 
                     try {
                         client.getSyncContext().push().get();
-                    }catch(Exception ex2) {
+                    } catch (Exception ex2) {
 
                         requestsSentToServer += 1;
 
@@ -427,7 +426,7 @@ public class OfflineTests extends TestGroup {
                     callback.onTestComplete(this, createResultFromException(e));
                     return;
                 } catch (Throwable e) {
-                    callback.onTestComplete(this, createResultFromException((Exception)e));
+                    callback.onTestComplete(this, createResultFromException((Exception) e));
                     return;
                 }
             }
@@ -691,13 +690,13 @@ public class OfflineTests extends TestGroup {
                     Query query =
                             QueryOperations
                                     .tableName(tableName)
-                                    //.field("name").eq(testFilter)
+                                            //.field("name").eq(testFilter)
                                     .top(5);
 
 
                     MobileServiceList<PersonItem> personItems = remoteTable.execute(query).get();
 
-                    while(personItems.getNextLink() != null) {
+                    while (personItems.getNextLink() != null) {
                         log("Querying " + personItems.getNextLink());
                         personItems = remoteTable.execute(personItems.getNextLink()).get();
                     }
@@ -2020,6 +2019,7 @@ class InstaItem {
     public void setRejected(boolean mRejected) {
         this.mRejected = mRejected;
     }
+
     public String getInspectionId() {
         return mInspectionId;
     }
