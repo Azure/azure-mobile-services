@@ -284,6 +284,12 @@ class QueryBase implements Query {
         return this;
     }
 
+    @Override
+    public Query val(byte[] byteArray) {
+        QueryOperations.join(this, QueryOperations.val(byteArray));
+        return this;
+    }
+
     /**
      * *** Logical Operators *****
      */
@@ -479,6 +485,12 @@ class QueryBase implements Query {
     }
 
     @Override
+    public Query eq(byte[] byteArray) {
+        QueryOperations.join(this, QueryOperations.eq(QueryOperations.val(byteArray)));
+        return this;
+    }
+
+    @Override
     public Query ne() {
         QueryOperations.join(this, QueryOperations.ne());
         return this;
@@ -514,6 +526,11 @@ class QueryBase implements Query {
         return this;
     }
 
+    @Override
+    public Query ne(byte[] byteArray) {
+        QueryOperations.join(this, QueryOperations.ne(QueryOperations.val(byteArray)));
+        return this;
+    }
     /**
      * *** Arithmetic Operators *****
      */

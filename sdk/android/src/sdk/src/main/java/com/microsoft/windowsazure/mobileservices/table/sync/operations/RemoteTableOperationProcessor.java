@@ -146,7 +146,7 @@ public class RemoteTableOperationProcessor implements TableOperationVisitor<Json
         }
     }
 
-    public boolean ExceptionIs404NotFound(ExecutionException ex) {
+    private boolean ExceptionIs404NotFound(ExecutionException ex) {
 
         MobileServiceException mse = (MobileServiceException) ex.getCause();
 

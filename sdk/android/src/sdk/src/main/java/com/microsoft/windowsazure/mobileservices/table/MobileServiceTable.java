@@ -515,11 +515,15 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
             public void onSuccess(JsonElement result) {
                 E entity = null;
                 try {
-                    entity = parseResults(result).get(0);
-                    if (entity != null && element != null) {
-                        copyFields(entity, element);
-                        entity = element;
+
+                    if (result != null) {
+                        entity = parseResults(result).get(0);
+                        if (entity != null && element != null) {
+                            copyFields(entity, element);
+                            entity = element;
+                        }
                     }
+
                     future.set(entity);
                 } catch (Exception e) {
                     future.setException(e);

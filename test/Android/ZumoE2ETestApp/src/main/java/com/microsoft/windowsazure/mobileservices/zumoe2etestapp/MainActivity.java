@@ -35,6 +35,7 @@ import android.preference.PreferenceManager;
 import android.text.ClipboardManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -55,6 +56,8 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestGr
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestResult;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestStatus;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.Util;
+import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.log.DaylightLogger;
+import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.ClientSDKLoginTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.CustomApiTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.EnhancedPushTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.LoginTests;
@@ -66,38 +69,40 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.RoundTripT
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.SystemPropertiesTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.UpdateDeleteTests;
 
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-//import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.CustomApiTests;
+//import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.EnhancedPushTests;
 //import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.LoginTests;
 //import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.MiscTests;
+//import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.PushTests;
+//import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.OfflineTests;
+//import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.SystemPropertiesTests;
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 @SuppressWarnings("deprecation")
 public class MainActivity extends Activity {
 
-    private static final String automationPreferencesFile = "/zumo/automationPreferences.txt";
     private static Activity mInstance;
     private StringBuilder mLog;
-    private boolean mRunningAllTests;
     private SharedPreferences mPrefManager;
-    private JsonObject mAutomationPreferences;
+    private Map<String, String> mAutomationPreferences;
     private ListView mTestCaseList;
     private Spinner mTestGroupSpinner;
 
@@ -122,33 +127,20 @@ public class MainActivity extends Activity {
 
         mPrefManager = PreferenceManager.getDefaultSharedPreferences(this);
 
-        try {
-            String sdCard = Environment.getExternalStorageDirectory().getPath();
-            FileInputStream fis = new FileInputStream(sdCard + automationPreferencesFile);
-            InputStreamReader isr = new InputStreamReader(fis);
-            BufferedReader br = new BufferedReader(isr);
-            StringBuilder sb = new StringBuilder();
-            String line = br.readLine();
-            while (line != null) {
-                sb.append(line);
-                sb.append('\n');
-                line = br.readLine();
-            }
-
-            JsonElement prefs = new JsonParser().parse(sb.toString());
-            if (prefs.isJsonObject()) {
-                this.mAutomationPreferences = prefs.getAsJsonObject();
-            }
-
-            br.close();
-            isr.close();
-            fis.close();
-
-            // Remove the file so that it doesn't get picked up for manual runs
-            File toBeDeleted = new File(sdCard + automationPreferencesFile);
-            toBeDeleted.delete();
-        } catch (IOException e) {
-            e.printStackTrace();
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            mAutomationPreferences = new HashMap<String, String>();
+            mAutomationPreferences.put("pref_run_unattended", extras.getString("pref_run_unattended", ""));
+            mAutomationPreferences.put("pref_mobile_service_url", extras.getString("pref_mobile_service_url", ""));
+            mAutomationPreferences.put("pref_mobile_service_key", extras.getString("pref_mobile_service_key", ""));
+            mAutomationPreferences.put("pref_google_userid", extras.getString("pref_google_userid", ""));
+            mAutomationPreferences.put("pref_google_webapp_clientid", extras.getString("pref_google_webapp_clientid", ""));
+            mAutomationPreferences.put("pref_master_run_id", extras.getString("pref_master_run_id", ""));
+            mAutomationPreferences.put("pref_runtime_version", extras.getString("pref_runtime_version", ""));
+            mAutomationPreferences.put("pref_daylight_client_id", extras.getString("pref_client_id", ""));
+            mAutomationPreferences.put("pref_daylight_client_secret", extras.getString("pref_client_secret", ""));
+            mAutomationPreferences.put("pref_daylight_url", extras.getString("pref_daylight_url", ""));
+            mAutomationPreferences.put("pref_daylight_project", extras.getString("pref_daylight_project", ""));
         }
 
         mTestCaseList = (ListView) findViewById(R.id.testCaseList);
@@ -172,6 +164,8 @@ public class MainActivity extends Activity {
             }
         });
 
+        ClientSDKLoginTests.mainActivity = this;
+
         PushTests.mainActivity = this;
         EnhancedPushTests.mainActivity = this;
 
@@ -188,53 +182,71 @@ public class MainActivity extends Activity {
     @SuppressWarnings("unchecked")
     private void refreshTestGroupsAndLog() {
         mLog = new StringBuilder();
-        mRunningAllTests = false;
 
-        ArrayAdapter<TestGroup> adapter = (ArrayAdapter<TestGroup>) mTestGroupSpinner.getAdapter();
-        adapter.clear();
-        adapter.add(new RoundTripTests());
-        adapter.add(new QueryTests());
-        adapter.add(new UpdateDeleteTests());
-        adapter.add(new LoginTests());
-        adapter.add(new MiscTests());
-        adapter.add(new PushTests());
-        adapter.add(new CustomApiTests());
-        adapter.add(new SystemPropertiesTests());
-        adapter.add(new EnhancedPushTests());
-        adapter.add(new OfflineTests());
+        Thread thread = new Thread() {
 
-        ArrayList<TestCase> allTests = new ArrayList<TestCase>();
-        ArrayList<TestCase> allUnattendedTests = new ArrayList<TestCase>();
-        for (int i = 0; i < adapter.getCount(); i++) {
-            TestGroup group = adapter.getItem(i);
-            allTests.add(Util.createSeparatorTest("Start of group: " + group.getName()));
-            allUnattendedTests.add(Util.createSeparatorTest("Start of group: " + group.getName()));
+            @Override
+            public void run() {
 
-            List<TestCase> testsForGroup = group.getTestCases();
-            for (TestCase test : testsForGroup) {
-                allTests.add(test);
-                if (test.canRunUnattended()) {
-                    allUnattendedTests.add(test);
-                }
+                final boolean isNetBackend = IsNetBackend();
+
+                runOnUiThread(new Runnable() {
+
+                    @Override
+                    public void run() {
+
+                        ArrayAdapter<TestGroup> adapter = (ArrayAdapter<TestGroup>) mTestGroupSpinner.getAdapter();
+                        adapter.clear();
+                        adapter.add(new RoundTripTests());
+                        adapter.add(new QueryTests());
+                        adapter.add(new UpdateDeleteTests());
+                        //adapter.add(new ClientSDKLoginTests());
+                        adapter.add(new LoginTests(isNetBackend));
+                        adapter.add(new MiscTests());
+                        // adapter.add(new PushTests());
+                        adapter.add(new CustomApiTests());
+                        adapter.add(new SystemPropertiesTests(isNetBackend));
+                        adapter.add(new EnhancedPushTests(isNetBackend));
+                        adapter.add(new OfflineTests());
+
+                        ArrayList<Pair<TestCase, String>> allTests = new ArrayList<Pair<TestCase, String>>();
+                        ArrayList<Pair<TestCase, String>> allUnattendedTests = new ArrayList<Pair<TestCase, String>>();
+                        for (int i = 0; i < adapter.getCount(); i++) {
+                            TestGroup group = adapter.getItem(i);
+                            allTests.add(new Pair<TestCase, String>(Util.createSeparatorTest("Start of group: " + group.getName()), "Separator"));
+                            allUnattendedTests.add(new Pair<TestCase, String>(Util.createSeparatorTest("Start of group: " + group.getName()), "Separator"));
+
+                            List<TestCase> testsForGroup = group.getTestCases();
+                            for (TestCase test : testsForGroup) {
+                                allTests.add(new Pair<TestCase, String>(test, group.getName()));
+                                if (test.canRunUnattended()) {
+                                    allUnattendedTests.add(new Pair<TestCase, String>(test, group.getName()));
+                                }
+                            }
+                            allTests.add(new Pair<TestCase, String>(Util.createSeparatorTest("----" + group.getName() + "----"), "Separator"));
+                            allUnattendedTests.add(new Pair<TestCase, String>(Util.createSeparatorTest("----" + group.getName() + "----"), "Separator"));
+                        }
+
+                        int unattendedTestsIndex = adapter.getCount();
+
+                        adapter.add(new CompositeTestGroup(TestGroup.AllUnattendedTestsGroupName, allUnattendedTests));
+                        adapter.add(new CompositeTestGroup(TestGroup.AllTestsGroupName, allTests));
+
+                        if (shouldRunUnattended()) {
+                            mTestGroupSpinner.setSelection(unattendedTestsIndex);
+                            selectTestGroup(unattendedTestsIndex);
+                            changeCheckAllTests(true);
+                            runTests();
+                        } else {
+                            mTestGroupSpinner.setSelection(0);
+                            selectTestGroup(0);
+                        }
+                    }
+                });
             }
-            allTests.add(Util.createSeparatorTest("------------------"));
-            allUnattendedTests.add(Util.createSeparatorTest("------------------"));
-        }
+        };
 
-        int unattendedTestsIndex = adapter.getCount();
-
-        adapter.add(new CompositeTestGroup(TestGroup.AllUnattendedTestsGroupName, allUnattendedTests));
-        adapter.add(new CompositeTestGroup(TestGroup.AllTestsGroupName, allTests));
-
-        if (shouldRunUnattended()) {
-            mTestGroupSpinner.setSelection(unattendedTestsIndex);
-            selectTestGroup(unattendedTestsIndex);
-            changeCheckAllTests(true);
-            runTests();
-        } else {
-            mTestGroupSpinner.setSelection(0);
-            selectTestGroup(0);
-        }
+        thread.start();
     }
 
     @Override
@@ -278,7 +290,6 @@ public class MainActivity extends Activity {
                 final WebView webView = new WebView(this);
 
                 String logContent = TextUtils.htmlEncode(mLog.toString()).replace("\n", "<br />");
-                final boolean isLogForAllGroups = mRunningAllTests;
                 String logHtml = "<html><body><pre>" + logContent + "</pre></body></html>";
                 webView.loadData(logHtml, "text/html", "utf-8");
 
@@ -291,16 +302,6 @@ public class MainActivity extends Activity {
                     }
                 });
 
-                final String postContent = mLog.toString();
-
-                logDialogBuilder.setNeutralButton("Post data", new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        postLogs(postContent, isLogForAllGroups);
-                    }
-                });
-
                 logDialogBuilder.setView(webView);
 
                 logDialogBuilder.create().show();
@@ -309,42 +310,6 @@ public class MainActivity extends Activity {
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    private void postLogs(final String logs, final boolean isLogForAllGroups) {
-        new AsyncTask<Void, Void, Void>() {
-
-            @Override
-            protected Void doInBackground(Void... params) {
-                try {
-                    String url = getLogPostURL();
-                    if (url != null && url.trim() != "") {
-                        url = url + "?platform=android";
-                        if (isLogForAllGroups) {
-                            url = url + "&allTests=true";
-                        }
-                        String clientVersion = Util.getGlobalTestParameters().get(TestGroup.ClientVersionKey);
-                        String runtimeVersion = Util.getGlobalTestParameters().get(TestGroup.ServerVersionKey);
-                        if (clientVersion != null) {
-                            url = url + "&clientVersion=" + clientVersion;
-                        }
-                        if (runtimeVersion != null) {
-                            url = url + "&runtimeVersion=" + runtimeVersion;
-                        }
-                        HttpPost post = new HttpPost();
-                        post.setEntity(new StringEntity(logs, MobileServiceClient.UTF8_ENCODING));
-
-                        post.setURI(new URI(url));
-
-                        new DefaultHttpClient().execute(post);
-                    }
-                } catch (Exception e) {
-                    // Wasn't able to post the data. Do nothing
-                }
-
-                return null;
-            }
-        }.execute();
     }
 
     private void changeCheckAllTests(boolean check) {
@@ -381,9 +346,6 @@ public class MainActivity extends Activity {
 
         final TestGroup group = (TestGroup) mTestGroupSpinner.getSelectedItem();
         logWithTimestamp(new Date(), "Tests for group \'" + group.getName() + "\'");
-        if (group.getName().startsWith(TestGroup.AllTestsGroupName)) {
-            mRunningAllTests = true;
-        }
 
         logSeparator();
 
@@ -429,9 +391,27 @@ public class MainActivity extends Activity {
                         log("TEST GROUP COMPLETED", group.getName() + " - " + group.getStatus().toString());
                         logSeparator();
 
+                        if (group.getName().startsWith(TestGroup.AllTestsGroupName)) {
+
+                            List<TestCase> tests = new ArrayList<TestCase>();
+
+                            for (TestResult result : results) {
+                                tests.add(result.getTestCase());
+                            }
+
+                            DaylightLogger logger = new DaylightLogger(getDaylightURL(), getDaylightProject(), getDaylightClientId(),
+                                    getDaylightClientSecret(), getDaylightRuntime(), getDaylightRunId());
+                            try {
+                                logger.reportResultsToDaylight(group.getFailedTestCount(), group.getStartTime(), group.getEndTime(), tests,
+                                        group.getSourceMap());
+                            } catch (Throwable e) {
+                                log(e.getMessage());
+                            }
+                        }
+
                         if (shouldRunUnattended()) {
-                            String logContent = mLog.toString();
-                            postLogs(logContent, true);
+                            // String logContent = mLog.toString();
+                            // postLogs(logContent, true);
 
                             boolean passed = true;
                             for (TestResult result : results) {
@@ -443,9 +423,10 @@ public class MainActivity extends Activity {
 
                             try {
                                 String sdCard = Environment.getExternalStorageDirectory().getPath();
-                                FileOutputStream fos = new FileOutputStream(sdCard + "/zumo/done.txt");
+                                FileOutputStream fos = new FileOutputStream(sdCard + "/done_android_e2e.txt");
                                 OutputStreamWriter osw = new OutputStreamWriter(fos);
                                 BufferedWriter bw = new BufferedWriter(osw);
+                                bw.write("Completed successfully.\n");
                                 bw.write(passed ? "PASSED" : "FAILED");
                                 bw.write("\n");
                                 bw.close();
@@ -465,7 +446,9 @@ public class MainActivity extends Activity {
                             while (e != null) {
                                 sb.append(e.getClass().getSimpleName() + ": ");
                                 sb.append(e.getMessage());
-                                sb.append(" // ");
+                                sb.append("\n");
+                                sb.append(Log.getStackTraceString(e));
+                                sb.append("\n\n");
                                 e = e.getCause();
                             }
 
@@ -560,19 +543,47 @@ public class MainActivity extends Activity {
         return this.getPreference(Constants.PREFERENCE_MOBILE_SERVICE_KEY);
     }
 
-    private String getLogPostURL() {
-        return this.getPreference(Constants.PREFERENCE_LOG_POST_URL);
+    private String getDaylightURL() {
+        return this.getPreference(Constants.PREFERENCE_DAYLIGHT_URL);
+    }
+
+    private String getDaylightProject() {
+        return this.getPreference(Constants.PREFERENCE_DAYLIGHT_PROJECT);
+    }
+
+    private String getDaylightClientId() {
+        return this.getPreference(Constants.PREFERENCE_DAYLIGHT_CLIENT_ID);
+    }
+
+    private String getDaylightClientSecret() {
+        return this.getPreference(Constants.PREFERENCE_DAYLIGHT_CLIENT_SECRET);
+    }
+
+    private String getDaylightRuntime() {
+        return this.getPreference(Constants.PREFERENCE_RUNTIME_VERSION);
+    }
+
+    private String getDaylightRunId() {
+        return this.getPreference(Constants.PREFERENCE_MASTER_RUN_ID);
+    }
+
+    public String getGoogleUserId() {
+        return this.getPreference(Constants.PREFERENCE_GOOGLE_USERID);
     }
 
     public String getGCMSenderId() {
         return this.getPreference(Constants.PREFERENCE_GCM_SENDER_ID);
     }
 
+    public String getGoogleWebAppClientId() {
+        return this.getPreference(Constants.PREFERENCE_GOOGLE_WEBAPP_CLIENTID);
+    }
+
     private boolean shouldRunUnattended() {
         if (mAutomationPreferences != null) {
-            if (mAutomationPreferences.has("pref_run_unattended")) {
-                JsonElement runUnattended = mAutomationPreferences.get("pref_run_unattended");
-                return runUnattended.getAsBoolean();
+            if (mAutomationPreferences.containsKey("pref_run_unattended")) {
+                String runUnattended = mAutomationPreferences.get("pref_run_unattended");
+                return runUnattended.equals("true");
             }
         }
 
@@ -580,8 +591,8 @@ public class MainActivity extends Activity {
     }
 
     private String getPreference(String key) {
-        if (mAutomationPreferences != null && mAutomationPreferences.has(key)) {
-            return mAutomationPreferences.get(key).getAsString();
+        if (mAutomationPreferences != null && mAutomationPreferences.containsKey(key)) {
+            return mAutomationPreferences.get(key);
         } else {
             return mPrefManager.getString(key, "");
         }
@@ -618,5 +629,40 @@ public class MainActivity extends Activity {
         builder.setMessage(message);
         builder.setTitle(title);
         builder.create().show();
+    }
+
+    private boolean IsNetBackend() {
+
+        try {
+
+            HttpClient httpclient = new DefaultHttpClient();
+            HttpResponse response = httpclient.execute(new HttpGet(getMobileServiceURL() + "api/runtimeinfo"));
+            String runtimeType;
+
+            StatusLine statusLine = response.getStatusLine();
+            if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                response.getEntity().writeTo(out);
+                String responseString = out.toString();
+
+                JsonObject jsonResult = new JsonParser().parse(responseString).getAsJsonObject();
+
+                runtimeType = jsonResult.get("runtime").getAsJsonObject().get("type").getAsString();
+
+                out.close();
+            } else {
+                response.getEntity().getContent().close();
+                throw new IOException(statusLine.getReasonPhrase());
+            }
+
+            if (runtimeType.equals(".NET")) {
+                return true;
+            }
+
+            return false;
+        }
+        catch(Exception ex) {
+            return false;
+        }
     }
 }

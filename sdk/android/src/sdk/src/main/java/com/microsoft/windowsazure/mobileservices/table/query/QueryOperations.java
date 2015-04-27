@@ -138,6 +138,23 @@ public class QueryOperations {
     }
 
     /**
+     * Creates a Query representing a byte array
+     *
+     * @param byteArray the date to represent
+     * @return the Query
+     */
+    public static Query val(byte[] byteArray) {
+        Query query = new QueryBase();
+
+        ConstantNode constantNode = new ConstantNode();
+        constantNode.setValue(byteArray);
+
+        query.setQueryNode(constantNode);
+
+        return query;
+    }
+
+    /**
      * Group query as a single argument.
      *
      * @param otherQuery
