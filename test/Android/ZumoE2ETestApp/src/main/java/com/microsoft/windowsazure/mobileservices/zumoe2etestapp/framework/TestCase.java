@@ -23,6 +23,7 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public abstract class TestCase {
     private String mName;
@@ -42,6 +43,8 @@ public abstract class TestCase {
     private Date mStartTime;
 
     private Date mEndTime;
+
+    private String mFileName;
 
     public TestCase(String name) {
         mEnabled = false;
@@ -124,6 +127,9 @@ public abstract class TestCase {
                 @Override
                 public void onTestComplete(TestCase test, TestResult result) {
                     thisTest.mEndTime = new Date();
+                    if (result != null && result.getTestCase() == null) {
+                        result.setTestCase(thisTest);
+                    }
                     callback.onTestComplete(test, result);
                 }
 
@@ -166,8 +172,7 @@ public abstract class TestCase {
 
     public TestResult createResultFromException(TestResult result, Exception e) {
 
-        if (e instanceof java.util.concurrent.ExecutionException ||
-                e instanceof InterruptedException) {
+        if (e instanceof ExecutionException || e instanceof InterruptedException) {
 
             e = (Exception) e.getCause();
         }
@@ -202,5 +207,13 @@ public abstract class TestCase {
 
     public void setExpectedExceptionClass(Class<?> expectedExceptionClass) {
         mExpectedExceptionClass = expectedExceptionClass;
+    }
+
+    public String getFileName() {
+        return mFileName;
+    }
+
+    public void setFileName(String fileName) {
+        mFileName = fileName;
     }
 }

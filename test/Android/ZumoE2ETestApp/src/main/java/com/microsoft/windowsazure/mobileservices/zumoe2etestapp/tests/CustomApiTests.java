@@ -69,11 +69,11 @@ import java.util.TimeZone;
 
 public class CustomApiTests extends TestGroup {
 
-    private static final String PUBLIC_API_NAME = "public";
+    private static final String PUBLIC_API_NAME = "PublicPermission";
     private static final String INEXISTENT_API_NAME = "InexistenApi";
-    private static final String APP_API_NAME = "application";
-    private static final String USER_API_NAME = "user";
-    private static final String ADMIN_API_NAME = "admin";
+    private static final String APP_API_NAME = "ApplicationPermission";
+    private static final String USER_API_NAME = "UserPermission";
+    private static final String ADMIN_API_NAME = "AdminPermission";
     private static final String MOVIEFINDER_API_NAME = "movieFinder";
     private static final String PATCH_METHOD_NAME = "PATCH";
     private Map<ApiPermissions, String> apiNames;
@@ -81,7 +81,7 @@ public class CustomApiTests extends TestGroup {
     public CustomApiTests() {
         super("Custom API tests");
 
-        apiNames = new HashMap<ApiPermissions, String>();
+        apiNames = new HashMap<CustomApiTests.ApiPermissions, String>();
         apiNames.put(ApiPermissions.Admin, ADMIN_API_NAME);
         apiNames.put(ApiPermissions.User, USER_API_NAME);
         apiNames.put(ApiPermissions.Application, APP_API_NAME);
@@ -105,8 +105,6 @@ public class CustomApiTests extends TestGroup {
         this.addTest(apiAuthenticatedTest);
         this.addTest(LoginTests.createLogoutTest());
 
-        this.addTest(QueryTests.createPopulateStringIdTest());
-
         for (TypedTestType testType : TypedTestType.values()) {
             this.addTest(createTypedApiTest(rndGen, testType));
         }
@@ -129,7 +127,6 @@ public class CustomApiTests extends TestGroup {
         this.addTest(invokeJsonApiOverload4WithCallbackTest());
         this.addTest(invokeJsonApiOverload4WithCallbackFailTest());
 
-        this.addTest(invokeTypedApiOverload1WithCallbackTest());
         this.addTest(invokeTypedApiOverload1WithCallbackFailTest());
 
         this.addTest(invokeTypedApiOverload2WithCallbackTest(rndGen));
@@ -495,11 +492,10 @@ public class CustomApiTests extends TestGroup {
                                 orderBy = null;
                                 break;
                             case 1:
-                                orderBy = "duration";
-                                break;
-
-                            case 2:
                                 orderBy = "title";
+                                break;
+                            case 2:
+                                orderBy = "title"; //duration
                                 break;
                         }
 
@@ -937,7 +933,7 @@ public class CustomApiTests extends TestGroup {
     @SuppressWarnings("deprecation")
     private TestCase invokeTypedApiOverload1WithCallbackFailTest() {
 
-        String name = String.format("Typed With Callback - Overload 1");
+        String name = String.format("Typed With Callback - Overload 1 - Fail");
 
         TestCase test = new TestCase(name) {
             TestExecutionCallback mCallback;
@@ -1034,7 +1030,7 @@ public class CustomApiTests extends TestGroup {
     @SuppressWarnings("deprecation")
     private TestCase invokeTypedApiOverload2WithCallbackFailTest(final Random rndGen) {
 
-        String name = String.format("Typed With Callback - Overload 2");
+        String name = String.format("Typed With Callback - Overload 2 - Fail");
 
         TestCase test = new TestCase(name) {
             TestExecutionCallback mCallback;
@@ -1135,7 +1131,7 @@ public class CustomApiTests extends TestGroup {
     @SuppressWarnings("deprecation")
     private TestCase invokeTypedApiOverload3WithCallbackFailTest(final Random rndGen) {
 
-        String name = String.format("Typed With Callback - Overload 3");
+        String name = String.format("Typed With Callback - Overload 3 - Fail");
 
         TestCase test = new TestCase(name) {
             TestExecutionCallback mCallback;
@@ -1238,7 +1234,7 @@ public class CustomApiTests extends TestGroup {
     @SuppressWarnings("deprecation")
     private TestCase invokeTypedApiOverload4WithCallbackFailTest(final Random rndGen) {
 
-        String name = String.format("Typed With Callback - Overload 4");
+        String name = String.format("Typed With Callback - Overload 4 - Fail");
 
         TestCase test = new TestCase(name) {
             TestExecutionCallback mCallback;
@@ -1293,7 +1289,6 @@ public class CustomApiTests extends TestGroup {
 
         TestCase test = new TestCase(name) {
             TestExecutionCallback mCallback;
-
             TestResult mResult;
 
             @Override

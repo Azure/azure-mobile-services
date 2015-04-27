@@ -45,7 +45,7 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestGr
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestResult;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestStatus;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.Util;
-import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.RoundTripTableElement;
+import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.IntIdRoundTripTableElement;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.StringIdRoundTripTableSoftDeleteElement;
 
 import java.util.HashMap;
@@ -55,11 +55,8 @@ import java.util.concurrent.ExecutionException;
 
 public class UpdateDeleteTests extends TestGroup {
 
-    protected static final String ROUNDTRIP_TABLE_NAME = "droidRoundTripTable";
-
-    protected static final String STRING_ID_ROUNDTRIP_TABLE_NAME = "stringIdRoundTripTable";
-
-    protected static final String STRING_ID_ROUNDTRIP_SOFT_DELETE_TABLE_NAME = "stringIdRoundTripSoftDeleteTable";
+    protected static final String ROUNDTRIP_TABLE_NAME = "IntIdRoundTripTable";
+    protected static final String STRING_ID_ROUNDTRIP_SOFT_DELETE_TABLE_NAME = "StringIdRoundTripTableSoftDelete";
 
     public UpdateDeleteTests() {
         super("Insert/Update/Delete Tests");
@@ -68,43 +65,39 @@ public class UpdateDeleteTests extends TestGroup {
 
         // typed update
 
-        this.addTest(createTypedUpdateTest("Update typed item", new RoundTripTableElement(rndGen), new RoundTripTableElement(rndGen), true, null));
+        this.addTest(createTypedUpdateTest("Update typed item", new IntIdRoundTripTableElement(rndGen), new IntIdRoundTripTableElement(rndGen), true, null));
 
-        this.addTest(createTypedUpdateTest("Update typed item, setting values to null", new RoundTripTableElement(rndGen), new RoundTripTableElement(false),
-                true, null));
+        this.addTest(createTypedUpdateTest("Update typed item, setting values to null", new IntIdRoundTripTableElement(rndGen), new IntIdRoundTripTableElement(
+                false), true, null));
 
-        RoundTripTableElement elem1 = new RoundTripTableElement(rndGen);
-        RoundTripTableElement elem2 = new RoundTripTableElement(rndGen);
-        elem2.id = 1000000000;
+        IntIdRoundTripTableElement elem1 = new IntIdRoundTripTableElement(rndGen);
+        IntIdRoundTripTableElement elem2 = new IntIdRoundTripTableElement(rndGen);
+        elem2.id = 1000000000L;
 
         this.addTest(createTypedUpdateTest("(Neg) Update typed item, non-existing item id", elem1, elem2, false, MobileServiceException.class));
 
-        elem1 = new RoundTripTableElement(rndGen);
-        elem2 = new RoundTripTableElement(rndGen);
-        elem2.id = 0;
+        elem1 = new IntIdRoundTripTableElement(rndGen);
+        elem2 = new IntIdRoundTripTableElement(rndGen);
+        elem2.id = 0L;
 
         this.addTest(createTypedUpdateTest("(Neg) Update typed item, id = 0", elem1, elem2, false, IllegalArgumentException.class));
 
         // untyped update
         JsonParser parser = new JsonParser();
 
-        String toInsertJsonString = "{" + "\"string1\":\"hello\"," + "\"bool1\":true," + "\"int1\":-1234," + "\"double1\":123.45," + "\"long1\":1234,"
-                + "\"date1\":\"2012-12-13T09:23:12.000Z\"," + "\"complexType1\":[{\"Name\":\"John Doe\",\"Age\":33}, null],"
-                + "\"complexType2\":{\"Name\":\"John Doe\",\"Age\":33,\"Friends\":[\"Jane\"]}" + "}";
+        String toInsertJsonString = "{" + "\"name\":\"hello\"," + "\"bool\":true," + "\"integer\":-1234," + "\"number\":123.45,"
+                + "\"date1\":\"2012-12-13T09:23:12.000Z\"" + "}";
 
-        String toUpdateJsonString = "{" + "\"string1\":\"world\"," + "\"bool1\":false," + "\"int1\":9999," + "\"double1\":888.88," + "\"long1\":77777777,"
-                + "\"date1\":\"1999-05-23T19:15:54.000Z\"," + "\"complexType1\":[{\"Name\":\"Jane Roe\",\"Age\":23}, null],"
-                + "\"complexType2\":{\"Name\":\"Jane Roe\",\"Age\":23,\"Friends\":[\"John\"]}" + "}";
+        String toUpdateJsonString = "{" + "\"name\":\"world\"," + "\"bool\":false," + "\"integer\":9999," + "\"number\":888.88,"
+                + "\"date1\":\"1999-05-23T19:15:54.000Z\"" + "}";
 
-        this.addTest(createUntypedUpdateTest("Update typed item", parser.parse(toInsertJsonString).getAsJsonObject(), parser.parse(toUpdateJsonString)
+        this.addTest(createUntypedUpdateTest("Update untyped item", parser.parse(toInsertJsonString).getAsJsonObject(), parser.parse(toUpdateJsonString)
                 .getAsJsonObject(), true, null));
 
         JsonObject toUpdate = parser.parse(toUpdateJsonString).getAsJsonObject();
-        toUpdate.add("string1", null);
-        toUpdate.add("bool1", null);
-        toUpdate.add("complexType2", null);
-        toUpdate.add("complexType1", null);
-        toUpdate.add("int1", null);
+        toUpdate.add("name", null);
+        toUpdate.add("bool", null);
+        toUpdate.add("integer", null);
 
         this.addTest(createUntypedUpdateTest("Update untyped item, setting values to null", parser.parse(toInsertJsonString).getAsJsonObject(),
                 cloneJson(toUpdate), true, null));
@@ -140,8 +133,8 @@ public class UpdateDeleteTests extends TestGroup {
         this.addTest(createSoftDeletePullTest("Soft Delete - Pull untyped item", false, null));
 
         // With Callbacks
-        this.addTest(createTypedUpdateWithCallbackTest("With Callback - Update typed item", new RoundTripTableElement(rndGen),
-                new RoundTripTableElement(rndGen), true, null));
+        this.addTest(createTypedUpdateWithCallbackTest("With Callback - Update typed item", new IntIdRoundTripTableElement(rndGen),
+                new IntIdRoundTripTableElement(rndGen), true, null));
         this.addTest(createUntypedUpdateWithCallbackTest("With Callback - Update untyped item, setting values to null", parser.parse(toInsertJsonString)
                 .getAsJsonObject(), cloneJson(toUpdate), true, null));
 
@@ -154,7 +147,7 @@ public class UpdateDeleteTests extends TestGroup {
         return new JsonParser().parse(json.toString()).getAsJsonObject();
     }
 
-    private TestCase createTypedUpdateTest(String name, final RoundTripTableElement itemToInsert, final RoundTripTableElement itemToUpdate,
+    private TestCase createTypedUpdateTest(String name, final IntIdRoundTripTableElement itemToInsert, final IntIdRoundTripTableElement itemToUpdate,
                                            final boolean setUpdatedId, final Class<?> expectedExceptionClass) {
 
         final TestCase test = new TestCase() {
@@ -162,7 +155,7 @@ public class UpdateDeleteTests extends TestGroup {
             @Override
             protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
 
-                final MobileServiceTable<RoundTripTableElement> table = client.getTable(ROUNDTRIP_TABLE_NAME, RoundTripTableElement.class);
+                final MobileServiceTable<IntIdRoundTripTableElement> table = client.getTable(ROUNDTRIP_TABLE_NAME, IntIdRoundTripTableElement.class);
                 final TestCase testCase = this;
 
                 log("insert item");
@@ -174,7 +167,7 @@ public class UpdateDeleteTests extends TestGroup {
 
                 try {
 
-                    RoundTripTableElement insertedItem = table.insert(itemToInsert).get();
+                    IntIdRoundTripTableElement insertedItem = table.insert(itemToInsert).get();
 
                     if (setUpdatedId) {
                         log("update item id " + insertedItem.id);
@@ -183,11 +176,11 @@ public class UpdateDeleteTests extends TestGroup {
 
                     log("update the item");
 
-                    RoundTripTableElement updatedItem = table.update(itemToUpdate).get();
+                    IntIdRoundTripTableElement updatedItem = table.update(itemToUpdate).get();
 
                     log("lookup item");
 
-                    RoundTripTableElement lookedUpItem = table.lookUp(updatedItem.id).get();
+                    IntIdRoundTripTableElement lookedUpItem = table.lookUp(updatedItem.id).get();
 
                     log("verify items are equal");
                     if (Util.compare(updatedItem, lookedUpItem)) { // check
@@ -356,7 +349,7 @@ public class UpdateDeleteTests extends TestGroup {
 
                             String message = "An item with id '" + entity.id + "' does not exist.";
 
-                            if (!ex.getMessage().contains(message)) {
+                            if (!ex.getMessage().contains(message) && !ex.getMessage().contains("404")) {
                                 createResultFromException(result, new ExpectedValueException(message, ex.getMessage()));
                             }
                         }
@@ -421,7 +414,7 @@ public class UpdateDeleteTests extends TestGroup {
 
                         String message = "An item with id '" + entity.id + "' does not exist.";
 
-                        if (!ex.getMessage().contains(message)) {
+                        if (!ex.getMessage().contains(message) && !ex.getMessage().contains("404")) {
                             createResultFromException(result, new ExpectedValueException(message, ex.getMessage()));
                         }
                     }
@@ -563,7 +556,7 @@ public class UpdateDeleteTests extends TestGroup {
 
                         String message = "An item with id '" + element.id + "' does not exist.";
 
-                        if (!ex.getMessage().contains(message)) {
+                        if (!ex.getMessage().contains(message) && !ex.getMessage().contains("404")) {
                             createResultFromException(result, new ExpectedValueException(message, ex.getMessage()));
                         }
                     }
@@ -613,8 +606,8 @@ public class UpdateDeleteTests extends TestGroup {
 
             @Override
             protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
-                RoundTripTableElement element = new RoundTripTableElement(new Random());
-                final MobileServiceTable<RoundTripTableElement> typedTable = client.getTable(ROUNDTRIP_TABLE_NAME, RoundTripTableElement.class);
+                IntIdRoundTripTableElement element = new IntIdRoundTripTableElement(new Random());
+                final MobileServiceTable<IntIdRoundTripTableElement> typedTable = client.getTable(ROUNDTRIP_TABLE_NAME, IntIdRoundTripTableElement.class);
                 final MobileServiceJsonTable jsonTable = client.getTable(ROUNDTRIP_TABLE_NAME);
 
                 final TestResult result = new TestResult();
@@ -627,11 +620,11 @@ public class UpdateDeleteTests extends TestGroup {
 
                 try {
 
-                    RoundTripTableElement entity = typedTable.insert(element).get();
+                    IntIdRoundTripTableElement entity = typedTable.insert(element).get();
 
                     if (useFakeId) {
                         log("use fake id");
-                        entity.id = 1000000000;
+                        entity.id = 1000000000L;
                     }
 
                     if (!includeId) {
@@ -666,24 +659,24 @@ public class UpdateDeleteTests extends TestGroup {
     }
 
     @SuppressWarnings("deprecation")
-    private TestCase createTypedUpdateWithCallbackTest(String name, final RoundTripTableElement itemToInsert, final RoundTripTableElement itemToUpdate,
-                                                       final boolean setUpdatedId, final Class<?> expectedExceptionClass) {
+    private TestCase createTypedUpdateWithCallbackTest(String name, final IntIdRoundTripTableElement itemToInsert,
+                                                       final IntIdRoundTripTableElement itemToUpdate, final boolean setUpdatedId, final Class<?> expectedExceptionClass) {
 
         final TestCase test = new TestCase() {
 
             @Override
             protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
 
-                final MobileServiceTable<RoundTripTableElement> table = client.getTable(ROUNDTRIP_TABLE_NAME, RoundTripTableElement.class);
+                final MobileServiceTable<IntIdRoundTripTableElement> table = client.getTable(ROUNDTRIP_TABLE_NAME, IntIdRoundTripTableElement.class);
                 final TestCase testCase = this;
 
                 log("insert item");
                 itemToInsert.id = null;
 
-                table.insert(itemToInsert, new TableOperationCallback<RoundTripTableElement>() {
+                table.insert(itemToInsert, new TableOperationCallback<IntIdRoundTripTableElement>() {
 
                     @Override
-                    public void onCompleted(final RoundTripTableElement insertedItem, Exception exception, ServiceFilterResponse response) {
+                    public void onCompleted(final IntIdRoundTripTableElement insertedItem, Exception exception, ServiceFilterResponse response) {
                         final TestResult result = new TestResult();
                         result.setTestCase(testCase);
                         result.setStatus(TestStatus.Passed);
@@ -696,18 +689,18 @@ public class UpdateDeleteTests extends TestGroup {
                             }
 
                             log("update the item");
-                            table.update(itemToUpdate, new TableOperationCallback<RoundTripTableElement>() {
+                            table.update(itemToUpdate, new TableOperationCallback<IntIdRoundTripTableElement>() {
 
                                 @Override
-                                public void onCompleted(final RoundTripTableElement updatedItem, Exception exception, ServiceFilterResponse response) {
+                                public void onCompleted(final IntIdRoundTripTableElement updatedItem, Exception exception, ServiceFilterResponse response) {
 
                                     if (exception == null) { // if it was ok
 
                                         log("lookup item");
-                                        table.lookUp(updatedItem.id, new TableOperationCallback<RoundTripTableElement>() {
+                                        table.lookUp(updatedItem.id, new TableOperationCallback<IntIdRoundTripTableElement>() {
 
                                             @Override
-                                            public void onCompleted(RoundTripTableElement lookedUpItem, Exception exception, ServiceFilterResponse response) {
+                                            public void onCompleted(IntIdRoundTripTableElement lookedUpItem, Exception exception, ServiceFilterResponse response) {
                                                 if (exception == null) { // if
                                                     // it
                                                     // was
@@ -898,16 +891,16 @@ public class UpdateDeleteTests extends TestGroup {
 
             @Override
             protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
-                RoundTripTableElement element = new RoundTripTableElement(new Random());
-                final MobileServiceTable<RoundTripTableElement> typedTable = client.getTable(ROUNDTRIP_TABLE_NAME, RoundTripTableElement.class);
+                IntIdRoundTripTableElement element = new IntIdRoundTripTableElement(new Random());
+                final MobileServiceTable<IntIdRoundTripTableElement> typedTable = client.getTable(ROUNDTRIP_TABLE_NAME, IntIdRoundTripTableElement.class);
                 final MobileServiceJsonTable jsonTable = client.getTable(ROUNDTRIP_TABLE_NAME);
 
                 final TestCase testCase = this;
                 log("insert item");
-                typedTable.insert(element, new TableOperationCallback<RoundTripTableElement>() {
+                typedTable.insert(element, new TableOperationCallback<IntIdRoundTripTableElement>() {
 
                     @Override
-                    public void onCompleted(RoundTripTableElement entity, Exception exception, ServiceFilterResponse response) {
+                    public void onCompleted(IntIdRoundTripTableElement entity, Exception exception, ServiceFilterResponse response) {
                         final TestResult result = new TestResult();
                         result.setStatus(TestStatus.Passed);
                         result.setTestCase(testCase);
@@ -917,7 +910,7 @@ public class UpdateDeleteTests extends TestGroup {
 
                             if (useFakeId) {
                                 log("use fake id");
-                                entity.id = 1000000000;
+                                entity.id = 1000000000L;
                             }
 
                             if (!includeId) {
