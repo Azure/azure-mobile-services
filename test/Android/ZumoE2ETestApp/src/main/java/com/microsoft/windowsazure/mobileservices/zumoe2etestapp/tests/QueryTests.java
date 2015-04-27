@@ -45,7 +45,6 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestRe
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestStatus;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.Util;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.AllIntIdMovies;
-import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.AllStringIdMovies;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.FilterResult;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.IntIdMovie;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.ListFilter;
@@ -73,19 +72,16 @@ import static com.microsoft.windowsazure.mobileservices.table.query.QueryOperati
 import static com.microsoft.windowsazure.mobileservices.table.query.QueryOperations.year;
 
 public class QueryTests extends TestGroup {
-    private static final String MOVIES_TABLE_NAME = "intIdMovies";
-    private static final String STRING_ID_MOVIES_TABLE_NAME = "stringIdMovies";
+    private static final String MOVIES_TABLE_NAME = "IntIdMovies";
+
+    // //private static final String STRING_ID_MOVIES_TABLE_NAME = "Movies";
 
     @SuppressWarnings("unchecked")
     public QueryTests() {
         super("Query tests");
 
-        this.addTest(createPopulateTest());
-
-        this.addTest(createPopulateStringIdTest());
-
         // numeric functions
-        this.addTest(createQueryTest("GreaterThan and LessThan - Movies from the 90s", field("year").gt(1989).and().field("year").lt(2000),
+        this.addTest(createQueryTest("GreaterThan and LessThan - Movies from the 90s", field("Year").gt(1989).and().field("Year").lt(2000),
                 new SimpleMovieFilter() {
 
                     @Override
@@ -94,7 +90,7 @@ public class QueryTests extends TestGroup {
                     }
                 }));
 
-        this.addTest(createQueryTest("GreaterEqual and LessEqual - Movies from the 90s", field("year").ge(1990).and().field("year").le(1999),
+        this.addTest(createQueryTest("GreaterEqual and LessEqual - Movies from the 90s", field("Year").ge(1990).and().field("Year").le(1999),
                 new SimpleMovieFilter() {
 
                     @Override
@@ -104,7 +100,7 @@ public class QueryTests extends TestGroup {
                 }));
 
         this.addTest(createQueryTest("Compound statement - OR of ANDs - Movies from the 30s and 50s",
-                field("year").ge(1930).and().field("year").lt(1940).or(field("year").ge(1950).and().field("year").lt(1960)), new SimpleMovieFilter() {
+                field("Year").ge(1930).and().field("Year").lt(1940).or(field("Year").ge(1950).and().field("Year").lt(1960)), new SimpleMovieFilter() {
 
                     @Override
                     protected boolean criteria(Movie movie) {
@@ -112,8 +108,8 @@ public class QueryTests extends TestGroup {
                     }
                 }));
 
-        this.addTest(createQueryTest("Division, equal and different - Movies from the year 2000 with rating other than R", query(field("year").div(1000)).eq(2)
-                .and().field("mpaarating").ne("R"), new SimpleMovieFilter() {
+        this.addTest(createQueryTest("Division, equal and different - Movies from the Year 2000 with rating other than R", query(field("Year").div(1000d))
+                .eq(2).and().field("MpaaRating").ne("R"), new SimpleMovieFilter() {
 
             @Override
             protected boolean criteria(Movie movie) {
@@ -122,7 +118,7 @@ public class QueryTests extends TestGroup {
         }));
 
         this.addTest(createQueryTest("Addition, subtraction, relational, AND - Movies from the 1980s which last less than 2 hours",
-                field("year").sub(1900).ge(80).and().field("year").add(10).lt(2000).and().field("duration").lt(120), new SimpleMovieFilter() {
+                field("Year").sub(1900).ge(80).and().field("Year").add(10).lt(2000).and().field("Duration").lt(120), new SimpleMovieFilter() {
 
                     @Override
                     protected boolean criteria(Movie movie) {
@@ -132,7 +128,7 @@ public class QueryTests extends TestGroup {
 
         // string functions
 
-        this.addTest(createQueryTest("StartsWith - Movies which starts with 'The'", startsWith("title", "The"), new SimpleMovieFilter() {
+        this.addTest(createQueryTest("StartsWith - Movies which starts with 'The'", startsWith("Title", "The"), new SimpleMovieFilter() {
 
             @Override
             protected boolean criteria(Movie movie) {
@@ -145,7 +141,7 @@ public class QueryTests extends TestGroup {
             }
         }, 100));
 
-        this.addTest(createQueryTest("StartsWith, case insensitive - Movies which start with 'the'", startsWith(toLower(field("title")), val("the")),
+        this.addTest(createQueryTest("StartsWith, case insensitive - Movies which start with 'the'", startsWith(toLower(field("Title")), val("the")),
                 new SimpleMovieFilter() {
 
                     @Override
@@ -159,7 +155,7 @@ public class QueryTests extends TestGroup {
                     }
                 }, 100));
 
-        this.addTest(createQueryTest("EndsWith, case insensitive - Movies which end with 'r'", endsWith(toLower(field("title")), val("r")),
+        this.addTest(createQueryTest("EndsWith, case insensitive - Movies which end with 'r'", endsWith(toLower(field("Title")), val("r")),
                 new SimpleMovieFilter() {
 
                     @Override
@@ -168,7 +164,7 @@ public class QueryTests extends TestGroup {
                     }
                 }));
 
-        this.addTest(createQueryTest("Contains - Movies which contain the word 'one', case insensitive", subStringOf(val("ONE"), toUpper(field("title"))),
+        this.addTest(createQueryTest("Contains - Movies which contain the word 'one', case insensitive", subStringOf(val("ONE"), toUpper(field("Title"))),
                 new SimpleMovieFilter() {
 
                     @Override
@@ -177,7 +173,7 @@ public class QueryTests extends TestGroup {
                     }
                 }));
 
-        this.addTest(createQueryTest("String equals - Movies since 1980 with rating PG-13", field("year").ge(1980).and().field("mpaarating").eq("PG-13"),
+        this.addTest(createQueryTest("String equals - Movies since 1980 with rating PG-13", field("Year").ge(1980).and().field("MpaaRating").eq("PG-13"),
                 new SimpleMovieFilter() {
 
                     @Override
@@ -192,7 +188,7 @@ public class QueryTests extends TestGroup {
                 }, 100));
 
         this.addTest(createQueryTest("String field, comparison to null - Movies since 1980 without a MPAA rating",
-                field("year").ge(1980).and().field("mpaarating").eq((String) null), new SimpleMovieFilter() {
+                field("Year").ge(1980).and().field("MpaaRating").eq((String) null), new SimpleMovieFilter() {
 
                     @Override
                     protected boolean criteria(Movie movie) {
@@ -205,8 +201,8 @@ public class QueryTests extends TestGroup {
                     }
                 }, 100));
 
-        this.addTest(createQueryTest("String field, comparison (not equal) to null - Movies before 1970 with a MPAA rating", field("year").lt(1970).and()
-                .field("mpaarating").ne((String) null), new SimpleMovieFilter() {
+        this.addTest(createQueryTest("String field, comparison (not equal) to null - Movies before 1970 with a MPAA rating", field("Year").lt(1970).and()
+                .field("MpaaRating").ne((String) null), new SimpleMovieFilter() {
 
             @Override
             protected boolean criteria(Movie movie) {
@@ -220,7 +216,7 @@ public class QueryTests extends TestGroup {
         }, 100));
 
         // Numeric functions
-        this.addTest(createQueryTest("Floor - Movies which last more than 3 hours", floor(field("duration").div(60)).ge(3), new SimpleMovieFilter() {
+        this.addTest(createQueryTest("Floor - Movies which last more than 3 hours", floor(field("Duration").div(60d)).ge(3), new SimpleMovieFilter() {
 
             @Override
             protected boolean criteria(Movie movie) {
@@ -229,7 +225,7 @@ public class QueryTests extends TestGroup {
         }));
 
         this.addTest(createQueryTest("Ceiling - Best picture winners which last at most 2 hours",
-                field("bestPictureWinner").eq(true).and().ceiling(field("duration").div(60)).eq(2), new SimpleMovieFilter() {
+                field("BestPictureWinner").eq(true).and().ceiling(field("Duration").div(60d)).eq(2), new SimpleMovieFilter() {
 
                     @Override
                     protected boolean criteria(Movie movie) {
@@ -238,7 +234,7 @@ public class QueryTests extends TestGroup {
                 }));
 
         this.addTest(createQueryTest("Round - Best picture winners which last more than 2.5 hours",
-                field("bestPictureWinner").eq(true).and().round(field("duration").div(60)).gt(2), new SimpleMovieFilter() {
+                field("BestPictureWinner").eq(true).and().round(field("Duration").div(60d)).gt(2), new SimpleMovieFilter() {
 
                     @Override
                     protected boolean criteria(Movie movie) {
@@ -247,7 +243,7 @@ public class QueryTests extends TestGroup {
                 }));
 
         this.addTest(createQueryTest("Date: Greater than, less than - Movies with release date in the 70s",
-                field("releaseDate").gt(Util.getUTCDate(1969, 12, 31)).and().field("releaseDate").lt(Util.getUTCDate(1971, 1, 1)), new SimpleMovieFilter() {
+                field("ReleaseDate").gt(Util.getUTCDate(1969, 12, 31)).and().field("ReleaseDate").lt(Util.getUTCDate(1971, 1, 1)), new SimpleMovieFilter() {
 
                     @Override
                     protected boolean criteria(Movie movie) {
@@ -256,8 +252,8 @@ public class QueryTests extends TestGroup {
                     }
                 }));
 
-        this.addTest(createQueryTest("Date: Greater than, less than - Movies with release date in the 80s", field("releaseDate")
-                .ge(Util.getUTCDate(1980, 1, 1)).and().field("releaseDate").le(Util.getUTCDate(1989, 1, 1, 23, 59, 59)), new SimpleMovieFilter() {
+        this.addTest(createQueryTest("Date: Greater than, less than - Movies with release date in the 80s", field("ReleaseDate")
+                .ge(Util.getUTCDate(1980, 1, 1)).and().field("ReleaseDate").le(Util.getUTCDate(1989, 1, 1, 23, 59, 59)), new SimpleMovieFilter() {
 
             @Override
             protected boolean criteria(Movie movie) {
@@ -267,7 +263,7 @@ public class QueryTests extends TestGroup {
         }));
 
         this.addTest(createQueryTest("Date: Date: Equal - Movies released on 1994-10-14 (Shawshank Redemption / Pulp Fiction)",
-                field("releaseDate").eq(Util.getUTCDate(1994, 10, 14)), new SimpleMovieFilter() {
+                field("ReleaseDate").eq(Util.getUTCDate(1994, 10, 14)), new SimpleMovieFilter() {
 
                     @Override
                     protected boolean criteria(Movie movie) {
@@ -276,7 +272,7 @@ public class QueryTests extends TestGroup {
                 }));
 
         // Date functions
-        this.addTest(createQueryTest("Date (month): Movies released in November", month("releaseDate").eq(11), new SimpleMovieFilter() {
+        this.addTest(createQueryTest("Date (month): Movies released in November", month("ReleaseDate").eq(11), new SimpleMovieFilter() {
 
             @Override
             protected boolean criteria(Movie movie) {
@@ -284,7 +280,7 @@ public class QueryTests extends TestGroup {
             }
         }));
 
-        this.addTest(createQueryTest("Date (day): Movies released in the first day of the month", day("releaseDate").eq(1), new SimpleMovieFilter() {
+        this.addTest(createQueryTest("Date (day): Movies released in the first day of the month", day("ReleaseDate").eq(1), new SimpleMovieFilter() {
 
             @Override
             protected boolean criteria(Movie movie) {
@@ -292,7 +288,7 @@ public class QueryTests extends TestGroup {
             }
         }));
 
-        this.addTest(createQueryTest("Date (year): Movies whose year is different than its release year", year("releaseDate").ne().field("year"),
+        this.addTest(createQueryTest("Date (Year): Movies whose Year is different than its release Year", year("ReleaseDate").ne().field("Year"),
                 new SimpleMovieFilter() {
 
                     @Override
@@ -308,7 +304,7 @@ public class QueryTests extends TestGroup {
 
         // boolean fields
         this.addTest(createQueryTest("Bool: equal to true - Best picture winners before 1950",
-                field("year").lt(1950).and().field("bestPictureWinner").eq(true), new SimpleMovieFilter() {
+                field("Year").lt(1950).and().field("BestPictureWinner").eq(true), new SimpleMovieFilter() {
 
                     @Override
                     protected boolean criteria(Movie movie) {
@@ -317,7 +313,7 @@ public class QueryTests extends TestGroup {
                 }));
 
         this.addTest(createQueryTest("Bool: equal to false - Best picture winners after 2000",
-                field("year").ge(2000).and().not(field("bestPictureWinner").eq(false)), new SimpleMovieFilter() {
+                field("Year").ge(2000).and().not(field("BestPictureWinner").eq(false)), new SimpleMovieFilter() {
 
                     @Override
                     protected boolean criteria(Movie movie) {
@@ -326,7 +322,7 @@ public class QueryTests extends TestGroup {
                 }));
 
         this.addTest(createQueryTest("Bool: not equal to false - Best picture winners after 2000",
-                field("bestPictureWinner").ne(false).and().field("year").ge(2000), new SimpleMovieFilter() {
+                field("BestPictureWinner").ne(false).and().field("Year").ge(2000), new SimpleMovieFilter() {
 
                     @Override
                     protected boolean criteria(Movie movie) {
@@ -360,7 +356,13 @@ public class QueryTests extends TestGroup {
             public FilterResult<Movie> filter(List<? extends Movie> list) {
                 return applyTopSkip(super.filter(list), Integer.MAX_VALUE, 500);
             }
-        }, null, 500, null, null, false, null));
+
+            @Override
+            protected List<Movie> applyOrder(List<? extends Movie> movies) {
+                Collections.sort(movies, new MovieComparator("getTitle"));
+                return new ArrayList<Movie>(movies);
+            }
+        }, null, 500, createOrder(new Pair<String, QueryOrder>("Title", QueryOrder.Ascending)), null, false, null));
 
         this.addTest(createQueryTest("Get first ($top) - 10", null, new SimpleMovieFilter() {
 
@@ -387,9 +389,15 @@ public class QueryTests extends TestGroup {
             public FilterResult<Movie> filter(List<? extends Movie> list) {
                 return applyTopSkip(super.filter(list), Integer.MAX_VALUE, movieCountMinus10);
             }
-        }, null, movieCountMinus10, null, null, false, null));
 
-        this.addTest(createQueryTest("Skip, take, includeTotalCount - movies 21-30, ordered by title", null, new SimpleMovieFilter() {
+            @Override
+            protected List<Movie> applyOrder(List<? extends Movie> movies) {
+                Collections.sort(movies, new MovieComparator("getTitle"));
+                return new ArrayList<Movie>(movies);
+            }
+        }, null, movieCountMinus10, createOrder(new Pair<String, QueryOrder>("Title", QueryOrder.Ascending)), null, false, null));
+
+        this.addTest(createQueryTest("Skip, take, includeTotalCount - movies 21-30, ordered by Title", null, new SimpleMovieFilter() {
 
             @Override
             protected boolean criteria(Movie movie) {
@@ -407,10 +415,10 @@ public class QueryTests extends TestGroup {
                 return new ArrayList<Movie>(movies);
             }
 
-        }, 10, 20, createOrder(new Pair<String, QueryOrder>("title", QueryOrder.Ascending)), null, false, null));
+        }, 10, 20, createOrder(new Pair<String, QueryOrder>("Title", QueryOrder.Ascending)), null, false, null));
 
-        this.addTest(createQueryTest("Skip, take, filter includeTotalCount - movies 11-20 which won a best picture award, ordered by year",
-                field("bestPictureWinner").eq(true), new SimpleMovieFilter() {
+        this.addTest(createQueryTest("Skip, take, filter includeTotalCount - movies 11-20 which won a best picture award, ordered by Year",
+                field("BestPictureWinner").eq(true), new SimpleMovieFilter() {
 
                     @Override
                     protected boolean criteria(Movie movie) {
@@ -428,9 +436,9 @@ public class QueryTests extends TestGroup {
                         return new ArrayList<Movie>(movies);
                     }
 
-                }, 10, 10, createOrder(new Pair<String, QueryOrder>("year", QueryOrder.Descending)), null, true, null));
+                }, 10, 10, createOrder(new Pair<String, QueryOrder>("Year", QueryOrder.Descending)), null, true, null));
 
-        this.addTest(createQueryTest("Select one field - Only title of movies from 2008", field("year").eq(2008), new SimpleMovieFilter() {
+        this.addTest(createQueryTest("Select one field - Only Title of movies from 2008", field("Year").eq(2008), new SimpleMovieFilter() {
 
             @Override
             protected FilterResult<Movie> getElements(List<? extends Movie> list) {
@@ -440,7 +448,7 @@ public class QueryTests extends TestGroup {
                 newRes.elements = new ArrayList<Movie>();
 
                 for (Movie movie : res.elements) {
-                    // only add title field
+                    // only add Title field
                     Movie newMovie = new IntIdMovie();
                     newMovie.setTitle(movie.getTitle());
                     newRes.elements.add(newMovie);
@@ -454,9 +462,9 @@ public class QueryTests extends TestGroup {
                 return movie.getYear() == 2008;
             }
 
-        }, null, null, null, project("Title"), true, null));
+        }, null, null, null, project("title"), true, null));
 
-        this.addTest(createQueryTest("Select multiple fields - List of movies from the 2000's", field("year").ge(2000), new SimpleMovieFilter() {
+        this.addTest(createQueryTest("Select multiple fields - List of movies from the 2000's", field("Year").ge(2000), new SimpleMovieFilter() {
 
                     @Override
                     protected FilterResult<Movie> getElements(List<? extends Movie> list) {
@@ -466,9 +474,9 @@ public class QueryTests extends TestGroup {
                         newRes.elements = new ArrayList<Movie>();
 
                         for (Movie movie : res.elements) {
-                            // only add title, bestPictureWinner,
-                            // releaseDate
-                            // and duration fields
+                            // only add Title, BestPictureWinner,
+                            // ReleaseDate
+                            // and Duration fields
                             IntIdMovie newMovie = new IntIdMovie();
                             newMovie.setTitle(movie.getTitle());
                             newMovie.setBestPictureWinner(movie.isBestPictureWinner());
@@ -498,12 +506,12 @@ public class QueryTests extends TestGroup {
                     }
 
                 }, 5, null,
-                createOrder(new Pair<String, QueryOrder>("releaseDate", QueryOrder.Descending), new Pair<String, QueryOrder>("title", QueryOrder.Ascending)),
-                project("Title", "BestPictureWinner", "Duration", "ReleaseDate"), true, null));
+                createOrder(new Pair<String, QueryOrder>("ReleaseDate", QueryOrder.Descending), new Pair<String, QueryOrder>("Title", QueryOrder.Ascending)),
+                project("title", "bestPictureWinner", "duration", "releaseDate"), true, null));
 
-        this.addTest(createQueryTest("(Neg) Very large top value", field("year").gt(2000), null, 1001, null, null, null, false, MobileServiceException.class));
+        this.addTest(createQueryTest("(Neg) Very large top value", field("Year").gt(2000), null, 1001, null, null, null, false, MobileServiceException.class));
 
-        this.addTest(createJsonQueryTest("Select multiple fields - Json - List of movies from the 2000's", field("year").ge(2000), new SimpleMovieFilter() {
+        this.addTest(createJsonQueryTest("Select multiple fields - Json - List of movies from the 2000's", field("Year").ge(2000), new SimpleMovieFilter() {
 
                     @Override
                     protected FilterResult<Movie> getElements(List<? extends Movie> list) {
@@ -513,9 +521,9 @@ public class QueryTests extends TestGroup {
                         newRes.elements = new ArrayList<Movie>();
 
                         for (Movie movie : res.elements) {
-                            // only add title, bestPictureWinner,
-                            // releaseDate
-                            // and duration fields
+                            // only add Title, BestPictureWinner,
+                            // ReleaseDate
+                            // and Duration fields
                             IntIdMovie newMovie = new IntIdMovie();
                             newMovie.setTitle(movie.getTitle());
                             newMovie.setBestPictureWinner(movie.isBestPictureWinner());
@@ -545,8 +553,8 @@ public class QueryTests extends TestGroup {
                     }
 
                 }, 5, null,
-                createOrder(new Pair<String, QueryOrder>("releaseDate", QueryOrder.Descending), new Pair<String, QueryOrder>("title", QueryOrder.Ascending)),
-                project("Title", "BestPictureWinner", "Duration", "ReleaseDate"), true, null));
+                createOrder(new Pair<String, QueryOrder>("ReleaseDate", QueryOrder.Descending), new Pair<String, QueryOrder>("Title", QueryOrder.Ascending)),
+                project("title", "bestPictureWinner", "duration", "releaseDate"), true, null));
 
         // invalid lookup
         for (int i = -1; i <= 0; i++) {
@@ -584,7 +592,7 @@ public class QueryTests extends TestGroup {
 
         // With Callback
         this.addTest(createQueryWithCallbackTest("With Callback - Addition, subtraction, relational, AND - Movies from the 1980s which last less than 2 hours",
-                field("year").sub(1900).ge(80).and().field("year").add(10).lt(2000).and().field("duration").lt(120), new SimpleMovieFilter() {
+                field("Year").sub(1900).ge(80).and().field("Year").add(10).lt(2000).and().field("Duration").lt(120), new SimpleMovieFilter() {
 
                     @Override
                     protected boolean criteria(Movie movie) {
@@ -593,7 +601,7 @@ public class QueryTests extends TestGroup {
                 }));
 
         this.addTest(createQueryWithCallbackTest("With Callback - String field, comparison (not equal) to null - Movies before 1970 with a MPAA rating",
-                field("year").lt(1970).and().field("mpaarating").ne((String) null), new SimpleMovieFilter() {
+                field("Year").lt(1970).and().field("MpaaRating").ne((String) null), new SimpleMovieFilter() {
 
                     @Override
                     protected boolean criteria(Movie movie) {
@@ -607,7 +615,7 @@ public class QueryTests extends TestGroup {
                 }, 100));
 
         this.addTest(createQueryWithCallbackTest("With Callback - Date: Date: Equal - Movies released on 1994-10-14 (Shawshank Redemption / Pulp Fiction)",
-                field("releaseDate").eq(Util.getUTCDate(1994, 10, 14)), new SimpleMovieFilter() {
+                field("ReleaseDate").eq(Util.getUTCDate(1994, 10, 14)), new SimpleMovieFilter() {
 
                     @Override
                     protected boolean criteria(Movie movie) {
@@ -615,8 +623,8 @@ public class QueryTests extends TestGroup {
                     }
                 }));
 
-        this.addTest(createQueryWithCallbackTest("With Callback - Date (year): Movies whose year is different than its release year", year("releaseDate").ne()
-                .field("year"), new SimpleMovieFilter() {
+        this.addTest(createQueryWithCallbackTest("With Callback - Date (Year): Movies whose Year is different than its release Year", year("ReleaseDate").ne()
+                .field("Year"), new SimpleMovieFilter() {
 
             @Override
             protected boolean criteria(Movie movie) {
@@ -630,7 +638,7 @@ public class QueryTests extends TestGroup {
         }, 100));
 
         this.addTest(createQueryWithCallbackTest("With Callback - Bool: not equal to false - Best picture winners after 2000",
-                field("bestPictureWinner").ne(false).and().field("year").ge(2000), new SimpleMovieFilter() {
+                field("BestPictureWinner").ne(false).and().field("Year").ge(2000), new SimpleMovieFilter() {
 
                     @Override
                     protected boolean criteria(Movie movie) {
@@ -638,7 +646,7 @@ public class QueryTests extends TestGroup {
                     }
                 }));
 
-        this.addTest(createQueryWithCallbackTest("With Callback - Select multiple fields - List of movies from the 2000's", field("year").ge(2000),
+        this.addTest(createQueryWithCallbackTest("With Callback - Select multiple fields - List of movies from the 2000's", field("Year").ge(2000),
                 new SimpleMovieFilter() {
 
                     @Override
@@ -649,9 +657,9 @@ public class QueryTests extends TestGroup {
                         newRes.elements = new ArrayList<Movie>();
 
                         for (Movie movie : res.elements) {
-                            // only add title, bestPictureWinner,
-                            // releaseDate
-                            // and duration fields
+                            // only add Title, BestPictureWinner,
+                            // ReleaseDate
+                            // and Duration fields
                             Movie newMovie = new IntIdMovie();
                             newMovie.setTitle(movie.getTitle());
                             newMovie.setBestPictureWinner(movie.isBestPictureWinner());
@@ -681,10 +689,10 @@ public class QueryTests extends TestGroup {
                     }
 
                 }, 5, null,
-                createOrder(new Pair<String, QueryOrder>("releaseDate", QueryOrder.Descending), new Pair<String, QueryOrder>("title", QueryOrder.Ascending)),
-                project("Title", "BestPictureWinner", "Duration", "ReleaseDate"), true, null));
+                createOrder(new Pair<String, QueryOrder>("ReleaseDate", QueryOrder.Descending), new Pair<String, QueryOrder>("Title", QueryOrder.Ascending)),
+                project("title", "bestPictureWinner", "duration", "releaseDate"), true, null));
 
-        this.addTest(createJsonQueryWithCallbackTest("With Callback - Select multiple fields - Json - List of movies from the 2000's", field("year").ge(2000),
+        this.addTest(createJsonQueryWithCallbackTest("With Callback - Select multiple fields - Json - List of movies from the 2000's", field("Year").ge(2000),
                 new SimpleMovieFilter() {
 
                     @Override
@@ -695,9 +703,9 @@ public class QueryTests extends TestGroup {
                         newRes.elements = new ArrayList<Movie>();
 
                         for (Movie movie : res.elements) {
-                            // only add title, bestPictureWinner,
-                            // releaseDate
-                            // and duration fields
+                            // only add Title, BestPictureWinner,
+                            // ReleaseDate
+                            // and Duration fields
                             Movie newMovie = new IntIdMovie();
                             newMovie.setTitle(movie.getTitle());
                             newMovie.setBestPictureWinner(movie.isBestPictureWinner());
@@ -727,93 +735,12 @@ public class QueryTests extends TestGroup {
                     }
 
                 }, 5, null,
-                createOrder(new Pair<String, QueryOrder>("releaseDate", QueryOrder.Descending), new Pair<String, QueryOrder>("title", QueryOrder.Ascending)),
-                project("Title", "BestPictureWinner", "Duration", "ReleaseDate"), true, null));
+                createOrder(new Pair<String, QueryOrder>("ReleaseDate", QueryOrder.Descending), new Pair<String, QueryOrder>("Title", QueryOrder.Ascending)),
+                project("title", "bestPictureWinner", "duration", "releaseDate"), true, null));
     }
 
     private static String[] project(String... fields) {
         return fields;
-    }
-
-    private static TestCase createPopulateTest() {
-        TestCase populateTable = new TestCase() {
-
-            @Override
-            protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
-
-                AllIntIdMovies allMovies = new AllIntIdMovies();
-                allMovies.setMovies(QueryTestData.getAllIntIdMovies());
-                final TestCase test = this;
-
-                MobileServiceClient otherClient = client.withFilter(new ServiceFilter() {
-
-                    public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request,
-                                                                                 NextServiceFilterCallback nextServiceFilterCallback) {
-                        String json = request.getContent();
-
-                        // remove IDs from the array
-                        json = json.replace("\"Id\":0,", "");
-                        try {
-                            request.setContent(json);
-                        } catch (Exception e) {
-                            // do nothing
-                        }
-
-                        return nextServiceFilterCallback.onNext(request);
-                    }
-                });
-
-                log("insert movies");
-
-                TestResult result = new TestResult();
-
-                try {
-                    otherClient.getTable(MOVIES_TABLE_NAME, AllIntIdMovies.class).insert(allMovies).get();
-                    result.setTestCase(test);
-                    result.setStatus(TestStatus.Passed);
-                } catch (Exception exception) {
-                    result = createResultFromException(exception);
-                } finally {
-                    if (callback != null)
-                        callback.onTestComplete(test, result);
-                }
-            }
-        };
-
-        populateTable.setName("Populate table, if necessary");
-
-        return populateTable;
-    }
-
-    static TestCase createPopulateStringIdTest() {
-        TestCase populateTable = new TestCase() {
-
-            @Override
-            protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
-                AllStringIdMovies allStringIdMovies = new AllStringIdMovies();
-                allStringIdMovies.setMovies(QueryTestData.getAllStringIdMovies());
-                final TestCase test = this;
-
-                log("insert string id movies");
-
-                TestResult result = new TestResult();
-
-                try {
-                    client.getTable(STRING_ID_MOVIES_TABLE_NAME, AllStringIdMovies.class).insert(allStringIdMovies).get();
-                    result.setTestCase(test);
-                    result.setStatus(TestStatus.Passed);
-                } catch (Exception exception) {
-                    result = createResultFromException(exception);
-                } finally {
-                    if (callback != null)
-                        callback.onTestComplete(test, result);
-                }
-            }
-        };
-
-        populateTable.setName("Populate String Id Movie table, if necessary");
-
-        return populateTable;
     }
 
     @SuppressWarnings("unchecked")

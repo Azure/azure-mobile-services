@@ -489,14 +489,23 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
      */
     public ListenableFuture<JsonObject> insert(final JsonObject element, List<Pair<String, String>> parameters) {
         final SettableFuture<JsonObject> future = SettableFuture.create();
+
+        Object id = null;
+
         try {
-            validateIdOnInsert(element);
+            id = validateIdOnInsert(element);
         } catch (Exception e) {
             future.setException(e);
             return future;
         }
 
         String content = element.toString();
+
+        if (!isNumericType(id) && id != null) {
+            content = removeSystemProperties(element).toString();
+        } else {
+            content = element.toString();
+        }
 
         EnumSet<MobileServiceFeatures> features = mFeatures.clone();
         if (parameters != null && parameters.size() > 0) {
@@ -1003,7 +1012,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
      *
      * @param json The JsonObject to modify
      */
-    private void validateIdOnInsert(final JsonObject json) {
+    private Object validateIdOnInsert(final JsonObject json) {
         // Remove id property if exists
         String[] idPropertyNames = new String[]{"id", "Id", "iD", "ID"};
 
@@ -1019,6 +1028,8 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
                     if (!isValidStringId(id)) {
                         throw new IllegalArgumentException("The entity to insert has an invalid string value on " + idProperty + " property.");
                     }
+
+                    return id;
                 } else if (isNumericType(idElement)) {
                     long id = getNumericValue(idElement);
 
@@ -1027,13 +1038,21 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
                     }
 
                     json.remove(idProperty);
+
+                    return id;
+
                 } else if (idElement.isJsonNull()) {
                     json.remove(idProperty);
+
+                    return null;
+
                 } else {
                     throw new IllegalArgumentException("The entity to insert should not have an " + idProperty + " defined with an invalid value");
                 }
             }
         }
+
+        return null;
     }
 
 }

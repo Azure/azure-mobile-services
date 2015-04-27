@@ -220,6 +220,14 @@ public interface Query {
      */
     Query val(Date date);
 
+    /**
+     * Specifies a byte array value
+     *
+     * @param number The string value to use
+     * @return Query
+     */
+    Query val(byte[] byteArray);
+
     /****** Logical Operators ******/
 
     /**
@@ -464,6 +472,14 @@ public interface Query {
     Query eq(Date dateValue);
 
     /**
+     * Equal comparison operator.
+     *
+     * @param byteArray
+     * @return Query
+     */
+    Query eq(byte[] byteArray);
+
+    /**
      * Not equal comparison operator.
      *
      * @return Query
@@ -509,6 +525,15 @@ public interface Query {
      * @return Query
      */
     Query ne(Date dateValue);
+
+
+    /**
+     * Not equal comparison operator.
+     *
+     * @param byteArray
+     * @return Query
+     */
+    Query ne(byte[] byteArray);
 
     /****** Arithmetic Operators ******/
 

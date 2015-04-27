@@ -31,10 +31,7 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestGr
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestResult;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestStatus;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.Util;
-import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.ComplexType;
-import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.ComplexType2;
-import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.EnumType;
-import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.RoundTripTableElement;
+import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.IntIdRoundTripTableElement;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -44,27 +41,31 @@ import java.util.TimeZone;
 
 public class RoundTripTests extends TestGroup {
 
-    protected static final String ROUND_TRIP_TABLE_NAME = "droidRoundTripTable";
+    protected static final String ROUND_TRIP_TABLE_NAME = "IntIdRoundTripTable";
 
     public RoundTripTests() {
         super("RoundTrip tests");
 
         Random rndGen = new Random();
 
-        TestCase createFirstRecord = new TestCase() {
+        TestCase createDeleteFullRecord = new TestCase() {
 
             @Override
             protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
-                RoundTripTableElement element = new RoundTripTableElement(true);
+                IntIdRoundTripTableElement element = new IntIdRoundTripTableElement(true);
                 final TestCase test = this;
 
                 TestResult result = new TestResult();
 
                 try {
-                    client.getTable(ROUND_TRIP_TABLE_NAME, RoundTripTableElement.class).insert(element).get();
+                    MobileServiceTable<IntIdRoundTripTableElement> table = client.getTable(ROUND_TRIP_TABLE_NAME, IntIdRoundTripTableElement.class);
+                    IntIdRoundTripTableElement fullRecord = table.insert(element).get();
+                    log("inserted full record");
+
+                    table.delete(fullRecord).get();
+                    log("deleted full record");
 
                     result.setStatus(TestStatus.Passed);
-
                 } catch (Exception exception) {
                     result = createResultFromException(exception);
                 } finally {
@@ -74,8 +75,8 @@ public class RoundTripTests extends TestGroup {
             }
         };
 
-        createFirstRecord.setName("Create first record");
-        this.addTest(createFirstRecord);
+        createDeleteFullRecord.setName("Create - Delete full record");
+        this.addTest(createDeleteFullRecord);
 
         // typed tests
         this.addTest(createSimpleTypedRoundTripTest("String: Empty", "", String.class));
@@ -115,55 +116,36 @@ public class RoundTripTests extends TestGroup {
         this.addTest(createSimpleTypedRoundTripTest("Int: MaxValue", Integer.valueOf(Integer.MAX_VALUE), Integer.class));
         this.addTest(createSimpleTypedRoundTripTest("Int: MinValue", Integer.valueOf(Integer.MIN_VALUE), Integer.class));
 
-        this.addTest(createSimpleTypedRoundTripTest("Long: zero", Long.valueOf(0), Long.class));
+		/*
+         * this.addTest(createSimpleTypedRoundTripTest("Long: zero",
+		 * Long.valueOf(0), Long.class));
+		 * 
+		 * Long maxAllowedValue = 0x0020000000000000L; Long minAllowedValue =
+		 * 0L; minAllowedValue = Long.valueOf(0xFFE0000000000000L);
+		 * 
+		 * this.addTest(createSimpleTypedRoundTripTest("Long: max allowed",
+		 * maxAllowedValue, Long.class));
+		 * this.addTest(createSimpleTypedRoundTripTest("Long: min allowed",
+		 * minAllowedValue, Long.class)); Long largePositiveValue =
+		 * maxAllowedValue - rndGen.nextInt(5000); Long largeNegativeValue =
+		 * minAllowedValue + rndGen.nextInt(5000);
+		 * this.addTest(createSimpleTypedRoundTripTest
+		 * ("Long: large value, less than max allowed (" + largePositiveValue +
+		 * ")", largePositiveValue, Long.class));
+		 * this.addTest(createSimpleTypedRoundTripTest
+		 * ("Long: large negative value, more than min allowed (" +
+		 * largeNegativeValue + ")", largeNegativeValue, Long.class));
+		 * 
+		 * this.addTest(createSimpleTypedRoundTripTestWithException(
+		 * "(Neg) Long: more than max allowed", maxAllowedValue + 1, Long.class,
+		 * IllegalArgumentException.class));
+		 * this.addTest(createSimpleTypedRoundTripTestWithException
+		 * ("(Neg) Long: less than min allowed", minAllowedValue - 1,
+		 * Long.class, IllegalArgumentException.class));
+		 */
 
-        Long maxAllowedValue = 0x0020000000000000L;
-        Long minAllowedValue = 0L;
-        minAllowedValue = Long.valueOf(0xFFE0000000000000L);
-
-        this.addTest(createSimpleTypedRoundTripTest("Long: max allowed", maxAllowedValue, Long.class));
-        this.addTest(createSimpleTypedRoundTripTest("Long: min allowed", minAllowedValue, Long.class));
-        Long largePositiveValue = maxAllowedValue - rndGen.nextInt(5000);
-        Long largeNegativeValue = minAllowedValue + rndGen.nextInt(5000);
-        this.addTest(createSimpleTypedRoundTripTest("Long: large value, less than max allowed (" + largePositiveValue + ")", largePositiveValue, Long.class));
-        this.addTest(createSimpleTypedRoundTripTest("Long: large negative value, more than min allowed (" + largeNegativeValue + ")", largeNegativeValue,
-                Long.class));
-
-        this.addTest(createSimpleTypedRoundTripTestWithException("(Neg) Long: more than max allowed", maxAllowedValue + 1, Long.class,
-                IllegalArgumentException.class));
-        this.addTest(createSimpleTypedRoundTripTestWithException("(Neg) Long: less than min allowed", minAllowedValue - 1, Long.class,
-                IllegalArgumentException.class));
-
-        this.addTest(createSimpleTypedRoundTripTest("Enum (with JSON converter): simple value", EnumType.Second, EnumType.class));
-
-        this.addTest(createSimpleTypedRoundTripTest("Complex type (custom table serialization): simple value", new ComplexType2(rndGen), ComplexType2.class));
-
-        // this.addTest(createSimpleTypedRoundTripTest(
-        // "Complex type (custom table serialization): null",
-        // null,
-        // ComplexType2.class));
-
-        this.addTest(createSimpleTypedRoundTripTest("Complex type (converter): empty array", new ComplexType[0], ComplexType[].class));
-
-        ComplexType[] ctArray1 = new ComplexType[1];
-        ctArray1[0] = new ComplexType(rndGen);
-
-        this.addTest(createSimpleTypedRoundTripTest("Complex type (converter): 1-element array", ctArray1, ComplexType[].class));
-
-        ComplexType[] ctArray2 = new ComplexType[3];
-        ctArray2[0] = new ComplexType(rndGen);
-        ctArray2[1] = null;
-        ctArray2[2] = new ComplexType(rndGen);
-
-        this.addTest(createSimpleTypedRoundTripTest("Complex type (converter): multi-element array", ctArray2, ComplexType[].class));
-
-        // this.addTest(createSimpleTypedRoundTripTest(
-        // "Complex type (converter): null array",
-        // null,
-        // ComplexType[].class));
-
-        RoundTripTableElement element1 = new RoundTripTableElement();
-        element1.id = 1;
+        IntIdRoundTripTableElement element1 = new IntIdRoundTripTableElement();
+        element1.id = 1L;
         this.addTest(createSimpleTypedRoundTripTestWithException("(Neg) Insert item with non-default id", element1, IllegalArgumentException.class, false));
 
         // untyped tests
@@ -200,30 +182,28 @@ public class RoundTripTests extends TestGroup {
         this.addTest(createSimpleUntypedRoundTripTest("Untyped Int: MaxValue", Integer.valueOf(Integer.MAX_VALUE), Integer.class));
         this.addTest(createSimpleUntypedRoundTripTest("Untyped Int: MinValue", Integer.valueOf(Integer.MIN_VALUE), Integer.class));
 
-        this.addTest(createSimpleUntypedRoundTripTest("Untyped Long: zero", Long.valueOf(0), Long.class));
-
-        this.addTest(createSimpleUntypedRoundTripTest("Untyped Long: max allowed", maxAllowedValue, Long.class));
-        this.addTest(createSimpleUntypedRoundTripTest("Untyped Long: min allowed", minAllowedValue, Long.class));
-        this.addTest(createSimpleUntypedRoundTripTest("Untyped Long: large value, less than max allowed (" + largePositiveValue + ")", largePositiveValue,
-                Long.class));
-        this.addTest(createSimpleUntypedRoundTripTest("Untyped Long: large negative value, more than min allowed (" + largeNegativeValue + ")",
-                largeNegativeValue, Long.class));
-
-        this.addTest(createSimpleUntypedRoundTripTestWithException("Untyped Long: more than max allowed", maxAllowedValue + 1, Long.class, null));
-        this.addTest(createSimpleUntypedRoundTripTestWithException("Untyped Long: less than min allowed", minAllowedValue - 1, Long.class, null));
-
-        this.addTest(createSimpleUntypedRoundTripTest("Untyped complex (object): simple value",
-                "{\"complexType2\":{\"Name\":\"John Doe\",\"Age\":33,\"Friends\":[\"Jane Roe\", \"John Smith\"]}}"));
-
-        this.addTest(createSimpleUntypedRoundTripTest("Untyped complex (object): null", "{\"complexType2\":null}"));
-
-        this.addTest(createSimpleUntypedRoundTripTest("Untyped complex (array): simple value",
-                "{\"complexType1\":[{\"Name\":\"Scooby\",\"Age\":10}, {\"Name\":\"Shaggy\",\"Age\":19}]}"));
-        this.addTest(createSimpleUntypedRoundTripTest("Untyped complex (array): empty array", "{\"complexType1\":[]}"));
-        this.addTest(createSimpleUntypedRoundTripTest("Untyped complex (array): null", "{\"complexType1\":null}"));
-
-        this.addTest(createSimpleUntypedRoundTripTest("Untyped complex (array): array with null elements",
-                "{\"complexType1\":[{\"Name\":\"Scooby\",\"Age\":10}, null, {\"Name\":\"Shaggy\",\"Age\":19}]}"));
+		/*
+         * this.addTest(createSimpleUntypedRoundTripTest("Untyped Long: zero",
+		 * Long.valueOf(0), Long.class));
+		 * 
+		 * this.addTest(createSimpleUntypedRoundTripTest("Untyped Long: max allowed"
+		 * , maxAllowedValue, Long.class));
+		 * this.addTest(createSimpleUntypedRoundTripTest
+		 * ("Untyped Long: min allowed", minAllowedValue, Long.class));
+		 * this.addTest(createSimpleUntypedRoundTripTest(
+		 * "Untyped Long: large value, less than max allowed (" +
+		 * largePositiveValue + ")", largePositiveValue, Long.class));
+		 * this.addTest(createSimpleUntypedRoundTripTest(
+		 * "Untyped Long: large negative value, more than min allowed (" +
+		 * largeNegativeValue + ")", largeNegativeValue, Long.class));
+		 * 
+		 * this.addTest(createSimpleUntypedRoundTripTestWithException(
+		 * "Untyped Long: more than max allowed", maxAllowedValue + 1,
+		 * Long.class, null));
+		 * this.addTest(createSimpleUntypedRoundTripTestWithException
+		 * ("Untyped Long: less than min allowed", minAllowedValue - 1,
+		 * Long.class, null));
+		 */
 
         this.addTest(createSimpleUntypedRoundTripTestWithException("(Neg) Insert item with non-default 'id' property", "{\"id\":1,\"value\":2}",
                 IllegalArgumentException.class));
@@ -238,27 +218,19 @@ public class RoundTripTests extends TestGroup {
         return createSimpleUntypedRoundTripTestWithException(testName, val, elementClass, null);
     }
 
-    private TestCase createSimpleUntypedRoundTripTest(String testName, String jsonObject) {
-        return createSimpleUntypedRoundTripTestWithException(testName, jsonObject, null);
-    }
-
     private TestCase createSimpleUntypedRoundTripTestWithException(String testName, final Object val, final Class<?> elementClass,
                                                                    Class<?> expectedExceptionClass) {
         String propertyName = null;
-        if (elementClass == EnumType.class) {
-            propertyName = "enumType";
-        } else if (elementClass == String.class) {
-            propertyName = "string1";
+        if (elementClass == String.class) {
+            propertyName = "name";
         } else if (elementClass == Date.class) {
             propertyName = "date1";
         } else if (elementClass == Boolean.class) {
-            propertyName = "bool1";
+            propertyName = "bool";
         } else if (elementClass == Double.class) {
-            propertyName = "double1";
-        } else if (elementClass == Long.class) {
-            propertyName = "long1";
+            propertyName = "number";
         } else if (elementClass == Integer.class) {
-            propertyName = "int1";
+            propertyName = "integer";
         }
 
         String propertyValue;
@@ -290,28 +262,30 @@ public class RoundTripTests extends TestGroup {
                     final JsonObject json = new JsonParser().parse(jsonString).getAsJsonObject();
 
                     log("insert item");
-
                     JsonObject jsonEntity = table.insert(json).get();
 
                     int id = jsonEntity.get("id").getAsInt();
                     log("lookup item " + id);
-
                     JsonObject newJsonEntity = (JsonObject) table.lookUp(id).get();
+
                     log("verify items are equal");
                     if (!Util.compareJson(json, newJsonEntity)) {
-                        createResultFromException(result, new ExpectedValueException(jsonEntity, newJsonEntity));
+                        createResultFromException(result, new ExpectedValueException(json, newJsonEntity));
                     }
 
-                    if (callback != null)
+                    if (callback != null) {
                         callback.onTestComplete(test, result);
-
+                    }
                 } catch (Exception exception) {
                     createResultFromException(result, exception);
-                    if (callback != null)
+
+                    if (callback != null) {
                         callback.onTestComplete(test, result);
+                    }
                 }
             }
         };
+
         testCase.setExpectedExceptionClass(expectedExceptionClass);
         testCase.setName(testName);
         return testCase;
@@ -322,38 +296,30 @@ public class RoundTripTests extends TestGroup {
     }
 
     private TestCase createSimpleTypedRoundTripTestWithException(String testName, final Object val, final Class<?> elementClass, Class<?> expectedExceptionClass) {
-        final RoundTripTableElement element = new RoundTripTableElement();
+        final IntIdRoundTripTableElement element = new IntIdRoundTripTableElement();
 
-        if (elementClass == EnumType.class) {
-            element.enumType = (EnumType) val;
-        } else if (elementClass == String.class) {
-            element.string1 = (String) val;
+        if (elementClass == String.class) {
+            element.name = (String) val;
         } else if (elementClass == Date.class) {
             element.date1 = (Date) val;
         } else if (elementClass == Boolean.class) {
-            element.bool1 = (Boolean) val;
+            element.bool = (Boolean) val;
         } else if (elementClass == Double.class) {
-            element.double1 = (Double) val;
-        } else if (elementClass == Long.class) {
-            element.long1 = (Long) val;
+            element.number = (Double) val;
         } else if (elementClass == Integer.class) {
-            element.int1 = (Integer) val;
-        } else if (elementClass == ComplexType2.class) {
-            element.complexType2 = (ComplexType2) val;
-        } else if (elementClass == ComplexType[].class) {
-            element.complexType1 = (ComplexType[]) val;
+            element.integer = (Integer) val;
         }
 
         return createSimpleTypedRoundTripTestWithException(testName, element, expectedExceptionClass, true);
     }
 
-    private TestCase createSimpleTypedRoundTripTestWithException(String testName, final RoundTripTableElement element, final Class<?> expectedExceptionClass,
-                                                                 final boolean removeId) {
+    private TestCase createSimpleTypedRoundTripTestWithException(String testName, final IntIdRoundTripTableElement element,
+                                                                 final Class<?> expectedExceptionClass, final boolean removeId) {
         TestCase testCase = new TestCase() {
 
             @Override
             protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
-                final MobileServiceTable<RoundTripTableElement> table = client.getTable(ROUND_TRIP_TABLE_NAME, RoundTripTableElement.class);
+                final MobileServiceTable<IntIdRoundTripTableElement> table = client.getTable(ROUND_TRIP_TABLE_NAME, IntIdRoundTripTableElement.class);
                 final TestResult result = new TestResult();
                 result.setStatus(TestStatus.Passed);
                 final TestCase test = this;
@@ -365,10 +331,10 @@ public class RoundTripTests extends TestGroup {
                 log("insert item");
 
                 try {
-                    RoundTripTableElement entity = table.insert(element).get();
+                    IntIdRoundTripTableElement entity = table.insert(element).get();
 
                     log("lookup item " + entity.id);
-                    RoundTripTableElement newEntity = table.lookUp(entity.id).get();
+                    IntIdRoundTripTableElement newEntity = table.lookUp(entity.id).get();
                     entity.id = newEntity.id; // patch
                     // to
                     // make
@@ -395,5 +361,4 @@ public class RoundTripTests extends TestGroup {
         testCase.setName(testName);
         return testCase;
     }
-
 }

@@ -273,6 +273,13 @@ public final class ExecutableJsonQuery implements Query {
         return this;
     }
 
+    @Override
+    public ExecutableJsonQuery val(byte[] byteArray) {
+        this.mQuery.val(byteArray);
+        return this;
+    }
+
+
     /**
      * *** Logical Operators *****
      */
@@ -468,6 +475,12 @@ public final class ExecutableJsonQuery implements Query {
     }
 
     @Override
+    public ExecutableJsonQuery eq(byte[] byteArray) {
+        this.mQuery.eq(byteArray);
+        return this;
+    }
+
+    @Override
     public ExecutableJsonQuery ne() {
         this.mQuery.ne();
         return this;
@@ -500,6 +513,12 @@ public final class ExecutableJsonQuery implements Query {
     @Override
     public ExecutableJsonQuery ne(Date dateValue) {
         this.mQuery.ne(dateValue);
+        return this;
+    }
+
+    @Override
+    public ExecutableJsonQuery ne(byte[] byteArray) {
+        this.mQuery.ne(byteArray);
         return this;
     }
 

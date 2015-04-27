@@ -2,23 +2,24 @@
 Copyright (c) Microsoft Open Technologies, Inc.
 All Rights Reserved
 Apache 2.0 License
- 
+
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
- 
+
      http://www.apache.org/licenses/LICENSE-2.0
- 
+
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
- 
+
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -52,8 +53,12 @@ public class LoginTests extends TestGroup {
 
     private static JsonObject lastUserIdentityObject;
 
-    public LoginTests() {
+    boolean isNetBackend;
+
+    public LoginTests(boolean isNetBackend) {
         super("Login tests");
+
+        this.isNetBackend = isNetBackend;
 
         this.addTest(createLogoutTest());
         this.addTest(createCRUDTest(APPLICATION_PERMISSION_TABLE_NAME, null, TablePermission.Application, false));
@@ -75,10 +80,12 @@ public class LoginTests extends TestGroup {
             this.addTest(createCRUDTest(USER_PERMISSION_TABLE_NAME, provider, TablePermission.User, true));
             this.addTest(createCRUDTest(ADMIN_PERMISSION_TABLE_NAME, provider, TablePermission.Admin, true));
 
-            if (providersWithRecycledTokenSupport.contains(provider)) {
-                this.addTest(createLogoutTest());
-                this.addTest(createClientSideLoginTest(provider));
-                this.addTest(createCRUDTest(USER_PERMISSION_TABLE_NAME, provider, TablePermission.User, true));
+            if (!isNetBackend) {
+                if (providersWithRecycledTokenSupport.contains(provider)) {
+                    this.addTest(createLogoutTest());
+                    this.addTest(createClientSideLoginTest(provider));
+                    this.addTest(createCRUDTest(USER_PERMISSION_TABLE_NAME, provider, TablePermission.User, true));
+                }
             }
         }
 
@@ -101,7 +108,10 @@ public class LoginTests extends TestGroup {
         this.addTest(createLoginWithCallbackTest(MobileServiceAuthenticationProvider.Facebook));
         this.addTest(createCRUDWithCallbackTest(USER_PERMISSION_TABLE_NAME, MobileServiceAuthenticationProvider.Facebook, TablePermission.User, true));
         this.addTest(createLogoutWithCallbackTest());
-        this.addTest(createClientSideLoginWithCallbackTest(providersWithRecycledTokenSupport.get(0)));
+        if (!isNetBackend) {
+            this.addTest(createClientSideLoginWithCallbackTest(providersWithRecycledTokenSupport.get(0)));
+        }
+
         this.addTest(createLogoutWithCallbackTest());
         // this.addTest(createLoginWithGoogleAccountWithCallbackTest(false,
         // null));
@@ -397,13 +407,13 @@ public class LoginTests extends TestGroup {
                 item.addProperty("name", "John Doe");
                 log("insert item");
 
-                int id = 1;
+                String id = "1";
 
                 try {
 
                     JsonObject jsonEntityInsert = table.insert(item).get();
 
-                    id = jsonEntityInsert.get("id").getAsInt();
+                    id = jsonEntityInsert.get("id").getAsString();
 
                     item.addProperty("id", id);
                 } catch (Exception exception) {
@@ -429,7 +439,7 @@ public class LoginTests extends TestGroup {
 
                 try {
 
-                    JsonElement jsonEntityLookUp = table.lookUp(item.get("id").getAsInt()).get();
+                    JsonElement jsonEntityLookUp = table.lookUp(item.get("id").getAsString()).get();
                     if (userIsAuthenticated && tableType == TablePermission.User) {
                         lastUserIdentityObject = jsonEntityLookUp.getAsJsonObject();
                     }
@@ -444,7 +454,7 @@ public class LoginTests extends TestGroup {
                 }
 
                 try {
-                    table.delete(item.get("id").getAsInt()).get();
+                    table.delete(item.get("id").getAsString()).get();
                 } catch (Exception exception) {
                     if (!validateExecution(crudShouldWork, exception, result)) {
                         callback.onTestComplete(testCase, result);
@@ -571,9 +581,9 @@ public class LoginTests extends TestGroup {
 
                     @Override
                     public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
-                        int id = 1;
+                        String id = "1";
                         if (exception == null) {
-                            id = jsonEntity.get("id").getAsInt();
+                            id = jsonEntity.get("id").getAsString();
                         }
 
                         item.addProperty("id", id);
@@ -595,7 +605,7 @@ public class LoginTests extends TestGroup {
                                 }
 
                                 log("lookup item");
-                                table.lookUp(item.get("id").getAsInt(), new TableJsonOperationCallback() {
+                                table.lookUp(item.get("id").getAsString(), new TableJsonOperationCallback() {
 
                                     @Override
                                     public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
@@ -604,12 +614,25 @@ public class LoginTests extends TestGroup {
                                             return;
                                         }
 
-                                        if (userIsAuthenticated && tableType == TablePermission.User) {
-                                            lastUserIdentityObject = new JsonParser().parse(jsonEntity.get("Identities").getAsString()).getAsJsonObject();
+                                        if (isNetBackend) {
+                                            if (userIsAuthenticated && tableType == TablePermission.User) {
+
+                                                JsonArray jsonIdentities = jsonEntity.get("identities").getAsJsonArray();
+
+                                                if (jsonIdentities.size() == 0) {
+                                                    lastUserIdentityObject = null;
+                                                } else {
+                                                    lastUserIdentityObject = jsonIdentities.get(jsonIdentities.size() - 1).getAsJsonObject();
+                                                }
+                                            }
+                                        } else {
+                                            if (userIsAuthenticated && tableType == TablePermission.User) {
+                                                lastUserIdentityObject = new JsonParser().parse(jsonEntity.get("Identities").getAsString()).getAsJsonObject();
+                                            }
                                         }
 
                                         log("delete item");
-                                        table.delete(item.get("id").getAsInt(), new TableDeleteCallback() {
+                                        table.delete(item.get("id").getAsString(), new TableDeleteCallback() {
 
                                             @Override
                                             public void onCompleted(Exception exception, ServiceFilterResponse response) {

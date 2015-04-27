@@ -272,6 +272,13 @@ public final class ExecutableQuery<E> implements Query {
         return this;
     }
 
+
+    @Override
+    public ExecutableQuery<E> val(byte[] byteArray) {
+        this.mQuery.val(byteArray);
+        return this;
+    }
+
     /**
      * *** Logical Operators *****
      */
@@ -467,6 +474,12 @@ public final class ExecutableQuery<E> implements Query {
     }
 
     @Override
+    public ExecutableQuery<E> eq(byte[] byteArray) {
+        this.mQuery.eq(byteArray);
+        return this;
+    }
+
+    @Override
     public ExecutableQuery<E> ne() {
         this.mQuery.ne();
         return this;
@@ -499,6 +512,12 @@ public final class ExecutableQuery<E> implements Query {
     @Override
     public ExecutableQuery<E> ne(Date dateValue) {
         this.mQuery.ne(dateValue);
+        return this;
+    }
+
+    @Override
+    public ExecutableQuery<E> ne(byte[] byteArray) {
+        this.mQuery.ne(byteArray);
         return this;
     }
 

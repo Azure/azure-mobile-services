@@ -25,6 +25,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.table.serialization.DateSerializer;
 
 import org.apache.http.Header;
 
@@ -194,7 +195,23 @@ public class Util {
         }
 
         if (e1 instanceof JsonPrimitive) {
-            if (!e1.equals(e2)) {
+            JsonPrimitive p1 = (JsonPrimitive) e1;
+            JsonPrimitive p2 = (JsonPrimitive) e2;
+
+            if (p1.isString()) {
+                try {
+                    Date d1 = DateSerializer.deserialize(p1.getAsString());
+                    Date d2 = DateSerializer.deserialize(p2.getAsString());
+
+                    if (!d1.equals(d2) && !e1.equals(e2)) {
+                        return false;
+                    }
+                } catch (Throwable t) {
+                    if (!e1.equals(e2)) {
+                        return false;
+                    }
+                }
+            } else if (!e1.equals(e2)) {
                 return false;
             }
         } else if (e1 instanceof JsonArray) {
@@ -210,9 +227,7 @@ public class Util {
                     return false;
                 }
             }
-
         } else if (e1 instanceof JsonObject) {
-
             JsonObject o1 = (JsonObject) e1;
             JsonObject o2 = (JsonObject) e2;
 
@@ -249,7 +264,6 @@ public class Util {
     }
 
     public static Date getUTCDate(int year, int month, int day) {
-
         return getUTCDate(year, month, day, 0, 0, 0);
     }
 
