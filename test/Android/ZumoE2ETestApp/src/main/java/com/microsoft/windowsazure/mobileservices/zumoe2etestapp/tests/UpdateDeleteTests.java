@@ -944,18 +944,17 @@ public class UpdateDeleteTests extends TestGroup {
                                 jsonTable.delete(client.getGsonBuilder().create().toJsonTree(entity).getAsJsonObject(),
                                         new TableDeleteCallback() {
 
-                                    @Override
-                                    public void onCompleted(Exception exception, ServiceFilterResponse response) {
-                                        if (exception != null) {
-                                            createResultFromException(result, exception);
-                                        }
+                                            @Override
+                                            public void onCompleted(Exception exception, ServiceFilterResponse response) {
+                                                if (exception != null) {
+                                                    createResultFromException(result, exception);
+                                                }
 
-                                        if (callback != null)
-                                            callback.onTestComplete(testCase, result);
-                                    }
-                                });
+                                                if (callback != null)
+                                                    callback.onTestComplete(testCase, result);
+                                            }
+                                        });
                             }
-
 
 
                         } else {
