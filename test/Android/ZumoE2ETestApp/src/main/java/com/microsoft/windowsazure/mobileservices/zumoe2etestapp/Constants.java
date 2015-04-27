@@ -24,7 +24,22 @@ public class Constants {
 
     public static final String PREFERENCE_MOBILE_SERVICE_KEY = "pref_mobile_service_key";
 
-    public static final String PREFERENCE_LOG_POST_URL = "pref_log_post_url";
+    public static final String PREFERENCE_MASTER_RUN_ID = "pref_master_run_id";
+
+    public static final String PREFERENCE_RUNTIME_VERSION = "pref_runtime_version";
+
+    public static final String PREFERENCE_DAYLIGHT_CLIENT_ID = "pref_daylight_client_id";
+
+    public static final String PREFERENCE_DAYLIGHT_CLIENT_SECRET = "pref_daylight_client_secret";
+
+    public static final String PREFERENCE_DAYLIGHT_URL = "pref_daylight_url";
+
+    public static final String PREFERENCE_DAYLIGHT_PROJECT = "pref_daylight_project";
+
+    public static final String PREFERENCE_GOOGLE_USERID = "pref_google_userid";
+
+    public static final String PREFERENCE_GOOGLE_WEBAPP_CLIENTID = "pref_google_webapp_clientid";
 
     public static final String PREFERENCE_GCM_SENDER_ID = "pref_GCM_sender_id";
+
 }

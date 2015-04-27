@@ -19,16 +19,17 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework;
 
+import android.util.Pair;
+
 import java.util.List;
 
 public class CompositeTestGroup extends TestGroup {
 
-    public CompositeTestGroup(String name, List<TestCase> testCases) {
+    public CompositeTestGroup(String name, List<Pair<TestCase, String>> testCases) {
         super(name);
 
-        for (TestCase test : testCases) {
-            this.addTest(test);
+        for (Pair<TestCase, String> test : testCases) {
+            this.addTest(test.first, test.second);
         }
     }
-
 }

@@ -27,25 +27,25 @@ import java.util.Locale;
 
 public class StringIdMovie implements Movie {
 
-    @SerializedName("Id")
+    @SerializedName("id")
     private String mId;
 
-    @SerializedName("Title")
+    @SerializedName("title")
     private String mTitle;
 
-    @SerializedName("Duration")
+    @SerializedName("duration")
     private int mDuration;
 
-    @SerializedName("MPAARating")
+    @SerializedName("mpaaRating")
     private String mMPAARating;
 
-    @SerializedName("ReleaseDate")
+    @SerializedName("releaseDate")
     private Date mReleaseDate;
 
-    @SerializedName("BestPictureWinner")
+    @SerializedName("bestPictureWinner")
     private boolean mBestPictureWinner;
 
-    @SerializedName("Year")
+    @SerializedName("year")
     private int mYear;
 
     public StringIdMovie() {
