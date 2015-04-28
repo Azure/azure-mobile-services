@@ -3,11 +3,9 @@
 // ----------------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 
 #if XAMARIN
@@ -19,7 +17,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     public class MobileServiceTableQueryMock<T> : IMobileServiceTableQuery<T>
     {
         public bool EnumerableAsyncThrowsException { get; set; }
-        
+
         public IMobileServiceTableQuery<T> IncludeTotalCount()
         {
             throw new NotImplementedException();
@@ -83,7 +81,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             {
                 throw new Exception();
             }
-            return Task.Run(() => Task.Delay(500).ContinueWith(t => (IEnumerable<T>)new TotalCountEnumerable<T>(2, new T[] { Activator.CreateInstance<T>(), Activator.CreateInstance<T>() })));
+            return Task.Run(() => Task.Delay(500).ContinueWith(t => (IEnumerable<T>)new QueryResultEnumerable<T>(2, null, new T[] { Activator.CreateInstance<T>(), Activator.CreateInstance<T>() })));
         }
 
         public Task<List<T>> ToListAsync()
@@ -117,7 +115,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public IQueryable<T> Query
         {
             get { return Enumerable.Empty<T>().AsQueryable(); }
+<<<<<<< HEAD
             set {  }
+=======
+            set { }
+>>>>>>> master
         }
     }
 }

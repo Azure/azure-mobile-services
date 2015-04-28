@@ -9,10 +9,10 @@
 #pragma mark * HTTP Method String Constants
 
 
-NSString *const httpGet = @"GET";
-NSString *const httpPatch = @"PATCH";
-NSString *const httpPost = @"POST";
-NSString *const httpDelete = @"DELETE";
+static NSString *const httpGet = @"GET";
+static NSString *const httpPatch = @"PATCH";
+static NSString *const httpPost = @"POST";
+static NSString *const httpDelete = @"DELETE";
 
 
 #pragma mark * MSTableRequest Private Interface

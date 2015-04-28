@@ -2,14 +2,15 @@ using System;
 using System.Globalization;
 using Android.Content;
 using System.Threading.Tasks;
-using Xamarin.Auth;
+using Xamarin.Auth._MobileServices;
+using System.Collections.Generic;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
     internal class MobileServiceUIAuthentication : MobileServiceAuthentication
     {
-        public MobileServiceUIAuthentication (Context context, IMobileServiceClient client, string providerName)
-            : base (client, providerName)
+        public MobileServiceUIAuthentication (Context context, IMobileServiceClient client, string providerName, IDictionary<string, string> parameters)
+            : base (client, providerName, parameters)
         {
             this.context = context;
         }

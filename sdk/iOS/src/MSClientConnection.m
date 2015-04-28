@@ -11,13 +11,13 @@
 #pragma mark * HTTP Header String Constants
 
 
-NSString *const xApplicationHeader = @"X-ZUMO-APPLICATION";
-NSString *const contentTypeHeader = @"Content-Type";
-NSString *const userAgentHeader = @"User-Agent";
-NSString *const zumoVersionHeader = @"X-ZUMO-VERSION";
-NSString *const jsonContentType = @"application/json";
-NSString *const xZumoAuth = @"X-ZUMO-AUTH";
-NSString *const xZumoInstallId = @"X-ZUMO-INSTALLATION-ID";
+static NSString *const xApplicationHeader = @"X-ZUMO-APPLICATION";
+static NSString *const contentTypeHeader = @"Content-Type";
+static NSString *const userAgentHeader = @"User-Agent";
+static NSString *const zumoVersionHeader = @"X-ZUMO-VERSION";
+static NSString *const jsonContentType = @"application/json";
+static NSString *const xZumoAuth = @"X-ZUMO-AUTH";
+static NSString *const xZumoInstallId = @"X-ZUMO-INSTALLATION-ID";
 
 
 #pragma mark * MSConnectionDelegate Private Interface

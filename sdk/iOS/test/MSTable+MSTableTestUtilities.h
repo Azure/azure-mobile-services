@@ -21,5 +21,4 @@
 +(NSArray *) testNonSystemProperties;
 +(NSArray *) testValidSystemPropertyQueryStrings;
 +(NSArray *) testInvalidSystemPropertyQueryStrings;
-+(NSString *) testInvalidSystemParameterQueryString;
 @end

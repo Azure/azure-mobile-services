@@ -10,12 +10,12 @@
 #pragma mark * Mobile Services Special Keys String Constants
 
 
-NSString *const idKey = @"id";
-NSString *const resultsKey = @"results";
-NSString *const countKey = @"count";
-NSString *const errorKey = @"error";
-NSString *const descriptionKey = @"description";
-NSString *const stringIdPattern = @"[+?`\"/\\\\]|[\\u0000-\\u001F]|[\\u007F-\\u009F]|^\\.{1,2}$";
+static NSString *const idKey = @"id";
+static NSString *const resultsKey = @"results";
+static NSString *const countKey = @"count";
+static NSString *const errorKey = @"error";
+static NSString *const descriptionKey = @"description";
+static NSString *const stringIdPattern = @"[+?`\"/\\\\]|[\\u0000-\\u001F]|[\\u007F-\\u009F]|^\\.{1,2}$";
 
 #pragma mark * MSJSONSerializer Implementation
 
@@ -479,7 +479,14 @@ static NSArray *allIdKeys;
         preSerializedItem = [item mutableCopy];
         
         if(removeSystemProperties) {
+<<<<<<< HEAD
             [self removeSystemProperties:preSerializedItem];
+=======
+            NSSet *systemProperties = [preSerializedItem keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
+                return [key length] > 1 && [[key substringToIndex:2] isEqualToString:@"__"];
+            }];
+            [preSerializedItem removeObjectsForKeys:[systemProperties allObjects]];
+>>>>>>> master
         }
         
         for (NSString *key in [preSerializedItem allKeys]) {

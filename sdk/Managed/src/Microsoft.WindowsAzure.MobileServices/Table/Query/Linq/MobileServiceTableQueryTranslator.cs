@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Microsoft.WindowsAzure.MobileServices.Query;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -155,13 +156,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                     break;
                 case "OrderBy":
                     this.AddOrdering(expression, true, true);
-                    break;                    
+                    break;
                 case "ThenBy":
                     this.AddOrdering(expression, true);
                     break;
                 case "OrderByDescending":
                     this.AddOrdering(expression, false, true);
-                    break;                    
+                    break;
                 case "ThenByDescending":
                     this.AddOrdering(expression, false);
                     break;
@@ -177,7 +178,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                     break;
                 default:
                     ThrowForUnsupportedException(expression);
-                    break;                    
+                    break;
             }
 
             return expression;
@@ -264,7 +265,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                         if (objectContract != null)
                         {
                             foreach (string propertyName in objectContract.Properties
-                                                                          .Where(p => p.Required == Required.Always || 
+                                                                          .Where(p => p.Required == Required.Always ||
                                                                                       p.Required == Required.AllowNull)
                                                                           .Select(p => p.PropertyName))
                             {
@@ -312,7 +313,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 
                     // Find the name of the member being ordered
                     MemberExpression memberAccess = lambda.Body as MemberExpression;
-                    if (memberAccess != null) 
+                    if (memberAccess != null)
                     {
                         string memberName = FilterBuildingExpressionVisitor.GetTableMemberName(memberAccess, this.ContractResolver);
                         if (memberName != null)
@@ -320,13 +321,21 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                             OrderByDirection direction = ascending ? OrderByDirection.Ascending : OrderByDirection.Descending;
                             var node = new OrderByNode(new MemberAccessNode(null, memberName), direction);
                             // Add the ordering
-                            if(prepend)
+                            if (prepend)
                             {
+<<<<<<< HEAD
                                 this.queryDescription.Ordering.Insert(0, node);
                             } 
                             else 
                             {
                                 this.queryDescription.Ordering.Add(node);                            
+=======
+                                this.queryDescription.Ordering.Insert(0, new KeyValuePair<string, bool>(memberName, ascending));
+                            }
+                            else
+                            {
+                                this.queryDescription.Ordering.Add(new KeyValuePair<string, bool>(memberName, ascending));
+>>>>>>> master
                             }
 
                             return;

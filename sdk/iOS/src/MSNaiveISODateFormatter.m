@@ -7,8 +7,8 @@
 
 #pragma mark * DateTime Format
 
-NSString *const formatDate = @"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
-NSString *const formatDateNoFractionalSeconds = @"yyyy-MM-dd'T'HH:mm:ss'Z'";
+static NSString *const formatDate = @"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+static NSString *const formatDateNoFractionalSeconds = @"yyyy-MM-dd'T'HH:mm:ss'Z'";
 
 
 #pragma mark * MSDateFormatter Implementation

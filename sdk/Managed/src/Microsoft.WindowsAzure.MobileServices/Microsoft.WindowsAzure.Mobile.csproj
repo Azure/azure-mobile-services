@@ -45,6 +45,9 @@
   <ItemGroup>
     <Compile Include="Authentication\MobileServiceTokenAuthentication.cs" />
     <Compile Include="Collections\MobileServiceCollection.cs" />
+    <Compile Include="Collections\MobileServiceCollectionEventArgs.cs" />
+    <Compile Include="EnumValueAttribute.cs" />
+    <Compile Include="Exceptions\MobileServiceConflictException.cs" />
     <Compile Include="Exceptions\MobileServiceInvalidOperationException.cs" />
     <Compile Include="Exceptions\MobileServicePreconditionFailedException.cs" />
     <Compile Include="Exceptions\MobileServiceLocalStoreException.cs" />
@@ -58,8 +61,11 @@
     <Compile Include="Extensions\MobileServiceLocalStoreExtensions.cs" />
     <Compile Include="Extensions\MobileServiceSyncContextExtensions.cs" />
     <Compile Include="Extensions\MobileServiceSyncTableExtensions.cs" />
+    <Compile Include="Extensions\MobileServiceTableExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
+    <Compile Include="Http\HttpUtility.cs" />
+    <Compile Include="Http\LinkHeaderValue.cs" />
     <Compile Include="Http\MobileServiceHttpResponse.cs" />
     <Compile Include="IMobileServiceClient.cs" />
     <Compile Include="Authentication\MobileServiceAuthentication.cs" />
@@ -88,6 +94,8 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Table\MobileServiceSystemColumns.cs" />
+    <Compile Include="Table\MobileServiceSystemProperties.cs" />
+    <Compile Include="Table\Query\IQueryResultEnumerable.cs" />
     <Compile Include="Table\Query\Linq\FilterBuildingExpressionVisitor.cs" />
     <Compile Include="Table\Query\Linq\IMobileServiceTableQuery.cs" />
     <Compile Include="Table\Query\Linq\MemberInfoKey.cs" />
@@ -122,6 +130,8 @@
     <Compile Include="Table\Sync\IMobileServiceSyncTable.cs" />
     <Compile Include="Table\Sync\IMobileServiceSyncTable.Generic.cs" />
     <Compile Include="Table\MobileServiceSystemProperties.cs" />
+    <Compile Include="Table\Query\ODataOptions.cs" />
+    <Compile Include="Table\Query\QueryResult.cs" />
     <Compile Include="Table\Serialization\UpdatedAtAttribute.cs" />
     <Compile Include="Table\Serialization\CreatedAtAttribute.cs" />
     <Compile Include="Table\Serialization\VersionAttribute.cs" />
@@ -133,8 +143,8 @@
     <Compile Include="MobileServiceUrlBuilder.cs" />
     <Compile Include="Table\Query\ITotalCountProvider.cs" />
     <Compile Include="Table\Query\MobileServiceTableQueryDescription.cs" />
-    <Compile Include="Table\Query\TotalCountEnumerable.cs" />
-    <Compile Include="Table\Query\TotalCountList.cs" />
+    <Compile Include="Table\Query\QueryResultEnumerable.cs" />
+    <Compile Include="Table\Query\QueryResultList.cs" />
     <Compile Include="Table\Serialization\DataTableAttribute.cs" />
     <Compile Include="Table\Serialization\MobileServiceContractResolver.cs" />
     <Compile Include="Table\Serialization\MobileServiceSerializer.cs" />
@@ -178,16 +188,16 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\packages\Newtonsoft.Json.6.0.2\lib\portable-net45+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\packages\Newtonsoft.Json.6.0.4\lib\portable-net45+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http">
-      <HintPath>..\..\packages\Microsoft.Net.Http.2.2.19\lib\portable-net40+sl4+win8+wp71+wpa81\System.Net.Http.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.Net.Http.2.2.28\lib\portable-net40+sl4+win8+wp71+wpa81\System.Net.Http.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http.Extensions">
-      <HintPath>..\..\packages\Microsoft.Net.Http.2.2.19\lib\portable-net40+sl4+win8+wp71+wpa81\System.Net.Http.Extensions.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.Net.Http.2.2.28\lib\portable-net40+sl4+win8+wp71+wpa81\System.Net.Http.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http.Primitives">
-      <HintPath>..\..\packages\Microsoft.Net.Http.2.2.19\lib\portable-net40+sl4+win8+wp71+wpa81\System.Net.Http.Primitives.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.Net.Http.2.2.28\lib\portable-net40+sl4+win8+wp71+wpa81\System.Net.Http.Primitives.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

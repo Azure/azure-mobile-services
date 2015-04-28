@@ -50,12 +50,12 @@ namespace Microsoft.WindowsAzure.MobileServices.TestFramework
             }
             catch (T ex)
             {
-               TestHarness.Log(
-                        string.Format(
-                            "Caught expected error {0}: {1}",
-                            ex.GetType().Name,
-                            ex.Message.Replace("\n", "   ").Replace("\r", "   ")));
-               return ex;
+                TestHarness.Log(
+                         string.Format(
+                             "Caught expected error {0}: {1}",
+                             ex.GetType().Name,
+                             ex.Message.Replace("\n", "   ").Replace("\r", "   ")));
+                return ex;
             }
             catch (Exception ex)
             {

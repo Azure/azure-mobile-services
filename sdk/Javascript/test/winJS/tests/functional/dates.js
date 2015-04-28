@@ -107,7 +107,7 @@ $testGroup('Dates')
                     $assert.areEqual(dateValue.valueOf(), item.date.valueOf());
 
                     $log('Querying for instance');
-                    return table.where({ date: dateValue }).where('id ge ?', item.id).read();
+                    return table.where({ date: dateValue }).where($isDotNet() ? 'Id eq \'' + item.id + '\'' : 'id ge ' + item.id).read();
                 },
                 function (items) {
                     $log('Verifying query response date');

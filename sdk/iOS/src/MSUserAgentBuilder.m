@@ -10,12 +10,12 @@
 #pragma mark * User Agent Header String Constants
 
 
-NSString *const sdkLanguage = @"objective-c";
-NSString *const userAgentValueFormat = @"ZUMO/%@ (lang=%@; os=%@; os_version=%@; arch=%@; version=%@)";
-NSString *const simulatorModel = @"iOSSimulator";
-NSString *const unknownValue = @"--";
-NSString *const sdkVersionFormat = @"%d.%d";
-NSString *const sdkFileVesionFormat = @"%d.%d.%d.0";
+static NSString *const sdkLanguage = @"objective-c";
+static NSString *const userAgentValueFormat = @"ZUMO/%@ (lang=%@; os=%@; os_version=%@; arch=%@; version=%@)";
+static NSString *const simulatorModel = @"iOSSimulator";
+static NSString *const unknownValue = @"--";
+static NSString *const sdkVersionFormat = @"%d.%d";
+static NSString *const sdkFileVesionFormat = @"%d.%d.%d.0";
 
 
 #pragma mark * MSUserAgentBuilder Implementation

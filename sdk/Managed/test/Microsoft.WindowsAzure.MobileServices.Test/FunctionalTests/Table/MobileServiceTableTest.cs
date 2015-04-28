@@ -453,6 +453,37 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
+        public async Task InsertAsync_ThrowsConflictException_WhenConflictOccurs()
+        {
+            await EnsureEmptyTableAsync<ToDoWithSystemPropertiesType>();
+            string id = "an id";
+            IMobileServiceTable table = GetClient().GetTable("stringId_test_table");
+
+            var item = new JObject() { { "id", id }, { "String", "a value" } };
+            var inserted = await table.InsertAsync(item);
+
+            var expectedException = await ThrowsAsync<MobileServiceConflictException>(() => table.InsertAsync(item));
+
+            Assert.IsNotNull(expectedException);
+        }
+
+        [AsyncTestMethod]
+        public async Task InsertAsync_ThrowsConflictException_WhenConflictOccurs_Generic()
+        {
+            await EnsureEmptyTableAsync<ToDoWithSystemPropertiesType>();
+
+            string id = "an id";
+            IMobileServiceTable<ToDoWithSystemPropertiesType> table = GetClient().GetTable<ToDoWithSystemPropertiesType>();
+
+            ToDoWithSystemPropertiesType item = new ToDoWithSystemPropertiesType() { Id = id, String = "a value" };
+            await table.InsertAsync(item);
+
+            var expectedException = await ThrowsAsync<MobileServiceConflictException<ToDoWithSystemPropertiesType>>(() => table.InsertAsync(item));
+
+            Assert.IsNotNull(expectedException);
+        }
+
+        [AsyncTestMethod]
         public async Task DeleteAsync_ThrowsPreconditionFailedException_WhenMergeConflictOccurs()
         {
             await EnsureEmptyTableAsync<ToDoWithSystemPropertiesType>();

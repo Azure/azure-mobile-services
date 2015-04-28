@@ -2,14 +2,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-#import <SenTestingKit/SenTestingKit.h>
+#import <XCTest/XCTest.h>
 #import "MSUserAgentBuilder.h"
 
-@interface MSUserAgentBuilderTests : SenTestCase
+@interface MSUserAgentBuilderTests : XCTestCase
 
 @end
 
 @implementation MSUserAgentBuilderTests
+
 
 #pragma mark * Setup and TearDown
 
@@ -32,7 +33,7 @@
 {
     NSString *userAgent = [MSUserAgentBuilder userAgent];
     
-    STAssertTrue([userAgent isEqualToString:@"ZUMO/1.2 (lang=objective-c; os=--; os_version=--; arch=iOSSimulator; version=1.2.0.0)"],
+    XCTAssertTrue([userAgent isEqualToString:@"ZUMO/1.2 (lang=objective-c; os=--; os_version=--; arch=iOSSimulator; version=1.2.0.0)"],
                  @"user agent was: %@", userAgent);
 }
 

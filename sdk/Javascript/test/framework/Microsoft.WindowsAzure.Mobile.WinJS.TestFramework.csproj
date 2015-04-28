@@ -158,6 +158,7 @@
   <ItemGroup>
     <Compile Include="ActionContinuation.cs" />
     <Compile Include="Assert.cs" />
+    <Compile Include="RuntimeTestFilter.cs" />
     <Compile Include="FunctionalTestFilter.cs" />
     <Compile Include="IAsyncExecution.cs" />
     <Compile Include="IContinuation.cs" />

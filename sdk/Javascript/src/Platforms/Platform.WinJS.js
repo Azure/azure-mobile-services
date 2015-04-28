@@ -9,8 +9,8 @@
 // Declare JSHint globals
 /*global WinJS:false, Windows:false, $__fileVersion__:false, $__version__:false */
 
-var _ = require('Extensions');
-var Validate = require('Validate');
+var _ = require('Extensions'),
+    Validate = require('Validate');
 
 exports.async = function async(func) {
     /// <summary>
@@ -66,8 +66,6 @@ exports.addToMobileServicesClientNamespace = function (declarations) {
     /// </param>
 
     try {
-        // The following namespace is retained for backward compatibility, but
-        // may soon change to 'WindowsAzure'
         WinJS.Namespace.define('WindowsAzure', declarations);
     } catch (ex) {
         // This can fail due to a WinRT issue where another assembly defining a
@@ -106,7 +104,7 @@ exports.writeSetting = function writeSetting(name, value) {
     /// </param>
     /// <param name="value" type="String" mayBeNull="true">
     /// The value of the setting.
-    /// </returns>
+    /// </param>
 
     var localSettings = Windows.Storage.ApplicationData.current.localSettings;
     if (!_.isNull(localSettings)) {

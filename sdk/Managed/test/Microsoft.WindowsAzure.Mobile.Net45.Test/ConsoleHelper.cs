@@ -3,6 +3,7 @@
 // ----------------------------------------------------------------------------
 
 using System;
+<<<<<<< HEAD
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -10,6 +11,11 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+=======
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Runtime.InteropServices;
+>>>>>>> master
 
 namespace Microsoft.WindowsAzure.MobileServices.Test
 {
@@ -27,6 +33,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             AttachConsole(ParentProcess);
         }
 
+<<<<<<< HEAD
+=======
+        public static void Flush()
+        {
+            consoleWriter.Flush();
+            Console.Out.Flush();
+        }
+
+>>>>>>> master
         public static void Write(string format, params object[] args)
         {
             consoleWriter.Write(format, args);

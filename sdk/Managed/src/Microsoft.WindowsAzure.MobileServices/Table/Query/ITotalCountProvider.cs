@@ -2,6 +2,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
+using System;
+
 namespace Microsoft.WindowsAzure.MobileServices
 {
     /// <summary>
@@ -11,6 +13,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// query.RequestTotalCount(), you can cast the result (whether its a
     /// sequence or a list) to ITotalCountProvider.
     /// </summary>
+    [Obsolete("Use IQueryResultEnumerable interface")]
     public interface ITotalCountProvider
     {
         /// <summary>

@@ -12,7 +12,7 @@ Imports Newtonsoft.Json
         Dim query As IMobileServiceTableQuery(Of U) = getQuery(table)
         Dim provider As MobileServiceTableQueryProvider = New MobileServiceTableQueryProvider()
         Dim compiledQuery As MobileServiceTableQueryDescription = provider.Compile(CType(query, MobileServiceTableQuery(Of U)))
-        Console.WriteLine(">>> {0}", compiledQuery.ToQueryString())
+        Console.WriteLine(">>> {0}", compiledQuery.ToODataString())
         Return compiledQuery
     End Function
 
@@ -225,7 +225,11 @@ Imports Newtonsoft.Json
 
         query = Compile(Of Product, Product)(Function(table) _
                                                  table.Where(Function(p) p.Created = New DateTime(1994, 10, 14, 0, 0, 0, DateTimeKind.Utc)))
+<<<<<<< HEAD
         Assert.AreEqual("(Created eq datetime'1994-10-14T00:00:00.000Z')", ODataExpressionVisitor.ToODataString(query.Filter))
+=======
+        Assert.AreEqual("(Created eq datetime'1994-10-14T00%3A00%3A00.000Z')", query.Filter)
+>>>>>>> master
     End Sub
 
     <TestMethod> Public Sub CombinedQuery()
@@ -246,8 +250,13 @@ Imports Newtonsoft.Json
                                                      .Skip(20) _
                                                      .Take(10))
         Assert.AreEqual( _
+<<<<<<< HEAD
             "$filter=(((Price le 10M) and (Weight gt 10f)) and not(InStock))&$orderby=Price desc,Name&$skip=20&$top=10&$select=Name,Price,Weight,WeightInKG", _
             query.ToQueryString())
+=======
+            "$filter=((Price le 10M) and (Weight gt 10f)) and not(InStock)&$orderby=Price desc,Name&$skip=20&$top=10&$select=Name,Price,Weight,WeightInKG", _
+            query.ToODataString())
+>>>>>>> master
     End Sub
 
     <TestMethod> Public Sub FilterOperators()
@@ -261,25 +270,41 @@ Imports Newtonsoft.Json
                                                             From p In table _
                                                             Where p.Weight + 1.0 = 10 _
                                                             Select p)
+<<<<<<< HEAD
         Assert.AreEqual("((Weight add 1.0) eq 10.0)", ODataExpressionVisitor.ToODataString(query.Filter))
+=======
+        Assert.AreEqual("((Weight add 1.0) eq 10.0)", query.Filter)
+>>>>>>> master
 
         query = Compile(Of Product, Product)(Function(table) _
                                                             From p In table _
                                                             Where p.Weight - 1.0 = 10 _
                                                             Select p)
+<<<<<<< HEAD
         Assert.AreEqual("((Weight sub 1.0) eq 10.0)", ODataExpressionVisitor.ToODataString(query.Filter))
+=======
+        Assert.AreEqual("((Weight sub 1.0) eq 10.0)", query.Filter)
+>>>>>>> master
 
         query = Compile(Of Product, Product)(Function(table) _
                                                             From p In table _
                                                             Where p.Weight * 2.0 = 10 _
                                                             Select p)
+<<<<<<< HEAD
         Assert.AreEqual("((Weight mul 2.0) eq 10.0)", ODataExpressionVisitor.ToODataString(query.Filter))
+=======
+        Assert.AreEqual("((Weight mul 2.0) eq 10.0)", query.Filter)
+>>>>>>> master
 
         query = Compile(Of Product, Product)(Function(table) _
                                                             From p In table _
                                                             Where p.Weight / 2.0 = 10 _
                                                             Select p)
+<<<<<<< HEAD
         Assert.AreEqual("((Weight div 2.0) eq 10.0)", ODataExpressionVisitor.ToODataString(query.Filter))
+=======
+        Assert.AreEqual("((Weight div 2.0) eq 10.0)", query.Filter)
+>>>>>>> master
 
         query = Compile(Of Product, Product)(Function(table) _
                                                             From p In table _
@@ -291,7 +316,11 @@ Imports Newtonsoft.Json
                                                             From p In table _
                                                             Where (p.Weight * 2.0) / 3.0 + 1.0 = 10 _
                                                             Select p)
+<<<<<<< HEAD
         Assert.AreEqual("((((Weight mul 2.0) div 3.0) add 1.0) eq 10.0)", ODataExpressionVisitor.ToODataString(query.Filter))
+=======
+        Assert.AreEqual("((((Weight mul 2.0) div 3.0) add 1.0) eq 10.0)", query.Filter)
+>>>>>>> master
     End Sub
 
     <TestMethod> Public Sub FilterMethods()
@@ -343,7 +372,11 @@ Imports Newtonsoft.Json
                                                     From p In table _
                                                     Where Math.Floor(p.Weight) = 10 _
                                                     Select p)
+<<<<<<< HEAD
         Assert.AreEqual("(floor(Weight) eq 10.0)", ODataExpressionVisitor.ToODataString(query.Filter))
+=======
+        Assert.AreEqual("(floor(Weight) eq 10.0)", query.Filter)
+>>>>>>> master
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
@@ -355,7 +388,11 @@ Imports Newtonsoft.Json
                                                     From p In table _
                                                     Where Math.Ceiling(p.Weight) = 10 _
                                                     Select p)
+<<<<<<< HEAD
         Assert.AreEqual("(ceiling(Weight) eq 10.0)", ODataExpressionVisitor.ToODataString(query.Filter))
+=======
+        Assert.AreEqual("(ceiling(Weight) eq 10.0)", query.Filter)
+>>>>>>> master
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
@@ -367,7 +404,11 @@ Imports Newtonsoft.Json
                                                     From p In table _
                                                     Where Math.Round(p.Weight) = 10 _
                                                     Select p)
+<<<<<<< HEAD
         Assert.AreEqual("(round(Weight) eq 10.0)", ODataExpressionVisitor.ToODataString(query.Filter))
+=======
+        Assert.AreEqual("(round(Weight) eq 10.0)", query.Filter)
+>>>>>>> master
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _

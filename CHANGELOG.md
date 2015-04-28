@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Azure Mobile Services Change Log
 
 ### Version 1.3 alpha4
@@ -13,10 +14,46 @@
 **Managed SDK** 
 - Added support for offline and sync
 - Added support for soft delete
+=======
+# Microsoft Azure Mobile Services Change Log
+### Version 1.2.5
+**Managed SDK**
+- Updated to use a modified build of Xamarin.Auth that will not conflict with any user-included version of Xamarin.Auth
+
+**Javascript SDK**
+- Added support for sending provider specific query string parameters in login using new loginWithOptions method
+- Added support for registering devices with notification hubs for apns and gcm
+- Fixed issue with InAppBrowser on iOS devices during auth workflows when using Cordova/PhoneGap
+
+### Version 1.2.4
+**Managed SDK**
+- Added support for following link headers returned from the .NET backend
+- Added a MobileServiceConflictException to detect duplicate inserts
+- Added support for datetimeoffsets in queries
+- Added support for sending provider specific query string parameters in LoginAsync()
+- Fixed an issue causing duplicate registrations in Xamarin.iOS against .NET backends
+
+**Javascript SDK**
+- Fixed crash when server response did not have a Content-Type header
+
+**iOS SDK**
+- Address bug where version property was returned to the caller even when not asked for
+- Fixes Swift QS for syntax changes up to Xcode Beta 7
+
+**Quickstarts**
+- Converted Windows Phone and Windows Store quickstarts to a univeral app quickstart
+- Converted WinJS Windows Store quickstart to a universal app quickstart
+- Fix syntax issues in iOS Swift quickstart
+>>>>>>> master
 
 ### Version 1.2.3
 **Managed SDK** 
 - Added support for Xamarin iOS Azure Notification Hub integration
+
+**iOS SDK**
+- Fix issue with const when using both Azure Messaging and Mobile Services frameworks
+- Fix issue [#306](https://github.com/Azure/azure-mobile-services/issues/306) with how arrays passed as query string params to table and custom APIs are converted 
+- Fix issue where system properties (__version, __updatedAt, etc) were returned to the caller when they were not requested
 
 ### Version 1.2.2
 **iOS SDK**

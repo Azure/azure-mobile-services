@@ -10,64 +10,64 @@
 #pragma mark * NSExpression Function String Constants
 
 
-NSString *const addFunction = @"add:to:";
-NSString *const subFunction =@"from:subtract:";
-NSString *const mulFunction = @"multiply:by:";
-NSString *const divFunction = @"divide:by:";
-NSString *const modFunction = @"modulus:by:";
-NSString *const ceilingFunction = @"ceiling:";
-NSString *const floorFunction = @"floor:";
-NSString *const toUpperFunction =@"uppercase:";
-NSString *const toLowerFunction = @"lowercase:";
-NSString *const truePredicate = @"TRUEPREDICATE";
-NSString *const falsePredicate = @"FALSEPREDICATE";
+static NSString *const addFunction = @"add:to:";
+static NSString *const subFunction =@"from:subtract:";
+static NSString *const mulFunction = @"multiply:by:";
+static NSString *const divFunction = @"divide:by:";
+static NSString *const modFunction = @"modulus:by:";
+static NSString *const ceilingFunction = @"ceiling:";
+static NSString *const floorFunction = @"floor:";
+static NSString *const toUpperFunction =@"uppercase:";
+static NSString *const toLowerFunction = @"lowercase:";
+static NSString *const truePredicate = @"TRUEPREDICATE";
+static NSString *const falsePredicate = @"FALSEPREDICATE";
 
 
 #pragma mark * Filter Query String Constants
 
 
-NSString *const openParentheses = @"(";
-NSString *const closeParentheses = @")";
-NSString *const comma = @",";
+static NSString *const openParentheses = @"(";
+static NSString *const closeParentheses = @")";
+static NSString *const comma = @",";
 
-NSString *const operatorOpenParentheses = @"%@(";
-NSString *const operatorWhitespace = @" %@ ";
+static NSString *const operatorOpenParentheses = @"%@(";
+static NSString *const operatorWhitespace = @" %@ ";
 
-NSString *const notOperator = @"not";
-NSString *const andOperator = @"and";
-NSString *const orOperator = @"or";
-NSString *const lessThanOperator = @"lt";
-NSString *const lessThanOrEqualsOperator = @"le";
-NSString *const greaterThanOperator = @"gt";
-NSString *const greaterThanOrEqualsOperator = @"ge";
-NSString *const equalsOperator = @"eq";
-NSString *const notEqualsOperator = @"ne";
-NSString *const addOperator = @"add";
-NSString *const subOperator = @"sub";
-NSString *const mulOperator =  @"mul";
-NSString *const divOperator = @"div";
-NSString *const modOperator =  @"mod";
-NSString *const ceilingOperator = @"ceiling";
-NSString *const floorOperator = @"floor";
-NSString *const toUpperOperator = @"toupper";
-NSString *const toLowerOperator = @"tolower";
-NSString *const startsWithOperator = @"startswith";
-NSString *const endsWithOperator = @"endswith";
-NSString *const substringOfOperator = @"substringof";
+static NSString *const notOperator = @"not";
+static NSString *const andOperator = @"and";
+static NSString *const orOperator = @"or";
+static NSString *const lessThanOperator = @"lt";
+static NSString *const lessThanOrEqualsOperator = @"le";
+static NSString *const greaterThanOperator = @"gt";
+static NSString *const greaterThanOrEqualsOperator = @"ge";
+static NSString *const equalsOperator = @"eq";
+static NSString *const notEqualsOperator = @"ne";
+static NSString *const addOperator = @"add";
+static NSString *const subOperator = @"sub";
+static NSString *const mulOperator =  @"mul";
+static NSString *const divOperator = @"div";
+static NSString *const modOperator =  @"mod";
+static NSString *const ceilingOperator = @"ceiling";
+static NSString *const floorOperator = @"floor";
+static NSString *const toUpperOperator = @"toupper";
+static NSString *const toLowerOperator = @"tolower";
+static NSString *const startsWithOperator = @"startswith";
+static NSString *const endsWithOperator = @"endswith";
+static NSString *const substringOfOperator = @"substringof";
 
-NSString *const nullConstant = @"null";
-NSString *const stringConstant = @"'%@'";
-NSString *const trueConstant = @"true";
-NSString *const falseConstant = @"false";
-NSString *const decimalConstant = @"%@m";
-NSString *const floatConstant = @"%gf";
-NSString *const doubleConstant = @"%gd";
-NSString *const intConstant = @"%d";
-NSString *const longConstant = @"%ld";
-NSString *const longLongConstant = @"%lldl";
-NSString *const dateTimeConstant = @"datetime'%@'";
-NSString *const alwaysTrueConstant = @"(1 eq 1)";
-NSString *const alwaysFalseConstant = @"(1 eq 0)";
+static NSString *const nullConstant = @"null";
+static NSString *const stringConstant = @"'%@'";
+static NSString *const trueConstant = @"true";
+static NSString *const falseConstant = @"false";
+static NSString *const decimalConstant = @"%@m";
+static NSString *const floatConstant = @"%gf";
+static NSString *const doubleConstant = @"%gd";
+static NSString *const intConstant = @"%d";
+static NSString *const longConstant = @"%ld";
+static NSString *const longLongConstant = @"%lldl";
+static NSString *const dateTimeConstant = @"datetime'%@'";
+static NSString *const alwaysTrueConstant = @"(1 eq 1)";
+static NSString *const alwaysFalseConstant = @"(1 eq 0)";
 
 
 #pragma mark * MSPredicateTranslator Implementation

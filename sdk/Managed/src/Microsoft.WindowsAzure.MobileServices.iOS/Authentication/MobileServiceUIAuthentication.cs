@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Globalization;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using MonoTouch.Foundation;
 using MonoTouch.UIKit;
-using Xamarin.Auth;
+using Xamarin.Auth._MobileServices;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
@@ -16,8 +13,8 @@ namespace Microsoft.WindowsAzure.MobileServices
         private readonly RectangleF rect;
         private readonly object view;
 
-        public MobileServiceUIAuthentication (RectangleF rect, object view, IMobileServiceClient client, string providerName)
-            : base(client, providerName)
+        public MobileServiceUIAuthentication(RectangleF rect, object view, IMobileServiceClient client, string providerName, IDictionary<string, string> parameters)
+            : base(client, providerName, parameters)
         {
             this.rect = rect;
             this.view = view;
@@ -27,7 +24,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             var tcs = new TaskCompletionSource<string>();
 
-            var auth = new WebRedirectAuthenticator (StartUri, EndUri);
+            var auth = new WebRedirectAuthenticator(StartUri, EndUri);
             auth.ClearCookiesBeforeLogin = false;
 
             UIViewController c = auth.GetUI();
@@ -39,15 +36,15 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 NSAction completed = () =>
                 {
-                    Exception ex = e.Exception ?? new Exception (e.Message);
-                    tcs.TrySetException (ex);
+                    Exception ex = e.Exception ?? new Exception(e.Message);
+                    tcs.TrySetException(ex);
                 };
 
                 if (controller != null)
-                    controller.DismissViewController (true, completed);
+                    controller.DismissViewController(true, completed);
                 if (popover != null)
                 {
-                    popover.Dismiss (true);
+                    popover.Dismiss(true);
                     completed();
                 }
             };
@@ -57,16 +54,16 @@ namespace Microsoft.WindowsAzure.MobileServices
                 NSAction completed = () =>
                 {
                     if (!e.IsAuthenticated)
-                        tcs.TrySetException (new InvalidOperationException (Resources.IAuthenticationBroker_AuthenticationCanceled));
+                        tcs.TrySetException(new InvalidOperationException(Resources.IAuthenticationBroker_AuthenticationCanceled));
                     else
-                        tcs.TrySetResult (e.Account.Properties["token"]);
+                        tcs.TrySetResult(e.Account.Properties["token"]);
                 };
 
                 if (controller != null)
-                    controller.DismissViewController (true, completed);
+                    controller.DismissViewController(true, completed);
                 if (popover != null)
                 {
-                    popover.Dismiss (true);
+                    popover.Dismiss(true);
                     completed();
                 }
             };
@@ -74,19 +71,19 @@ namespace Microsoft.WindowsAzure.MobileServices
             controller = view as UIViewController;
             if (controller != null)
             {
-                controller.PresentViewController (c, true, null);
+                controller.PresentViewController(c, true, null);
             }
             else
             {
                 UIView v = view as UIView;
                 UIBarButtonItem barButton = view as UIBarButtonItem;
 
-                popover = new UIPopoverController (c);
+                popover = new UIPopoverController(c);
 
                 if (barButton != null)
-                    popover.PresentFromBarButtonItem (barButton, UIPopoverArrowDirection.Any, true);
+                    popover.PresentFromBarButtonItem(barButton, UIPopoverArrowDirection.Any, true);
                 else
-                    popover.PresentFromRect (rect, v, UIPopoverArrowDirection.Any, true);
+                    popover.PresentFromRect(rect, v, UIPopoverArrowDirection.Any, true);
             }
 
             return tcs.Task;

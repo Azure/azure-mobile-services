@@ -134,6 +134,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("deviceToken");
             }
 
+            deviceToken = deviceToken.ToUpperInvariant();
             return this.RegistrationManager.DeleteRegistrationsForChannelAsync(deviceToken);
         }
 
@@ -154,6 +155,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("registration.deviceToken");
             }
 
+            registration.PushHandle = registration.PushHandle.ToUpperInvariant();
             return this.RegistrationManager.RegisterAsync(registration);
         }
 
@@ -164,6 +166,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>List of registrations</returns>
         public Task<List<Registration>> ListRegistrationsAsync(string deviceToken)
         {
+            deviceToken = deviceToken.ToUpperInvariant();
             return this.RegistrationManager.ListRegistrationsAsync(deviceToken);
         }
     }

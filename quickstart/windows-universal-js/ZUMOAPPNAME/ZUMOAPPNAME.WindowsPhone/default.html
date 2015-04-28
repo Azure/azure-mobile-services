@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>ZUMOAPPNAME.WindowsPhone</title>
+
+    <!-- WinJS references -->
+    <!-- At runtime, ui-themed.css resolves to ui-themed.light.css or ui-themed.dark.css 
+    based on the user’s theme setting. This is part of the MRT resource loading functionality. -->
+    <link href="/css/ui-themed.css" rel="stylesheet" />
+    <script src="//Microsoft.Phone.WinJS.2.1/js/base.js"></script>
+    <script src="//Microsoft.Phone.WinJS.2.1/js/ui.js"></script>
+    <script type="text/javascript" src="/js/MobileServices.js"></script>
+
+    <!-- ZUMOAPPNAME.WindowsPhone references -->
+    <link href="/css/default.css" rel="stylesheet" />
+    <script src="/js/default.js"></script>
+</head>
+<body class="phone">
+    <div style="margin:38px 18px 18px 18px">
+        <h4 style="margin-bottom:18px">ZUMOAPPNAME</h4>
+
+        <div>Enter some text below and click Save to insert a new TodoItem item into your database</div>
+        
+        <input type="text" id="textInput" style="width:240px;vertical-align:middle;margin-right:10px;" />
+        <button id="buttonSave" style="vertical-align:middle">Save</button>
+        
+        <div>Click refresh below to load the unfinished TodoItems from your database. Use the checkbox to complete and update your TodoItems</div>
+
+        <button id="buttonRefresh" style="width:100%">Refresh</button>
+
+        <div id="TemplateItem" data-win-control="WinJS.Binding.Template">
+            <input type="checkbox" style="margin-right:5px" data-win-bind="checked: complete; dataContext: this; innerText: text" />
+        </div>
+
+        <div id="listItems"
+             data-win-control="WinJS.UI.ListView"
+             data-win-options="{ itemTemplate: TemplateItem, layout: {type: WinJS.UI.ListLayout} }">
+        </div>
+    </div>
+
+
+</body>
+</html>

@@ -23,4 +23,8 @@ sdk/Managed/test/Microsoft.WindowsAzure.MobileServices.SQLiteStore.Net45.Test/sq
 StyleCop.Cache
 packages
 *.suo
+<<<<<<< HEAD
 *.jar
+=======
+deriveddata
+>>>>>>> master

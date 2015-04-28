@@ -3,7 +3,7 @@ using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using MonoTouch.Dialog;
 using MonoTouch.UIKit;
 
-namespace Microsoft.WindowsAzure.Mobile.iOS.Test
+namespace MicrosoftWindowsAzureMobileiOSTest
 {
     public class TestViewController
         : DialogViewController

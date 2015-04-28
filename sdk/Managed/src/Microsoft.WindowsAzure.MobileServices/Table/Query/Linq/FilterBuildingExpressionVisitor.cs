@@ -237,14 +237,99 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         {
             Debug.Assert(expression != null);
             Debug.Assert(contractResolver != null);
-                    
+
             // Walk the expression tree and build the filter.
             FilterBuildingExpressionVisitor visitor = new FilterBuildingExpressionVisitor(contractResolver);
             visitor.Visit(expression);
 
+<<<<<<< HEAD
             QueryNode node = visitor.filterExpression.FirstOrDefault();
             return node;
         }        
+=======
+            // Special case a few primitive types
+            RuntimeTypeHandle handle = value.GetType().TypeHandle;
+            if (handle.Equals(typeof(bool).TypeHandle))
+            {
+                // Make sure booleans are lower case
+                return ((bool)value).ToString().ToLower();
+            }
+            else if (handle.Equals(typeof(byte).TypeHandle))
+            {
+                // Format bytes as hex pairs
+                return ((byte)value).ToString("X2", CultureInfo.InvariantCulture);
+            }
+            // unsigned int doesn't fit an int so send as long
+            else if (handle.Equals(typeof(long).TypeHandle) || handle.Equals(typeof(ulong).TypeHandle)
+                 || handle.Equals(typeof(uint).TypeHandle))
+            {
+                return string.Format(CultureInfo.InvariantCulture, "{0}L", value);
+            }
+            else if (handle.Equals(typeof(float).TypeHandle))
+            {
+                return string.Format(CultureInfo.InvariantCulture, "{0}f", value);
+            }
+            else if (handle.Equals(typeof(Decimal).TypeHandle))
+            {
+                return string.Format(CultureInfo.InvariantCulture, "{0}M", value);
+            }
+            else if (handle.Equals(typeofInt.TypeHandle) || handle.Equals(typeof(short).TypeHandle)
+                || handle.Equals(typeof(ushort).TypeHandle) || handle.Equals(typeof(sbyte).TypeHandle))
+            {
+                return string.Format(CultureInfo.InvariantCulture, "{0}", value);
+            }
+            else if (handle.Equals(typeof(double).TypeHandle))
+            {
+                string temp = string.Format(CultureInfo.InvariantCulture, "{0}", value);
+                if (temp.Contains("E") || temp.Contains("."))
+                {
+                    return temp;
+                }
+                return temp + ".0";
+            }
+            else if (handle.Equals(typeof(char).TypeHandle))
+            {
+                // Escape the char constant by: (1) replacing a single quote with a 
+                // pair of single quotes, and (2) Uri escaping with percent encoding
+                char ch = (char)value;
+                string charEscaped = Uri.EscapeDataString(ch == '\'' ? "''" : ch.ToString());
+                return string.Format(CultureInfo.InvariantCulture, "'{0}'", charEscaped);
+            }
+            else if (handle.Equals(typeof(DateTime).TypeHandle))
+            {
+                // Format dates in the official OData format
+                return string.Format(
+                    CultureInfo.InvariantCulture,
+                    "datetime'{0}'",
+                    Uri.EscapeDataString(ToRoundtripDateString(((DateTime)value))));
+            }
+            else if (handle.Equals(typeof(DateTimeOffset).TypeHandle))
+            {
+                // Format dates in the official OData format
+                return string.Format(
+                    CultureInfo.InvariantCulture,
+                    "datetimeoffset'{0}'",
+                    Uri.EscapeDataString(((DateTimeOffset)value).ToString("o")));
+            }
+            else if (handle.Equals(typeof(Guid).TypeHandle))
+            {
+                // GUIDs are in registry format without the { }s
+                Guid guid = (Guid)value;
+                return string.Format(
+                    CultureInfo.InvariantCulture,
+                    "guid'{0}'",
+                    guid.ToString().TrimStart('{').TrimEnd('}'));
+            }
+            else
+            {
+                // Escape the string constant by: (1) replacing single quotes with a 
+                // pair of single quotes, and (2) Uri escaping with percent encoding
+                string text = value.ToString();
+                string textEscaped = Uri.EscapeDataString(text.Replace("'", "''"));
+                return string.Format(CultureInfo.InvariantCulture, "'{0}'", textEscaped);
+            }
+        }
+>>>>>>> master
 
         /// <summary>
         /// Get the table member name referenced by an expression or return null.
@@ -346,7 +431,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                                 node != null ? node.ToString() : null));
                 }
             }
-            
+
             return node;
         }
 
@@ -464,7 +549,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                 BinaryExpression stringCompareExpression = null;
                 if (this.CheckEnumExpression(expression, out enumExpression, out constantExpression))
                 {
-                    this.Visit(this.RewriteEnumExpression(enumExpression, (ConstantExpression)expression.Right, expression.NodeType));            
+                    this.Visit(this.RewriteEnumExpression(enumExpression, (ConstantExpression)expression.Right, expression.NodeType));
                 }
                 // special case concat as it's OData function isn't infix
                 else if (expression.NodeType == ExpressionType.Add &&
@@ -563,54 +648,55 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         private bool CheckVBStringCompareExpression(BinaryExpression expression, out BinaryExpression stringComparison)
         {
             stringComparison = null;
-            if (expression.Left.Type == typeofInt && 
+            if (expression.Left.Type == typeofInt &&
                 expression.Left.NodeType == ExpressionType.Call &&
                 expression.Right.Type == typeofInt &&
                 expression.Right.NodeType == ExpressionType.Constant &&
-                ((ConstantExpression)expression.Right).Value.Equals(0)) {
-                    MethodCallExpression methodCall = (MethodCallExpression)expression.Left;
-                    if ((methodCall.Method.DeclaringType.FullName == VBOperatorClass || methodCall.Method.DeclaringType.FullName == VBOperatorClassAlt) &&
-                        methodCall.Method.Name == VBCompareStringMethod &&
-                        methodCall.Arguments.Count == VBCompareStringArguments &&
-                        methodCall.Arguments[VBCaseSensitiveCompareArgumentIndex].Type == typeof(bool) &&
-                        methodCall.Arguments[VBCaseSensitiveCompareArgumentIndex].NodeType == ExpressionType.Constant)
+                ((ConstantExpression)expression.Right).Value.Equals(0))
+            {
+                MethodCallExpression methodCall = (MethodCallExpression)expression.Left;
+                if ((methodCall.Method.DeclaringType.FullName == VBOperatorClass || methodCall.Method.DeclaringType.FullName == VBOperatorClassAlt) &&
+                    methodCall.Method.Name == VBCompareStringMethod &&
+                    methodCall.Arguments.Count == VBCompareStringArguments &&
+                    methodCall.Arguments[VBCaseSensitiveCompareArgumentIndex].Type == typeof(bool) &&
+                    methodCall.Arguments[VBCaseSensitiveCompareArgumentIndex].NodeType == ExpressionType.Constant)
+                {
+                    bool doCaseInsensitiveComparison = ((ConstantExpression)methodCall.Arguments[VBCaseSensitiveCompareArgumentIndex]).Value.Equals(true);
+                    Expression leftExpression = methodCall.Arguments[0];
+                    Expression rightExpression = methodCall.Arguments[1];
+                    if (doCaseInsensitiveComparison)
                     {
-                        bool doCaseInsensitiveComparison = ((ConstantExpression)methodCall.Arguments[VBCaseSensitiveCompareArgumentIndex]).Value.Equals(true);
-                        Expression leftExpression = methodCall.Arguments[0];
-                        Expression rightExpression = methodCall.Arguments[1];
-                        if (doCaseInsensitiveComparison)
-                        {
-                            leftExpression = MethodCallExpression.Call(leftExpression, stringToLowerMethod);
-                            rightExpression = MethodCallExpression.Call(rightExpression, stringToLowerMethod);
-                        }
-
-                        switch (expression.NodeType)
-                        {
-                            case ExpressionType.Equal:
-                                stringComparison = BinaryExpression.Equal(leftExpression, rightExpression);
-                                break;
-                            case ExpressionType.NotEqual:
-                                stringComparison = BinaryExpression.NotEqual(leftExpression, rightExpression);
-                                break;
-                            case ExpressionType.LessThan:
-                                stringComparison = BinaryExpression.LessThan(leftExpression, rightExpression);
-                                break;
-                            case ExpressionType.LessThanOrEqual:
-                                stringComparison = BinaryExpression.LessThanOrEqual(leftExpression, rightExpression);
-                                break;
-                            case ExpressionType.GreaterThan:
-                                stringComparison = BinaryExpression.GreaterThan(leftExpression, rightExpression);
-                                break;
-                            case ExpressionType.GreaterThanOrEqual:
-                                stringComparison = BinaryExpression.GreaterThanOrEqual(leftExpression, rightExpression);
-                                break;
-                        }
-
-                        if (stringComparison != null)
-                        {
-                            return true;
-                        }
+                        leftExpression = MethodCallExpression.Call(leftExpression, stringToLowerMethod);
+                        rightExpression = MethodCallExpression.Call(rightExpression, stringToLowerMethod);
                     }
+
+                    switch (expression.NodeType)
+                    {
+                        case ExpressionType.Equal:
+                            stringComparison = BinaryExpression.Equal(leftExpression, rightExpression);
+                            break;
+                        case ExpressionType.NotEqual:
+                            stringComparison = BinaryExpression.NotEqual(leftExpression, rightExpression);
+                            break;
+                        case ExpressionType.LessThan:
+                            stringComparison = BinaryExpression.LessThan(leftExpression, rightExpression);
+                            break;
+                        case ExpressionType.LessThanOrEqual:
+                            stringComparison = BinaryExpression.LessThanOrEqual(leftExpression, rightExpression);
+                            break;
+                        case ExpressionType.GreaterThan:
+                            stringComparison = BinaryExpression.GreaterThan(leftExpression, rightExpression);
+                            break;
+                        case ExpressionType.GreaterThanOrEqual:
+                            stringComparison = BinaryExpression.GreaterThanOrEqual(leftExpression, rightExpression);
+                            break;
+                    }
+
+                    if (stringComparison != null)
+                    {
+                        return true;
+                    }
+                }
             }
 
             return false;
@@ -655,7 +741,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         {
             //get type of enum
             Type enumType = enumExpression.Operand.Type;
-            
+
             // note: the constant part of the expression will always be a valid type for Enum.ToObject, 
             // because otherwise the compiler would have complained in the first place.
             // transform int into string
@@ -675,7 +761,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         /// <returns>The rewritten expression.</returns>
         private Expression RewriteStringAddition(BinaryExpression expression)
         {
-            Expression[] expressions = new [] { expression.Left, expression.Right };
+            Expression[] expressions = new[] { expression.Left, expression.Right };
             return Expression.Call(concatMethod, expressions);
         }
 
@@ -715,7 +801,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                 this.filterExpression.Push(new MemberAccessNode(null, memberName));
                 return expression;
             }
-            
+
             // Check if this member is actually a function that looks like a
             // property (like string.Length, etc.)
             string methodName = null;
@@ -873,13 +959,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             if (enumerable != null && comparand != null)
             {
                 List<object> elements = enumerable.OfType<object>().ToList();
-                if(elements.Count > 0)
+                if (elements.Count > 0)
                 {
                     // create our rewritten expression tree
                     // by tranforming the contains into a concatenation of 'or' expressions
                     Expression orExpression = elements.Select(o => Expression.Equal(comparand, Expression.Constant(o)))
                     .Aggregate((e1, e2) => Expression.OrElse(e1, e2));
-                    
+
                     this.Visit(orExpression);
                 }
             }
@@ -927,8 +1013,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         /// <returns>
         /// The ordered collection of arguments for the given OData filter method.
         /// </returns>
-        private static IEnumerable<Expression> GetFilterMethodArguments(MethodCallExpression expression, 
-                                                                        string methodName, 
+        private static IEnumerable<Expression> GetFilterMethodArguments(MethodCallExpression expression,
+                                                                        string methodName,
                                                                         bool isStatic)
         {
             IEnumerable<Expression> arguments;
@@ -949,6 +1035,27 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             }
 
             return arguments;
+<<<<<<< HEAD
         }       
+=======
+        }
+
+        /// <summary>
+        /// Convert a date to the ISO 8601 roundtrip format supported by the
+        /// server.
+        /// </summary>
+        /// <param name="date">
+        /// The date to convert.
+        /// </param>
+        /// <returns>
+        /// The date in UTC as a string. 
+        /// </returns>
+        private static string ToRoundtripDateString(DateTime date)
+        {
+            return date.ToUniversalTime().ToString(
+                "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffK",
+                CultureInfo.InvariantCulture);
+        }
+>>>>>>> master
     }
 }

@@ -2,11 +2,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-#import <SenTestingKit/SenTestingKit.h>
+#import <XCTest/XCTest.h>
 #import "MSClient.h"
 #import "MSMultiRequestTestFilter.h"
+#import "MSPush.h"
 
-@interface MSPushTests : SenTestCase
+@interface MSPushTests : XCTestCase
 @property (nonatomic) BOOL done;
 @property (nonatomic) MSClient *client;
 @property (nonatomic) NSURL *url;
@@ -51,11 +52,11 @@
     testFilterEmptyListRegistrations.ignoreNextFilter = YES;
     testFilterEmptyListRegistrations.dataToUse = data;
     testFilterEmptyListRegistrations.onInspectRequest = ^(NSURLRequest *request) {
-        STAssertTrue([request.HTTPMethod isEqualToString:@"GET"], @"Expected request HTTPMethod to be GET.");
+        XCTAssertTrue([request.HTTPMethod isEqualToString:@"GET"], @"Expected request HTTPMethod to be GET.");
         NSString *expectedQueryAndPath = @"push/registrations?deviceId=59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8&platform=apns";
         NSString *expectedUrl = [[self.url URLByAppendingPathComponent:expectedQueryAndPath]  absoluteString];
         
-        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri %@, but found %@.", expectedUrl, [request URL]);
+        XCTAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri %@, but found %@.", expectedUrl, [request URL]);
         
         return request;
     };
@@ -74,9 +75,9 @@
     testFilterCreateRegistrationId.responseToUse = createRegistrationIdResponse;
     testFilterCreateRegistrationId.ignoreNextFilter = YES;
     testFilterCreateRegistrationId.onInspectRequest = ^(NSURLRequest *request) {
-        STAssertTrue([request.HTTPMethod isEqualToString:@"POST"], @"Expected request HTTPMethod to be POST.");
+        XCTAssertTrue([request.HTTPMethod isEqualToString:@"POST"], @"Expected request HTTPMethod to be POST.");
         NSString *expectedUrl = [[self.url URLByAppendingPathComponent:@"push/registrationids"] absoluteString];
-        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
+        XCTAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
         return request;
     };
     
@@ -100,16 +101,16 @@
     testFilterUpsertRegistration.ignoreNextFilter = YES;
     
     testFilterUpsertRegistration.onInspectRequest = ^(NSURLRequest *request) {
-        STAssertTrue([request.HTTPMethod isEqualToString:@"PUT"], @"Expected request HTTPMethod to be POST.");
+        XCTAssertTrue([request.HTTPMethod isEqualToString:@"PUT"], @"Expected request HTTPMethod to be POST.");
         NSString *expectedUrl = [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:registrationId] absoluteString];
-        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
+        XCTAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
         
         NSString *httpBody = [[NSString alloc] initWithData:request.HTTPBody encoding:NSUTF8StringEncoding];
-        STAssertTrue([httpBody rangeOfString:registrationId].location == NSNotFound, @"The request body should not included registrationId.");
-        STAssertTrue([httpBody rangeOfString:@"\"deviceId\":\"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8\""].location != NSNotFound,
+        XCTAssertTrue([httpBody rangeOfString:registrationId].location == NSNotFound, @"The request body should not included registrationId.");
+        XCTAssertTrue([httpBody rangeOfString:@"\"deviceId\":\"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8\""].location != NSNotFound,
                      @"The request body should include deviceId.");
-        STAssertTrue([httpBody rangeOfString:@"\"platform\":\"apns\""].location != NSNotFound, @"The request body should include platform.");
-        STAssertTrue([httpBody rangeOfString:@"\"tags\":[\"tag1\",\"tag2\"]"].location != NSNotFound, @"The request body should include tags.");
+        XCTAssertTrue([httpBody rangeOfString:@"\"platform\":\"apns\""].location != NSNotFound, @"The request body should include platform.");
+        XCTAssertTrue([httpBody rangeOfString:@"\"tags\":[\"tag1\",\"tag2\"]"].location != NSNotFound, @"The request body should include tags.");
         return request;
     };
     
@@ -121,79 +122,79 @@
     
     NSData *deviceToken = [self bytesFromHexString:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8"];
     [filteredClient.push registerNativeWithDeviceToken:deviceToken tags:@[@"tag1",@"tag2"] completion:^(NSError *error) {
-        STAssertNil(error, @"Error should be nil %@", error.description);
+        XCTAssertNil(error, @"Error should be nil %@", error.description);
         self.done = YES;
     }];
     
-    STAssertTrue([self waitForTest:15], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:15], @"Test timed out.");
 }
 
 - (void)testRegisterNativeRequiredDeviceToken {
     [self.client.push registerNativeWithDeviceToken:nil tags:@[@"tag1",@"tag2"] completion:^(NSError *error) {
-        STAssertEquals(error.code, MSPushRequiredParameter, @"Error code was expected to be MSPushRequiredParameter.");
-        STAssertEquals(error.domain, MSErrorDomain, @"Error code was expected to be MSErrorDomain.");
-        STAssertTrue([error.description rangeOfString:@"deviceToken"].location != NSNotFound, @"Expected deviceToken in error description.");
+        XCTAssertEqual(error.code, [@MSPushRequiredParameter integerValue], @"Error code was expected to be MSPushRequiredParameter.");
+        XCTAssertEqual(error.domain, MSErrorDomain, @"Error code was expected to be MSErrorDomain.");
+        XCTAssertTrue([error.description rangeOfString:@"deviceToken"].location != NSNotFound, @"Expected deviceToken in error description.");
         self.done = YES;
     }];
     
-    STAssertTrue([self waitForTest:15], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:15], @"Test timed out.");
 }
 
 - (void)testRegisterTemplateRequiredDeviceToken {
     [self.client.push registerTemplateWithDeviceToken:nil name:nil jsonBodyTemplate:nil expiryTemplate:nil tags:nil completion:^(NSError *error) {
-        STAssertEquals(error.code, MSPushRequiredParameter, @"Error code was expected to be MSPushRequiredParameter.");
-        STAssertEquals(error.domain, MSErrorDomain, @"Error code was expected to be MSErrorDomain.");
-        STAssertTrue([error.description rangeOfString:@"deviceToken"].location != NSNotFound, @"Expected deviceToken in error description.");
+        XCTAssertEqual(error.code, [@MSPushRequiredParameter integerValue], @"Error code was expected to be MSPushRequiredParameter.");
+        XCTAssertEqual(error.domain, MSErrorDomain, @"Error code was expected to be MSErrorDomain.");
+        XCTAssertTrue([error.description rangeOfString:@"deviceToken"].location != NSNotFound, @"Expected deviceToken in error description.");
         self.done = YES;
     }];
     
-    STAssertTrue([self waitForTest:15], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:15], @"Test timed out.");
 }
 
 - (void)testRegisterTemplateRequiredName {
     NSData *deviceToken = [self bytesFromHexString:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8"];
     [self.client.push registerTemplateWithDeviceToken:deviceToken name:nil jsonBodyTemplate:nil expiryTemplate:nil tags:nil completion:^(NSError *error) {
-        STAssertEquals(error.code, MSPushRequiredParameter, @"Error code was expected to be MSPushRequiredParameter.");
-        STAssertEquals(error.domain, MSErrorDomain, @"Error code was expected to be MSErrorDomain.");
-        STAssertTrue([error.description rangeOfString:@"name"].location != NSNotFound, @"Expected name in error description.");
+        XCTAssertEqual(error.code, [@MSPushRequiredParameter integerValue], @"Error code was expected to be MSPushRequiredParameter.");
+        XCTAssertEqual(error.domain, MSErrorDomain, @"Error code was expected to be MSErrorDomain.");
+        XCTAssertTrue([error.description rangeOfString:@"name"].location != NSNotFound, @"Expected name in error description.");
         self.done = YES;
     }];
     
-    STAssertTrue([self waitForTest:15], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:15], @"Test timed out.");
 }
 
 - (void)testUnregisterTemplateRequiredName {
     [self.client.push unregisterTemplateWithName:nil completion:^(NSError *error) {
-        STAssertEquals(error.code, MSPushRequiredParameter, @"Error code was expected to be MSPushRequiredParameter.");
-        STAssertEquals(error.domain, MSErrorDomain, @"Error code was expected to be MSErrorDomain.");
-        STAssertTrue([error.description rangeOfString:@"name"].location != NSNotFound, @"Expected name in error description.");
+        XCTAssertEqual(error.code, [@MSPushRequiredParameter integerValue], @"Error code was expected to be MSPushRequiredParameter.");
+        XCTAssertEqual(error.domain, MSErrorDomain, @"Error code was expected to be MSErrorDomain.");
+        XCTAssertTrue([error.description rangeOfString:@"name"].location != NSNotFound, @"Expected name in error description.");
         self.done = YES;
     }];
     
-    STAssertTrue([self waitForTest:15], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:15], @"Test timed out.");
 }
 
 - (void)testUnregisterAllRequiredDeviceToken {
     [self.client.push unregisterAllWithDeviceToken:nil completion:^(NSError *error) {
-        STAssertEquals(error.code, MSPushRequiredParameter, @"Error code was expected to be MSPushRequiredParameter.");
-        STAssertEquals(error.domain, MSErrorDomain, @"Error code was expected to be MSErrorDomain.");
-        STAssertTrue([error.description rangeOfString:@"deviceToken"].location != NSNotFound, @"Expected deviceToken in error description.");
+        XCTAssertEqual(error.code, [@MSPushRequiredParameter integerValue], @"Error code was expected to be MSPushRequiredParameter.");
+        XCTAssertEqual(error.domain, MSErrorDomain, @"Error code was expected to be MSErrorDomain.");
+        XCTAssertTrue([error.description rangeOfString:@"deviceToken"].location != NSNotFound, @"Expected deviceToken in error description.");
         self.done = YES;
     }];
     
-    STAssertTrue([self waitForTest:15], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:15], @"Test timed out.");
 }
 
 - (void)testRegisterTemplateRequiredTemplateBody {
     NSData *deviceToken = [self bytesFromHexString:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8"];
     [self.client.push registerTemplateWithDeviceToken:deviceToken name:@"foo" jsonBodyTemplate:nil expiryTemplate:nil tags:nil completion:^(NSError *error) {
-        STAssertEquals(error.code, MSPushRequiredParameter, @"Error code was expected to be MSPushRequiredParameter.");
-        STAssertEquals(error.domain, MSErrorDomain, @"Error code was expected to be MSErrorDomain.");
-        STAssertTrue([error.description rangeOfString:@"bodyTemplate"].location != NSNotFound, @"Expected bodyTemplate in error description.");
+        XCTAssertEqual(error.code, [@MSPushRequiredParameter integerValue], @"Error code was expected to be MSPushRequiredParameter.");
+        XCTAssertEqual(error.domain, MSErrorDomain, @"Error code was expected to be MSErrorDomain.");
+        XCTAssertTrue([error.description rangeOfString:@"bodyTemplate"].location != NSNotFound, @"Expected bodyTemplate in error description.");
         self.done = YES;
     }];
     
-    STAssertTrue([self waitForTest:15], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:15], @"Test timed out.");
 }
 
 - (void)testRegisterTemplateInitial
@@ -211,11 +212,11 @@
     testFilterEmptyListRegistrations.ignoreNextFilter = YES;
     testFilterEmptyListRegistrations.dataToUse = data;
     testFilterEmptyListRegistrations.onInspectRequest = ^(NSURLRequest *request) {
-        STAssertTrue([request.HTTPMethod isEqualToString:@"GET"], @"Expected request HTTPMethod to be GET.");
+        XCTAssertTrue([request.HTTPMethod isEqualToString:@"GET"], @"Expected request HTTPMethod to be GET.");
         NSString *expectedQueryAndPath = @"push/registrations?deviceId=59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8&platform=apns";
         NSString *expectedUrl = [[self.url URLByAppendingPathComponent:expectedQueryAndPath]  absoluteString];
         
-        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
+        XCTAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
         
         return request;
     };
@@ -234,9 +235,9 @@
     testFilterCreateRegistrationId.responseToUse = createRegistrationIdResponse;
     testFilterCreateRegistrationId.ignoreNextFilter = YES;
     testFilterCreateRegistrationId.onInspectRequest = ^(NSURLRequest *request) {
-        STAssertTrue([request.HTTPMethod isEqualToString:@"POST"], @"Expected request HTTPMethod to be POST.");
+        XCTAssertTrue([request.HTTPMethod isEqualToString:@"POST"], @"Expected request HTTPMethod to be POST.");
         NSString *expectedUrl = [[self.url URLByAppendingPathComponent:@"push/registrationids"] absoluteString];
-        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
+        XCTAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
         return request;
     };
     
@@ -260,19 +261,19 @@
     testFilterUpsertRegistration.ignoreNextFilter = YES;
     
     testFilterUpsertRegistration.onInspectRequest = ^(NSURLRequest *request) {
-        STAssertTrue([request.HTTPMethod isEqualToString:@"PUT"], @"Expected request HTTPMethod to be POST.");
+        XCTAssertTrue([request.HTTPMethod isEqualToString:@"PUT"], @"Expected request HTTPMethod to be POST.");
         NSString *expectedUrl = [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:registrationId] absoluteString];
-        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
+        XCTAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
         
         NSString *httpBody = [[NSString alloc] initWithData:request.HTTPBody encoding:NSUTF8StringEncoding];
-        STAssertTrue([httpBody rangeOfString:registrationId].location == NSNotFound, @"The request body should not included registrationId.");
-        STAssertTrue([httpBody rangeOfString:@"\"deviceId\":\"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8\""].location != NSNotFound,
+        XCTAssertTrue([httpBody rangeOfString:registrationId].location == NSNotFound, @"The request body should not included registrationId.");
+        XCTAssertTrue([httpBody rangeOfString:@"\"deviceId\":\"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8\""].location != NSNotFound,
                      @"The request body should include deviceId.");
-        STAssertTrue([httpBody rangeOfString:@"\"platform\":\"apns\""].location != NSNotFound, @"The request body should include platform.");
-        STAssertTrue([httpBody rangeOfString:@"\"tags\":[\"tag1\",\"tag2\"]"].location != NSNotFound, @"The request body should include tags.");
-        STAssertTrue([httpBody rangeOfString:@"\"templateBody\":\"{aps:{alert:\\\"$(prop1)\\\"}}\""].location != NSNotFound, @"The request body should include a templateBody.");
-        STAssertTrue([httpBody rangeOfString:@"\"templateName\":\"template1\""].location != NSNotFound, @"The request body should include a templateName.");
-        STAssertTrue([httpBody rangeOfString:@"\"expiry\":\"$(expiry)\""].location != NSNotFound, @"The request body should include a templateName.");
+        XCTAssertTrue([httpBody rangeOfString:@"\"platform\":\"apns\""].location != NSNotFound, @"The request body should include platform.");
+        XCTAssertTrue([httpBody rangeOfString:@"\"tags\":[\"tag1\",\"tag2\"]"].location != NSNotFound, @"The request body should include tags.");
+        XCTAssertTrue([httpBody rangeOfString:@"\"templateBody\":\"{aps:{alert:\\\"$(prop1)\\\"}}\""].location != NSNotFound, @"The request body should include a templateBody.");
+        XCTAssertTrue([httpBody rangeOfString:@"\"templateName\":\"template1\""].location != NSNotFound, @"The request body should include a templateName.");
+        XCTAssertTrue([httpBody rangeOfString:@"\"expiry\":\"$(expiry)\""].location != NSNotFound, @"The request body should include a templateName.");
         return request;
     };
     
@@ -284,11 +285,11 @@
     
     NSData *deviceToken = [self bytesFromHexString:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8"];
     [filteredClient.push registerTemplateWithDeviceToken:deviceToken name:@"template1" jsonBodyTemplate:@"{aps:{alert:\"$(prop1)\"}}" expiryTemplate:@"$(expiry)" tags:@[@"tag1",@"tag2"] completion:^(NSError *error) {
-        STAssertNil(error, @"Error should be nil %@", error.description);
+        XCTAssertNil(error, @"Error should be nil %@", error.description);
         self.done = YES;
     }];
     
-    STAssertTrue([self waitForTest:15], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:15], @"Test timed out.");
 }
 
 - (void)testRegisterUpdateWithEmptyStorage
@@ -306,11 +307,11 @@
     testFilterListRegistrations.ignoreNextFilter = YES;
     testFilterListRegistrations.dataToUse = data;
     testFilterListRegistrations.onInspectRequest = ^(NSURLRequest *request) {
-        STAssertTrue([request.HTTPMethod isEqualToString:@"GET"], @"Expected request HTTPMethod to be GET.");
+        XCTAssertTrue([request.HTTPMethod isEqualToString:@"GET"], @"Expected request HTTPMethod to be GET.");
         NSString *expectedQueryAndPath = @"push/registrations?deviceId=59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8&platform=apns";
         NSString *expectedUrl = [[self.url URLByAppendingPathComponent:expectedQueryAndPath] absoluteString];
         
-        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri %@, but found %@.", expectedUrl, [request URL]);
+        XCTAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri %@, but found %@.", expectedUrl, [request URL]);
         
         return request;
     };
@@ -335,16 +336,16 @@
     testFilterUpsertRegistration.ignoreNextFilter = YES;
     
     testFilterUpsertRegistration.onInspectRequest = ^(NSURLRequest *request) {
-        STAssertTrue([request.HTTPMethod isEqualToString:@"PUT"], @"Expected request HTTPMethod to be POST.");
+        XCTAssertTrue([request.HTTPMethod isEqualToString:@"PUT"], @"Expected request HTTPMethod to be POST.");
         NSString *expectedUrl = [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:registrationId] absoluteString];
-        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
+        XCTAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
         
         NSString *httpBody = [[NSString alloc] initWithData:request.HTTPBody encoding:NSUTF8StringEncoding];
-        STAssertTrue([httpBody rangeOfString:registrationId].location == NSNotFound, @"The request body should not included registrationId.");
-        STAssertTrue([httpBody rangeOfString:@"\"deviceId\":\"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8\""].location != NSNotFound,
+        XCTAssertTrue([httpBody rangeOfString:registrationId].location == NSNotFound, @"The request body should not included registrationId.");
+        XCTAssertTrue([httpBody rangeOfString:@"\"deviceId\":\"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8\""].location != NSNotFound,
                      @"The request body should include deviceId.");
-        STAssertTrue([httpBody rangeOfString:@"\"platform\":\"apns\""].location != NSNotFound, @"The request body should include platform.");
-        STAssertTrue([httpBody rangeOfString:@"\"tags\":[\"tag1\",\"tag2\"]"].location != NSNotFound, @"The request body should include tags.");
+        XCTAssertTrue([httpBody rangeOfString:@"\"platform\":\"apns\""].location != NSNotFound, @"The request body should include platform.");
+        XCTAssertTrue([httpBody rangeOfString:@"\"tags\":[\"tag1\",\"tag2\"]"].location != NSNotFound, @"The request body should include tags.");
         return request;
     };
     
@@ -355,11 +356,11 @@
     
     NSData *deviceToken = [self bytesFromHexString:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8"];
     [filteredClient.push registerNativeWithDeviceToken:deviceToken tags:@[@"tag1",@"tag2"] completion:^(NSError *error) {
-        STAssertNil(error, @"Error should be nil %@", error.description);
+        XCTAssertNil(error, @"Error should be nil %@", error.description);
         self.done = YES;
     }];
     
-    STAssertTrue([self waitForTest:15], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:15], @"Test timed out.");
 }
 
 - (void)testRegisterUpdateWithRegistrationInStorage
@@ -386,16 +387,16 @@
     testFilterUpsertRegistration.ignoreNextFilter = YES;
     
     testFilterUpsertRegistration.onInspectRequest = ^(NSURLRequest *request) {
-        STAssertTrue([request.HTTPMethod isEqualToString:@"PUT"], @"Expected request HTTPMethod to be POST.");
+        XCTAssertTrue([request.HTTPMethod isEqualToString:@"PUT"], @"Expected request HTTPMethod to be POST.");
         NSString *expectedUrl = [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:registrationId] absoluteString];
-        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
+        XCTAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
         
         NSString *httpBody = [[NSString alloc] initWithData:request.HTTPBody encoding:NSUTF8StringEncoding];
-        STAssertTrue([httpBody rangeOfString:registrationId].location == NSNotFound, @"The request body should not included registrationId.");
-        STAssertTrue([httpBody rangeOfString:@"\"deviceId\":\"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8\""].location != NSNotFound,
+        XCTAssertTrue([httpBody rangeOfString:registrationId].location == NSNotFound, @"The request body should not included registrationId.");
+        XCTAssertTrue([httpBody rangeOfString:@"\"deviceId\":\"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8\""].location != NSNotFound,
                      @"The request body should include deviceId.");
-        STAssertTrue([httpBody rangeOfString:@"\"platform\":\"apns\""].location != NSNotFound, @"The request body should include platform.");
-        STAssertTrue([httpBody rangeOfString:@"\"tags\":[\"tag1\",\"tag2\"]"].location != NSNotFound, @"The request body should include tags.");
+        XCTAssertTrue([httpBody rangeOfString:@"\"platform\":\"apns\""].location != NSNotFound, @"The request body should include platform.");
+        XCTAssertTrue([httpBody rangeOfString:@"\"tags\":[\"tag1\",\"tag2\"]"].location != NSNotFound, @"The request body should include tags.");
         return request;
     };
     
@@ -405,11 +406,11 @@
     
     NSData *deviceToken = [self bytesFromHexString:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8"];
     [filteredClient.push registerNativeWithDeviceToken:deviceToken tags:@[@"tag1",@"tag2"] completion:^(NSError *error) {
-        STAssertNil(error, @"Error should be nil %@", error.description);
+        XCTAssertNil(error, @"Error should be nil %@", error.description);
         self.done = YES;
     }];
 
-    STAssertTrue([self waitForTest:15], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:15], @"Test timed out.");
 }
 
 - (void)testRegisterUpdateWithRegistrationInStorageExpiredRegistrationId
@@ -436,16 +437,16 @@
     testFilterUpsertRegistrationExpired.ignoreNextFilter = YES;
     
     testFilterUpsertRegistrationExpired.onInspectRequest = ^(NSURLRequest *request) {
-        STAssertTrue([request.HTTPMethod isEqualToString:@"PUT"], @"Expected request HTTPMethod to be POST.");
+        XCTAssertTrue([request.HTTPMethod isEqualToString:@"PUT"], @"Expected request HTTPMethod to be POST.");
         NSString *expectedUrl = [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:registrationId] absoluteString];
-        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
+        XCTAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
         
         NSString *httpBody = [[NSString alloc] initWithData:request.HTTPBody encoding:NSUTF8StringEncoding];
-        STAssertTrue([httpBody rangeOfString:registrationId].location == NSNotFound, @"The request body should not included registrationId.");
-        STAssertTrue([httpBody rangeOfString:@"\"deviceId\":\"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8\""].location != NSNotFound,
+        XCTAssertTrue([httpBody rangeOfString:registrationId].location == NSNotFound, @"The request body should not included registrationId.");
+        XCTAssertTrue([httpBody rangeOfString:@"\"deviceId\":\"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8\""].location != NSNotFound,
                      @"The request body should include deviceId.");
-        STAssertTrue([httpBody rangeOfString:@"\"platform\":\"apns\""].location != NSNotFound, @"The request body should include platform.");
-        STAssertTrue([httpBody rangeOfString:@"\"tags\":[\"tag1\",\"tag2\"]"].location != NSNotFound, @"The request body should include tags.");
+        XCTAssertTrue([httpBody rangeOfString:@"\"platform\":\"apns\""].location != NSNotFound, @"The request body should include platform.");
+        XCTAssertTrue([httpBody rangeOfString:@"\"tags\":[\"tag1\",\"tag2\"]"].location != NSNotFound, @"The request body should include tags.");
         return request;
     };
     
@@ -463,9 +464,9 @@
     testFilterCreateRegistrationId.responseToUse = createRegistrationIdResponse;
     testFilterCreateRegistrationId.ignoreNextFilter = YES;
     testFilterCreateRegistrationId.onInspectRequest = ^(NSURLRequest *request) {
-        STAssertTrue([request.HTTPMethod isEqualToString:@"POST"], @"Expected request HTTPMethod to be POST.");
+        XCTAssertTrue([request.HTTPMethod isEqualToString:@"POST"], @"Expected request HTTPMethod to be POST.");
         NSString *expectedUrl = [[self.url URLByAppendingPathComponent:@"push/registrationids"] absoluteString];
-        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
+        XCTAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
         return request;
     };
     
@@ -480,16 +481,16 @@
     testFilterUpsertRegistration.ignoreNextFilter = YES;
     
     testFilterUpsertRegistration.onInspectRequest = ^(NSURLRequest *request) {
-        STAssertTrue([request.HTTPMethod isEqualToString:@"PUT"], @"Expected request HTTPMethod to be POST.");
+        XCTAssertTrue([request.HTTPMethod isEqualToString:@"PUT"], @"Expected request HTTPMethod to be POST.");
         NSString *expectedUrl = [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:registrationId] absoluteString];
-        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
+        XCTAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
         
         NSString *httpBody = [[NSString alloc] initWithData:request.HTTPBody encoding:NSUTF8StringEncoding];
-        STAssertTrue([httpBody rangeOfString:registrationId].location == NSNotFound, @"The request body should not included registrationId.");
-        STAssertTrue([httpBody rangeOfString:@"\"deviceId\":\"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8\""].location != NSNotFound,
+        XCTAssertTrue([httpBody rangeOfString:registrationId].location == NSNotFound, @"The request body should not included registrationId.");
+        XCTAssertTrue([httpBody rangeOfString:@"\"deviceId\":\"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8\""].location != NSNotFound,
                      @"The request body should include deviceId.");
-        STAssertTrue([httpBody rangeOfString:@"\"platform\":\"apns\""].location != NSNotFound, @"The request body should include platform.");
-        STAssertTrue([httpBody rangeOfString:@"\"tags\":[\"tag1\",\"tag2\"]"].location != NSNotFound, @"The request body should include tags.");
+        XCTAssertTrue([httpBody rangeOfString:@"\"platform\":\"apns\""].location != NSNotFound, @"The request body should include platform.");
+        XCTAssertTrue([httpBody rangeOfString:@"\"tags\":[\"tag1\",\"tag2\"]"].location != NSNotFound, @"The request body should include tags.");
         return request;
     };
 
@@ -502,11 +503,11 @@
     
     NSData *deviceToken = [self bytesFromHexString:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8"];
     [filteredClient.push registerNativeWithDeviceToken:deviceToken tags:@[@"tag1",@"tag2"] completion:^(NSError *error) {
-        STAssertNil(error, @"Error should be nil %@", error.description);
+        XCTAssertNil(error, @"Error should be nil %@", error.description);
         self.done = YES;
     }];
 
-    STAssertTrue([self waitForTest:15], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:15], @"Test timed out.");
 }
 
 - (void)testDeleteForMissingRegistration
@@ -524,11 +525,11 @@
     testFilterEmptyListRegistrations.ignoreNextFilter = YES;
     testFilterEmptyListRegistrations.dataToUse = data;
     testFilterEmptyListRegistrations.onInspectRequest = ^(NSURLRequest *request) {
-        STAssertTrue([request.HTTPMethod isEqualToString:@"GET"], @"Expected request HTTPMethod to be GET.");
+        XCTAssertTrue([request.HTTPMethod isEqualToString:@"GET"], @"Expected request HTTPMethod to be GET.");
         NSString *expectedQuery = @"?deviceId=59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8&platform=apns";
         NSString *expectedUrl = [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:expectedQuery]  absoluteString];
         
-        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
+        XCTAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
         
         return request;
     };
@@ -538,16 +539,16 @@
     MSClient *filteredClient = [self.client clientWithFilter:testFilter];
     
     [filteredClient.push unregisterTemplateWithName:@"template1" completion:^(NSError *error) {
-        STAssertNil(error, @"Missing local registration is a no-op on delete");
+        XCTAssertNil(error, @"Missing local registration is a no-op on delete");
         self.done = YES;
     }];
     
-    STAssertTrue([self waitForTest:15], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:15], @"Test timed out.");
 }
 
 - (void)testDeleteForExistingRegistrationFromRefresh
 {
-    [self setStorage:[self.url host] deviceToken:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8" storageVersion:@"v1.0.0" registrations:[NSDictionary dictionary]];
+    [self setStorage:[self.url host] deviceToken:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8" storageVersion:@"v1.0.0" registrations:@{}];
     
     MSTestFilter *testFilterListRegistrations = [MSTestFilter new];
     NSString* stringData = @"[{\"templateName\":\"template1\",\"registrationId\":\"8313603759421994114-6468852488791307573-9\"}]";
@@ -562,11 +563,11 @@
     testFilterListRegistrations.ignoreNextFilter = YES;
     testFilterListRegistrations.dataToUse = data;
     testFilterListRegistrations.onInspectRequest = ^(NSURLRequest *request) {
-        STAssertTrue([request.HTTPMethod isEqualToString:@"GET"], @"Expected request HTTPMethod to be GET.");
+        XCTAssertTrue([request.HTTPMethod isEqualToString:@"GET"], @"Expected request HTTPMethod to be GET.");
         NSString *expectedQuery = @"?deviceId=59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8&platform=apns";
         NSString *expectedUrl = [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:expectedQuery]  absoluteString];
         
-        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
+        XCTAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
         
         return request;
     };
@@ -581,9 +582,9 @@
     testFilterDeleteRegistration.responseToUse = deleteResponse;
     testFilterDeleteRegistration.ignoreNextFilter = YES;
     testFilterDeleteRegistration.onInspectRequest = ^(NSURLRequest *request) {
-        STAssertTrue([request.HTTPMethod isEqualToString:@"DELETE"], @"Expected request HTTPMethod to be DELETE.");
+        XCTAssertTrue([request.HTTPMethod isEqualToString:@"DELETE"], @"Expected request HTTPMethod to be DELETE.");
         NSString *expectedUrl = [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:@"8313603759421994114-6468852488791307573-9"] absoluteString];
-        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
+        XCTAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
         return request;
     };
     
@@ -593,11 +594,11 @@
     MSClient *filteredClient = [self.client clientWithFilter:testFilter];
     
     [filteredClient.push unregisterTemplateWithName:@"template1" completion:^(NSError *error) {
-        STAssertNil(error, @"Error should be nil %@", error.description);
+        XCTAssertNil(error, @"Error should be nil %@", error.description);
         self.done = YES;
     }];
     
-    STAssertTrue([self waitForTest:15], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:15], @"Test timed out.");
 }
 
 - (void)testDeleteForExistingRegistrationFromStorage
@@ -614,9 +615,9 @@
     testFilterDeleteRegistration.responseToUse = deleteResponse;
     testFilterDeleteRegistration.ignoreNextFilter = YES;
     testFilterDeleteRegistration.onInspectRequest = ^(NSURLRequest *request) {
-        STAssertTrue([request.HTTPMethod isEqualToString:@"DELETE"], @"Expected request HTTPMethod to be DELETE.");
+        XCTAssertTrue([request.HTTPMethod isEqualToString:@"DELETE"], @"Expected request HTTPMethod to be DELETE.");
         NSString *expectedUrl = [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:@"8313603759421994114-6468852488791307573-9"] absoluteString];
-        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
+        XCTAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
         return request;
     };
     
@@ -625,16 +626,16 @@
     MSClient *filteredClient = [self.client clientWithFilter:testFilter];
     
     [filteredClient.push unregisterTemplateWithName:@"template1" completion:^(NSError *error) {
-        STAssertNil(error, @"Error should be nil %@", error.description);
+        XCTAssertNil(error, @"Error should be nil %@", error.description);
         self.done = YES;
     }];
     
-    STAssertTrue([self waitForTest:15], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:15], @"Test timed out.");
 }
 
 - (void)testDeleteForMissingRegistrationAfterRefresh
 {
-    [self setStorage:[self.url host] deviceToken:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8" storageVersion:@"v1.0.0" registrations:[NSDictionary dictionary]];
+    [self setStorage:[self.url host] deviceToken:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8" storageVersion:@"v1.0.0" registrations:@{}];
     
     MSTestFilter *testFilterListRegistrations = [MSTestFilter new];
     NSString* stringData = @"[{\"templateName\":\"template1\",\"registrationId\":\"8313603759421994114-6468852488791307573-9\"}]";
@@ -649,11 +650,11 @@
     testFilterListRegistrations.ignoreNextFilter = YES;
     testFilterListRegistrations.dataToUse = data;
     testFilterListRegistrations.onInspectRequest = ^(NSURLRequest *request) {
-        STAssertTrue([request.HTTPMethod isEqualToString:@"GET"], @"Expected request HTTPMethod to be GET.");
+        XCTAssertTrue([request.HTTPMethod isEqualToString:@"GET"], @"Expected request HTTPMethod to be GET.");
         NSString *expectedQuery = @"?deviceId=59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8&platform=apns";
         NSString *expectedUrl = [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:expectedQuery]  absoluteString];
         
-        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
+        XCTAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
         
         return request;
     };
@@ -668,9 +669,9 @@
     testFilterDeleteRegistration.responseToUse = deleteResponse;
     testFilterDeleteRegistration.ignoreNextFilter = YES;
     testFilterDeleteRegistration.onInspectRequest = ^(NSURLRequest *request) {
-        STAssertTrue([request.HTTPMethod isEqualToString:@"DELETE"], @"Expected request HTTPMethod to be DELETE.");
+        XCTAssertTrue([request.HTTPMethod isEqualToString:@"DELETE"], @"Expected request HTTPMethod to be DELETE.");
         NSString *expectedUrl = [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:@"8313603759421994114-6468852488791307573-9"] absoluteString];
-        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
+        XCTAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
         return request;
     };
     
@@ -680,16 +681,16 @@
     MSClient *filteredClient = [self.client clientWithFilter:testFilter];
     
     [filteredClient.push unregisterTemplateWithName:@"template2" completion:^(NSError *error) {
-        STAssertNil(error, @"Error should be nil %@", error.description);
+        XCTAssertNil(error, @"Error should be nil %@", error.description);
         self.done = YES;
     }];
     
-    STAssertTrue([self waitForTest:15], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:15], @"Test timed out.");
 }
 
 - (void)testDeleteAllRegistrations
 {
-    [self setStorage:[self.url host] deviceToken:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8" storageVersion:@"v1.0.0" registrations:[NSDictionary dictionary]];
+    [self setStorage:[self.url host] deviceToken:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8" storageVersion:@"v1.0.0" registrations:@{}];
     
     MSTestFilter *testFilterListRegistrations = [MSTestFilter new];
     NSString* stringData = @"[{\"templateName\":\"template1\",\"registrationId\":\"8313603759421994114-6468852488791307573-9\"},{\"templateName\":\"template2\",\"registrationId\":\"8313603759421994114-6468852488791307573-7\"}]";
@@ -704,11 +705,11 @@
     testFilterListRegistrations.ignoreNextFilter = YES;
     testFilterListRegistrations.dataToUse = data;
     testFilterListRegistrations.onInspectRequest = ^(NSURLRequest *request) {
-        STAssertTrue([request.HTTPMethod isEqualToString:@"GET"], @"Expected request HTTPMethod to be GET.");
+        XCTAssertTrue([request.HTTPMethod isEqualToString:@"GET"], @"Expected request HTTPMethod to be GET.");
         NSString *expectedQueryAndPath = @"push/registrations?deviceId=59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8&platform=apns";
         NSString *expectedUrl = [[self.url URLByAppendingPathComponent:expectedQueryAndPath]  absoluteString];
         
-        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri %@, but found %@.", expectedUrl, [request URL]);
+        XCTAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri %@, but found %@.", expectedUrl, [request URL]);
         
         return request;
     };
@@ -720,44 +721,34 @@
                                          statusCode:200
                                          HTTPVersion:nil headerFields:nil];
     
+    __block NSMutableArray *expectedUrls = [@[
+                                              [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:@"8313603759421994114-6468852488791307573-7"] absoluteString],
+                                              [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:@"8313603759421994114-6468852488791307573-9"] absoluteString]] mutableCopy];
+    
     testFilterDeleteRegistration.responseToUse = deleteResponse;
     testFilterDeleteRegistration.ignoreNextFilter = YES;
     testFilterDeleteRegistration.onInspectRequest = ^(NSURLRequest *request) {
-        STAssertTrue([request.HTTPMethod isEqualToString:@"DELETE"], @"Expected request HTTPMethod to be DELETE.");
-        NSString *expectedUrl = [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:@"8313603759421994114-6468852488791307573-7"] absoluteString];
-        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
-        return request;
-    };
-    
-    MSTestFilter *testFilterDeleteRegistration2 = [MSTestFilter new];
-    
-    NSHTTPURLResponse *deleteResponse2 = [[NSHTTPURLResponse alloc]
-                                         initWithURL:nil
-                                         statusCode:200
-                                         HTTPVersion:nil headerFields:nil];
-    
-    testFilterDeleteRegistration2.responseToUse = deleteResponse2;
-    testFilterDeleteRegistration2.ignoreNextFilter = YES;
-    testFilterDeleteRegistration2.onInspectRequest = ^(NSURLRequest *request) {
-        STAssertTrue([request.HTTPMethod isEqualToString:@"DELETE"], @"Expected request HTTPMethod to be DELETE.");
-        NSString *expectedUrl = [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:@"8313603759421994114-6468852488791307573-9"] absoluteString];
-        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
+        XCTAssertTrue([request.HTTPMethod isEqualToString:@"DELETE"], @"Expected request HTTPMethod to be DELETE.");
+        NSString *actualUrl = request.URL.absoluteString;
+        XCTAssertTrue([expectedUrls containsObject:actualUrl], @"Expected request to have expected Uri.");
+        [expectedUrls removeObject:actualUrl];
         return request;
     };
     
     MSMultiRequestTestFilter *testFilter = [[MSMultiRequestTestFilter alloc] init];
     testFilter.testFilters = @[testFilterListRegistrations,
                                testFilterDeleteRegistration,
-                               testFilterDeleteRegistration2];
+                               testFilterDeleteRegistration];
     MSClient *filteredClient = [self.client clientWithFilter:testFilter];
     
     NSData *deviceToken = [self bytesFromHexString:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8"];
     [filteredClient.push unregisterAllWithDeviceToken:deviceToken completion:^(NSError *error) {
-        STAssertNil(error, @"Error should be nil %@", error.description);
+        XCTAssertTrue(expectedUrls.count == 0, @"Expected all URLs to have been hit");
+        XCTAssertNil(error, @"Error should be nil %@", error.description);
         self.done = YES;
     }];
     
-    STAssertTrue([self waitForTest:15], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:15], @"Test timed out.");
 }
 
 -(BOOL) waitForTest:(NSTimeInterval)testDuration {

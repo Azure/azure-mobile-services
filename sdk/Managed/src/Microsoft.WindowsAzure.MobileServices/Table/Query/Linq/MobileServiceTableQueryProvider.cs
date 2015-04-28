@@ -5,9 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Sync;
 using Newtonsoft.Json.Linq;
@@ -16,12 +14,22 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 {
     internal class MobileServiceTableQueryProvider
     {
+<<<<<<< HEAD
         private IMobileServiceSyncTable syncTable;
 
         public MobileServiceTableQueryProvider(IMobileServiceSyncTable syncTable = null)
         {
             this.syncTable = syncTable;
         }
+=======
+
+
+        /// <summary>
+        /// Feature which are sent as telemetry information to the service for all
+        /// outgoing calls.
+        /// </summary>
+        internal MobileServiceFeatures Features { get; set; }
+>>>>>>> master
 
         /// <summary>
         /// Create a new query based off a table and and a new
@@ -87,6 +95,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             MobileServiceTableQueryDescription compiledQuery = this.Compile(query);
 
             // Send the query
+<<<<<<< HEAD
             string odata = compiledQuery.ToQueryString();
             JToken response = await this.Execute<T>(query, odata);
 
@@ -94,6 +103,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             var result = QueryResult.Parse(response);
             return new TotalCountEnumerable<T>(
                 result.TotalCount,
+=======
+            string odata = compiledQuery.ToODataString();
+            QueryResult result = await this.Execute<T>(query, odata);
+
+            return new QueryResultEnumerable<T>(
+                result.TotalCount,
+                result.NextLink,
+>>>>>>> master
                 query.Table.MobileServiceClient.Serializer.Deserialize(result.Values, compiledQuery.ProjectionArgumentType).Select(
                     value =>
                     {
@@ -108,6 +125,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                     }));
         }
 
+<<<<<<< HEAD
         protected virtual Task<JToken> Execute<T>(IMobileServiceTableQuery<T> query, string odata)
         {
             if (this.syncTable == null)
@@ -115,6 +133,21 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                 return query.Table.ReadAsync(odata, query.Parameters);
             }
             return this.syncTable.ReadAsync(odata);
+=======
+        protected virtual async Task<QueryResult> Execute<T>(IMobileServiceTableQuery<T> query, string odata)
+        {
+            var table = query.Table as MobileServiceTable;
+            if (table != null)
+            {
+                // Add telemetry information if possible.
+                return await table.ReadAsync(odata, query.Parameters, this.Features | MobileServiceFeatures.TypedTable);
+            }
+            else
+            {
+                JToken result = await query.Table.ReadAsync(odata, query.Parameters);
+                return QueryResult.Parse(result, null, validate: true);
+            }
+>>>>>>> master
         }
 
         /// <summary>
@@ -133,10 +166,18 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             return compiledQuery;
         }
 
+<<<<<<< HEAD
         internal string ToQueryString<T>(IMobileServiceTableQuery<T> query)
         {
             MobileServiceTableQueryDescription description = this.Compile(query);
             return description.ToQueryString();
         }        
+=======
+        internal string ToODataString<T>(IMobileServiceTableQuery<T> query)
+        {
+            MobileServiceTableQueryDescription description = this.Compile(query);
+            return description.ToODataString();
+        }
+>>>>>>> master
     }
 }

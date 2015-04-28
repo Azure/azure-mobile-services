@@ -2,11 +2,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
+<<<<<<< HEAD
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+=======
+>>>>>>> master
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
@@ -40,4 +43,8 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         public static readonly string Deleted = "__deleted";
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> master

@@ -496,6 +496,18 @@ exports.url = {
         } else {
             return path + '?' + exports.trimStart(queryString, '?');
         }
+    },
+
+    isAbsoluteUrl: function (url) {
+        /// <summary>
+        /// Currently just a simple check if the url begins with http:// or https:/
+        /// </summary>
+        if (_.isNullOrEmpty(url)) {
+            return false;
+        }
+
+        var start = url.substring(0, 7).toLowerCase();
+        return (start  == "http://" || start == "https:/");
     }
 };
 
@@ -537,7 +549,10 @@ exports.createError = function (exceptionOrMessage, request) {
             // defaulting to the status
             var isText = false;
             if (request.getResponseHeader) {
-                isText = request.getResponseHeader('Content-Type').toLowerCase().indexOf("text") >= 0;
+                var contentType = request.getResponseHeader('Content-Type');
+                if (contentType) {
+                    isText = contentType.toLowerCase().indexOf("text") >= 0;
+                }
             }
 
             try {

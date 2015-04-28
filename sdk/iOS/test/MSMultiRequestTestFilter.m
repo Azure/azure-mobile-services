@@ -10,7 +10,7 @@
     self = [super init];
     if (self)
     {
-        _testFilters = [NSArray array];
+        _testFilters = @[];
         _currentIndex = 0;
     }
     
