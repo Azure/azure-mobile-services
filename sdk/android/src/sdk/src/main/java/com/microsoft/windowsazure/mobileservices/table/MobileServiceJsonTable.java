@@ -213,7 +213,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 
         return future;
     }
-    
+
     /**
      * Retrieves a set of rows from the table using a query
      *
@@ -490,22 +490,14 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
     public ListenableFuture<JsonObject> insert(final JsonObject element, List<Pair<String, String>> parameters) {
         final SettableFuture<JsonObject> future = SettableFuture.create();
 
-        Object id = null;
-
         try {
-            id = validateIdOnInsert(element);
+            validateIdOnInsert(element);
         } catch (Exception e) {
             future.setException(e);
             return future;
         }
 
         String content = element.toString();
-
-        if (!isNumericType(id) && id != null) {
-            content = removeSystemProperties(element).toString();
-        } else {
-            content = element.toString();
-        }
 
         EnumSet<MobileServiceFeatures> features = mFeatures.clone();
         if (parameters != null && parameters.size() > 0) {
