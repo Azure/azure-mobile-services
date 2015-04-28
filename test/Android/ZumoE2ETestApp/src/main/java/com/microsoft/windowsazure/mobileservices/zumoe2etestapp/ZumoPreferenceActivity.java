@@ -23,7 +23,7 @@ import android.os.Bundle;
 import android.preference.PreferenceActivity;
 
 /**
- * A {@link android.preference.PreferenceActivity} that presents a set of application settings.
+ * A {@link PreferenceActivity} that presents a set of application settings.
  */
 public class ZumoPreferenceActivity extends PreferenceActivity {
     @SuppressWarnings("deprecation")

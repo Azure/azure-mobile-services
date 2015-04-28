@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    tools:context=".MainActivity" >
+    tools:context=".MainActivity">
 
     <Spinner
         android:id="@+id/testGroupSpinner"
@@ -15,7 +15,7 @@
         android:id="@+id/testCaseList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:listitem="@layout/row_list_test_case" >
+        tools:listitem="@layout/row_list_test_case">
 
     </ListView>
 

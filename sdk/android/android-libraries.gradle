@@ -50,6 +50,6 @@ task androidSourcesJar(type: Jar) {
 
 artifacts {
     archives androidSourcesJar
-    archives androidJavadocsJar
+    //archives androidJavadocsJar
     archives file : file('build/release/' + PUBLISH_ARTIFACT_ID + '-' + myProject.version + '.jar')
 }

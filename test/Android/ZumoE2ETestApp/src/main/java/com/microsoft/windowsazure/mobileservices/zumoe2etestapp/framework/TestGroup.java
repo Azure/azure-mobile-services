@@ -24,8 +24,17 @@ import android.os.Build;
 
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 
@@ -35,15 +44,20 @@ public abstract class TestGroup {
     public static final String ClientVersionKey = "client-version";
     public static final String ServerVersionKey = "server-version";
     List<TestCase> mTestCases;
+    Map<String, String> mSourceMap;
     String mName;
     TestStatus mStatus;
     ConcurrentLinkedQueue<TestCase> mTestRunQueue;
     boolean mNewTestRun;
+    private int mFailedTestCount;
+    private Date mStartTime;
+    private Date mEndTime;
 
     public TestGroup(String name) {
         mName = name;
         mStatus = TestStatus.NotRun;
         mTestCases = new ArrayList<TestCase>();
+        mSourceMap = new HashMap<String, String>();
         mTestRunQueue = new ConcurrentLinkedQueue<TestCase>();
         mNewTestRun = false;
     }
@@ -56,8 +70,17 @@ public abstract class TestGroup {
         return mTestCases;
     }
 
+    public Map<String, String> getSourceMap() {
+        return mSourceMap;
+    }
+
     protected void addTest(TestCase testCase) {
+        addTest(testCase, this.getClass().getName());
+    }
+
+    protected void addTest(TestCase testCase, String source) {
         mTestCases.add(testCase);
+        mSourceMap.put(testCase.getName(), source);
     }
 
     public void runTests(MobileServiceClient client, TestExecutionCallback callback) {
@@ -76,6 +99,7 @@ public abstract class TestGroup {
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void runTests(List<TestCase> testsToRun, final MobileServiceClient client, final TestExecutionCallback callback) {
+
         try {
             onPreExecute(client);
         } catch (Exception e) {
@@ -95,6 +119,7 @@ public abstract class TestGroup {
         cleanTestsState();
         testRunStatus.results.clear();
         mStatus = TestStatus.NotRun;
+
         if (oldQueueSize == 0) {
             for (final TestCase test : mTestRunQueue) {
 
@@ -111,10 +136,29 @@ public abstract class TestGroup {
                 try {
                     latch.await();
                 } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
 
+                if (test.getStatus() == TestStatus.Failed) {
+                    mFailedTestCount++;
+                }
+            }
+
+            // End Run
+            final CountDownLatch latch = new CountDownLatch(1);
+
+            Thread thread = new Thread() {
+                public void run() {
+                    executeNextTest(null, client, callback, testRunStatus, latch);
+                }
+            };
+
+            thread.run();
+
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -174,7 +218,6 @@ public abstract class TestGroup {
                         // executeNextTest(client, callback, testRunStatus);
                     }
                 });
-
             } else {
                 // end run
 
@@ -201,14 +244,12 @@ public abstract class TestGroup {
 
                 latch.countDown();
             }
-
         } catch (Exception e) {
             if (callback != null)
                 callback.onTestGroupComplete(group, testRunStatus.results);
 
             latch.countDown();
         }
-
     }
 
     public String getName() {
@@ -219,17 +260,30 @@ public abstract class TestGroup {
         mName = name;
     }
 
+    public int getFailedTestCount() {
+        return mFailedTestCount;
+    }
+
+    public Date getStartTime() {
+        return mStartTime;
+    }
+
+    public Date getEndTime() {
+        return mEndTime;
+    }
+
     @Override
     public String toString() {
         return getName();
     }
 
     public void onPreExecute(MobileServiceClient client) {
-
+        mFailedTestCount = 0;
+        mStartTime = new Date();
     }
 
     public void onPostExecute(MobileServiceClient client) {
-
+        mEndTime = new Date();
     }
 
     private class TestRunStatus {
