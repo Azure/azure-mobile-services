@@ -944,443 +944,395 @@ public class OfflineTests extends TestGroup {
     }
 
 
-        private TestCase createDeleteSyncConflict() {
+    private TestCase createDeleteSyncConflict() {
 
-            final String tableName = "offlineReady";
+        final String tableName = "offlineReady";
 
-            final TestCase test = new TestCase() {
+        final TestCase test = new TestCase() {
 
-                @Override
-                protected void executeTest(MobileServiceClient offlineReadyClient, final TestExecutionCallback callback) {
+            @Override
+            protected void executeTest(MobileServiceClient offlineReadyClient, final TestExecutionCallback callback) {
 
-                    TestCase testCase = this;
-                    TestResult result = new TestResult();
-                    result.setStatus(TestStatus.Passed);
-                    result.setTestCase(testCase);
+                TestCase testCase = this;
+                TestResult result = new TestResult();
+                result.setStatus(TestStatus.Passed);
+                result.setTestCase(testCase);
+                try {
+
+                    SQLiteLocalStore localStore = new SQLiteLocalStore(offlineReadyClient.getContext(), OFFLINE_TABLE_NAME, null, 1);
+
+                    log("Defined the table on the local store");
+
+                    Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
+                    tableDefinition.put("id", ColumnDataType.String);
+                    tableDefinition.put("name", ColumnDataType.String);
+                    tableDefinition.put("age", ColumnDataType.Integer);
+                    tableDefinition.put("float", ColumnDataType.Real);
+                    tableDefinition.put("date", ColumnDataType.Date);
+                    tableDefinition.put("bool", ColumnDataType.Boolean);
+                    tableDefinition.put("__version", ColumnDataType.String);
+
+                    log("Initialized the store and sync context");
+
+                    localStore.defineTable(tableName, tableDefinition);
+
+                    MobileServiceSyncTable<OfflineReadyItem> localTable = offlineReadyClient.getSyncTable(tableName, OfflineReadyItem.class);
+
+                    MobileServiceTable<OfflineReadyItem> remoteTable = offlineReadyClient.getTable(tableName, OfflineReadyItem.class);
+
+                    offlineReadyClient.getSyncContext().initialize(localStore, new SimpleSyncHandler()).get();
+
+                    localTable.purge(null).get();
+                    log("Removed all items from the local table");
+
+                    OfflineReadyItem item = new OfflineReadyItem(new Random());
+
+                    item = localTable.insert(item).get();
+
+                    log("Inserted the item to the local store:" + item);
+
+                    Query pullQuery = QueryOperations.tableName(tableName).field("id").eq(item.getId());
+
+                    localTable.pull(pullQuery).get();
+
+                    log("Changing the item on the server");
+
+                    item.setFlag(!item.getFlag());
+
+                    item = remoteTable.update(item).get();
+
+                    log("Updated the item: " + item);
+
+                    OfflineReadyItem localItem = localTable.lookUp(item.getId()).get();
+                    OfflineReadyItem serverItem = remoteTable.lookUp(item.getId()).get();
+
+                    log("Retrieved the item from the local table, now updating it");
+
+                    localItem.setDate(new Date());
+
+                    localTable.update(localItem).get();
+
+                    log("Updated the item on the local table");
+
+                    localTable.delete(localItem);
+
+                    log("Now trying to pull changes from the server (will trigger a push)");
+
                     try {
-
-                        SQLiteLocalStore localStore = new SQLiteLocalStore(offlineReadyClient.getContext(), OFFLINE_TABLE_NAME, null, 1);
-
-                        log("Defined the table on the local store");
-
-                        Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
-                        tableDefinition.put("id", ColumnDataType.String);
-                        tableDefinition.put("name", ColumnDataType.String);
-                        tableDefinition.put("age", ColumnDataType.Integer);
-                        tableDefinition.put("float", ColumnDataType.Real);
-                        tableDefinition.put("date", ColumnDataType.Date);
-                        tableDefinition.put("bool", ColumnDataType.Boolean);
-                        tableDefinition.put("__version", ColumnDataType.String);
-
-                        log("Initialized the store and sync context");
-
-                        localStore.defineTable(tableName, tableDefinition);
-
-                        MobileServiceSyncTable<OfflineReadyItem> localTable = offlineReadyClient.getSyncTable(tableName, OfflineReadyItem.class);
-
-                        MobileServiceTable<OfflineReadyItem> remoteTable = offlineReadyClient.getTable(tableName, OfflineReadyItem.class);
-
-                        offlineReadyClient.getSyncContext().initialize(localStore, new SimpleSyncHandler()).get();
-
-                        localTable.purge(null).get();
-                        log("Removed all items from the local table");
-
-                        OfflineReadyItem item = new OfflineReadyItem(new Random());
-
-                        item = localTable.insert(item).get();
-
-                        log("Inserted the item to the local store:" + item);
-
-                        Query pullQuery = QueryOperations.tableName(tableName).field("id").eq(item.getId());
-
                         localTable.pull(pullQuery).get();
+                        log("Error, pull (push) should have caused a conflict, but none happened.");
+                        result.setStatus(TestStatus.Failed);
+                        callback.onTestComplete(this, result);
+                        return;
+                    } catch (Exception ex) {
+                        log("Push exception: " + ex);
+                        log("Expected exception was thrown.");
 
-                        log("Changing the item on the server");
+                        MobileServicePushFailedException mspfe = (MobileServicePushFailedException) ex.getCause();
 
-                        item.setFlag(!item.getFlag());
-
-                        item = remoteTable.update(item).get();
-
-                        log("Updated the item: " + item);
-
-                        OfflineReadyItem localItem = localTable.lookUp(item.getId()).get();
-                        OfflineReadyItem serverItem = remoteTable.lookUp(item.getId()).get();
-
-                        log("Retrieved the item from the local table, now updating it");
-
-                        localItem.setDate(new Date());
-
-                        localTable.update(localItem).get();
-
-                        log("Updated the item on the local table");
-
-                        localTable.delete(localItem);
-
-                        log("Now trying to pull changes from the server (will trigger a push)");
-
-                        try {
-                            localTable.pull(pullQuery).get();
-                            log("Error, pull (push) should have caused a conflict, but none happened.");
+                        if (mspfe == null || mspfe.getPushCompletionResult().getOperationErrors().size() != 1) {
                             result.setStatus(TestStatus.Failed);
                             callback.onTestComplete(this, result);
                             return;
-                        } catch (Exception ex) {
-                            log("Push exception: " + ex);
-                            log("Expected exception was thrown.");
+                        }
 
-                            MobileServicePushFailedException mspfe = (MobileServicePushFailedException) ex.getCause();
+                        TableOperationError tableOperationError = mspfe.getPushCompletionResult().getOperationErrors().get(0);
 
-                            if (mspfe == null || mspfe.getPushCompletionResult().getOperationErrors().size() != 1) {
+                        try {
+
+                            log("Count pending operations");
+
+                            if (offlineReadyClient.getSyncContext().getPendingOperations() != 1) {
+                                log("Expected 1 pending operations");
+
                                 result.setStatus(TestStatus.Failed);
                                 callback.onTestComplete(this, result);
                                 return;
                             }
 
-                            TableOperationError tableOperationError = mspfe.getPushCompletionResult().getOperationErrors().get(0);
+                            log("Cleaning operation");
 
                             try {
-
-                                log("Count pending operations");
-
-                                if (offlineReadyClient.getSyncContext().getPendingOperations() != 1) {
-                                    log("Expected 1 pending operations");
-
-                                    result.setStatus(TestStatus.Failed);
-                                    callback.onTestComplete(this, result);
-                                    return;
-                                }
-
-                                log("Cleaning operation");
-
-                                try {
-                                    offlineReadyClient.getSyncContext().cancelAndUpdateItem(tableOperationError);
-                                } catch (Throwable throwable) {
-                                    result.setStatus(TestStatus.Failed);
-                                    callback.onTestComplete(this, result);
-                                    return;
-                                }
-
+                                offlineReadyClient.getSyncContext().cancelAndUpdateItem(tableOperationError);
                             } catch (Throwable throwable) {
                                 result.setStatus(TestStatus.Failed);
                                 callback.onTestComplete(this, result);
                                 return;
                             }
+
+                        } catch (Throwable throwable) {
+                            result.setStatus(TestStatus.Failed);
+                            callback.onTestComplete(this, result);
+                            return;
                         }
-
-                        log("Cleaning up");
-
-                        localTable.delete(serverItem).get();
-
-                        log("Local table cleaned up. Now sync'ing once more");
-                        offlineReadyClient.getSyncContext().push().get();
-                        log("Done");
-
-                        callback.onTestComplete(this, result);
-
-                    } catch (Exception e) {
-                        callback.onTestComplete(this, createResultFromException(e));
-                        return;
                     }
+
+                    log("Cleaning up");
+
+                    localTable.delete(serverItem).get();
+
+                    log("Local table cleaned up. Now sync'ing once more");
+                    offlineReadyClient.getSyncContext().push().get();
+                    log("Done");
+
+                    callback.onTestComplete(this, result);
+
+                } catch (Exception e) {
+                    callback.onTestComplete(this, createResultFromException(e));
+                    return;
                 }
-            };
+            }
+        };
 
-            test.setName("Offline - Test delete a locally updated item");
+        test.setName("Offline - Test delete a locally updated item");
 
-            return test;
-        }
+        return test;
+    }
 
-        private TestCase createSyncConflictTest(final boolean autoResolve) {
+    private TestCase createSyncConflictTest(final boolean autoResolve) {
 
-            final String tableName = "offlineReady";
+        final String tableName = "offlineReady";
 
-            final TestCase test = new TestCase() {
+        final TestCase test = new TestCase() {
 
-                @Override
-                protected void executeTest(MobileServiceClient offlineReadyClient, final TestExecutionCallback callback) {
+            @Override
+            protected void executeTest(MobileServiceClient offlineReadyClient, final TestExecutionCallback callback) {
 
-                    TestCase testCase = this;
-                    TestResult result = new TestResult();
-                    result.setStatus(TestStatus.Passed);
-                    result.setTestCase(testCase);
+                TestCase testCase = this;
+                TestResult result = new TestResult();
+                result.setStatus(TestStatus.Passed);
+                result.setTestCase(testCase);
+                try {
+
+                    boolean resolveConflictsOnClient = autoResolve;
+
+                    SQLiteLocalStore localStore = new SQLiteLocalStore(offlineReadyClient.getContext(), OFFLINE_TABLE_NAME, null, 1);
+
+                    log("Defined the table on the local store");
+
+                    Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
+                    tableDefinition.put("id", ColumnDataType.String);
+                    tableDefinition.put("name", ColumnDataType.String);
+                    tableDefinition.put("age", ColumnDataType.Integer);
+                    tableDefinition.put("float", ColumnDataType.Real);
+                    tableDefinition.put("date", ColumnDataType.Date);
+                    tableDefinition.put("bool", ColumnDataType.Boolean);
+                    tableDefinition.put("__version", ColumnDataType.String);
+
+                    log("Initialized the store and sync context");
+
+                    localStore.defineTable(tableName, tableDefinition);
+
+                    MobileServiceSyncTable<OfflineReadyItem> localTable = offlineReadyClient.getSyncTable(tableName, OfflineReadyItem.class);
+
+                    MobileServiceTable<OfflineReadyItem> remoteTable = offlineReadyClient.getTable(tableName, OfflineReadyItem.class);
+
+                    ConflictResolvingSyncHandler conflictResolvingSyncHandler = new ConflictResolvingSyncHandler(this, offlineReadyClient);
+
+                    if (resolveConflictsOnClient) {
+                        offlineReadyClient.getSyncContext().initialize(localStore, conflictResolvingSyncHandler).get();
+                    } else {
+                        offlineReadyClient.getSyncContext().initialize(localStore, new SimpleSyncHandler()).get();
+                    }
+
+                    localTable.purge(null).get();
+                    log("Removed all items from the local table");
+
+                    OfflineReadyItem item = new OfflineReadyItem(new Random());
+
+                    item = localTable.insert(item).get();
+
+                    log("Inserted the item to the local store:" + item);
+
+                    Query pullQuery = QueryOperations.tableName(tableName).field("id").eq(item.getId());
+
+                    localTable.pull(pullQuery).get();
+
+                    log("Changing the item on the server");
+
+                    item.setFlag(!item.getFlag());
+
+                    item = remoteTable.update(item).get();
+
+                    log("Updated the item: " + item);
+
+                    OfflineReadyItem localItem = localTable.lookUp(item.getId()).get();
+
+                    log("Retrieved the item from the local table, now updating it");
+
+                    localItem.setDate(new Date());
+
+                    localTable.update(localItem).get();
+                    log("Updated the item on the local table");
+
+                    log("Now trying to pull changes from the server (will trigger a push)");
+
                     try {
-
-                        boolean resolveConflictsOnClient = autoResolve;
-
-                        SQLiteLocalStore localStore = new SQLiteLocalStore(offlineReadyClient.getContext(), OFFLINE_TABLE_NAME, null, 1);
-
-                        log("Defined the table on the local store");
-
-                        Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
-                        tableDefinition.put("id", ColumnDataType.String);
-                        tableDefinition.put("name", ColumnDataType.String);
-                        tableDefinition.put("age", ColumnDataType.Integer);
-                        tableDefinition.put("float", ColumnDataType.Real);
-                        tableDefinition.put("date", ColumnDataType.Date);
-                        tableDefinition.put("bool", ColumnDataType.Boolean);
-                        tableDefinition.put("__version", ColumnDataType.String);
-
-                        log("Initialized the store and sync context");
-
-                        localStore.defineTable(tableName, tableDefinition);
-
-                        MobileServiceSyncTable<OfflineReadyItem> localTable = offlineReadyClient.getSyncTable(tableName, OfflineReadyItem.class);
-
-                        MobileServiceTable<OfflineReadyItem> remoteTable = offlineReadyClient.getTable(tableName, OfflineReadyItem.class);
-
-                        ConflictResolvingSyncHandler conflictResolvingSyncHandler = new ConflictResolvingSyncHandler(this, offlineReadyClient);
-
-                        if (resolveConflictsOnClient) {
-                            offlineReadyClient.getSyncContext().initialize(localStore, conflictResolvingSyncHandler).get();
+                        localTable.pull(pullQuery).get();
+                        if (!autoResolve) {
+                            log("Error, pull (push) should have caused a conflict, but none happened.");
+                            result.setStatus(TestStatus.Failed);
+                            callback.onTestComplete(this, result);
+                            return;
                         } else {
-                            offlineReadyClient.getSyncContext().initialize(localStore, new SimpleSyncHandler()).get();
-                        }
-
-                        localTable.purge(null).get();
-                        log("Removed all items from the local table");
-
-                        OfflineReadyItem item = new OfflineReadyItem(new Random());
-
-                        item = localTable.insert(item).get();
-
-                        log("Inserted the item to the local store:" + item);
-
-                        Query pullQuery = QueryOperations.tableName(tableName).field("id").eq(item.getId());
-
-                        localTable.pull(pullQuery).get();
-
-                        log("Changing the item on the server");
-
-                        item.setFlag(!item.getFlag());
-
-                        item = remoteTable.update(item).get();
-
-                        log("Updated the item: " + item);
-
-                        OfflineReadyItem localItem = localTable.lookUp(item.getId()).get();
-
-                        log("Retrieved the item from the local table, now updating it");
-
-                        localItem.setDate(new Date());
-
-                        localTable.update(localItem).get();
-                        log("Updated the item on the local table");
-
-                        log("Now trying to pull changes from the server (will trigger a push)");
-
-                        try {
-                            localTable.pull(pullQuery).get();
-                            if (!autoResolve) {
-                                log("Error, pull (push) should have caused a conflict, but none happened.");
+                            OfflineReadyItem expectedMergedItem = conflictResolvingSyncHandler.conflictResolution(localItem, item);
+                            OfflineReadyItem localMergedItem = localTable.lookUp(item.getId()).get();
+                            if (localMergedItem.equals(expectedMergedItem)) {
+                                log("Item was merged correctly.");
+                            } else {
+                                log("Error, item not merged correctly. Expected: " + expectedMergedItem + " Actual: " + localMergedItem);
                                 result.setStatus(TestStatus.Failed);
                                 callback.onTestComplete(this, result);
                                 return;
-                            } else {
-                                OfflineReadyItem expectedMergedItem = conflictResolvingSyncHandler.conflictResolution(localItem, item);
-                                OfflineReadyItem localMergedItem = localTable.lookUp(item.getId()).get();
-                                if (localMergedItem.equals(expectedMergedItem)) {
-                                    log("Item was merged correctly.");
-                                } else {
-                                    log("Error, item not merged correctly. Expected: " + expectedMergedItem + " Actual: " + localMergedItem);
-                                    result.setStatus(TestStatus.Failed);
-                                    callback.onTestComplete(this, result);
-                                    return;
-                                }
-                            }
-                        } catch (Exception ex) {
-                            log("Push exception: " + ex);
-
-                            MobileServicePushFailedException mspfe = (MobileServicePushFailedException) ex.getCause();
-
-                            if (autoResolve) {
-                                log("Error, push should have succeeded.");
-                                result.setStatus(TestStatus.Failed);
-                                callback.onTestComplete(this, result);
-                                return;
-                            } else {
-                                log("Expected exception was thrown.");
-
-                                try {
-                                    offlineReadyClient.getSyncContext().cancelAndUpdateItem(mspfe.getPushCompletionResult().getOperationErrors().get(0));
-                                } catch (Throwable throwable) {
-                                    log("Error, cancel And Update Item should have succeeded.");
-                                    result.setStatus(TestStatus.Failed);
-                                    callback.onTestComplete(this, result);
-                                    return;
-                                }
                             }
                         }
+                    } catch (Exception ex) {
+                        log("Push exception: " + ex);
 
-                        log("Cleaning up");
+                        MobileServicePushFailedException mspfe = (MobileServicePushFailedException) ex.getCause();
 
-                        localTable.delete(item).get();
-
-                        log("Local table cleaned up. Now sync'ing once more");
-                        offlineReadyClient.getSyncContext().push().get();
-                        log("Done");
-
-                        callback.onTestComplete(this, result);
-
-                    } catch (Exception e) {
-                        callback.onTestComplete(this, createResultFromException(e));
-                        return;
-                    }
-                }
-
-                ;
-            };
-
-            test.setName("Offline - dealing with conflicts - " + (autoResolve ? "client resolves conflicts" : "push fails after conflicts"));
-
-            return test;
-        }
-
-        private TestCase createSyncConflictAndResolveWithMethodTest(final boolean useCancelAndUpdateItem) {
-
-            final String tableName = "offlineReady";
-
-            final TestCase test = new TestCase() {
-
-                @Override
-                protected void executeTest(MobileServiceClient offlineReadyClient, final TestExecutionCallback callback) {
-
-                    TestCase testCase = this;
-                    TestResult result = new TestResult();
-                    result.setStatus(TestStatus.Passed);
-                    result.setTestCase(testCase);
-                    try {
-
-                        SQLiteLocalStore localStore = new SQLiteLocalStore(offlineReadyClient.getContext(), OFFLINE_TABLE_NAME, null, 1);
-
-                        log("Defined the table on the local store");
-
-                        Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
-                        tableDefinition.put("id", ColumnDataType.String);
-                        tableDefinition.put("name", ColumnDataType.String);
-                        tableDefinition.put("age", ColumnDataType.Integer);
-                        tableDefinition.put("float", ColumnDataType.Real);
-                        tableDefinition.put("date", ColumnDataType.Date);
-                        tableDefinition.put("bool", ColumnDataType.Boolean);
-                        tableDefinition.put("__version", ColumnDataType.String);
-
-                        log("Initialized the store and sync context");
-
-                        localStore.defineTable(tableName, tableDefinition);
-
-                        MobileServiceSyncTable<OfflineReadyItem> localTable = offlineReadyClient.getSyncTable(tableName, OfflineReadyItem.class);
-
-                        MobileServiceTable<OfflineReadyItem> remoteTable = offlineReadyClient.getTable(tableName, OfflineReadyItem.class);
-
-                        ConflictResolvingSyncHandler conflictResolvingSyncHandler = new ConflictResolvingSyncHandler(this, offlineReadyClient);
-
-                        offlineReadyClient.getSyncContext().initialize(localStore, new SimpleSyncHandler()).get();
-
-                        localTable.purge(null).get();
-                        log("Removed all items from the local table");
-
-                        OfflineReadyItem item = new OfflineReadyItem(new Random());
-
-                        item = localTable.insert(item).get();
-
-                        log("Inserted the item to the local store:" + item);
-
-                        Query pullQuery = QueryOperations.tableName(tableName).field("id").eq(item.getId());
-
-                        localTable.pull(pullQuery).get();
-
-                        log("Changing the item on the server");
-
-                        item.setFlag(!item.getFlag());
-
-                        item = remoteTable.update(item).get();
-
-                        log("Updated the item: " + item);
-
-                        OfflineReadyItem localItem = localTable.lookUp(item.getId()).get();
-                        OfflineReadyItem serverItem = remoteTable.lookUp(item.getId()).get();
-
-                        log("Retrieved the item from the local table, now updating it");
-
-                        localItem.setDate(new Date());
-
-                        localTable.update(localItem).get();
-                        log("Updated the item on the local table");
-
-                        log("Now trying to pull changes from the server (will trigger a push)");
-
-                        try {
-                            localTable.pull(pullQuery).get();
-                            log("Error, pull (push) should have caused a conflict, but none happened.");
+                        if (autoResolve) {
+                            log("Error, push should have succeeded.");
                             result.setStatus(TestStatus.Failed);
                             callback.onTestComplete(this, result);
                             return;
-                        } catch (Exception ex) {
-                            log("Push exception: " + ex);
+                        } else {
                             log("Expected exception was thrown.");
 
-                            MobileServicePushFailedException mspfe = (MobileServicePushFailedException) ex.getCause();
-
-                            if (mspfe == null || mspfe.getPushCompletionResult().getOperationErrors().size() != 1) {
-                                result.setStatus(TestStatus.Failed);
-                                callback.onTestComplete(this, result);
-                                return;
-                            }
-
-                            TableOperationError tableOperationError = mspfe.getPushCompletionResult().getOperationErrors().get(0);
-
                             try {
-
-                                log("Count pending operations");
-
-                                if (offlineReadyClient.getSyncContext().getPendingOperations() != 1) {
-                                    log("Expected 1 pending operations");
-
-                                    result.setStatus(TestStatus.Failed);
-                                    callback.onTestComplete(this, result);
-                                    return;
-                                }
+                                offlineReadyClient.getSyncContext().cancelAndUpdateItem(mspfe.getPushCompletionResult().getOperationErrors().get(0));
                             } catch (Throwable throwable) {
+                                log("Error, cancel And Update Item should have succeeded.");
                                 result.setStatus(TestStatus.Failed);
                                 callback.onTestComplete(this, result);
                                 return;
-                            }
-
-                            if (useCancelAndUpdateItem) {
-                                try {
-                                    offlineReadyClient.getSyncContext().cancelAndUpdateItem(tableOperationError);
-                                } catch (Throwable throwable) {
-                                    throwable.printStackTrace();
-                                }
-
-                                OfflineReadyItem resolvedLocalItem = localTable.lookUp(tableOperationError.getItemId()).get();
-
-                                if (!serverItem.equals(resolvedLocalItem)) {
-                                    result.setStatus(TestStatus.Failed);
-                                    result.setStatus(TestStatus.Failed);
-                                    callback.onTestComplete(this, result);
-                                    return;
-                                }
-
-                            } else {
-                                try {
-                                    offlineReadyClient.getSyncContext().cancelAndDiscardItem(tableOperationError);
-                                } catch (Throwable throwable) {
-                                    result.setStatus(TestStatus.Failed);
-                                    callback.onTestComplete(this, result);
-                                    return;
-                                }
-
-                                OfflineReadyItem resolvedItem = localTable.lookUp(tableOperationError.getItemId()).get();
-
-                                if (resolvedItem != null) {
-                                    result.setStatus(TestStatus.Failed);
-                                    callback.onTestComplete(this, result);
-                                }
                             }
                         }
+                    }
+
+                    log("Cleaning up");
+
+                    localTable.delete(item).get();
+
+                    log("Local table cleaned up. Now sync'ing once more");
+                    offlineReadyClient.getSyncContext().push().get();
+                    log("Done");
+
+                    callback.onTestComplete(this, result);
+
+                } catch (Exception e) {
+                    callback.onTestComplete(this, createResultFromException(e));
+                    return;
+                }
+            }
+
+            ;
+        };
+
+        test.setName("Offline - dealing with conflicts - " + (autoResolve ? "client resolves conflicts" : "push fails after conflicts"));
+
+        return test;
+    }
+
+    private TestCase createSyncConflictAndResolveWithMethodTest(final boolean useCancelAndUpdateItem) {
+
+        final String tableName = "offlineReady";
+
+        final TestCase test = new TestCase() {
+
+            @Override
+            protected void executeTest(MobileServiceClient offlineReadyClient, final TestExecutionCallback callback) {
+
+                TestCase testCase = this;
+                TestResult result = new TestResult();
+                result.setStatus(TestStatus.Passed);
+                result.setTestCase(testCase);
+                try {
+
+                    SQLiteLocalStore localStore = new SQLiteLocalStore(offlineReadyClient.getContext(), OFFLINE_TABLE_NAME, null, 1);
+
+                    log("Defined the table on the local store");
+
+                    Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
+                    tableDefinition.put("id", ColumnDataType.String);
+                    tableDefinition.put("name", ColumnDataType.String);
+                    tableDefinition.put("age", ColumnDataType.Integer);
+                    tableDefinition.put("float", ColumnDataType.Real);
+                    tableDefinition.put("date", ColumnDataType.Date);
+                    tableDefinition.put("bool", ColumnDataType.Boolean);
+                    tableDefinition.put("__version", ColumnDataType.String);
+
+                    log("Initialized the store and sync context");
+
+                    localStore.defineTable(tableName, tableDefinition);
+
+                    MobileServiceSyncTable<OfflineReadyItem> localTable = offlineReadyClient.getSyncTable(tableName, OfflineReadyItem.class);
+
+                    MobileServiceTable<OfflineReadyItem> remoteTable = offlineReadyClient.getTable(tableName, OfflineReadyItem.class);
+
+                    ConflictResolvingSyncHandler conflictResolvingSyncHandler = new ConflictResolvingSyncHandler(this, offlineReadyClient);
+
+                    offlineReadyClient.getSyncContext().initialize(localStore, new SimpleSyncHandler()).get();
+
+                    localTable.purge(null).get();
+                    log("Removed all items from the local table");
+
+                    OfflineReadyItem item = new OfflineReadyItem(new Random());
+
+                    item = localTable.insert(item).get();
+
+                    log("Inserted the item to the local store:" + item);
+
+                    Query pullQuery = QueryOperations.tableName(tableName).field("id").eq(item.getId());
+
+                    localTable.pull(pullQuery).get();
+
+                    log("Changing the item on the server");
+
+                    item.setFlag(!item.getFlag());
+
+                    item = remoteTable.update(item).get();
+
+                    log("Updated the item: " + item);
+
+                    OfflineReadyItem localItem = localTable.lookUp(item.getId()).get();
+                    OfflineReadyItem serverItem = remoteTable.lookUp(item.getId()).get();
+
+                    log("Retrieved the item from the local table, now updating it");
+
+                    localItem.setDate(new Date());
+
+                    localTable.update(localItem).get();
+                    log("Updated the item on the local table");
+
+                    log("Now trying to pull changes from the server (will trigger a push)");
+
+                    try {
+                        localTable.pull(pullQuery).get();
+                        log("Error, pull (push) should have caused a conflict, but none happened.");
+                        result.setStatus(TestStatus.Failed);
+                        callback.onTestComplete(this, result);
+                        return;
+                    } catch (Exception ex) {
+                        log("Push exception: " + ex);
+                        log("Expected exception was thrown.");
+
+                        MobileServicePushFailedException mspfe = (MobileServicePushFailedException) ex.getCause();
+
+                        if (mspfe == null || mspfe.getPushCompletionResult().getOperationErrors().size() != 1) {
+                            result.setStatus(TestStatus.Failed);
+                            callback.onTestComplete(this, result);
+                            return;
+                        }
+
+                        TableOperationError tableOperationError = mspfe.getPushCompletionResult().getOperationErrors().get(0);
 
                         try {
-                            if (offlineReadyClient.getSyncContext().getPendingOperations() != 0) {
-                                log("Expected 0 pending operations");
+
+                            log("Count pending operations");
+
+                            if (offlineReadyClient.getSyncContext().getPendingOperations() != 1) {
+                                log("Expected 1 pending operations");
 
                                 result.setStatus(TestStatus.Failed);
                                 callback.onTestComplete(this, result);
@@ -1392,26 +1344,74 @@ public class OfflineTests extends TestGroup {
                             return;
                         }
 
-                        log("Cleaning up");
-                        localTable.delete(item).get();
+                        if (useCancelAndUpdateItem) {
+                            try {
+                                offlineReadyClient.getSyncContext().cancelAndUpdateItem(tableOperationError);
+                            } catch (Throwable throwable) {
+                                throwable.printStackTrace();
+                            }
 
-                        log("Local table cleaned up. Now sync'ing once more");
-                        offlineReadyClient.getSyncContext().push().get();
-                        log("Done");
+                            OfflineReadyItem resolvedLocalItem = localTable.lookUp(tableOperationError.getItemId()).get();
 
+                            if (!serverItem.equals(resolvedLocalItem)) {
+                                result.setStatus(TestStatus.Failed);
+                                result.setStatus(TestStatus.Failed);
+                                callback.onTestComplete(this, result);
+                                return;
+                            }
+
+                        } else {
+                            try {
+                                offlineReadyClient.getSyncContext().cancelAndDiscardItem(tableOperationError);
+                            } catch (Throwable throwable) {
+                                result.setStatus(TestStatus.Failed);
+                                callback.onTestComplete(this, result);
+                                return;
+                            }
+
+                            OfflineReadyItem resolvedItem = localTable.lookUp(tableOperationError.getItemId()).get();
+
+                            if (resolvedItem != null) {
+                                result.setStatus(TestStatus.Failed);
+                                callback.onTestComplete(this, result);
+                            }
+                        }
+                    }
+
+                    try {
+                        if (offlineReadyClient.getSyncContext().getPendingOperations() != 0) {
+                            log("Expected 0 pending operations");
+
+                            result.setStatus(TestStatus.Failed);
+                            callback.onTestComplete(this, result);
+                            return;
+                        }
+                    } catch (Throwable throwable) {
+                        result.setStatus(TestStatus.Failed);
                         callback.onTestComplete(this, result);
-
-                    } catch (Exception e) {
-                        callback.onTestComplete(this, createResultFromException(e));
                         return;
                     }
+
+                    log("Cleaning up");
+                    localTable.delete(item).get();
+
+                    log("Local table cleaned up. Now sync'ing once more");
+                    offlineReadyClient.getSyncContext().push().get();
+                    log("Done");
+
+                    callback.onTestComplete(this, result);
+
+                } catch (Exception e) {
+                    callback.onTestComplete(this, createResultFromException(e));
+                    return;
                 }
-            };
+            }
+        };
 
-            test.setName("Offline - dealing with conflicts - with " + (useCancelAndUpdateItem ? "cancelAndUpdateItem" : "cancelAndDiscardItem"));
+        test.setName("Offline - dealing with conflicts - with " + (useCancelAndUpdateItem ? "cancelAndUpdateItem" : "cancelAndDiscardItem"));
 
-            return test;
-        }
+        return test;
+    }
 
     private TestCase createSyncTestForAuthenticatedTable(final boolean isLoggedIn) {
 
@@ -1679,7 +1679,7 @@ public class OfflineTests extends TestGroup {
 
                     MobileServiceSyncTable<OfflineReadyItem> localTable = offlineReadyClient.getSyncTable(tableName, OfflineReadyItem.class);
 
-                    MobileServiceJsonTable remoteTable = offlineReadyClient.getTable(tableName);
+                    MobileServiceTable<OfflineReadyItem> remoteTable = offlineReadyClient.getTable(tableName, OfflineReadyItem.class);
 
                     offlineReadyClient.getSyncContext().initialize(localStore, new SimpleSyncHandler()).get();
 
@@ -1691,22 +1691,18 @@ public class OfflineTests extends TestGroup {
 
                     log("Removed all items from the local table");
 
-                    List<OfflineReadyItem> mOfflineReadyItemsNoVersion = new ArrayList<OfflineReadyItem>();
-
                     Random rand = new Random();
 
                     int elementsCount = rand.nextInt((100 - 50) + 1) + 50;
 
                     String testFilter = UUID.randomUUID().toString();
 
-                    Gson gsonBuilder = offlineReadyClient.getGsonBuilder().create();
-
                     for (int i = 0; i < elementsCount; i++) {
 
                         OfflineReadyItem item = new OfflineReadyItem(new Random());
                         item.setName(testFilter);
 
-                        remoteTable.insert(gsonBuilder.toJsonTree(item).getAsJsonObject()).get();
+                        remoteTable.insert(item).get();
 
                     }
 
