@@ -1,10 +1,6 @@
-//
-//  MSManagedObjectObserver.m
-//  WindowsAzureMobileServices
-//
-//  Created by Phillip Van Nortwick on 2/5/15.
-//  Copyright (c) 2015 Windows Azure. All rights reserved.
-//
+// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
 
 #import "MSManagedObjectObserver.h"
 #import "MSCoreDataStore.h"
@@ -18,26 +14,29 @@
 
 @implementation MSManagedObjectObserver
 
-- (instancetype) initWithClient:(MSClient *)client
+- (instancetype) initWithClient:(MSClient *)client context:(NSManagedObjectContext *)context
 {
     self = [super init];
+    
+    NSAssert(context != nil, @"context may not be nil");
+    
     if (self) {
-		// Copy so we can change the handling of how the sync table operations are handled
-        _client = [client copy];
-		
-		if ([_client.syncContext.dataSource isKindOfClass:[MSCoreDataStore class]])
-		{
-			MSCoreDataStore *dataStore = _client.syncContext.dataSource;
-			_context = dataStore.context;
-			
-			[[NSNotificationCenter defaultCenter] addObserver:self
-													 selector:@selector(handleDidSaveNotification:)
-														 name:NSManagedObjectContextDidSaveNotification
-													   object:_context];
-		}
-		
+        if (![client.syncContext.dataSource isKindOfClass:[MSCoreDataStore class]]) {
+            // Throw error
+            return nil;
+        }
+        
+        MSCoreDataStore *store = client.syncContext.dataSource;
+        NSAssert(store.context != context, @"Observed context may not be the client's context");
+        
+        _client = client;
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleDidSaveNotification:)
+                                                     name:NSManagedObjectContextDidSaveNotification
+                                                   object:context];
+        
 		// Modify the handling of sync table operations for this instance of the data source
-		_client.syncContext.dataSource.handlesSyncTableOperations = FALSE;
+		_client.syncContext.dataSource.handlesSyncTableOperations = NO;
     }
     return self;
 }
