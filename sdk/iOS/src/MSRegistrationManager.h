@@ -3,7 +3,9 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSClient.h"
+#import "BlockDefinitions.h"
+
+@class MSClient;
 
 /// MSRegistrationManager orchestrates the steps of registering and unregistering.
 /// Its goal is to ensure that registrations are never duplicated and that

@@ -7,6 +7,8 @@
 #import "MSURLBuilder.h"
 #import "MSSyncContextInternal.h"
 #import "MSTableInternal.h"
+#import "MSSyncTable.h"
+#import "MSClientInternal.h"
 
 #pragma mark * MSQuery Implementation
 

@@ -3,7 +3,8 @@
 // ----------------------------------------------------------------------------
 
 #import "MSClient.h"
-#import "MSSerializer.h"
+
+@protocol MSSerializer;
 
 @interface MSClient ()
 

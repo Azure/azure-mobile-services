@@ -6,7 +6,8 @@
 #import "MSLoginView.h"
 #import "MSLoginSerializer.h"
 #import "MSJSONSerializer.h"
-
+#import "MSSerializer.h"
+#import "MSClient.h"
 
 #pragma mark * MSLoginController Private Interface
 

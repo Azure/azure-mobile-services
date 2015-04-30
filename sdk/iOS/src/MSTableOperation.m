@@ -8,6 +8,7 @@
 #import "MSTable.h"
 #import "MSTableInternal.h"
 #import "MSJSONSerializer.h"
+#import "MSSerializer.h"
 
 @implementation MSTableOperation
 

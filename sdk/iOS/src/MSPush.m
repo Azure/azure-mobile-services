@@ -5,6 +5,7 @@
 #import "MSPush.h"
 #import "MSRegistrationManager.h"
 #import "MSLocalStorage.h"
+#import "MSError.h"
 
 @interface MSPush ()
 @property (nonatomic, strong, readonly) MSRegistrationManager *registrationManager;

@@ -3,7 +3,8 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSClient.h"
+#import "BlockDefinitions.h"
+@class MSClient;
 #import "MSSerializer.h"
 
 

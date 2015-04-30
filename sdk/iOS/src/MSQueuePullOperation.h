@@ -3,7 +3,9 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSSyncContext.h"
+#import "BlockDefinitions.h"
+@class MSSyncContext;
+@class MSQuery;
 
 @interface MSQueuePullOperation : NSOperation {
     BOOL executing_;

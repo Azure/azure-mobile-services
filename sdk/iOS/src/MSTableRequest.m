@@ -6,6 +6,7 @@
 #import "MSURLBuilder.h"
 #import "MSSDKFeatures.h"
 #import "MSClientInternal.h"
+#import "MSTable.h"
 
 #pragma mark * HTTP Method String Constants
 

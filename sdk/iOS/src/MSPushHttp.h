@@ -3,11 +3,10 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSClientConnection.h"
-#import "MSPush.h"
+#import "BlockDefinitions.h"
 
-typedef void (^MSCreateRegistrationIdBlock)(NSString *registrationId, NSError *error);
-typedef void (^MSListRegistrationsBlock)(NSArray *registrations, NSError *error);
+@class MSClient;
+@class MSClientConnection;
 
 @interface MSPushHttp : NSObject
 

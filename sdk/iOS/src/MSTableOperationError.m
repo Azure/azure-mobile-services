@@ -7,6 +7,7 @@
 #import "MSError.h"
 #import "MSTableOperationInternal.h"
 #import "MSSyncContextInternal.h"
+#import "MSSerializer.h"
 
 @interface MSTableOperationError()
 

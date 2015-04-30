@@ -4,8 +4,12 @@
 
 #import <Foundation/Foundation.h>
 #import "MSClientConnection.h"
-#import "MSTable.h"
-#import "MSTableRequest.h"
+
+@class MSTable;
+@class MSTableRequest;
+@class MSTableItemRequest;
+@class MSTableDeleteRequest;
+@class MSTableReadQueryRequest;
 
 #pragma  mark * MSTableConnection Public Interface
 

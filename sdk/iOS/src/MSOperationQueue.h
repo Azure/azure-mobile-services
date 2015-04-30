@@ -3,8 +3,10 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSTableOperation.h"
-#import "MSClient.h"
+
+@class MSClient;
+@class MSTableOperation;
+@protocol MSSyncContextDataSource;
 
 /// A simple queue interface to abstract access from implementation. For now this may just
 /// be an NSArray but long term this is liable to change

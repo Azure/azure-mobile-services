@@ -3,16 +3,10 @@
 // ----------------------------------------------------------------------------
 
 #import <UIKit/UIKit.h>
+#import "BlockDefinitions.h"
 
 @class MSClient;
 @class MSUser;
-
-
-#pragma mark * Block Type Definitions
-
-/// Callback logging in an end user. If there was an error or the login was
-/// cancelled, *error* will be non-nil.
-typedef void (^MSClientLoginBlock)(MSUser *user, NSError *error);
 
 #pragma  mark * MSLoginController Public Interface
 

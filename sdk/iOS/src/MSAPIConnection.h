@@ -2,8 +2,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
+@class MSAPIRequest;
+@class MSClient;
+
 #import "MSClientConnection.h"
-#import "MSAPIRequest.h"
 
 
 #pragma  mark * MSAPIConnection Public Interface

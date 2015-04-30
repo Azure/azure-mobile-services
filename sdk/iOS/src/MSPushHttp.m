@@ -5,6 +5,8 @@
 #import "MSPushRequest.h"
 #import "MSPushHttp.h"
 #import "MSClientInternal.h"
+#import "BlockDefinitions.h"
+#import "MSClientConnection.h"
 
 @interface MSPushHttp ()
 @property (nonatomic, weak, readonly) MSClient *client;

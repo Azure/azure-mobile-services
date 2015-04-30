@@ -4,28 +4,17 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#import "BlockDefinitions.h"
 #import "MSError.h"
-#import "MSFilter.h"
-#import "MSLoginController.h"
-#import "MSSyncContext.h"
 
 @class MSTable;
 @class MSUser;
 @class MSSyncTable;
 @class MSPush;
+@class MSSyncContext;
+@class MSLoginController;
 
-
-#pragma mark * Block Type Definitions
-/// Callback for method with no return other than error.
-typedef void (^MSCompletionBlock)(NSError *error);
-
-/// Callback for invokeAPI method that expects a JSON result.
-typedef void (^MSAPIBlock)(id result, NSHTTPURLResponse *response, NSError *error);
-
-/// Callback for the invokeAPI method that can return any media type.
-typedef void (^MSAPIDataBlock)(NSData *result,
-                               NSHTTPURLResponse *response,
-                               NSError *error);
+@protocol MSFilter;
 
 #pragma  mark * MSClient Public Interface
 

@@ -19,6 +19,10 @@
 #import "MSCoreDataStore.h"
 #import "MSPush.h"
 #import "MSDateOffset.h"
+#import "MSQueryResult.h"
+#import "MSSyncContextReadResult.h"
+#import "MSQuery.h"
+#import "MSOperationQueue.h"
 
 #define WindowsAzureMobileServicesSdkMajorVersion 2
 #define WindowsAzureMobileServicesSdkMinorVersion 1
