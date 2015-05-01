@@ -5,8 +5,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Phone.Notification;
 using Newtonsoft.Json.Linq;
@@ -392,21 +390,21 @@ namespace ZumoE2ETestAppWP8.Tests
                 if (ZumoTestGlobals.Instance.IsNHPushEnabled)
                 {
                     var zumoPush = ZumoTestGlobals.Instance.Client.GetPush();
-                    TemplateRegistration reg = null;
+                    MpnsTemplateRegistration reg = null;
                     if (registerTemplate)
                     {
                         switch (templateType)
                         {
                             case "toast":
-                                reg = new TemplateRegistration(pushChannel.ChannelUri.ToString(), ZumoPushTestGlobals.NHWp8ToastTemplate, "wp8" + ZumoPushTestGlobals.NHToastTemplateName, "World English".Split());
+                                reg = new MpnsTemplateRegistration(pushChannel.ChannelUri.ToString(), ZumoPushTestGlobals.NHWp8ToastTemplate, "wp8" + ZumoPushTestGlobals.NHToastTemplateName, "World English".Split());
                                 break;
                             case "tile":
-                                reg = new TemplateRegistration(pushChannel.ChannelUri.ToString(), ZumoPushTestGlobals.NHWp8TileTemplate, "wp8" + ZumoPushTestGlobals.NHTileTemplateName, "World Mandarin".Split());
+                                reg = new MpnsTemplateRegistration(pushChannel.ChannelUri.ToString(), ZumoPushTestGlobals.NHWp8TileTemplate, "wp8" + ZumoPushTestGlobals.NHTileTemplateName, "World Mandarin".Split());
                                 break;
                             case "raw":
                                 IDictionary<string, string> wp8Headers = new Dictionary<string, string>();
                                 wp8Headers.Add("X-NotificationClass", "3");
-                                reg = new TemplateRegistration(pushChannel.ChannelUri.ToString(), ZumoPushTestGlobals.NHWp8RawTemplate, "wp8" + ZumoPushTestGlobals.NHRawTemplateName, "World French".Split(), wp8Headers);
+                                reg = new MpnsTemplateRegistration(pushChannel.ChannelUri.ToString(), ZumoPushTestGlobals.NHWp8RawTemplate, "wp8" + ZumoPushTestGlobals.NHRawTemplateName, "World French".Split(), wp8Headers);
                                 break;
                         }
 

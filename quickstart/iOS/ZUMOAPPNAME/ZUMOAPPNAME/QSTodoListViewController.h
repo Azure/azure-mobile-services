@@ -16,11 +16,9 @@
 
 #import <UIKit/UIKit.h>
 
-@interface QSTodoListViewController : UITableViewController
+@interface QSTodoListViewController : UITableViewController<NSFetchedResultsControllerDelegate>
 
-@property (weak, nonatomic) IBOutlet UITextField                *itemText;
-@property (weak, nonatomic) IBOutlet UIActivityIndicatorView    *activityIndicator;
-
+@property (weak, nonatomic) IBOutlet UITextField *itemText;
 - (IBAction)onAdd:(id)sender;
 
 @end

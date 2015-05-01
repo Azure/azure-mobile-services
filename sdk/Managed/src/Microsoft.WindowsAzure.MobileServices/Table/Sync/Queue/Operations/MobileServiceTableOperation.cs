@@ -3,29 +3,25 @@
 // ----------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Runtime.ExceptionServices;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.WindowsAzure.MobileServices.Threading;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
-    internal abstract class MobileServiceTableOperation: IMobileServiceTableOperation
+    internal abstract class MobileServiceTableOperation : IMobileServiceTableOperation
     {
         // --- Persisted properties -- //
         public string Id { get; private set; }
         public abstract MobileServiceTableOperationKind Kind { get; }
+        public MobileServiceTableKind TableKind { get; private set; }
         public string TableName { get; private set; }
         public string ItemId { get; private set; }
         public JObject Item { get; set; }
-        public DateTime CreatedAt { get; private set; }
+
+        public MobileServiceTableOperationState State { get; internal set; }
         public long Sequence { get; set; }
+        public long Version { get; set; }
 
         // --- Non persisted properties -- //
         IMobileServiceTable IMobileServiceTableOperation.Table
@@ -34,8 +30,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         }
 
         public MobileServiceTable Table { get; set; }
-        
+
         public bool IsCancelled { get; private set; }
+        public bool IsUpdated { get; private set; }
+
         public virtual bool CanWriteResultToStore
         {
             get { return true; }
@@ -44,14 +42,16 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         protected virtual bool SerializeItemToQueue
         {
             get { return false; }
-        }        
+        }
 
-        protected MobileServiceTableOperation(string tableName, string itemId)
+        protected MobileServiceTableOperation(string tableName, MobileServiceTableKind tableKind, string itemId)
         {
             this.Id = Guid.NewGuid().ToString();
-            this.CreatedAt = DateTime.UtcNow;
+            this.State = MobileServiceTableOperationState.Pending;
+            this.TableKind = tableKind;
             this.TableName = tableName;
             this.ItemId = itemId;
+            this.Version = 1;
         }
 
         public void AbortPush()
@@ -60,7 +60,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         }
 
         public async Task<JObject> ExecuteAsync()
-        {            
+        {
             if (this.IsCancelled)
             {
                 return null;
@@ -68,14 +68,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
             if (this.Item == null)
             {
-                throw new MobileServiceInvalidOperationException(Resources.MobileServiceTableOperation_ItemNotFound, request: null, response: null);
+                throw new MobileServiceInvalidOperationException("Operation must have an item associated with it.", request: null, response: null);
             }
 
             JToken response = await OnExecuteAsync();
             var result = response as JObject;
             if (response != null && result == null)
             {
-                throw new MobileServiceInvalidOperationException(Resources.MobileServiceTableOperation_ResultNotJObject, request: null, response: null);
+                throw new MobileServiceInvalidOperationException("Mobile Service table operation returned an unexpected response.", request: null, response: null);
             }
 
             return result;
@@ -86,6 +86,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         internal void Cancel()
         {
             this.IsCancelled = true;
+        }
+
+        internal void Update()
+        {
+            this.Version++;
+            this.IsUpdated = true;
         }
 
         /// <summary>
@@ -116,11 +122,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             {
                 { MobileServiceSystemColumns.Id, String.Empty },
                 { "kind", 0 },
+                { "state", 0 },
                 { "tableName", String.Empty },
+                { "tableKind", 0 },
                 { "itemId", String.Empty },
                 { "item", String.Empty },
                 { MobileServiceSystemColumns.CreatedAt, DateTime.Now },
-                { "sequence", 0 }
+                { "sequence", 0 },
+                { "version", 0 }
             });
         }
 
@@ -130,11 +139,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             {
                 { MobileServiceSystemColumns.Id, this.Id },
                 { "kind", (int)this.Kind },
+                { "state", (int)this.State },
                 { "tableName", this.TableName },
+                { "tableKind", (int)this.TableKind },
                 { "itemId", this.ItemId },
                 { "item", this.Item != null && this.SerializeItemToQueue ? this.Item.ToString(Formatting.None) : null },
-                { MobileServiceSystemColumns.CreatedAt, this.CreatedAt },
-                { "sequence", this.Sequence }
+                { "sequence", this.Sequence },
+                { "version", this.Version }
             };
 
             return obj;
@@ -148,31 +159,30 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
 
             var kind = (MobileServiceTableOperationKind)obj.Value<int>("kind");
-            string id = obj.Value<string>(MobileServiceSystemColumns.Id);
             string tableName = obj.Value<string>("tableName");
+            var tableKind = (MobileServiceTableKind)obj.Value<int?>("tableKind").GetValueOrDefault();
             string itemId = obj.Value<string>("itemId");
-            string itemJson = obj.Value<string>("item");
-            JObject item = !String.IsNullOrEmpty(itemJson) ? JObject.Parse(itemJson) : null;
-            DateTime createdAt = obj.Value<DateTime>(MobileServiceSystemColumns.CreatedAt);
-            long sequence = obj.Value<long>("sequence");
+
 
             MobileServiceTableOperation operation = null;
             switch (kind)
             {
                 case MobileServiceTableOperationKind.Insert:
-                    operation = new InsertOperation(tableName, itemId); break;
-                case MobileServiceTableOperationKind.Update: 
-                    operation = new UpdateOperation(tableName, itemId); break;
+                    operation = new InsertOperation(tableName, tableKind, itemId); break;
+                case MobileServiceTableOperationKind.Update:
+                    operation = new UpdateOperation(tableName, tableKind, itemId); break;
                 case MobileServiceTableOperationKind.Delete:
-                    operation = new DeleteOperation(tableName, itemId); break;
+                    operation = new DeleteOperation(tableName, tableKind, itemId); break;
             }
 
             if (operation != null)
             {
-                operation.Id = id;
-                operation.Sequence = sequence;
-                operation.CreatedAt = createdAt;
-                operation.Item = item;
+                operation.Id = obj.Value<string>(MobileServiceSystemColumns.Id);
+                operation.Sequence = obj.Value<long?>("sequence").GetValueOrDefault();
+                operation.Version = obj.Value<long?>("version").GetValueOrDefault();
+                string itemJson = obj.Value<string>("item");
+                operation.Item = !String.IsNullOrEmpty(itemJson) ? JObject.Parse(itemJson) : null;
+                operation.State = (MobileServiceTableOperationState)obj.Value<int?>("state").GetValueOrDefault();
             }
 
             return operation;

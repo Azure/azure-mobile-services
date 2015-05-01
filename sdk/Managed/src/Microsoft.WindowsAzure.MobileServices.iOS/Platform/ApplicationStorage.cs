@@ -1,6 +1,10 @@
 ﻿using System;
 
+#if __UNIFIED__
+using Foundation;
+#else
 using MonoTouch.Foundation;
+#endif
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
@@ -38,7 +42,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                throw new ArgumentException(Resources.IApplicationStorage_NullOrWhitespaceSettingName, "name");
+                throw new ArgumentException("An application setting name must be provided. Null, empty or whitespace only names are not allowed.", "name");
             }
 
             value = null;
@@ -69,7 +73,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                throw new ArgumentException(Resources.IApplicationStorage_NullOrWhitespaceSettingName, "name");
+                throw new ArgumentException("An application setting name must be provided. Null, empty or whitespace only names are not allowed.", "name");
             }
 
             var defaults = NSUserDefaults.StandardUserDefaults;

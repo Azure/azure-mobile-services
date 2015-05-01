@@ -3,11 +3,7 @@
 // ----------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices;
 using Newtonsoft.Json;
 using ZumoE2ETestApp.Framework;
@@ -33,7 +29,7 @@ namespace ZumoE2ETestApp.Tests.Types
         public double FloatingNumber { get; set; }
 
         [JsonProperty("date")]
-        public DateTime Date { get; set; }
+        public DateTimeOffset Date { get; set; }
 
         [JsonProperty("bool")]
         public bool Flag { get; set; }

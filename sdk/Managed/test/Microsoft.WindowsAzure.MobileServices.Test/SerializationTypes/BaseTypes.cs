@@ -18,6 +18,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public byte Byte { get; set; }
     }
 
+    public class BytesType
+    {
+        public string Id { get; set; }
+
+        public byte[] Data { get; set; }
+    }
+
     public class SByteType
     {
         public int Id { get; set; }

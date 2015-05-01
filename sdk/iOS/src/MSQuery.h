@@ -14,7 +14,7 @@
 /// configured and then sent to the Microsoft Azure Mobile Service using the
 /// *readOnSuccess:onError:* method. *MSQuery* instances can be modfied and
 /// reused, but are not threadsafe.
-@interface MSQuery : NSObject
+@interface MSQuery : NSObject <NSCopying>
 
 #pragma mark * Public Initializer Methods
 

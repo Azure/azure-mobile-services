@@ -3,16 +3,20 @@
 // ----------------------------------------------------------------------------
 
 // Note: Cordova is PhoneGap.
-// This login UI implementation uses the InAppBrowser plugin which is built into Cordova 2.3.0+.
+// This login UI implementation uses the InAppBrowser plugin,
+// to install the plugin use the following command
+//   cordova plugin add org.apache.cordova.inappbrowser
 
-var requiredCordovaVersion = { major: 2, minor: 3 };
+var requiredCordovaVersion = { major: 3, minor: 0 };
 
 exports.supportsCurrentRuntime = function () {
     /// <summary>
     /// Determines whether or not this login UI is usable in the current runtime.
     /// </summary>
 
-    return !!currentCordovaVersion();
+    // When running application inside of Ripple emulator, InAppBrowser functionality is not supported.
+    // We should use Browser popup login method instead.
+    return !!currentCordovaVersion() && !isRunUnderRippleEmulator();
 };
 
 exports.login = function (startUri, endUri, callback) {
@@ -22,44 +26,61 @@ exports.login = function (startUri, endUri, callback) {
 
     // Ensure it's a sufficiently new version of Cordova, and if not fail synchronously so that
     // the error message will show up in the browser console.
-    var foundCordovaVersion = currentCordovaVersion();
+    var foundCordovaVersion = currentCordovaVersion(),
+        message;
+
     if (!isSupportedCordovaVersion(foundCordovaVersion)) {
-        var message = "Not a supported version of Cordova. Detected: " + foundCordovaVersion +
+        message = "Not a supported version of Cordova. Detected: " + foundCordovaVersion +
                     ". Required: " + requiredCordovaVersion.major + "." + requiredCordovaVersion.minor;
+        throw new Error(message);
+    }
+    if (!hasInAppBrowser) {
+        message = 'A required plugin: "org.apache.cordova.inappbrowser" was not detected.';
         throw new Error(message);
     }
 
     // Initially we show a page with a spinner. This stays on screen until the login form has loaded.
     var redirectionScript = "<script>location.href = unescape('" + window.escape(startUri) + "')</script>",
-        startPage = "data:text/html," + encodeURIComponent(getSpinnerMarkup() + redirectionScript),
-        loginWindow = window.open(startPage, "_blank", "location=no"),
-        flowHasFinished = false,
-        loadEventHandler = function (evt) {
-            if (!flowHasFinished && evt.url.indexOf(endUri) === 0) {
+        startPage = "data:text/html," + encodeURIComponent(getSpinnerMarkup() + redirectionScript);
+
+    // iOS inAppBrowser issue requires this wrapping
+    setTimeout(function () {
+        var loginWindow = window.open(startPage, "_blank", "location=no"),
+            flowHasFinished = false,
+            loadEventHandler = function (evt) {
+                if (!flowHasFinished && evt.url.indexOf(endUri) === 0) {
+                    flowHasFinished = true;
+                    setTimeout(function () {
+                        loginWindow.close();
+                    }, 500);
+                    var result = parseOAuthResultFromDoneUrl(evt.url);
+                    callback(result.error, result.oAuthToken);
+                }
+            };
+
+        // Ideally we'd just use loadstart because it happens earlier, but it randomly skips
+        // requests on iOS, so we have to listen for loadstop as well (which is reliable).
+        loginWindow.addEventListener('loadstart', loadEventHandler);
+        loginWindow.addEventListener('loadstop', loadEventHandler);
+
+        loginWindow.addEventListener('exit', function (evt) {
+            if (!flowHasFinished) {
                 flowHasFinished = true;
-                loginWindow.close();
-                var result = parseOAuthResultFromDoneUrl(evt.url);
-                callback(result.error, result.oAuthToken);
+                callback("UserCancelled", null);
             }
-        };
-
-    // Ideally we'd just use loadstart because it happens earlier, but it randomly skips
-    // requests on iOS, so we have to listen for loadstop as well (which is reliable).
-    loginWindow.addEventListener('loadstart', loadEventHandler);
-    loginWindow.addEventListener('loadstop', loadEventHandler);
-
-    loginWindow.addEventListener('exit', function (evt) {
-        if (!flowHasFinished) {
-            flowHasFinished = true;
-            callback("UserCancelled", null);
-        }
-    });
+        });
+    }, 500);
 };
 
+function isRunUnderRippleEmulator () {
+    // Returns true when application runs under Ripple emulator 
+    return window.parent && !!window.parent.ripple;
+}
+
 function currentCordovaVersion() {
-    // If running inside Cordova, returns a string similar to "2.3.0". Otherwise, returns a falsey value.
+    // If running inside Cordova, returns a string similar to "3.5.0". Otherwise, returns a falsey value.
     // Note: We can only detect Cordova after its deviceready event has fired, so don't call login until then.
-    return window.device && window.device.cordova;
+    return window.cordova && window.cordova.version;
 }
 
 function isSupportedCordovaVersion(version) {
@@ -72,6 +93,10 @@ function isSupportedCordovaVersion(version) {
                (major === required.major && minor >= required.minor);
     }
     return false;
+}
+
+function hasInAppBrowser() {
+    return !window.open;
 }
 
 function parseOAuthResultFromDoneUrl(url) {

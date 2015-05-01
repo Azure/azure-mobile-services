@@ -26,7 +26,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         string TableName { get; }
 
         /// <summary>
-        /// Excutes a query against the table.
+        /// The supported odata options on the remote table
+        /// </summary>
+        MobileServiceRemoteTableOptions SupportedOptions { get; set; }
+
+        /// <summary>
+        /// Executes a query against the table.
         /// </summary>
         /// <param name="query">
         /// A query to execute.
@@ -81,10 +86,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         Task<JObject> LookupAsync(string id);
 
         /// <summary>
-        /// Pulls all items that match the given query from the associated remote table. Supports incremental sync when using the JavaScript Mobile Services backend. For more information, see http://go.microsoft.com/fwlink/?LinkId=506788.
+        /// Pulls all items that match the given query from the associated remote table. Supports incremental sync.
         /// </summary>
-        /// <param name="queryKey">
-        /// A string that uniquely identifies this query and is used to keep track of its sync state. [JavaScript Mobile Services backend only] Supplying this parameter enables incremental sync whenever the same key is used again.
+        /// <param name="queryId">
+        /// A string that uniquely identifies this query and is used to keep track of its sync state. Supplying this parameter enables incremental sync whenever the same key is used again.
         /// </param>
         /// <param name="query">
         /// An OData query that determines which items to 
@@ -94,23 +99,27 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// A dictionary of user-defined parameters and values to include in 
         /// the request URI query string.
         /// </param>
+        /// <param name="pushOtherTables">
+        /// Push other tables if this table is dirty.
+        /// </param>
         /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe
         /// </param>
         /// <returns>
         /// A task that completes when pull operation has finished.
         /// </returns>
-        Task PullAsync(string queryKey, string query, IDictionary<string, string> parameters, CancellationToken cancellationToken);
+        Task PullAsync(string queryId, string query, IDictionary<string, string> parameters, bool pushOtherTables, CancellationToken cancellationToken);
 
         /// <summary>
         /// Deletes all the items in local table that match the query.
         /// </summary>
-        /// <param name="queryKey">
+        /// <param name="queryId">
         /// A string that uniquely identifies this query and is used to keep track of its sync state. Supplying this parameter resets the incremental sync state for the query.
         /// </param>
         /// <param name="query">An OData query that determines which items to delete.</param>
+        /// <param name="force">Force the purge by discarding the pending operations.</param>
         /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe
         /// </param>
         /// <returns>A task that completes when purge operation has finished.</returns>
-        Task PurgeAsync(string queryKey, string query, CancellationToken cancellationToken);
+        Task PurgeAsync(string queryId, string query, bool force, CancellationToken cancellationToken);
     }
 }

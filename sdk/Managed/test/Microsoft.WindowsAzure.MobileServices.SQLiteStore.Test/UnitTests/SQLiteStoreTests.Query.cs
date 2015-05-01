@@ -3,44 +3,41 @@
 // ----------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Query;
-using Microsoft.WindowsAzure.MobileServices.SQLiteStore;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Schema;
-using SQLitePCL;
 
 namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 {
     [Tag("query")]
     public class SQLiteStoreQueryTests : TestBase
     {
-       private static readonly DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-       private static readonly JObject[] testData = new[]
-       {
-            new JObject(){{"id", "1"}, {"col1", "the"}, {"col2", 5}, {"col3", 234f}, {"col4", epoch.AddMilliseconds(32434)}, {"col5", false }},
-            new JObject(){{"id", "2"}, {"col1", "quick"}, {"col2", 3}, {"col3", 9867.12}, {"col4", epoch.AddMilliseconds(99797)}, {"col5", true }},
-            new JObject(){{"id", "3"}, {"col1", "brown"}, {"col2", 1}, {"col3", 11f}, {"col4", epoch.AddMilliseconds(23987239840)}, {"col5", false}},
-            new JObject(){{"id", "4"}, {"col1", "fox"}, {"col2", 6}, {"col3", 23908.99}, {"col4", epoch.AddMilliseconds(8888888888888)}, {"col5", true}},
-            new JObject(){{"id", "5"}, {"col1", "jumped"}, {"col2", 9}, {"col3", 678.932}, {"col4", epoch.AddMilliseconds(333333333332)}, {"col5", true}},
-            new JObject(){{"id", "6"}, {"col1", "EndsWithBackslash\\"}, {"col2", 8}, {"col3", 521f}, {"col4", epoch.AddMilliseconds(17071985)}, {"col5", true}}
-       };
-       private const string TestTable = "test";
-       private const string MathTestTable = "mathtest";
-       private static bool queryTableInitialized;
 
-       public static string TestDbName = SQLiteStoreTests.TestDbName;
+        private static readonly Guid guid = Guid.Parse("d9c8bcf9-9c85-42e6-967b-c686d92f32cb");
+        private static readonly DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        private static readonly JObject[] testData = new[]
+        {
+            new JObject(){{"id", "1"}, {"col1", "the"}, {"col2", 5}, {"col3", 234f}, {"col4", epoch.AddMilliseconds(32434)}, {"col5", false }, {"col6", Guid.Empty}},
+            new JObject(){{"id", "2"}, {"col1", "quick"}, {"col2", 3}, {"col3", 9867.12}, {"col4", epoch.AddMilliseconds(99797)}, {"col5", true }, {"col6", Guid.Empty}},
+            new JObject(){{"id", "3"}, {"col1", "brown"}, {"col2", 1}, {"col3", 11f}, {"col4", epoch.AddMilliseconds(23987239840)}, {"col5", false}, {"col6", Guid.Empty}},
+            new JObject(){{"id", "4"}, {"col1", "fox"}, {"col2", 6}, {"col3", 23908.99}, {"col4", epoch.AddMilliseconds(8888888888888)}, {"col5", true}, {"col6", Guid.Empty}},
+            new JObject(){{"id", "5"}, {"col1", "jumped"}, {"col2", 9}, {"col3", 678.932}, {"col4", epoch.AddMilliseconds(333333333332)}, {"col5", true}, {"col6", guid}},
+            new JObject(){{"id", "6"}, {"col1", "EndsWithBackslash\\"}, {"col2", 8}, {"col3", 521f}, {"col4", epoch.AddMilliseconds(17071985)}, {"col5", true}, {"col6", guid}}
+        };
+        private const string TestTable = "test";
+        private const string MathTestTable = "mathtest";
+        private static bool queryTableInitialized;
+
+        public static string TestDbName = SQLiteStoreTests.TestDbName;
 
         [AsyncTestMethod]
         public async Task Query_OnBool_Implicit()
         {
             await TestQuery("$filter=col5", 4);
-            await TestQuery("$filter=not(col5)", 2);            
+            await TestQuery("$filter=not(col5)", 2);
         }
 
         [AsyncTestMethod]
@@ -95,17 +92,23 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         }
 
         [AsyncTestMethod]
+        public async Task Query_OnGuid()
+        {
+            await TestQuery(string.Format("$filter=col6 eq guid'{0}'", guid), 2);
+        }
+
+        [AsyncTestMethod]
         public async Task Query_WithSelection()
         {
-            JArray results = await Query<JArray>("$select=col1,col2");            
+            JArray results = await Query<JArray>("$select=col1,col2");
             var expected = new JArray(testData.Select(x => new JObject() { { "col1", x["col1"] }, { "col2", x["col2"] } }));
             AssertJArraysAreEqual(results, expected);
-        }        
+        }
 
         [AsyncTestMethod]
         public async Task Query_WithOrdering_Ascending()
         {
-            JArray results = await Query<JArray>("$orderby=col2");           
+            JArray results = await Query<JArray>("$orderby=col2");
             var expected = new JArray(testData.OrderBy(x => x["col2"].Value<int>()));
             AssertJArraysAreEqual(results, expected);
         }
@@ -137,8 +140,22 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         [AsyncTestMethod]
         public async Task Query_OnString_SubstringOf()
         {
-            await TestQuery("$filter=substringof(col1, 'ump')", 1);
-            await TestQuery("$filter=substringof(col1, 'umx')", 0);
+            await TestQuery("$filter=substringof('ump', col1)", 1);
+            await TestQuery("$filter=substringof('umx', col1)", 0);
+        }
+
+        [AsyncTestMethod]
+        public async Task Query_OnString_StartsWith()
+        {
+            await TestQuery("$filter=startswith(col1, 'jum')", 1);
+            await TestQuery("$filter=startswith(col1, 'pum')", 0);
+        }
+
+        [AsyncTestMethod]
+        public async Task Query_OnString_EndsWith()
+        {
+            await TestQuery("$filter=endswith(col1, 'umped')", 1);
+            await TestQuery("$filter=endswith(col1, 'umxed')", 0);
         }
 
         [AsyncTestMethod]
@@ -257,13 +274,19 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             var store = new MobileServiceSQLiteStore(TestDbName);
             store.DefineTable(MathTestTable, new JObject()
             {
+                { "id", String.Empty },
                 { "val", 0f },
                 { "expected", 0f }
             });
 
             await store.InitializeAsync();
 
-            await InsertAll(store, MathTestTable, mathTestData);
+            foreach (JObject item in mathTestData)
+            {
+                item[MobileServiceSystemColumns.Id] = Guid.NewGuid().ToString();
+            }
+
+            await store.UpsertAsync(MathTestTable, mathTestData, ignoreMissingColumns: false);
 
             return store;
         }
@@ -283,14 +306,15 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
                 { "col2", 0L },
                 { "col3", 0f },
                 { "col4", DateTime.UtcNow },
-                { "col5", false }
+                { "col5", false },
+                { "col6", Guid.Empty }
             });
 
             await store.InitializeAsync();
 
             if (!queryTableInitialized)
             {
-                await InsertAll(store, TestTable, testData);
+                await store.UpsertAsync(TestTable, testData, ignoreMissingColumns: false);
             }
 
             queryTableInitialized = true;
@@ -319,7 +343,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             Assert.AreEqual(results.Count, expectedResults);
         }
 
-        private static async Task<T> Query<T>(string query) where T:JToken
+        private static async Task<T> Query<T>(string query) where T : JToken
         {
             using (MobileServiceSQLiteStore store = await SetupTestTable())
             {
@@ -327,17 +351,9 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             }
         }
 
-        private static async Task<T> Query<T>(MobileServiceSQLiteStore store, string tableName, string query) where T:JToken
+        private static async Task<T> Query<T>(MobileServiceSQLiteStore store, string tableName, string query) where T : JToken
         {
             return (T)await store.ReadAsync(MobileServiceTableQueryDescription.Parse(tableName, query));
-        }
-
-        private async static Task InsertAll(MobileServiceSQLiteStore store, string tableName, JObject[] items)
-        {
-            foreach (JObject item in items)
-            {
-                await store.UpsertAsync(tableName, new[]{item}, fromServer: false);
-            }
         }
     }
 }

@@ -3,108 +3,112 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.WindowsAzure.MobileServices;
+using Microsoft.WindowsAzure.MobileServices.Sync;
+using Microsoft.WindowsAzure.MobileServices.SQLiteStore;
 
 namespace ZUMOAPPNAME
 {
-	public class QSTodoService : DelegatingHandler
-	{
-		static QSTodoService instance = new QSTodoService ();
-		const string applicationURL = @"ZUMOAPPURL";
-		const string applicationKey = @"ZUMOAPPKEY";
-		MobileServiceClient client;
-		IMobileServiceTable<ToDoItem> todoTable;
-		int busyCount = 0;
+    public class QSTodoService 
+    {
+        static QSTodoService instance = new QSTodoService ();
 
-		public event Action<bool> BusyUpdate;
+        const string applicationURL = @"ZUMOAPPURL";
+        const string applicationKey = @"ZUMOAPPKEY";
+		const string localDbPath    = "localstore.db";
 
-		QSTodoService ()
-		{
-			CurrentPlatform.Init ();
+        private MobileServiceClient client;
+        private IMobileServiceSyncTable<ToDoItem> todoTable;
 
-			// Initialize the Mobile Service client with your URL and key
-			client = new MobileServiceClient (applicationURL, applicationKey, this);
+        private QSTodoService ()
+        {
+            CurrentPlatform.Init ();
+            SQLitePCL.CurrentPlatform.Init(); 
 
-			// Create an MSTable instance to allow us to work with the TodoItem table
-			todoTable = client.GetTable <ToDoItem> ();
-		}
+            // Initialize the Mobile Service client with your URL and key
+            client = new MobileServiceClient (applicationURL, applicationKey);
 
-		public static QSTodoService DefaultService {
-			get {
-				return instance;
-			}
-		}
+            // Create an MSTable instance to allow us to work with the TodoItem table
+            todoTable = client.GetSyncTable <ToDoItem> ();
+        }
 
-		public List<ToDoItem> Items { get; private set;}
+        public static QSTodoService DefaultService {
+            get {
+                return instance;
+            }
+        }
 
-		async public Task<List<ToDoItem>> RefreshDataAsync ()
-		{
-			try {
-				// This code refreshes the entries in the list view by querying the TodoItems table.
-				// The query excludes completed TodoItems
-				Items = await todoTable
-					.Where (todoItem => todoItem.Complete == false).ToListAsync ();
+        public List<ToDoItem> Items { get; private set;}
 
-			} catch (MobileServiceInvalidOperationException e) {
-				Console.Error.WriteLine (@"ERROR {0}", e.Message);
-				return null;
-			}
+        public async Task InitializeStoreAsync()
+        {
+			var store = new MobileServiceSQLiteStore(localDbPath);
+            store.DefineTable<ToDoItem>();
 
-			return Items;
-		}
+            // Uses the default conflict handler, which fails on conflict
+            // To use a different conflict handler, pass a parameter to InitializeAsync. For more details, see http://go.microsoft.com/fwlink/?LinkId=521416
+            await client.SyncContext.InitializeAsync(store);
+        }
 
-		public async Task InsertTodoItemAsync (ToDoItem todoItem)
-		{
-			try {
-				// This code inserts a new TodoItem into the database. When the operation completes
-				// and Mobile Services has assigned an Id, the item is added to the CollectionView
-				await todoTable.InsertAsync (todoItem);
-				Items.Add (todoItem); 
+        public async Task SyncAsync()
+        {
+            try
+            {
+                await client.SyncContext.PushAsync();
+                await todoTable.PullAsync("allTodoItems", todoTable.CreateQuery()); // query ID is used for incremental sync
+            }
 
-			} catch (MobileServiceInvalidOperationException e) {
-				Console.Error.WriteLine (@"ERROR {0}", e.Message);
-			}
-		}
+            catch (MobileServiceInvalidOperationException e)
+            {
+                Console.Error.WriteLine(@"Sync Failed: {0}", e.Message);
+            }
+        }
 
-		public async Task CompleteItemAsync (ToDoItem item)
-		{
-			try {
-				// This code takes a freshly completed TodoItem and updates the database. When the MobileService 
-				// responds, the item is removed from the list 
-				item.Complete = true;
-				await todoTable.UpdateAsync (item);
-				Items.Remove (item);
+        public async Task<List<ToDoItem>> RefreshDataAsync ()
+        {
+            try {
+				// update the local store
+				// all operations on todoTable use the local database, call SyncAsync to send changes
+                await SyncAsync(); 							
 
-			} catch (MobileServiceInvalidOperationException e) {
-				Console.Error.WriteLine (@"ERROR {0}", e.Message);
-			}
-		}
+                // This code refreshes the entries in the list view by querying the local TodoItems table.
+                // The query excludes completed TodoItems
+                Items = await todoTable
+                    	.Where (todoItem => todoItem.Complete == false).ToListAsync ();
 
-		void Busy (bool busy)
-		{
-			// assumes always executes on UI thread
-			if (busy) {
-				if (busyCount++ == 0 && BusyUpdate != null)
-					BusyUpdate (true);
+            } catch (MobileServiceInvalidOperationException e) {
+                Console.Error.WriteLine (@"ERROR {0}", e.Message);
+                return null;
+            }
 
-			} else {
-				if (--busyCount == 0 && BusyUpdate != null)
-					BusyUpdate (false);
+            return Items;
+        }
 
-			}
-		}
+        public async Task InsertTodoItemAsync (ToDoItem todoItem)
+        {
+            try {                
+				await todoTable.InsertAsync (todoItem); // Insert a new TodoItem into the local database. 
+				await SyncAsync(); // send changes to the mobile service
 
-		#region implemented abstract members of HttpMessageHandler
+                Items.Add (todoItem); 
 
-		protected override async Task<System.Net.Http.HttpResponseMessage> SendAsync (System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
-		{
-			Busy (true);
-			var response = await base.SendAsync (request, cancellationToken);
+            } catch (MobileServiceInvalidOperationException e) {
+                Console.Error.WriteLine (@"ERROR {0}", e.Message);
+            }
+        }
 
-			Busy (false);
-			return response;
-		}
+        public async Task CompleteItemAsync (ToDoItem item)
+        {
+            try {
+				item.Complete = true; 
+                await todoTable.UpdateAsync (item); // update todo item in the local database
+				await SyncAsync(); // send changes to the mobile service
 
-		#endregion
-	}
+                Items.Remove (item);
+
+            } catch (MobileServiceInvalidOperationException e) {
+                Console.Error.WriteLine (@"ERROR {0}", e.Message);
+            }
+        }
+    }
 }
 

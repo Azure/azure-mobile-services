@@ -12,10 +12,9 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// <summary>
     /// Help to do registrationManagement and convert the exceptions
     /// </summary>
-    internal class RegistrationManager
+    internal class RegistrationManager : IRegistrationManager
     {
-        internal readonly PushHttpClient PushHttpClient;
-        internal readonly ILocalStorageManager LocalStorageManager;
+        internal readonly PushHttpClient PushHttpClient;        
 
         public RegistrationManager(PushHttpClient pushHttpClient, ILocalStorageManager storageManager)
         {
@@ -23,6 +22,8 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             this.LocalStorageManager = storageManager;
         }
+
+        public ILocalStorageManager LocalStorageManager { get; private set; }
 
         /// <summary>
         /// If local storage does not have this registrationName, we will create a new one.
@@ -69,22 +70,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             // recreate registration id if we encountered a previously expired registrationId
             await this.CreateRegistrationIdAsync(registration);
             await this.UpsertRegistration(registration);
-        }
-
-        public async Task RefreshRegistrationsForChannelAsync(string deviceId)
-        {
-            var registrations = new List<Registration>(await this.PushHttpClient.ListRegistrationsAsync(deviceId));
-            var count = registrations.Count;
-            if (count == 0)
-            {
-                this.LocalStorageManager.ClearRegistrations();
-            }
-
-            for (int i = 0; i < count; i++)
-            {
-                this.LocalStorageManager.UpdateRegistrationByRegistrationId(registrations[i].RegistrationId, registrations[i].Name, registrations[i].PushHandle);
-            }
-        }
+        }        
 
         public async Task UnregisterAsync(string registrationName)
         {
@@ -132,6 +118,21 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             await this.PushHttpClient.CreateOrUpdateRegistrationAsync(registration);
             this.LocalStorageManager.UpdateRegistrationByName(registration.Name, registration.RegistrationId, registration.PushHandle);
+        }
+
+        private async Task RefreshRegistrationsForChannelAsync(string deviceId)
+        {
+            var registrations = new List<Registration>(await this.PushHttpClient.ListRegistrationsAsync(deviceId));
+            var count = registrations.Count;
+            if (count == 0)
+            {
+                this.LocalStorageManager.ClearRegistrations();
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                this.LocalStorageManager.UpdateRegistrationByRegistrationId(registrations[i].RegistrationId, registrations[i].Name, registrations[i].PushHandle);
+            }
         }
     }
 }

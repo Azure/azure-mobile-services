@@ -1,6 +1,0 @@
-bin/
-bld/
-obj/
-*.suo
-packages/*
-.nuget/Nuget.exe

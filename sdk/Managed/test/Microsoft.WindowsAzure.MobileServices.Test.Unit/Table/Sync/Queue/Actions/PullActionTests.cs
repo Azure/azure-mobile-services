@@ -5,7 +5,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -44,17 +43,19 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
         public async Task DoesNotUpsertAnObject_IfItDoesNotHaveAnId()
         {
             var query = new MobileServiceTableQueryDescription("test");
-            var action = new PullAction(this.table.Object, this.context.Object, null, query, null, this.opQueue.Object, this.settings.Object, this.store.Object, CancellationToken.None);
+            var action = new PullAction(this.table.Object, MobileServiceTableKind.Table, this.context.Object, null, query, null, null, this.opQueue.Object, this.settings.Object, this.store.Object, MobileServiceRemoteTableOptions.All, null, CancellationToken.None);
 
-            var itemWithId = new JObject(){{"id", "abc"}, {"text", "has id"}};
+            var itemWithId = new JObject() { { "id", "abc" }, { "text", "has id" } };
             var itemWithoutId = new JObject() { { "text", "no id" } };
             var result = new JArray(new[]{
                 itemWithId,
                 itemWithoutId
             });
             this.opQueue.Setup(q => q.LockTableAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult<IDisposable>(null));
-            this.opQueue.Setup(q => q.CountPending(It.IsAny<string>())).Returns(Task.FromResult(0L));            
-            this.table.Setup(t => t.ReadAsync(It.IsAny<string>(), It.IsAny<IDictionary<string, string>>())).Returns(Task.FromResult<JToken>(result));
+            this.opQueue.Setup(q => q.CountPending(It.IsAny<string>())).Returns(Task.FromResult(0L));
+            this.table.SetupSequence(t => t.ReadAsync(It.IsAny<string>(), It.IsAny<IDictionary<string, string>>(), It.IsAny<MobileServiceFeatures>()))
+                      .Returns(Task.FromResult(QueryResult.Parse(result, null, false)))
+                      .Returns(Task.FromResult(QueryResult.Parse(new JArray(), null, false)));
             this.store.Setup(s => s.UpsertAsync("test", It.IsAny<IEnumerable<JObject>>(), true))
                       .Returns(Task.FromResult(0))
                       .Callback<string, IEnumerable<JObject>, bool>((tableName, items, fromServer) =>
@@ -73,7 +74,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
         }
 
         [TestMethod]
-        public async Task SavesTheMaxUpdatedAt_IfQueryKeyIsSpecified_WithoutFilter()
+        public async Task SavesTheMaxUpdatedAt_IfQueryIdIsSpecified_WithoutFilter()
         {
             var query = new MobileServiceTableQueryDescription("test");
 
@@ -82,12 +83,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
                 new JObject() { { "id", "abc" }, { "text", "has id"}, { "__updatedAt", "1985-07-17" } },
                 new JObject() { { "id", "abc" }, { "text", "has id"}, { "__updatedAt", "2014-07-09" } }
             });
-            string expectedOdata = "$filter=(__updatedAt ge datetime'2013-01-01T00:00:00.000Z')&$orderby=__updatedAt";
-            await TestIncrementalSync(query, result, expectedOdata, new DateTime(2014, 07, 09), savesMax: true);
+            string firstQuery = "$filter=(__updatedAt ge datetimeoffset'2013-01-01T00%3A00%3A00.0000000%2B00%3A00')&$orderby=__updatedAt&$skip=0&$top=50";
+            string secondQuery = "$filter=(__updatedAt ge datetimeoffset'2014-07-09T07%3A00%3A00.0000000%2B00%3A00')&$orderby=__updatedAt&$skip=0&$top=50";
+            await TestIncrementalSync(query, result, new DateTime(2014, 07, 09), savesMax: true, firstQuery: firstQuery, secondQuery: secondQuery);
         }
 
         [TestMethod]
-        public async Task SavesTheMaxUpdatedAt_IfQueryKeyIsSpecified()
+        public async Task SavesTheMaxUpdatedAt_IfQueryIdIsSpecified()
         {
             var query = new MobileServiceTableQueryDescription("test");
             query.Filter = new BinaryOperatorNode(BinaryOperatorKind.Equal, new ConstantNode(4), new ConstantNode(3));
@@ -97,8 +99,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
                 new JObject() { { "id", "abc" }, { "text", "has id"}, { "__updatedAt", "1985-07-17" } },
                 new JObject() { { "id", "abc" }, { "text", "has id"}, { "__updatedAt", "2014-07-09" } }
             });
-            string expectedOdata = "$filter=((4 eq 3) and (__updatedAt ge datetime'2013-01-01T00:00:00.000Z'))&$orderby=__updatedAt,text desc";
-            await TestIncrementalSync(query, result, expectedOdata, new DateTime(2014, 07, 09), savesMax: true);
+            string firstQuery = "$filter=((4 eq 3) and (__updatedAt ge datetimeoffset'2013-01-01T00%3A00%3A00.0000000%2B00%3A00'))&$orderby=__updatedAt&$skip=0&$top=50";
+            string secondQuery = "$filter=((4 eq 3) and (__updatedAt ge datetimeoffset'2014-07-09T07%3A00%3A00.0000000%2B00%3A00'))&$orderby=__updatedAt&$skip=0&$top=50";
+            await TestIncrementalSync(query, result, new DateTime(2014, 07, 09), savesMax: true, firstQuery: firstQuery, secondQuery: secondQuery);
         }
 
         [TestMethod]
@@ -106,8 +109,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
         {
             var query = new MobileServiceTableQueryDescription("test");
             var result = new JArray();
-            string expectedOdata = "$filter=(__updatedAt ge datetime'2013-01-01T00:00:00.000Z')&$orderby=__updatedAt";
-            await TestIncrementalSync(query, result, expectedOdata, DateTime.MinValue, savesMax: false);
+            string expectedOdata = "$filter=(__updatedAt ge datetimeoffset'2013-01-01T00%3A00%3A00.0000000%2B00%3A00')&$orderby=__updatedAt&$skip=0&$top=50";
+            await TestIncrementalSync(query, result, DateTime.MinValue, savesMax: false, firstQuery: expectedOdata, secondQuery: null);
         }
 
         [TestMethod]
@@ -119,8 +122,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
             {
                 new JObject() { { "id", "abc" }, { "text", "has id"}, { "__updatedAt", "1985-07-17" } },
             });
-            string expectedOdata = "$filter=((4 eq 3) and (__updatedAt ge datetime'2013-01-01T00:00:00.000Z'))&$orderby=__updatedAt";
-            await TestIncrementalSync(query, result, expectedOdata, new DateTime(2014, 07, 09), savesMax: false);
+            string firstQuery = "$filter=((4 eq 3) and (__updatedAt ge datetimeoffset'2013-01-01T00%3A00%3A00.0000000%2B00%3A00'))&$orderby=__updatedAt&$skip=0&$top=50";
+            string secondQuery = "$filter=((4 eq 3) and (__updatedAt ge datetimeoffset'2013-01-01T00%3A00%3A00.0000000%2B00%3A00'))&$orderby=__updatedAt&$skip=1&$top=50";
+            await TestIncrementalSync(query, result, new DateTime(2014, 07, 09), savesMax: false, firstQuery: firstQuery, secondQuery: secondQuery);
         }
 
         [TestMethod]
@@ -133,27 +137,35 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
                 new JObject() { { "id", "abc" }, { "text", "has id"} },
                 new JObject() { { "id", "abc" }, { "text", "has id"} }
             });
-            string expectedOdata = "$filter=((4 eq 3) and (__updatedAt ge datetime'2013-01-01T00:00:00.000Z'))&$orderby=__updatedAt";
-            await TestIncrementalSync(query, result, expectedOdata, new DateTime(2014, 07, 09), savesMax: false);
+            string firstQuery = "$filter=((4 eq 3) and (__updatedAt ge datetimeoffset'2013-01-01T00%3A00%3A00.0000000%2B00%3A00'))&$orderby=__updatedAt&$skip=0&$top=50";
+            string secondQuery = "$filter=((4 eq 3) and (__updatedAt ge datetimeoffset'2013-01-01T00%3A00%3A00.0000000%2B00%3A00'))&$orderby=__updatedAt&$skip=2&$top=50";
+            await TestIncrementalSync(query, result, new DateTime(2014, 07, 09), savesMax: false, firstQuery: firstQuery, secondQuery: secondQuery);
         }
 
-        private async Task TestIncrementalSync(MobileServiceTableQueryDescription query, JArray result, string odata, DateTime maxUpdatedAt, bool savesMax)
+        private async Task TestIncrementalSync(MobileServiceTableQueryDescription query, JArray result, DateTime maxUpdatedAt, bool savesMax, string firstQuery, string secondQuery)
         {
-            var action = new PullAction(this.table.Object, this.context.Object, "latestItems", query, null, this.opQueue.Object, this.settings.Object, this.store.Object, CancellationToken.None);
+            var action = new PullAction(this.table.Object, MobileServiceTableKind.Table, this.context.Object, "latestItems", query, null, null, this.opQueue.Object, this.settings.Object, this.store.Object, MobileServiceRemoteTableOptions.All, null, CancellationToken.None);
 
             this.opQueue.Setup(q => q.LockTableAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult<IDisposable>(null));
             this.opQueue.Setup(q => q.CountPending(It.IsAny<string>())).Returns(Task.FromResult(0L));
-            this.table.Setup(t => t.ReadAsync(odata, It.IsAny<IDictionary<string, string>>())).Returns(Task.FromResult<JToken>(result));
+            this.table.Setup(t => t.ReadAsync(firstQuery, It.IsAny<IDictionary<string, string>>(), It.IsAny<MobileServiceFeatures>()))
+                      .Returns(Task.FromResult(QueryResult.Parse(result, null, false)));
+
+            if (result.Any())
+            {
+                this.table.Setup(t => t.ReadAsync(secondQuery, It.IsAny<IDictionary<string, string>>(), It.IsAny<MobileServiceFeatures>()))
+                          .Returns(Task.FromResult(QueryResult.Parse(new JArray(), null, false)));
+            }
 
             if (result.Any())
             {
                 this.store.Setup(s => s.UpsertAsync("test", It.IsAny<IEnumerable<JObject>>(), true)).Returns(Task.FromResult(0));
             }
 
-            this.settings.Setup(s => s.GetDeltaToken("test", "latestItems")).Returns(Task.FromResult(new DateTime(2013, 1, 1, 0, 0, 0, DateTimeKind.Utc)));
+            this.settings.Setup(s => s.GetDeltaTokenAsync("test", "latestItems")).Returns(Task.FromResult(new DateTimeOffset(2013, 1, 1, 0, 0, 0, TimeSpan.Zero)));
             if (savesMax)
             {
-                this.settings.Setup(s => s.SetDeltaToken("test", "latestItems", maxUpdatedAt)).Returns(Task.FromResult(0));
+                this.settings.Setup(s => s.SetDeltaTokenAsync("test", "latestItems", maxUpdatedAt)).Returns(Task.FromResult(0));
             }
 
             await action.ExecuteAsync();

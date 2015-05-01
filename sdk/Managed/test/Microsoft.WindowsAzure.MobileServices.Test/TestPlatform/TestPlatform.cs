@@ -31,7 +31,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             "Microsoft.WindowsAzure.Mobile.WP8.Test",
             "Microsoft.WindowsAzure.Mobile.WP81.Test",
             "Microsoft.WindowsAzure.Mobile.Android.Test",
-            "Microsoft.WindowsAzure.Mobile.iOS.Test"
+            "MicrosoftWindowsAzureMobileiOSTest"
         };
 
         /// <summary>

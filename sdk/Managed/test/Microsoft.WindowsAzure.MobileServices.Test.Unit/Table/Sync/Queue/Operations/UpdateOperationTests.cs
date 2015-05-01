@@ -2,13 +2,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.WindowsAzure.MobileServices.Sync;
 using Moq;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Operations
 {
@@ -20,7 +20,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         [TestInitialize]
         public void Initialize()
         {
-            this.operation = new UpdateOperation("test", "abc");
+            this.operation = new UpdateOperation("test", MobileServiceTableKind.Table, "abc");
         }
 
         [TestMethod]
@@ -64,40 +64,52 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         [TestMethod]
         public void Validate_Throws_WithInsertOperation()
         {
-            var tableOperation = new InsertOperation("test", "abc");
-            var ex = AssertEx.Throws<InvalidOperationException>(() => this.operation.Validate(tableOperation));
+            var newOperation = new InsertOperation("test", MobileServiceTableKind.Table, "abc");
+            var ex = AssertEx.Throws<InvalidOperationException>(() => this.operation.Validate(newOperation));
             Assert.AreEqual("An update operation on the item is already in the queue.", ex.Message);
         }
 
         [TestMethod]
         public void Validate_Succeeds_WithUpdateOperation()
         {
-            var tableOperation = new UpdateOperation("test", "abc");
-            this.operation.Validate(tableOperation);
+            var newOperation = new UpdateOperation("test", MobileServiceTableKind.Table, "abc");
+            this.operation.Validate(newOperation);
         }
 
         [TestMethod]
         public void Validate_Succeeds_WithDeleteOperation()
         {
-            var tableOperation = new DeleteOperation("test", "abc");
-            this.operation.Validate(tableOperation);
+            var newOperation = new DeleteOperation("test", MobileServiceTableKind.Table, "abc");
+            this.operation.Validate(newOperation);
         }
 
         [TestMethod]
         public void Collapse_CancelsNewOperation_WithUpdateOperation()
         {
-            var tableOperation = new UpdateOperation("test", "abc");
-            this.operation.Collapse(tableOperation);
-            Assert.IsTrue(tableOperation.IsCancelled);
+            var newOperation = new UpdateOperation("test", MobileServiceTableKind.Table, "abc");
+            this.operation.Collapse(newOperation);
+
+            // new operation should be cancelled
+            Assert.IsTrue(newOperation.IsCancelled);
+
+            // existing operation should be updated and not cancelled
             Assert.IsFalse(this.operation.IsCancelled);
+            Assert.IsTrue(this.operation.IsUpdated);
+            Assert.AreEqual(this.operation.Version, 2);
         }
 
         [TestMethod]
         public void Collapse_CancelsExistingOperation_WithDeleteOperation()
         {
-            var tableOperation = new DeleteOperation("test", "abc");
-            this.operation.Collapse(tableOperation);
-            Assert.IsFalse(tableOperation.IsCancelled);
+            var newOperation = new DeleteOperation("test", MobileServiceTableKind.Table, "abc");
+            this.operation.Collapse(newOperation);
+
+            // new operation should not be cancelled but rather updated
+            Assert.IsFalse(newOperation.IsCancelled);
+            Assert.IsTrue(newOperation.IsUpdated);
+            Assert.AreEqual(newOperation.Version, 2L);
+
+            // existing operation should be cancelled
             Assert.IsTrue(this.operation.IsCancelled);
         }
     }

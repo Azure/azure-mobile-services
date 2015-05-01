@@ -1,12 +1,12 @@
 using System;
-using System.Drawing;
+using CoreGraphics;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using MonoTouch.Dialog;
-using MonoTouch.UIKit;
+using UIKit;
 
-namespace Microsoft.WindowsAzure.Mobile.iOS.Test
+namespace MicrosoftWindowsAzureMobileiOSTest
 {
     public class HarnessViewController
         : DialogViewController, ITestReporter
@@ -14,7 +14,7 @@ namespace Microsoft.WindowsAzure.Mobile.iOS.Test
         public HarnessViewController()
 	        : base (UITableViewStyle.Grouped, null, pushing: true)
         {
-            this.progress = new UIProgressView (new RectangleF (0, 0, View.Bounds.Width, 5)) {
+            this.progress = new UIProgressView (new CGRect (0, 0, View.Bounds.Width, 5)) {
 	            AutoresizingMask = UIViewAutoresizing.FlexibleWidth
             };
 

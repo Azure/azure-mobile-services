@@ -42,6 +42,11 @@
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
     <None Include="packages.config" />
+    <Compile Include="SerializationTypes\JObjectTypes.cs" />
+    <Compile Include="SerializationTypes\TypeWithConstructor.cs" />
+    <Compile Include="UnitTests\Http\HttpUtilityTests.cs" />
+    <Compile Include="UnitTests\OData\ODataExpressionParser.Test.cs" />
+    <Compile Include="UnitTests\Table\MobileServiceObjectReaderTests.cs" />
     <Compile Include="UnitTests\Table\Sync\MobileServiceSyncContext.Test.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -67,7 +72,6 @@
     <Compile Include="UnitTests\HttpHandlers\TestHttpHandler.cs" />
     <Compile Include="FunctionalTests\BloggingTest.cs" />
     <Compile Include="FunctionalTests\Book.cs" />
-    <Compile Include="FunctionalTests\DataTypesTest.cs" />
     <Compile Include="FunctionalTests\DateTests.cs" />
     <Compile Include="FunctionalTests\FunctionalTestBase.cs" />
     <Compile Include="FunctionalTests\QueryingTest.cs" />
@@ -94,7 +98,9 @@
     <Compile Include="SerializationTypes\SerializationTypeUtility.cs" />
     <Compile Include="SerializationTypes\SimpleTreeType.cs" />
     <Compile Include="UnitTests\HttpHandlers\ComplexDelegatingHandler.cs" />
+    <Compile Include="UnitTests\MobileServiceFeatures.Test.cs" />
     <Compile Include="UnitTests\MobileServiceClient.Test.cs" />
+    <Compile Include="UnitTests\Authentication\MobileServiceTokenAuthenticationTests.cs" />
     <Compile Include="UnitTests\Push\Push.Test.cs" />
     <Compile Include="UnitTests\Push\PushHttpClient.Test.cs" />
     <Compile Include="UnitTests\Table\MobileServiceTable.Test.cs" />
@@ -122,20 +128,17 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\packages\Newtonsoft.Json.6.0.2\lib\portable-net45+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\packages\Newtonsoft.Json.6.0.4\lib\portable-net45+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http">
-      <HintPath>..\..\packages\Microsoft.Net.Http.2.2.19\lib\portable-net40+sl4+win8+wp71+wpa81\System.Net.Http.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.Net.Http.2.2.28\lib\portable-net40+sl4+win8+wp71+wpa81\System.Net.Http.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http.Extensions">
-      <HintPath>..\..\packages\Microsoft.Net.Http.2.2.19\lib\portable-net40+sl4+win8+wp71+wpa81\System.Net.Http.Extensions.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.Net.Http.2.2.28\lib\portable-net40+sl4+win8+wp71+wpa81\System.Net.Http.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http.Primitives">
-      <HintPath>..\..\packages\Microsoft.Net.Http.2.2.19\lib\portable-net40+sl4+win8+wp71+wpa81\System.Net.Http.Primitives.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.Net.Http.2.2.28\lib\portable-net40+sl4+win8+wp71+wpa81\System.Net.Http.Primitives.dll</HintPath>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <Import Project="..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />

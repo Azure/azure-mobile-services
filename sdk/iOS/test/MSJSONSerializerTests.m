@@ -2,13 +2,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-#import <SenTestingKit/SenTestingKit.h>
+#import <XCTest/XCTest.h>
 #import "WindowsAzureMobileServices.h"
 #import "MSJSONSerializer.h"
 #import "MSClientConnection.h"
 #import "MSTable+MSTableTestUtilities.h"
 
-@interface MSJSONSerializerTests : SenTestCase {
+@interface MSJSONSerializerTests : XCTestCase {
     MSJSONSerializer *serializer;
 }
 
@@ -16,7 +16,9 @@
 
 @implementation MSJSONSerializerTests
 
-# pragma mark * Setup and TearDown Methods
+
+#pragma mark * Setup and TearDown Methods
+
 
 - (void) setUp
 {
@@ -30,7 +32,10 @@
     NSLog(@"%@ tearDown", self.name);
 }
 
-# pragma mark * stringFromItem:orError
+
+#pragma mark * stringFromItem:orError
+
+
 -(void)testStringFromItemReturnsId
 {
     NSArray *validIds = [MSTable testValidStringIds];
@@ -47,16 +52,16 @@
         id testId;
         NSString *expected;
         if([test isKindOfClass:[NSDictionary class]]) {
-            testId = [test objectForKey:@"id"];
-            expected = [test objectForKey:@"string"];
+            testId = test[@"id"];
+            expected = test[@"string"];
         } else {
             testId = test;
             expected = test;
         }
         NSString *actualId = [serializer stringFromItemId:testId orError:&error];
         
-        STAssertNil(error, @"error was not nil after getting string id for %@", testId);
-        STAssertTrue([actualId isEqualToString:expected], @"error string id was %@ and not %@", actualId, expected);
+        XCTAssertNil(error, @"error was not nil after getting string id for %@", testId);
+        XCTAssertTrue([actualId isEqualToString:expected], @"error string id was %@ and not %@", actualId, expected);
     }
 }
 
@@ -72,10 +77,10 @@
     for (id testId in invalidIds)
     {
         NSString *actualId = [serializer stringFromItemId:testId orError:&error];
-        STAssertNotNil(error, @"error was nil after getting string id %@", actualId);
+        XCTAssertNotNil(error, @"error was nil after getting string id %@", actualId);
         
-        STAssertEquals([@MSInvalidItemIdWithRequest integerValue], error.code, @"Unexpected error code: %d", error.code);
-        STAssertEqualObjects(@"The item provided did not have a valid id.", error.localizedDescription, @"Unexpected messge: %@", error.localizedDescription);
+        XCTAssertEqual(error.code, MSInvalidItemIdWithRequest);
+        XCTAssertEqualObjects(error.localizedDescription, @"The item provided did not have a valid id.");
     }
 }
 
@@ -83,12 +88,14 @@
 {
     NSError *error = nil;
     [serializer stringFromItemId:nil orError:&error];
-    STAssertNotNil(error, @"error was nil after getting nil item id");
-    STAssertEquals([@MSExpectedItemIdWithRequest integerValue], error.code, @"Unexpected error code: %d", error.code);
-    STAssertEqualObjects(@"The item id was not provided.", error.localizedDescription, @"Unexpected message: %@", error.localizedDescription);
+    XCTAssertNotNil(error, @"error was nil after getting nil item id");
+    XCTAssertEqual(error.code, MSExpectedItemIdWithRequest);
+    XCTAssertEqualObjects(error.localizedDescription, @"The item id was not provided.");
 }
 
-# pragma mark * dataFromItem:idAllowed:ensureDictionary:orError: Tests
+
+#pragma mark * dataFromItem:idAllowed:ensureDictionary:orError: Tests
+
 
 -(void)testDataFromItemReturnsData
 {
@@ -101,14 +108,14 @@
                      removeSystemProperties:NO
                                     orError:&error];
     
-    STAssertNotNil(data, @"data was nil after serializing item.");
-    STAssertNil(error, @"error was not nil after serializing item.");
+    XCTAssertNotNil(data, @"data was nil after serializing item.");
+    XCTAssertNil(error, @"error was not nil after serializing item.");
     
     NSString *expected = @"{\"id\":5,\"name\":\"bob\"}";
     NSString *actual = [[NSString alloc] initWithData:data
                                              encoding:NSUTF8StringEncoding];
     
-    STAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
+    XCTAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
 }
 
 -(void)testDataFromItemWithStringIdReturnsData
@@ -122,14 +129,14 @@
                      removeSystemProperties:NO
                                     orError:&error];
     
-    STAssertNotNil(data, @"data was nil after serializing item.");
-    STAssertNil(error, @"error was not nil after serializing item.");
+    XCTAssertNotNil(data, @"data was nil after serializing item.");
+    XCTAssertNil(error, @"error was not nil after serializing item.");
     
     NSString *expected = @"{\"id\":\"MY-ID\",\"name\":\"bob\"}";
     NSString *actual = [[NSString alloc] initWithData:data
                                              encoding:NSUTF8StringEncoding];
     
-    STAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
+    XCTAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
 }
 
 -(void)testDataFromItemWithStringIdReturnsDataWithIdNotAllowed
@@ -143,14 +150,14 @@
                      removeSystemProperties:NO
                                     orError:&error];
     
-    STAssertNotNil(data, @"data was nil after serializing item.");
-    STAssertNil(error, @"error was not nil after serializing item.");
+    XCTAssertNotNil(data, @"data was nil after serializing item.");
+    XCTAssertNil(error, @"error was not nil after serializing item.");
     
     NSString *expected = @"{\"id\":\"MY-ID\",\"name\":\"bob\"}";
     NSString *actual = [[NSString alloc] initWithData:data
                                              encoding:NSUTF8StringEncoding];
     
-    STAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
+    XCTAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
 }
 
 -(void)testDataFromItemWithNullUppercaseIdReturnsDataWithIdNotAllowed
@@ -164,14 +171,14 @@
                      removeSystemProperties:NO
                                     orError:&error];
     
-    STAssertNotNil(data, @"data was nil after serializing item.");
-    STAssertNil(error, @"error was not nil after serializing item.");
+    XCTAssertNotNil(data, @"data was nil after serializing item.");
+    XCTAssertNil(error, @"error was not nil after serializing item.");
     
     NSString *expected = @"{\"ID\":null,\"name\":\"bob\"}";
     NSString *actual = [[NSString alloc] initWithData:data
                                              encoding:NSUTF8StringEncoding];
     
-    STAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
+    XCTAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
 }
 
 -(void)testDataFromItemWithEmptyUppercaseIdReturnsDataWithIdNotAllowed
@@ -185,14 +192,14 @@
                      removeSystemProperties:NO
                                     orError:&error];
     
-    STAssertNotNil(data, @"data was nil after serializing item.");
-    STAssertNil(error, @"error was not nil after serializing item.");
+    XCTAssertNotNil(data, @"data was nil after serializing item.");
+    XCTAssertNil(error, @"error was not nil after serializing item.");
     
     NSString *expected = @"{\"ID\":\"\",\"name\":\"bob\"}";
     NSString *actual = [[NSString alloc] initWithData:data
                                              encoding:NSUTF8StringEncoding];
     
-    STAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
+    XCTAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
 }
 
 -(void)testDataFromItemErrorForNilItem
@@ -204,15 +211,14 @@
                      removeSystemProperties:NO
                                     orError:&error];
     
-    STAssertNil(data, @"data was not nil after serializing item.");
-    STAssertNotNil(error, @"error was nil after serializing item.");
-    STAssertTrue(error.domain == MSErrorDomain,
-                 @"error domain should have been MSErrorDomain.");
-    STAssertTrue(error.code == MSExpectedItemWithRequest,
+    XCTAssertNil(data, @"data was not nil after serializing item.");
+    XCTAssertNotNil(error, @"error was nil after serializing item.");
+    XCTAssertEqualObjects(error.domain, MSErrorDomain);
+    XCTAssertTrue(error.code == MSExpectedItemWithRequest,
                  @"error code should have been MSExpectedItemWithRequest.");
     
-    NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-    STAssertTrue([description isEqualToString:@"No item was provided."],
+    NSString *description = error.localizedDescription;
+    XCTAssertTrue([description isEqualToString:@"No item was provided."],
                  @"description was: %@", description);
 }
 
@@ -226,7 +232,7 @@
     dateParts.hour = 15;
     dateParts.minute = 44;
     dateParts.calendar = [[NSCalendar alloc]
-                          initWithCalendarIdentifier:NSGregorianCalendar];
+                          initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
     dateParts.calendar.timeZone = [NSTimeZone timeZoneForSecondsFromGMT:0];
     
     NSDate *date1 = dateParts.date;
@@ -250,14 +256,14 @@
                      removeSystemProperties:NO
                                     orError:&error];
     
-    STAssertNotNil(data, @"data was nil after serializing item.");
-    STAssertNil(error, @"error was not nil after serializing item.");
+    XCTAssertNotNil(data, @"data was nil after serializing item.");
+    XCTAssertNil(error, @"error was not nil after serializing item.");
     
     NSString *expected = @"{\"id\":5,\"x\":[\"1999-12-03T15:44:00.000Z\",{\"y\":\"1999-12-03T15:44:29.000Z\"}],\"z\":\"1999-12-03T15:44:29.300Z\"}";
     NSString *actual = [[NSString alloc] initWithData:data
                                              encoding:NSUTF8StringEncoding];
     
-    STAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
+    XCTAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
 }
 
 -(void)testDataFromItemErrorWithIdNotAllowed
@@ -270,15 +276,14 @@
                      removeSystemProperties:NO
                                     orError:&error];
     
-    STAssertNil(data, @"data was not nil after serializing item.");
-    STAssertNotNil(error, @"error was nil after serializing item.");
-    STAssertTrue(error.domain == MSErrorDomain,
-                 @"error domain should have been MSErrorDomain.");
-    STAssertTrue(error.code == MSExistingItemIdWithRequest,
+    XCTAssertNil(data, @"data was not nil after serializing item.");
+    XCTAssertNotNil(error, @"error was nil after serializing item.");
+    XCTAssertEqualObjects(error.domain, MSErrorDomain);
+    XCTAssertTrue(error.code == MSExistingItemIdWithRequest,
                  @"error code should have been MSExistingItemIdWithRequest.");
     
-    NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-    STAssertTrue([description isEqualToString:@"The item provided must not have an id."],
+    NSString *description = error.localizedDescription;
+    XCTAssertTrue([description isEqualToString:@"The item provided must not have an id."],
                  @"description was: %@", description);
 }
 
@@ -292,15 +297,14 @@
                      removeSystemProperties:NO
                                     orError:&error];
     
-    STAssertNil(data, @"data was not nil after serializing item.");
-    STAssertNotNil(error, @"error was nil after serializing item.");
-    STAssertTrue(error.domain == MSErrorDomain,
-                 @"error domain should have been MSErrorDomain.");
-    STAssertTrue(error.code == MSExistingItemIdWithRequest,
+    XCTAssertNil(data, @"data was not nil after serializing item.");
+    XCTAssertNotNil(error, @"error was nil after serializing item.");
+    XCTAssertEqualObjects(error.domain, MSErrorDomain);
+    XCTAssertTrue(error.code == MSExistingItemIdWithRequest,
                  @"error code should have been MSExistingItemIdWithRequest.");
     
-    NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-    STAssertTrue([description isEqualToString:@"The item provided must not have an id."],
+    NSString *description = error.localizedDescription;
+    XCTAssertTrue([description isEqualToString:@"The item provided must not have an id."],
                  @"description was: %@", description);
 }
 
@@ -314,15 +318,14 @@
                      removeSystemProperties:NO
                                     orError:&error];
     
-    STAssertNil(data, @"data was not nil after serializing item.");
-    STAssertNotNil(error, @"error was nil after serializing item.");
-    STAssertTrue(error.domain == MSErrorDomain,
-                 @"error domain should have been MSErrorDomain.");
-    STAssertTrue(error.code == MSInvalidItemIdWithRequest,
+    XCTAssertNil(data, @"data was not nil after serializing item.");
+    XCTAssertNotNil(error, @"error was nil after serializing item.");
+    XCTAssertEqualObjects(error.domain, MSErrorDomain);
+    XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                  @"error code should have been MSInvalidItemIdWithRequest.");
     
-    NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-    STAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
+    NSString *description = error.localizedDescription;
+    XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                  @"description was: %@", description);
 }
 
@@ -336,15 +339,14 @@
                      removeSystemProperties:NO
                                     orError:&error];
     
-    STAssertNil(data, @"data was not nil after serializing item.");
-    STAssertNotNil(error, @"error was nil after serializing item.");
-    STAssertTrue(error.domain == MSErrorDomain,
-                 @"error domain should have been MSErrorDomain.");
-    STAssertTrue(error.code == MSExistingItemIdWithRequest,
+    XCTAssertNil(data, @"data was not nil after serializing item.");
+    XCTAssertNotNil(error, @"error was nil after serializing item.");
+    XCTAssertEqualObjects(error.domain, MSErrorDomain);
+    XCTAssertTrue(error.code == MSExistingItemIdWithRequest,
                  @"error code should have been MSExistingItemIdWithRequest.");
     
-    NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-    STAssertTrue([description isEqualToString:@"The item provided must not have an id."],
+    NSString *description = error.localizedDescription;
+    XCTAssertTrue([description isEqualToString:@"The item provided must not have an id."],
                  @"description was: %@", description);
 }
 
@@ -358,14 +360,14 @@
                      removeSystemProperties:NO
                                     orError:&error];
     
-    STAssertNotNil(data, @"data was nil after serializing item.");
-    STAssertNil(error, @"error was not nil after serializing item.");
+    XCTAssertNotNil(data, @"data was nil after serializing item.");
+    XCTAssertNil(error, @"error was not nil after serializing item.");
     
     NSString *expected = @"{\"name\":\"bob\"}";
     NSString *actual = [[NSString alloc] initWithData:data
                                              encoding:NSUTF8StringEncoding];
     
-    STAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
+    XCTAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
 }
 
 -(void)testDataFromItemWithNonDictionaryItem
@@ -379,17 +381,19 @@
                      removeSystemProperties:NO
                                     orError:&error];
     
-    STAssertNotNil(data, @"data was nil after serializing item.");
-    STAssertNil(error, @"error was not nil after serializing item.");
+    XCTAssertNotNil(data, @"data was nil after serializing item.");
+    XCTAssertNil(error, @"error was not nil after serializing item.");
     
     NSString *expected = @"[{\"id\":5,\"name\":\"bob\"}]";
     NSString *actual = [[NSString alloc] initWithData:data
                                              encoding:NSUTF8StringEncoding];
     
-    STAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
+    XCTAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
 }
 
-# pragma mark * itemIdFromItem: Tests
+
+#pragma mark * itemIdFromItem: Tests
+
 
 -(void)testItemIdFromItemReturnsId
 {
@@ -398,8 +402,8 @@
     NSNumber *itemId = [serializer itemIdFromItem:item orError:&error];
     long long expected = 5;
     
-    STAssertNil(error, @"error should have been nil.");
-    STAssertEquals(expected, [itemId longLongValue], @"itemId was not correct.");
+    XCTAssertNil(error, @"error should have been nil.");
+    XCTAssertEqual(expected, [itemId longLongValue], @"itemId was not correct.");
 }
 
 -(void)testItemIdFromItemWithStringIdReturnsId
@@ -408,8 +412,8 @@
     NSError *error = nil;
     NSString *itemId = [serializer itemIdFromItem:item orError:&error];
 
-    STAssertNil(error, @"error should have been nil.");
-    STAssertEquals(@"my-id", itemId, @"itemId was not correct.");
+    XCTAssertNil(error, @"error should have been nil.");
+    XCTAssertEqual(@"my-id", itemId, @"itemId was not correct.");
 }
 
 -(void)testItemIdFromItemThrowsForMissingId
@@ -419,8 +423,8 @@
     NSError *error = nil;
     NSNumber *itemId = [serializer itemIdFromItem:item orError:&error];
     
-    STAssertNotNil(error, @"error should not have been nil.");
-    STAssertNil(itemId, @"itemId should have been nil.");
+    XCTAssertNotNil(error, @"error should not have been nil.");
+    XCTAssertNil(itemId, @"itemId should have been nil.");
 }
 
 -(void)testItemIdFromItemThrowsForNonNumericNonStringMissingId
@@ -430,8 +434,8 @@
     NSError *error = nil;
     id itemId = [serializer itemIdFromItem:item orError:&error];
     
-    STAssertNotNil(error, @"error should not have been nil.");
-    STAssertNil(itemId, @"itemId should have been nil.");
+    XCTAssertNotNil(error, @"error should not have been nil.");
+    XCTAssertNil(itemId, @"itemId should have been nil.");
 }
 
 -(void)testItemIdFromItemReturnsErrorIfIdIsNotLowercased
@@ -441,12 +445,13 @@
     NSError *error = nil;
     NSNumber *itemId = [serializer itemIdFromItem:item orError:&error];
     
-    STAssertNotNil(error, @"error should not have been nil.");
-    STAssertNil(itemId, @"itemId should have been nil.");
+    XCTAssertNotNil(error, @"error should not have been nil.");
+    XCTAssertNil(itemId, @"itemId should have been nil.");
 }
 
 
-# pragma mark * itemFromData: Tests
+#pragma mark * itemFromData: Tests
+
 
 -(void)testItemFromDataReturnsOriginalItemUpdated
 {
@@ -463,9 +468,9 @@
                          ensureDictionary:YES
                                   orError:&error];
     
-    STAssertNotNil(newItem, @"item was nil after deserializing item.");
-    STAssertNil(error, @"error was not nil after deserializing item.");
-    STAssertTrue([[newItem objectForKey:@"name"] isEqualToString:@"bob"],
+    XCTAssertNotNil(newItem, @"item was nil after deserializing item.");
+    XCTAssertNil(error, @"error was not nil after deserializing item.");
+    XCTAssertTrue([newItem[@"name"] isEqualToString:@"bob"],
                  @"The name key should have been updated to 'bob'.");
 }
 
@@ -480,9 +485,9 @@
                          ensureDictionary:YES
                                   orError:&error];
     
-    STAssertNotNil(newItem, @"item was nil after deserializing item.");
-    STAssertNil(error, @"error was not nil after deserializing item.");
-    STAssertTrue([[newItem objectForKey:@"name"] isEqualToString:@"bob"],
+    XCTAssertNotNil(newItem, @"item was nil after deserializing item.");
+    XCTAssertNil(error, @"error was not nil after deserializing item.");
+    XCTAssertTrue([newItem[@"name"] isEqualToString:@"bob"],
                  @"The name key should have been updated to 'bob'.");
 }
 
@@ -497,24 +502,24 @@
                          ensureDictionary:YES
                                   orError:&error];
     
-    STAssertNotNil(newItem, @"item was nil after deserializing item.");
-    STAssertNil(error, @"error was not nil after deserializing item.");
+    XCTAssertNotNil(newItem, @"item was nil after deserializing item.");
+    XCTAssertNil(error, @"error was not nil after deserializing item.");
     
-    NSDate *date = [newItem objectForKey:@"date"];
-    STAssertNotNil(date, @"date was nil after deserializing item.");
+    NSDate *date = newItem[@"date"];
+    XCTAssertNotNil(date, @"date was nil after deserializing item.");
     
     NSCalendar *gregorian = [[NSCalendar alloc]
-                             initWithCalendarIdentifier:NSGregorianCalendar];
+                             initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
     [gregorian setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
     NSDateComponents *dateParts =
-        [gregorian components:(NSYearCalendarUnit |
-                               NSHourCalendarUnit |
-                               NSSecondCalendarUnit)
+        [gregorian components:(NSCalendarUnitYear |
+                               NSCalendarUnitHour |
+                               NSCalendarUnitSecond)
                      fromDate:date];
 
-    STAssertTrue(dateParts.year == 1999, @"year was: %d", dateParts.year);
-    STAssertTrue(dateParts.hour == 15, @"hour was: %d", dateParts.hour);
-    STAssertTrue(dateParts.second == 29, @"second was: %d", dateParts.second);
+    XCTAssertEqual(dateParts.year, 1999);
+    XCTAssertEqual(dateParts.hour, 15);
+    XCTAssertEqual(dateParts.second, 29);
 }
 
 -(void)testItemFromDataReturnsNewItemWithNoFractionalSecondsDates
@@ -528,24 +533,24 @@
                          ensureDictionary:YES
                                   orError:&error];
     
-    STAssertNotNil(newItem, @"item was nil after deserializing item.");
-    STAssertNil(error, @"error was not nil after deserializing item.");
+    XCTAssertNotNil(newItem, @"item was nil after deserializing item.");
+    XCTAssertNil(error, @"error was not nil after deserializing item.");
     
-    NSDate *date = [newItem objectForKey:@"date"];
-    STAssertNotNil(date, @"date was nil after deserializing item.");
+    NSDate *date = newItem[@"date"];
+    XCTAssertNotNil(date, @"date was nil after deserializing item.");
     
     NSCalendar *gregorian = [[NSCalendar alloc]
-                             initWithCalendarIdentifier:NSGregorianCalendar];
+                             initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
     [gregorian setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
     NSDateComponents *dateParts =
-    [gregorian components:(NSYearCalendarUnit |
-                           NSHourCalendarUnit |
-                           NSSecondCalendarUnit)
+    [gregorian components:(NSCalendarUnitYear |
+                           NSCalendarUnitHour |
+                           NSCalendarUnitSecond)
                  fromDate:date];
     
-    STAssertTrue(dateParts.year == 1999, @"year was: %d", dateParts.year);
-    STAssertTrue(dateParts.hour == 15, @"hour was: %d", dateParts.hour);
-    STAssertTrue(dateParts.second == 29, @"second was: %d", dateParts.second);
+    XCTAssertEqual(dateParts.year, 1999);
+    XCTAssertEqual(dateParts.hour, 15);
+    XCTAssertEqual(dateParts.second, 29);
 }
 
 -(void)testItemFromDataReturnsErrorIfReadFails
@@ -559,12 +564,11 @@
                          ensureDictionary:YES
                                   orError:&error];
     
-    STAssertNotNil(error, @"error was nil after deserializing item.");
-    STAssertNil(newItem, @"error was not nil after deserializing item.");
-    STAssertTrue([[error domain] isEqualToString:@"NSCocoaErrorDomain"],
+    XCTAssertNotNil(error, @"error was nil after deserializing item.");
+    XCTAssertNil(newItem, @"error was not nil after deserializing item.");
+    XCTAssertTrue([[error domain] isEqualToString:@"NSCocoaErrorDomain"],
                  @"error domain was: %@", [error domain]);
-    STAssertTrue([error code] == 3840, // JSON Parse Error
-                 @"error code was: %d",[error code]);
+    XCTAssertEqual(error.code, 3840);
 }
 
 -(void)testItemFromDataReturnsErrorIfItemIsNotDictionary
@@ -578,12 +582,10 @@
                          ensureDictionary:YES
                                   orError:&error];
     
-    STAssertNotNil(error, @"error was nil after deserializing item.");
-    STAssertNil(newItem, @"newItem was not nil after deserializing item.");
-    STAssertTrue([error domain] == MSErrorDomain,
-                 @"error domain was: %@", [error domain]);
-    STAssertTrue([error code] == MSExpectedItemWithResponse,
-                 @"error code was: %d",[error code]);
+    XCTAssertNotNil(error, @"error was nil after deserializing item.");
+    XCTAssertNil(newItem, @"newItem was not nil after deserializing item.");
+    XCTAssertEqualObjects(error.domain, MSErrorDomain);
+    XCTAssertEqual(error.code, MSExpectedItemWithResponse);
 }
 
 -(void)testItemFromDataReturnsNonDictionary
@@ -597,16 +599,16 @@
                          ensureDictionary:NO
                                   orError:&error];
     
-    STAssertNil(error, @"error was not nil after deserializing item.");
-    STAssertNotNil(newItem, @"newItem was nil after deserializing item.");
-    STAssertTrue([[newItem objectAtIndex:0] isEqual:@5],
+    XCTAssertNil(error, @"error was not nil after deserializing item.");
+    XCTAssertNotNil(newItem, @"newItem was nil after deserializing item.");
+    XCTAssertTrue([newItem[0] isEqual:@5],
                  @"The first element should have been a 5.");
-    STAssertTrue([[newItem objectAtIndex:1] isEqualToString:@"This is not an object!"],
+    XCTAssertTrue([newItem[1] isEqualToString:@"This is not an object!"],
                  @"The second element should have been 'This is not an object!'.");
 }
 
 
-# pragma mark * totalCountAndItems: Tests
+#pragma mark * totalCountAndItems: Tests
 
 
 -(void)testTotalCountAndItemsReturnsItems
@@ -620,14 +622,14 @@
                                                  fromData:data
                                                   orError:&error];
     
-    STAssertNotNil(items, @"items was nil after deserializing item.");
-    STAssertNil(error, @"error was not nil after deserializing item.");
-    STAssertTrue(totalCount == -1,
+    XCTAssertNotNil(items, @"items was nil after deserializing item.");
+    XCTAssertNil(error, @"error was not nil after deserializing item.");
+    XCTAssertTrue(totalCount == -1,
                  @"The totalCount should have been -1 since it was not given.");
-    STAssertTrue(items.count == 2,
+    XCTAssertTrue(items.count == 2,
                  @"The items array should have had 2 items in it.");
     
-    STAssertTrue([[[items objectAtIndex:0] objectForKey:@"name"]
+    XCTAssertTrue([items[0][@"name"]
                   isEqualToString:@"bob"],
                  @"The name key should have been updated to 'bob'.");
 }
@@ -643,49 +645,50 @@
                                                  fromData:data
                                                   orError:&error];
     
-    STAssertNotNil(items, @"items was nil after deserializing item.");
-    STAssertNil(error, @"error was not nil after deserializing item.");
-    STAssertTrue(totalCount == -1,
+    XCTAssertNotNil(items, @"items was nil after deserializing item.");
+    XCTAssertNil(error, @"error was not nil after deserializing item.");
+    XCTAssertTrue(totalCount == -1,
                  @"The totalCount should have been -1 since it was not given.");
-    STAssertTrue(items.count == 2,
+    XCTAssertTrue(items.count == 2,
                  @"The items array should have had 2 items in it.");
     
-    STAssertTrue([[[items objectAtIndex:0] objectForKey:@"name"]
+    XCTAssertTrue([items[0][@"name"]
                   isEqualToString:@"bob"],
                  @"The name key should have been updated to 'bob'.");
     
     
-    NSArray *dates = [[items objectAtIndex:0] objectForKey:@"dates"];
-    STAssertNotNil(dates, @"dates was nil after deserializing item.");
+    NSArray *dates = items[0][@"dates"];
+    XCTAssertNotNil(dates, @"dates was nil after deserializing item.");
     
-    NSDate *date = [dates objectAtIndex:0];
-    STAssertNotNil(date, @"date was nil after deserializing item.");
+    NSDate *date = dates[0];
+    XCTAssertNotNil(date, @"date was nil after deserializing item.");
     
     NSCalendar *gregorian = [[NSCalendar alloc]
-                             initWithCalendarIdentifier:NSGregorianCalendar];
+                             initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
     [gregorian setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
     NSDateComponents *dateParts =
-    [gregorian components:(NSYearCalendarUnit |
-                           NSHourCalendarUnit |
-                           NSSecondCalendarUnit)
+    [gregorian components:(NSCalendarUnitYear |
+                           NSCalendarUnitHour |
+                           NSCalendarUnitSecond)
                  fromDate:date];
     
-    STAssertTrue(dateParts.year == 1999, @"year was: %d", dateParts.year);
-    STAssertTrue(dateParts.hour == 15, @"hour was: %d", dateParts.hour);
-    STAssertTrue(dateParts.second == 29, @"second was: %d", dateParts.second);
     
-    NSDate *date2 = [[items objectAtIndex:1] objectForKey:@"date"];
-    STAssertNotNil(date2, @"date was nil after deserializing item.");
+    XCTAssertEqual(dateParts.year, 1999);
+    XCTAssertEqual(dateParts.hour, 15);
+    XCTAssertEqual(dateParts.second, 29);
+    
+    NSDate *date2 = items[1][@"date"];
+    XCTAssertNotNil(date2, @"date was nil after deserializing item.");
 
     NSDateComponents *dateParts2 =
-    [gregorian components:(NSYearCalendarUnit |
-                           NSHourCalendarUnit |
-                           NSSecondCalendarUnit)
+    [gregorian components:(NSCalendarUnitYear |
+                           NSCalendarUnitHour |
+                           NSCalendarUnitSecond)
                  fromDate:date2];
-    
-    STAssertTrue(dateParts2.year == 2012, @"year was: %d", dateParts2.year);
-    STAssertTrue(dateParts2.hour == 8, @"hour was: %d", dateParts2.hour);
-    STAssertTrue(dateParts2.second == 0, @"second was: %d", dateParts2.second);
+
+    XCTAssertEqual(dateParts2.year, 2012);
+    XCTAssertEqual(dateParts2.hour, 8);
+    XCTAssertEqual(dateParts2.second, 0);
 }
 
 -(void)testTotalCountAndItemsReturnsTotalCount
@@ -699,14 +702,14 @@
                                                  fromData:data
                                                   orError:&error];
     
-    STAssertNotNil(items, @"items was nil after deserializing item.");
-    STAssertNil(error, @"error was not nil after deserializing item.");
-    STAssertTrue(totalCount == 50,
+    XCTAssertNotNil(items, @"items was nil after deserializing item.");
+    XCTAssertNil(error, @"error was not nil after deserializing item.");
+    XCTAssertTrue(totalCount == 50,
                  @"The totalCount should have been 50 since it was given.");
-    STAssertTrue(items.count == 2,
+    XCTAssertTrue(items.count == 2,
                  @"The items array should have had 2 items in it.");
     
-    STAssertTrue([[[items objectAtIndex:0] objectForKey:@"name"]
+    XCTAssertTrue([items[0][@"name"]
                   isEqualToString:@"bob"],
                  @"The name key should have been updated to 'bob'.");
 }
@@ -724,14 +727,13 @@
                                                  fromData:data
                                                   orError:&error];
     
-    STAssertNotNil(error, @"error was nil after deserializing item.");
-    STAssertNil(items, @"error was not nil after deserializing item.");
-    STAssertTrue(totalCount == -1,
+    XCTAssertNotNil(error, @"error was nil after deserializing item.");
+    XCTAssertNil(items, @"error was not nil after deserializing item.");
+    XCTAssertTrue(totalCount == -1,
                  @"The totalCount should have been -1 since there was an error.");
-    STAssertTrue([[error domain] isEqualToString:@"NSCocoaErrorDomain"],
-                 @"error domain was: %@", [error domain]);
-    STAssertTrue([error code] == 3840, // JSON Parse Error
-                 @"error code was: %d",[error code]);
+    
+    XCTAssertEqualObjects(error.domain, @"NSCocoaErrorDomain");
+    XCTAssertEqual(error.code, 3840);
 }
 
 -(void)testTotalCountAndItemsReturnsErrorIfMissingCount
@@ -745,14 +747,11 @@
                                                  fromData:data
                                                   orError:&error];
     
-    STAssertNotNil(error, @"error was nil after deserializing item.");
-    STAssertNil(items, @"error was not nil after deserializing item.");
-    STAssertTrue(totalCount == -1,
-                 @"The totalCount should have been -1 since there was an error.");
-    STAssertTrue([error domain] == MSErrorDomain,
-                 @"error domain was: %@", [error domain]);
-    STAssertTrue([error code] == MSExpectedTotalCountWithResponse,
-                 @"error code was: %d",[error code]);
+    XCTAssertNotNil(error, @"error was nil after deserializing item.");
+    XCTAssertNil(items, @"error was not nil after deserializing item.");
+    XCTAssertEqual(totalCount, -1, @"The totalCount should have been -1 since there was an error.");
+    XCTAssertEqualObjects(error.domain, MSErrorDomain);
+    XCTAssertEqual(error.code, MSExpectedTotalCountWithResponse);
 }
 
 -(void)testTotalCountAndItemsReturnsErrorIfMissingResults
@@ -766,18 +765,16 @@
                                                  fromData:data
                                                   orError:&error];
     
-    STAssertNotNil(error, @"error was nil after deserializing item.");
-    STAssertNil(items, @"error was not nil after deserializing item.");
-    STAssertTrue(totalCount == -1,
-                 @"The totalCount should have been -1 since there was an error.");
-    STAssertTrue([error domain] == MSErrorDomain,
-                 @"error domain was: %@", [error domain]);
-    STAssertTrue([error code] == MSExpectedItemsWithResponse,
-                 @"error code was: %d",[error code]);
+    XCTAssertNotNil(error, @"error was nil after deserializing item.");
+    XCTAssertNil(items, @"error was not nil after deserializing item.");
+    
+    XCTAssertEqual(totalCount, -1, @"The totalCount should have been -1 since there was an error.");
+    XCTAssertEqualObjects(error.domain, MSErrorDomain);
+    XCTAssertEqual(error.code, MSExpectedItemsWithResponse);
 }
 
 
-# pragma mark * errorFromData: Tests
+#pragma mark * errorFromData: Tests
 
 
 -(void)testErrorFromDataReturnsError
@@ -787,14 +784,11 @@
     
     NSError *error = [serializer errorFromData:data MIMEType:@"text/json"];
     
-    STAssertNotNil(error, @"error was nil after deserializing item.");
-    STAssertTrue([error domain] == MSErrorDomain,
-                 @"error domain was: %@", [error domain]);
-    STAssertTrue([error code] == MSErrorMessageErrorCode,
-                 @"error code was: %d",[error code]);
-    STAssertTrue([[error localizedDescription] isEqualToString:
-                  @"This is an Error Message!"],
-                 @"error description was: %@", [error localizedDescription]);
+    XCTAssertNotNil(error, @"error was nil after deserializing item.");
+    
+    XCTAssertEqualObjects(error.domain, MSErrorDomain);
+    XCTAssertEqual(error.code, MSErrorMessageErrorCode);
+    XCTAssertEqualObjects(error.localizedDescription, @"This is an Error Message!");
 }
 
 -(void)testErrorFromDataReturnsErrorFromObjectWithErrorKey
@@ -804,14 +798,10 @@
     
     NSError *error = [serializer errorFromData:data MIMEType:@"text/JSON"];
     
-    STAssertNotNil(error, @"error was nil after deserializing item.");
-    STAssertTrue([error domain] == MSErrorDomain,
-                 @"error domain was: %@", [error domain]);
-    STAssertTrue([error code] == MSErrorMessageErrorCode,
-                 @"error code was: %d",[error code]);
-    STAssertTrue([[error localizedDescription] isEqualToString:
-                  @"This is another Error Message!"],
-                 @"error description was: %@", [error localizedDescription]);
+    XCTAssertNotNil(error, @"error was nil after deserializing item.");
+    XCTAssertEqualObjects(error.domain, MSErrorDomain);
+    XCTAssertEqual(error.code, MSErrorMessageErrorCode);
+    XCTAssertEqualObjects(error.localizedDescription, @"This is another Error Message!");
 }
 
 -(void)testErrorFromDataReturnsErrorFromObjectWithDescriptionKey
@@ -821,12 +811,10 @@
     
     NSError *error = [serializer errorFromData:data MIMEType:@"application/json"];
     
-    STAssertNotNil(error, @"error was nil after deserializing item.");
-    STAssertTrue([error domain] == MSErrorDomain,
-                 @"error domain was: %@", [error domain]);
-    STAssertTrue([error code] == MSErrorMessageErrorCode,
-                 @"error code was: %d",[error code]);
-    STAssertTrue([[error localizedDescription] isEqualToString:
+    XCTAssertNotNil(error, @"error was nil after deserializing item.");
+    XCTAssertEqualObjects(error.domain, MSErrorDomain);
+    XCTAssertEqual(error.code, MSErrorMessageErrorCode);
+    XCTAssertTrue([[error localizedDescription] isEqualToString:
                   @"This is another Error Message!"],
                  @"error description was: %@", [error localizedDescription]);
 }
@@ -838,11 +826,9 @@
     
     NSError *error = [serializer errorFromData:data MIMEType:@"application/JSON"];
     
-    STAssertNotNil(error, @"error was nil after deserializing item.");
-    STAssertTrue([[error domain] isEqualToString:@"NSCocoaErrorDomain"],
-                 @"error domain was: %@", [error domain]);
-    STAssertTrue([error code] == 3840, // JSON Parse Error
-                 @"error code was: %d",[error code]);
+    XCTAssertNotNil(error, @"error was nil after deserializing item.");
+    XCTAssertEqualObjects(error.domain, @"NSCocoaErrorDomain");
+    XCTAssertEqual(error.code, 3840);
 }
 
 -(void)testErrorFromDataReturnsJsonEvenIfNotExpectedJsonForm
@@ -852,14 +838,10 @@
     
     NSError *error = [serializer errorFromData:data MIMEType:@"text/json"];
     
-    STAssertNotNil(error, @"error was nil after deserializing item.");
-    STAssertTrue([[error domain] isEqualToString:MSErrorDomain],
-                 @"error domain was: %@", [error domain]);
-    STAssertTrue([error code] == MSErrorMessageErrorCode,
-                 @"error code was: %d",[error code]);
-    STAssertTrue([[error localizedDescription] isEqualToString:
-                  @"{}"],
-                  @"error description was: %@", [error localizedDescription]);
+    XCTAssertNotNil(error, @"error was nil after deserializing item.");
+    XCTAssertEqualObjects(error.domain, MSErrorDomain);
+    XCTAssertEqual(error.code, MSErrorMessageErrorCode);
+    XCTAssertEqualObjects(error.localizedDescription, @"{}");
 }
 
 -(void)testErrorFromDataReturnsNonJson
@@ -869,14 +851,10 @@
     
     NSError *error = [serializer errorFromData:data MIMEType:@"application/xml"];
     
-    STAssertNotNil(error, @"error was nil after deserializing item.");
-    STAssertTrue([[error domain] isEqualToString:MSErrorDomain],
-                 @"error domain was: %@", [error domain]);
-    STAssertTrue([error code] == MSErrorMessageErrorCode,
-                 @"error code was: %d",[error code]);
-    STAssertTrue([[error localizedDescription] isEqualToString:
-                  @"<Hey>This sure is some poor xml</Hey>"],
-                  @"error description was: %@", [error localizedDescription]);
+    XCTAssertNotNil(error, @"error was nil after deserializing item.");
+    XCTAssertEqualObjects(error.domain, MSErrorDomain);
+    XCTAssertEqual(error.code, MSErrorMessageErrorCode);
+    XCTAssertEqualObjects(error.localizedDescription, @"<Hey>This sure is some poor xml</Hey>");
 }
 
 -(void)testSystemPropertiesNotRemovedWithIntId
@@ -886,13 +864,13 @@
     NSDictionary *item = @{@"id": @7, @"__Prop1": @6};
     NSData *data = [serializer dataFromItem:item idAllowed:YES ensureDictionary:NO removeSystemProperties:YES orError:&error];
     
-    STAssertNil(error, @"An error occurred %d", error.code);
+    XCTAssertNil(error, @"An error occurred: %@", error.localizedDescription);
     
     NSString *expected = @"{\"id\":7,\"__Prop1\":6}";
     NSString *actual = [[NSString alloc] initWithData:data
                                              encoding:NSUTF8StringEncoding];
     
-    STAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
+    XCTAssertEqualObjects(actual, expected);
 }
 
 -(void)testSystemPropertiesNotRemovedWithArray
@@ -902,13 +880,13 @@
     NSArray *item = @[@{@"id": @7, @"__Prop1": @6}];
     NSData *data = [serializer dataFromItem:item idAllowed:YES ensureDictionary:NO removeSystemProperties:YES orError:&error];
     
-    STAssertNil(error, @"An error occurred %d", error.code);
+    XCTAssertNil(error, @"An error occurred: %@", error.localizedDescription);
     
     NSString *expected = @"[{\"id\":7,\"__Prop1\":6}]";
     NSString *actual = [[NSString alloc] initWithData:data
                                              encoding:NSUTF8StringEncoding];
     
-    STAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
+    XCTAssertEqualObjects(actual, expected);
 }
 
 -(void)testSystemPropertiesRemovedWithStringId
@@ -917,13 +895,13 @@
     NSDictionary *item = @{@"id": @"one", @"__Prop1": @6, @"__prop4": @"help"};
     NSData *data = [serializer dataFromItem:item idAllowed:YES ensureDictionary:NO removeSystemProperties:YES orError:&error];
     
-    STAssertNil(error, @"An error occurred %d", error.code);
+    XCTAssertNil(error, @"An error occurred: %@", error.localizedDescription);
     
     NSString *expected = @"{\"id\":\"one\"}";
     NSString *actual = [[NSString alloc] initWithData:data
                                          encoding:NSUTF8StringEncoding];
     
-    STAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
+    XCTAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
 }
 
 @end

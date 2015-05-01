@@ -2,14 +2,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-using Newtonsoft.Json.Linq;
 using System;
 using System.Diagnostics;
+using System.Net;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
-    internal class DeleteOperation: MobileServiceTableOperation
+    internal class DeleteOperation : MobileServiceTableOperation
     {
         public override MobileServiceTableOperationKind Kind
         {
@@ -26,13 +27,26 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             get { return true; } // delete should save the item in queue since store copy is deleted right away with delete operation
         }
 
-        public DeleteOperation(string tableName, string itemId) : base(tableName, itemId)
+        public DeleteOperation(string tableName, MobileServiceTableKind tableKind, string itemId)
+            : base(tableName, tableKind, itemId)
         {
         }
 
-        protected override Task<JToken> OnExecuteAsync()
+        protected override async Task<JToken> OnExecuteAsync()
         {
-            return this.Table.DeleteAsync(this.Item);
+            try
+            {
+                return await this.Table.DeleteAsync(this.Item);
+            }
+            catch (MobileServiceInvalidOperationException ex)
+            {
+                // if the item is already deleted then local store is in-sync with the server state
+                if (ex.Response.StatusCode == HttpStatusCode.NotFound)
+                {
+                    return null;
+                }
+                throw;
+            }
         }
 
         public override void Validate(MobileServiceTableOperation newOperation)
@@ -40,7 +54,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             Debug.Assert(newOperation.ItemId == this.ItemId);
 
             // we don't allow any more operations on object that has already been deleted
-            throw new InvalidOperationException(Resources.SyncContext_DeletePending);
+            throw new InvalidOperationException("A delete operation on the item is already in the queue.");
         }
 
         public override void Collapse(MobileServiceTableOperation other)

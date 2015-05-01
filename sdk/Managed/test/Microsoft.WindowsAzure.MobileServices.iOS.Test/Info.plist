@@ -7,9 +7,11 @@
 		<integer>1</integer>
 	</array>
 	<key>UISupportedInterfaceOrientations</key>
-	<array/>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
 	<key>MinimumOSVersion</key>
-	<string>3.2</string>
+	<string>5.2</string>
 	<key>NSMainNibFile</key>
 	<string></string>
 	<key>UIStatusBarTintParameters</key>
@@ -28,5 +30,7 @@
 	<string>com.mobileservices.iOSTest</string>
 	<key>CFBundleVersion</key>
 	<string>1.0</string>
+	<key>CFBundleShortVersionString</key>
+	<string></string>
 </dict>
 </plist>

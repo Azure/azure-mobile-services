@@ -96,13 +96,17 @@
 /// MSQeury object.
 /// Before a pull is allowed to run, all pending requests on the specified table will be sent to
 /// the server. If a pending request for this table fails, the pull will be cancelled
--(void)pullWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion;
+-(void)pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion;
 
 /// Removes all records in the local cache that match the results of the specified query.
 /// If query is nil, all records in the local table will be removed.
-/// Before local data is removed, all pending operations for this table will be pushed to
-/// the server.
+/// Before local data is removed, a check will be made for pending operations on this table. If
+/// any are found the purge will be cancelled and an error returned.
 -(void)purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion;
+
+/// Purges all data, pending operations, operation errors, and metadata for the
+/// MSSyncTable from the local cache.
+-(void)forcePurgeWithCompletion:(MSSyncBlock)completion;
 
 /// @}
 

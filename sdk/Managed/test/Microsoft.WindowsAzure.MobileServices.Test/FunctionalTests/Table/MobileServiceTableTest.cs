@@ -54,6 +54,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [Version]
         public String Version { get; set; }
 
+        [Deleted]
+        public bool Deleted { get; set; }
+
         public ToDoWithSystemPropertiesType()
         {
         }
@@ -450,6 +453,37 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 Assert.AreEqual(exception.Response.StatusCode, HttpStatusCode.NotFound);
                 Assert.IsTrue(exception.Message.Contains(string.Format("Error: An item with id '{0}' does not exist.", testId)));
             }
+        }
+
+        [AsyncTestMethod]
+        public async Task InsertAsync_ThrowsConflictException_WhenConflictOccurs()
+        {
+            await EnsureEmptyTableAsync<ToDoWithSystemPropertiesType>();
+            string id = "an id";
+            IMobileServiceTable table = GetClient().GetTable("stringId_test_table");
+
+            var item = new JObject() { { "id", id }, { "String", "a value" } };
+            var inserted = await table.InsertAsync(item);
+
+            var expectedException = await ThrowsAsync<MobileServiceConflictException>(() => table.InsertAsync(item));
+
+            Assert.IsNotNull(expectedException);
+        }
+
+        [AsyncTestMethod]
+        public async Task InsertAsync_ThrowsConflictException_WhenConflictOccurs_Generic()
+        {
+            await EnsureEmptyTableAsync<ToDoWithSystemPropertiesType>();
+
+            string id = "an id";
+            IMobileServiceTable<ToDoWithSystemPropertiesType> table = GetClient().GetTable<ToDoWithSystemPropertiesType>();
+
+            ToDoWithSystemPropertiesType item = new ToDoWithSystemPropertiesType() { Id = id, String = "a value" };
+            await table.InsertAsync(item);
+
+            var expectedException = await ThrowsAsync<MobileServiceConflictException<ToDoWithSystemPropertiesType>>(() => table.InsertAsync(item));
+
+            Assert.IsNotNull(expectedException);
         }
 
         [AsyncTestMethod]

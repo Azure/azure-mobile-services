@@ -57,14 +57,20 @@
     void (^callCompletionIfAllDone)() = ^{
         allDoneCount++;
         if (allDoneCount == 2) {
-            [controller dismissViewControllerAnimated:animated completion:^{
-                if (completion) {
-                    completion(localUser, localError);
-                }
-                localUser = nil;
-                localError = nil;
-                loginController = nil;
-            }];
+            // Its possible for this to be triggered to close in the completion block of the present
+            // controller call, for example when there is no network connection.
+            // In order to avoid an error with the presentation animation still finishing, put the
+            // dismiss call onto the main queue and let this block finish running.
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [controller dismissViewControllerAnimated:animated completion:^{
+                    if (completion) {
+                        completion(localUser, localError);
+                    }
+                    localUser = nil;
+                    localError = nil;
+                    loginController = nil;
+                }];
+            });
         }
     };
     

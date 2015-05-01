@@ -81,7 +81,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.IsNotNull(registration.RegistrationId);
             // TODO: Uncomment when .Net Runtime implements installationID
             //Assert.IsTrue(registration.Tags.Contains(zumoInstallationId));
-            Assert.AreEqual(registration.Tags.Count(), DefaultTags.Length + 1);
+            //Assert.AreEqual(registration.Tags.Count(), DefaultTags.Length + 1);
         }
 
         public Registration GetNewNativeRegistration(string deviceId, IEnumerable<string> tags)

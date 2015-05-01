@@ -2,10 +2,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-using Microsoft.WindowsAzure.Mobile.Service.Tables;
 using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration.Conventions;
 using System.Linq;
+using Microsoft.WindowsAzure.Mobile.Service.Tables;
 using ZumoE2EServerApp.DataObjects;
 
 namespace ZumoE2EServerApp.Models
@@ -32,6 +32,8 @@ namespace ZumoE2EServerApp.Models
         public DbSet<StringIdRoundTripTableItemForDB> StringIdRoundTripTableItemForDBs { get; set; }
 
         public DbSet<W8JSRoundTripTableItemForDB> W8JSRoundTripTableForDBs { get; set; }
+
+        public DbSet<OfflineReady> OfflineReadyItems { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

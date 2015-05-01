@@ -2,10 +2,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-using System;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.WindowsAzure.MobileServices.Sync;
@@ -24,12 +20,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         [TestInitialize]
         public void Initialize()
         {
-            this.operation = new Mock<MobileServiceTableOperation>("test", "abc") { CallBase = true };            
+            this.operation = new Mock<MobileServiceTableOperation>("test", MobileServiceTableKind.Table, "abc") { CallBase = true };
             var client = new Mock<MobileServiceClient>(MockBehavior.Strict);
             client.Object.Serializer = new MobileServiceSerializer();
             this.table = new Mock<MobileServiceTable>("test", client.Object);
             operation.Object.Table = this.table.Object;
-        }        
+        }
 
         [TestMethod]
         public async Task ExecuteAsync_Throws_WhenItemIsNull()
@@ -83,7 +79,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
             Assert.AreEqual(serializedOperation["tableName"], "test");
             Assert.AreEqual(serializedOperation["kind"], 0);
             Assert.AreEqual(serializedOperation["item"], JValue.CreateString(null));
-            Assert.IsNotNull(serializedOperation["__createdAt"]);
             Assert.IsNotNull(serializedOperation["sequence"]);
         }
 
@@ -99,22 +94,59 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
             Assert.AreEqual(serializedOperation["tableName"], operation.TableName);
             Assert.AreEqual(MobileServiceTableOperationKind.Insert, operation.Kind);
             Assert.IsNull(operation.Item);
-            Assert.AreEqual(serializedOperation["__createdAt"], operation.CreatedAt);
             Assert.AreEqual(serializedOperation["sequence"], operation.Sequence);
         }
 
         [TestMethod]
         public void Deserialize_Succeeds_WithItem()
         {
-            var serializedOperation = JObject.Parse("{\"id\":\"70cf6cc2-5981-4a32-ae6c-249572917a46\",\"kind\": 2,\"tableName\":\"test\",\"itemId\":\"abc\",\"item\":\"{\\\"id\\\":\\\"abc\\\",\\\"text\\\":\\\"example\\\"}\",\"__createdAt\":\"2014-03-11T20:37:10.3366689Z\",\"sequence\":0}");
+            var serializedOperation = JObject.Parse(@"
+            {""id"":""70cf6cc2-5981-4a32-ae6c-249572917a46"",
+            ""kind"": 2,
+            ""tableName"":""test"",
+            ""itemId"":""abc"",
+            ""version"":123,
+            ""sequence"":null,
+            ""state"":null,
+            ""item"":""{\""id\"":\""abc\"",\""text\"":\""example\""}"",
+            ""__createdAt"":""2014-03-11T20:37:10.3366689Z"",
+            ""sequence"":0
+            }");
+            var operation = MobileServiceTableOperation.Deserialize(serializedOperation);
+
+            Assert.AreEqual(serializedOperation["id"], operation.Id);
+            Assert.AreEqual(serializedOperation["itemId"], operation.ItemId);
+            Assert.AreEqual(serializedOperation["version"], operation.Version);
+            Assert.AreEqual(serializedOperation["tableName"], operation.TableName);
+            Assert.AreEqual(MobileServiceTableOperationKind.Delete, operation.Kind);
+            Assert.AreEqual(serializedOperation["sequence"], operation.Sequence);
+            Assert.AreEqual("abc", operation.Item["id"]);
+            Assert.AreEqual("example", operation.Item["text"]);
+        }
+
+        [TestMethod]
+        public void Deserialize_Succeeds_WhenVersionSequenceOrStateIsNull()
+        {
+            var serializedOperation = JObject.Parse(@"
+            {""id"":""70cf6cc2-5981-4a32-ae6c-249572917a46"",
+            ""kind"": 2,
+            ""tableName"":""test"",
+            ""itemId"":""abc"",
+            ""version"":null,
+            ""sequence"":null,
+            ""state"":null,
+            ""item"":""{\""id\"":\""abc\"",\""text\"":\""example\""}"",
+            ""__createdAt"":""2014-03-11T20:37:10.3366689Z"",
+            ""sequence"":0
+            }");
             var operation = MobileServiceTableOperation.Deserialize(serializedOperation);
 
             Assert.AreEqual(serializedOperation["id"], operation.Id);
             Assert.AreEqual(serializedOperation["itemId"], operation.ItemId);
             Assert.AreEqual(serializedOperation["tableName"], operation.TableName);
             Assert.AreEqual(MobileServiceTableOperationKind.Delete, operation.Kind);
-            Assert.AreEqual(serializedOperation["__createdAt"], operation.CreatedAt);
             Assert.AreEqual(serializedOperation["sequence"], operation.Sequence);
+            Assert.AreEqual(0, operation.Version);
             Assert.AreEqual("abc", operation.Item["id"]);
             Assert.AreEqual("example", operation.Item["text"]);
         }

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Sync;
 using Microsoft.WindowsAzure.MobileServices.Test;
@@ -21,6 +22,33 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         private const string TestTable = "stringId_test_table";
 
         public static string TestDbName = SQLiteStoreTests.TestDbName;
+
+        [AsyncTestMethod]
+        public async Task InsertAsync_Throws_IfItemAlreadyExistsInLocalStore()
+        {
+            ResetDatabase(TestTable);
+
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable(TestTable, new JObject()
+            {
+                { "id", String.Empty},
+                { "String", String.Empty }
+            });
+
+            var hijack = new TestHttpHandler();
+            IMobileServiceClient service = await CreateClient(hijack, store);
+
+            string pullResult = "[{\"id\":\"abc\",\"String\":\"Wow\"}]";
+            hijack.AddResponseContent(pullResult);
+            hijack.AddResponseContent("[]");
+
+            IMobileServiceSyncTable table = service.GetSyncTable(TestTable);
+            await table.PullAsync(null, null);
+
+            var ex = await AssertEx.Throws<MobileServiceLocalStoreException>(() => table.InsertAsync(new JObject() { { "id", "abc" } }));
+
+            Assert.AreEqual(ex.Message, "An insert operation on the item is already in the queue.");
+        }
 
         [AsyncTestMethod]
         public async Task ReadAsync_RoundTripsDate()
@@ -76,6 +104,61 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         }
 
         [AsyncTestMethod]
+        public async Task ReadAsync_RoundTripsBytes()
+        {
+            const string tableName = "bytes_test_table";
+
+            ResetDatabase(tableName);
+
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable(tableName, new JObject {
+                { "id", String.Empty },
+                { "data", new byte[0] }
+            });
+
+            var hijack = new TestHttpHandler();
+            IMobileServiceClient service = await CreateClient(hijack, store);
+            IMobileServiceSyncTable table = service.GetSyncTable(tableName);
+
+            byte[] theData = { 0, 128, 255 };
+
+            JObject inserted = await table.InsertAsync(new JObject { { "data", theData } });
+
+            Assert.AreEquivalent(theData, inserted["data"].Value<byte[]>());
+
+            JObject rehydrated = await table.LookupAsync(inserted["id"].Value<string>());
+
+            Assert.AreEquivalent(theData, rehydrated["data"].Value<byte[]>());
+        }
+
+        [AsyncTestMethod]
+        public async Task ReadAsync_RoundTripsBytes_Generic()
+        {
+            const string tableName = "BytesType";
+
+            ResetDatabase(tableName);
+
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable<BytesType>();
+
+            var hijack = new TestHttpHandler();
+            IMobileServiceClient service = await CreateClient(hijack, store);
+            IMobileServiceSyncTable<BytesType> table = service.GetSyncTable<BytesType>();
+
+            byte[] theData = { 0, 128, 255 };
+
+            BytesType inserted = new BytesType { Data = theData };
+
+            await table.InsertAsync(inserted);
+
+            Assert.AreEquivalent(inserted.Data, theData);
+
+            BytesType rehydrated = await table.LookupAsync(inserted.Id);
+
+            Assert.AreEquivalent(rehydrated.Data, theData);
+        }
+
+        [AsyncTestMethod]
         public async Task ReadAsync_WithSystemPropertyType_Generic()
         {
             string tableName = "stringId_test_table";
@@ -109,6 +192,30 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             string expectedRequestContent = @"{""id"":""123"",""String"":""def""}";
             // version should not be sent with insert request
             Assert.AreEqual(hijack.RequestContents[0], expectedRequestContent);
+        }
+
+        [AsyncTestMethod]
+        public async Task ReadAsync_StringCompare_WithSpecialChars()
+        {
+            ResetDatabase("stringId_test_table");
+
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable<ToDoWithSystemPropertiesType>();
+
+            IMobileServiceClient service = await CreateClient(new TestHttpHandler(), store);
+            var table = service.GetSyncTable<ToDoWithSystemPropertiesType>();
+
+            var inserted = new ToDoWithSystemPropertiesType()
+            {
+                Id = "123",
+                Version = "abc",
+                String = "test@contoso.com"
+            };
+            await table.InsertAsync(inserted);
+
+            ToDoWithSystemPropertiesType rehydrated = (await table.Where(t => t.String == "test@contoso.com").ToListAsync()).FirstOrDefault();
+
+            Assert.AreEqual(rehydrated.String, "test@contoso.com");
         }
 
         [AsyncTestMethod]
@@ -160,12 +267,72 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
                 await store.InitializeAsync();
 
-                await store.UpsertAsync("ITEMwithDATE", new[]{new JObject()
+                await store.UpsertAsync("ITEMwithDATE", new[]
                 {
-                    { "ID", Guid.NewGuid() },
-                    {"dATE", DateTime.UtcNow }
-                }}, fromServer: false);
+                    new JObject()
+                    {
+                        { "ID", Guid.NewGuid() },
+                        {"dATE", DateTime.UtcNow }
+                    }
+                }, ignoreMissingColumns: false);
             }
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_DoesIncrementalSync_WhenQueryIdIsSpecified()
+        {
+            ResetDatabase(TestTable);
+
+            var hijack = new TestHttpHandler();
+            IMobileServiceSyncTable<ToDoWithStringId> table = await GetSynctable<ToDoWithStringId>(hijack);
+
+            string pullResult = "[{\"id\":\"b\",\"String\":\"Wow\",\"__version\":\"def\", \"__updatedAt\":\"2014-01-30T23:01:33.444Z\"}]";
+            hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(pullResult) }); // pull
+            hijack.AddResponseContent("[]");
+
+            await table.PullAsync(queryId: "todoItems", query: table.CreateQuery());
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.0000000%2B00%3A00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__deleted");
+
+
+            pullResult = "[{\"id\":\"b\",\"String\":\"Updated\",\"__version\":\"def\", \"__updatedAt\":\"2014-02-27T23:01:33.444Z\"}]";
+            hijack.AddResponseContent(pullResult); // pull
+            hijack.AddResponseContent("[]");
+
+            await table.PullAsync(queryId: "todoItems", query: table.CreateQuery());
+
+            var item = await table.LookupAsync("b");
+            Assert.AreEqual(item.String, "Updated");
+            AssertEx.QueryEquals(hijack.Requests[2].RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetimeoffset'2014-01-30T23%3A01%3A33.4440000%2B00%3A00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__deleted");
+
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_DoesIncrementalSync_WhenQueryIdIsSpecified_WithoutCache()
+        {
+            ResetDatabase(TestTable);
+
+            var hijack = new TestHttpHandler();
+            IMobileServiceSyncTable<ToDoWithStringId> table = await GetSynctable<ToDoWithStringId>(hijack);
+
+            string pullResult = "[{\"id\":\"b\",\"String\":\"Wow\",\"__version\":\"def\", \"__updatedAt\":\"2014-01-30T23:01:33.444Z\"}]";
+            hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(pullResult) }); // pull
+            hijack.AddResponseContent("[]");
+
+            await table.PullAsync(queryId: "todoItems", query: table.CreateQuery());
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.0000000%2B00%3A00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__deleted");
+
+            table = await GetSynctable<ToDoWithStringId>(hijack);
+
+
+            pullResult = "[{\"id\":\"b\",\"String\":\"Updated\",\"__version\":\"def\", \"__updatedAt\":\"2014-02-27T23:01:33.444Z\"}]";
+            hijack.AddResponseContent(pullResult); // pull
+            hijack.AddResponseContent("[]");
+
+            await table.PullAsync(queryId: "todoItems", query: table.CreateQuery());
+
+            var item = await table.LookupAsync("b");
+            Assert.AreEqual(item.String, "Updated");
+            AssertEx.QueryEquals(hijack.Requests[2].RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetimeoffset'2014-01-30T23%3A01%3A33.4440000%2B00%3A00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__deleted");
         }
 
         [AsyncTestMethod]
@@ -174,23 +341,13 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             ResetDatabase(TestTable);
 
             var hijack = new TestHttpHandler();
-            var store = new MobileServiceSQLiteStore(TestDbName);
-            store.DefineTable<ToDoWithSystemPropertiesType>();
+            IMobileServiceSyncTable<ToDoWithSystemPropertiesType> table = await GetSynctable<ToDoWithSystemPropertiesType>(hijack);
 
-            IMobileServiceClient service = await CreateClient(hijack, store);
-            IMobileServiceSyncTable<ToDoWithSystemPropertiesType> table = service.GetSyncTable<ToDoWithSystemPropertiesType>();
-
-            hijack.OnSendingRequest = req =>
-            {
-                // we request all the system properties present on DefineTable<> object
-                Assert.AreEqual(req.RequestUri.Query, "?__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt%2C__version");
-
-                return Task.FromResult(req);
-            };
             string pullResult = "[{\"id\":\"b\",\"String\":\"Wow\",\"__version\":\"def\",\"__createdAt\":\"2014-01-29T23:01:33.444Z\", \"__updatedAt\":\"2014-01-30T23:01:33.444Z\"}]";
             hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(pullResult) }); // pull
+            hijack.AddResponseContent("[]");
 
-            await table.PullAsync();
+            await table.PullAsync(null, null);
 
             var item = await table.LookupAsync("b");
             Assert.AreEqual(item.String, "Wow");
@@ -198,6 +355,224 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             // we preserved the system properties returned from server on update
             Assert.AreEqual(item.CreatedAt.ToUniversalTime(), new DateTime(2014, 01, 29, 23, 1, 33, 444, DateTimeKind.Utc));
             Assert.AreEqual(item.UpdatedAt.ToUniversalTime(), new DateTime(2014, 01, 30, 23, 1, 33, 444, DateTimeKind.Utc));
+
+            // we request all the system properties present on DefineTable<> object
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.Query, "?$skip=0&$top=50&__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt%2C__version%2C__deleted");
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_DoesNotTriggerPush_OnUnrelatedTables_WhenThereIsOperationTable()
+        {
+            ResetDatabase(TestTable);
+            TestUtilities.DropTestTable(TestDbName, "unrelatedTable");
+            TestUtilities.DropTestTable(TestDbName, "relatedTable");
+            TestUtilities.DropTestTable(TestDbName, "StringIdType");
+
+            var hijack = new TestHttpHandler();
+            hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
+            hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for pull
+            hijack.AddResponseContent("[]"); // last page
+
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable("unrelatedTable", new JObject() { { "id", String.Empty } });
+            store.DefineTable<StringIdType>();
+
+            IMobileServiceClient client = await CreateClient(hijack, store);
+
+            // insert item in pull table
+            IMobileServiceSyncTable unrelatedTable = client.GetSyncTable("unrelatedTable");
+            await unrelatedTable.InsertAsync(new JObject() { { "id", "abc" } });
+
+            // then insert item in other table
+            MobileServiceSyncTable<StringIdType> mainTable = client.GetSyncTable<StringIdType>() as MobileServiceSyncTable<StringIdType>;
+            var item = new StringIdType() { Id = "an id", String = "what?" };
+            await mainTable.InsertAsync(item);
+
+            await mainTable.PullAsync(null, null, null, null, CancellationToken.None, "relatedTable");
+
+            Assert.AreEqual(hijack.Requests.Count, 3); // 1 for push and 2 for pull
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.AbsolutePath, "/tables/StringIdType");
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.AbsolutePath, "/tables/StringIdType");
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.AbsolutePath, "/tables/StringIdType");
+            Assert.AreEqual(1L, client.SyncContext.PendingOperations);
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_DoesNotTriggerPush_WhenPushOtherTablesIsFalse()
+        {
+            ResetDatabase(TestTable);
+            TestUtilities.DropTestTable(TestDbName, "unrelatedTable");
+            TestUtilities.DropTestTable(TestDbName, "StringIdType");
+
+            var hijack = new TestHttpHandler();
+            hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
+            hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for pull
+            hijack.AddResponseContent("[]"); // last page
+
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable("unrelatedTable", new JObject() { { "id", String.Empty } });
+            store.DefineTable<StringIdType>();
+
+            IMobileServiceClient client = await CreateClient(hijack, store);
+
+            // insert item in pull table
+            IMobileServiceSyncTable unrelatedTable = client.GetSyncTable("unrelatedTable");
+            await unrelatedTable.InsertAsync(new JObject() { { "id", "abc" } });
+
+            // then insert item in other table
+            MobileServiceSyncTable<StringIdType> mainTable = client.GetSyncTable<StringIdType>() as MobileServiceSyncTable<StringIdType>;
+            var item = new StringIdType() { Id = "an id", String = "what?" };
+            await mainTable.InsertAsync(item);
+
+            await mainTable.PullAsync(null, null, null, false, CancellationToken.None);
+
+            Assert.AreEqual(hijack.Requests.Count, 3); // 1 for push and 2 for pull
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.AbsolutePath, "/tables/StringIdType");
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.AbsolutePath, "/tables/StringIdType");
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.AbsolutePath, "/tables/StringIdType");
+            Assert.AreEqual(1L, client.SyncContext.PendingOperations);
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_TriggersPush_OnRelatedTables_WhenThereIsOperationTable()
+        {
+            ResetDatabase(TestTable);
+            TestUtilities.DropTestTable(TestDbName, "relatedTable");
+            TestUtilities.DropTestTable(TestDbName, "StringIdType");
+
+            var hijack = new TestHttpHandler();
+            hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
+            hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hi\"}");
+            hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for pull
+            hijack.AddResponseContent("[]"); // last page
+
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable("relatedTable", new JObject() { { "id", String.Empty } });
+            store.DefineTable<StringIdType>();
+
+            IMobileServiceClient client = await CreateClient(hijack, store);
+
+            // insert item in pull table
+            IMobileServiceSyncTable unrelatedTable = client.GetSyncTable("relatedTable");
+            await unrelatedTable.InsertAsync(new JObject() { { "id", "abc" } });
+
+            // then insert item in other table
+            MobileServiceSyncTable<StringIdType> mainTable = client.GetSyncTable<StringIdType>() as MobileServiceSyncTable<StringIdType>;
+            var item = new StringIdType() { Id = "abc", String = "what?" };
+            await mainTable.InsertAsync(item);
+
+            await mainTable.PullAsync(null, null, null, null, CancellationToken.None, "relatedTable");
+
+            Assert.AreEqual(hijack.Requests.Count, 4); // 2 for push and 2 for pull
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.AbsolutePath, "/tables/relatedTable");
+            AssertEx.QueryEquals(hijack.Requests[1].RequestUri.AbsolutePath, "/tables/StringIdType");
+            AssertEx.QueryEquals(hijack.Requests[1].RequestUri.AbsolutePath, "/tables/StringIdType");
+            AssertEx.QueryEquals(hijack.Requests[1].RequestUri.AbsolutePath, "/tables/StringIdType");
+            Assert.AreEqual(0L, client.SyncContext.PendingOperations);
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_TriggersPush_WhenPushOtherTablesIsTrue_AndThereIsOperationTable()
+        {
+            ResetDatabase(TestTable);
+            TestUtilities.DropTestTable(TestDbName, "relatedTable");
+            TestUtilities.DropTestTable(TestDbName, "StringIdType");
+
+            var hijack = new TestHttpHandler();
+            hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
+            hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hi\"}");
+            hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for pull
+            hijack.AddResponseContent("[]"); // last page
+
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable("relatedTable", new JObject() { { "id", String.Empty } });
+            store.DefineTable<StringIdType>();
+
+            IMobileServiceClient client = await CreateClient(hijack, store);
+
+            // insert item in pull table
+            IMobileServiceSyncTable unrelatedTable = client.GetSyncTable("relatedTable");
+            await unrelatedTable.InsertAsync(new JObject() { { "id", "abc" } });
+
+            // then insert item in other table
+            MobileServiceSyncTable<StringIdType> mainTable = client.GetSyncTable<StringIdType>() as MobileServiceSyncTable<StringIdType>;
+            var item = new StringIdType() { Id = "abc", String = "what?" };
+            await mainTable.InsertAsync(item);
+
+            await mainTable.PullAsync(null, null, null, true, CancellationToken.None);
+
+            Assert.AreEqual(hijack.Requests.Count, 4); // 2 for push and 2 for pull
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.AbsolutePath, "/tables/relatedTable");
+            AssertEx.QueryEquals(hijack.Requests[1].RequestUri.AbsolutePath, "/tables/StringIdType");
+            AssertEx.QueryEquals(hijack.Requests[1].RequestUri.AbsolutePath, "/tables/StringIdType");
+            AssertEx.QueryEquals(hijack.Requests[1].RequestUri.AbsolutePath, "/tables/StringIdType");
+            Assert.AreEqual(0L, client.SyncContext.PendingOperations);
+        }
+
+        [AsyncTestMethod]
+        public async Task PushAsync_PushesOnlySelectedTables_WhenSpecified()
+        {
+            ResetDatabase(TestTable);
+            TestUtilities.DropTestTable(TestDbName, "someTable");
+            TestUtilities.DropTestTable(TestDbName, "StringIdType");
+
+            var hijack = new TestHttpHandler();
+            hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
+
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable("someTable", new JObject() { { "id", String.Empty } });
+            store.DefineTable<StringIdType>();
+
+            IMobileServiceClient client = await CreateClient(hijack, store);
+
+            // insert item in pull table
+            IMobileServiceSyncTable unrelatedTable = client.GetSyncTable("someTable");
+            await unrelatedTable.InsertAsync(new JObject() { { "id", "abc" } });
+
+            // then insert item in other table
+            MobileServiceSyncTable<StringIdType> mainTable = client.GetSyncTable<StringIdType>() as MobileServiceSyncTable<StringIdType>;
+            var item = new StringIdType() { Id = "abc", String = "what?" };
+            await mainTable.InsertAsync(item);
+
+            await (client.SyncContext as MobileServiceSyncContext).PushAsync(CancellationToken.None, MobileServiceTableKind.Table, "someTable");
+
+            Assert.AreEqual(hijack.Requests.Count, 1);
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.AbsolutePath, "/tables/someTable");
+            Assert.AreEqual(1L, client.SyncContext.PendingOperations);
+        }
+
+        [AsyncTestMethod]
+        public async Task PushAsync_PushesAllTables_WhenEmptyListIsGiven()
+        {
+            ResetDatabase(TestTable);
+            TestUtilities.DropTestTable(TestDbName, "someTable");
+            TestUtilities.DropTestTable(TestDbName, "StringIdType");
+
+            var hijack = new TestHttpHandler();
+            hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
+            hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
+
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable("someTable", new JObject() { { "id", String.Empty } });
+            store.DefineTable<StringIdType>();
+
+            IMobileServiceClient client = await CreateClient(hijack, store);
+
+            // insert item in pull table
+            IMobileServiceSyncTable table1 = client.GetSyncTable("someTable");
+            await table1.InsertAsync(new JObject() { { "id", "abc" } });
+
+            // then insert item in other table
+            MobileServiceSyncTable<StringIdType> table2 = client.GetSyncTable<StringIdType>() as MobileServiceSyncTable<StringIdType>;
+            var item = new StringIdType() { Id = "abc", String = "what?" };
+            await table2.InsertAsync(item);
+
+            await (client.SyncContext as MobileServiceSyncContext).PushAsync(CancellationToken.None);
+
+            Assert.AreEqual(hijack.Requests.Count, 2);
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.AbsolutePath, "/tables/someTable");
+            AssertEx.QueryEquals(hijack.Requests[1].RequestUri.AbsolutePath, "/tables/StringIdType");
+            Assert.AreEqual(0L, client.SyncContext.PendingOperations);
         }
 
         [AsyncTestMethod]
@@ -236,7 +611,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             hijack.OnSendingRequest = async req =>
             {
                 // we request all the system properties present on DefineTable<> object
-                Assert.AreEqual(req.RequestUri.Query, "?__systemproperties=__createdAt%2C__updatedAt%2C__version");
+                Assert.AreEqual(req.RequestUri.Query, "?__systemproperties=__createdAt%2C__updatedAt%2C__version%2C__deleted");
 
                 string content = await req.Content.ReadAsStringAsync();
                 Assert.AreEqual(content, @"{""id"":""b"",""String"":""Hey""}"); // the system properties are not sent to server
@@ -297,6 +672,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             var result = await table.IncludeTotalCount().Take(0).ToCollectionAsync();
             Assert.AreEqual(result.TotalCount, 2L);
 
+            await service.SyncContext.PushAsync();
             await table.PurgeAsync();
 
             result = await table.IncludeTotalCount().Take(0).ToCollectionAsync();
@@ -466,7 +842,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
                 DateTime = new DateTime(2010, 10, 10, 10, 10, 10, DateTimeKind.Utc),
                 DateTimeOffset = new DateTimeOffset(2011, 11, 11, 11, 11, 11, 11, TimeSpan.Zero),
                 Nullable = 12.13,
-                NullableDateTime = new DateTime(2014, 12, 14, 14, 14, 14, DateTimeKind.Utc),
+                NullableDateTime = new DateTime(2010, 10, 10, 10, 10, 10, DateTimeKind.Utc),
+                TimeSpan = new TimeSpan(0, 12, 12, 15, 95),
                 Uri = new Uri("http://example.com"),
                 Enum1 = Enum1.Enum1Value2,
                 Enum2 = Enum2.Enum2Value2,
@@ -503,6 +880,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 ""dateTime"":""2010-10-10T10:10:10.000Z"",
 ""dateTimeOffset"":""2011-11-11T11:11:11.011Z"",
 ""nullableDateTime"":""2010-10-10T10:10:10.000Z"",
+""timeSpan"":""12:12:15.095"",
 ""nullable"":12.13,
 ""uri"":""http://example.com/"",
 ""enum1"":""Enum1Value2"",
@@ -519,13 +897,14 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         }
 
         [AsyncTestMethod]
-        public async Task Insert_ThenPush_ThenPull_ThenRead_ThenUpdate_ThenRefresh_ThenDelete_ThenLookup_ThenPurge_ThenRead()
+        public async Task Insert_ThenPush_ThenPull_ThenRead_ThenUpdate_ThenRefresh_ThenDelete_ThenLookup_ThenPush_ThenPurge_ThenRead()
         {
             ResetDatabase(TestTable);
 
             var hijack = new TestHttpHandler();
             hijack.AddResponseContent("{\"id\":\"b\",\"String\":\"Hey\"}"); // insert response
             hijack.AddResponseContent("[{\"id\":\"b\",\"String\":\"Hey\"},{\"id\":\"a\",\"String\":\"World\"}]"); // pull response            
+            hijack.AddResponseContent("[]"); // pull last page
 
             IMobileServiceClient service = await CreateTodoClient(hijack);
             IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
@@ -537,7 +916,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             await service.SyncContext.PushAsync();
 
             // then pull changes from server
-            await table.PullAsync();
+            await table.PullAsync(null, null);
 
             // order the records by id so we can assert them predictably 
             IList<ToDoWithStringId> items = await table.OrderBy(i => i.Id).ToListAsync();
@@ -553,8 +932,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             Assert.AreEqual(items[1].Id, "b");
             Assert.AreEqual(items[1].String, "Hey");
 
-            // we made 2 requests, one for push and one for pull
-            Assert.AreEqual(hijack.Requests.Count, 2);
+            // we made 2 requests, one for push and two for pull
+            Assert.AreEqual(hijack.Requests.Count, 3);
 
             // recreating the client from state in the store
             service = await CreateTodoClient(hijack);
@@ -594,6 +973,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             service = await CreateTodoClient(hijack);
             table = service.GetSyncTable<ToDoWithStringId>();
 
+            await service.SyncContext.PushAsync();
             // now purge the remaining records
             await table.PurgeAsync();
 
@@ -602,6 +982,16 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
             // There shouldn't be anything remaining
             Assert.AreEqual(remaining.Count(), 0);
+        }
+
+        private static async Task<IMobileServiceSyncTable<T>> GetSynctable<T>(TestHttpHandler hijack)
+        {
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable<T>();
+
+            IMobileServiceClient service = await CreateClient(hijack, store);
+            IMobileServiceSyncTable<T> table = service.GetSyncTable<T>();
+            return table;
         }
 
         private static async Task<IMobileServiceClient> CreateTodoClient(TestHttpHandler hijack)
@@ -621,9 +1011,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         private static void ResetDatabase(string testTableName)
         {
             TestUtilities.DropTestTable(TestDbName, testTableName);
-            TestUtilities.DropTestTable(TestDbName, MobileServiceLocalSystemTables.OperationQueue);
-            TestUtilities.DropTestTable(TestDbName, MobileServiceLocalSystemTables.SyncErrors);
-            TestUtilities.DropTestTable(TestDbName, MobileServiceLocalSystemTables.Config);
+            TestUtilities.ResetDatabase(TestDbName);
         }
     }
 }

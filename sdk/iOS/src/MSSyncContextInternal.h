@@ -12,7 +12,6 @@
 @property (nonatomic, weak)             MSClient *client;
 @property (nonatomic, strong, readonly) MSOperationQueue *operationQueue;
 @property (nonatomic, strong)           NSOperationQueue *callbackQueue;
-@property (nonatomic, strong)           NSMutableArray *errors;
 
 @property (atomic) NSInteger operationSequence;
 
@@ -26,9 +25,11 @@
 
 -(void) readWithQuery:(MSQuery *)query completion:(MSReadQueryBlock)completion;
 
--(void) pullWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion;
+-(void) pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion;
 
 -(void) purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion;
+
+-(void) forcePurgeWithTable:(MSSyncTable *)syncTable completion:(MSSyncBlock)completion;
 
 
 #pragma mark * Operation Helpers

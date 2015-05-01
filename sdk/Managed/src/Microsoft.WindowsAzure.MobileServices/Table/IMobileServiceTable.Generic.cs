@@ -19,6 +19,18 @@ namespace Microsoft.WindowsAzure.MobileServices
     public interface IMobileServiceTable<T> : IMobileServiceTable
     {
         /// <summary>
+        /// Executes a query against the table.
+        /// </summary>
+        /// <param name="query">
+        /// A query to execute.
+        /// </param>
+        /// <returns>
+        /// A task that will return with results when the query finishes.
+        /// </returns>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Generic are not nested when used via async.")]
+        Task<IEnumerable<U>> ReadAsync<U>(string query);
+
+        /// <summary>
         /// Returns instances from a table using a query.
         /// </summary>
         /// <typeparam name="U">
@@ -153,14 +165,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         Task UpdateAsync(T instance, IDictionary<string, string> parameters);
 
         /// <summary>
-        /// Undeletes an <paramref name="instance"/> from the table [JavaScript Mobile Services backend only].
+        /// Undeletes an <paramref name="instance"/> from the table. This requires the soft delete feature to be enabled on the Mobile Service. Visit <see href="http://go.microsoft.com/fwlink/?LinkId=507647">the link</see> for details.
         /// </summary>
         /// <param name="instance">The instance to undelete from the table.</param>
         /// <returns>A task that will complete when the undelete finishes.</returns>
         Task UndeleteAsync(T instance);
 
         /// <summary>
-        /// Undeletes an <paramref name="instance"/> from the table [JavaScript Mobile Services backend only]. 
+        /// Undeletes an <paramref name="instance"/> from the table. This requires the soft delete feature to be enabled on the Mobile Service. Visit <see href="http://go.microsoft.com/fwlink/?LinkId=507647">the link</see> for details.
         /// </summary>
         /// <param name="instance">The instance to undelete from the table.</param>
         /// <param name="parameters">
@@ -214,8 +226,8 @@ namespace Microsoft.WindowsAzure.MobileServices
         IMobileServiceTableQuery<T> IncludeTotalCount();
 
         /// <summary>
-        /// Creates a query that will ensure it gets the deleted records [JavaScript Mobile Services backend only].
-        /// </summary>
+        /// Creates a query that will ensure it gets the deleted records. This requires the soft delete feature to be enabled on the Mobile Service. Visit <see href="http://go.microsoft.com/fwlink/?LinkId=507647">the link</see> for details.
+        /// </summary>        
         /// <returns>
         /// A query against the table.
         /// </returns>

@@ -6,6 +6,7 @@
 #import "MSTableOperationInternal.h"
 #import "MSClient.h"
 #import "MSTable.h"
+#import "MSTableInternal.h"
 #import "MSJSONSerializer.h"
 
 @implementation MSTableOperation
@@ -51,6 +52,8 @@
         itemId_ = [item objectForKey:@"itemId"];
         tableName_ = [item objectForKey:@"table"];
         operationId_ = [[item objectForKey:@"id"] integerValue];
+        
+        item_ = [rawItem objectForKey:@"item"];
     }
     return self;
 }
@@ -68,15 +71,16 @@
     MSJSONSerializer *serializer = [MSJSONSerializer new];
     NSData *data = [serializer dataFromItem:properties idAllowed:YES ensureDictionary:NO removeSystemProperties:NO orError:nil];
     
-    return @{ @"id": [NSNumber numberWithInteger:self.operationId], @"table": self.tableName, @"itemId": self.itemId, @"properties": data };
+    return @{ @"id": [NSNumber numberWithInteger:self.operationId], @"table": self.tableName, @"tableKind": @0, @"itemId": self.itemId, @"properties": data };
 }
 
-- (void) executeWithCompletion:(void(^)(NSDictionary *, NSError *))completion
+- (void) executeWithCompletion:(void(^)(id, NSError *))completion
 {
     MSTable *table = [self.client tableWithName:self.tableName];
+    table.features = MSFeatureOffline;
     
-    if ([self.dataSource respondsToSelector:@selector(systemPropetiesForTable:)]) {
-        table.systemProperties = [self.dataSource systemPropetiesForTable:self.tableName];
+    if ([self.dataSource respondsToSelector:@selector(systemPropertiesForTable:)]) {
+        table.systemProperties = [self.dataSource systemPropertiesForTable:self.tableName];
     } else {
         table.systemProperties = MSSystemPropertyVersion;
     }

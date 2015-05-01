@@ -4,12 +4,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.WindowsAzure.MobileServices.Sync;
 using Microsoft.WindowsAzure.MobileServices.Threading;
 using Newtonsoft.Json.Linq;
 
@@ -18,10 +14,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     /// <summary>
     /// Reads and writes settings in the __config table of <see cref="IMobileServiceLocalStore"/>
     /// </summary>
-    internal class MobileServiceSyncSettingsManager: IDisposable
+    internal class MobileServiceSyncSettingsManager : IDisposable
     {
+        private const string DefaultDeltaToken = "1970-01-01T00:00:00.0000000+00:00";
         private AsyncLockDictionary cacheLock = new AsyncLockDictionary();
-        private Dictionary<string, object> cache = new Dictionary<string, object>();
+        private Dictionary<string, string> cache = new Dictionary<string, string>();
         private IMobileServiceLocalStore store;
 
         protected MobileServiceSyncSettingsManager()
@@ -33,27 +30,34 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             this.store = store;
         }
 
-        public virtual async Task<MobileServiceSystemProperties> GetSystemProperties(string tableName)
+        public virtual async Task<MobileServiceSystemProperties> GetSystemPropertiesAsync(string tableName)
         {
             string key = GetSystemPropertiesKey(tableName);
-            int value = await GetSetting(key, (int)MobileServiceSystemProperties.Version);
-            return (MobileServiceSystemProperties)value;
+            string value = await GetSettingAsync(key, ((int)MobileServiceSystemProperties.Version).ToString());
+            return (MobileServiceSystemProperties)Int32.Parse(value);
         }
 
-        public virtual Task ResetDeltaToken(string tableName, string queryKey)
+        public virtual async Task ResetDeltaTokenAsync(string tableName, string queryId)
         {
-            return this.store.DeleteAsync(MobileServiceLocalSystemTables.Config, GetDeltaTokenKey(tableName, queryKey));
-        }        
+            string key = GetDeltaTokenKey(tableName, queryId);
 
-        public virtual Task<DateTime> GetDeltaToken(string tableName, string queryKey)
-        {
-            return this.GetSetting(GetDeltaTokenKey(tableName, queryKey), DateTime.MinValue);
+            using (await this.cacheLock.Acquire(key, CancellationToken.None))
+            {
+                this.cache.Remove(key);
+                await this.store.DeleteAsync(MobileServiceLocalSystemTables.Config, key);
+            }
         }
 
-        public virtual Task SetDeltaToken(string tableName, string queryKey, DateTime token)
+        public async virtual Task<DateTimeOffset> GetDeltaTokenAsync(string tableName, string queryId)
         {
-            return this.SetSetting(GetDeltaTokenKey(tableName, queryKey), token);
-        }        
+            string value = await this.GetSettingAsync(GetDeltaTokenKey(tableName, queryId), DefaultDeltaToken);
+            return DateTimeOffset.Parse(value);
+        }
+
+        public virtual Task SetDeltaTokenAsync(string tableName, string queryId, DateTimeOffset token)
+        {
+            return this.SetSettingAsync(GetDeltaTokenKey(tableName, queryId), token.ToString("o"));
+        }
 
         /// <summary>
         /// Defines the the table for storing config settings
@@ -68,20 +72,26 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             });
         }
 
-        private Task SetSetting(string key, object value)
-        {
-            return this.store.UpsertAsync(MobileServiceLocalSystemTables.Config, new JObject()
-            {
-                { MobileServiceSystemColumns.Id, key },
-                { "value", value == null ? null : (string)Convert.ChangeType(value, typeof(string)) }
-            }, fromServer: false);
-        }
-
-        private async Task<T> GetSetting<T>(string key, T defaultValue)
+        private async Task SetSettingAsync(string key, string value)
         {
             using (await this.cacheLock.Acquire(key, CancellationToken.None))
             {
-                object value;
+                this.cache[key] = value;
+
+                await this.store.UpsertAsync(MobileServiceLocalSystemTables.Config, new JObject()
+                {
+                    { MobileServiceSystemColumns.Id, key },
+                    { "value", value }
+                }, fromServer: false);
+            }
+        }
+
+
+        private async Task<string> GetSettingAsync(string key, string defaultValue)
+        {
+            using (await this.cacheLock.Acquire(key, CancellationToken.None))
+            {
+                string value;
                 if (!this.cache.TryGetValue(key, out value))
                 {
                     JObject setting = await this.store.LookupAsync(MobileServiceLocalSystemTables.Config, key);
@@ -92,22 +102,23 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                     else
                     {
                         string rawValue = setting.Value<string>("value");
-                        value = rawValue == null ? defaultValue : Convert.ChangeType(rawValue, typeof(T));
+                        value = rawValue ?? defaultValue;
                     }
                     this.cache[key] = value;
                 }
-                return (T)value;
+
+                return value;
             }
         }
 
-        private string GetDeltaTokenKey(string tableName, string queryKey)
+        private string GetDeltaTokenKey(string tableName, string queryId)
         {
-            return tableName + "_" + queryKey + "_deltaToken";
+            return "deltaToken|" + tableName + "|" + queryId;
         }
 
         private static string GetSystemPropertiesKey(string tableName)
         {
-            return tableName + "_systemProperties";
+            return "systemProperties|" + tableName;
         }
 
         public void Dispose()
@@ -119,6 +130,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         protected virtual void Dispose(bool disposing)
         {
             this.store.Dispose();
-        }        
+        }
     }
 }

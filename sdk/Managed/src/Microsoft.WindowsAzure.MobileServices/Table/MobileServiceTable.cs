@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MobileServices.Query;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -33,7 +34,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// The name of the system properties query string parameter
         /// </summary>
-        private const string SystemPropertiesQueryParameterName = "__systemproperties";
+        public const string SystemPropertiesQueryParameterName = "__systemproperties";
 
         /// <summary>
         /// The name of the include deleted query string parameter
@@ -56,29 +57,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         public MobileServiceSystemProperties SystemProperties { get; set; }
 
-        private Dictionary<string, string> requestHeaders;
-
         /// <summary>
-        /// Additional headers to be sent with all table requests to the server
+        /// Feature which are sent as telemetry information to the service for all
+        /// outgoing calls.
         /// </summary>
-        public void AddRequestHeader(string header, string value)
-        {
-            if (String.IsNullOrEmpty(header)) 
-            {
-                throw new ArgumentNullException("header");
-            }
-            if (String.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if (this.requestHeaders == null)
-            {
-                this.requestHeaders = new Dictionary<string, string>();
-            }
-
-            this.requestHeaders.Add(header, value);
-        }
+        internal MobileServiceFeatures Features { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the MobileServiceTable class.
@@ -100,7 +83,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// Excutes a query against the table.
+        /// Executes a query against the table.
         /// </summary>
         /// <param name="query">
         /// A query to execute.
@@ -108,13 +91,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A task that will return with results when the query finishes.
         /// </returns>
-        public virtual Task<JToken> ReadAsync(string query)
+        public async virtual Task<JToken> ReadAsync(string query)
         {
-            return this.ReadAsync(query, null);
+
+            return await this.ReadAsync(query, null, wrapResult: false);
         }
 
         /// <summary>
-        /// Excutes a query against the table.
+        /// Executes a query against the table.
         /// </summary>
         /// <param name="query">
         /// A query to execute.
@@ -123,14 +107,63 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// A dictionary of user-defined parameters and values to include in 
         /// the request URI query string.
         /// </param>
+        /// <param name="wrapResult">
+        /// Specifies whether response should be formatted as JObject including extra response details e.g. link header
+        /// </param>
         /// <returns>
         /// A task that will return with results when the query finishes.
         /// </returns>
-        public virtual async Task<JToken> ReadAsync(string query, IDictionary<string, string> parameters)
+        public virtual async Task<JToken> ReadAsync(string query, IDictionary<string, string> parameters, bool wrapResult)
         {
+            QueryResult result = await this.ReadAsync(query, parameters, MobileServiceFeatures.UntypedTable);
+            if (wrapResult)
+            {
+                return result.ToJObject();
+            }
+            else
+            {
+                return result.Response;
+            }
+        }
+
+        /// <summary>
+        /// Executes a query against the table.
+        /// </summary>
+        /// <param name="query">
+        /// A query to execute.
+        /// </param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in 
+        /// the request URI query string.
+        /// </param>
+        /// <param name="features">
+        /// Value indicating which features of the SDK are being used in this call. Useful for telemetry.
+        /// </param>
+        /// <returns>
+        /// A task that will return with results when the query finishes.
+        /// </returns>
+        internal virtual async Task<QueryResult> ReadAsync(string query, IDictionary<string, string> parameters, MobileServiceFeatures features)
+        {
+            features = this.AddRequestFeatures(features, parameters);
             parameters = AddSystemProperties(this.SystemProperties, parameters);
 
-            string uriPath = MobileServiceUrlBuilder.CombinePaths(TableRouteSeparatorName, this.TableName);
+            string uriPath;
+            Uri uri;
+            bool absolute;
+            if (HttpUtility.TryParseQueryUri(this.MobileServiceClient.ApplicationUri, query, out uri, out absolute))
+            {
+                if (absolute)
+                {
+                    features |= MobileServiceFeatures.ReadWithLinkHeader;
+                }
+                uriPath = HttpUtility.GetUriWithoutQuery(uri);
+                query = uri.Query;
+            }
+            else
+            {
+                uriPath = MobileServiceUrlBuilder.CombinePaths(TableRouteSeparatorName, this.TableName);
+            }
+
             string parametersString = MobileServiceUrlBuilder.GetQueryString(parameters);
 
             // Concatenate the query and the user-defined query string parameters
@@ -148,8 +181,19 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             string uriString = MobileServiceUrlBuilder.CombinePathAndQuery(uriPath, query);
 
-            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, this.MobileServiceClient.CurrentUser, null, true, this.requestHeaders);
-            return response.Content.ParseToJToken(this.MobileServiceClient.SerializerSettings);
+            return await ReadAsync(uriString, features);
+        }
+
+        internal Task<QueryResult> ReadAsync(Uri uri)
+        {
+            return this.ReadAsync(uri.ToString(), this.Features);
+        }
+
+        private async Task<QueryResult> ReadAsync(string uriString, MobileServiceFeatures features)
+        {
+            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, this.MobileServiceClient.CurrentUser, null, true, features: this.Features | features);
+
+            return QueryResult.Parse(response, this.MobileServiceClient.SerializerSettings, validate: false);
         }
 
         /// <summary>
@@ -179,7 +223,28 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A task that will complete when the insert finishes.
         /// </returns>
-        public async Task<JToken> InsertAsync(JObject instance, IDictionary<string, string> parameters)
+        public Task<JToken> InsertAsync(JObject instance, IDictionary<string, string> parameters)
+        {
+            return this.InsertAsync(instance, parameters, MobileServiceFeatures.UntypedTable);
+        }
+
+        /// <summary>
+        /// Inserts an <paramref name="instance"/> into the table.
+        /// </summary>
+        /// <param name="instance">
+        /// The instance to insert into the table.
+        /// </param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in 
+        /// the request URI query string.
+        /// </param>
+        /// <param name="features">
+        /// Value indicating which features of the SDK are being used in this call. Useful for telemetry.
+        /// </param>
+        /// <returns>
+        /// A task that will complete when the insert finishes.
+        /// </returns>
+        internal async Task<JToken> InsertAsync(JObject instance, IDictionary<string, string> parameters, MobileServiceFeatures features)
         {
             if (instance == null)
             {
@@ -194,18 +259,21 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentException(
                         string.Format(
                             CultureInfo.InvariantCulture,
-                            Resources.MobileServiceTable_InsertWithExistingId,
+                            "Cannot insert if the {0} member is already set.",
                            MobileServiceSystemColumns.Id),
                             "instance");
             }
 
+            features = this.AddRequestFeatures(features, parameters);
             parameters = AddSystemProperties(this.SystemProperties, parameters);
-
             string uriString = GetUri(this.TableName, null, parameters);
-            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Post, uriString, this.MobileServiceClient.CurrentUser, instance.ToString(Formatting.None), true, this.requestHeaders);
-            
-            var result = GetJTokenFromResponse(response);
-            return RemoveUnrequestedSystemProperties(result, parameters, response.Etag);
+
+            return await this.TransformHttpException(async () =>
+            {
+                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Post, uriString, this.MobileServiceClient.CurrentUser, instance.ToString(Formatting.None), true, features: this.Features | features);
+                var result = GetJTokenFromResponse(response);
+                return RemoveUnrequestedSystemProperties(result, parameters, response.Etag);
+            });
         }
 
         /// <summary>
@@ -239,7 +307,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 return item;
             }
 
-            var actualSystemProperties = GetRequestedSystemProperties(parameters);    
+            var actualSystemProperties = GetRequestedSystemProperties(parameters);
             if (actualSystemProperties == MobileServiceSystemProperties.All)
             {
                 return item;
@@ -329,26 +397,46 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A task that will complete when the update finishes.
         /// </returns>
-        public async Task<JToken> UpdateAsync(JObject instance, IDictionary<string, string> parameters)
+        public Task<JToken> UpdateAsync(JObject instance, IDictionary<string, string> parameters)
+        {
+            return this.UpdateAsync(instance, parameters, MobileServiceFeatures.UntypedTable);
+        }
+
+        /// <summary>
+        /// Updates an <paramref name="instance"/> in the table.
+        /// </summary>
+        /// <param name="instance">
+        /// The instance to update in the table.
+        /// </param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in 
+        /// the request URI query string.
+        /// </param>
+        /// <param name="features">
+        /// Value indicating which features of the SDK are being used in this call. Useful for telemetry.
+        /// </param>
+        /// <returns>
+        /// A task that will complete when the update finishes.
+        /// </returns>
+        internal async Task<JToken> UpdateAsync(JObject instance, IDictionary<string, string> parameters, MobileServiceFeatures features)
         {
             if (instance == null)
             {
                 throw new ArgumentNullException("instance");
             }
 
+            features = this.AddRequestFeatures(features, parameters);
             object id = MobileServiceSerializer.GetId(instance);
             Dictionary<string, string> headers = StripSystemPropertiesAndAddVersionHeader(ref instance, ref parameters, id);
+            string content = instance.ToString(Formatting.None);
+            string uriString = GetUri(this.TableName, id, parameters);
 
-            return await this.TransformConflictToPreconditionFailedException(async () =>
+            return await this.TransformHttpException(async () =>
             {
-                string content = instance.ToString(Formatting.None);
-                string uriString = GetUri(this.TableName, id, parameters);
-
-                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(patchHttpMethod, uriString, this.MobileServiceClient.CurrentUser, content, true, headers);
-
+                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(patchHttpMethod, uriString, this.MobileServiceClient.CurrentUser, content, true, headers, this.Features | features);
                 var result = GetJTokenFromResponse(response);
                 return RemoveUnrequestedSystemProperties(result, parameters, response.Etag);
-            });            
+            });
         }
 
         /// <summary>
@@ -370,7 +458,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// the request URI query string.
         /// </param>
         /// <returns>A task that will complete when the undelete finishes.</returns>
-        public async Task<JToken> UndeleteAsync(JObject instance, IDictionary<string, string> parameters)
+        public Task<JToken> UndeleteAsync(JObject instance, IDictionary<string, string> parameters)
+        {
+            return UndeleteAsync(instance, parameters, MobileServiceFeatures.UntypedTable);
+        }
+
+        protected async Task<JToken> UndeleteAsync(JObject instance, IDictionary<string, string> parameters, MobileServiceFeatures features)
         {
             if (instance == null)
             {
@@ -381,17 +474,17 @@ namespace Microsoft.WindowsAzure.MobileServices
 
 
             Dictionary<string, string> headers = StripSystemPropertiesAndAddVersionHeader(ref instance, ref parameters, id);
+            string content = instance.ToString(Formatting.None);
+            string uriString = GetUri(this.TableName, id, parameters);
 
-            return await this.TransformConflictToPreconditionFailedException(async () =>
+            return await this.TransformHttpException(async () =>
             {
-                string content = instance.ToString(Formatting.None);
-                string uriString = GetUri(this.TableName, id, parameters);
-
-                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Post, uriString, this.MobileServiceClient.CurrentUser, null, true, headers);
-                return GetJTokenFromResponse(response);
-            });            
+                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Post, uriString, this.MobileServiceClient.CurrentUser, null, true, headers, this.Features | features);
+                var result = GetJTokenFromResponse(response);
+                return RemoveUnrequestedSystemProperties(result, parameters, response.Etag);
+            });
         }
-     
+
         /// <summary>
         /// Deletes an <paramref name="instance"/> from the table.
         /// </summary>
@@ -419,20 +512,42 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A task that will complete when the delete finishes.
         /// </returns>
-        public async Task<JToken> DeleteAsync(JObject instance, IDictionary<string, string> parameters)
+        public Task<JToken> DeleteAsync(JObject instance, IDictionary<string, string> parameters)
+        {
+            return this.DeleteAsync(instance, parameters, MobileServiceFeatures.UntypedTable);
+        }
+
+        /// <summary>
+        /// Deletes an <paramref name="instance"/> from the table.
+        /// </summary>
+        /// <param name="instance">
+        /// The instance to delete from the table.
+        /// </param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in 
+        /// the request URI query string.
+        /// </param>
+        /// <param name="features">
+        /// Value indicating which features of the SDK are being used in this call. Useful for telemetry.
+        /// </param>
+        /// <returns>
+        /// A task that will complete when the delete finishes.
+        /// </returns>
+        internal async Task<JToken> DeleteAsync(JObject instance, IDictionary<string, string> parameters, MobileServiceFeatures features)
         {
             if (instance == null)
             {
                 throw new ArgumentNullException("instance");
             }
 
-            return await TransformConflictToPreconditionFailedException(async () =>
-            {
-                object id = MobileServiceSerializer.GetId(instance);
-                Dictionary<string, string> headers = StripSystemPropertiesAndAddVersionHeader(ref instance, ref parameters, id);
-                string uriString = GetUri(this.TableName, id, parameters);
-                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Delete, uriString, this.MobileServiceClient.CurrentUser, null, false, headers);
+            object id = MobileServiceSerializer.GetId(instance);
+            features = this.AddRequestFeatures(features, parameters);
+            Dictionary<string, string> headers = StripSystemPropertiesAndAddVersionHeader(ref instance, ref parameters, id);
+            string uriString = GetUri(this.TableName, id, parameters);
 
+            return await TransformHttpException(async () =>
+            {
+                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Delete, uriString, this.MobileServiceClient.CurrentUser, null, false, headers, this.Features | features);
                 var result = GetJTokenFromResponse(response);
                 return RemoveUnrequestedSystemProperties(result, parameters, response.Etag);
             });
@@ -465,14 +580,36 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A task that will return with a result when the lookup finishes.
         /// </returns>
-        public async Task<JToken> LookupAsync(object id, IDictionary<string, string> parameters)
+        public Task<JToken> LookupAsync(object id, IDictionary<string, string> parameters)
+        {
+            return this.LookupAsync(id, parameters, MobileServiceFeatures.UntypedTable);
+        }
+
+        /// <summary>
+        /// Executes a lookup against a table.
+        /// </summary>
+        /// <param name="id">
+        /// The id of the instance to lookup.
+        /// </param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in 
+        /// the request URI query string.
+        /// </param>
+        /// <param name="features">
+        /// Value indicating which features of the SDK are being used in this call. Useful for telemetry.
+        /// </param>
+        /// <returns>
+        /// A task that will return with a result when the lookup finishes.
+        /// </returns>
+        internal async Task<JToken> LookupAsync(object id, IDictionary<string, string> parameters, MobileServiceFeatures features)
         {
             MobileServiceSerializer.EnsureValidId(id);
 
+            features = this.AddRequestFeatures(features, parameters);
             parameters = AddSystemProperties(this.SystemProperties, parameters);
 
             string uriString = GetUri(this.TableName, id, parameters);
-            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, this.MobileServiceClient.CurrentUser, null, true, this.requestHeaders);
+            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, this.MobileServiceClient.CurrentUser, null, true, features: this.Features | features);
             return GetJTokenFromResponse(response);
         }
 
@@ -559,7 +696,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             string systemPropertiesString = string.Join(",", systemProperties);
             return systemPropertiesString;
-        }       
+        }
 
         /// <summary>
         /// Parses body of the <paramref name="response"/> as JToken
@@ -637,9 +774,32 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// Executes a request and transforms a 412 precondition failed response to <see cref="MobileServicePreconditionFailedException"/>.
+        /// Adds, if applicable, the <see cref="MobileServiceFeatures.AdditionalQueryParameters"/> value to the
+        /// existing list of features used in the current operation, as well as any features set for the
+        /// entire table.
         /// </summary>
-        private async Task<JToken> TransformConflictToPreconditionFailedException(Func<Task<JToken>> action)
+        /// <param name="existingFeatures">The features from the SDK being used for the current operation.</param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in
+        /// the request URI query string.
+        /// </param>
+        /// <returns>The features used in the current operation.</returns>
+        private MobileServiceFeatures AddRequestFeatures(MobileServiceFeatures existingFeatures, IDictionary<string, string> parameters)
+        {
+            if (parameters != null && parameters.Count > 0)
+            {
+                existingFeatures |= MobileServiceFeatures.AdditionalQueryParameters;
+            }
+
+            existingFeatures |= this.Features;
+
+            return existingFeatures;
+        }
+
+        /// <summary>
+        /// Executes a request and transforms a 412 and 409 response to respective exception type.
+        /// </summary>
+        private async Task<JToken> TransformHttpException(Func<Task<JToken>> action)
         {
             MobileServiceInvalidOperationException error = null;
 
@@ -650,7 +810,8 @@ namespace Microsoft.WindowsAzure.MobileServices
             catch (MobileServiceInvalidOperationException ex)
             {
                 if (ex.Response != null &&
-                    ex.Response.StatusCode != HttpStatusCode.PreconditionFailed)
+                    ex.Response.StatusCode != HttpStatusCode.PreconditionFailed &&
+                    ex.Response.StatusCode != HttpStatusCode.Conflict)
                 {
                     throw;
                 }
@@ -659,7 +820,16 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             Tuple<string, JToken> responseContent = await this.ParseContent(error.Response);
-            throw new MobileServicePreconditionFailedException(error, responseContent.Item2.ValidItemOrNull());
+            JObject value = responseContent.Item2.ValidItemOrNull();
+            if (error.Response.StatusCode == HttpStatusCode.Conflict)
+            {
+                error = new MobileServiceConflictException(error, value);
+            }
+            else if (error.Response.StatusCode == HttpStatusCode.PreconditionFailed)
+            {
+                error = new MobileServicePreconditionFailedException(error, value);
+            }
+            throw error;
         }
 
         /// <summary>
@@ -674,22 +844,24 @@ namespace Microsoft.WindowsAzure.MobileServices
                 instance = MobileServiceSerializer.RemoveSystemProperties(instance, out version);
             }
             parameters = AddSystemProperties(this.SystemProperties, parameters);
-            Dictionary<string, string> headers = AddIfMatchHeader(version, this.requestHeaders);
+            Dictionary<string, string> headers = AddIfMatchHeader(version);
             return headers;
         }
 
         /// <summary>
         /// Adds If-Match header to request if version is non-null.
         /// </summary>
-        private static Dictionary<string, string> AddIfMatchHeader(string version, Dictionary<string, string> headers)
+        private static Dictionary<string, string> AddIfMatchHeader(string version)
         {
+            Dictionary<string, string> headers = null;
             if (!String.IsNullOrEmpty(version))
             {
-                headers = headers == null ? new Dictionary<string, string>() : new Dictionary<string, string>(headers);
+                headers = new Dictionary<string, string>();
                 headers["If-Match"] = GetEtagFromValue(version);
             }
+
             return headers;
-        } 
+        }
 
         /// <summary>
         /// Gets a valid etag from a string value. Etags are surrounded

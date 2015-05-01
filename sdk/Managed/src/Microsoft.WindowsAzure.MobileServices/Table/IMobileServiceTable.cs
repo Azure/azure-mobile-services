@@ -30,7 +30,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         MobileServiceSystemProperties SystemProperties { get; set; }
 
         /// <summary>
-        /// Excutes a query against the table.
+        /// Executes a query against the table.
         /// </summary>
         /// <param name="query">
         /// A query to execute.
@@ -41,7 +41,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         Task<JToken> ReadAsync(string query);
 
         /// <summary>
-        /// Excutes a query against the table.
+        /// Executes a query against the table.
         /// </summary>
         /// <param name="query">
         /// A query to execute.
@@ -50,10 +50,13 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// A dictionary of user-defined parameters and values to include in 
         /// the request URI query string.
         /// </param>
+        /// <param name="wrapResult">
+        /// Specifies whether response should be formatted as JObject including extra response details e.g. link header
+        /// </param>
         /// <returns>
         /// A task that will return with results when the query finishes.
         /// </returns>
-        Task<JToken> ReadAsync(string query, IDictionary<string, string> parameters);
+        Task<JToken> ReadAsync(string query, IDictionary<string, string> parameters, bool wrapResult);
 
         /// <summary>
         /// Inserts an <paramref name="instance"/> into the table.
@@ -134,14 +137,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         Task<JToken> DeleteAsync(JObject instance, IDictionary<string, string> parameters);
 
         /// <summary>
-        /// Undeletes an <paramref name="instance"/> from the table [JavaScript Mobile Services backend only].
+        /// Undeletes an <paramref name="instance"/> from the table. This requires the soft delete feature to be enabled on the Mobile Service. Visit <see href="http://go.microsoft.com/fwlink/?LinkId=507647">the link</see> for details.
         /// </summary>
         /// <param name="instance">The instance to undelete from the table.</param>
         /// <returns>A task that will complete when the undelete finishes.</returns>
         Task<JToken> UndeleteAsync(JObject instance);
 
         /// <summary>
-        /// Undeletes an <paramref name="instance"/> from the table [JavaScript Mobile Services backend only].
+        /// Undeletes an <paramref name="instance"/> from the table. This requires the soft delete feature to be enabled on the Mobile Service. Visit <see href="http://go.microsoft.com/fwlink/?LinkId=507647">the link</see> for details.
         /// </summary>
         /// <param name="instance">The instance to undelete from the table.</param>
         /// <param name="parameters">

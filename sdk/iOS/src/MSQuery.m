@@ -6,6 +6,7 @@
 #import "MSPredicateTranslator.h"
 #import "MSURLBuilder.h"
 #import "MSSyncContextInternal.h"
+#import "MSTableInternal.h"
 
 #pragma mark * MSQuery Implementation
 
@@ -83,9 +84,18 @@
 
 -(void) readWithCompletion:(MSReadQueryBlock)completion;
 {
+    return [self readInternalWithFeatures:MSFeatureNone completion:completion];
+}
+
+
+#pragma mark * Private Methods
+
+-(void)readInternalWithFeatures:(MSFeatures)features completion:(MSReadQueryBlock)completion {
     // Get the query string
     NSError *error = nil;
     
+    features |= MSFeatureTableReadQuery;
+
     // query execution logic depends on if its against a sync or remote table
     if (self.syncTable != nil) {
         [self.syncTable.client.syncContext readWithQuery:self completion:completion];
@@ -95,20 +105,15 @@
         if (!queryString) {
             // Query string is invalid, so call error handler
             if (completion) {
-                completion(nil, -1, error);
+                completion(nil, error);
             }
         }
         else {
             // Call read with the query string
-            [self.table readWithQueryString:queryString
-                              completion:completion];
+            [self.table readWithQueryStringInternal:queryString features:features completion:completion];
         }
     }
 }
-
-
-#pragma mark * Private Methods
-
 
 -(void) orderBy:(NSString *)field isAscending:(BOOL)isAscending
 {
@@ -139,6 +144,29 @@
 -(NSString *) description
 {
     return [self queryStringOrError:nil];
+}
+
+-(id)copyWithZone:(NSZone *)zone
+{
+    MSQuery *query = [[MSQuery allocWithZone:zone] init];
+    query.predicate = [self.predicate copyWithZone:zone];
+    query.parameters = [self.parameters copyWithZone:zone];
+    query.selectFields = [query.selectFields copyWithZone:zone];
+    query.fetchLimit = self.fetchLimit;
+    query.fetchOffset = self.fetchOffset;
+    query.orderBy = [self.orderBy copyWithZone:zone];
+    query.includeTotalCount = self.includeTotalCount;
+    
+    if (self.syncTable) {
+        query.syncTable = [[MSSyncTable alloc] initWithName:self.syncTable.name
+                                                     client:self.syncTable.client];
+    }
+    if (self.table) {
+        query.table = [[MSTable alloc] initWithName:self.table.name
+                                             client:self.table.client];
+    }
+    
+    return query;
 }
 
 @end

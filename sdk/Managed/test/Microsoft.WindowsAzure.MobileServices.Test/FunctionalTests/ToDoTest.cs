@@ -125,6 +125,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.Contains(tps.Title, "cover sheet");
         }
 
+#pragma warning disable 618 // for using obsolete ITotalCountProvider
         [AsyncTestMethod]
         [Tag("TotalCount")]
         public async Task TotalCountBasics()

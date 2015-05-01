@@ -8,7 +8,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Query;
@@ -16,12 +15,13 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
-    internal class MobileServiceSyncTable<T>: MobileServiceSyncTable, IMobileServiceSyncTable<T>
+    internal class MobileServiceSyncTable<T> : MobileServiceSyncTable, IMobileServiceSyncTable<T>
     {
         private MobileServiceTableQueryProvider queryProvider;
         private IMobileServiceTable<T> remoteTable;
 
-        public MobileServiceSyncTable(string tableName, MobileServiceClient client): base(tableName, client)
+        public MobileServiceSyncTable(string tableName, MobileServiceTableKind kind, MobileServiceClient client)
+            : base(tableName, kind, client)
         {
             this.remoteTable = client.GetTable<T>();
             this.queryProvider = new MobileServiceTableQueryProvider(this);
@@ -43,28 +43,28 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return this.queryProvider.Execute(query);
         }
 
-        public Task PullAsync<U>(string queryKey, IMobileServiceTableQuery<U> query, CancellationToken cancellationToken)
+        public Task PullAsync<U>(string queryId, IMobileServiceTableQuery<U> query, bool pushOtherTables, CancellationToken cancellationToken)
         {
             if (query == null)
             {
                 throw new ArgumentNullException("query");
             }
-            string queryString = this.queryProvider.ToQueryString(query);
+            string queryString = this.queryProvider.ToODataString(query);
 
-            return this.PullAsync(queryKey, queryString, query.Parameters, cancellationToken);
+            return this.PullAsync(queryId, queryString, query.Parameters, pushOtherTables, cancellationToken);
         }
 
-        public Task PurgeAsync<U>(string queryKey, IMobileServiceTableQuery<U> query, CancellationToken cancellationToken)
+        public Task PurgeAsync<U>(string queryId, IMobileServiceTableQuery<U> query, CancellationToken cancellationToken)
         {
             if (query == null)
             {
                 throw new ArgumentNullException("query");
             }
-            string queryString = this.queryProvider.ToQueryString(query);
+            string queryString = this.queryProvider.ToODataString(query);
 
-            return this.PurgeAsync(queryKey, queryString, cancellationToken);
+            return this.PurgeAsync(queryId, queryString, false, cancellationToken);
         }
-        
+
         public async Task RefreshAsync(T instance)
         {
             if (instance == null)
@@ -79,7 +79,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 return; // refresh is not supposed to throw if your object does not have an id for some reason
             }
 
-            string id = EnsureIdIsString(objId);            
+            string id = EnsureIdIsString(objId);
 
             // Get the latest version of this element
             JObject refreshed = await base.LookupAsync(id);
@@ -89,9 +89,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 throw new InvalidOperationException(
                     string.Format(
                         CultureInfo.InvariantCulture,
-                        Resources.MobileServiceTable_ItemNotFoundInStore));
+                        "Item not found in local store."));
             }
-            
+
             // Deserialize that value back into the current instance
             serializer.Deserialize<T>(refreshed, instance);
         }
@@ -198,7 +198,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         public async Task<List<T>> ToListAsync()
         {
-            return new TotalCountList<T>(await this.ReadAsync());
+            return new QueryResultList<T>(await this.ReadAsync());
         }
     }
 }

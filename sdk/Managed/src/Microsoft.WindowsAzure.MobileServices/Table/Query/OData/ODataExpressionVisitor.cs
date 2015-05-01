@@ -81,7 +81,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                     break;
                 default:
                     throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture,
-                                                                  Resources.FilterBuildingExpressionVisitor_UnsupportedInWhereExpression,
+                                                                  "'{0}' is not supported in a 'Where' Mobile Services query expression.",
                                                                   nodeIn.OperatorKind));
             }
 
@@ -211,14 +211,18 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                 return string.Format(
                     CultureInfo.InvariantCulture,
                     "datetime'{0}'",
-                    ToRoundtripDateString(((DateTime)value)));
+                    Uri.EscapeDataString(
+                        ToRoundtripDateString(((DateTime)value)))
+                    );
             }
             else if (handle.Equals(typeof(DateTimeOffset).TypeHandle))
             {
                 return string.Format(
                     CultureInfo.InvariantCulture,
                     "datetimeoffset'{0}'",
-                    ((DateTimeOffset)value).ToString("o"));
+                    Uri.EscapeDataString(
+                        ((DateTimeOffset)value).ToString("o")
+                    ));
             }
             else if (handle.Equals(typeof(Guid).TypeHandle))
             {

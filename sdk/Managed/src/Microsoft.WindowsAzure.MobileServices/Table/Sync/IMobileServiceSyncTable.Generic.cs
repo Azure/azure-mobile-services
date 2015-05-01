@@ -90,33 +90,36 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         Task DeleteAsync(T instance);
 
         /// <summary>
-        /// Pulls all items that match the given query from the associated remote table. Supports incremental sync when using the JavaScript Mobile Services backend. For more information, see http://go.microsoft.com/fwlink/?LinkId=506788.
+        /// Pulls all items that match the given query from the associated remote table.
         /// </summary>
-        /// <param name="queryKey">
-        /// A string that uniquely identifies this query and is used to keep track of its sync state. [JavaScript Mobile Services backend only] Supplying this parameter enables incremental sync whenever the same key is used again.
+        /// <param name="queryId">
+        /// A string that uniquely identifies this query and is used to keep track of its sync state. Supplying this parameter enables incremental sync whenever the same key is used again.
         /// </param>
         /// <param name="query">
         /// An OData query that determines which items to 
         /// pull from the remote table.
+        /// </param>
+        /// <param name="pushOtherTables">
+        /// Push other tables if this table is dirty
         /// </param>
         /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe
         /// </param>
         /// <returns>
         /// A task that completes when pull operation has finished.
         /// </returns>
-        Task PullAsync<U>(string queryKey, IMobileServiceTableQuery<U> query, CancellationToken cancellationToken);
+        Task PullAsync<U>(string queryId, IMobileServiceTableQuery<U> query, bool pushOtherTables, CancellationToken cancellationToken);
 
         /// <summary>
         /// Deletes all the items in local table that match the query.
         /// </summary>
-        /// <param name="queryKey">
+        /// <param name="queryId">
         /// A string that uniquely identifies this query and is used to keep track of its sync state. Supplying this parameter resets the incremental sync state for the query.
         /// </param>
         /// <param name="query">An OData query that determines which items to delete.</param>
         /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe
         /// </param>
         /// <returns>A task that completes when purge operation has finished.</returns>
-        Task PurgeAsync<U>(string queryKey, IMobileServiceTableQuery<U> query, CancellationToken cancellationToken);
+        Task PurgeAsync<U>(string queryId, IMobileServiceTableQuery<U> query, CancellationToken cancellationToken);
 
         /// <summary>
         /// Lookup an instance from a table by its id.

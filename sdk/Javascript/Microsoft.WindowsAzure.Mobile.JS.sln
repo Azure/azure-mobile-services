@@ -1,5 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30723.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.JS", "src\Microsoft.WindowsAzure.Mobile.JS.csproj", "{0D39CF6F-4884-4D43-8744-2CEB723629C8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{2BDD39FE-2E9F-4B97-8173-02037CF765AA}"
@@ -20,6 +22,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Azure.Zumo.Web.Test", "test\web\Microsoft.Azure.Zumo.Web.Test.csproj", "{5AA504E2-10A2-4179-9645-47E5CF857DDF}"
 	ProjectSection(ProjectDependencies) = postProject
 		{0D39CF6F-4884-4D43-8744-2CEB723629C8} = {0D39CF6F-4884-4D43-8744-2CEB723629C8}
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B7E1D498-5891-43F0-80A6-6DE18515433C}"
+	ProjectSection(SolutionItems) = preProject
+		gruntfile.js = gruntfile.js
+		package.json = package.json
 	EndProjectSection
 EndProject
 Global
@@ -196,7 +204,7 @@ Global
 		{0D39CF6F-4884-4D43-8744-2CEB723629C8} = {2BDD39FE-2E9F-4B97-8173-02037CF765AA}
 		{96B18D27-DFF3-47A2-835B-EF1E6AF1A39C} = {F52A1420-8C01-42ED-8EF2-71F83EE49A87}
 		{6445515D-9E58-4812-BAD6-BC81DAF1C0EE} = {F52A1420-8C01-42ED-8EF2-71F83EE49A87}
-		{5AA504E2-10A2-4179-9645-47E5CF857DDF} = {F52A1420-8C01-42ED-8EF2-71F83EE49A87}
 		{FFD91CC6-07FF-4D69-A064-2A911E2B4087} = {8F22488F-603B-4BA2-9AA0-DBC7D4487978}
+		{5AA504E2-10A2-4179-9645-47E5CF857DDF} = {F52A1420-8C01-42ED-8EF2-71F83EE49A87}
 	EndGlobalSection
 EndGlobal

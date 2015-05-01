@@ -25,7 +25,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// The AuthenticationBroker associated with the current Login action.
         /// </summary>
-        internal AuthenticationBroker Broker { get; set; }
+        internal static AuthenticationBroker Broker { get; set; }
 
         /// <summary>
         /// Initiatlizes the page by hooking up some event handlers.
@@ -71,6 +71,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
+
+            if (Broker == null)
+            {
+                throw new InvalidOperationException(string.Format("This page must be called from the type '{0}'.",
+                    typeof(AuthenticationBroker).FullName));
+            }
 
             // Make sure that there is an authentication operation in progress.
             // If not, we'll navigate back to the previous page.

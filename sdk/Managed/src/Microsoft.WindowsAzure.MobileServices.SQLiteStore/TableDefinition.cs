@@ -4,13 +4,15 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 {
-    internal class TableDefinition: Dictionary<string, ColumnDefinition>
+    /// <summary>
+    /// A class that represents the structure of table on local store
+    /// </summary>
+    [SuppressMessage("Microsoft.Interoperability", "CA1405:ComVisibleTypeBaseTypesShouldBeComVisible")]
+    public class TableDefinition : Dictionary<string, ColumnDefinition>
     {
         public MobileServiceSystemProperties SystemProperties { get; private set; }
 

@@ -24,3 +24,5 @@ StyleCop.Cache
 packages
 *.suo
 *.jar
+*.xccheckout
+deriveddata

@@ -2,11 +2,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-#import <SenTestingKit/SenTestingKit.h>
+#import <XCTest/XCTest.h>
 #import "MSTable.h"
 #import "MSURLBuilder.h"
 
-@interface MSURLBuilderTests : SenTestCase
+@interface MSURLBuilderTests : XCTestCase
 
 @end
 
@@ -60,9 +60,9 @@
     
     for (id testCase in testCases) {
         
-        NSString *expectedURL = [testCase objectAtIndex:0];
-        NSString *appURL = [testCase objectAtIndex:1];
-        NSString *tableName = [testCase objectAtIndex:2];
+        NSString *expectedURL = testCase[0];
+        NSString *appURL = testCase[1];
+        NSString *tableName = testCase[2];
         
         MSClient *client = [MSClient clientWithApplicationURLString:appURL];
         MSTable *table = [client tableWithName:tableName];
@@ -71,8 +71,8 @@
                                      parameters:nil
                                             orError:nil];
         
-        STAssertNotNil(url, @"url should not be nil");
-        STAssertTrue([[url absoluteString] isEqualToString:expectedURL],
+        XCTAssertNotNil(url, @"url should not be nil");
+        XCTAssertTrue([[url absoluteString] isEqualToString:expectedURL],
                      @"the url was: %@", [url absoluteString]);
     }
 }
@@ -117,10 +117,10 @@
     
     for (id testCase in testCases) {
         
-        NSString *expectedURL = [testCase objectAtIndex:0];
-        NSString *appURL = [testCase objectAtIndex:1];
-        NSString *tableName = [testCase objectAtIndex:2];
-        NSDictionary *parameters = [testCase objectAtIndex:3];
+        NSString *expectedURL = testCase[0];
+        NSString *appURL = testCase[1];
+        NSString *tableName = testCase[2];
+        NSDictionary *parameters = testCase[3];
         
         MSClient *client = [MSClient clientWithApplicationURLString:appURL];
         MSTable *table = [client tableWithName:tableName];
@@ -129,8 +129,8 @@
                                      parameters:parameters
                                             orError:nil];
         
-        STAssertNotNil(url, @"url should not be nil");
-        STAssertTrue([[url absoluteString] isEqualToString:expectedURL],
+        XCTAssertNotNil(url, @"url should not be nil");
+        XCTAssertTrue([[url absoluteString] isEqualToString:expectedURL],
                      @"the url was: %@", [url absoluteString]);
     }
 }
@@ -150,15 +150,15 @@
                                  parameters:parameters
                                         orError:&error];
     
-    STAssertNil(url, @"url should be nil");
-    STAssertNotNil(error, @"error should not have been nil.");
-    STAssertTrue(error.domain == MSErrorDomain,
+    XCTAssertNil(url, @"url should be nil");
+    XCTAssertNotNil(error, @"error should not have been nil.");
+    XCTAssertTrue(error.domain == MSErrorDomain,
                  @"error domain should have been MSErrorDomain.");
-    STAssertTrue(error.code == MSInvalidUserParameterWithRequest,
+    XCTAssertTrue(error.code == MSInvalidUserParameterWithRequest,
                  @"error code should have been MSInvalidUserParameterWithRequest.");
     
-    NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-    STAssertTrue([description isEqualToString:@"'$notAllowed' is an invalid user-defined query string parameter. User-defined query string parameters must not begin with a '$'."],
+    NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
+    XCTAssertTrue([description isEqualToString:@"'$notAllowed' is an invalid user-defined query string parameter. User-defined query string parameters must not begin with a '$'."],
                  @"description was: %@", description);
 }
 
@@ -190,10 +190,10 @@
     
     for (id testCase in testCases) {
         
-        NSString *appURL = [testCase objectAtIndex:1];
-        NSString *tableName = [testCase objectAtIndex:2];
-        NSString *itemId = [testCase objectAtIndex:3];
-        NSString *expectedURL = [testCase objectAtIndex:0];
+        NSString *appURL = testCase[1];
+        NSString *tableName = testCase[2];
+        NSString *itemId = testCase[3];
+        NSString *expectedURL = testCase[0];
         
         MSClient *client = [MSClient clientWithApplicationURLString:appURL];
         MSTable *table = [client tableWithName:tableName];
@@ -203,8 +203,8 @@
                                      parameters:nil
                                             orError:nil];
         
-        STAssertNotNil(url, @"url should not be nil");
-        STAssertTrue([[url absoluteString] isEqualToString:expectedURL],
+        XCTAssertNotNil(url, @"url should not be nil");
+        XCTAssertTrue([[url absoluteString] isEqualToString:expectedURL],
                      @"the url was: %@", [url absoluteString]);
     }
 }
@@ -241,11 +241,11 @@
     
     for (id testCase in testCases) {
         
-        NSString *expectedURL = [testCase objectAtIndex:0];
-        NSString *appURL = [testCase objectAtIndex:1];
-        NSString *tableName = [testCase objectAtIndex:2];
-        NSString *itemId = [testCase objectAtIndex:3];
-        NSDictionary *parameters = [testCase objectAtIndex:4];
+        NSString *expectedURL = testCase[0];
+        NSString *appURL = testCase[1];
+        NSString *tableName = testCase[2];
+        NSString *itemId = testCase[3];
+        NSDictionary *parameters = testCase[4];
         
         MSClient *client = [MSClient clientWithApplicationURLString:appURL];
         MSTable *table = [client tableWithName:tableName];
@@ -255,8 +255,8 @@
                                      parameters:parameters
                                             orError:nil];
         
-        STAssertNotNil(url, @"url should not be nil");
-        STAssertTrue([[url absoluteString] isEqualToString:expectedURL],
+        XCTAssertNotNil(url, @"url should not be nil");
+        XCTAssertTrue([[url absoluteString] isEqualToString:expectedURL],
                      @"the url was: %@", [url absoluteString]);
     }
 }
@@ -278,15 +278,15 @@
                                  parameters:parameters
                                         orError:&error];
     
-    STAssertNil(url, @"url should be nil");
-    STAssertNotNil(error, @"error should not have been nil.");
-    STAssertTrue(error.domain == MSErrorDomain,
+    XCTAssertNil(url, @"url should be nil");
+    XCTAssertNotNil(error, @"error should not have been nil.");
+    XCTAssertTrue(error.domain == MSErrorDomain,
                  @"error domain should have been MSErrorDomain.");
-    STAssertTrue(error.code == MSInvalidUserParameterWithRequest,
+    XCTAssertTrue(error.code == MSInvalidUserParameterWithRequest,
                  @"error code should have been MSInvalidUserParameterWithRequest.");
     
-    NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-    STAssertTrue([description isEqualToString:@"'$' is an invalid user-defined query string parameter. User-defined query string parameters must not begin with a '$'."],
+    NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
+    XCTAssertTrue([description isEqualToString:@"'$' is an invalid user-defined query string parameter. User-defined query string parameters must not begin with a '$'."],
                  @"description was: %@", description);
 }
 
@@ -318,10 +318,10 @@
     
     for (id testCase in testCases) {
         
-        NSString *appURL = [testCase objectAtIndex:1];
-        NSString *tableName = [testCase objectAtIndex:2];
-        NSString *query = [testCase objectAtIndex:3];
-        NSString *expectedURL = [testCase objectAtIndex:0];
+        NSString *appURL = testCase[1];
+        NSString *tableName = testCase[2];
+        NSString *query = testCase[3];
+        NSString *expectedURL = testCase[0];
         
         MSClient *client = [MSClient clientWithApplicationURLString:appURL];
         MSTable *table = [client tableWithName:tableName];
@@ -329,8 +329,8 @@
         NSURL *url = [MSURLBuilder URLForTable:table
                                           query:query];
         
-        STAssertNotNil(url, @"url should not be nil");
-        STAssertTrue([[url absoluteString] isEqualToString:expectedURL],
+        XCTAssertNotNil(url, @"url should not be nil");
+        XCTAssertTrue([[url absoluteString] isEqualToString:expectedURL],
                      @"the url was: %@", [url absoluteString]);
     }
 }
@@ -365,9 +365,9 @@
     
     for (id testCase in testCases) {
         
-        NSString *expectedURL = [testCase objectAtIndex:0];
-        NSString *appURL = [testCase objectAtIndex:1];
-        NSString *APIName = [testCase objectAtIndex:2];
+        NSString *expectedURL = testCase[0];
+        NSString *appURL = testCase[1];
+        NSString *APIName = testCase[2];
         
         MSClient *client = [MSClient clientWithApplicationURLString:appURL];
         
@@ -376,8 +376,8 @@
                                   parameters:nil
                                      orError:nil];
         
-        STAssertNotNil(url, @"url should not be nil");
-        STAssertTrue([[url absoluteString] isEqualToString:expectedURL],
+        XCTAssertNotNil(url, @"url should not be nil");
+        XCTAssertTrue([[url absoluteString] isEqualToString:expectedURL],
                      @"the url was: %@", [url absoluteString]);
     }
 }
@@ -422,10 +422,10 @@
     
     for (id testCase in testCases) {
         
-        NSString *expectedURL = [testCase objectAtIndex:0];
-        NSString *appURL = [testCase objectAtIndex:1];
-        NSString *APIName = [testCase objectAtIndex:2];
-        NSDictionary *parameters = [testCase objectAtIndex:3];
+        NSString *expectedURL = testCase[0];
+        NSString *appURL = testCase[1];
+        NSString *APIName = testCase[2];
+        NSDictionary *parameters = testCase[3];
         
         MSClient *client = [MSClient clientWithApplicationURLString:appURL];
         
@@ -434,8 +434,8 @@
                                   parameters:parameters
                                      orError:nil];
         
-        STAssertNotNil(url, @"url should not be nil");
-        STAssertTrue([[url absoluteString] isEqualToString:expectedURL],
+        XCTAssertNotNil(url, @"url should not be nil");
+        XCTAssertTrue([[url absoluteString] isEqualToString:expectedURL],
                      @"the url was: %@", [url absoluteString]);
     }
 }
@@ -443,7 +443,7 @@
 
 -(void) testQueryStringFromQueryEscapesPredicateConstants
 {
-    NSString *expectedQueryString = @"$filter=(title%20eq%20'%23%3F%26$%20encode%20me%21')&$inlinecount=none";
+    NSString *expectedQueryString = @"$filter=(title%20eq%20'%23%3F%26$%20encode%20me%21')";
     NSString *appURL = @"http:\\someApp.com";
     NSString *tableName = @"someTable";
     NSString *predicateString = @"title == '#?&$ encode me!'";
@@ -458,8 +458,8 @@
     NSString *queryString = [MSURLBuilder queryStringFromQuery:query
                                                             orError:nil];
     
-    STAssertNotNil(queryString, @"queryString should not be nil");
-    STAssertTrue([queryString isEqualToString:expectedQueryString],
+    XCTAssertNotNil(queryString, @"queryString should not be nil");
+    XCTAssertTrue([queryString isEqualToString:expectedQueryString],
                  @"the queryString was: %@", queryString);
     
 }
@@ -485,15 +485,15 @@
     NSString *queryString = [MSURLBuilder queryStringFromQuery:query
                                                             orError:&error];
     
-    STAssertNil(queryString, @"queryString should be nil");
-    STAssertNotNil(error, @"error should not have been nil.");
-    STAssertTrue(error.domain == MSErrorDomain,
+    XCTAssertNil(queryString, @"queryString should be nil");
+    XCTAssertNotNil(error, @"error should not have been nil.");
+    XCTAssertTrue(error.domain == MSErrorDomain,
                  @"error domain should have been MSErrorDomain.");
-    STAssertTrue(error.code == MSInvalidUserParameterWithRequest,
+    XCTAssertTrue(error.code == MSInvalidUserParameterWithRequest,
                  @"error code should have been MSInvalidUserParameterWithRequest.");
     
-    NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-    STAssertTrue([description isEqualToString:@"'$key2' is an invalid user-defined query string parameter. User-defined query string parameters must not begin with a '$'."],
+    NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
+    XCTAssertTrue([description isEqualToString:@"'$key2' is an invalid user-defined query string parameter. User-defined query string parameters must not begin with a '$'."],
                  @"description was: %@", description);}
 
 @end

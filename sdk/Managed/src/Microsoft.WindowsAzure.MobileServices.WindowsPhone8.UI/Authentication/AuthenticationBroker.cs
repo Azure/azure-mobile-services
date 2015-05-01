@@ -100,8 +100,8 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.EndUri = endUrl;
             this.AuthenticationInProgress = true;
 
-            //hook up the broker to the page on the event.
-            rootFrame.Navigated += rootFrame_Navigated;
+            //hook up the broker to the page.
+            LoginPage.Broker = this;
 
             // Navigate to the login page.
             rootFrame.Navigate(this.LoginPageUri);
@@ -114,13 +114,13 @@ namespace Microsoft.WindowsAzure.MobileServices
                     string message;
                     if (this.responseStatus == PhoneAuthenticationStatus.UserCancel)
                     {
-                        message = Resources.IAuthenticationBroker_AuthenticationCanceled;
+                        message = "Authentication was cancelled by the user.";
                         throw new InvalidOperationException(message);
                     }
                     else
                     {
                         message = string.Format(CultureInfo.InvariantCulture,
-                                                Resources.IAuthenticationBroker_AuthenticationFailed,
+                                                "Authentication failed with HTTP response code {0}.",
                                                 this.responseErrorDetail);
                     }
 
@@ -131,20 +131,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             });
 
             return task;
-        }
-
-        /// <summary>
-        /// Hooks up the broker to the page.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void rootFrame_Navigated(object sender, NavigationEventArgs e)
-        {
-            PhoneApplicationFrame rootFrame = Application.Current.RootVisual as PhoneApplicationFrame;
-            rootFrame.Navigated -= rootFrame_Navigated;
-
-            LoginPage page = e.Content as LoginPage;
-            page.Broker = this;
         }
 
         internal void OnAuthenticationFinished(string data, PhoneAuthenticationStatus status, uint error)
@@ -187,12 +173,12 @@ namespace Microsoft.WindowsAzure.MobileServices
                 string errorString = GetSubStringAfterMatch(responseData, "#error=");
                 if (string.IsNullOrEmpty(errorString))
                 {
-                    message = Resources.IAuthenticationBroker_InvalidLoginResponse;
+                    message = "Invalid format of the authentication response.";
                 }
                 else
                 {
                     message = string.Format(CultureInfo.InvariantCulture,
-                                            Resources.IAuthenticationBroker_LoginFailed,
+                                            "Login failed: {0}",
                                             errorString);
                 }
 

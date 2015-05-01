@@ -35,7 +35,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         public async Task<string> CreateRegistrationIdAsync()
         {
-            var response = await this.client.HttpClient.RequestAsync(HttpMethod.Post, "/push/registrationids", this.client.CurrentUser, new ByteArrayContent(new byte[0]), null);
+            var response = await this.client.HttpClient.RequestAsync(HttpMethod.Post, "/push/registrationids", this.client.CurrentUser, null, null);
             var locationPath = response.Headers.Location.AbsolutePath;
             return locationPath.Substring(locationPath.LastIndexOf('/') + 1);
         }

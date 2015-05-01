@@ -52,6 +52,10 @@ typedef void (^MSSyncPushCompletionBlock)(void);
 
 /// Provides the name of the table to track all table operation errors until they have been resolved
 - (NSString *) errorTableName;
+
+/// Provides the name of the table to track configuration data
+- (NSString *) configTableName;
+
 /// @}
 
 /// @name Fetching and Retrieving Data
@@ -81,7 +85,7 @@ typedef void (^MSSyncPushCompletionBlock)(void);
 
 /// Returns the MSSystemProperties that should be stored locally (example: __createdAt, __updatedAt)
 /// If not implemented, the default of __version will be asked for from the server
--(NSUInteger) systemPropetiesForTable:(NSString *)table;
+-(NSUInteger) systemPropertiesForTable:(NSString *)table;
 
 /// @}
 

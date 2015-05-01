@@ -15,21 +15,16 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Initializes a new instance of the
         /// <see cref="MobileServicePreconditionFailedException"/> class.
         /// </summary>
-        /// <param name="innerException">
+        /// <param name="source">
         /// The inner exception.
         /// </param>
         /// <param name="value">
         /// The current instance from the server that the precondition failed for.
         /// </param>
-        public MobileServicePreconditionFailedException(MobileServiceInvalidOperationException innerException, JObject value): base(innerException.Message, innerException.Request, innerException.Response)
+        public MobileServicePreconditionFailedException(MobileServiceInvalidOperationException source, JObject value)
+            : base(source.Message, source.Request, source.Response, value)
         {
-            this.Value = value;
         }
-
-        /// <summary>
-        /// The current instance from the server that the precondition failed for.
-        /// </summary>
-        public JObject Value { get; private set; }
     }
 
     /// <summary>
@@ -41,13 +36,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Initializes a new instance of the
         /// <see cref="MobileServicePreconditionFailedException"/> class.
         /// </summary>
-        /// <param name="innerException">
+        /// <param name="source">
         /// The inner exception.
         /// </param>
         /// <param name="item">
         /// The current instance from the server that the precondition failed for.
         /// </param>
-        public MobileServicePreconditionFailedException(MobileServicePreconditionFailedException innerException, T item): base(innerException, innerException.Value)
+        public MobileServicePreconditionFailedException(MobileServiceInvalidOperationException source, T item)
+            : base(source, source.Value)
         {
             this.Item = item;
         }

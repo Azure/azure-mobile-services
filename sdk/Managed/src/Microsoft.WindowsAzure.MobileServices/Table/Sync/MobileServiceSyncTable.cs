@@ -6,8 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,23 +13,29 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
-    internal class MobileServiceSyncTable: IMobileServiceSyncTable
+    internal class MobileServiceSyncTable : IMobileServiceSyncTable
     {
-        private static readonly Regex queryKeyRegex = new Regex("^[a-zA-Z][a-zA-Z0-9]{0,24}$");
+        private static readonly Regex queryIdRegex = new Regex("^[^|]{0,50}$");
         private MobileServiceSyncContext syncContext;
 
         public MobileServiceClient MobileServiceClient { get; private set; }
 
         public string TableName { get; private set; }
 
-        public MobileServiceSyncTable(string tableName, MobileServiceClient client)
+        public MobileServiceTableKind Kind { get; private set; }
+
+        public MobileServiceRemoteTableOptions SupportedOptions { get; set; }
+
+        public MobileServiceSyncTable(string tableName, MobileServiceTableKind Kind, MobileServiceClient client)
         {
             Debug.Assert(tableName != null);
             Debug.Assert(client != null);
 
             this.MobileServiceClient = client;
             this.TableName = tableName;
+            this.Kind = Kind;
             this.syncContext = (MobileServiceSyncContext)client.SyncContext;
+            this.SupportedOptions = MobileServiceRemoteTableOptions.All;
         }
 
         public Task<JToken> ReadAsync(string query)
@@ -39,16 +43,23 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return this.syncContext.ReadAsync(this.TableName, query);
         }
 
-        public Task PullAsync(string queryKey, string query, IDictionary<string, string> parameters, CancellationToken cancellationToken)
+        public Task PullAsync(string queryId, string query, IDictionary<string, string> parameters, MobileServiceObjectReader reader, CancellationToken cancellationToken, params string[] relatedTables)
         {
-            ValidateQueryKey(queryKey);
-            return this.syncContext.PullAsync(this.TableName, queryKey, query, parameters, cancellationToken);
+            ValidateQueryId(queryId);
+
+            return this.syncContext.PullAsync(this.TableName, this.Kind, queryId, query, this.SupportedOptions, parameters, relatedTables, reader, cancellationToken);
         }
 
-        public Task PurgeAsync(string queryKey, string query, CancellationToken cancellationToken)
+        public Task PullAsync(string queryId, string query, IDictionary<string, string> parameters, bool pushOtherTables, CancellationToken cancellationToken)
         {
-            ValidateQueryKey(queryKey);
-            return this.syncContext.PurgeAsync(this.TableName, queryKey, query, cancellationToken);
+            ValidateQueryId(queryId);
+            return this.syncContext.PullAsync(this.TableName, this.Kind, queryId, query, this.SupportedOptions, parameters, pushOtherTables ? new string[0] : null, null, cancellationToken);
+        }
+
+        public Task PurgeAsync(string queryId, string query, bool force, CancellationToken cancellationToken)
+        {
+            ValidateQueryId(queryId);
+            return this.syncContext.PurgeAsync(this.TableName, this.Kind, queryId, query, force, cancellationToken);
         }
 
         public async Task<JObject> InsertAsync(JObject instance)
@@ -65,25 +76,25 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 EnsureIdIsString(id);
             }
 
-            await this.syncContext.InsertAsync(this.TableName, (string)id, instance);
+            await this.syncContext.InsertAsync(this.TableName, this.Kind, (string)id, instance);
 
             return instance;
-        }        
+        }
 
         public async Task UpdateAsync(JObject instance)
         {
             string id = EnsureIdIsString(instance);
             instance = RemoveSystemPropertiesKeepVersion(instance);
 
-            await this.syncContext.UpdateAsync(this.TableName, id, instance);
-        }        
+            await this.syncContext.UpdateAsync(this.TableName, this.Kind, id, instance);
+        }
 
         public async Task DeleteAsync(JObject instance)
         {
             string id = EnsureIdIsString(instance);
             instance = RemoveSystemPropertiesKeepVersion(instance);
 
-            await this.syncContext.DeleteAsync(this.TableName, id, instance);
+            await this.syncContext.DeleteAsync(this.TableName, this.Kind, id, instance);
         }
 
         public Task<JObject> LookupAsync(string id)
@@ -115,20 +126,20 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return EnsureIdIsString(id);
         }
 
-        private static void ValidateQueryKey(string queryKey)
+        internal static void ValidateQueryId(string queryId)
         {
-            if (string.IsNullOrWhiteSpace(queryKey))
+            if (string.IsNullOrWhiteSpace(queryId))
             {
                 return;
             }
 
-            if (!queryKeyRegex.IsMatch(queryKey))
+            if (!queryIdRegex.IsMatch(queryId))
             {
                 throw new ArgumentException(
                         string.Format(
                             CultureInfo.InvariantCulture,
-                            Resources.MobileServiceSyncTable_InvalidQueryKey,
-                            "queryKey"));
+                            "The query id must not contain pipe character and should be less than 50 characters in length.",
+                            "queryId"));
             }
         }
 
@@ -140,7 +151,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 throw new ArgumentException(
                      string.Format(
                         CultureInfo.InvariantCulture,
-                        Resources.MobileServiceSyncTable_IdMustBeString,
+                        "The id must be of type string.",
                         MobileServiceSystemColumns.Id),
                      "instance");
             }

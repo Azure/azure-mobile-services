@@ -1,0 +1,187 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory),Microsoft.WindowsAzure.Mobile.Build.msbuild))\tools\Microsoft.WindowsAzure.Mobile.Build.settings.targets" Condition="$(CmdLine) != ''" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{9D2109B6-F005-4419-B9DB-8FA2A4514D28}</ProjectGuid>
+    <ProjectTypeGuids>{6BC8ED88-2882-458C-8E55-DFD12B67127B};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Microsoft.WindowsAzure.MobileServices</RootNamespace>
+    <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
+    <AssemblyName>Microsoft.WindowsAzure.Mobile.Ext</AssemblyName>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\classic\Debug</OutputPath>
+    <IntermediateOutputPath>obj\classic\Debug</IntermediateOutputPath>
+    <DefineConstants>DEBUG;__IOS__;__MOBILE__;PLATFORM_IOS;XAMARIN_AUTH_INTERNAL</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <MtouchDebug>true</MtouchDebug>
+    <CodesignKey>iPhone Developer</CodesignKey>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\classic\Release</OutputPath>
+    <IntermediateOutputPath>obj\classic\Release</IntermediateOutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <CodesignKey>iPhone Developer</CodesignKey>
+    <DocumentationFile>bin\iPhone\Release\Microsoft.WindowsAzure.Mobile.Ext.xml</DocumentationFile>
+    <DefineConstants>__IOS__;__MOBILE__;PLATFORM_IOS;XAMARIN_AUTH_INTERNAL</DefineConstants>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\..\..\managed\src\Microsoft.WindowsAzure.MobileServices.WindowsStore\ExpressionUtility\PartialEvaluator.cs">
+      <Link>ExpressionUtility\PartialEvaluator.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\src\Microsoft.WindowsAzure.MobileServices.WindowsStore\ExpressionUtility\VisitorHelper.cs">
+      <Link>ExpressionUtility\VisitorHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\src\Microsoft.WindowsAzure.MobileServices.WindowsStore\Platform\ExpressionUtility.cs">
+      <Link>Platform\ExpressionUtility.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth.iOS\ACAccountWrapper.cs">
+      <Link>Auth\iOS\ACAccountWrapper.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth.iOS\FormAuthenticatorController.cs">
+      <Link>Auth\iOS\FormAuthenticatorController.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth.iOS\KeyChainAccountStore.cs">
+      <Link>Auth\iOS\KeyChainAccountStore.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth.iOS\ProgressLabel.cs">
+      <Link>Auth\iOS\ProgressLabel.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth.iOS\UIViewControllerEx.cs">
+      <Link>Auth\iOS\UIViewControllerEx.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth.iOS\WebAuthenticatorController.cs">
+      <Link>Auth\iOS\WebAuthenticatorController.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Android\ExpressionUtility\ExpressionVisitor.cs">
+      <Link>ExpressionUtility\ExpressionVisitor.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\Account.cs">
+      <Link>Auth\Account.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\AccountStore.cs">
+      <Link>Auth\AccountStore.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\Authenticator.cs">
+      <Link>Auth\Authenticator.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\AuthException.cs">
+      <Link>Auth\AuthException.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\ExceptionEx.cs">
+      <Link>Auth\ExceptionEx.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\FormAuthenticator.cs">
+      <Link>Auth\FormAuthenticator.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\OAuth1.cs">
+      <Link>Auth\OAuth1.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\OAuth1Authenticator.cs">
+      <Link>Auth\OAuth1Authenticator.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\OAuth1Request.cs">
+      <Link>Auth\OAuth1Request.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\OAuth2Authenticator.cs">
+      <Link>Auth\OAuth2Authenticator.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\OAuth2Request.cs">
+      <Link>Auth\OAuth2Request.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\Request.cs">
+      <Link>Auth\Request.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\Response.cs">
+      <Link>Auth\Response.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\System.Json\JavaScriptReader.cs">
+      <Link>Auth\Json\JavaScriptReader.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\System.Json\JsonArray.cs">
+      <Link>Auth\Json\JsonArray.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\System.Json\JsonObject.cs">
+      <Link>Auth\Json\JsonObject.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\System.Json\JsonPrimitive.cs">
+      <Link>Auth\Json\JsonPrimitive.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\System.Json\JsonType.cs">
+      <Link>Auth\Json\JsonType.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\System.Json\JsonValue.cs">
+      <Link>Auth\Json\JsonValue.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\WebAuthenticator.cs">
+      <Link>Auth\WebAuthenticator.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\WebEx.cs">
+      <Link>Auth\WebEx.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\WebRedirectAuthenticator.cs">
+      <Link>Auth\WebRedirectAuthenticator.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\WebUtilities.cs">
+      <Link>Auth\WebUtilities.cs</Link>
+    </Compile>
+    <Compile Include="Authentication\MobileServiceUIAuthentication.cs" />
+    <Compile Include="Extensions\MobileServiceClientExtensions.cs" />
+    <Compile Include="Platform\ApplicationStorage.cs" />
+    <Compile Include="Platform\CurrentPlatform.cs" />
+    <Compile Include="Platform\PlatformInformation.cs" />
+    <Compile Include="Push\Push.cs" />
+    <Compile Include="Platform\PushUtility.cs" />
+    <Compile Include="Push\ApnsRegistration.cs" />
+    <Compile Include="Push\ApnsTemplateRegistration.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
+    <Reference Include="monotouch" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\packages\Newtonsoft.Json.6.0.4\lib\portable-net45+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.Extensions">
+      <HintPath>..\..\packages\Microsoft.Net.Http.2.2.28\lib\monotouch\System.Net.Http.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.Primitives">
+      <HintPath>..\..\packages\Microsoft.Net.Http.2.2.28\lib\monotouch\System.Net.Http.Primitives.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.WindowsAzure.MobileServices\Microsoft.WindowsAzure.Mobile.csproj">
+      <Project>{75557793-E36E-4190-8714-5BD2665859FB}</Project>
+      <Name>Microsoft.WindowsAzure.Mobile</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.MonoTouch.CSharp.targets" />
+  <Import Project="..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />
+  <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">
+    <Error Condition="!Exists('..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=317567." HelpKeyword="BCLBUILD2001" />
+    <Error Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="The build restored NuGet packages. Build the project again to include these packages in the build. For more information, see http://go.microsoft.com/fwlink/?LinkID=317568." HelpKeyword="BCLBUILD2002" />
+  </Target>
+</Project>

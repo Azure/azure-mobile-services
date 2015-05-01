@@ -71,8 +71,8 @@ $testGroup('MobileServiceClient.js',
         });
     }),
     
-    $test('login')
-    .description('Verify login mechanics')
+    $test('login - Verify login mechanics')
+    .tag('login')
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
         client = client.withFilter(function (req, next, callback) {
@@ -88,6 +88,57 @@ $testGroup('MobileServiceClient.js',
             $assert.areEqual(client.currentUser.userId, 'bob');
             $assert.areEqual(client.currentUser.mobileServiceAuthenticationToken, 'zumo');            
         });
+    }),
+
+    $test('loginWithOptions_token')
+    .tag('login')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.type, 'POST');
+            $assert.contains(req.url, "login");
+            $assert.areEqual(req.data, '{"authenticationToken":"token.a.b"}');
+            callback(null, { status: 200, responseText: '{"authenticationToken":"zumo","user":{"userId":"bob"}}' });
+        });
+
+        client._login.ignoreFilters = false;
+
+        return client.loginWithOptions('token.a.b').then(function (currentUser) {
+            $assert.areEqual(client.currentUser.userId, 'bob');
+            $assert.areEqual(client.currentUser.mobileServiceAuthenticationToken, 'zumo');
+        });
+    }),
+
+    $test('loginWithOptions_provider_parameters')
+    .tag('login')
+    .checkAsync(function () {
+        return testLoginParameters(['facebook', { parameters: {display: 'popup' }}],
+                                  "http://www.test.com/login/facebook?display=popup",
+                                  "http://www.test.com/login/done");
+    }),
+
+    $test('loginWithOptions_provider_singlesignon_parameters')
+    .tag('login')
+    .checkAsync(function () {
+        return testLoginParameters(['facebook', { useSingleSignOn: true, parameters: { display: 'popup' } }],
+                                  "http://www.test.com/login/facebook?display=popup",
+                                  null);
+    }),
+
+    $test('loginWithOptions_provider_singlesignon')
+    .tag('login')
+    .checkAsync(function () {
+        return testLoginParameters(['facebook', { useSingleSignOn: true }],
+                                  "http://www.test.com/login/facebook",
+                                  null);
+    }),
+
+    $test('loginWithOptions_provider')
+    .tag('login')
+    .checkAsync(function () {
+        return testLoginParameters(['facebook'],
+                                  "http://www.test.com/login/facebook",
+                                  "http://www.test.com/login/done");
     }),
 
     $test('logout')
@@ -121,6 +172,23 @@ $testGroup('MobileServiceClient.js',
         });
         client.invokeApi("checkins/post").done(function (response) {
             $assert.fail("api call failed");
+        },
+        function (error) {
+            $assert.areEqual(error.message, "bad robot");
+        });
+    }),
+
+    $test('CustomAPI - error response as json object without content-type')
+    .description('Verify the custom API error messages')
+    .check(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.type, 'POST');
+            $assert.areEqual(req.url, 'http://www.test.com/api/checkins/post');
+            callback(null, { status: 400, responseText: '{"error":"bad robot"}', getResponseHeader: function () { return null; } });
+        });
+        client.invokeApi("checkins/post").done(function (response) {
+            $assert.fail("api call failed");            
         },
         function (error) {
             $assert.areEqual(error.message, "bad robot");
@@ -247,11 +315,11 @@ $testGroup('MobileServiceClient.js',
     .check(function () {
         var client = new MobileServiceClient.MobileServiceClient("http://www.test.com", "123456abcdefg");
         client = client.withFilter(function (req, next, callback) {
-            $assert.areEqual(req.data, "\"2014-03-06T09:59:00.000Z\"");
+            $assert.areEqual(req.data, "\"2013-04-14T06:01:59.000Z\"");
             callback(null, { status: 200, responseText: '{"result":3}', getResponseHeader: function () { return 'application/json'; } });
         });
 
-        var date = new Date(2013, 14, 6, 1, 59);
+        var date = new Date(Date.UTC(2013, 3, 14, 6, 1, 59));
         client.invokeApi("scenarios/verifyRequestAccess", { body: date }).done(function (response) {
         }, function (error) {
             $assert.fail("api call failed");
@@ -377,5 +445,189 @@ $testGroup('MobileServiceClient.js',
         }, function (error) {
             $assert.fail("api call failed");
         });
+    }),
+
+    $test('CustomAPI - specifies accept: application/json header by default')
+    .check(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.headers.accept, 'application/json');
+            callback(null, { status: 200 });
+        });
+        client.invokeApi("someApi").done(function (response) { }, function (error) {
+            $assert.fail("api call failed");
+        });
+    }),
+
+    $test('CustomAPI - specifies accept: application/json header by default when options are passed')
+    .check(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.headers.accept, 'application/json');
+            callback(null, { status: 200 });
+        });
+        client.invokeApi("someApi", {}).done(function (response) { }, function (error) {
+            $assert.fail("api call failed");
+        });
+    }),
+
+    $test('CustomAPI - specifies accept: application/json header by default when headers are passed')
+    .check(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.headers.accept, 'application/json');
+            callback(null, { status: 200 });
+        });
+        client.invokeApi("someApi", { headers: { someHeader: 'test' } }).done(function (response) { }, function (error) {
+            $assert.fail("api call failed");
+        });
+    }),
+
+    $test('CustomAPI - Does not override existing accept headers')
+    .check(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.headers.accept, 'application/xml');
+            callback(null, { status: 200 });
+        });
+        client.invokeApi("someApi", { headers: { 'accept': 'application/xml' } }).done(function (response) { }, function (error) {
+            $assert.fail("api call failed");
+        });
+    }),
+
+    $test('Features - CustomAPI - Call with object (JSON-ified)')
+    .description('Verify the features headers for custom calls')
+    .check(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.headers["X-ZUMO-FEATURES"], "AJ");
+            callback(null, { status: 200, getResponseHeader: function () { return 'application/json'; } });
+        });
+        client.invokeApi("scenarios/verifyRequestAccess", {
+            body: { hello: "world" },
+            method: "POST"
+        }).done(function (response) {
+
+        }, function (error) {
+            $assert.fail("api call failed");
+        });
+    }),
+
+    $test('Features - CustomAPI - Call with object (JSON-ified) and parameters')
+    .description('Verify the features headers for custom calls')
+    .check(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.headers["X-ZUMO-FEATURES"], "AJ,QS");
+            callback(null, { status: 200, getResponseHeader: function () { return 'application/json'; } });
+        });
+        client.invokeApi("scenarios/verifyRequestAccess", {
+            body: { hello: "world" },
+            method: "POST",
+            parameters: { 'a': 1, 'b': 2 }
+        }).done(function (response) {
+
+        }, function (error) {
+            $assert.fail("api call failed");
+        });
+    }),
+
+    $test('Features - CustomAPI - Call with non-object (not JSON-ified)')
+    .description('Verify the features headers for custom calls')
+    .check(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.headers["X-ZUMO-FEATURES"], "AG");
+            callback(null, { status: 200, getResponseHeader: function () { return 'application/json'; } });
+        });
+        client.invokeApi("scenarios/verifyRequestAccess", {
+            body: "<hello>world</hello>",
+            method: "POST",
+            headers: { 'Content-Type': 'application/xml' }
+        }).done(function (response) {
+
+        }, function (error) {
+            $assert.fail("api call failed");
+        });
+    }),
+
+    $test('Features - CustomAPI - Call with object (JSON-ified)')
+    .description('Verify the features headers for custom calls')
+    .check(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.headers["X-ZUMO-FEATURES"], "AG,QS");
+            callback(null, { status: 200, getResponseHeader: function () { return 'application/json'; } });
+        });
+        client.invokeApi("scenarios/verifyRequestAccess", {
+            body: "<hello>world</hello>",
+            method: "POST",
+            headers: { 'Content-Type': 'application/xml' },
+            parameters: { 'a': 1, 'b': 2 }
+        }).done(function (response) {
+
+        }, function (error) {
+            $assert.fail("api call failed");
+        });
+    }),
+
+    $test('Features - CustomAPI - Call with no body')
+    .description('Verify the features headers for custom calls')
+    .check(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.headers["X-ZUMO-FEATURES"], "QS");
+            callback(null, { status: 200, getResponseHeader: function () { return 'application/json'; } });
+        });
+        client.invokeApi("scenarios/verifyRequestAccess", {
+            method: "GET",
+            parameters: { a: 1, b: 2 }
+        }).done(function (response) {
+
+        }, function (error) {
+            $assert.fail("api call failed");
+        });
+    }),
+
+    $test('Features - CustomAPI - Headers parameters is not modified')
+    .description('Verify the features headers for custom calls')
+    .check(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        var reqHeaders = { 'Content-Type': 'application/xml' };
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.headers["X-ZUMO-FEATURES"], "AG");
+            callback(null, { status: 200, getResponseHeader: function () { return 'application/json'; } });
+        });
+        client.invokeApi("scenarios/verifyRequestAccess", {
+            method: "POST",
+            body: "<hello>world</hello>"
+        }).done(function (response) {
+            $assert.isNull(reqHeaders["X-ZUMO-FEATURES"]);
+        }, function (error) {
+            $assert.fail("api call failed");
+        });
     })
 );
+
+function testLoginParameters(args, expectedStartUri, expectedEndUri) {
+    var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+
+    var _login = Platform.login;
+    Platform.login = function (startUri, endUri, callback) {
+        Platform.login = _login;
+
+        $assert.areEqual(startUri, expectedStartUri);
+        $assert.areEqual(endUri, expectedEndUri);
+        callback(null, {
+            authenticationToken: "zumo",
+            user: {
+                "userId": "bob"
+            }
+        });
+    };
+
+    return client.loginWithOptions.apply(client, args).then(function (currentUser) {
+        $assert.areEqual(client.currentUser.userId, 'bob');
+        $assert.areEqual(client.currentUser.mobileServiceAuthenticationToken, 'zumo');
+    });
+}

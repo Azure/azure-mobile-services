@@ -36,7 +36,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 if (tags.Any(s => s.Contains(",")))
                 {
-                    throw new ArgumentException(Resources.Push_TagNoCommas, "tags");
+                    throw new ArgumentException("Tags must not contain ','.", "tags");
                 }
             }
 

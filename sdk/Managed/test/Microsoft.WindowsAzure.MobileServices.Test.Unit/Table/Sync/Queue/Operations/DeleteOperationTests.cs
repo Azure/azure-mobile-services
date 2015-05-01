@@ -10,6 +10,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Net;
+using System.Net.Http;
 
 namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Operations
 {
@@ -21,7 +22,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         [TestInitialize]
         public void Initialize()
         {
-            this.operation = new DeleteOperation("test", "abc");
+            this.operation = new DeleteOperation("test", MobileServiceTableKind.Table, "abc");
         }
 
         [TestMethod]
@@ -47,6 +48,23 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         }
 
         [TestMethod]
+        public async Task ExecuteAsync_IgnoresNotFound()
+        {
+            var client = new Mock<MobileServiceClient>(MockBehavior.Strict);
+
+            var table = new Mock<MobileServiceTable>("test", client.Object);
+            this.operation.Table = table.Object;
+
+            var item = JObject.Parse("{\"id\":\"abc\",\"Text\":\"Example\"}");
+            this.operation.Item = item;
+
+            table.Setup(t => t.DeleteAsync(item)).Throws(new MobileServiceInvalidOperationException("not found", new HttpRequestMessage(), new HttpResponseMessage(HttpStatusCode.NotFound)));
+
+            JObject result = await this.operation.ExecuteAsync();
+            Assert.IsNull(result);
+        }
+
+        [TestMethod]
         public async Task ExecuteLocalAsync_DeletesItemOnStore()
         {
             var store = new Mock<IMobileServiceLocalStore>();
@@ -68,21 +86,21 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         [TestMethod]
         public void Validate_Throws_WithInsertOperation()
         {
-            var tableOperation = new InsertOperation("test", "abc");
+            var tableOperation = new InsertOperation("test", MobileServiceTableKind.Table, "abc");
             TestDeleteValidateThrows(tableOperation);
         }
 
         [TestMethod]
         public void Validate_Throws_WithUpdateOperation()
         {
-            var tableOperation = new UpdateOperation("test", "abc");
+            var tableOperation = new UpdateOperation("test", MobileServiceTableKind.Table, "abc");
             TestDeleteValidateThrows(tableOperation);
         }
 
         [TestMethod]
         public void Validate_Throws_WithDeleteOperation()
         {
-            var tableOperation = new DeleteOperation("test", "abc");
+            var tableOperation = new DeleteOperation("test", MobileServiceTableKind.Table, "abc");
             TestDeleteValidateThrows(tableOperation);
         }
 

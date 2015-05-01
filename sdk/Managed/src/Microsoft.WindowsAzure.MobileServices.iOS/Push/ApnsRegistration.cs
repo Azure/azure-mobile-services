@@ -6,6 +6,12 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
+#if __UNIFIED__
+using Foundation;
+#else
+using MonoTouch.Foundation;
+#endif
+
 namespace Microsoft.WindowsAzure.MobileServices
 {
     /// <summary>
@@ -19,7 +25,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// Create a default Registration for a deviceToken
+        /// PLEASE USE NSData overload of this constructor!! Create a default Registration for a deviceToken
         /// </summary>
         /// <param name="deviceToken">The device token</param>
         public ApnsRegistration(string deviceToken)
@@ -28,17 +34,52 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// Create a default Registration for a deviceToken with specific tags
+        /// Create a default Registration for a deviceToken
+        /// </summary>
+        /// <param name="deviceToken">The device token</param>
+        public ApnsRegistration(NSData deviceToken)
+            : this(deviceToken, null)
+        {
+        }        
+
+        /// <summary>
+        /// PLEASE USE NSData overload of this constructor!! Create a default Registration for a deviceToken with specific tags
         /// </summary>
         /// <param name="deviceToken">The device token</param>
         /// <param name="tags">The tags to register to receive notifications from</param>
         public ApnsRegistration(string deviceToken, IEnumerable<string> tags)
-            : base(deviceToken, tags)
+            : base(TrimDeviceToken(deviceToken), tags)
         {
-            if (string.IsNullOrWhiteSpace(deviceToken))
+        }
+
+        /// <summary>
+        /// Create a default Registration for a deviceToken with specific tags
+        /// </summary>
+        /// <param name="deviceToken">The device token</param>
+        /// <param name="tags">The tags to register to receive notifications from</param>
+        public ApnsRegistration(NSData deviceToken, IEnumerable<string> tags)
+            : base(ApnsRegistration.ParseDeviceToken(deviceToken), tags)
+        {            
+        }
+
+        internal static string TrimDeviceToken(string deviceToken)
+        {
+            if (deviceToken == null)
             {
                 throw new ArgumentNullException("deviceToken");
             }
+
+            return deviceToken.Trim('<','>').Replace(" ", string.Empty).ToUpperInvariant();
+        }
+
+        internal static string ParseDeviceToken(NSData deviceToken)
+        {
+            if (deviceToken == null)
+            {
+                throw new ArgumentNullException("deviceToken");
+            }
+
+            return TrimDeviceToken(deviceToken.Description);
         }
 
         /// <summary>
@@ -53,7 +94,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             set
             {
-                this.PushHandle = value;
+                this.PushHandle = TrimDeviceToken(value);
             }
         }
     }

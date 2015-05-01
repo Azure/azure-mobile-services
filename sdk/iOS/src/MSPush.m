@@ -48,7 +48,7 @@
 
 - (void) unregisterNativeWithCompletion:(MSCompletionBlock)completion
 {
-    [self.registrationManager deleteRegistrationWithName:NativeRegistrationName
+    [self.registrationManager deleteRegistrationWithName:MSNativeRegistrationName
                                               completion:completion];
 }
 

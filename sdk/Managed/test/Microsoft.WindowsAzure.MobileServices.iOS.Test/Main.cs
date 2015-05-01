@@ -1,6 +1,6 @@
-﻿using MonoTouch.UIKit;
+using UIKit;
 
-namespace Microsoft.WindowsAzure.Mobile.iOS.Test
+namespace MicrosoftWindowsAzureMobileiOSTest
 {
 	public class Application
 	{

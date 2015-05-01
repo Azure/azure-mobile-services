@@ -9,6 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MobileServices.Query;
 
 namespace Microsoft.WindowsAzure.MobileServices.Query
 {
@@ -308,7 +309,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         }
 
         /// <summary>
-        /// Ensure the query will get the deleted records [JavaScript Mobile Services backend only].
+        /// Ensure the query will get the deleted records. This requires the soft delete feature to be enabled on the Mobile Service. Visit <see href="http://go.microsoft.com/fwlink/?LinkId=507647">the link</see> for details.
         /// </summary>
         /// <returns>
         /// The query object.
@@ -341,7 +342,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         public async Task<List<T>> ToListAsync()
         {
             IEnumerable<T> items = await this.QueryProvider.Execute(this);
-            return new TotalCountList<T>(items);
+            return new QueryResultList<T>(items);
         }
     }
 }

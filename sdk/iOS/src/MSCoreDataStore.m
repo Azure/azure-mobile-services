@@ -34,6 +34,10 @@ NSString *const StoreDeleted = @"ms_deleted";
     return @"MS_TableOperationErrors";
 }
 
+-(NSString *) configTableName {
+    return @"MS_TableConfig";
+}
+
 /// Helper function to get a specific record from a table, if
 -(id) getRecordForTable:(NSString *)table itemId:(NSString *)itemId asDictionary:(BOOL)asDictionary orError:(NSError **)error
 {
@@ -71,6 +75,27 @@ NSString *const StoreDeleted = @"ms_deleted";
     }
     
     return [results firstObject];
+}
+
++(NSDictionary *) tableItemFromManagedObject:(NSManagedObject *)object
+{
+    NSArray *attributes = [object.entity.attributesByName allKeys];
+    NSMutableDictionary *serverItem = [[object dictionaryWithValuesForKeys:attributes] mutableCopy];
+
+    // Find all system columns in the item
+    NSSet *systemColumnNames = [serverItem keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
+        NSString *columnName = (NSString *)key;
+        return [columnName hasPrefix:StoreSystemColumnPrefix];
+    }];
+    
+    // Now translate every system column from ms_x to __x
+    for (NSString *columnName in systemColumnNames) {
+        NSString *adjustedName = [MSCoreDataStore externalNameForStoreColumnName:columnName];
+        serverItem[adjustedName] = serverItem[columnName];
+        [serverItem removeObjectForKey:columnName];
+    }
+    
+    return serverItem;
 }
 
 /// Helper function to convert a server (external) item to only contain the appropriate keys for storage
@@ -134,7 +159,7 @@ NSString *const StoreDeleted = @"ms_deleted";
 
 #pragma mark - MSSyncContextDataSource
 
--(NSUInteger) systemPropetiesForTable:(NSString *)table
+-(NSUInteger) systemPropertiesForTable:(NSString *)table
 {
     MSSystemProperties properties = MSSystemPropertyNone;
     NSEntityDescription *entity = [NSEntityDescription entityForName:table

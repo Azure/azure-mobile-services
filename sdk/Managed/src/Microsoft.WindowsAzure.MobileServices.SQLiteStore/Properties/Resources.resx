@@ -126,6 +126,9 @@
   <data name="SQLiteStore_DefineAfterInitialize" xml:space="preserve">
     <value>Cannot define a table after the store has been initialized.</value>
   </data>
+  <data name="SQLiteStore_DefineTableEmptyCtorNotDefined" xml:space="preserve">
+    <value>The generic type T does not have parameterless constructor.</value>
+  </data>
   <data name="SQLiteStore_DefineTableTNotAnObject" xml:space="preserve">
     <value>The generic type T is not an object.</value>
   </data>
@@ -140,6 +143,9 @@
   </data>
   <data name="SQLiteStore_TableNotDefined" xml:space="preserve">
     <value>Table with name '{0}' is not defined.</value>
+  </data>
+  <data name="SQLiteStore_TooManyColumns" xml:space="preserve">
+    <value>The number of fields per entity in an upsert operation is limited to {0}.</value>
   </data>
   <data name="SQLiteStore_ValueTypeNotSupported" xml:space="preserve">
     <value>Value of type '{0}' is not supported.</value>

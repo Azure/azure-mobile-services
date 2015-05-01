@@ -40,6 +40,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         }
 
         /// <summary>
+        /// Gets the uri path if the query was an absolute or relative uri
+        /// </summary>
+        internal string UriPath { get; private set; }
+
+        /// <summary>
         /// Gets or sets the name of the table being queried.
         /// </summary>
         public string TableName { get; private set; }
@@ -97,7 +102,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         public MobileServiceTableQueryDescription Clone()
         {
             var clone = new MobileServiceTableQueryDescription(this.TableName);
-            
+
             clone.Filter = this.Filter;
             clone.Selection = this.Selection.ToList();
             clone.Ordering = this.Ordering.ToList();
@@ -117,28 +122,26 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         /// <returns>
         /// URI fragment representing the query.
         /// </returns>
-        public string ToQueryString()
+        public string ToODataString()
         {
             char? separator = null;
             StringBuilder text = new StringBuilder();
-            
+
             // Add the filter
             if (this.Filter != null)
             {
                 string filterStr = ODataExpressionVisitor.ToODataString(this.Filter);
-                text.AppendFormat(CultureInfo.InvariantCulture, "{0}$filter={1}", separator, filterStr);
-                separator = '&';                
+                text.AppendFormat(CultureInfo.InvariantCulture, "{0}{1}={2}", separator, ODataOptions.Filter, filterStr);
+                separator = '&';
             }
 
             // Add the ordering
             if (this.Ordering.Count > 0)
             {
                 IEnumerable<string> orderings = this.Ordering
-                                                    .Select(o => {
-                                                        var exprVisitor = new ODataExpressionVisitor();
-                                                        o.Expression.Accept(exprVisitor);
-                                                        string result = exprVisitor.Expression.ToString();
-
+                                                    .Select(o =>
+                                                    {
+                                                        string result = ODataExpressionVisitor.ToODataString(o.Expression);
                                                         if (o.Direction == OrderByDirection.Descending)
                                                         {
                                                             result += " desc";
@@ -146,35 +149,35 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                                                         return result;
                                                     });
 
-                text.AppendFormat(CultureInfo.InvariantCulture, "{0}$orderby={1}", separator, string.Join(",", orderings));
+                text.AppendFormat(CultureInfo.InvariantCulture, "{0}{1}={2}", separator, ODataOptions.OrderBy, string.Join(",", orderings));
                 separator = '&';
             }
 
             // Skip any elements
             if (this.Skip.HasValue && this.Skip >= 0)
             {
-                text.AppendFormat(CultureInfo.InvariantCulture, "{0}$skip={1}", separator, this.Skip);
+                text.AppendFormat(CultureInfo.InvariantCulture, "{0}{1}={2}", separator, ODataOptions.Skip, this.Skip);
                 separator = '&';
             }
 
             // Take the desired number of elements
             if (this.Top.HasValue && this.Top >= 0)
             {
-                text.AppendFormat(CultureInfo.InvariantCulture, "{0}$top={1}", separator, this.Top);
+                text.AppendFormat(CultureInfo.InvariantCulture, "{0}{1}={2}", separator, ODataOptions.Top, this.Top);
                 separator = '&';
             }
 
             // Add the selection
             if (this.Selection.Count > 0)
             {
-                text.AppendFormat(CultureInfo.InvariantCulture, "{0}$select={1}", separator, string.Join(",", this.Selection));
+                text.AppendFormat(CultureInfo.InvariantCulture, "{0}{1}={2}", separator, ODataOptions.Select, string.Join(",", this.Selection.Select(Uri.EscapeDataString)));
                 separator = '&';
             }
 
             // Add the total count
             if (this.IncludeTotalCount)
             {
-                text.AppendFormat(CultureInfo.InvariantCulture, "{0}$inlinecount=allpages", separator);
+                text.AppendFormat(CultureInfo.InvariantCulture, "{0}{1}=allpages", separator, ODataOptions.InlineCount);
                 separator = '&';
             }
 
@@ -190,6 +193,27 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         public static MobileServiceTableQueryDescription Parse(string tableName, string query)
         {
             query = query ?? String.Empty;
+
+            return Parse(tableName, query, null);
+        }
+
+        internal static MobileServiceTableQueryDescription Parse(Uri applicationUri, string tableName, string query)
+        {
+            query = query ?? String.Empty;
+            string uriPath = null;
+            Uri uri;
+            bool absolute;
+            if (HttpUtility.TryParseQueryUri(applicationUri, query, out uri, out absolute))
+            {
+                query = uri.Query.Length > 0 ? uri.Query.Substring(1) : String.Empty;
+                uriPath = uri.AbsolutePath;
+            }
+
+            return Parse(tableName, query, uriPath);
+        }
+
+        private static MobileServiceTableQueryDescription Parse(string tableName, string query, string uriPath)
+        {
             bool includeTotalCount = false;
             int? top = null;
             int? skip = null;
@@ -197,13 +221,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             QueryNode filter = null;
             IList<OrderByNode> orderings = null;
 
-            char[] separator = new[] { '=' };
-            var parameters = query.Split('&').Select(part => part.Split(separator, 2));
+            IDictionary<string, string> parameters = HttpUtility.ParseQueryString(query);
 
-            foreach (string[] parameter in parameters)
+            foreach (KeyValuePair<string, string> parameter in parameters)
             {
-                string key = parameter[0];
-                string value = parameter.Length > 1 ? parameter[1] : String.Empty;
+                string key = parameter.Key;
+                string value = parameter.Value;
                 if (String.IsNullOrEmpty(key))
                 {
                     continue;
@@ -211,46 +234,47 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 
                 switch (key)
                 {
-                    case "$filter":
+                    case ODataOptions.Filter:
                         filter = ODataExpressionParser.ParseFilter(value);
                         break;
-                    case "$orderby":
+                    case ODataOptions.OrderBy:
                         orderings = ODataExpressionParser.ParseOrderBy(value);
                         break;
-                    case "$skip":
+                    case ODataOptions.Skip:
                         skip = Int32.Parse(value);
                         break;
-                    case "$top":
+                    case ODataOptions.Top:
                         top = Int32.Parse(value);
                         break;
-                    case "$select":
+                    case ODataOptions.Select:
                         selection = value.Split(',');
                         break;
-                    case "$inlinecount":
+                    case ODataOptions.InlineCount:
                         includeTotalCount = "allpages".Equals(value);
                         break;
                     default:
-                        throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, Resources.MobileServiceTableQueryDescription_UnrecognizedQueryParameter, key), "query");
+                        throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unrecognized query parameter '{0}'.", key), "query");
                 }
             }
 
-            var queryDescription = new MobileServiceTableQueryDescription(tableName) 
-            { 
+            var description = new MobileServiceTableQueryDescription(tableName)
+            {
                 IncludeTotalCount = includeTotalCount,
                 Skip = skip,
                 Top = top
             };
+            description.UriPath = uriPath;
             if (selection != null)
             {
-                ((List<string>)queryDescription.Selection).AddRange(selection);
+                ((List<string>)description.Selection).AddRange(selection);
             }
             if (orderings != null)
             {
-                ((List<OrderByNode>)queryDescription.Ordering).AddRange(orderings);
+                ((List<OrderByNode>)description.Ordering).AddRange(orderings);
             }
-            queryDescription.Filter = filter;
+            description.Filter = filter;
 
-            return queryDescription;
-        }        
+            return description;
+        }
     }
 }

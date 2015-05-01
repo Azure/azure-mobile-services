@@ -99,7 +99,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             IMobileServiceTableQuery<U> query = getQuery(table);
             MobileServiceTableQueryProvider provider = new MobileServiceTableQueryProvider();
             MobileServiceTableQueryDescription compiledQuery = provider.Compile((MobileServiceTableQuery<U>)query);
-            Log(">>> " + compiledQuery.ToQueryString());
+            Log(">>> " + compiledQuery.ToODataString());
             return compiledQuery;
         }
 
@@ -343,10 +343,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             AssertFilter(query.Filter, "((Weight le 10f) or (InStock eq true))");
 
             query = Compile<Product, Product>(table => table.Where(p => p.Created == new DateTime(1994, 10, 14, 0, 0, 0, DateTimeKind.Utc)));
-            AssertFilter(query.Filter, "(Created eq datetime'1994-10-14T00:00:00.000Z')");
+            AssertFilter(query.Filter, "(Created eq datetime'1994-10-14T00%3A00%3A00.000Z')");
 
             query = Compile<ProductWithDateTimeOffset, ProductWithDateTimeOffset>(table => table.Where(p => p.Created == new DateTimeOffset(1994, 10, 13, 17, 0, 0, TimeSpan.FromHours(7))));
-            AssertFilter(query.Filter, "(Created eq datetimeoffset'1994-10-13T17:00:00.0000000+07:00')");
+            AssertFilter(query.Filter, "(Created eq datetimeoffset'1994-10-13T17%3A00%3A00.0000000%2B07%3A00')");
         }
 
         [Tag("notXamarin_iOS")] // LambdaExpression.Compile() is not supported on Xamarin.iOS
@@ -361,7 +361,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                  select new { p.Name, p.Price })
                 .Skip(20)
                 .Take(10));
-            Assert.AreEqual("$filter=(((Price le 10M) and (Weight gt 10f)) and not(InStock))&$orderby=Price desc,Name&$skip=20&$top=10&$select=Name,Price,Weight,WeightInKG", query.ToQueryString());
+            Assert.AreEqual("$filter=(((Price le 10M) and (Weight gt 10f)) and not(InStock))&$orderby=Price desc,Name&$skip=20&$top=10&$select=Name,Price,Weight,WeightInKG", query.ToODataString());
         }
 
         [TestMethod]
@@ -902,11 +902,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 select p);
             AssertFilter(query.Filter, "(Updated eq null)");
 
+            var minDate = new DateTime(1, 1, 1, 8, 0, 0, DateTimeKind.Utc);
             query = Compile<Product, Product>(table =>
                from p in table
-               where p.Updated == DateTime.MinValue
+               where p.Updated == minDate
                select p);
-            AssertFilter(query.Filter, "(Updated eq datetime'0001-01-01T08:00:00.000Z')");
+            AssertFilter(query.Filter, "(Updated eq datetime'0001-01-01T08%3A00%3A00.000Z')");
 
             query = Compile<Product, Product>(table =>
                 from p in table
@@ -1039,7 +1040,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual("Product", query.TableName);
             Assert.AreEqual(0, query.Skip);
             Assert.IsFalse(query.Top.HasValue);
-            Assert.AreEqual("$skip=0", query.ToQueryString());
+            Assert.AreEqual("$skip=0", query.ToODataString());
         }
 
         [TestMethod]
@@ -1049,7 +1050,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual("Product", query.TableName);
             Assert.AreEqual(0, query.Top);
             Assert.IsFalse(query.Skip.HasValue);
-            Assert.AreEqual("$top=0", query.ToQueryString());
+            Assert.AreEqual("$top=0", query.ToODataString());
         }
 
         [TestMethod]

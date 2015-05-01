@@ -3,11 +3,6 @@
 // ----------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.WindowsAzure.MobileServices.Query
 {
@@ -16,9 +11,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         private string text;
         private int textLen;
         private int textPos;
-        private char ch;
+        public char CurrentChar { get; private set; }
 
-        public QueryToken Token {get; private set; }
+        public QueryToken Token { get; private set; }
 
         public ODataExpressionLexer(string expression)
         {
@@ -31,14 +26,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 
         public QueryToken NextToken()
         {
-            while (Char.IsWhiteSpace(this.ch))
+            while (Char.IsWhiteSpace(this.CurrentChar))
             {
                 this.NextChar();
             }
 
             QueryTokenKind t = QueryTokenKind.Unknown;
             int tokenPos = this.textPos;
-            switch (this.ch)
+            switch (this.CurrentChar)
             {
                 case '(':
                     this.NextChar();
@@ -61,39 +56,39 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                     t = QueryTokenKind.Dot;
                     break;
                 case '\'':
-                    char quote = this.ch;
+                    char quote = this.CurrentChar;
                     do
                     {
                         this.AdvanceToNextOccuranceOf(quote);
                         if (this.textPos == this.textLen)
                         {
-                            this.ParseError(Resources.ODataExpressionParser_UnterminatedStringLiteral, this.textPos);
+                            this.ParseError("The specified odata query has unterminated string literal.", this.textPos);
                         }
                         this.NextChar();
                     }
-                    while (this.ch == quote);
+                    while (this.CurrentChar == quote);
                     t = QueryTokenKind.StringLiteral;
                     break;
                 default:
-                    if (this.IsIdentifierStart(this.ch) || this.ch == '@' || this.ch == '_')
+                    if (this.IsIdentifierStart(this.CurrentChar) || this.CurrentChar == '@' || this.CurrentChar == '_')
                     {
                         do
                         {
                             this.NextChar();
                         }
-                        while (this.IsIdentifierPart(this.ch) || this.ch == '_');
+                        while (this.IsIdentifierPart(this.CurrentChar) || this.CurrentChar == '_');
                         t = QueryTokenKind.Identifier;
                         break;
                     }
-                    if (Char.IsDigit(this.ch))
+                    if (Char.IsDigit(this.CurrentChar))
                     {
                         t = QueryTokenKind.IntegerLiteral;
                         do
                         {
                             this.NextChar();
                         }
-                        while (Char.IsDigit(this.ch));
-                        if (this.ch == '.')
+                        while (Char.IsDigit(this.CurrentChar));
+                        if (this.CurrentChar == '.')
                         {
                             t = QueryTokenKind.RealLiteral;
                             this.NextChar();
@@ -102,13 +97,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                             {
                                 this.NextChar();
                             }
-                            while (Char.IsDigit(this.ch));
+                            while (Char.IsDigit(this.CurrentChar));
                         }
-                        if (this.ch == 'E' || this.ch == 'e')
+                        if (this.CurrentChar == 'E' || this.CurrentChar == 'e')
                         {
                             t = QueryTokenKind.RealLiteral;
                             this.NextChar();
-                            if (this.ch == '+' || this.ch == '-')
+                            if (this.CurrentChar == '+' || this.CurrentChar == '-')
                             {
                                 this.NextChar();
                             }
@@ -117,9 +112,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                             {
                                 this.NextChar();
                             }
-                            while (Char.IsDigit(this.ch));
+                            while (Char.IsDigit(this.CurrentChar));
                         }
-                        if (this.ch == 'F' || this.ch == 'f' || this.ch == 'M' || this.ch == 'm' || this.ch == 'D' || this.ch == 'd')
+                        if (this.CurrentChar == 'F' || this.CurrentChar == 'f' || this.CurrentChar == 'M' || this.CurrentChar == 'm' || this.CurrentChar == 'D' || this.CurrentChar == 'd')
                         {
                             t = QueryTokenKind.RealLiteral;
                             this.NextChar();
@@ -131,7 +126,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                         t = QueryTokenKind.End;
                         break;
                     }
-                    this.ParseError(Resources.ODataExpressionParser_SyntaxError, this.textPos);
+                    this.ParseError("The specified odata query has syntax errors.", this.textPos);
                     break;
             }
             this.Token.Kind = t;
@@ -145,64 +140,81 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 
         private void ValidateDigit()
         {
-            if (!Char.IsDigit(this.ch)) {
-                this.ParseError(Resources.ODataExpressionParser_DigitExpected, this.textPos);
+            if (!Char.IsDigit(this.CurrentChar))
+            {
+                this.ParseError("Digit expected.", this.textPos);
             }
         }
 
-        private void ReClassifyToken() {
-            if (Token.Kind == QueryTokenKind.Identifier) {
-                if (this.Token.Text == "or") {
+        private void ReClassifyToken()
+        {
+            if (Token.Kind == QueryTokenKind.Identifier)
+            {
+                if (this.Token.Text == "or")
+                {
                     this.Token.Kind = QueryTokenKind.Or;
                 }
-                else if (this.Token.Text == "add") {
+                else if (this.Token.Text == "add")
+                {
                     this.Token.Kind = QueryTokenKind.Add;
                 }
-                else if (this.Token.Text == "and") {
+                else if (this.Token.Text == "and")
+                {
                     this.Token.Kind = QueryTokenKind.And;
                 }
-                else if (this.Token.Text == "div") {
+                else if (this.Token.Text == "div")
+                {
                     this.Token.Kind = QueryTokenKind.Divide;
                 }
-                else if (this.Token.Text == "sub") {
+                else if (this.Token.Text == "sub")
+                {
                     this.Token.Kind = QueryTokenKind.Sub;
                 }
-                else if (this.Token.Text == "mul") {
+                else if (this.Token.Text == "mul")
+                {
                     this.Token.Kind = QueryTokenKind.Multiply;
                 }
-                else if (this.Token.Text == "mod") {
+                else if (this.Token.Text == "mod")
+                {
                     this.Token.Kind = QueryTokenKind.Modulo;
                 }
-                else if (this.Token.Text == "ne") {
+                else if (this.Token.Text == "ne")
+                {
                     this.Token.Kind = QueryTokenKind.NotEqual;
                 }
-                else if (this.Token.Text == "not") {
+                else if (this.Token.Text == "not")
+                {
                     this.Token.Kind = QueryTokenKind.Not;
                 }
-                else if (this.Token.Text == "le") {
+                else if (this.Token.Text == "le")
+                {
                     this.Token.Kind = QueryTokenKind.LessThanEqual;
                 }
-                else if (this.Token.Text == "lt") {
+                else if (this.Token.Text == "lt")
+                {
                     this.Token.Kind = QueryTokenKind.LessThan;
                 }
-                else if (this.Token.Text == "eq") {
+                else if (this.Token.Text == "eq")
+                {
                     this.Token.Kind = QueryTokenKind.Equal;
                 }
-                else if (this.Token.Text == "ge") {
+                else if (this.Token.Text == "ge")
+                {
                     this.Token.Kind = QueryTokenKind.GreaterThanEqual;
                 }
-                else if (this.Token.Text == "gt") {
+                else if (this.Token.Text == "gt")
+                {
                     this.Token.Kind = QueryTokenKind.GreaterThan;
                 }
             }
         }
 
-        private bool IsIdentifierStart (char ch) 
+        private bool IsIdentifierStart(char ch)
         {
             return Char.IsLetter(ch);
         }
 
-        private bool IsIdentifierPart (char ch) 
+        private bool IsIdentifierPart(char ch)
         {
             bool result = this.IsIdentifierStart(ch) || Char.IsDigit(ch) || (ch == '_' || ch == '-');
             return result;
@@ -211,7 +223,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         private void AdvanceToNextOccuranceOf(char endingValue)
         {
             this.NextChar();
-            while (this.textPos < this.textLen && this.ch != endingValue)
+            while (this.textPos < this.textLen && this.CurrentChar != endingValue)
             {
                 this.NextChar();
             }
@@ -223,14 +235,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             {
                 this.textPos++;
             }
-            this.ch = (this.textPos < this.textLen) ? this.text[this.textPos] : '\0';
+            this.CurrentChar = (this.textPos < this.textLen) ? this.text[this.textPos] : '\0';
         }
 
         private void SetTextPos(int pos)
         {
             this.textPos = pos;
-            this.ch = (this.textPos < this.textLen) ? this.text[this.textPos] : '\0';
-        }               
+            this.CurrentChar = (this.textPos < this.textLen) ? this.text[this.textPos] : '\0';
+        }
 
         private void ParseError(string message, int errorPos)
         {

@@ -235,9 +235,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>The table.</returns>
         public IMobileServiceSyncTable GetSyncTable(string tableName)
         {
+            return GetSyncTable(tableName, MobileServiceTableKind.Table);
+        }
+
+        internal MobileServiceSyncTable GetSyncTable(string tableName, MobileServiceTableKind kind)
+        {
             ValidateTableName(tableName);
 
-            return new MobileServiceSyncTable(tableName, this);
+            return new MobileServiceSyncTable(tableName, kind, this);
         }
 
         /// <summary>
@@ -270,7 +275,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         public IMobileServiceSyncTable<T> GetSyncTable<T>()
         {
             string tableName = this.SerializerSettings.ContractResolver.ResolveTableName(typeof(T));
-            return new MobileServiceSyncTable<T>(tableName, this);
+            return new MobileServiceSyncTable<T>(tableName, MobileServiceTableKind.Table, this);
         }
 
         /// <summary>
@@ -351,7 +356,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("token");
             }
 
-            MobileServiceTokenAuthentication auth = new MobileServiceTokenAuthentication(this, provider, token);
+            MobileServiceTokenAuthentication auth = new MobileServiceTokenAuthentication(this, provider, token, parameters: null);
             return auth.LoginAsync();
         }
 
@@ -432,7 +437,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 content = serializer.Serialize(body).ToString();
             }
 
-            string response = await this.InternalInvokeApiAsync(apiName, content, method, parameters);
+            string response = await this.InternalInvokeApiAsync(apiName, content, method, parameters, MobileServiceFeatures.TypedApiCall);
             if (string.IsNullOrEmpty(response))
             {
                 return default(U);
@@ -511,7 +516,8 @@ namespace Microsoft.WindowsAzure.MobileServices
                         break;
                 }
             }
-            string response = await this.InternalInvokeApiAsync(apiName, content, method, parameters);
+
+            string response = await this.InternalInvokeApiAsync(apiName, content, method, parameters, MobileServiceFeatures.JsonApiCall);
             return response.ParseToJToken(this.SerializerSettings);
         }
 
@@ -524,11 +530,19 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="parameters">
         /// A dictionary of user-defined parameters and values to include in the request URI query string.
         /// </param>
+        /// <param name="features">
+        /// Value indicating which features of the SDK are being used in this call. Useful for telemetry.
+        /// </param>
         /// <returns>The response content from the custom api invocation.</returns>
-        private async Task<string> InternalInvokeApiAsync(string apiName, string content, HttpMethod method, IDictionary<string, string> parameters = null)
+        private async Task<string> InternalInvokeApiAsync(string apiName, string content, HttpMethod method, IDictionary<string, string> parameters, MobileServiceFeatures features)
         {
             method = method ?? defaultHttpMethod;
-            MobileServiceHttpResponse response = await this.HttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), this.CurrentUser, content, false);
+            if (parameters != null && parameters.Count > 0)
+            {
+                features |= MobileServiceFeatures.AdditionalQueryParameters;
+            }
+
+            MobileServiceHttpResponse response = await this.HttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), this.CurrentUser, content, false, features: features);
             return response.Content;
         }
 
@@ -540,7 +554,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns></returns>
         private string CreateAPIUriString(string apiName, IDictionary<string, string> parameters = null)
         {
-            string uriFragment = string.Format(CultureInfo.InvariantCulture, "api/{0}", apiName);
+            string uriFragment = apiName.StartsWith("/") ? apiName : string.Format(CultureInfo.InvariantCulture, "api/{0}", apiName);
             string queryString = MobileServiceUrlBuilder.GetQueryString(parameters, useTableAPIRules: false);
 
             return MobileServiceUrlBuilder.CombinePathAndQuery(uriFragment, queryString);
@@ -563,7 +577,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         public async Task<HttpResponseMessage> InvokeApiAsync(string apiName, HttpContent content, HttpMethod method, IDictionary<string, string> requestHeaders, IDictionary<string, string> parameters)
         {
             method = method ?? defaultHttpMethod;
-            HttpResponseMessage response = await this.HttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), this.CurrentUser, content, requestHeaders);
+            HttpResponseMessage response = await this.HttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), this.CurrentUser, content, requestHeaders: requestHeaders, features: MobileServiceFeatures.GenericApiCall);
             return response;
         }
 
@@ -606,7 +620,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentException(
                     string.Format(
                         CultureInfo.InvariantCulture,
-                        Resources.MobileServiceClient_EmptyArgument,
+                        "{0} cannot be null, empty or only whitespace.",
                         "tableName"));
             }
         }
