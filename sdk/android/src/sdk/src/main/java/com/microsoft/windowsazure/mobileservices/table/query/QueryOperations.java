@@ -33,7 +33,7 @@ public class QueryOperations {
     /**
      * Creates Query with the requested table name.
      *
-     * @param tabledName The name of the table
+     * @param tableName The name of the table
      * @return The Query
      */
     public static Query tableName(String tableName) {
@@ -913,7 +913,7 @@ public class QueryOperations {
      * String value with the contents of the parameter value with all leading
      * and trailing white-space characters removed.
      *
-     * @param exp
+     * @param field
      * @return Query
      */
     public static Query trim(String field) {
@@ -1196,7 +1196,7 @@ public class QueryOperations {
     /**
      * Creates a Query representing a function call
      *
-     * @param functionName The function name
+     * @param operatorKind The function name
      * @param parameters   The function parameters
      * @return The Query representing a function call
      */
