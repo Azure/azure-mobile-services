@@ -1,0 +1,32 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditTextPreference
+        android:defaultValue="@string/pref_default_mobile_service_url"
+        android:key="pref_mobile_service_url"
+        android:maxLines="1"
+        android:singleLine="true"
+        android:title="@string/pref_mobile_service_url" />
+
+    <EditTextPreference
+        android:defaultValue="@string/pref_default_mobile_service_key"
+        android:key="pref_mobile_service_key"
+        android:maxLines="1"
+        android:singleLine="true"
+        android:title="@string/pref_mobile_service_key" />
+
+    <EditTextPreference
+        android:defaultValue="@string/pref_default_log_post_url"
+        android:key="pref_log_post_url"
+        android:maxLines="1"
+        android:singleLine="true"
+        android:title="@string/pref_log_post_url" />
+
+    <EditTextPreference
+        android:defaultValue="@string/pref_default_GCM_sender_id"
+        android:key="pref_GCM_sender_id"
+        android:maxLines="1"
+        android:singleLine="true"
+        android:title="@string/pref_GCM_sender_id" />
+
+
+</PreferenceScreen>

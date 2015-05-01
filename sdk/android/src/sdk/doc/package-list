@@ -1,1 +1,14 @@
 com.microsoft.windowsazure.mobileservices
+com.microsoft.windowsazure.mobileservices.authentication
+com.microsoft.windowsazure.mobileservices.http
+com.microsoft.windowsazure.mobileservices.notifications
+com.microsoft.windowsazure.mobileservices.table
+com.microsoft.windowsazure.mobileservices.table.query
+com.microsoft.windowsazure.mobileservices.table.serialization
+com.microsoft.windowsazure.mobileservices.table.sync
+com.microsoft.windowsazure.mobileservices.table.sync.localstore
+com.microsoft.windowsazure.mobileservices.table.sync.operations
+com.microsoft.windowsazure.mobileservices.table.sync.push
+com.microsoft.windowsazure.mobileservices.table.sync.queue
+com.microsoft.windowsazure.mobileservices.table.sync.synchandler
+com.microsoft.windowsazure.mobileservices.threading
