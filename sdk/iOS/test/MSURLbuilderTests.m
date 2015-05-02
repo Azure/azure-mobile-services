@@ -5,6 +5,7 @@
 #import <XCTest/XCTest.h>
 #import "MSTable.h"
 #import "MSURLBuilder.h"
+#import "WindowsAzureMobileServices.h"
 
 @interface MSURLBuilderTests : XCTestCase
 

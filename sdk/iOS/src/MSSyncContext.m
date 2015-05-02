@@ -16,6 +16,11 @@
 #import "MSNaiveISODateFormatter.h"
 #import "MSDateOffset.h"
 #import "MSTableConfigValue.h"
+#import "MSQueryResult.h"
+#import "MSSyncContextReadResult.h"
+#import "MSOperationQueue.h"
+#import "MSSyncTable.h"
+#import "MSSerializer.h"
 
 @implementation MSSyncContext {
     dispatch_queue_t writeOperationQueue;

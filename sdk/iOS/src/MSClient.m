@@ -6,6 +6,7 @@
 #import "MSTable.h"
 #import "MSClientConnection.h"
 #import "MSLogin.h"
+#import "MSLoginController.h"
 #import "MSUser.h"
 #import "MSAPIRequest.h"
 #import "MSAPIConnection.h"

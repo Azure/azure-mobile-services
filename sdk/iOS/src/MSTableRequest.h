@@ -3,7 +3,10 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSTable.h"
+#import "BlockDefinitions.h"
+
+@class MSTable;
+@class MSSDKFeatures;
 #import "MSSerializer.h"
 #import "MSSDKFeatures.h"
 

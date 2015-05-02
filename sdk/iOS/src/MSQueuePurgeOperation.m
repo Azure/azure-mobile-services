@@ -13,6 +13,8 @@
 #import "MSClientInternal.h"
 #import "MSQueryInternal.h"
 #import "MSTableConfigValue.h"
+#import "MSOperationQueue.h"
+#import "MSSyncTable.h"
 
 @interface MSQueuePurgeOperation()
 

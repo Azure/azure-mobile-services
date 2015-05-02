@@ -300,6 +300,7 @@
 		E8F33B36161668DA002DD7C6 /* MSJSONSerializerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSJSONSerializerTests.m; sourceTree = "<group>"; };
 		E8F33B38161668E4002DD7C6 /* MSPredicateTranslatorTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSPredicateTranslatorTests.m; sourceTree = "<group>"; };
 		E8F33B3A161668ED002DD7C6 /* MSQueryTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSQueryTests.m; sourceTree = "<group>"; };
+		F3EE33E21AF2C0C9009874A0 /* BlockDefinitions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BlockDefinitions.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -529,6 +530,7 @@
 				E8F33B1B161667EC002DD7C6 /* Serialization */,
 				E8F33B1C161667F6002DD7C6 /* Query */,
 				E8F33AE11616659C002DD7C6 /* Supporting Files */,
+				F3EE33E21AF2C0C9009874A0 /* BlockDefinitions.h */,
 			);
 			name = Source;
 			path = src;

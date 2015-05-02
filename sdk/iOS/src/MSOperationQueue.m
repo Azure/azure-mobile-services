@@ -7,6 +7,8 @@
 #import "MSTable.h"
 #import "MSTableOperationInternal.h"
 #import "MSQuery.h"
+#import "MSSyncTable.h"
+#import "MSSyncContextReadResult.h"
 
 @interface MSOperationQueue()
 @property (nonatomic, weak) id<MSSyncContextDataSource> dataSource;

@@ -5,6 +5,7 @@
 #import "MSRegistrationManager.h"
 #import "MSLocalStorage.h"
 #import "MSPushHttp.h"
+#import "MSClient.h"
 
 @interface MSRegistrationManager ()
 @property (nonatomic, strong, readonly) MSLocalStorage *storage;

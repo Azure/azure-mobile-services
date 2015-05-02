@@ -3,20 +3,12 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSTableOperation.h"
-#import "MSSyncContextReadResult.h"
+#import "BlockDefinitions.h"
 
 @class MSQuery;
 @class MSSyncContext;
-
-/// Callback for updates and deletes. If there was an error, the *error* will be non-nil.
-typedef void (^MSSyncBlock)(NSError *error);
-
-/// Callback for inserts. If there was an error, the *error* will be non-nil.
-typedef void (^MSSyncItemBlock)(NSDictionary *item, NSError *error);
-
-/// Callback for push operations
-typedef void (^MSSyncPushCompletionBlock)(void);
+@class MSTableOperation;
+@class MSSyncContextReadResult;
 
 /// The MSSyncContextDelegate allows for customizing the handling of errors, conflicts, and other
 /// conditions that may occur when syncing data between the device and the mobile service.

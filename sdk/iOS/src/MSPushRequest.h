@@ -3,7 +3,6 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSClient.h"
 
 @interface MSPushRequest : NSMutableURLRequest
 

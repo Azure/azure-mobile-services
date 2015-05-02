@@ -3,7 +3,7 @@
 // ----------------------------------------------------------------------------
 
 #import "MSAPIConnection.h"
-
+#import "MSAPiRequest.h"
 
 #pragma mark * MSAPIConnection Private Interface
 
