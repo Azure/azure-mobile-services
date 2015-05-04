@@ -4,7 +4,9 @@
 
 #import "MSUserAgentBuilder.h"
 #import "WindowsAzureMobileServices.h"
+#if TARGET_OS_IPHONE
 #import <UIKit/UIKit.h>
+#endif
 
 
 #pragma mark * User Agent Header String Constants
@@ -34,15 +36,19 @@ static NSString *const sdkFileVesionFormat = @"%d.%d.%d";
     NSString *OSversion = nil;
     
     // Get the device related info
-#if TARGET_IPHONE_SIMULATOR
+#if TARGET_IPHONE_SIMULATOR && TARGET_OS_IPHONE
     model = simulatorModel;
     OS = unknownValue;
     OSversion = unknownValue;
-#else
+#elif TARGET_OS_IPHONE
     UIDevice *currentDevice = [UIDevice currentDevice];
     model = [currentDevice model];
     OS = [currentDevice systemName];
     OSversion = [currentDevice systemVersion];
+#else
+	OSversion = [[NSProcessInfo processInfo] operatingSystemVersionString];
+	OS = @"OSX";
+	model = @"Mac";
 #endif
     NSString *sdkVersion = [NSString stringWithFormat:sdkVersionFormat,
                                 WindowsAzureMobileServicesSdkMajorVersion,

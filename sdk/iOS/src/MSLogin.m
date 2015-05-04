@@ -7,7 +7,7 @@
 #import "MSJSONSerializer.h"
 #import "MSClientConnection.h"
 #import "MSClient.h"
-#import "MSLoginController.h"
+#import "WindowsAzureMobileServices.h"
 
 #pragma mark * MSLogin Private Interface
 
@@ -44,7 +44,7 @@
 
 #pragma  mark * Public Login Methods
 
-
+#if TARGET_OS_IPHONE
 -(void) loginWithProvider:(NSString *)provider
              controller:(UIViewController *)controller
                  animated:(BOOL)animated
@@ -121,6 +121,8 @@
                                             provider:provider
                                           completion:completion];
 }
+
+#endif
 
 -(void) loginWithProvider:(NSString *)provider
                 token:(NSDictionary *)token

@@ -5,6 +5,8 @@
 #ifndef WindowsAzureMobileServices_BlockDefinitions_h
 #define WindowsAzureMobileServices_BlockDefinitions_h
 
+#import <Foundation/Foundation.h>
+
 @class MSUser;
 @class MSQueryResult;
 

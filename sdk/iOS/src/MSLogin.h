@@ -2,7 +2,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
+#if TARGET_OS_IPHONE
 #import <UIKit/UIKit.h>
+#endif
 #import "BlockDefinitions.h"
 
 @class MSClient;
@@ -33,7 +35,7 @@
 
 #pragma  mark * Public Login Methods
 
-
+#if TARGET_OS_IPHONE
 // Logs in the current end user with the given provider by presenting the
 // MSLoginController with the given |controller|.
 -(void)loginWithProvider:(NSString *)provider
@@ -45,6 +47,8 @@
 // end user with the given provider.
 -(MSLoginController *)loginViewControllerWithProvider:(NSString *)provider
                                       completion:(MSClientLoginBlock)completion;
+
+#endif
 
 // Logs in the current end user with the given provider and the given token for
 // the provider.
