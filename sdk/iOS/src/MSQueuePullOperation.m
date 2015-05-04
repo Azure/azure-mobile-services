@@ -15,6 +15,11 @@
 #import "MSNaiveISODateFormatter.h"
 #import "MSDateOffset.h"
 #import "MSTableConfigValue.h"
+#import "MSQueryResult.h"
+#import "MSTable.h"
+#import "MSSyncTable.h"
+#import "MSOperationQueue.h"
+#import "MSSyncContextReadResult.h"
 
 @interface MSQueuePullOperation()
 

@@ -181,7 +181,7 @@
 
 #pragma mark * Public Authentication Methods
 
-
+#if TARGET_OS_IPHONE
 -(void) loginWithProvider:(NSString *)provider
              controller:(UIViewController *)controller
                  animated:(BOOL)animated
@@ -199,6 +199,7 @@
     return [self.login loginViewControllerWithProvider:provider
                                             completion:completion];
 }
+#endif
 
 -(void) loginWithProvider:(NSString *)provider
                 token:(NSDictionary *)token

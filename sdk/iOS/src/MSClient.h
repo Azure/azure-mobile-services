@@ -3,29 +3,20 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
+#if TARGET_OS_IPHONE
 #import <UIKit/UIKit.h>
+#endif
 #import "MSError.h"
-#import "MSFilter.h"
-#import "MSLoginController.h"
-#import "MSSyncContext.h"
+#import "BlockDefinitions.h"
 
 @class MSTable;
 @class MSUser;
 @class MSSyncTable;
 @class MSPush;
+@class MSSyncContext;
+@class MSLoginController;
 
-
-#pragma mark * Block Type Definitions
-/// Callback for method with no return other than error.
-typedef void (^MSCompletionBlock)(NSError *error);
-
-/// Callback for invokeAPI method that expects a JSON result.
-typedef void (^MSAPIBlock)(id result, NSHTTPURLResponse *response, NSError *error);
-
-/// Callback for the invokeAPI method that can return any media type.
-typedef void (^MSAPIDataBlock)(NSData *result,
-                               NSHTTPURLResponse *response,
-                               NSError *error);
+@protocol MSFilter;
 
 #pragma  mark * MSClient Public Interface
 
@@ -146,6 +137,7 @@ typedef void (^MSAPIDataBlock)(NSData *result,
 
 #pragma mark * Public Login and Logout Methods
 
+#if TARGET_OS_IPHONE
 /// Logs in the current end user with the given provider by presenting the
 /// MSLoginController with the given controller.
 -(void)loginWithProvider:(NSString *)provider
@@ -157,6 +149,7 @@ typedef void (^MSAPIDataBlock)(NSData *result,
 /// end user with the given provider.
 -(MSLoginController *)loginViewControllerWithProvider:(NSString *)provider
                                  completion:(MSClientLoginBlock)completion;
+#endif
 
 /// Logs in the current end user with the given provider and the given token for
 /// the provider.

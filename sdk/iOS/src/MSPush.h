@@ -3,7 +3,9 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSClient.h"
+#import "BlockDefinitions.h"
+
+@class MSClient;
 
 #pragma  mark * MSClient Public Interface
 

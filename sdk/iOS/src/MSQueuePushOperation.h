@@ -3,7 +3,9 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSSyncContext.h"
+#import "BlockDefinitions.h"
+
+@class MSSyncContext;
 
 /// Performs all actions associated with a push operation including, sending each operation to
 /// the server, processing errors, and triggering the appropriate calls to the delegate, datasource,

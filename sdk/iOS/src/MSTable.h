@@ -3,30 +3,10 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSClient.h"
-#import "MSQueryResult.h"
+#import "BlockDefinitions.h"
 
 @class MSQuery;
-
-#pragma mark * Block Type Definitions
-
-/// Callback for updates, inserts or readWithId requests. If there was an
-/// error, the *error* will be non-nil.
-typedef void (^MSItemBlock)(NSDictionary *item, NSError *error);
-
-/// Callback for deletes. If there was an error, the *error* will be non-nil.
-typedef void (^MSDeleteBlock)(id itemId, NSError *error);
-
-/// Callback for reads. If there was an error, the *error* will be non-nil. If
-/// there was not an error, then the result will always be non-nil
-/// but but items may be empty if the query returned no results. If the query included a
-/// request for the total count of items on the server (not just those returned
-/// in *items* array), the *totalCount* in the result will have this value; otherwise
-/// *totalCount* will be -1.
-/// if the server returned a link to next page of results then
-/// nextLink will be non-nil.
-typedef void (^MSReadQueryBlock)(MSQueryResult *result,
-                                 NSError *error);
+@class MSClient;
 
 typedef NS_OPTIONS(NSUInteger, MSSystemProperties) {
     MSSystemPropertyNone        = 0,

@@ -3,8 +3,8 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSUser.h"
 
+@class MSUser;
 
 #pragma mark * MSLoginSerializer Public Interface
 

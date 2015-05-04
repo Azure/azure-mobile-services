@@ -2,10 +2,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
-#import "MSClient.h"
-#import "MSLoginController.h"
-#import "MSLoginView.h"
+#import <UIKit/UIKit.h>
+#import "BlockDefinitions.h"
+
+@class MSClient;
+@class MSLoginController;
 
 
 #pragma mark * MSLogin Public Interface

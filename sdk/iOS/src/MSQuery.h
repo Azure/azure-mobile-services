@@ -3,8 +3,10 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSTable.h"
-#import "MSSyncTable.h"
+#import "BlockDefinitions.h"
+
+@class MSSyncTable;
+@class MSTable;
 
 #pragma mark * MSQuery Public Interface
 

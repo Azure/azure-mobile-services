@@ -3,8 +3,6 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSError.h"
-
 
 #pragma mark * Block Type Definitions
 

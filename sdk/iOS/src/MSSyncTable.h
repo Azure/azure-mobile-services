@@ -3,8 +3,10 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSClient.h"
-#import "MSTable.h"
+#import "BlockDefinitions.h"
+
+@class MSClient;
+@class MSQuery;
 
 /// The *MSSyncTable* class represents a table of a Windows Azure Mobile Service.
 /// Items can be inserted, updated, deleted and read from the table. The table
