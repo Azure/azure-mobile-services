@@ -68,9 +68,4 @@ typedef void (^MSResponseBlock)(NSHTTPURLResponse *response,
 								NSData *data,
 								NSError *error);
 
-#pragma mark * MSPushHttp
-
-typedef void (^MSCreateRegistrationIdBlock)(NSString *registrationId, NSError *error);
-typedef void (^MSListRegistrationsBlock)(NSArray *registrations, NSError *error);
-
 #endif
