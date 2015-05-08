@@ -4,6 +4,7 @@
 
 #import "MSPushConnection.h"
 #import "MSError.h"
+#import "MSPushRequest.h"
 
 @implementation MSPushConnection
 

@@ -8,6 +8,7 @@
 #import "MSQuery.h"
 #import "MSTable+MSTableTestUtilities.h"
 #import "MSSDKFeatures.h"
+#import "MSQueryResult.h"
 
 @interface MSTableTests : XCTestCase {
     MSClient *client;

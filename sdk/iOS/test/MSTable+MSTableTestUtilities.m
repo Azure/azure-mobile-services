@@ -3,6 +3,7 @@
 // ----------------------------------------------------------------------------
 
 #import "MSTable+MSTableTestUtilities.h"
+#import "MSQueryResult.h"
 
 @implementation MSTable (MSTableFunctionalTestUtilities)
 
