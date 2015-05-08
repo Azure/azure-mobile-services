@@ -134,39 +134,6 @@
 		E8F33B3D1616694C002DD7C6 /* MSQueryTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B3A161668ED002DD7C6 /* MSQueryTests.m */; };
 		E8F33B3E16166956002DD7C6 /* MSJSONSerializerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B36161668DA002DD7C6 /* MSJSONSerializerTests.m */; };
 		E8F33B3F1616695E002DD7C6 /* MSPredicateTranslatorTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B38161668E4002DD7C6 /* MSPredicateTranslatorTests.m */; };
-		F35896AA1AFD067700D9FE99 /* MSURLbuilderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8EA24BE161CFC6400BE055D /* MSURLbuilderTests.m */; };
-		F35896AB1AFD067700D9FE99 /* MSUserAgentBuilderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E84CA4D5162373E2009B2588 /* MSUserAgentBuilderTests.m */; };
-		F35896AC1AFD067700D9FE99 /* MSMultiRequestTestFilter.h in Sources */ = {isa = PBXBuildFile; fileRef = A24701C9196897C100385DA2 /* MSMultiRequestTestFilter.h */; };
-		F35896AD1AFD067700D9FE99 /* MSMultiRequestTestFilter.m in Sources */ = {isa = PBXBuildFile; fileRef = A24701CA196897C100385DA2 /* MSMultiRequestTestFilter.m */; };
-		F35896AE1AFD067700D9FE99 /* MSTestFilter.h in Sources */ = {isa = PBXBuildFile; fileRef = E8E37902161E2FC500C13F00 /* MSTestFilter.h */; };
-		F35896AF1AFD067700D9FE99 /* MSTestFilter.m in Sources */ = {isa = PBXBuildFile; fileRef = E8E37903161E2FC500C13F00 /* MSTestFilter.m */; };
-		F35896B01AFD067700D9FE99 /* MSTable+MSTableTestUtilities.h in Sources */ = {isa = PBXBuildFile; fileRef = A22CF3711825914700660C79 /* MSTable+MSTableTestUtilities.h */; };
-		F35896B11AFD067700D9FE99 /* MSTable+MSTableTestUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = A22CF3721825914700660C79 /* MSTable+MSTableTestUtilities.m */; };
-		F35896B21AFD067700D9FE99 /* MSTableFuncTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A214410B182631A500C2E762 /* MSTableFuncTests.m */; };
-		F35896B31AFD067700D9FE99 /* MSClientTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB01B161A28FC008053F9 /* MSClientTests.m */; };
-		F35896B41AFD067700D9FE99 /* MSFilterTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E8E37906161F4D0D00C13F00 /* MSFilterTest.m */; };
-		F35896B51AFD067700D9FE99 /* MSQueryTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B3A161668ED002DD7C6 /* MSQueryTests.m */; };
-		F35896B61AFD067700D9FE99 /* MSTableTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB024161B5A4D008053F9 /* MSTableTests.m */; };
-		F35896B71AFD067700D9FE99 /* MSTestWaiter.h in Sources */ = {isa = PBXBuildFile; fileRef = CF4D498D1A3253F7006AEB70 /* MSTestWaiter.h */; };
-		F35896B81AFD067700D9FE99 /* MSTestWaiter.m in Sources */ = {isa = PBXBuildFile; fileRef = CF4D498B1A3253E2006AEB70 /* MSTestWaiter.m */; };
-		F35896B91AFD067700D9FE99 /* MSUserTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB021161B57C8008053F9 /* MSUserTests.m */; };
-		F35896BA1AFD067700D9FE99 /* MSCoreDataStoreTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A295B2B2192AB2040067562E /* MSCoreDataStoreTests.m */; };
-		F35896BB1AFD067700D9FE99 /* CoreDataTestModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = A28224B1192ACFB700EF8743 /* CoreDataTestModel.xcdatamodeld */; };
-		F35896BC1AFD067700D9FE99 /* MSCoreDataStore+TestHelper.h in Sources */ = {isa = PBXBuildFile; fileRef = A29F44A11953CBF30063C0C1 /* MSCoreDataStore+TestHelper.h */; };
-		F35896BD1AFD067700D9FE99 /* MSCoreDataStore+TestHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = A29F44A21953CBF30063C0C1 /* MSCoreDataStore+TestHelper.m */; };
-		F35896BE1AFD067700D9FE99 /* TodoItem.h in Sources */ = {isa = PBXBuildFile; fileRef = A24425501A67496600854EF9 /* TodoItem.h */; };
-		F35896BF1AFD067700D9FE99 /* TodoItem.m in Sources */ = {isa = PBXBuildFile; fileRef = A24425511A67496600854EF9 /* TodoItem.m */; };
-		F35896C01AFD067700D9FE99 /* MSTableOperationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A2ADF7E81914481B0078BB16 /* MSTableOperationTests.m */; };
-		F35896C11AFD067700D9FE99 /* MSTableOperationErrorTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A232CCA11AC8FDE800E15D3A /* MSTableOperationErrorTests.m */; };
-		F35896C21AFD067700D9FE99 /* MSOfflinePassthroughHelper.h in Sources */ = {isa = PBXBuildFile; fileRef = A258891818A19D1B00962F9A /* MSOfflinePassthroughHelper.h */; };
-		F35896C31AFD067700D9FE99 /* MSOfflinePassthroughHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = A258891918A19D1B00962F9A /* MSOfflinePassthroughHelper.m */; };
-		F35896C41AFD067700D9FE99 /* MSSyncTableTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A258891A18A19D1B00962F9A /* MSSyncTableTests.m */; };
-		F35896C51AFD067700D9FE99 /* MSPushTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A24701C4196897A700385DA2 /* MSPushTests.m */; };
-		F35896C61AFD067700D9FE99 /* MSPredicateTranslatorTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B38161668E4002DD7C6 /* MSPredicateTranslatorTests.m */; };
-		F35896C71AFD067700D9FE99 /* MSJSONSerializerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B36161668DA002DD7C6 /* MSJSONSerializerTests.m */; };
-		F35896C81AFD067700D9FE99 /* WindowsAzureMobileServicesTests-Info.plist in Sources */ = {isa = PBXBuildFile; fileRef = E8F33AF71616659C002DD7C6 /* WindowsAzureMobileServicesTests-Info.plist */; };
-		F35896C91AFD067700D9FE99 /* settings.plist in Sources */ = {isa = PBXBuildFile; fileRef = CF4D49911A36334C006AEB70 /* settings.plist */; };
-		F35896CA1AFD067700D9FE99 /* WindowsAzureMobileServicesFunctionalTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B34161668C4002DD7C6 /* WindowsAzureMobileServicesFunctionalTests.m */; };
 		F3C002341AF7F7450028AB81 /* BlockDefinitions.h in Headers */ = {isa = PBXBuildFile; fileRef = F3C002331AF7F7450028AB81 /* BlockDefinitions.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F3C002451AF7FF4A0028AB81 /* WindowsAzureMobileServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3C0023A1AF7FF490028AB81 /* WindowsAzureMobileServices.framework */; };
 		F3C002531AF7FFD10028AB81 /* MSQueryResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 7929542719B7C793006A3829 /* MSQueryResult.m */; };
@@ -1184,39 +1151,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F35896AA1AFD067700D9FE99 /* MSURLbuilderTests.m in Sources */,
-				F35896AB1AFD067700D9FE99 /* MSUserAgentBuilderTests.m in Sources */,
-				F35896AC1AFD067700D9FE99 /* MSMultiRequestTestFilter.h in Sources */,
-				F35896AD1AFD067700D9FE99 /* MSMultiRequestTestFilter.m in Sources */,
-				F35896AE1AFD067700D9FE99 /* MSTestFilter.h in Sources */,
-				F35896AF1AFD067700D9FE99 /* MSTestFilter.m in Sources */,
-				F35896B01AFD067700D9FE99 /* MSTable+MSTableTestUtilities.h in Sources */,
-				F35896B11AFD067700D9FE99 /* MSTable+MSTableTestUtilities.m in Sources */,
-				F35896B21AFD067700D9FE99 /* MSTableFuncTests.m in Sources */,
-				F35896B31AFD067700D9FE99 /* MSClientTests.m in Sources */,
-				F35896B41AFD067700D9FE99 /* MSFilterTest.m in Sources */,
-				F35896B51AFD067700D9FE99 /* MSQueryTests.m in Sources */,
-				F35896B61AFD067700D9FE99 /* MSTableTests.m in Sources */,
-				F35896B71AFD067700D9FE99 /* MSTestWaiter.h in Sources */,
-				F35896B81AFD067700D9FE99 /* MSTestWaiter.m in Sources */,
-				F35896B91AFD067700D9FE99 /* MSUserTests.m in Sources */,
-				F35896BA1AFD067700D9FE99 /* MSCoreDataStoreTests.m in Sources */,
-				F35896BB1AFD067700D9FE99 /* CoreDataTestModel.xcdatamodeld in Sources */,
-				F35896BC1AFD067700D9FE99 /* MSCoreDataStore+TestHelper.h in Sources */,
-				F35896BD1AFD067700D9FE99 /* MSCoreDataStore+TestHelper.m in Sources */,
-				F35896BE1AFD067700D9FE99 /* TodoItem.h in Sources */,
-				F35896BF1AFD067700D9FE99 /* TodoItem.m in Sources */,
-				F35896C01AFD067700D9FE99 /* MSTableOperationTests.m in Sources */,
-				F35896C11AFD067700D9FE99 /* MSTableOperationErrorTests.m in Sources */,
-				F35896C21AFD067700D9FE99 /* MSOfflinePassthroughHelper.h in Sources */,
-				F35896C31AFD067700D9FE99 /* MSOfflinePassthroughHelper.m in Sources */,
-				F35896C41AFD067700D9FE99 /* MSSyncTableTests.m in Sources */,
-				F35896C51AFD067700D9FE99 /* MSPushTests.m in Sources */,
-				F35896C61AFD067700D9FE99 /* MSPredicateTranslatorTests.m in Sources */,
-				F35896C71AFD067700D9FE99 /* MSJSONSerializerTests.m in Sources */,
-				F35896C81AFD067700D9FE99 /* WindowsAzureMobileServicesTests-Info.plist in Sources */,
-				F35896C91AFD067700D9FE99 /* settings.plist in Sources */,
-				F35896CA1AFD067700D9FE99 /* WindowsAzureMobileServicesFunctionalTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
