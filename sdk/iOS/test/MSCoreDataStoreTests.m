@@ -20,6 +20,9 @@
 
 @implementation MSCoreDataStoreTests
 
+// Table used for running tests
+NSString * const TableName = @"TodoItem";
+
 - (void)setUp
 {
     NSLog(@"%@ setUp", self.name);
@@ -46,6 +49,54 @@
 {
     XCTAssertNotNil(self.store, @"store creation failed");
 }
+
+// Tests MSCoreDataStore Read, Update and Delete operations are case insensitive for the Id column.
+-(void)testReadUpdateDelete_CaseInsensitiveIdOperations
+{
+    NSError *error;
+
+    // Seed data to be inserted in the table
+    NSString * const originalItemId = @"itemid";
+    NSString * const originalText = @"original text";
+    NSArray * const originalItems = @[@{@"id":originalItemId, @"text":originalText}];
+
+    // Data to be used for updating the table. The Id differs from the Id of the seed data only in case
+    NSString * const updatedItemId = @"ITEMID";
+    NSString * const updatedText = @"updated text";
+    NSArray * const updatedItems = @[@{@"id":updatedItemId, @"text":updatedText}];
+
+    // Populate the table
+    [self.store upsertItems:originalItems table:TableName orError:&error];
+    XCTAssertNil(error, @"upsert failed: %@", error.description);
+
+    // Read the table using ID with different case
+    NSDictionary *item = [self.store readTable:TableName withItemId:updatedItemId orError:&error];
+    XCTAssertNil(error, @"readTable:withItemId: failed: %@", error.description);
+    XCTAssertNotNil(item, @"item should have been found in the table");
+
+    // Update the item using ID with different case
+    [self.store upsertItems:updatedItems table:TableName orError:&error];
+    XCTAssertNil(error, @"upsert failed: %@", error.description);
+
+    // Verify the original row got updated
+    item = [self.store readTable:TableName withItemId:originalItemId orError:&error];
+    XCTAssertTrue([item[@"id"] isEqualToString:updatedItemId], @"Incorrect item id"); //ttodoshrirs correct
+    XCTAssertTrue([item[@"text"] isEqualToString:updatedText], @"Incorrect text");
+
+    // Delete the row using an ID with different case
+    [self.store deleteItemsWithIds:@[originalItemId] table:TableName orError:&error];
+    XCTAssertNil(error, @"deleteItemsWithIds: failed: %@", error.description);
+
+    // Read to ensure the item is actually gone
+    item = [self.store readTable:TableName withItemId:originalItemId orError:&error];
+    XCTAssertNil(error, @"readTable:withItemId: failed: %@", error.description);
+    XCTAssertNil(item, @"item should have been nil");
+
+    item = [self.store readTable:TableName withItemId:updatedItemId orError:&error];
+    XCTAssertNil(error, @"readTable:withItemId: failed: %@", error.description);
+    XCTAssertNil(item, @"item should have been nil");
+}
+
 
 -(void)testUpsertSingleRecordAndReadSuccess
 {
