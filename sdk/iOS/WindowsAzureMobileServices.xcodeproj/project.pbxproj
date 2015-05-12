@@ -134,6 +134,7 @@
 		E8F33B3D1616694C002DD7C6 /* MSQueryTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B3A161668ED002DD7C6 /* MSQueryTests.m */; };
 		E8F33B3E16166956002DD7C6 /* MSJSONSerializerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B36161668DA002DD7C6 /* MSJSONSerializerTests.m */; };
 		E8F33B3F1616695E002DD7C6 /* MSPredicateTranslatorTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B38161668E4002DD7C6 /* MSPredicateTranslatorTests.m */; };
+		F3C002341AF7F7450028AB81 /* BlockDefinitions.h in Headers */ = {isa = PBXBuildFile; fileRef = F3C002331AF7F7450028AB81 /* BlockDefinitions.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -288,6 +289,7 @@
 		E8F33B36161668DA002DD7C6 /* MSJSONSerializerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSJSONSerializerTests.m; sourceTree = "<group>"; };
 		E8F33B38161668E4002DD7C6 /* MSPredicateTranslatorTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSPredicateTranslatorTests.m; sourceTree = "<group>"; };
 		E8F33B3A161668ED002DD7C6 /* MSQueryTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSQueryTests.m; sourceTree = "<group>"; };
+		F3C002331AF7F7450028AB81 /* BlockDefinitions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BlockDefinitions.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -511,6 +513,7 @@
 				E8F33B1B161667EC002DD7C6 /* Serialization */,
 				E8F33B1C161667F6002DD7C6 /* Query */,
 				E8F33AE11616659C002DD7C6 /* Supporting Files */,
+				F3C002331AF7F7450028AB81 /* BlockDefinitions.h */,
 			);
 			name = Source;
 			path = src;
@@ -649,6 +652,7 @@
 				A281900418BB2FF5001B14E7 /* MSTableOperationError.h in Headers */,
 				E8E37913161F769D00C13F00 /* MSFilter.h in Headers */,
 				A2ACD540192322C50012B1ED /* MSCoreDataStore.h in Headers */,
+				F3C002341AF7F7450028AB81 /* BlockDefinitions.h in Headers */,
 				CF762EC61A1D366E0018C292 /* MSDateOffset.h in Headers */,
 				A24701B9196896F500385DA2 /* MSPush.h in Headers */,
 				870C0C9C199C246700A134DD /* MSSDKFeatures.h in Headers */,

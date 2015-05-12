@@ -3,7 +3,10 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSSyncContext.h"
+#import "BlockDefinitions.h"
+#import "MSTableOperation.h"
+
+@class MSSyncContext;
 
 /// The *MSTableOperationError* class represents an error that occurred while sending a
 /// a table operation (insert, etc) to the Windows Azure Mobile Service during a sync

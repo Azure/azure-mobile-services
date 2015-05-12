@@ -3,10 +3,10 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSClient.h"
-#import "MSTable.h"
-#import "MSQuery.h"
 
+@class MSClient;
+@class MSTable;
+@class MSQuery;
 
 #pragma  mark * MSURLBuilder Public Interface
 

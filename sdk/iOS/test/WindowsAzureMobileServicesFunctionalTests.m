@@ -6,6 +6,7 @@
 #import "WindowsAzureMobileServices.h"
 #import "MSTestFilter.h"
 #import "MSTable+MSTableTestUtilities.h"
+#import "MSQueryResult.h"
 
 @interface WindowsAzureMobileServicesFunctionalTests : XCTestCase {
     MSClient *client;

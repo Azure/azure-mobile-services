@@ -2,8 +2,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
+#import "BlockDefinitions.h"
 #import "MSClientConnection.h"
-#import "MSPushRequest.h"
+
+@class MSPushConnection;
+@class MSPushRequest;
+@class MSClient;
 
 // The |MSPushConnection| class is a subclass of the |MSClientConnection|
 // that takes |MSTableRequest| instances and the appropriate |MS*SuccessBlock|

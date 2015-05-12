@@ -3,9 +3,10 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSClient.h"
-#import "MSSerializer.h"
+#import "BlockDefinitions.h"
 
+@class MSClient;
+@protocol MSSerializer;
 
 #pragma mark * MSAPIRequest Public Interface
 

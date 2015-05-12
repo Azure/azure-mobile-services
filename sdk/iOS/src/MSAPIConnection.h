@@ -3,8 +3,9 @@
 // ----------------------------------------------------------------------------
 
 #import "MSClientConnection.h"
-#import "MSAPIRequest.h"
 
+@class MSAPIRequest;
+@class MSClient;
 
 #pragma  mark * MSAPIConnection Public Interface
 

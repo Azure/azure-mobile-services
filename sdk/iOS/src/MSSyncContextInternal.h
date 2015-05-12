@@ -3,9 +3,13 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSClient.h"
-#import "MSOperationQueue.h"
-#import "MSTable.h"
+#import "MSSyncContext.h"
+#import "MSTableOperation.h"
+
+@class MSClient;
+@class MSOperationQueue;
+@class MSQuery;
+@class MSSyncTable;
 
 @interface MSSyncContext()
 

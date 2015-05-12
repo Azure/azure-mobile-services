@@ -3,20 +3,9 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSClient.h"
-#import "MSSerializer.h"
+#import "BlockDefinitions.h"
 
-
-#pragma mark * Block Type Definitions
-
-
-// Callback for connections. If there was an error, the |error| will be non-nil.
-// If there was not an error, the |response| will be non-nil, but
-// the |data| may or may not be nil depending on if the response had content.
-typedef void (^MSResponseBlock)(NSHTTPURLResponse *response,
-                                NSData *data,
-                                NSError *error);
-
+@class MSClient;
 
 #pragma mark * MSClientConnection Public Interface
 

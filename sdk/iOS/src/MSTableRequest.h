@@ -3,13 +3,13 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSTable.h"
-#import "MSSerializer.h"
+#import "BlockDefinitions.h"
 #import "MSSDKFeatures.h"
 
 @class MSTableItemRequest;
 @class MSTableDeleteRequest;
 @class MSTableReadQueryRequest;
+@class MSTable;
 
 
 #pragma mark * Public MSTableRequestType Enum Type

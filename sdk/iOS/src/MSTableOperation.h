@@ -2,7 +2,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-#import "MSUser.h"
+#import <Foundation/Foundation.h>
+#import "MSTableOperation.h"
 
 /// The *MSTableOperation* object represents a pending operation that was created by an earlier
 /// call using the *MSSyncTable* object. This is a wrapper to facilitae sending the operation

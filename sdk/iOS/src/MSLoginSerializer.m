@@ -4,7 +4,7 @@
 
 #import "MSLoginSerializer.h"
 #import "MSError.h"
-
+#import "MSUser.h"
 
 #pragma mark * MSLoginSerializer Implementation
 

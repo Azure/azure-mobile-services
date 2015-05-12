@@ -3,7 +3,9 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSClient.h"
+#import "BlockDefinitions.h"
+
+@class MSPush;
 
 @interface MSPushRequest : NSMutableURLRequest
 

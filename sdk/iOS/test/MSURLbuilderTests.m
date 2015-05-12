@@ -5,6 +5,8 @@
 #import <XCTest/XCTest.h>
 #import "MSTable.h"
 #import "MSURLBuilder.h"
+#import "MSClient.h"
+#import "MSQuery.h"
 
 @interface MSURLBuilderTests : XCTestCase
 

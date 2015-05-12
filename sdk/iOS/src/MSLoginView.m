@@ -4,7 +4,7 @@
 
 #import "MSLoginView.h"
 #import "MSClientConnection.h"
-
+#import "MSClient.h"
 
 #pragma mark * MSLoginViewErrorDomain
 
