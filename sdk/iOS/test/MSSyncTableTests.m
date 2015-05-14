@@ -1839,27 +1839,36 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     ((MSTestFilter *)filter.testFilters[0]).onInspectRequest = ^(NSURLRequest *request) {
 
         // Insert an item with Id differing from that of the pulled item only in case
+        done = NO;
         NSDictionary *item = @{ @"id": @"ONE", @"name":@"fifth item" };
-        MSTestWaiter *insertWaiter = [MSTestWaiter new];
     
         [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
             XCTAssertNil(error, @"error should have been nil.");
-            insertWaiter.done = YES;
+            done = YES;
         }];
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out");
     
-        XCTAssertTrue([insertWaiter waitForTest:0.1], @"Test timed out.");
         return request;
     };
 
-    done = NO;
+    XCTestExpectation *pullExpectation = [self expectationWithDescription:@"table pull"];
     [todoTable pullWithQuery:query queryId:@"test-1" completion:^(NSError *error) {
         XCTAssertNil(error, @"Error found: %@", error.description);
         XCTAssertEqual(offline.upsertCalls, 4);
         XCTAssertEqual(offline.upsertedItems, 4);
         NSLog(@"done pull");
-        done = YES;
+        [pullExpectation fulfill];
     }];
-    XCTAssertTrue([self waitForTest:30.0], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:30.0 handler:nil];
+    
+    // Count the number of items in the table
+    XCTestExpectation *readExpectation = [self expectationWithDescription:@"table read"];
+    [client.syncContext readWithQuery:query completion:^(MSQueryResult *result, NSError *error) {
+        XCTAssertNil(error);
+        XCTAssertEqual(result.items.count, 2, @"Expected 2 items, one with Id ONE and one with Id two");
+        [readExpectation fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:10 handler:nil];
 }
 
 -(void) testIncrementalPullWithUpdateSkipsUpdatedItem

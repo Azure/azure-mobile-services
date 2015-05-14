@@ -58,12 +58,12 @@ NSString * const TableName = @"TodoItem";
     // Seed data to be inserted in the table
     NSString * const originalItemId = @"itemid";
     NSString * const originalText = @"original text";
-    NSArray * const originalItems = @[@{@"id":originalItemId, @"text":originalText}];
+    NSArray * const originalItems = @[ @{ @"id":originalItemId, @"text":originalText } ];
 
     // Data to be used for updating the table. The Id differs from the Id of the seed data only in case
     NSString * const updatedItemId = @"ITEMID";
     NSString * const updatedText = @"updated text";
-    NSArray * const updatedItems = @[@{@"id":updatedItemId, @"text":updatedText}];
+    NSArray * const updatedItems = @[ @{ @"id":updatedItemId, @"text":updatedText } ];
 
     // Populate the table
     [self.store upsertItems:originalItems table:TableName orError:&error];
@@ -80,7 +80,7 @@ NSString * const TableName = @"TodoItem";
 
     // Verify the original row got updated
     item = [self.store readTable:TableName withItemId:originalItemId orError:&error];
-    XCTAssertTrue([item[@"id"] isEqualToString:updatedItemId], @"Incorrect item id"); //ttodoshrirs correct
+    XCTAssertTrue([item[@"id"] isEqualToString:updatedItemId], @"Incorrect item id");
     XCTAssertTrue([item[@"text"] isEqualToString:updatedText], @"Incorrect text");
 
     // Delete the row using an ID with different case
