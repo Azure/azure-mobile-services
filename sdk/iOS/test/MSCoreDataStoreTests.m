@@ -64,6 +64,9 @@ NSString * const TableName = @"TodoItem";
     NSString * const updatedItemId = @"ITEMID";
     NSString * const updatedText = @"updated text";
     NSArray * const updatedItems = @[ @{ @"id":updatedItemId, @"text":updatedText } ];
+    
+    // Initialize table
+    MSSyncTable *syncTable = [[MSSyncTable alloc] initWithName:TableName client:self.client];
 
     // Populate the table
     [self.store upsertItems:originalItems table:TableName orError:&error];
@@ -79,22 +82,21 @@ NSString * const TableName = @"TodoItem";
     XCTAssertNil(error, @"upsert failed: %@", error.description);
 
     // Verify the original row got updated
-    item = [self.store readTable:TableName withItemId:originalItemId orError:&error];
-    XCTAssertTrue([item[@"id"] isEqualToString:updatedItemId], @"Incorrect item id");
-    XCTAssertTrue([item[@"text"] isEqualToString:updatedText], @"Incorrect text");
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:syncTable predicate:nil];
+    MSSyncContextReadResult *result = [self.store readWithQuery:query orError:&error];
+    XCTAssertNil(error, @"readWithQuery: failed: %@", error.description);
+    XCTAssertEqual(result.items.count, 1, "Expected exactly one item in the table");
+    XCTAssertTrue([result.items[0][@"id"] isEqualToString:updatedItemId], @"Incorrect item id. Did the query return wrong item?");
+    XCTAssertTrue([result.items[0][@"text"] isEqualToString:updatedText], @"Incorrect text. Did the query return wrong item?");
 
     // Delete the row using an ID with different case
     [self.store deleteItemsWithIds:@[originalItemId] table:TableName orError:&error];
     XCTAssertNil(error, @"deleteItemsWithIds: failed: %@", error.description);
 
     // Read to ensure the item is actually gone
-    item = [self.store readTable:TableName withItemId:originalItemId orError:&error];
-    XCTAssertNil(error, @"readTable:withItemId: failed: %@", error.description);
-    XCTAssertNil(item, @"item should have been nil");
-
-    item = [self.store readTable:TableName withItemId:updatedItemId orError:&error];
-    XCTAssertNil(error, @"readTable:withItemId: failed: %@", error.description);
-    XCTAssertNil(item, @"item should have been nil");
+    result = [self.store readWithQuery:query orError:&error];
+    XCTAssertNil(error, @"readWithQuery: failed: %@", error.description);
+    XCTAssertEqual(result.items.count, 0, "Expected the table to be empty");
 }
 
 
