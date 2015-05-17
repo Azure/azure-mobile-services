@@ -10,6 +10,8 @@
 @class MSOperationQueue;
 @class MSQuery;
 @class MSSyncTable;
+@class MSQueuePushOperation;
+@class MSQueuePullOperation;
 
 @interface MSSyncContext()
 
@@ -29,7 +31,7 @@
 
 -(void) readWithQuery:(MSQuery *)query completion:(MSReadQueryBlock)completion;
 
--(void) pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion;
+-(MSQueuePullOperation *) pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion;
 
 -(void) purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion;
 
