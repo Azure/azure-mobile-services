@@ -57,8 +57,7 @@ static NSString *const TableName = @"TodoItem";
 
     // Seed data to be inserted in the table
     NSString *originalItemId = @"itemid";
-    NSString *originalText = @"original text";
-    NSArray *originalItems = @[ @{ @"id" : originalItemId, @"text" : originalText } ];
+    NSArray *originalItems = @[ @{ @"id" : originalItemId, @"text" : @"original text" } ];
 
     // Data to be used for updating the table. The Id differs from the Id of the seed data only in case
     NSString *updatedItemId = @"ITEMID";
