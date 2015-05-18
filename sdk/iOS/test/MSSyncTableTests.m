@@ -1821,6 +1821,55 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     XCTAssertEqual(client.syncContext.pendingOperationsCount, 1);
 }
 
+// Tests pull when there are pending changes with different cased Id
+-(void)testPullKeepsPendingChangesWithDifferentCasedId
+{
+    // Response of a pull operation
+    NSString *firstPullData = @"[{\"id\": \"one\", \"text\":\"first item\", \"__updatedAt\":\"1999-12-03T15:44:29.0Z\"},{\"id\": \"two\", \"text\":\"second item\", \"__updatedAt\":\"1999-12-03T15:44:28.0Z\"}]";
+
+    // Setup filter to get the pull response
+    MSMultiRequestTestFilter *filter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[@200] data:@[firstPullData] appendEmptyRequest:YES];
+
+    // Initialization
+    MSClient *filteredClient = [client clientWithFilter:filter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"TodoItem"];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
+
+    // Perform an insert operation in the middle of a pull operation
+    ((MSTestFilter *)filter.testFilters[0]).onInspectRequest = ^(NSURLRequest *request) {
+
+        // Insert an item with Id differing from that of the pulled item only in case
+        done = NO;
+        NSDictionary *item = @{ @"id" : @"ONE", @"name" : @"fifth item" };
+    
+        [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
+            XCTAssertNil(error, @"error should have been nil.");
+            done = YES;
+        }];
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out");
+    
+        return request;
+    };
+
+    XCTestExpectation *pullExpectation = [self expectationWithDescription:@"table pull"];
+    [todoTable pullWithQuery:query queryId:@"test-1" completion:^(NSError *error) {
+        XCTAssertNil(error, @"Error found: %@", error.description);
+        XCTAssertEqual(offline.upsertCalls, 4);
+        XCTAssertEqual(offline.upsertedItems, 4);
+        [pullExpectation fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:30.0 handler:nil];
+    
+    // Count the number of items in the table
+    XCTestExpectation *readExpectation = [self expectationWithDescription:@"table read"];
+    [client.syncContext readWithQuery:query completion:^(MSQueryResult *result, NSError *error) {
+        XCTAssertNil(error);
+        XCTAssertEqual(result.items.count, 2, @"Expected 2 items, one with Id ONE and one with Id two");
+        [readExpectation fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:10 handler:nil];
+}
+
 -(void) testIncrementalPullWithUpdateSkipsUpdatedItem
 {
     NSString *insertResponse = @"{\"id\": \"one\", \"text\":\"first item\", \"__updatedAt\":\"1999-12-03T15:44:29.0Z\"}";
@@ -2308,6 +2357,27 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     }];
     
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+// Tests operation queue querying is case insensitive for Id column
+-(void)testOperationQueueQueryingForIdCaseInsensitivity
+{
+    MSSyncTable *todoTable = [[MSSyncTable alloc] initWithName:@"TodoItem" client:client];
+    
+    NSDictionary *item = @{ @"id" : @"itemid", @"name" : @"some name" };
+    
+    // Perform an insert operation
+    XCTestExpectation *insertExpectation = [self expectationWithDescription:@"table insert"];
+    [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
+        XCTAssertNil(error, @"error should have been nil.");
+        [insertExpectation fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:0.1 handler:nil];
+    
+    // Query the operation queue for the inserted item using a different case for the Id
+    NSArray *items = [client.syncContext.operationQueue getOperationsForTable:todoTable.name item:@"ITEMID"];
+    
+    XCTAssertEqual(items.count, 1, "Expected to find 1 item in the operation queue");
 }
 
 -(void)testOperationErrorRelationship
