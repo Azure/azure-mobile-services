@@ -143,19 +143,19 @@
 -(void)loginWithProvider:(nonnull NSString *)provider
               controller:(nonnull UIViewController *)controller
                 animated:(BOOL)animated
-              completion:(nonnull MSClientLoginBlock)completion;
+              completion:(nullable MSClientLoginBlock)completion;
 
 /// Returns an MSLoginController that can be used to log in the current
 /// end user with the given provider.
 -(nonnull MSLoginController *)loginViewControllerWithProvider:(nonnull NSString *)provider
-                                 completion:(nonnull MSClientLoginBlock)completion;
+                                 completion:(nullable MSClientLoginBlock)completion;
 #endif
 
 /// Logs in the current end user with the given provider and the given token for
 /// the provider.
 -(void)loginWithProvider:(nonnull NSString *)provider
                    token:(nonnull NSDictionary *)token
-              completion:(nonnull MSClientLoginBlock)completion;
+              completion:(nullable MSClientLoginBlock)completion;
 
 /// Logs out the current end user.
 -(void)logout;
@@ -169,10 +169,6 @@
 
 /// Returns an MSTable instance for a table with the given name.
 -(nonnull MSTable *)tableWithName:(nonnull NSString *)tableName;
-
-/// Old method to return an MSTable instance for a table with the given name.
-/// This has been deprecated. Use tableWithName:
--(nonnull MSTable *)getTable:(nonnull NSString *)tableName __deprecated;
 
 /// Returns an MSSyncTable instance for a table with the given name.
 -(nonnull MSSyncTable *)syncTableWithName:(nonnull NSString *)tableName;
@@ -188,7 +184,7 @@
 /// response content will be treated as JSON.
 -(void)invokeAPI:(nonnull NSString *)APIName
             body:(nullable id)body
-      HTTPMethod:(nonnull NSString *)method
+      HTTPMethod:(nullable NSString *)method
       parameters:(nullable NSDictionary *)parameters
          headers:(nullable NSDictionary *)headers
       completion:(nullable MSAPIBlock)completion;
@@ -197,7 +193,7 @@
 /// response content can be of any media type.
 -(void)invokeAPI:(nonnull NSString *)APIName
             data:(nullable NSData *)data
-      HTTPMethod:(nonnull NSString *)method
+      HTTPMethod:(nullable NSString *)method
       parameters:(nullable NSDictionary *)parameters
          headers:(nullable NSDictionary *)headers
       completion:(nullable MSAPIDataBlock)completion;
