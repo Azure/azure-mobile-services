@@ -164,11 +164,6 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
 
 -(void) testInsertWithIgnoreSuccess
 {
-    [self helpInsertWithIgnore:YES];
-}
-
--(void) helpInsertWithIgnore:(BOOL) ignore
-{
     MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:500];
     MSClient *filteredClient = [client clientWithFilter:testFilter];
     offline.handlesSyncTableOperations = NO;
@@ -183,12 +178,14 @@ static NSString *const AllColumnTypesTable = @"ColumnTypes";
     
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     
-    // Expect 1 upsert for item, 1 for operation
-    XCTAssertEqual(offline.upsertCalls, 2);
+    // Expect 1 for operation, 0 for item operation saves
+    XCTAssertEqual(offline.upsertCalls, 1);
     
     NSError *error = nil;
+
+    // Now verify item was not inserted as well
     NSDictionary *savedItem = [offline readTable:TodoTableNoVersion withItemId:@"test1" orError:&error];
-    XCTAssertNotNil(savedItem, @"Unable to find expected item in store");
+    XCTAssertNil(savedItem, @"Find unexpected item in store");
 }
 
 -(void) testInsertItemWithValidId

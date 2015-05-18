@@ -18,6 +18,7 @@
 @property (nonatomic, strong) MSClient *client;
 @property (nonatomic, strong) MSCoreDataStore *store;
 @property (nonatomic, strong) NSManagedObjectContext *context;
+@property (nonatomic, strong) NSManagedObjectContext *storeContext;
 @property (nonatomic, strong) MSManagedObjectObserver *observer;
 
 @property (nonatomic, strong) TodoItem *item;
@@ -28,7 +29,7 @@
 /// Helper method so we can start observing at the point we want to rather than initialized during setup
 - (void)startObservingContextWithObservationCompletion:(MSManagedObjectObserverCompletionBlock)completionBlock
 {
-	self.observer = [[MSManagedObjectObserver alloc] initWithClient:self.client];
+    self.observer = [[MSManagedObjectObserver alloc] initWithClient:self.client context: self.context];
 	self.observer.observerActionCompleted = completionBlock;
 }
 
@@ -47,7 +48,9 @@
     [super setUp];
 	
 	self.context = [MSCoreDataStore inMemoryManagedObjectContext];
-	self.store = [[MSCoreDataStore alloc] initWithManagedObjectContext:self.context];
+    self.storeContext = [MSCoreDataStore inMemoryManagedObjectContext];
+    
+    self.store = [[MSCoreDataStore alloc] initWithManagedObjectContext:self.storeContext];
 	
 	self.client = [[MSClient alloc] initWithApplicationURL:nil applicationKey:nil];
 	self.client.syncContext = [[MSSyncContext alloc] initWithDelegate:nil dataSource:self.store callback:nil];
@@ -66,7 +69,7 @@
 	
 	[self startObservingContextWithObservationCompletion:^(MSTableOperationTypes operationType, NSDictionary *item, NSError *error) {
 		NSFetchRequest *tableOperationsRequest = [NSFetchRequest fetchRequestWithEntityName:@"MS_TableOperations"];
-		NSArray *tableOperations = [self.context executeFetchRequest:tableOperationsRequest error:nil];
+		NSArray *tableOperations = [self.storeContext executeFetchRequest:tableOperationsRequest error:nil];
 		
 		XCTAssertEqual(tableOperations.count, 1, @"Should have one insert operation after the save of TodoItem %@", self.item);
 		
@@ -103,7 +106,7 @@
 	// Start observing after insert as we are only concerned about subsequent updates
 	[self startObservingContextWithObservationCompletion:^(MSTableOperationTypes operationType, NSDictionary *item, NSError *error) {
 		NSFetchRequest *tableOperationsRequest = [NSFetchRequest fetchRequestWithEntityName:@"MS_TableOperations"];
-		NSArray *tableOperations = [self.context executeFetchRequest:tableOperationsRequest error:nil];
+		NSArray *tableOperations = [self.storeContext executeFetchRequest:tableOperationsRequest error:nil];
 		
 		XCTAssertEqual(tableOperations.count, 1, @"Should have one insert operation after the save of TodoItem %@", self.item);
 		
@@ -142,7 +145,7 @@
 	
 	[self startObservingContextWithObservationCompletion:^(MSTableOperationTypes operationType, NSDictionary *item, NSError *error) {
 		NSFetchRequest *tableOperationsRequest = [NSFetchRequest fetchRequestWithEntityName:@"MS_TableOperations"];
-		NSArray *tableOperations = [self.context executeFetchRequest:tableOperationsRequest error:nil];
+		NSArray *tableOperations = [self.storeContext executeFetchRequest:tableOperationsRequest error:nil];
 		
 		XCTAssertEqual(tableOperations.count, 1, @"Should have one insert operation after the save of TodoItem %@", self.item);
 		

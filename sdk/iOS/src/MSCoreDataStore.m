@@ -256,7 +256,7 @@ NSString *const StoreDeleted = @"ms_deleted";
                 return [columnName hasPrefix:SystemColumnPrefix];
             }];
             
-            __block bool hasVersion;
+            __block bool hasVersion = false;
             [systemColumnIndexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
                 NSString *columnName = [properties objectAtIndex:idx];
                 if (!hasVersion && versionProperty) {
