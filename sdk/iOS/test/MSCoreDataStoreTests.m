@@ -21,7 +21,7 @@
 @implementation MSCoreDataStoreTests
 
 // Table used for running tests
-NSString * const TableName = @"TodoItem";
+static NSString *const TableName = @"TodoItem";
 
 - (void)setUp
 {
@@ -56,14 +56,14 @@ NSString * const TableName = @"TodoItem";
     NSError *error;
 
     // Seed data to be inserted in the table
-    NSString * const originalItemId = @"itemid";
-    NSString * const originalText = @"original text";
-    NSArray * const originalItems = @[ @{ @"id":originalItemId, @"text":originalText } ];
+    NSString *originalItemId = @"itemid";
+    NSString *originalText = @"original text";
+    NSArray *originalItems = @[ @{ @"id" : originalItemId, @"text" : originalText } ];
 
     // Data to be used for updating the table. The Id differs from the Id of the seed data only in case
-    NSString * const updatedItemId = @"ITEMID";
-    NSString * const updatedText = @"updated text";
-    NSArray * const updatedItems = @[ @{ @"id":updatedItemId, @"text":updatedText } ];
+    NSString *updatedItemId = @"ITEMID";
+    NSString *updatedText = @"updated text";
+    NSArray *updatedItems = @[ @{ @"id" : updatedItemId, @"text" : updatedText } ];
     
     // Initialize table
     MSSyncTable *syncTable = [[MSSyncTable alloc] initWithName:TableName client:self.client];
