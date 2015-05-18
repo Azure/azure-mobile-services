@@ -162,7 +162,7 @@ static NSOperationQueue *pushQueue_;
         }
         
         // Update local store and then the operation queue
-        if (error == nil) {
+        if (error == nil && self.dataSource.handlesSyncTableOperations) {
             switch (action) {
                 case MSTableOperationInsert: {
                     // Check to see if this item already exists
