@@ -19,6 +19,7 @@
 #import "MSSyncContextInternal.h"
 #import "MSTableConfigValue.h"
 #import "MSOperationQueue.h"
+#import "MSQueryResult.h"
 
 static NSString *const TodoTableNoVersion = @"TodoNoVersion";
 static NSString *const AllColumnTypesTable = @"ColumnTypes";
