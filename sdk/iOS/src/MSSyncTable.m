@@ -59,28 +59,28 @@
 #pragma mark * Public Local Storage Management commands
 
 
--(void)pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion
+-(MSQueuePullOperation *)pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion
 {
-    [self.client.syncContext pullWithQuery:query queryId:queryId completion:completion];
+    return [self.client.syncContext pullWithQuery:query queryId:queryId completion:completion];
 }
 
--(void)purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion
+-(MSQueuePurgeOperation *)purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion
 {
     // If no query, purge all records in the table by default
     if (query == nil) {
         MSQuery *allRecords = [[MSQuery alloc] initWithSyncTable:self];
-        [self.client.syncContext purgeWithQuery:allRecords completion:completion];
+        return [self.client.syncContext purgeWithQuery:allRecords completion:completion];
         
     } else {
-        [self.client.syncContext purgeWithQuery:query completion:completion];
+        return [self.client.syncContext purgeWithQuery:query completion:completion];
     }
 }
 
 /// Purges all data, pending operations, operation errors, and metadata for the
 /// MSSyncTable from the local store.
--(void)forcePurgeWithCompletion:(MSSyncBlock)completion
+-(MSQueuePurgeOperation *)forcePurgeWithCompletion:(MSSyncBlock)completion
 {
-    [self.client.syncContext forcePurgeWithTable:self completion:completion];
+    return [self.client.syncContext forcePurgeWithTable:self completion:completion];
 }
 
 #pragma mark * Public Read Methods

@@ -7,6 +7,10 @@
 #import "MSOperationQueue.h"
 #import "MSTable.h"
 
+@class MSQueuePushOperation;
+@class MSQueuePullOperation;
+@class MSQueuePurgeOperation;
+
 @interface MSSyncContext()
 
 @property (nonatomic, weak)             MSClient *client;
@@ -25,11 +29,11 @@
 
 -(void) readWithQuery:(MSQuery *)query completion:(MSReadQueryBlock)completion;
 
--(void) pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion;
+-(MSQueuePullOperation *) pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion;
 
--(void) purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion;
+-(MSQueuePurgeOperation *) purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion;
 
--(void) forcePurgeWithTable:(MSSyncTable *)syncTable completion:(MSSyncBlock)completion;
+-(MSQueuePurgeOperation *) forcePurgeWithTable:(MSSyncTable *)syncTable completion:(MSSyncBlock)completion;
 
 
 #pragma mark * Operation Helpers

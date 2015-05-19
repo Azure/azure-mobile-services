@@ -8,6 +8,7 @@
 
 @class MSQuery;
 @class MSSyncContext;
+@class MSQueuePushOperation;
 
 /// Callback for updates and deletes. If there was an error, the *error* will be non-nil.
 typedef void (^MSSyncBlock)(NSError *error);
@@ -109,7 +110,7 @@ typedef void (^MSSyncPushCompletionBlock)(void);
 @property (nonatomic, readonly) NSUInteger pendingOperationsCount;
 
 /// Executes all current pending operations on the queue
-- (void) pushWithCompletion:(MSSyncBlock)completion;
+- (MSQueuePushOperation *) pushWithCompletion:(MSSyncBlock)completion;
 
 /// Specifies the delegate that will be used in the resolution of syncing issues
 @property (nonatomic, strong) id<MSSyncContextDelegate> delegate;
