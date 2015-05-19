@@ -60,7 +60,7 @@
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:syncTable];
     
     if (item) {
-        query.predicate = [NSPredicate predicateWithFormat:@"(table == %@) AND (itemId == %@)", table, item];
+        query.predicate = [NSPredicate predicateWithFormat:@"(table == %@) AND (itemId ==[c] %@)", table, item];
     } else {
         query.predicate = [NSPredicate predicateWithFormat:@"(table == %@)", table];
     }
