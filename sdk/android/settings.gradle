@@ -1,0 +1,5 @@
+include ':notifications-handler', ':sdk', ':sdk.testapp', ':ZumoE2ETestApp'
+project(':notifications-handler').projectDir = new File('src/notifications-handler')
+project(':sdk').projectDir = new File('src/sdk')
+project(':sdk.testapp').projectDir = new File('test/sdk.testapp')
+project(':ZumoE2ETestApp').projectDir = new File('../../test/Android/ZumoE2ETestApp')
