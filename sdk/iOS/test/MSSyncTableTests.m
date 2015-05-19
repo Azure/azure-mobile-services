@@ -207,12 +207,14 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     // Now try sending the pending operation to the server
     expectation = [self expectationWithDescription:@"Push for Valid Item"];
     
-    [client.syncContext pushWithCompletion:^(NSError *error) {
+    MSQueuePushOperation *push = [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(insertRanToServer, @"the insert call didn't go to the server");
         XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
         [expectation fulfill];
     }];
+	
+	XCTAssertNotNil(push);
     
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
@@ -269,12 +271,13 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     // Now push this item to the server
     expectation = [self expectationWithDescription:@"Push with many column types"];
     
-    [client.syncContext pushWithCompletion:^(NSError *error) {
+    MSQueuePushOperation *push = [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(insertRanToServer, @"the insert call didn't go to the server");
         XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
         [expectation fulfill];
     }];
+	XCTAssertNotNil(push);
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
@@ -307,7 +310,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     // Now verify that the item is invalid for the server to handle
     expectation = [self expectationWithDescription:@"Push with Binary data in it"];
-    [client.syncContext pushWithCompletion:^(NSError *error) {
+    MSQueuePushOperation *push = [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertFalse(insertRanToServer);
         XCTAssertNotNil(error);
         XCTAssertEqual(error.code, MSPushCompleteWithErrors);
@@ -323,6 +326,9 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
         [expectation fulfill];
         
     }];
+	
+	XCTAssertNotNil(push);
+	
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
@@ -352,12 +358,13 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     // Now push the first item to the server
     expectation = [self expectationWithDescription:@"Pushing First Insert"];
-    [client.syncContext pushWithCompletion:^(NSError *error) {
+    MSQueuePushOperation *push = [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(serverCalls == 1, @"the insert call didn't go to the server");
         
         [expectation fulfill];
     }];
+	XCTAssertNotNil(push);
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
     
     // Create the a new item and insert it
@@ -372,7 +379,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 
     // Finally, push the second item to server
     expectation = [self expectationWithDescription:@"Pushing Second Insert"];
-    [client.syncContext pushWithCompletion:^(NSError *error) {
+    push = [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(serverCalls == 2, @"the insert call didn't go to the server");
         XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
@@ -380,6 +387,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
         
         [expectation fulfill];
     }];
+	XCTAssertNotNil(push);
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
@@ -410,7 +418,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     // Now try to push and trigger a conflict response
     expectation = [self expectationWithDescription:@"Push with server conflict"];
-    [client.syncContext pushWithCompletion:^(NSError *error) {
+    MSQueuePushOperation *push = [client.syncContext pushWithCompletion:^(NSError *error) {
         // Verify the call went to the server
         XCTAssertEqual(serverCalls, 1, @"the insert call didn't go to the server");
         
@@ -439,6 +447,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
         
         [expectation fulfill];
     }];
+	XCTAssertNotNil(push);
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
@@ -484,13 +493,14 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     // Push queue to server
     expectation = [self expectationWithDescription:self.name];
-    [client.syncContext pushWithCompletion:^(NSError *error) {
+    MSQueuePushOperation *push = [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(callsToServer == 1, @"only one call to server should have been made");
         XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
         [expectation fulfill];
         
     }];
+	XCTAssertNotNil(push);
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
@@ -527,13 +537,14 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     // Push to server (no calls expected)
     expectation = [self expectationWithDescription:@"Pushing (expecting no items)"];
-    [client.syncContext pushWithCompletion:^(NSError *error) {
+    MSQueuePushOperation *push = [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(callsToServer == 0, @"no calls to server should have been made");
         XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
         [expectation fulfill];
         
     }];
+	XCTAssertNotNil(push);
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
@@ -700,12 +711,13 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     
     done = NO;
-    [client.syncContext pushWithCompletion:^(NSError *error) {
+    MSQueuePushOperation *push = [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(updateSentToServer, @"the update call didn't go to the server");
         XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
         done = YES;
     }];
+	XCTAssertNotNil(push);
     XCTAssertTrue([self waitForTest:2000.1], @"Test timed out.");
 }
 
@@ -764,11 +776,12 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     
     done = NO;
-    [client.syncContext pushWithCompletion:^(NSError *error) {
+    MSQueuePushOperation *push = [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(callsToServer == 1, @"expected only 1 call to the server");
         done = YES;
     }];
+	XCTAssertNotNil(push);
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
@@ -805,11 +818,12 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     
     done = NO;
-    [client.syncContext pushWithCompletion:^(NSError *error) {
+    MSQueuePushOperation *push = [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(callsToServer == 1, @"expected only 1 call to the server");
         done = YES;
     }];
+	XCTAssertNotNil(push);
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
@@ -847,11 +861,12 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     
     done = NO;
-    [client.syncContext pushWithCompletion:^(NSError *error) {
+    MSQueuePushOperation *push = [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(deleteSentToServer, @"the delete call didn't go to the server");
         done = YES;
     }];
+	XCTAssertNotNil(push);
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
@@ -885,11 +900,12 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     XCTAssertTrue([self waitForTest:1000.1], @"Test timed out.");
     
     done = NO;
-    [client.syncContext pushWithCompletion:^(NSError *error) {
+    MSQueuePushOperation *push = [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(deleteSentToServer, @"the delete call didn't go to the server");
         done = YES;
     }];
+	XCTAssertNotNil(push);
     XCTAssertTrue([self waitForTest:2000.1], @"Test timed out.");
 }
 
@@ -1580,7 +1596,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     done = NO;
     actualRequest = nil;
-    [client.syncContext pushWithCompletion:^(NSError *error) {
+    MSQueuePushOperation *push = [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
         
@@ -1591,6 +1607,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
         
         done = YES;
     }];
+	XCTAssertNotNil(push);
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
