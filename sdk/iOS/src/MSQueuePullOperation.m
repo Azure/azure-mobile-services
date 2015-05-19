@@ -193,7 +193,7 @@
                     isDeleted = ((NSNumber *)isDeletedObj).boolValue;
                 }
                 
-                NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@", @"itemId", obj[MSSystemColumnId]];
+                NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K ==[c] %@", @"itemId", obj[MSSystemColumnId]];
                 NSArray *matchingRecords = [pendingOps filteredArrayUsingPredicate:predicate];
                 
                 // we want to ignore items that have been touched since the Pull was started

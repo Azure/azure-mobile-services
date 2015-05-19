@@ -1,5 +1,33 @@
 # Azure Mobile Services Android SDK Change Log
 
+### Android SDK: Version 2.0.2
+- Support for operation state tracking
+- Fix for type incompatibility from datetime to datetimeoffset 
+- Methods added for CancelAndDiscard and CancelAndUpdate for customized conflict handling 
+- Fix for the local store database connection issue caused due to race condition in asynchronous operations
+- Updated end to end test
+- Support for binary data type on queries (for instance to query using the __version column)
+- Improvements on the DateSerializer
+
+### Android SDK: Version 2.0.2-Beta2
+- Fix for the pull action with SQLite
+
+### Android SDK: Version 2.0.2-Beta
+- Mobile Services SDK version indicator with user-agent
+- Introduced conflict exception to facilitate handling of 409 conflict
+- Fix for the cropped UI for Facebook authentication
+- Fix for SQL ordering issue
+- Support for Incremental Sync to pull data with flexibility
+- Support for Soft Delete
+- Improved SQLite insert performance on pull
+- Purge no longer pushes, instead it throws an exception as user expects
+- Local item deletion exception is handled properly according to server state
+- Support for continuation tokens in queries for paging
+- InsertAsync throws expected exception on duplicate insert
+- Fix for Local store & SQLite missing/mismatch table columns (i.e. “_deleted”)
+- Support for Android Studio
+- Send custom query string parameters with loginAsync Android
+
 ### Android SDK: Version 1.1.5
 - Added support for Windows Azure Notification Hub integration
 
