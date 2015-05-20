@@ -53,7 +53,7 @@ static NSOperationQueue *pushQueue_;
     self = [super init];
     if (self)
     {
-        writeOperationQueue = dispatch_queue_create("WriteOperationQueue", DISPATCH_QUEUE_CONCURRENT);
+        writeOperationQueue = dispatch_queue_create("WriteOperationQueue", DISPATCH_QUEUE_SERIAL);
         
         callbackQueue_ = callbackQueue;
         if (!callbackQueue_) {
