@@ -38,6 +38,9 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 {
     NSLog(@"%@ setUp", self.name);
     
+    NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
+    config.timeoutIntervalForRequest = 11;
+    
     client = [MSClient clientWithApplicationURLString:@"https://someUrl/"];
     offline = [[MSOfflinePassthroughHelper alloc] initWithManagedObjectContext:[MSCoreDataStore inMemoryManagedObjectContext]];
     
@@ -955,6 +958,112 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
         XCTAssertNil(item, @"No item should have been found");
         XCTAssertNil(error, @"No error should have been returned");
     }];
+}
+
+
+#pragma mark Push Tests
+
+
+-(void) testPushNetworkTimeout
+{
+    MSTestFilter *filter = [[MSTestFilter alloc] init];
+    filter.ignoreNextFilter = NO;
+    filter.errorToUse = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorTimedOut userInfo:nil];
+    
+    MSClient *filteredClient = [client clientWithFilter:filter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
+    
+    // Create the first item to insert
+    XCTestExpectation *expectation = [self expectationWithDescription:self.name];
+    NSDictionary *item = @{ @"id" : @"test1", @"name" : @"test name" };
+    
+    [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
+        XCTAssertNil(error, @"error should have been nil.");
+        [expectation fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
+    
+    // Now push the first item to the server
+    expectation = [self expectationWithDescription:@"Pushing First Insert"];
+    [filteredClient.syncContext pushWithCompletion:^(NSError *error) {
+        XCTAssertNotNil(error, @"error should have been nil.");
+        XCTAssertEqual(error.code, MSPushAbortedNetwork);
+        
+        [expectation fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:90.0 handler:nil];
+}
+
+
+-(void) testPushNetworkTimeoutWithErroredOps
+{
+    NSArray *codes = @[ @412, @200, @0 ];
+    NSArray *data = @[
+        @"{\"id\": \"test1\", \"name\":\"servers name\", \"__version\":\"1\" }",
+        @"{\"id\": \"test2\", \"name\":\"test name2\", \"__version\":\"2\" }",
+        [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorTimedOut userInfo:nil]
+    ];
+    
+    MSMultiRequestTestFilter *filter = [MSMultiRequestTestFilter testFilterWithStatusCodes:codes
+                                                                                      data:data
+                                                                        appendEmptyRequest:NO];
+    
+    MSClient *filteredClient = [client clientWithFilter:filter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
+    
+    // Queue up 1 update that will conflict
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Local Update"];
+    [todoTable update:@{ @"id" : @"test1", @"name": @"test name" } completion:^(NSError *error) {
+        [expectation fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:10.0 handler:nil];
+
+    // Queue up 2 update that will succeed
+    expectation = [self expectationWithDescription:@"Local Update"];
+    [todoTable update:@{ @"id" : @"test2", @"name": @"test name2" } completion:^(NSError *error) {
+        [expectation fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:10.0 handler:nil];
+
+    
+    // Now add operation that will get the timeout
+    expectation = [self expectationWithDescription:@"Local Insert"];
+    [todoTable insert:@{ @"id" : @"test3", @"name": @"test name3" } completion:^(NSDictionary *item, NSError *error) {
+        [expectation fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:10.0 handler:nil];
+
+    // And a last one that will not execute
+    expectation = [self expectationWithDescription:@"Local Insert 2"];
+    [todoTable insert:@{ @"id" : @"test4", @"name": @"test name4" } completion:^(NSDictionary *item, NSError *error) {
+        [expectation fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:10.0 handler:nil];
+
+    XCTAssertEqual(filteredClient.syncContext.pendingOperationsCount, 4);
+    
+    // Now push the items to the server, and check network error on 3, andr  4th remains
+    expectation = [self expectationWithDescription:@"Push With Early Abort"];
+    [filteredClient.syncContext pushWithCompletion:^(NSError *error) {
+        XCTAssertNotNil(error, @"error should have been nil.");
+        XCTAssertEqual(error.code, MSPushAbortedNetwork);
+        
+        NSArray *operationErrors = error.userInfo[MSErrorPushResultKey];
+        XCTAssertNotNil(operationErrors);
+        XCTAssertEqual(operationErrors.count, 1);
+        
+        MSTableOperationError *opError = [operationErrors firstObject];
+        XCTAssertEqualObjects(opError.itemId, @"test1");
+        XCTAssertEqual(opError.code, MSErrorPreconditionFailed);
+        
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:90.0 handler:nil];
+    
+    // Verify we made 3 requests, and of the 4 pending we are now down to 3
+    XCTAssertEqual(filter.actualRequests.count, 3);
+    XCTAssertEqual(filteredClient.syncContext.pendingOperationsCount, 3);
 }
 
 
