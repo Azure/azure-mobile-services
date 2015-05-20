@@ -97,8 +97,9 @@
 
 /// Initiates a request to go to the server and get a set of records matching the specified
 /// MSQeury object.
-/// Before a pull is allowed to run, all pending requests on the specified table will be sent to
-/// the server. If a pending request for this table fails, the pull will be cancelled
+/// Before a pull is allowed to run, one operation to send all pending requests on the
+/// specified table will be sent to the server. If a pending request for this table fails,
+/// the pull will be cancelled
 -(NSOperation *)pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion;
 
 /// Removes all records in the local cache that match the results of the specified query.
