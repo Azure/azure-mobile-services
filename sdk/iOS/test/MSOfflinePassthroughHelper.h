@@ -25,6 +25,8 @@
 @property (nonatomic) BOOL errorOnReadWithQueryOrError;
 @property (nonatomic) BOOL errorOnReadTableWithItemIdOrError;
 
+@property (nonatomic) BOOL errorOnUpsertItemsForOperations;
+
 @property (nonatomic, strong) NSMutableDictionary *data;
 
 -(void) resetCounts;

@@ -300,7 +300,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             if (busy)
             {
-                throw new InvalidOperationException(Resources.MobileServiceCollection_LoadInProcess);
+                throw new InvalidOperationException("Loading of more items already in process.");
             }
 
             busy = true;

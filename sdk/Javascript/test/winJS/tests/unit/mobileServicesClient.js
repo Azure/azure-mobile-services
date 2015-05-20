@@ -447,6 +447,54 @@ $testGroup('MobileServiceClient.js',
         });
     }),
 
+    $test('CustomAPI - specifies accept: application/json header by default')
+    .check(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.headers.accept, 'application/json');
+            callback(null, { status: 200 });
+        });
+        client.invokeApi("someApi").done(function (response) { }, function (error) {
+            $assert.fail("api call failed");
+        });
+    }),
+
+    $test('CustomAPI - specifies accept: application/json header by default when options are passed')
+    .check(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.headers.accept, 'application/json');
+            callback(null, { status: 200 });
+        });
+        client.invokeApi("someApi", {}).done(function (response) { }, function (error) {
+            $assert.fail("api call failed");
+        });
+    }),
+
+    $test('CustomAPI - specifies accept: application/json header by default when headers are passed')
+    .check(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.headers.accept, 'application/json');
+            callback(null, { status: 200 });
+        });
+        client.invokeApi("someApi", { headers: { someHeader: 'test' } }).done(function (response) { }, function (error) {
+            $assert.fail("api call failed");
+        });
+    }),
+
+    $test('CustomAPI - Does not override existing accept headers')
+    .check(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.headers.accept, 'application/xml');
+            callback(null, { status: 200 });
+        });
+        client.invokeApi("someApi", { headers: { 'accept': 'application/xml' } }).done(function (response) { }, function (error) {
+            $assert.fail("api call failed");
+        });
+    }),
+
     $test('Features - CustomAPI - Call with object (JSON-ified)')
     .description('Verify the features headers for custom calls')
     .check(function () {

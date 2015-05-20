@@ -138,7 +138,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 throw new ArgumentException(
                         string.Format(
                             CultureInfo.InvariantCulture,
-                            Resources.MobileServiceSyncTable_InvalidQueryId,
+                            "The query id must not contain pipe character and should be less than 50 characters in length.",
                             "queryId"));
             }
         }
@@ -151,7 +151,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 throw new ArgumentException(
                      string.Format(
                         CultureInfo.InvariantCulture,
-                        Resources.MobileServiceSyncTable_IdMustBeString,
+                        "The id must be of type string.",
                         MobileServiceSystemColumns.Id),
                      "instance");
             }

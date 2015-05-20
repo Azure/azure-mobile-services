@@ -486,7 +486,7 @@
         XCTAssertNotNil(error, @"error should not have been nil.");
         XCTAssertTrue(error.domain == MSErrorDomain,
                      @"error domain should have been MSErrorDomain.");
-        NSLog([NSString stringWithFormat:@"%ld",error.code]);
+        NSLog(@"%ld", (long)error.code);
         XCTAssertTrue(error.code == MSErrorMessageErrorCode,
                      @"error code should have been MSErrorMessageErrorCode.");
         

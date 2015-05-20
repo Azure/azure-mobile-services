@@ -30,7 +30,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 if (uri.Host != applicationUri.Host)
                 {
-                    throw new ArgumentException(Resources.MobileServiceTable_QueryUriHostIsDifferent);
+                    throw new ArgumentException("The query uri must be on the same host as the Mobile Service.");
                 }
 
                 absolute = true;

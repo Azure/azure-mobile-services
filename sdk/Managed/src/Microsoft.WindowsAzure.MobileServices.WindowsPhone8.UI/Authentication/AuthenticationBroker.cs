@@ -114,13 +114,13 @@ namespace Microsoft.WindowsAzure.MobileServices
                     string message;
                     if (this.responseStatus == PhoneAuthenticationStatus.UserCancel)
                     {
-                        message = Resources.IAuthenticationBroker_AuthenticationCanceled;
+                        message = "Authentication was cancelled by the user.";
                         throw new InvalidOperationException(message);
                     }
                     else
                     {
                         message = string.Format(CultureInfo.InvariantCulture,
-                                                Resources.IAuthenticationBroker_AuthenticationFailed,
+                                                "Authentication failed with HTTP response code {0}.",
                                                 this.responseErrorDetail);
                     }
 
@@ -173,12 +173,12 @@ namespace Microsoft.WindowsAzure.MobileServices
                 string errorString = GetSubStringAfterMatch(responseData, "#error=");
                 if (string.IsNullOrEmpty(errorString))
                 {
-                    message = Resources.IAuthenticationBroker_InvalidLoginResponse;
+                    message = "Invalid format of the authentication response.";
                 }
                 else
                 {
                     message = string.Format(CultureInfo.InvariantCulture,
-                                            Resources.IAuthenticationBroker_LoginFailed,
+                                            "Login failed: {0}",
                                             errorString);
                 }
 

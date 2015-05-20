@@ -50,12 +50,12 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             if (templateName.Equals(Registration.NativeRegistrationName))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, Resources.Push_ConflictWithReservedName, Registration.NativeRegistrationName));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Template name conflicts with reserved name '{0}'.", Registration.NativeRegistrationName));
             }
 
             if (templateName.Contains(":") || templateName.Contains(";"))
             {
-                throw new ArgumentException(Resources.Push_InvalidTemplateName);
+                throw new ArgumentException("Template name cannot contain ';' or ':'.");
             }
 
             if (string.IsNullOrWhiteSpace(jsonTemplate))

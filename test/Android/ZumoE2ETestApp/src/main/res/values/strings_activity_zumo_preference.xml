@@ -1,0 +1,17 @@
+<resources>
+
+    <string name="title_activity_zumo_preference">Settings</string>
+
+    <!-- General settings -->
+    <string name="pref_header_general">General</string>
+	
+	<string name="pref_mobile_service_url">Mobile Service URL</string>
+    <string name="pref_default_mobile_service_url">https://lagash-android.azure-mobile.net/</string>
+    <string name="pref_mobile_service_key">Mobile Service Key</string>
+    <string name="pref_default_mobile_service_key">CpAMwnhRWlXIPLyVlvSaJCLovuGxWT15</string>
+    <string name="pref_log_post_url">Log POST URL</string>
+    <string name="pref_default_log_post_url"></string>
+    <string name="pref_GCM_sender_id">GCM Sender Id</string>
+    <string name="pref_default_GCM_sender_id">245086394985</string>
+    
+</resources>

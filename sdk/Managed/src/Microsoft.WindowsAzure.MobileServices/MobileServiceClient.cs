@@ -620,7 +620,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentException(
                     string.Format(
                         CultureInfo.InvariantCulture,
-                        Resources.MobileServiceClient_EmptyArgument,
+                        "{0} cannot be null, empty or only whitespace.",
                         "tableName"));
             }
         }
