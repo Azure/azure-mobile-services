@@ -59,12 +59,12 @@
 #pragma mark * Public Local Storage Management commands
 
 
--(MSQueuePullOperation *)pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion
+-(NSOperation *)pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion
 {
     return [self.client.syncContext pullWithQuery:query queryId:queryId completion:completion];
 }
 
--(MSQueuePurgeOperation *)purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion
+-(NSOperation *)purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion
 {
     // If no query, purge all records in the table by default
     if (query == nil) {
@@ -78,7 +78,7 @@
 
 /// Purges all data, pending operations, operation errors, and metadata for the
 /// MSSyncTable from the local store.
--(MSQueuePurgeOperation *)forcePurgeWithCompletion:(MSSyncBlock)completion
+-(NSOperation *)forcePurgeWithCompletion:(MSSyncBlock)completion
 {
     return [self.client.syncContext forcePurgeWithTable:self completion:completion];
 }

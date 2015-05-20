@@ -323,7 +323,7 @@ static NSOperationQueue *pushQueue_;
 }
 
 /// Verify our input is valid and try to pull our data down from the server
-- (MSQueuePullOperation *) pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion;
+- (NSOperation *) pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion;
 {
     // make a copy since we'll be modifying it internally
     MSQuery *queryCopy = [query copy];
@@ -413,7 +413,7 @@ static NSOperationQueue *pushQueue_;
 ///  Check if our table has pending operations, if so, push
 ///    If push fails, return error, else repeat while we have pending operations
 ///  Read from server using an MSQueuePullOperation
-- (MSQueuePullOperation *) pullWithQueryInternal:(MSQuery *)query queryId:(NSString *)queryId maxRecords:(NSInteger)maxRecords completion:(MSSyncBlock)completion
+- (NSOperation *) pullWithQueryInternal:(MSQuery *)query queryId:(NSString *)queryId maxRecords:(NSInteger)maxRecords completion:(MSSyncBlock)completion
 {
 	MSQueuePullOperation *pull = [[MSQueuePullOperation alloc] initWithSyncContext:self
 																			 query:query
@@ -423,28 +423,30 @@ static NSOperationQueue *pushQueue_;
 																	 callbackQueue:self.callbackQueue
 																		completion:completion];
 	
-	// Before we can pull from the remote, we need to make sure out table doesn't having pending operations
-	NSArray *tableOps = [self.operationQueue getOperationsForTable:query.table.name item:nil];
-	if (tableOps.count > 0) {
-		MSQueuePushOperation *push = [self pushWithCompletion:^(NSError *error) {
-			// For now we just abort the pull if the push failed to complete successfully
-			// Long term we can be smarter and check if our table succeeded
-			if (error) {
-				if (completion) {
-					[self.callbackQueue addOperationWithBlock:^{
-						completion(error);
-					}];
+	dispatch_async(writeOperationQueue, ^{
+		// Before we can pull from the remote, we need to make sure out table doesn't having pending operations
+		NSArray *tableOps = [self.operationQueue getOperationsForTable:query.table.name item:nil];
+		if (tableOps.count > 0) {
+			NSOperation *push = [self pushWithCompletion:^(NSError *error) {
+				// For now we just abort the pull if the push failed to complete successfully
+				// Long term we can be smarter and check if our table succeeded
+				if (error) {
+					if (completion) {
+						[self.callbackQueue addOperationWithBlock:^{
+							completion(error);
+						}];
+					}
+				} else {
+					// Check again if we have new pending ops while we synced, and repeat as needed
+					[pushQueue_ addOperation:pull];
 				}
-			} else {
-				// Check again if we have new pending ops while we synced, and repeat as needed
-				[pushQueue_ addOperation:pull];
-			}
-		}];
-		
-		[pull addDependency:push];
-	} else {
-		[pushQueue_ addOperation:pull];
-	}
+			}];
+			
+			[pull addDependency:push];
+		} else {
+			[pushQueue_ addOperation:pull];
+		}
+	});
 	
 	return pull;
 }
@@ -452,7 +454,7 @@ static NSOperationQueue *pushQueue_;
 /// In order to purge data from the local store, purge first checks if there are any pending operations for
 /// the specific table on the query. If there are, no purge is performed and an error returned to the user.
 /// Otherwise clear the local table of all macthing records
-- (MSQueuePurgeOperation *) purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion
+- (NSOperation *) purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion
 {
     MSQueuePurgeOperation *purge = [[MSQueuePurgeOperation alloc] initPurgeWithSyncContext:self
                                                                                      query:query
@@ -467,7 +469,7 @@ static NSOperationQueue *pushQueue_;
 
 /// Purges all data, pending operations, operation errors, and metadata for the
 /// MSSyncTable from the local store.
--(MSQueuePurgeOperation *) forcePurgeWithTable:(MSSyncTable *)syncTable completion:(MSSyncBlock)completion
+-(NSOperation *) forcePurgeWithTable:(MSSyncTable *)syncTable completion:(MSSyncBlock)completion
 {
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:syncTable];
     MSQueuePurgeOperation *purge = [[MSQueuePurgeOperation alloc] initPurgeWithSyncContext:self

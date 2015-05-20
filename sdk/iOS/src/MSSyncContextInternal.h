@@ -29,11 +29,11 @@
 
 -(void) readWithQuery:(MSQuery *)query completion:(MSReadQueryBlock)completion;
 
--(MSQueuePullOperation *) pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion;
+-(NSOperation *) pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion;
 
--(MSQueuePurgeOperation *) purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion;
+-(NSOperation *) purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion;
 
--(MSQueuePurgeOperation *) forcePurgeWithTable:(MSSyncTable *)syncTable completion:(MSSyncBlock)completion;
+-(NSOperation *) forcePurgeWithTable:(MSSyncTable *)syncTable completion:(MSSyncBlock)completion;
 
 
 #pragma mark * Operation Helpers

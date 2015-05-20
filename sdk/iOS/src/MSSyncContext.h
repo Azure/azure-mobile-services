@@ -110,7 +110,7 @@ typedef void (^MSSyncPushCompletionBlock)(void);
 @property (nonatomic, readonly) NSUInteger pendingOperationsCount;
 
 /// Executes all current pending operations on the queue
-- (MSQueuePushOperation *) pushWithCompletion:(MSSyncBlock)completion;
+- (NSOperation *) pushWithCompletion:(MSSyncBlock)completion;
 
 /// Specifies the delegate that will be used in the resolution of syncing issues
 @property (nonatomic, strong) id<MSSyncContextDelegate> delegate;
