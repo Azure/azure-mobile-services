@@ -9,6 +9,7 @@
 @class MSSyncContext;
 @class MSTableOperation;
 @class MSSyncContextReadResult;
+@class MSQueuePushOperation;
 
 /// The MSSyncContextDelegate allows for customizing the handling of errors, conflicts, and other
 /// conditions that may occur when syncing data between the device and the mobile service.
@@ -101,7 +102,7 @@
 @property (nonatomic, readonly) NSUInteger pendingOperationsCount;
 
 /// Executes all current pending operations on the queue
-- (void) pushWithCompletion:(MSSyncBlock)completion;
+- (MSQueuePushOperation *) pushWithCompletion:(MSSyncBlock)completion;
 
 /// Specifies the delegate that will be used in the resolution of syncing issues
 @property (nonatomic, strong) id<MSSyncContextDelegate> delegate;
