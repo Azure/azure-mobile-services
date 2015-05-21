@@ -11,7 +11,7 @@
 #import "MSQuery.h"
 #import "MSQueryInternal.h"
 #import "MSQueuePushOperation.h"
-#import "MSQueuePullOperation.h"
+#import "MSQueuePullOperationInternal.h"
 #import "MSQueuePurgeOperation.h"
 #import "MSNaiveISODateFormatter.h"
 #import "MSDateOffset.h"
@@ -432,6 +432,7 @@ static NSOperationQueue *pushQueue_;
                 // Long term we can be smarter and check if our table succeeded
                 if (error) {
                     [pull cancel];
+					[pull completeOperation];
                     
                     if (completion) {
                         [self.callbackQueue addOperationWithBlock:^{

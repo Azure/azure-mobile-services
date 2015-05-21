@@ -1769,6 +1769,54 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     XCTAssertEqual(1, filter.actualRequests.count);
 }
 
+- (void)testPullResultingInErrorAllowsDependentOperationsToComplete
+{
+	XCTestExpectation *expectation = [self expectationWithDescription:self.name];
+	
+	MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:500];
+	
+	BOOL __block insertRanToServer = NO;
+	testFilter.onInspectRequest =  ^(NSURLRequest *request) {
+		insertRanToServer = YES;
+		return request;
+	};
+	
+	MSClient *filteredClient = [client clientWithFilter:testFilter];
+	MSSyncTable *todoTable = [filteredClient syncTableWithName:AllColumnTypesTable];
+	
+	// Create the item
+	NSDictionary *item = @{ @"id": @"simpleId",
+							@"binary": [@"my test data" dataUsingEncoding:NSUTF8StringEncoding]
+							};
+	
+	// Insert the item
+	[todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
+		XCTAssertNil(error, @"error should have been nil.");
+		[expectation fulfill];
+	}];
+	
+	[self waitForExpectationsWithTimeout:1.0 handler:nil];
+	
+	// Now verify that the item is invalid for the server to handle
+	expectation = [self expectationWithDescription:@"Push with Binary data in it"];
+	NSOperation *pull = [todoTable pullWithQuery:[todoTable query] queryId:nil completion:^(NSError *error) {
+		// Expect pull operation to have error returned due to push operation failing
+		XCTAssertNotNil(error);
+	}];
+	
+	NSOperationQueue *dummyQueue = [[NSOperationQueue alloc] init];
+	NSOperation *anotherOperation = [NSBlockOperation blockOperationWithBlock:^{
+		XCTAssertTrue(pull.isFinished);
+		
+		// Should reach here after pull operation fails
+		[expectation fulfill];
+	}];
+	[anotherOperation addDependency:pull];
+	[dummyQueue addOperation:anotherOperation];
+	
+	[self waitForExpectationsWithTimeout:1.0 handler:nil];
+}
+
 -(void) testPullWithIncludeDeletedReturnsErrorIfNotTrue
 {
     MSSyncTable *todoTable = [client syncTableWithName:@"TodoItem"];
