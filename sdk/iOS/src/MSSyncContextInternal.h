@@ -7,10 +7,6 @@
 #import "MSOperationQueue.h"
 #import "MSTable.h"
 
-@class MSQueuePushOperation;
-@class MSQueuePullOperation;
-@class MSQueuePurgeOperation;
-
 @interface MSSyncContext()
 
 @property (nonatomic, weak)             MSClient *client;

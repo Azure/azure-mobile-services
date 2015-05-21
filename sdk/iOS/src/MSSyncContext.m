@@ -82,7 +82,7 @@ static NSOperationQueue *pushQueue_;
 /// Begin sending pending operations to the remote tables. Abort the push attempt whenever any single operation
 /// recieves an error due to network or authorization. Otherwise operations will all run and all errors returned
 /// to the caller at once.
--(MSQueuePushOperation *) pushWithCompletion:(MSSyncBlock)completion
+-(NSOperation *) pushWithCompletion:(MSSyncBlock)completion
 {
     // TODO: Allow users to cancel operations
     MSQueuePushOperation *push = [[MSQueuePushOperation alloc] initWithSyncContext:self
@@ -431,13 +431,14 @@ static NSOperationQueue *pushQueue_;
 				// For now we just abort the pull if the push failed to complete successfully
 				// Long term we can be smarter and check if our table succeeded
 				if (error) {
+					[pull cancel];
+					
 					if (completion) {
 						[self.callbackQueue addOperationWithBlock:^{
 							completion(error);
 						}];
 					}
 				} else {
-					// Check again if we have new pending ops while we synced, and repeat as needed
 					[pushQueue_ addOperation:pull];
 				}
 			}];

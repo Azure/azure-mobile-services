@@ -8,7 +8,6 @@
 
 @class MSQuery;
 @class MSSyncContext;
-@class MSQueuePushOperation;
 
 /// Callback for updates and deletes. If there was an error, the *error* will be non-nil.
 typedef void (^MSSyncBlock)(NSError *error);
