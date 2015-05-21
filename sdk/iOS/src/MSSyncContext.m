@@ -91,8 +91,8 @@ static NSOperationQueue *pushQueue_;
                                                                         completion:completion];
     
     [pushQueue_ addOperation:push];
-	
-	return push;
+    
+    return push;
 }
 
 
@@ -415,41 +415,41 @@ static NSOperationQueue *pushQueue_;
 ///  Read from server using an MSQueuePullOperation
 - (NSOperation *) pullWithQueryInternal:(MSQuery *)query queryId:(NSString *)queryId maxRecords:(NSInteger)maxRecords completion:(MSSyncBlock)completion
 {
-	MSQueuePullOperation *pull = [[MSQueuePullOperation alloc] initWithSyncContext:self
-																			 query:query
-																		   queryId:queryId
-																		maxRecords:maxRecords
-																	 dispatchQueue:writeOperationQueue
-																	 callbackQueue:self.callbackQueue
-																		completion:completion];
-	
-	dispatch_async(writeOperationQueue, ^{
-		// Before we can pull from the remote, we need to make sure out table doesn't having pending operations
-		NSArray *tableOps = [self.operationQueue getOperationsForTable:query.table.name item:nil];
-		if (tableOps.count > 0) {
-			NSOperation *push = [self pushWithCompletion:^(NSError *error) {
-				// For now we just abort the pull if the push failed to complete successfully
-				// Long term we can be smarter and check if our table succeeded
-				if (error) {
-					[pull cancel];
-					
-					if (completion) {
-						[self.callbackQueue addOperationWithBlock:^{
-							completion(error);
-						}];
-					}
-				} else {
-					[pushQueue_ addOperation:pull];
-				}
-			}];
-			
-			[pull addDependency:push];
-		} else {
-			[pushQueue_ addOperation:pull];
-		}
-	});
-	
-	return pull;
+    MSQueuePullOperation *pull = [[MSQueuePullOperation alloc] initWithSyncContext:self
+                                                                             query:query
+                                                                           queryId:queryId
+                                                                        maxRecords:maxRecords
+                                                                     dispatchQueue:writeOperationQueue
+                                                                     callbackQueue:self.callbackQueue
+                                                                        completion:completion];
+    
+    dispatch_async(writeOperationQueue, ^{
+        // Before we can pull from the remote, we need to make sure out table doesn't having pending operations
+        NSArray *tableOps = [self.operationQueue getOperationsForTable:query.table.name item:nil];
+        if (tableOps.count > 0) {
+            NSOperation *push = [self pushWithCompletion:^(NSError *error) {
+                // For now we just abort the pull if the push failed to complete successfully
+                // Long term we can be smarter and check if our table succeeded
+                if (error) {
+                    [pull cancel];
+                    
+                    if (completion) {
+                        [self.callbackQueue addOperationWithBlock:^{
+                            completion(error);
+                        }];
+                    }
+                } else {
+                    [pushQueue_ addOperation:pull];
+                }
+            }];
+            
+            [pull addDependency:push];
+        } else {
+            [pushQueue_ addOperation:pull];
+        }
+    });
+    
+    return pull;
 }
 
 /// In order to purge data from the local store, purge first checks if there are any pending operations for
@@ -464,8 +464,8 @@ static NSOperationQueue *pushQueue_;
                                                                              callbackQueue:self.callbackQueue
                                                                                 completion:completion];
     [pushQueue_ addOperation:purge];
-	
-	return purge;
+    
+    return purge;
 }
 
 /// Purges all data, pending operations, operation errors, and metadata for the
@@ -480,8 +480,8 @@ static NSOperationQueue *pushQueue_;
                                                                              callbackQueue:self.callbackQueue
                                                                                 completion:completion];
     [pushQueue_ addOperation:purge];
-	
-	return purge;
+    
+    return purge;
 }
 
 + (BOOL) dictionary:(NSDictionary *)dictionary containsCaseInsensitiveKey:(NSString *)key
