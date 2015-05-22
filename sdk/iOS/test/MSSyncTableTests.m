@@ -18,6 +18,7 @@
 #import "MSTableOperationError.h"
 #import "MSSyncContextInternal.h"
 #import "MSTableConfigValue.h"
+#import "MSClientInternal.h"
 
 static NSString *const TodoTableNoVersion = @"TodoNoVersion";
 static NSString *const AllColumnTypesTable = @"ColumnTypes";
@@ -1082,9 +1083,348 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     XCTAssertEqual(filteredClient.syncContext.pendingOperationsCount, 3);
 }
 
+// Tests cancellation of the push operation at various stages of a push workflow.
+// - Verifies that a push following a cancelled push operation works as expected
+// - Verifies that cancelling a push operation finishes the push NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pushed to the server
+-(void) testPushCancellability
+{
+    XCTAssertEqual([self performPushWithCancellationPoint:0 serverResponseCode:@200], 0, "Push cancellation failed");
+    XCTAssertEqual([self performPushWithCancellationPoint:1 serverResponseCode:@200], 0, "Push cancellation failed");
+    XCTAssertEqual([self performPushWithCancellationPoint:2 serverResponseCode:@200], 1, "Push cancellation failed");
+    XCTAssertEqual([self performPushWithCancellationPoint:3 serverResponseCode:@200], 0, "Push cancellation failed");
+
+    XCTAssertEqual([self performPushWithCancellationPoint:0 serverResponseCode:@500], 0, "Push cancellation failed");
+    XCTAssertEqual([self performPushWithCancellationPoint:1 serverResponseCode:@500], 0, "Push cancellation failed");
+    XCTAssertEqual([self performPushWithCancellationPoint:2 serverResponseCode:@500], 0, "Push cancellation failed");
+    XCTAssertEqual([self performPushWithCancellationPoint:3 serverResponseCode:@500], 0, "Push cancellation failed");
+}
+
+// Performs push and cancels it at the specified cancellation point.
+// - Verifies that a push operation following a cancelled push operation works as expected
+// - Verifies that cancelling a push finishes the push NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pushed to the server
+// - Returns the number of items pushed to the server.
+-(int) performPushWithCancellationPoint:(int) requestedCancellationPoint serverResponseCode:(NSNumber *)serverResponseCode
+{
+    // Initialization
+    MSMultiRequestTestFilter *filter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[serverResponseCode] data:@[@"{\"id\": \"id1\", \"text\":\"server\"}"] appendEmptyRequest:YES];
+    MSClient *filteredClient = [client clientWithFilter:filter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
+
+    // Start with a clean slate
+    [[todoTable forcePurgeWithCompletion:^(NSError *error) {
+        XCTAssertNil(error, @"error should have been nil.");
+    }] waitUntilFinished];
+
+    __block NSOperation *pushOperation;
+
+    // Define filters
+    ((MSTestFilter *)filter.testFilters[0]).onInspectRequest = ^(NSURLRequest *request) {
+
+        // Cancellation point 0
+        if (requestedCancellationPoint == 0)
+            [pushOperation cancel];
+        
+        return request;
+    };
+    
+    ((MSTestFilter *)filter.testFilters[0]).onInspectResponseData = ^(NSURLRequest *request, NSData *data) {
+
+        // Cancellation point 1
+        if (requestedCancellationPoint == 1)
+            [pushOperation cancel];
+        
+        return data;
+    };
+    
+    // Perform an insert
+    XCTestExpectation *insertExpectation = [self expectationWithDescription:@"insert expectation"];
+    [todoTable insert:@{ @"id" : @"id1", @"text" : @"client" } completion:^(NSDictionary *item, NSError *error) {
+        [insertExpectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:10 handler:nil];
+    
+    // Perform a push
+    pushOperation = [filteredClient.syncContext pushWithCompletion:^(NSError *error) {
+        
+        // Cancellation point 2
+        if (requestedCancellationPoint == 2)
+            [pushOperation cancel];
+    }];
+    
+    // Cancellation point 3
+    if (requestedCancellationPoint == 3)
+        [pushOperation cancel];
+
+    [self verifyFinished:pushOperation];
+
+    int synchronizedItemCount = [self synchronizedItemCount];
+
+    // Perform another insert
+    insertExpectation = [self expectationWithDescription:@"insert expectation"];
+    [todoTable insert:@{ @"id" : @"id2", @"text" : @"client" } completion:^(NSDictionary *item, NSError *error) {
+        [insertExpectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:10 handler:nil];
+
+    XCTAssertEqual([self performVanillaPush], 2, "Expected all inserted items to have been pushed to the server by now");
+
+    return synchronizedItemCount;
+}
+
+// Performs a push operation and returns the count of all client items pushed so far
+-(int) performVanillaPush
+{
+    // Define a filter that returns an appropriate server response for the requested item
+    MSTestFilter *filter = [MSTestFilter new];
+    MSClient *filteredClient = [client clientWithFilter:filter];
+
+    filter.ignoreNextFilter = YES;
+    filter.onInspectResponseData = ^(NSURLRequest *request, NSData *data) {
+        NSError *error = nil;
+        
+        NSDictionary *item = [filteredClient.serializer itemFromData:request.HTTPBody withOriginalItem:nil ensureDictionary:YES orError:&error];
+        XCTAssertNil(error);
+        
+        NSString *responseString = [NSString stringWithFormat:@"{\"id\": \"%@\", \"text\":\"server\"}", item[@"id"]];
+        NSData *pushResponse = [responseString dataUsingEncoding:NSUTF8StringEncoding];
+
+        return pushResponse;
+    };
+
+    // Perform push
+    XCTestExpectation *pushExpectation = [self expectationWithDescription:@"push expectation"];
+    [filteredClient.syncContext pushWithCompletion:^(NSError *error) {
+        XCTAssertNil(error, "Expected successful push");
+        [pushExpectation fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:10 handler:nil];
+    
+    return [self synchronizedItemCount];
+}
+
+// Returns the number of synchronized items, i.e. items that are present on the server as well as the client.
+// An item is synchronized if it was successfully pushed to the server from the client OR
+// if it was successfully pulled from the server to the client.
+-(int) synchronizedItemCount
+{
+    // Initialization
+    MSSyncTable *todoTable = [client syncTableWithName:TodoTableNoVersion];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
+
+    // Number synchronized items
+    __block int numSynchronizedItems = 0;
+
+    XCTestExpectation *readExpectation = [self expectationWithDescription:@"read expectation"];
+
+    // Read from the table
+    [client.syncContext readWithQuery:query completion:^(MSQueryResult *result, NSError *error) {
+        
+        // Count the number of synchronized items
+        for (NSDictionary* item in result.items) {
+            if ([item[@"text"] isEqualToString:@"server"]) {
+                ++numSynchronizedItems;
+            }
+        }
+
+        [readExpectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:10 handler:nil];
+    
+    return numSynchronizedItems;
+}
+
+// Verify that the specified NSOperation has finished
+-(void) verifyFinished:(NSOperation *)operation
+{
+    XCTestExpectation *completionExpectation = [self expectationWithDescription:@"Completion expectation"];
+    
+    // Define an operation and make it dependent on blockingOperation
+    NSOperation *dependentOperation = [NSBlockOperation blockOperationWithBlock:^{
+        [completionExpectation fulfill];
+    }];
+
+    // Add the dependentOperation to the queue after configuring dependencies
+    [dependentOperation addDependency:operation];
+    [[NSOperationQueue new] addOperation:dependentOperation];
+    
+    [self waitForExpectationsWithTimeout:10 handler:nil];
+}
 
 #pragma mark Pull Tests
 
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability
+{
+    XCTAssertEqual([self performPullWithCancellationPoint:0 serverPushResponseCode:@200 serverPullResponseCode:@200], 1, "Pull cancellation failed");
+    XCTAssertEqual([self performPullWithCancellationPoint:1 serverPushResponseCode:@200 serverPullResponseCode:@200], 1, "Pull cancellation failed");
+    XCTAssertEqual([self performPullWithCancellationPoint:2 serverPushResponseCode:@200 serverPullResponseCode:@200], 1, "Pull cancellation failed");
+    XCTAssertEqual([self performPullWithCancellationPoint:3 serverPushResponseCode:@200 serverPullResponseCode:@200], 1, "Pull cancellation failed");
+    XCTAssertEqual([self performPullWithCancellationPoint:4 serverPushResponseCode:@200 serverPullResponseCode:@200], 2, "Pull cancellation failed");
+    XCTAssertEqual([self performPullWithCancellationPoint:5 serverPushResponseCode:@200 serverPullResponseCode:@200], 1, "Pull cancellation failed");
+   
+    XCTAssertEqual([self performPullWithCancellationPoint:0 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed");
+    XCTAssertEqual([self performPullWithCancellationPoint:1 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed");
+    XCTAssertEqual([self performPullWithCancellationPoint:2 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed");
+    XCTAssertEqual([self performPullWithCancellationPoint:3 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed");
+    XCTAssertEqual([self performPullWithCancellationPoint:4 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed");
+    XCTAssertEqual([self performPullWithCancellationPoint:5 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed");
+    
+    XCTAssertEqual([self performPullWithCancellationPoint:0 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed");
+    XCTAssertEqual([self performPullWithCancellationPoint:1 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed");
+    XCTAssertEqual([self performPullWithCancellationPoint:2 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed");
+    XCTAssertEqual([self performPullWithCancellationPoint:3 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed");
+    XCTAssertEqual([self performPullWithCancellationPoint:4 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed");
+    XCTAssertEqual([self performPullWithCancellationPoint:5 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed");
+    
+    XCTAssertEqual([self performPullWithCancellationPoint:0 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed");
+    XCTAssertEqual([self performPullWithCancellationPoint:1 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed");
+    XCTAssertEqual([self performPullWithCancellationPoint:2 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed");
+    XCTAssertEqual([self performPullWithCancellationPoint:3 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed");
+    XCTAssertEqual([self performPullWithCancellationPoint:4 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed");
+    XCTAssertEqual([self performPullWithCancellationPoint:5 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed");
+    
+    [self performPullWithCancellationPoint:0 serverPushResponseCode:@500 serverPullResponseCode:@200];
+}
+
+// Performs pull and cancels it at the specified cancellation point.
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pull from the server
+// - Returns the number of items pulled from the server.
+-(int) performPullWithCancellationPoint:(int) requestedCancellationPoint serverPushResponseCode:(NSNumber *)serverPushResponseCode serverPullResponseCode:(NSNumber *)serverPullResponseCode
+{
+    // Initialization
+    NSString *serverPushData = @"{\"id\": \"id1\", \"text\":\"server\"}";
+    NSString *serverPullData = @"[{\"id\": \"id1\", \"text\":\"server\"}, {\"id\": \"id2\", \"text\":\"server\"}]";
+    MSMultiRequestTestFilter *filter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[serverPushResponseCode, serverPullResponseCode] data:@[serverPushData, serverPullData] appendEmptyRequest:YES];
+    MSClient *filteredClient = [client clientWithFilter:filter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
+    
+    // Start with a clean slate
+    [[todoTable forcePurgeWithCompletion:^(NSError *error) {
+        XCTAssertNil(error, @"error should have been nil.");
+    }] waitUntilFinished];
+    
+    __block NSOperation *pullOperation;
+    
+    // Define filters
+    ((MSTestFilter *)filter.testFilters[0]).onInspectRequest = ^(NSURLRequest *request) {
+        
+        // Cancellation point 0
+        if (requestedCancellationPoint == 0)
+            [pullOperation cancel];
+        
+        return request;
+    };
+    
+    ((MSTestFilter *)filter.testFilters[0]).onInspectResponseData = ^(NSURLRequest *request, NSData *data) {
+        
+        // Cancellation point 1
+        if (requestedCancellationPoint == 1)
+            [pullOperation cancel];
+        
+        return data;
+    };
+    
+    ((MSTestFilter *)filter.testFilters[1]).onInspectRequest = ^(NSURLRequest *request) {
+        
+        // Cancellation point 2
+        if (requestedCancellationPoint == 2)
+            [pullOperation cancel];
+        
+        return request;
+    };
+    
+    ((MSTestFilter *)filter.testFilters[1]).onInspectResponseData = ^(NSURLRequest *request, NSData *data) {
+        
+        // Cancellation point 3
+        if (requestedCancellationPoint == 3)
+            [pullOperation cancel];
+        
+        return data;
+    };
+    
+    // Insert an item
+    XCTestExpectation *insertExpectation = [self expectationWithDescription:@"insert expectation"];
+    [todoTable insert:@{ @"id" : @"id1", @"text" : @"client" } completion:^(NSDictionary *item, NSError *error) {
+        [insertExpectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:10 handler:nil];
+    
+    // Perform a pull
+    pullOperation = [filteredClient.syncContext pullWithQuery:query queryId:nil completion:^(NSError *error) {
+
+        // Cancellation point 4
+        if (requestedCancellationPoint == 4)
+            [pullOperation cancel];
+    }];
+
+    // Cancellation point 5
+    if (requestedCancellationPoint == 5)
+        [pullOperation cancel];
+
+    [self verifyFinished:pullOperation];
+    
+    int synchronizedItemCount = [self synchronizedItemCount];
+    
+    XCTAssertEqual([self performVanillaPull], 3, "Expected all server items to have been pulled to the client by now");
+    
+    return synchronizedItemCount;
+}
+
+// Performs a pull operation and returns the count of all the server items pulled so far
+-(int) performVanillaPull
+{
+    // Initialization
+    MSTestFilter *filter = [MSTestFilter new];
+    MSClient *filteredClient = [client clientWithFilter:filter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
+
+    __block bool isFirstPullRequest = true;
+    filter.ignoreNextFilter = YES;
+    filter.onInspectResponseData = ^(NSURLRequest *request, NSData *data) {
+
+        NSDictionary *item = [filteredClient.serializer itemFromData:request.HTTPBody withOriginalItem:nil ensureDictionary:YES orError:nil];
+        
+        NSString *responseString;
+        if (item != nil) // This means it is a push request
+        {
+            responseString = [NSString stringWithFormat:@"{\"id\": \"%@\", \"text\":\"server\"}", item[@"id"]];
+        }
+        else if (isFirstPullRequest) // First pull request
+        {
+            responseString = @"[{\"id\": \"id1\", \"text\":\"server\"}, {\"id\": \"id2\", \"text\":\"server\"}, {\"id\": \"id3\", \"text\":\"server\"}]";
+            isFirstPullRequest = false;
+        }
+        else // Second pull request
+        {
+            responseString = @"[]";
+        }
+        
+        NSData *pushResponse = [responseString dataUsingEncoding:NSUTF8StringEncoding];
+        return pushResponse;
+    };
+    
+    // Perform pull
+    NSOperation *pullOperation = [filteredClient.syncContext pullWithQuery:query queryId:nil completion:^(NSError *error) {
+        XCTAssertNil(error, "Expected successful pull");
+    }];
+    
+    [self verifyFinished:pullOperation];
+    
+    return [self synchronizedItemCount];
+}
 
 -(void) testPullSuccess
 {
@@ -1876,54 +2216,6 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     XCTAssertEqual(1, filter.actualRequests.count);
-}
-
-- (void)testPullResultingInErrorAllowsDependentOperationsToComplete
-{
-	XCTestExpectation *expectation = [self expectationWithDescription:self.name];
-	
-	MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:500];
-	
-	BOOL __block insertRanToServer = NO;
-	testFilter.onInspectRequest =  ^(NSURLRequest *request) {
-		insertRanToServer = YES;
-		return request;
-	};
-	
-	MSClient *filteredClient = [client clientWithFilter:testFilter];
-	MSSyncTable *todoTable = [filteredClient syncTableWithName:AllColumnTypesTable];
-	
-	// Create the item
-	NSDictionary *item = @{ @"id": @"simpleId",
-							@"binary": [@"my test data" dataUsingEncoding:NSUTF8StringEncoding]
-							};
-	
-	// Insert the item
-	[todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
-		XCTAssertNil(error, @"error should have been nil.");
-		[expectation fulfill];
-	}];
-	
-	[self waitForExpectationsWithTimeout:1.0 handler:nil];
-	
-	// Now verify that the item is invalid for the server to handle
-	expectation = [self expectationWithDescription:@"Push with Binary data in it"];
-	NSOperation *pull = [todoTable pullWithQuery:[todoTable query] queryId:nil completion:^(NSError *error) {
-		// Expect pull operation to have error returned due to push operation failing
-		XCTAssertNotNil(error);
-	}];
-	
-	NSOperationQueue *dummyQueue = [[NSOperationQueue alloc] init];
-	NSOperation *anotherOperation = [NSBlockOperation blockOperationWithBlock:^{
-		XCTAssertTrue(pull.isFinished);
-		
-		// Should reach here after pull operation fails
-		[expectation fulfill];
-	}];
-	[anotherOperation addDependency:pull];
-	[dummyQueue addOperation:anotherOperation];
-	
-	[self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 -(void) testPullWithIncludeDeletedReturnsErrorIfNotTrue
