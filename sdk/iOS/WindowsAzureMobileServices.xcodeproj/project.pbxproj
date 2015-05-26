@@ -134,6 +134,7 @@
 		E8F33B3D1616694C002DD7C6 /* MSQueryTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B3A161668ED002DD7C6 /* MSQueryTests.m */; };
 		E8F33B3E16166956002DD7C6 /* MSJSONSerializerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B36161668DA002DD7C6 /* MSJSONSerializerTests.m */; };
 		E8F33B3F1616695E002DD7C6 /* MSPredicateTranslatorTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B38161668E4002DD7C6 /* MSPredicateTranslatorTests.m */; };
+		F3EA41DD1B0E63470014B587 /* MSQueuePullOperationInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = F3EA41DC1B0E62F40014B587 /* MSQueuePullOperationInternal.h */; };
 		F3C002341AF7F7450028AB81 /* BlockDefinitions.h in Headers */ = {isa = PBXBuildFile; fileRef = F3C002331AF7F7450028AB81 /* BlockDefinitions.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
@@ -289,6 +290,7 @@
 		E8F33B36161668DA002DD7C6 /* MSJSONSerializerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSJSONSerializerTests.m; sourceTree = "<group>"; };
 		E8F33B38161668E4002DD7C6 /* MSPredicateTranslatorTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSPredicateTranslatorTests.m; sourceTree = "<group>"; };
 		E8F33B3A161668ED002DD7C6 /* MSQueryTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSQueryTests.m; sourceTree = "<group>"; };
+		F3EA41DC1B0E62F40014B587 /* MSQueuePullOperationInternal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSQueuePullOperationInternal.h; sourceTree = "<group>"; };
 		F3C002331AF7F7450028AB81 /* BlockDefinitions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BlockDefinitions.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -359,6 +361,7 @@
 				A25888FC18A19D0B00962F9A /* MSOperationQueue.h */,
 				A25888FD18A19D0B00962F9A /* MSOperationQueue.m */,
 				CF4D49851A2E5C96006AEB70 /* MSQueuePullOperation.h */,
+				F3EA41DC1B0E62F40014B587 /* MSQueuePullOperationInternal.h */,
 				CF4D49891A2E5CF8006AEB70 /* MSQueuePullOperation.m */,
 				CF1D745A1A5D85D80074789F /* MSQueuePurgeOperation.h */,
 				CF1D74581A5D85C60074789F /* MSQueuePurgeOperation.m */,
@@ -655,6 +658,7 @@
 				F3C002341AF7F7450028AB81 /* BlockDefinitions.h in Headers */,
 				CF762EC61A1D366E0018C292 /* MSDateOffset.h in Headers */,
 				A24701B9196896F500385DA2 /* MSPush.h in Headers */,
+				F3EA41DD1B0E63470014B587 /* MSQueuePullOperationInternal.h in Headers */,
 				870C0C9C199C246700A134DD /* MSSDKFeatures.h in Headers */,
 				E8E3790F161F769D00C13F00 /* MSError.h in Headers */,
 				A2C14C6A19105D9F00A58609 /* MSSyncContextReadResult.h in Headers */,

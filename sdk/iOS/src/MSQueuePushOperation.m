@@ -186,9 +186,9 @@
                                                    code:MSPushAbortedAuthentication
                                           internalError:error];
             }
-            else if(error.domain == NSURLErrorDomain) {
+            else if ([error.domain isEqualToString:NSURLErrorDomain]) {
                 self.error = [self errorWithDescription:@"Push aborted due to network error"
-                                                   code:MSPushAbortedUnknown
+                                                   code:MSPushAbortedNetwork
                                           internalError:error];
             }
             else if (!didCondense) {
