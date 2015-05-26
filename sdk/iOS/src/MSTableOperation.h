@@ -28,13 +28,13 @@ typedef NS_OPTIONS(NSUInteger, MSTableOperationTypes) {
 @property (nonatomic, readonly) MSTableOperationTypes type;
 
 /// The name of the table associated with the item
-@property (nonatomic, copy, readonly) NSString *tableName;
+@property (nonatomic, copy, readonly, nonnull) NSString *tableName;
 
 /// The Id of the item the operation should run on.
-@property (nonatomic, copy, readonly) NSString *itemId;
+@property (nonatomic, copy, readonly, nullable) NSString *itemId;
 
 /// The item that will be sent to the server when execute is called.
-@property (nonatomic, strong) NSDictionary *item;
+@property (nonatomic, strong, nonnull) NSDictionary *item;
 
 /// @}
 
@@ -44,7 +44,7 @@ typedef NS_OPTIONS(NSUInteger, MSTableOperationTypes) {
 /// Perform's the associated PushOperationType (insert, etc) for the table item.
 /// The callback will be passed the result (an item on insert/update, and the string
 /// id on a delete) or the error from the mobile service.
--(void) executeWithCompletion:(void(^)(id itemOrItemId, NSError *error))completion;
+-(void) executeWithCompletion:(nullable void(^)(id __nonnull itemOrItemId, NSError *__nullable error))completion;
 
 /// @}
 

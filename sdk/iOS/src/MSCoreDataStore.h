@@ -21,7 +21,7 @@
 /// @{
 
 /// Creates a CoreDataStore with the given managed object context.
--(id) initWithManagedObjectContext:(NSManagedObjectContext *)context;
+-(nonnull instancetype) initWithManagedObjectContext:(nonnull NSManagedObjectContext *)context;
 
 /// @}
 
@@ -31,7 +31,7 @@
 
 /// Converts a managed object from the core data layer back into a dictionary with the
 /// properties expected when using a MSTable or MSSyncTable
-+(NSDictionary *) tableItemFromManagedObject:(NSManagedObject *)object;
++(nonnull NSDictionary *) tableItemFromManagedObject:(nonnull NSManagedObject *)object;
 
 /// @}
 

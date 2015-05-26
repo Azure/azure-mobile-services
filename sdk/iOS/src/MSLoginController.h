@@ -23,9 +23,9 @@
 
 /// Initializes an *MSLoginController* instance with the given client, login
 /// provider and completion block.
--(id)initWithClient:(MSClient *)client
-           provider:(NSString *)provider
-         completion:(MSClientLoginBlock)completion;
+-(nonnull instancetype)initWithClient:(nonnull MSClient *)client
+							 provider:(nonnull NSString *)provider
+						   completion:(nullable MSClientLoginBlock)completion;
 
 ///@}
 
@@ -36,22 +36,22 @@
 ///@{
 
 /// The client associated with this *MSLoginController*.
-@property (nonatomic, strong, readonly)     MSClient *client;
+@property (nonatomic, strong, readonly, nonnull)     MSClient *client;
 
 /// The login provider associated with this *MSLoginController*.
-@property (nonatomic, copy,   readonly)     NSString *provider;
+@property (nonatomic, copy,   readonly, nonnull)     NSString *provider;
 
 /// The *UIActivityIndicatorView* on the *UIToolbar* associated with the
 /// *MSLoginController*. If the toolbar is visible, the actvivity indicator
 /// will become active whenever the end user is navigating to a new URL during
 /// the login flow.
-@property (nonatomic, strong, readonly)     UIActivityIndicatorView *activityIndicator;
+@property (nonatomic, strong, readonly, nullable)     UIActivityIndicatorView *activityIndicator;
 
 /// The *UIToolbar* associated with the *MSLoginController*. The toolbar includes
 /// a cancel button and an activity indicator. The visibility and placement of
 /// the toolbar can be configured using the *showToolbar* and *toolbarPosition*
 /// properties respectively.
-@property (nonatomic, strong, readonly)     UIToolbar *toolbar;
+@property (nonatomic, strong, readonly, nullable)     UIToolbar *toolbar;
 
 ///@}
 

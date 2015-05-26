@@ -19,27 +19,27 @@
 ///@{
 
 /// Unique error id in table store
-@property (nonatomic, readonly) NSString *guid;
+@property (nonatomic, readonly, nonnull) NSString *guid;
 
 /// The name of the table the operation was being performed for
-@property (nonatomic, readonly, copy) NSString *table;
+@property (nonatomic, readonly, copy, nonnull) NSString *table;
 
 /// The type of operation being performed on the table (insert, update, delete)
 @property (nonatomic, readonly) MSTableOperationTypes operation;
 
 /// The id of the item to the operation ran for
-@property (nonatomic, readonly, copy) NSString *itemId;
+@property (nonatomic, readonly, copy, nullable) NSString *itemId;
 
 /// The full item being sent to the server, this item may not always be present for all
 /// operations
-@property (nonatomic, readonly, copy) NSDictionary *item;
+@property (nonatomic, readonly, copy, nonnull) NSDictionary *item;
 
 /// Represents the error code recieved while executing the table operation, see *MSError*
 /// for a list of Mobile Service's error codes
 @property (nonatomic, readonly) NSInteger code;
 
 /// A description of what caused the operation to fail
-@property (nonatomic, readonly) NSString *description;
+@property (nonatomic, readonly, nonnull) NSString *description;
 
 /// The HTTP status code recieved while executing the operation from the mobile service. Note:
 /// this item may not be set if the operation failed before going to the server
@@ -47,7 +47,7 @@
 
 /// When the status code is a precondition failure, this item will contain the current version
 /// of the item on the server
-@property (nonatomic, readonly) NSDictionary *serverItem;
+@property (nonatomic, readonly, nullable) NSDictionary *serverItem;
 
 ///@}
 
@@ -59,25 +59,25 @@
 
 /// Removes the pending operation so it will not be tried again the next time push is called. In addition,
 /// updates the local store state
-- (void) cancelOperationAndUpdateItem:(NSDictionary *)item completion:(MSSyncBlock)completion;
+- (void) cancelOperationAndUpdateItem:(nonnull NSDictionary *)item completion:(nullable MSSyncBlock)completion;
 
 /// Removes the pending operation so it will not be tried again the next time push is called. In addition,
 /// removes the item associated with the operation from the local store
-- (void) cancelOperationAndDiscardItemWithCompletion:(MSSyncBlock)completion;
+- (void) cancelOperationAndDiscardItemWithCompletion:(nonnull MSSyncBlock)completion;
 
 
 /// @name Initializing the MSTableOperationError Object
 /// @{
 
 /// Initializes the table operation error from the provided operation, item, error, and context objects.
-- (id) initWithOperation:(MSTableOperation *)operation item:(NSDictionary *)item context:(MSSyncContext *)context error:(NSError *) error;
+- (nonnull instancetype) initWithOperation:(nonnull MSTableOperation *)operation item:(nonnull NSDictionary *)item context:(nullable MSSyncContext *)context error:(nonnull NSError *) error;
 
-- (id) initWithOperation:(MSTableOperation *)operation item:(NSDictionary *)item error:(NSError *) error __deprecated;
+- (nonnull instancetype) initWithOperation:(nonnull MSTableOperation *)operation item:(nonnull NSDictionary *)item error:(nonnull NSError *) error __deprecated;
 
 /// Initializes the table operation error from a serialized representation of a MSTableOperationError.
-- (id) initWithSerializedItem:(NSDictionary *)item context:(MSSyncContext *)context;
+- (nonnull instancetype) initWithSerializedItem:(nonnull NSDictionary *)item context:(nullable MSSyncContext *)context;
 
-- (id) initWithSerializedItem:(NSDictionary *)item __deprecated;
+- (nonnull instancetype) initWithSerializedItem:(nonnull NSDictionary *)item __deprecated;
 
 ///@}
 
@@ -86,7 +86,7 @@
 
 /// Returns an NSDictionary with two keys, id and properties, where properties contains a serialized version
 /// of the error
-- (NSDictionary *) serialize;
+- (nonnull NSDictionary *) serialize;
 
 /// @}
 @end

@@ -20,10 +20,10 @@
 ///@{
 
 /// The name of this table.
-@property (nonatomic, copy, readonly)           NSString *name;
+@property (nonatomic, copy, readonly, nonnull)           NSString *name;
 
 /// The client associated with this table.
-@property (nonatomic, strong, readonly)         MSClient *client;
+@property (nonatomic, strong, readonly, nonnull)         MSClient *client;
 
 //@property (nonatomic) MSSystemProperties systemProperties;
 ///@}
@@ -32,7 +32,7 @@
 ///@{
 
 /// Initializes an *MSTable* instance with the given name and client.
--(id)initWithName:(NSString *)tableName client:(MSClient *)client;
+-(nonnull instancetype)initWithName:(nonnull NSString *)tableName client:(nonnull MSClient *)client;
 
 ///@}
 
@@ -42,17 +42,17 @@
 /// Sends a request to the MSSyncContext's data source to upsert the given
 /// item into the local store. In addition queues a request to send the insert
 /// to the mobile service.
--(void)insert:(NSDictionary *)item completion:(MSSyncItemBlock)completion;
+-(void)insert:(nonnull NSDictionary *)item completion:(nullable MSSyncItemBlock)completion;
 
 /// Sends a request to the MSSyncContext's data source to upsert the given
 /// item into the local store. In addition queues a request to send the update
 /// to the mobile service.
--(void)update:(NSDictionary *)item completion:(MSSyncBlock)completion;
+-(void)update:(nonnull NSDictionary *)item completion:(nullable MSSyncBlock)completion;
 
 /// Sends a request to the MSSyncContext's data source to delete the given
 /// item in the local store. In addition queues a request to send the delete
 /// to the mobile service.
--(void)delete:(NSDictionary *)item completion:(MSSyncBlock)completion;
+-(void)delete:(nonnull NSDictionary *)item completion:(nullable MSSyncBlock)completion;
 
 ///@}
 
@@ -64,17 +64,17 @@
 
 /// Sends a request to the Windows Azure Mobile Service to return the item
 /// with the given id from the table.
--(void)readWithId:(NSString *)itemId completion:(MSItemBlock)completion;
+-(void)readWithId:(nonnull NSString *)itemId completion:(nullable MSItemBlock)completion;
 
 /// Sends a request to the Windows Azure Mobile Service to return all items
 /// from the table. The Windows Azure Mobile Service will apply a default
 /// limit to the number of items returned.
--(void)readWithCompletion:(MSReadQueryBlock)completion;
+-(void)readWithCompletion:(nullable MSReadQueryBlock)completion;
 
 /// Sends a request to the Windows Azure Mobile Service to return all items
 /// from the table that meet the conditions of the given predicate.
--(void)readWithPredicate:(NSPredicate *)predicate
-              completion:(MSReadQueryBlock)completion;
+-(void)readWithPredicate:(nullable NSPredicate *)predicate
+              completion:(nullable MSReadQueryBlock)completion;
 
 #pragma mark * Public Query Constructor Methods
 
@@ -82,12 +82,12 @@
 /// configured and then executed to retrieve items from the table. An *MSQuery*
 /// instance provides more flexibilty when querying a table than the table
 /// read* methods.
--(MSQuery *)query;
+-(nonnull MSQuery *)query;
 
 /// Returns an *MSQuery* instance associated with the table that uses
 /// the given predicate. An *MSQuery* instance provides more flexibilty when
 /// querying a table than the table read* methods.
--(MSQuery *)queryWithPredicate:(NSPredicate *)predicate;
+-(nonnull MSQuery *)queryWithPredicate:(nullable NSPredicate *)predicate;
 
 /// @}
 
@@ -98,17 +98,17 @@
 /// MSQeury object.
 /// Before a pull is allowed to run, all pending requests on the specified table will be sent to
 /// the server. If a pending request for this table fails, the pull will be cancelled
--(void)pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion;
+-(void)pullWithQuery:(nonnull MSQuery *)query queryId:(nullable NSString *)queryId completion:(nullable MSSyncBlock)completion;
 
 /// Removes all records in the local cache that match the results of the specified query.
 /// If query is nil, all records in the local table will be removed.
 /// Before local data is removed, a check will be made for pending operations on this table. If
 /// any are found the purge will be cancelled and an error returned.
--(void)purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion;
+-(void)purgeWithQuery:(nullable MSQuery *)query completion:(nullable MSSyncBlock)completion;
 
 /// Purges all data, pending operations, operation errors, and metadata for the
 /// MSSyncTable from the local cache.
--(void)forcePurgeWithCompletion:(MSSyncBlock)completion;
+-(void)forcePurgeWithCompletion:(nullable MSSyncBlock)completion;
 
 /// @}
 

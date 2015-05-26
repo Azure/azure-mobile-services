@@ -18,7 +18,7 @@
 ///@{
 
 /// Initializes an *MSUser* instance with the given user id.
--(id)initWithUserId:(NSString *)userId;
+-(nonnull instancetype)initWithUserId:(nonnull NSString *)userId;
 
 ///@}
 
@@ -30,7 +30,7 @@
 
 
 /// The user id of the end user.
-@property (nonatomic, copy, readonly)   NSString *userId;
+@property (nonatomic, copy, readonly, nonnull)   NSString *userId;
 
 
 #pragma mark * Public Readwrite Properties
@@ -40,7 +40,7 @@
 /// requests made to the Microsoft Azure Mobile Service, allowing the client to
 /// perform all actions on the Microsoft Azure Mobile Service that require
 /// authenticated-user level permissions.
-@property (nonatomic, copy)         NSString *mobileServiceAuthenticationToken;
+@property (nonatomic, copy, nonnull)         NSString *mobileServiceAuthenticationToken;
 
 ///@}
 
