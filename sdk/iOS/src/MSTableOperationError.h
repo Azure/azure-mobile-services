@@ -28,11 +28,11 @@
 @property (nonatomic, readonly) MSTableOperationTypes operation;
 
 /// The id of the item to the operation ran for
-@property (nonatomic, readonly, copy, nullable) NSString *itemId;
+@property (nonatomic, readonly, copy, nonnull) NSString *itemId;
 
 /// The full item being sent to the server, this item may not always be present for all
 /// operations
-@property (nonatomic, readonly, copy, nonnull) NSDictionary *item;
+@property (nonatomic, readonly, copy, nullable) NSDictionary *item;
 
 /// Represents the error code recieved while executing the table operation, see *MSError*
 /// for a list of Mobile Service's error codes
@@ -63,7 +63,7 @@
 
 /// Removes the pending operation so it will not be tried again the next time push is called. In addition,
 /// removes the item associated with the operation from the local store
-- (void) cancelOperationAndDiscardItemWithCompletion:(nonnull MSSyncBlock)completion;
+- (void) cancelOperationAndDiscardItemWithCompletion:(nullable MSSyncBlock)completion;
 
 
 /// @name Initializing the MSTableOperationError Object

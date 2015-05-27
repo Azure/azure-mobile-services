@@ -142,7 +142,7 @@ extern NSString *const MSSystemColumnDeleted;
 /// fromm the table that meet the conditions of the given query.
 /// You can also use a URI in place of queryString to fetch results from a URI e.g.
 /// result.nextLink gives you URI to next page of results for a query that you can pass here.
--(void)readWithQueryString:(nullable NSString *)queryString
+-(void)readWithQueryString:(nonnull NSString *)queryString
                 completion:(nullable MSReadQueryBlock)completion;
 
 /// Sends a request to the Microsoft Azure Mobile Service to return all items
@@ -152,7 +152,7 @@ extern NSString *const MSSystemColumnDeleted;
 
 /// Sends a request to the Microsoft Azure Mobile Service to return all items
 /// from the table that meet the conditions of the given predicate.
--(void)readWithPredicate:(nullable NSPredicate *) predicate
+-(void)readWithPredicate:(nonnull NSPredicate *) predicate
       completion:(nullable MSReadQueryBlock)completion;
 
 #pragma mark * Public Query Constructor Methods
@@ -167,7 +167,7 @@ extern NSString *const MSSystemColumnDeleted;
 /// Returns an *MSQuery* instance associated with the table that uses
 /// the given predicate. An *MSQuery* instance provides more flexibilty when
 /// querying a table than the table read* methods.
--(nonnull MSQuery *)queryWithPredicate:(nullable NSPredicate *)predicate;
+-(nonnull MSQuery *)queryWithPredicate:(nonnull NSPredicate *)predicate;
 
 ///@}
 

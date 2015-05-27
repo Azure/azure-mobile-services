@@ -30,7 +30,7 @@
 
 
 /// The user id of the end user.
-@property (nonatomic, copy, readonly, nonnull)   NSString *userId;
+@property (nonatomic, copy, readonly, nullable)   NSString *userId;
 
 
 #pragma mark * Public Readwrite Properties

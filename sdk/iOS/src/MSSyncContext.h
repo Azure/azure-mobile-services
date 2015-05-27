@@ -63,7 +63,7 @@
 -(BOOL) upsertItems:(nullable NSArray *)item table:(nonnull NSString *)table orError:(NSError * __nullable * __nullable)error;
 
 /// Should remove the provided item from the local store
--(BOOL) deleteItemsWithIds:(nullable NSArray *)items table:(nonnull NSString *)table orError:(NSError * __nullable * __nullable)error;
+-(BOOL) deleteItemsWithIds:(nonnull NSArray *)items table:(nonnull NSString *)table orError:(NSError * __nullable * __nullable)error;
 
 /// Should remove all entries from the specified table in the local store
 -(BOOL) deleteUsingQuery:(nullable MSQuery *)query orError:(NSError * __nullable * __nullable)error;
