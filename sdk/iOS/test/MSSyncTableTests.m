@@ -1089,15 +1089,15 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 // - Verifies that the expected number of items are pushed to the server
 -(void) testPushCancellability
 {
-    XCTAssertEqual([self performPushWithCancellationPoint:0 serverResponseCode:@200], 0, "Push cancellation failed");
-    XCTAssertEqual([self performPushWithCancellationPoint:1 serverResponseCode:@200], 0, "Push cancellation failed");
-    XCTAssertEqual([self performPushWithCancellationPoint:2 serverResponseCode:@200], 1, "Push cancellation failed");
-    XCTAssertEqual([self performPushWithCancellationPoint:3 serverResponseCode:@200], 0, "Push cancellation failed");
+    XCTAssertEqual([self performPushWithCancellationPoint:0 serverResponseCode:200], 0, "Push cancellation failed");
+    XCTAssertEqual([self performPushWithCancellationPoint:1 serverResponseCode:200], 0, "Push cancellation failed");
+    XCTAssertEqual([self performPushWithCancellationPoint:2 serverResponseCode:200], 1, "Push cancellation failed");
+    XCTAssertEqual([self performPushWithCancellationPoint:3 serverResponseCode:200], 0, "Push cancellation failed");
 
-    XCTAssertEqual([self performPushWithCancellationPoint:0 serverResponseCode:@500], 0, "Push cancellation failed");
-    XCTAssertEqual([self performPushWithCancellationPoint:1 serverResponseCode:@500], 0, "Push cancellation failed");
-    XCTAssertEqual([self performPushWithCancellationPoint:2 serverResponseCode:@500], 0, "Push cancellation failed");
-    XCTAssertEqual([self performPushWithCancellationPoint:3 serverResponseCode:@500], 0, "Push cancellation failed");
+    XCTAssertEqual([self performPushWithCancellationPoint:0 serverResponseCode:500], 0, "Push cancellation failed");
+    XCTAssertEqual([self performPushWithCancellationPoint:1 serverResponseCode:500], 0, "Push cancellation failed");
+    XCTAssertEqual([self performPushWithCancellationPoint:2 serverResponseCode:500], 0, "Push cancellation failed");
+    XCTAssertEqual([self performPushWithCancellationPoint:3 serverResponseCode:500], 0, "Push cancellation failed");
 }
 
 // Performs push and cancels it at the specified cancellation point.
@@ -1105,10 +1105,10 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 // - Verifies that cancelling a push finishes the push NSOperation regardless of the cancellation point
 // - Verifies that the expected number of items are pushed to the server
 // - Returns the number of items pushed to the server.
--(int) performPushWithCancellationPoint:(int) requestedCancellationPoint serverResponseCode:(NSNumber *)serverResponseCode
+-(int) performPushWithCancellationPoint:(int) requestedCancellationPoint serverResponseCode:(NSInteger)serverResponseCode
 {
     // Initialization
-    MSMultiRequestTestFilter *filter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[serverResponseCode] data:@[@"{\"id\": \"id1\", \"text\":\"server\"}"] appendEmptyRequest:YES];
+    MSTestFilter *filter = [MSTestFilter testFilterWithStatusCode:serverResponseCode data:@"{\"id\": \"id1\", \"text\":\"server\"}"];
     MSClient *filteredClient = [client clientWithFilter:filter];
     MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
 
@@ -1119,8 +1119,8 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 
     __block NSOperation *pushOperation;
 
-    // Define filters
-    ((MSTestFilter *)filter.testFilters[0]).onInspectRequest = ^(NSURLRequest *request) {
+    // Define the filter
+    filter.onInspectRequest = ^(NSURLRequest *request) {
 
         // Cancellation point 0
         if (requestedCancellationPoint == 0) {
@@ -1130,7 +1130,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
         return request;
     };
     
-    ((MSTestFilter *)filter.testFilters[0]).onInspectResponseData = ^(NSURLRequest *request, NSData *data) {
+    filter.onInspectResponseData = ^(NSURLRequest *request, NSData *data) {
 
         // Cancellation point 1
         if (requestedCancellationPoint == 1) {
