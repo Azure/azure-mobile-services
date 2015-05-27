@@ -148,6 +148,12 @@ To run the HTML tests:
 2. In the Solution Explorer, select the Microsoft.WindowsAzure.Mobile.WinJS.Test project and right-click to select 'View in Browser'.
 3. The default browser will launch and run the test HTML application. Some tests may fail because due to an 'Unexpected connection failure'. This is because the test is configured to connect to a Mobile Service that does not exist. These failures can be ignored.
 
+## Additional Resources
+
+* [Quickstarts](https://github.com/Azure/azure-mobile-services-quickstarts)
+* [E2E Test Suite](https://github.com/Azure/azure-mobile-services-test)
+* [Samples](https://github.com/Azure/mobile-services-samples)
+
 ## Need Help?
 
 Be sure to check out the Mobile Services [Developer Forum](http://social.msdn.microsoft.com/Forums/en-US/azuremobile/) if you are having trouble. The Mobile Services product team actively monitors the forum and will be more than happy to assist you.
