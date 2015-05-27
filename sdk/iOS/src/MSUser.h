@@ -18,7 +18,7 @@
 ///@{
 
 /// Initializes an *MSUser* instance with the given user id.
--(nonnull instancetype)initWithUserId:(nonnull NSString *)userId;
+-(nonnull instancetype)initWithUserId:(nullable NSString *)userId;
 
 ///@}
 
@@ -40,7 +40,7 @@
 /// requests made to the Microsoft Azure Mobile Service, allowing the client to
 /// perform all actions on the Microsoft Azure Mobile Service that require
 /// authenticated-user level permissions.
-@property (nonatomic, copy, nonnull)         NSString *mobileServiceAuthenticationToken;
+@property (nonatomic, copy, nullable)         NSString *mobileServiceAuthenticationToken;
 
 ///@}
 
