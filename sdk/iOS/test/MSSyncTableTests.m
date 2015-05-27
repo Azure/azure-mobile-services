@@ -1123,8 +1123,9 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     ((MSTestFilter *)filter.testFilters[0]).onInspectRequest = ^(NSURLRequest *request) {
 
         // Cancellation point 0
-        if (requestedCancellationPoint == 0)
+        if (requestedCancellationPoint == 0) {
             [pushOperation cancel];
+        }
         
         return request;
     };
@@ -1132,8 +1133,9 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     ((MSTestFilter *)filter.testFilters[0]).onInspectResponseData = ^(NSURLRequest *request, NSData *data) {
 
         // Cancellation point 1
-        if (requestedCancellationPoint == 1)
+        if (requestedCancellationPoint == 1) {
             [pushOperation cancel];
+        }
         
         return data;
     };
@@ -1150,13 +1152,15 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     pushOperation = [filteredClient.syncContext pushWithCompletion:^(NSError *error) {
         
         // Cancellation point 2
-        if (requestedCancellationPoint == 2)
+        if (requestedCancellationPoint == 2) {
             [pushOperation cancel];
+        }
     }];
     
     // Cancellation point 3
-    if (requestedCancellationPoint == 3)
+    if (requestedCancellationPoint == 3) {
         [pushOperation cancel];
+    }
 
     [self verifyFinished:pushOperation];
 
@@ -1320,8 +1324,9 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     ((MSTestFilter *)filter.testFilters[0]).onInspectRequest = ^(NSURLRequest *request) {
         
         // Cancellation point 0
-        if (requestedCancellationPoint == 0)
+        if (requestedCancellationPoint == 0) {
             [pullOperation cancel];
+        }
         
         return request;
     };
@@ -1329,8 +1334,9 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     ((MSTestFilter *)filter.testFilters[0]).onInspectResponseData = ^(NSURLRequest *request, NSData *data) {
         
         // Cancellation point 1
-        if (requestedCancellationPoint == 1)
+        if (requestedCancellationPoint == 1) {
             [pullOperation cancel];
+        }
         
         return data;
     };
@@ -1338,8 +1344,9 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     ((MSTestFilter *)filter.testFilters[1]).onInspectRequest = ^(NSURLRequest *request) {
         
         // Cancellation point 2
-        if (requestedCancellationPoint == 2)
+        if (requestedCancellationPoint == 2) {
             [pullOperation cancel];
+        }
         
         return request;
     };
@@ -1347,8 +1354,9 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     ((MSTestFilter *)filter.testFilters[1]).onInspectResponseData = ^(NSURLRequest *request, NSData *data) {
         
         // Cancellation point 3
-        if (requestedCancellationPoint == 3)
+        if (requestedCancellationPoint == 3) {
             [pullOperation cancel];
+        }
         
         return data;
     };
@@ -1365,13 +1373,15 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     pullOperation = [filteredClient.syncContext pullWithQuery:query queryId:nil completion:^(NSError *error) {
 
         // Cancellation point 4
-        if (requestedCancellationPoint == 4)
+        if (requestedCancellationPoint == 4) {
             [pullOperation cancel];
+        }
     }];
 
     // Cancellation point 5
-    if (requestedCancellationPoint == 5)
+    if (requestedCancellationPoint == 5) {
         [pullOperation cancel];
+    }
 
     [self verifyFinished:pullOperation];
     
