@@ -1174,17 +1174,17 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     [self waitForExpectationsWithTimeout:10 handler:nil];
 
-    XCTAssertEqual([self performVanillaPush], 2, "Expected all inserted items to have been pushed to the server by now");
+    XCTAssertEqual([self performFollowupPushWithClient:client], 2, "Expected all inserted items to have been pushed to the server by now");
 
     return synchronizedItemCount;
 }
 
 // Performs a push operation and returns the count of all client items pushed so far
--(int) performVanillaPush
+-(int) performFollowupPushWithClient:(MSClient *)pushClient
 {
     // Define a filter that returns an appropriate server response for the requested item
     MSTestFilter *filter = [MSTestFilter new];
-    MSClient *filteredClient = [client clientWithFilter:filter];
+    MSClient *filteredClient = [pushClient clientWithFilter:filter];
 
     filter.ignoreNextFilter = YES;
     filter.onInspectResponseData = ^(NSURLRequest *request, NSData *data) {
@@ -1383,17 +1383,17 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     int synchronizedItemCount = [self synchronizedItemCount];
     
-    XCTAssertEqual([self performVanillaPull], 3, "Expected all server items to have been pulled to the client by now");
+    XCTAssertEqual([self performFollowupPullWithClient:client], 3, "Expected all server items to have been pulled to the client by now");
     
     return synchronizedItemCount;
 }
 
 // Performs a pull operation and returns the count of all the server items pulled so far
--(int) performVanillaPull
+-(int) performFollowupPullWithClient:(MSClient *)pullClient
 {
     // Initialization
     MSTestFilter *filter = [MSTestFilter new];
-    MSClient *filteredClient = [client clientWithFilter:filter];
+    MSClient *filteredClient = [pullClient clientWithFilter:filter];
     MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
 
