@@ -1087,17 +1087,24 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 // - Verifies that a push following a cancelled push operation works as expected
 // - Verifies that cancelling a push operation finishes the push NSOperation regardless of the cancellation point
 // - Verifies that the expected number of items are pushed to the server
--(void) testPushCancellability
+-(void) testPushCancellability_successfulpush
 {
-    XCTAssertEqual([self performPushWithCancellationPoint:0 serverResponseCode:200], 0, "Push cancellation failed");
-    XCTAssertEqual([self performPushWithCancellationPoint:1 serverResponseCode:200], 0, "Push cancellation failed");
-    XCTAssertEqual([self performPushWithCancellationPoint:2 serverResponseCode:200], 1, "Push cancellation failed");
-    XCTAssertEqual([self performPushWithCancellationPoint:3 serverResponseCode:200], 0, "Push cancellation failed");
+    XCTAssertEqual([self performPushWithCancellationPoint:0 serverResponseCode:200], 0, "Push cancellation failed at cancellation point 0");
+    XCTAssertEqual([self performPushWithCancellationPoint:1 serverResponseCode:200], 0, "Push cancellation failed at cancellation point 1");
+    XCTAssertEqual([self performPushWithCancellationPoint:2 serverResponseCode:200], 1, "Push cancellation failed at cancellation point 2");
+    XCTAssertEqual([self performPushWithCancellationPoint:3 serverResponseCode:200], 0, "Push cancellation failed at cancellation point 3");
+}
 
-    XCTAssertEqual([self performPushWithCancellationPoint:0 serverResponseCode:500], 0, "Push cancellation failed");
-    XCTAssertEqual([self performPushWithCancellationPoint:1 serverResponseCode:500], 0, "Push cancellation failed");
-    XCTAssertEqual([self performPushWithCancellationPoint:2 serverResponseCode:500], 0, "Push cancellation failed");
-    XCTAssertEqual([self performPushWithCancellationPoint:3 serverResponseCode:500], 0, "Push cancellation failed");
+// Tests cancellation of the push operation at various stages of a push workflow.
+// - Verifies that a push following a cancelled push operation works as expected
+// - Verifies that cancelling a push operation finishes the push NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pushed to the server
+-(void) testPushCancellability_unsuccessfulpush
+{
+    XCTAssertEqual([self performPushWithCancellationPoint:0 serverResponseCode:500], 0, "Push cancellation failed at cancellation point 0");
+    XCTAssertEqual([self performPushWithCancellationPoint:1 serverResponseCode:500], 0, "Push cancellation failed at cancellation point 1");
+    XCTAssertEqual([self performPushWithCancellationPoint:2 serverResponseCode:500], 0, "Push cancellation failed at cancellation point 2");
+    XCTAssertEqual([self performPushWithCancellationPoint:3 serverResponseCode:500], 0, "Push cancellation failed at cancellation point 3");
 }
 
 // Performs push and cancels it at the specified cancellation point.
@@ -1261,37 +1268,56 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 // - Verifies that a pull operation following a cancelled pull operation works as expected
 // - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
 // - Verifies that the expected number of items are pulled from the server
--(void) testPullCancellability
+-(void) testPullCancellability_successfulpush_successfulpull
 {
-    XCTAssertEqual([self performPullWithCancellationPoint:0 serverPushResponseCode:@200 serverPullResponseCode:@200], 1, "Pull cancellation failed");
-    XCTAssertEqual([self performPullWithCancellationPoint:1 serverPushResponseCode:@200 serverPullResponseCode:@200], 1, "Pull cancellation failed");
-    XCTAssertEqual([self performPullWithCancellationPoint:2 serverPushResponseCode:@200 serverPullResponseCode:@200], 1, "Pull cancellation failed");
-    XCTAssertEqual([self performPullWithCancellationPoint:3 serverPushResponseCode:@200 serverPullResponseCode:@200], 1, "Pull cancellation failed");
-    XCTAssertEqual([self performPullWithCancellationPoint:4 serverPushResponseCode:@200 serverPullResponseCode:@200], 2, "Pull cancellation failed");
-    XCTAssertEqual([self performPullWithCancellationPoint:5 serverPushResponseCode:@200 serverPullResponseCode:@200], 1, "Pull cancellation failed");
-   
-    XCTAssertEqual([self performPullWithCancellationPoint:0 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed");
-    XCTAssertEqual([self performPullWithCancellationPoint:1 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed");
-    XCTAssertEqual([self performPullWithCancellationPoint:2 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed");
-    XCTAssertEqual([self performPullWithCancellationPoint:3 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed");
-    XCTAssertEqual([self performPullWithCancellationPoint:4 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed");
-    XCTAssertEqual([self performPullWithCancellationPoint:5 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed");
-    
-    XCTAssertEqual([self performPullWithCancellationPoint:0 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed");
-    XCTAssertEqual([self performPullWithCancellationPoint:1 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed");
-    XCTAssertEqual([self performPullWithCancellationPoint:2 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed");
-    XCTAssertEqual([self performPullWithCancellationPoint:3 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed");
-    XCTAssertEqual([self performPullWithCancellationPoint:4 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed");
-    XCTAssertEqual([self performPullWithCancellationPoint:5 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed");
-    
-    XCTAssertEqual([self performPullWithCancellationPoint:0 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed");
-    XCTAssertEqual([self performPullWithCancellationPoint:1 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed");
-    XCTAssertEqual([self performPullWithCancellationPoint:2 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed");
-    XCTAssertEqual([self performPullWithCancellationPoint:3 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed");
-    XCTAssertEqual([self performPullWithCancellationPoint:4 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed");
-    XCTAssertEqual([self performPullWithCancellationPoint:5 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed");
-    
-    [self performPullWithCancellationPoint:0 serverPushResponseCode:@500 serverPullResponseCode:@200];
+    XCTAssertEqual([self performPullWithCancellationPoint:0 serverPushResponseCode:@200 serverPullResponseCode:@200], 1, "Pull cancellation failed at cancellation point 0");
+    XCTAssertEqual([self performPullWithCancellationPoint:1 serverPushResponseCode:@200 serverPullResponseCode:@200], 1, "Pull cancellation failed at cancellation point 1");
+    XCTAssertEqual([self performPullWithCancellationPoint:2 serverPushResponseCode:@200 serverPullResponseCode:@200], 1, "Pull cancellation failed at cancellation point 2");
+    XCTAssertEqual([self performPullWithCancellationPoint:3 serverPushResponseCode:@200 serverPullResponseCode:@200], 1, "Pull cancellation failed at cancellation point 3");
+    XCTAssertEqual([self performPullWithCancellationPoint:4 serverPushResponseCode:@200 serverPullResponseCode:@200], 2, "Pull cancellation failed at cancellation point 4");
+    XCTAssertEqual([self performPullWithCancellationPoint:5 serverPushResponseCode:@200 serverPullResponseCode:@200], 1, "Pull cancellation failed at cancellation point 5");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_successfulpush_unsuccessfulpull
+{
+    XCTAssertEqual([self performPullWithCancellationPoint:0 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed at cancellation point 0");
+    XCTAssertEqual([self performPullWithCancellationPoint:1 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed at cancellation point 1");
+    XCTAssertEqual([self performPullWithCancellationPoint:2 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed at cancellation point 2");
+    XCTAssertEqual([self performPullWithCancellationPoint:3 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed at cancellation point 3");
+    XCTAssertEqual([self performPullWithCancellationPoint:4 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed at cancellation point 4");
+    XCTAssertEqual([self performPullWithCancellationPoint:5 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed at cancellation point 5");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_unsuccessfulpush_successfulpull
+{
+    XCTAssertEqual([self performPullWithCancellationPoint:0 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed at cancellation point 0");
+    XCTAssertEqual([self performPullWithCancellationPoint:1 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed at cancellation point 1");
+    XCTAssertEqual([self performPullWithCancellationPoint:2 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed at cancellation point 2");
+    XCTAssertEqual([self performPullWithCancellationPoint:3 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed at cancellation point 3");
+    XCTAssertEqual([self performPullWithCancellationPoint:4 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed at cancellation point 4");
+    XCTAssertEqual([self performPullWithCancellationPoint:5 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed at cancellation point 5");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_unsuccessfulpush_unsuccessfulpull
+{
+    XCTAssertEqual([self performPullWithCancellationPoint:0 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed at cancellation point 0");
+    XCTAssertEqual([self performPullWithCancellationPoint:1 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed at cancellation point 1");
+    XCTAssertEqual([self performPullWithCancellationPoint:2 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed at cancellation point 2");
+    XCTAssertEqual([self performPullWithCancellationPoint:3 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed at cancellation point 3");
+    XCTAssertEqual([self performPullWithCancellationPoint:4 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed at cancellation point 4");
+    XCTAssertEqual([self performPullWithCancellationPoint:5 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed at cancellation point 5");
 }
 
 // Performs pull and cancels it at the specified cancellation point.
