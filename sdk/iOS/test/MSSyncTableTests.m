@@ -1218,23 +1218,19 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     // Initialization
     MSSyncTable *todoTable = [client syncTableWithName:TodoTableNoVersion];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
+    query.predicate = [NSPredicate predicateWithFormat:@"text == 'server'"];
 
     // Number synchronized items
     __block int numSynchronizedItems = 0;
-
+    
     XCTestExpectation *readExpectation = [self expectationWithDescription:@"read expectation"];
-
+    
     // Read from the table
     [client.syncContext readWithQuery:query completion:^(MSQueryResult *result, NSError *error) {
         
-        // Count the number of synchronized items
-        for (NSDictionary* item in result.items) {
-            if ([item[@"text"] isEqualToString:@"server"]) {
-                ++numSynchronizedItems;
-            }
-        }
-
+        numSynchronizedItems = result.items.count;
         [readExpectation fulfill];
+        
     }];
     
     [self waitForExpectationsWithTimeout:10 handler:nil];
