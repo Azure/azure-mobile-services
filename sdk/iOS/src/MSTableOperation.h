@@ -34,7 +34,7 @@ typedef NS_OPTIONS(NSUInteger, MSTableOperationTypes) {
 @property (nonatomic, copy, readonly, nonnull) NSString *itemId;
 
 /// The item that will be sent to the server when execute is called.
-@property (nonatomic, strong, nonnull) NSDictionary *item;
+@property (nonatomic, strong, nullable) NSDictionary *item;
 
 /// @}
 
