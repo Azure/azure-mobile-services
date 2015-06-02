@@ -43,17 +43,17 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return this.syncContext.ReadAsync(this.TableName, query);
         }
 
-        public Task PullAsync(string queryId, string query, IDictionary<string, string> parameters, MobileServiceObjectReader reader, CancellationToken cancellationToken, params string[] relatedTables)
+        public Task PullAsync(string queryId, string query, IDictionary<string, string> parameters, MobileServiceObjectReader reader, CancellationToken cancellationToken, PullOptions pullOptions, params string[] relatedTables)
         {
             ValidateQueryId(queryId);
 
-            return this.syncContext.PullAsync(this.TableName, this.Kind, queryId, query, this.SupportedOptions, parameters, relatedTables, reader, cancellationToken);
+            return this.syncContext.PullAsync(this.TableName, this.Kind, queryId, query, this.SupportedOptions, parameters, relatedTables, reader, cancellationToken, pullOptions);
         }
 
-        public Task PullAsync(string queryId, string query, IDictionary<string, string> parameters, bool pushOtherTables, CancellationToken cancellationToken)
+        public Task PullAsync(string queryId, string query, IDictionary<string, string> parameters, bool pushOtherTables, CancellationToken cancellationToken, PullOptions pullOptions)
         {
             ValidateQueryId(queryId);
-            return this.syncContext.PullAsync(this.TableName, this.Kind, queryId, query, this.SupportedOptions, parameters, pushOtherTables ? new string[0] : null, null, cancellationToken);
+            return this.syncContext.PullAsync(this.TableName, this.Kind, queryId, query, this.SupportedOptions, parameters, pushOtherTables ? new string[0] : null, null, cancellationToken, pullOptions);
         }
 
         public Task PurgeAsync(string queryId, string query, bool force, CancellationToken cancellationToken)

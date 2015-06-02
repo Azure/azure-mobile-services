@@ -18,6 +18,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         private IDictionary<string, string> parameters;
         private MobileServiceRemoteTableOptions options; // the supported options on remote table 
+        private PullOptions pullOptions;
         private readonly PullCursor cursor;
         private Task pendingAction;
         private PullStrategy strategy;
@@ -33,6 +34,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                           MobileServiceSyncSettingsManager settings,
                           IMobileServiceLocalStore store,
                           MobileServiceRemoteTableOptions options,
+                          PullOptions pullOptions,
                           MobileServiceObjectReader reader,
                           CancellationToken cancellationToken)
             : base(table, tableKind, queryId, query, relatedTables, context, operationQueue, settings, store, cancellationToken)
@@ -40,6 +42,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             this.options = options;
             this.parameters = parameters;
             this.cursor = new PullCursor(query);
+            this.pullOptions = pullOptions;
             this.Reader = reader ?? new MobileServiceObjectReader();
         }
 
@@ -182,11 +185,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             bool isIncrementalSync = !String.IsNullOrEmpty(this.QueryId);
             if (isIncrementalSync)
             {
-                this.strategy = new IncrementalPullStrategy(this.Table, this.Query, this.QueryId, this.Settings, this.cursor, this.options);
+                this.strategy = new IncrementalPullStrategy(this.Table, this.Query, this.QueryId, this.Settings, this.cursor, this.options, this.pullOptions);
             }
             else
             {
-                this.strategy = new PullStrategy(this.Query, this.cursor, this.options);
+                this.strategy = new PullStrategy(this.Query, this.cursor, this.options, this.pullOptions);
             }
             await this.strategy.InitializeAsync();
         }

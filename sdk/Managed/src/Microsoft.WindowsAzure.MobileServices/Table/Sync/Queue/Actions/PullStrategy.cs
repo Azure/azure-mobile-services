@@ -9,19 +9,22 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
     internal class PullStrategy
     {
-        private const int DefaultTop = 50;
-
         protected MobileServiceTableQueryDescription Query { get; private set; }
         protected PullCursor Cursor { get; private set; }
         protected bool SupportsSkip { get; private set; }
         protected bool SupportsTop { get; private set; }
 
+        protected PullOptions PullOptions { get; private set; }
+
+
         public PullStrategy(MobileServiceTableQueryDescription query,
                             PullCursor cursor,
-                            MobileServiceRemoteTableOptions options)
+                            MobileServiceRemoteTableOptions options,
+                            PullOptions pullOptions)
         {
             this.Query = query;
             this.Cursor = cursor;
+            this.PullOptions = pullOptions ?? new PullOptions();
             this.SupportsSkip = options.HasFlag(MobileServiceRemoteTableOptions.Skip);
             this.SupportsTop = options.HasFlag(MobileServiceRemoteTableOptions.Top);
         }
@@ -35,8 +38,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                     this.Query.Skip = this.Query.Skip.GetValueOrDefault();
                 }
 
-                // always download in batches of 50 or less for efficiency 
-                this.Query.Top = Math.Min(this.Query.Top.GetValueOrDefault(DefaultTop), DefaultTop);
+                // always download in batches of MaxPageSize or less for efficiency
+                this.Query.Top = Math.Min(this.Query.Top.GetValueOrDefault(this.PullOptions.MaxPageSize), this.PullOptions.MaxPageSize);
             }
             return Task.FromResult(0);
         }
