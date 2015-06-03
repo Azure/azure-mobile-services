@@ -14,6 +14,7 @@
 
 // Error
 @property (nonatomic) NSInteger code;
+@property (nonatomic) NSString *domain;
 
 @property (nonatomic) NSString *description;
 
@@ -53,6 +54,7 @@
     self = [self init];
     
     _code = error.code;
+    _domain = [error.domain copy];
     _description = [error.localizedDescription copy];
     
     NSHTTPURLResponse *response = [error.userInfo objectForKey:MSErrorResponseKey];
@@ -88,6 +90,7 @@
         NSDictionary *data = [serializer itemFromData:properties withOriginalItem:nil ensureDictionary:NO orError:nil];
         
         _code = [[data objectForKey:@"code"] integerValue];
+        _domain = [data objectForKey:@"domain"];
         _description = [data objectForKey:@"description"];
         _table = [data objectForKey:@"table"];
         _operation = [[data objectForKey:@"operation"] integerValue];
@@ -111,6 +114,7 @@
 {
     NSMutableDictionary *properties = [@{
             @"code": [NSNumber numberWithInteger:self.code],
+            @"domain": self.domain,
             @"description": self.description,
             @"table": self.table,
             @"operation": [NSNumber numberWithInteger:self.operation],

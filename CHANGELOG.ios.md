@@ -6,6 +6,7 @@
 
 ### Version 2.1.0
 - Fix cancelAndUpdate and cancelAndDiscard actions on the MSTableOperationError class
+- Fix issues with sync operations not firing their completion blocks on the correct queue
 
 ### Version 2.0.0
 - GA of offline sync changes from previous betas

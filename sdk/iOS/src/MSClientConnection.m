@@ -52,7 +52,7 @@ static NSOperationQueue *delegateQueue;
 +(NSURLSession *)sessionWithDelegate:(id<NSURLSessionDelegate>)delegate delegateQueue:(NSOperationQueue *)queue
 {
 	NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
-	
+    
 	NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration
 											 delegate:delegate
 										delegateQueue:queue];

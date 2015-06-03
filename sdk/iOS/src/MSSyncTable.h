@@ -8,6 +8,9 @@
 @class MSClient;
 @class MSQuery;
 
+@class MSQueuePullOperation;
+@class MSQueuePurgeOperation;
+
 /// The *MSSyncTable* class represents a table of a Windows Azure Mobile Service.
 /// Items can be inserted, updated, deleted and read from the table. The table
 /// can also be queried to retrieve an array of items that meet the given query
@@ -96,19 +99,20 @@
 
 /// Initiates a request to go to the server and get a set of records matching the specified
 /// MSQeury object.
-/// Before a pull is allowed to run, all pending requests on the specified table will be sent to
-/// the server. If a pending request for this table fails, the pull will be cancelled
--(void)pullWithQuery:(nullable MSQuery *)query queryId:(nullable NSString *)queryId completion:(nullable MSSyncBlock)completion;
+/// Before a pull is allowed to run, one operation to send all pending requests on the
+/// specified table will be sent to the server. If a pending request for this table fails,
+/// the pull will be cancelled
+-(nullable NSOperation *)pullWithQuery:(nullable MSQuery *)query queryId:(nullable NSString *)queryId completion:(nullable MSSyncBlock)completion;
 
 /// Removes all records in the local cache that match the results of the specified query.
 /// If query is nil, all records in the local table will be removed.
 /// Before local data is removed, a check will be made for pending operations on this table. If
 /// any are found the purge will be cancelled and an error returned.
--(void)purgeWithQuery:(nullable MSQuery *)query completion:(nullable MSSyncBlock)completion;
+-(nonnull NSOperation *)purgeWithQuery:(nullable MSQuery *)query completion:(nullable MSSyncBlock)completion;
 
 /// Purges all data, pending operations, operation errors, and metadata for the
 /// MSSyncTable from the local cache.
--(void)forcePurgeWithCompletion:(nullable MSSyncBlock)completion;
+-(nonnull NSOperation *)forcePurgeWithCompletion:(nullable MSSyncBlock)completion;
 
 /// @}
 

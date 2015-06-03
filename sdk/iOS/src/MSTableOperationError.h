@@ -38,6 +38,10 @@
 /// for a list of Mobile Service's error codes
 @property (nonatomic, readonly) NSInteger code;
 
+/// Represents the domain of the error recieved while executing the table operation, this will typically
+/// be the MSErrorDomain, but may differ if the delegate chooses to return other error types
+@property (nonatomic, readonly, nullable) NSString *domain;
+
 /// A description of what caused the operation to fail
 @property (nonatomic, readonly, nonnull) NSString *description;
 

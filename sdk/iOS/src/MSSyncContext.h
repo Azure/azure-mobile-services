@@ -48,6 +48,10 @@
 /// Provides the name of the table to track configuration data
 - (nonnull NSString *) configTableName;
 
+/// Indicates if the items passed to a sync table call should be saved by the SDK, if disabled, the local store will only
+/// recieve upserts/deletes for data calls originating from the server (pulls & pushes) plus the state tracking on the operation queue.
+@property (nonatomic) BOOL handlesSyncTableOperations;
+
 /// @}
 
 /// @name Fetching and Retrieving Data
@@ -101,7 +105,7 @@
 @property (nonatomic, readonly) NSUInteger pendingOperationsCount;
 
 /// Executes all current pending operations on the queue
-- (void) pushWithCompletion:(nullable MSSyncBlock)completion;
+- (nonnull NSOperation *) pushWithCompletion:(nullable MSSyncBlock)completion;
 
 /// Specifies the delegate that will be used in the resolution of syncing issues
 @property (nonatomic, strong, nullable) id<MSSyncContextDelegate> delegate;
