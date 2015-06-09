@@ -1087,11 +1087,35 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 // - Verifies that a push following a cancelled push operation works as expected
 // - Verifies that cancelling a push operation finishes the push NSOperation regardless of the cancellation point
 // - Verifies that the expected number of items are pushed to the server
--(void) testPushCancellability_successfulpush
+-(void) testPushCancellability_SuccessfulPush_CancelBeforeSendingPushRequest
 {
     XCTAssertEqual([self performPushWithCancellationPoint:0 serverResponseCode:200], 0, "Push cancellation failed at cancellation point 0");
+}
+
+// Tests cancellation of the push operation at various stages of a push workflow.
+// - Verifies that a push following a cancelled push operation works as expected
+// - Verifies that cancelling a push operation finishes the push NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pushed to the server
+-(void) testPushCancellability_SuccessfulPush_CancelWhileProcessingPushreponse
+{
     XCTAssertEqual([self performPushWithCancellationPoint:1 serverResponseCode:200], 0, "Push cancellation failed at cancellation point 1");
+}
+
+// Tests cancellation of the push operation at various stages of a push workflow.
+// - Verifies that a push following a cancelled push operation works as expected
+// - Verifies that cancelling a push operation finishes the push NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pushed to the server
+-(void) testPushCancellability_SuccessfulPush_CancelFromCompletionBlock
+{
     XCTAssertEqual([self performPushWithCancellationPoint:2 serverResponseCode:200], 1, "Push cancellation failed at cancellation point 2");
+}
+
+// Tests cancellation of the push operation at various stages of a push workflow.
+// - Verifies that a push following a cancelled push operation works as expected
+// - Verifies that cancelling a push operation finishes the push NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pushed to the server
+-(void) testPushCancellability_SuccessfulPush_CancelRightAfterPushWithCompletionReturns
+{
     XCTAssertEqual([self performPushWithCancellationPoint:3 serverResponseCode:200], 0, "Push cancellation failed at cancellation point 3");
 }
 
@@ -1099,11 +1123,36 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 // - Verifies that a push following a cancelled push operation works as expected
 // - Verifies that cancelling a push operation finishes the push NSOperation regardless of the cancellation point
 // - Verifies that the expected number of items are pushed to the server
--(void) testPushCancellability_unsuccessfulpush
+-(void) testPushCancellability_UnsuccessfulPush_CancelBeforeSendingPushRequest
 {
     XCTAssertEqual([self performPushWithCancellationPoint:0 serverResponseCode:500], 0, "Push cancellation failed at cancellation point 0");
+}
+
+
+// Tests cancellation of the push operation at various stages of a push workflow.
+// - Verifies that a push following a cancelled push operation works as expected
+// - Verifies that cancelling a push operation finishes the push NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pushed to the server
+-(void) testPushCancellability_UnsuccessfulPush_CancelWhileProcessingPushreponse
+{
     XCTAssertEqual([self performPushWithCancellationPoint:1 serverResponseCode:500], 0, "Push cancellation failed at cancellation point 1");
+}
+
+// Tests cancellation of the push operation at various stages of a push workflow.
+// - Verifies that a push following a cancelled push operation works as expected
+// - Verifies that cancelling a push operation finishes the push NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pushed to the server
+-(void) testPushCancellability_UnsuccessfulPush_CancelFromCompletionBlock
+{
     XCTAssertEqual([self performPushWithCancellationPoint:2 serverResponseCode:500], 0, "Push cancellation failed at cancellation point 2");
+}
+
+// Tests cancellation of the push operation at various stages of a push workflow.
+// - Verifies that a push following a cancelled push operation works as expected
+// - Verifies that cancelling a push operation finishes the push NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pushed to the server
+-(void) testPushCancellability_UnsuccessfulPush_CancelRightAfterPushWithCompletionReturns
+{
     XCTAssertEqual([self performPushWithCancellationPoint:3 serverResponseCode:500], 0, "Push cancellation failed at cancellation point 3");
 }
 
@@ -1112,17 +1161,16 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 // - Verifies that cancelling a push finishes the push NSOperation regardless of the cancellation point
 // - Verifies that the expected number of items are pushed to the server
 // - Returns the number of items pushed to the server.
+// Cancellation point 0: just before the push request is sent to the server
+// Cancellation point 1: while processing the push response
+// Cancellation point 2: while executing the push completion block
+// Cancellation point 4: immediately after the push NSOperation is returned by pushWithCompletion:
 -(int) performPushWithCancellationPoint:(int) requestedCancellationPoint serverResponseCode:(NSInteger)serverResponseCode
 {
     // Initialization
     MSTestFilter *filter = [MSTestFilter testFilterWithStatusCode:serverResponseCode data:@"{\"id\": \"id1\", \"text\":\"server\"}"];
     MSClient *filteredClient = [client clientWithFilter:filter];
     MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
-
-    // Start with a clean slate
-    [[todoTable forcePurgeWithCompletion:^(NSError *error) {
-        XCTAssertNil(error, @"error should have been nil.");
-    }] waitUntilFinished];
 
     __block NSOperation *pushOperation;
 
@@ -1268,13 +1316,55 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 // - Verifies that a pull operation following a cancelled pull operation works as expected
 // - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
 // - Verifies that the expected number of items are pulled from the server
--(void) testPullCancellability_successfulpush_successfulpull
+-(void) testPullCancellability_SuccessfulPush_SuccessfulPull_CancelBeforeSendingPushRequest
 {
     XCTAssertEqual([self performPullWithCancellationPoint:0 serverPushResponseCode:@200 serverPullResponseCode:@200], 1, "Pull cancellation failed at cancellation point 0");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_SuccessfulPush_SuccessfulPull_CancelWhileProcessingPushResponse
+
+{
     XCTAssertEqual([self performPullWithCancellationPoint:1 serverPushResponseCode:@200 serverPullResponseCode:@200], 1, "Pull cancellation failed at cancellation point 1");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_SuccessfulPush_SuccessfulPull_CancelBeforeSendingPullReuest
+{
     XCTAssertEqual([self performPullWithCancellationPoint:2 serverPushResponseCode:@200 serverPullResponseCode:@200], 1, "Pull cancellation failed at cancellation point 2");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_SuccessfulPush_SuccessfulPull_CancelWhileProcessingPullResponse
+{
     XCTAssertEqual([self performPullWithCancellationPoint:3 serverPushResponseCode:@200 serverPullResponseCode:@200], 1, "Pull cancellation failed at cancellation point 3");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_SuccessfulPush_SuccessfulPull_CancelFromCompletionBlock
+{
+
     XCTAssertEqual([self performPullWithCancellationPoint:4 serverPushResponseCode:@200 serverPullResponseCode:@200], 2, "Pull cancellation failed at cancellation point 4");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_SuccessfulPush_SuccessfulPull_CancelRightAfterPullWithQueryReturns
+{
     XCTAssertEqual([self performPullWithCancellationPoint:5 serverPushResponseCode:@200 serverPullResponseCode:@200], 1, "Pull cancellation failed at cancellation point 5");
 }
 
@@ -1282,13 +1372,54 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 // - Verifies that a pull operation following a cancelled pull operation works as expected
 // - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
 // - Verifies that the expected number of items are pulled from the server
--(void) testPullCancellability_successfulpush_unsuccessfulpull
+-(void) testPullCancellability_SuccessfulPush_UnsuccessfulPull_CancelBeforeSendingPushRequest
 {
     XCTAssertEqual([self performPullWithCancellationPoint:0 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed at cancellation point 0");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_SuccessfulPush_UnsuccessfulPull_CancelWhileProcessingPushResponse
+{
+
     XCTAssertEqual([self performPullWithCancellationPoint:1 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed at cancellation point 1");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_SuccessfulPush_UnsuccessfulPull_CancelBeforeSendingPullReuest
+{
     XCTAssertEqual([self performPullWithCancellationPoint:2 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed at cancellation point 2");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_SuccessfulPush_UnsuccessfulPull_CancelWhileProcessingPullResponse
+{
     XCTAssertEqual([self performPullWithCancellationPoint:3 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed at cancellation point 3");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_SuccessfulPush_UnsuccessfulPull_CancelFromCompletionBlock
+{
     XCTAssertEqual([self performPullWithCancellationPoint:4 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed at cancellation point 4");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_SuccessfulPush_UnsuccessfulPull_CancelRightAfterPullWithQueryReturns
+{
     XCTAssertEqual([self performPullWithCancellationPoint:5 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed at cancellation point 5");
 }
 
@@ -1296,13 +1427,54 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 // - Verifies that a pull operation following a cancelled pull operation works as expected
 // - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
 // - Verifies that the expected number of items are pulled from the server
--(void) testPullCancellability_unsuccessfulpush_successfulpull
+-(void) testPullCancellability_UnsuccessfulPush_SuccessfulPull_CancelBeforeSendingPushRequest
 {
     XCTAssertEqual([self performPullWithCancellationPoint:0 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed at cancellation point 0");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_UnsuccessfulPush_SuccessfulPull_CancelWhileProcessingPushResponse
+
+{
     XCTAssertEqual([self performPullWithCancellationPoint:1 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed at cancellation point 1");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_UnsuccessfulPush_SuccessfulPull_CancelBeforeSendingPullReuest
+{
     XCTAssertEqual([self performPullWithCancellationPoint:2 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed at cancellation point 2");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_UnsuccessfulPush_SuccessfulPull_CancelWhileProcessingPullResponse
+{
     XCTAssertEqual([self performPullWithCancellationPoint:3 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed at cancellation point 3");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_UnsuccessfulPush_SuccessfulPull_CancelFromCompletionBlock
+{
     XCTAssertEqual([self performPullWithCancellationPoint:4 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed at cancellation point 4");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_UnsuccessfulPush_SuccessfulPull_CancelRightAfterPullWithQueryReturns
+{
     XCTAssertEqual([self performPullWithCancellationPoint:5 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed at cancellation point 5");
 }
 
@@ -1310,13 +1482,53 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 // - Verifies that a pull operation following a cancelled pull operation works as expected
 // - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
 // - Verifies that the expected number of items are pulled from the server
--(void) testPullCancellability_unsuccessfulpush_unsuccessfulpull
+-(void) testPullCancellability_UnsuccessfulPush_UnsuccessfulPull_CancelBeforeSendingPushRequest
 {
     XCTAssertEqual([self performPullWithCancellationPoint:0 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed at cancellation point 0");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_UnsuccessfulPush_UnsuccessfulPull
+{
     XCTAssertEqual([self performPullWithCancellationPoint:1 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed at cancellation point 1");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_UnsuccessfulPush_UnsuccessfulPull_CancelBeforeSendingPullReuest
+{
     XCTAssertEqual([self performPullWithCancellationPoint:2 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed at cancellation point 2");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_UnsuccessfulPush_UnsuccessfulPull_CancelWhileProcessingPullResponse
+{
     XCTAssertEqual([self performPullWithCancellationPoint:3 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed at cancellation point 3");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_UnsuccessfulPush_UnsuccessfulPull_CancelFromCompletionBlock
+{
     XCTAssertEqual([self performPullWithCancellationPoint:4 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed at cancellation point 4");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_UnsuccessfulPush_UnsuccessfulPull_CancelRightAfterPullWithQueryReturns
+{
     XCTAssertEqual([self performPullWithCancellationPoint:5 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed at cancellation point 5");
 }
 
@@ -1325,6 +1537,12 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 // - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
 // - Verifies that the expected number of items are pull from the server
 // - Returns the number of items pulled from the server.
+// Cancellation point 0: just before the push request initiated by the pull is sent to the server
+// Cancellation point 1: immediately after receiving response for the push initiated by the pull operation
+// Cancellation point 2: just before the pull request is sent to the server
+// Cancellation point 3: immediately after receiving response for the pull request
+// Cancellation point 4: while executing the pull completion block
+// Cancellation point 5: immediately after the pull NSOperation is returned by pullWithQuery:queryId:completion:
 -(int) performPullWithCancellationPoint:(int) requestedCancellationPoint serverPushResponseCode:(NSNumber *)serverPushResponseCode serverPullResponseCode:(NSNumber *)serverPullResponseCode
 {
     // Initialization
@@ -1334,11 +1552,6 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     MSClient *filteredClient = [client clientWithFilter:filter];
     MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
-    
-    // Start with a clean slate
-    [[todoTable forcePurgeWithCompletion:^(NSError *error) {
-        XCTAssertNil(error, @"error should have been nil.");
-    }] waitUntilFinished];
     
     __block NSOperation *pullOperation;
     
