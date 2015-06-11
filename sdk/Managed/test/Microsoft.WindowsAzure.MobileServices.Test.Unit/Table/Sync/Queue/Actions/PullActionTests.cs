@@ -43,7 +43,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
         public async Task DoesNotUpsertAnObject_IfItDoesNotHaveAnId()
         {
             var query = new MobileServiceTableQueryDescription("test");
-            var action = new PullAction(this.table.Object, MobileServiceTableKind.Table, this.context.Object, null, query, null, null, this.opQueue.Object, this.settings.Object, this.store.Object, MobileServiceRemoteTableOptions.All, null, CancellationToken.None);
+            var action = new PullAction(this.table.Object, MobileServiceTableKind.Table, this.context.Object, null, query, null, null, this.opQueue.Object, this.settings.Object, this.store.Object, MobileServiceRemoteTableOptions.All, pullOptions: null, reader: null, cancellationToken: CancellationToken.None);
 
             var itemWithId = new JObject() { { "id", "abc" }, { "text", "has id" } };
             var itemWithoutId = new JObject() { { "text", "no id" } };
@@ -142,9 +142,31 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
             await TestIncrementalSync(query, result, new DateTime(2014, 07, 09), savesMax: false, firstQuery: firstQuery, secondQuery: secondQuery);
         }
 
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void NegativePageSize_Throws()
+        {
+            new PullOptions
+            {
+                MaxPageSize = -1,
+            };
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void ZeroPageSize_Throws()
+        {
+            new PullOptions
+            {
+                MaxPageSize = 0,
+            };
+        }
+
         private async Task TestIncrementalSync(MobileServiceTableQueryDescription query, JArray result, DateTime maxUpdatedAt, bool savesMax, string firstQuery, string secondQuery)
         {
-            var action = new PullAction(this.table.Object, MobileServiceTableKind.Table, this.context.Object, "latestItems", query, null, null, this.opQueue.Object, this.settings.Object, this.store.Object, MobileServiceRemoteTableOptions.All, null, CancellationToken.None);
+            var action = new PullAction(this.table.Object, MobileServiceTableKind.Table, this.context.Object,
+                "latestItems", query, null, null, this.opQueue.Object, this.settings.Object, this.store.Object,
+                MobileServiceRemoteTableOptions.All, pullOptions: null, reader: null, cancellationToken: CancellationToken.None);
 
             this.opQueue.Setup(q => q.LockTableAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult<IDisposable>(null));
             this.opQueue.Setup(q => q.CountPending(It.IsAny<string>())).Returns(Task.FromResult(0L));
