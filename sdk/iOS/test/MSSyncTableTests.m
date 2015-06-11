@@ -1584,6 +1584,142 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
                   @"Invalid URL: %@", thirdRequest.URL.absoluteString);
 }
 
+-(void) testPullTable_UsePullSettings_NegativePageSize
+{
+    MSPullSettings *pullSettings = [MSPullSettings new];
+    pullSettings.pageSize = -1;
+    
+    NSString *pullRequest = [self getPullTableRequestWithPullSettings:pullSettings usePullSettings:YES];
+
+    XCTAssertEqualObjects(pullRequest, @"https://someUrl/tables/TodoNoVersion?$top=50&__includeDeleted=true&$skip=0&__systemProperties=__deleted", "Incorrect pull request");
+}
+
+-(void) testPullTable_UsePullSettings_ZeroPageSize
+{
+    MSPullSettings *pullSettings = [MSPullSettings new];
+    pullSettings.pageSize = 0;
+    
+    NSString *pullRequest = [self getPullTableRequestWithPullSettings:pullSettings usePullSettings:YES];
+    
+    XCTAssertEqualObjects(pullRequest, @"https://someUrl/tables/TodoNoVersion?$top=50&__includeDeleted=true&$skip=0&__systemProperties=__deleted", "Incorrect pull request");
+}
+
+-(void) testPullTable_UsePullSettings_ValidPageSize
+{
+    MSPullSettings *pullSettings = [MSPullSettings new];
+    pullSettings.pageSize = 1;
+    
+    NSString *pullRequest = [self getPullTableRequestWithPullSettings:pullSettings usePullSettings:YES];
+    
+    XCTAssertEqualObjects(pullRequest, @"https://someUrl/tables/TodoNoVersion?$top=1&__includeDeleted=true&$skip=0&__systemProperties=__deleted", "Incorrect pull request");
+}
+
+-(void) testPullTable_PageOptionsNil
+{
+    NSString *pullRequest = [self getPullTableRequestWithPullSettings:nil usePullSettings:YES];
+    
+    XCTAssertEqualObjects(pullRequest, @"https://someUrl/tables/TodoNoVersion?$top=50&__includeDeleted=true&$skip=0&__systemProperties=__deleted", "Incorrect pull request");
+}
+
+-(void) testPullTable_NoPageOptions
+{
+    NSString *pullRequest = [self getPullTableRequestWithPullSettings:nil usePullSettings:NO];
+    
+    XCTAssertEqualObjects(pullRequest, @"https://someUrl/tables/TodoNoVersion?$top=50&__includeDeleted=true&$skip=0&__systemProperties=__deleted", "Incorrect pull request");
+}
+
+-(NSString *) getPullTableRequestWithPullSettings:(MSPullSettings *)pullSettings usePullSettings:(BOOL)shouldUsePullSettings
+{
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:nil];
+    __block NSString *pullRequest = nil;
+    
+    testFilter.onInspectRequest = ^(NSURLRequest *request) {
+        pullRequest = request.URL.absoluteString;
+        return request;
+    };
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
+    
+    if (shouldUsePullSettings) {
+        [[todoTable pullWithQuery:query queryId:nil pullSettings:pullSettings completion:nil] waitUntilFinished];
+    }
+    else {
+        [[todoTable pullWithQuery:query queryId:nil completion:nil] waitUntilFinished];
+    }
+    
+    return pullRequest;
+}
+
+-(void) testPullSyncContext_UsePullSettings_NegativePageSize
+{
+    MSPullSettings *pullSettings = [MSPullSettings new];
+    pullSettings.pageSize = -1;
+    
+    NSString *pullRequest = [self getPullSyncContextRequestWithPullSettings:pullSettings usePullSettings:YES];
+    
+    XCTAssertEqualObjects(pullRequest, @"https://someUrl/tables/TodoNoVersion?$top=50&__includeDeleted=true&$skip=0&__systemProperties=__deleted", "Incorrect pull request");
+}
+
+-(void) testPullSyncContext_UsePullSettings_ZeroPageSize
+{
+    MSPullSettings *pullSettings = [MSPullSettings new];
+    pullSettings.pageSize = 0;
+    
+    NSString *pullRequest = [self getPullSyncContextRequestWithPullSettings:pullSettings usePullSettings:YES];
+    
+    XCTAssertEqualObjects(pullRequest, @"https://someUrl/tables/TodoNoVersion?$top=50&__includeDeleted=true&$skip=0&__systemProperties=__deleted", "Incorrect pull request");
+}
+
+-(void) testPullSyncContext_UsePullSettings_ValidPageSize
+{
+    MSPullSettings *pullSettings = [MSPullSettings new];
+    pullSettings.pageSize = 1;
+    
+    NSString *pullRequest = [self getPullSyncContextRequestWithPullSettings:pullSettings usePullSettings:YES];
+    
+    XCTAssertEqualObjects(pullRequest, @"https://someUrl/tables/TodoNoVersion?$top=1&__includeDeleted=true&$skip=0&__systemProperties=__deleted", "Incorrect pull request");
+}
+
+-(void) testPullSyncContext_PageOptionsNil
+{
+    NSString *pullRequest = [self getPullSyncContextRequestWithPullSettings:nil usePullSettings:YES];
+    
+    XCTAssertEqualObjects(pullRequest, @"https://someUrl/tables/TodoNoVersion?$top=50&__includeDeleted=true&$skip=0&__systemProperties=__deleted", "Incorrect pull request");
+}
+
+-(void) testPullSyncContext_NoPageOptions
+{
+    NSString *pullRequest = [self getPullSyncContextRequestWithPullSettings:nil usePullSettings:NO];
+    
+    XCTAssertEqualObjects(pullRequest, @"https://someUrl/tables/TodoNoVersion?$top=50&__includeDeleted=true&$skip=0&__systemProperties=__deleted", "Incorrect pull request");
+}
+
+-(NSString *) getPullSyncContextRequestWithPullSettings:(MSPullSettings *)pullSettings usePullSettings:(BOOL)shouldUsePullSettings
+{
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:nil];
+    __block NSString *pullRequest = nil;
+    
+    testFilter.onInspectRequest = ^(NSURLRequest *request) {
+        pullRequest = request.URL.absoluteString;
+        return request;
+    };
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
+    
+    if (shouldUsePullSettings) {
+        [[filteredClient.syncContext pullWithQuery:query queryId:nil pullSettings:pullSettings completion:nil] waitUntilFinished];
+    }
+    else {
+        [[filteredClient.syncContext pullWithQuery:query queryId:nil completion:nil] waitUntilFinished];
+    }
+    
+    return pullRequest;
+}
+
 -(void) testPullWithFetchOffset
 {
     // Pull should start with a $skip and the skip should be incremented by the number of records pulled

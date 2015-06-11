@@ -5,6 +5,7 @@
 #import <Foundation/Foundation.h>
 #import "MSClient.h"
 #import "MSTable.h"
+#import "MSPullSettings.h"
 
 @class MSQueuePullOperation;
 @class MSQueuePurgeOperation;
@@ -96,11 +97,18 @@
 /// @{
 
 /// Initiates a request to go to the server and get a set of records matching the specified
-/// MSQeury object.
+/// MSQuery object.
 /// Before a pull is allowed to run, one operation to send all pending requests on the
 /// specified table will be sent to the server. If a pending request for this table fails,
 /// the pull will be cancelled
 -(NSOperation *)pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion;
+
+/// Initiates a request to go to the server and get a set of records matching the specified
+/// MSQuery object.
+/// Before a pull is allowed to run, one operation to send all pending requests on the
+/// specified table will be sent to the server. If a pending request for this table fails,
+/// the pull will be cancelled
+-(NSOperation *)pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId pullSettings:(MSPullSettings *)pullSettings completion:(MSSyncBlock)completion;
 
 /// Removes all records in the local cache that match the results of the specified query.
 /// If query is nil, all records in the local table will be removed.

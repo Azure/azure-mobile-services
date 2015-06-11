@@ -61,7 +61,12 @@
 
 -(NSOperation *)pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion
 {
-    return [self.client.syncContext pullWithQuery:query queryId:queryId completion:completion];
+    return [self pullWithQuery:query queryId:queryId pullSettings:nil completion:completion];
+}
+
+-(NSOperation *)pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId pullSettings:(id)pullSettings completion:(MSSyncBlock)completion
+{
+    return [self.client.syncContext pullWithQuery:query queryId:queryId pullSettings:pullSettings completion:completion];
 }
 
 -(NSOperation *)purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion
