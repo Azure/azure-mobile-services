@@ -26,8 +26,6 @@
 
 -(void) readWithQuery:(MSQuery *)query completion:(MSReadQueryBlock)completion;
 
--(NSOperation *) pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion;
-
 -(NSOperation *) pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId pullSettings:(MSPullSettings *)pullSettings completion:(MSSyncBlock)completion;
 
 -(NSOperation *) purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion;

@@ -10,8 +10,6 @@
 
 NSInteger const defaultPageSize = 50;
 
-@synthesize pageSize = _pageSize;
-
 #pragma mark * Initializer method(s)
 
 - (id)init {
@@ -26,18 +24,7 @@ NSInteger const defaultPageSize = 50;
 #pragma mark * Accessor method(s)
 
 - (void)setPageSize:(NSInteger)pageSize {
-    if (pageSize <= 0) {
-        _pageSize = defaultPageSize;
-    }
-    else {
-        _pageSize = pageSize;
-    }
-}
-
-#pragma mark * Class factory method(s)
-
-+ (MSPullSettings *)default {
-    return [MSPullSettings new];
+    _pageSize = pageSize <= 0 ? defaultPageSize : pageSize;
 }
 
 @end

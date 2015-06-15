@@ -320,12 +320,6 @@ static NSOperationQueue *pushQueue_;
     });
 }
 
-/// Pull data down from the server
-- (NSOperation *) pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion;
-{
-    return [self pullWithQuery:query queryId:queryId pullSettings:nil completion:completion];
-}
-
 /// Verify our input is valid and try to pull our data down from the server
 - (NSOperation *) pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId pullSettings:(MSPullSettings *)pullSettings completion:(MSSyncBlock)completion;
 {
@@ -333,7 +327,7 @@ static NSOperationQueue *pushQueue_;
     MSQuery *queryCopy = [query copy];
     
     if (!pullSettings) {
-        pullSettings = [MSPullSettings default];
+        pullSettings = [MSPullSettings new];
     }
     
     // We want to throw on unsupported fields so we can change this decision later

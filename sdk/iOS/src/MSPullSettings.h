@@ -17,13 +17,4 @@
 
 ///@}
 
-#pragma mark * Class methods
-
-///@name Class factory methods
-
-/// Class factory method for getting default pull settings
-+ (MSPullSettings *)default;
-
-///}
-
 @end

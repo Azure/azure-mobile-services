@@ -1589,7 +1589,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     MSPullSettings *pullSettings = [MSPullSettings new];
     pullSettings.pageSize = -1;
     
-    NSString *pullRequest = [self getPullTableRequestWithPullSettings:pullSettings usePullSettings:YES];
+    NSString *pullRequest = [self pullRequestWithSettings:pullSettings shouldUsePullSettings:YES];
 
     XCTAssertEqualObjects(pullRequest, @"https://someUrl/tables/TodoNoVersion?$top=50&__includeDeleted=true&$skip=0&__systemProperties=__deleted", "Incorrect pull request");
 }
@@ -1599,7 +1599,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     MSPullSettings *pullSettings = [MSPullSettings new];
     pullSettings.pageSize = 0;
     
-    NSString *pullRequest = [self getPullTableRequestWithPullSettings:pullSettings usePullSettings:YES];
+    NSString *pullRequest = [self pullRequestWithSettings:pullSettings shouldUsePullSettings:YES];
     
     XCTAssertEqualObjects(pullRequest, @"https://someUrl/tables/TodoNoVersion?$top=50&__includeDeleted=true&$skip=0&__systemProperties=__deleted", "Incorrect pull request");
 }
@@ -1609,26 +1609,26 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     MSPullSettings *pullSettings = [MSPullSettings new];
     pullSettings.pageSize = 1;
     
-    NSString *pullRequest = [self getPullTableRequestWithPullSettings:pullSettings usePullSettings:YES];
+    NSString *pullRequest = [self pullRequestWithSettings:pullSettings shouldUsePullSettings:YES];
     
     XCTAssertEqualObjects(pullRequest, @"https://someUrl/tables/TodoNoVersion?$top=1&__includeDeleted=true&$skip=0&__systemProperties=__deleted", "Incorrect pull request");
 }
 
--(void) testPullTable_PageOptionsNil
+-(void) testPullTable_PageSettingsNil
 {
-    NSString *pullRequest = [self getPullTableRequestWithPullSettings:nil usePullSettings:YES];
+    NSString *pullRequest = [self pullRequestWithSettings:nil shouldUsePullSettings:YES];
     
     XCTAssertEqualObjects(pullRequest, @"https://someUrl/tables/TodoNoVersion?$top=50&__includeDeleted=true&$skip=0&__systemProperties=__deleted", "Incorrect pull request");
 }
 
--(void) testPullTable_NoPageOptions
+-(void) testPullTable_NoPageSettings
 {
-    NSString *pullRequest = [self getPullTableRequestWithPullSettings:nil usePullSettings:NO];
+    NSString *pullRequest = [self pullRequestWithSettings:nil shouldUsePullSettings:NO];
     
     XCTAssertEqualObjects(pullRequest, @"https://someUrl/tables/TodoNoVersion?$top=50&__includeDeleted=true&$skip=0&__systemProperties=__deleted", "Incorrect pull request");
 }
 
--(NSString *) getPullTableRequestWithPullSettings:(MSPullSettings *)pullSettings usePullSettings:(BOOL)shouldUsePullSettings
+-(NSString *) pullRequestWithSettings:(MSPullSettings *)pullSettings shouldUsePullSettings:(BOOL)shouldUsePullSettings
 {
     MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:nil];
     __block NSString *pullRequest = nil;
@@ -1657,7 +1657,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     MSPullSettings *pullSettings = [MSPullSettings new];
     pullSettings.pageSize = -1;
     
-    NSString *pullRequest = [self getPullSyncContextRequestWithPullSettings:pullSettings usePullSettings:YES];
+    NSString *pullRequest = [self getPullSyncContextRequestWithPullSettings:pullSettings shouldUsePullSettings:YES];
     
     XCTAssertEqualObjects(pullRequest, @"https://someUrl/tables/TodoNoVersion?$top=50&__includeDeleted=true&$skip=0&__systemProperties=__deleted", "Incorrect pull request");
 }
@@ -1667,7 +1667,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     MSPullSettings *pullSettings = [MSPullSettings new];
     pullSettings.pageSize = 0;
     
-    NSString *pullRequest = [self getPullSyncContextRequestWithPullSettings:pullSettings usePullSettings:YES];
+    NSString *pullRequest = [self getPullSyncContextRequestWithPullSettings:pullSettings shouldUsePullSettings:YES];
     
     XCTAssertEqualObjects(pullRequest, @"https://someUrl/tables/TodoNoVersion?$top=50&__includeDeleted=true&$skip=0&__systemProperties=__deleted", "Incorrect pull request");
 }
@@ -1677,26 +1677,26 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     MSPullSettings *pullSettings = [MSPullSettings new];
     pullSettings.pageSize = 1;
     
-    NSString *pullRequest = [self getPullSyncContextRequestWithPullSettings:pullSettings usePullSettings:YES];
+    NSString *pullRequest = [self getPullSyncContextRequestWithPullSettings:pullSettings shouldUsePullSettings:YES];
     
     XCTAssertEqualObjects(pullRequest, @"https://someUrl/tables/TodoNoVersion?$top=1&__includeDeleted=true&$skip=0&__systemProperties=__deleted", "Incorrect pull request");
 }
 
--(void) testPullSyncContext_PageOptionsNil
+-(void) testPullSyncContext_PageSettingsNil
 {
-    NSString *pullRequest = [self getPullSyncContextRequestWithPullSettings:nil usePullSettings:YES];
+    NSString *pullRequest = [self getPullSyncContextRequestWithPullSettings:nil shouldUsePullSettings:YES];
     
     XCTAssertEqualObjects(pullRequest, @"https://someUrl/tables/TodoNoVersion?$top=50&__includeDeleted=true&$skip=0&__systemProperties=__deleted", "Incorrect pull request");
 }
 
--(void) testPullSyncContext_NoPageOptions
+-(void) testPullSyncContext_NoPageSettings
 {
-    NSString *pullRequest = [self getPullSyncContextRequestWithPullSettings:nil usePullSettings:NO];
+    NSString *pullRequest = [self getPullSyncContextRequestWithPullSettings:nil shouldUsePullSettings:NO];
     
     XCTAssertEqualObjects(pullRequest, @"https://someUrl/tables/TodoNoVersion?$top=50&__includeDeleted=true&$skip=0&__systemProperties=__deleted", "Incorrect pull request");
 }
 
--(NSString *) getPullSyncContextRequestWithPullSettings:(MSPullSettings *)pullSettings usePullSettings:(BOOL)shouldUsePullSettings
+-(NSString *) getPullSyncContextRequestWithPullSettings:(MSPullSettings *)pullSettings shouldUsePullSettings:(BOOL)shouldUsePullSettings
 {
     MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:nil];
     __block NSString *pullRequest = nil;
@@ -1714,7 +1714,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
         [[filteredClient.syncContext pullWithQuery:query queryId:nil pullSettings:pullSettings completion:nil] waitUntilFinished];
     }
     else {
-        [[filteredClient.syncContext pullWithQuery:query queryId:nil completion:nil] waitUntilFinished];
+        [[filteredClient.syncContext pullWithQuery:query queryId:nil pullSettings:nil completion:nil] waitUntilFinished];
     }
     
     return pullRequest;
