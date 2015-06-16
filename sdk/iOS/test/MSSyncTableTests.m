@@ -1363,7 +1363,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     XCTAssertTrue([self waitForTest:30.0], @"Test timed out.");
 }
 
--(void) testPullWithFetchLimit
+-(void) testPullWithFetchLimitGreaterThanDefaultPageSize
 {
     // Pull should make requests with $top=50 until it has pulled all the data up to fetchLimit.
     
@@ -1402,6 +1402,54 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
                   @"Invalid URL: %@", secondRequest.URL.absoluteString);
     
     NSArray *expectedThirdResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=50", @"$skip=100"];
+    XCTAssertTrue([self checkURL:thirdRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedThirdResult],
+                  @"Invalid URL: %@", thirdRequest.URL.absoluteString);
+}
+
+-(void) testPullWithFetchLimitGreaterThanCustomPageSize
+{
+    // Pull should make requests with $top=10 until it has pulled all the data up to fetchLimit.
+    
+    // the ids don't really matter for this test
+    NSString* tenItems = [MSMultiRequestTestFilter testDataWithItemCount:10 startId:0];
+    
+    MSMultiRequestTestFilter *testFilter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[@200, @200, @200] data:@[tenItems, tenItems, tenItems] appendEmptyRequest:NO];
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
+    
+    query.fetchLimit = 30;
+    
+    MSPullSettings *pullSettings = [MSPullSettings new];
+    pullSettings.pageSize = 10;
+    
+    XCTAssertNotEqual(pullSettings.pageSize, MSPullSettings.defaultPageSize, "This test requires the custom page size to be different from the default page size");
+    
+    NSOperation *pull = [todoTable pullWithQuery:query queryId:nil pullSettings:pullSettings completion:^(NSError *error) {
+        XCTAssertNil(error, @"Error found: %@", error.description);
+        done = YES;
+    }];
+    
+    XCTAssertNotNil(pull);
+    
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    
+    XCTAssertEqual(3, testFilter.actualRequests.count);
+    
+    NSURLRequest *firstRequest = testFilter.actualRequests[0];
+    NSURLRequest *secondRequest = testFilter.actualRequests[1];
+    NSURLRequest *thirdRequest = testFilter.actualRequests[2];
+    
+    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=10", @"$skip=0"];
+    XCTAssertTrue([self checkURL:firstRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedFirstResult],
+                  @"Invalid URL: %@", firstRequest.URL.absoluteString);
+    
+    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=10", @"$skip=10"];
+    XCTAssertTrue([self checkURL:secondRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedSecondResult],
+                  @"Invalid URL: %@", secondRequest.URL.absoluteString);
+    
+    NSArray *expectedThirdResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=10", @"$skip=20"];
     XCTAssertTrue([self checkURL:thirdRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedThirdResult],
                   @"Invalid URL: %@", thirdRequest.URL.absoluteString);
 }
