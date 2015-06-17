@@ -1428,12 +1428,11 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     NSOperation *pull = [todoTable pullWithQuery:query queryId:nil settings:pullSettings completion:^(NSError *error) {
         XCTAssertNil(error, @"Error found: %@", error.description);
-        done = YES;
     }];
     
     XCTAssertNotNil(pull);
     
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    [pull waitUntilFinished];
     
     XCTAssertEqual(3, testFilter.actualRequests.count);
     
