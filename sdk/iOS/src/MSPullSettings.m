@@ -12,7 +12,7 @@ static NSInteger const MSDefaultPageSize = 50;
 
 #pragma mark * Initializer method(s)
 
-- (id)init {
+- (instancetype)init {
     self = [super init];
     if (self) {
         _pageSize = MSDefaultPageSize;
