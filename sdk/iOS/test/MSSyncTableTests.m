@@ -1641,29 +1641,38 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     // Set |pageSize| in such a way that it would never match |MSPullSettings.defaultPageSize|.
     pullSettings.pageSize = MSPullSettings.defaultPageSize + 1;
     
-    NSString *pullRequest = [self pullRequestWithSettings:pullSettings shouldUsePullSettings:YES isIncremental:NO];
-
-    NSString *expectedPullRequest = [NSString stringWithFormat:@"https://someUrl/tables/TodoNoVersion?$top=%ld&__includeDeleted=true&$skip=0&__systemProperties=__deleted", (long) pullSettings.pageSize];
+    NSURL *pullRequest = [self pullRequestWithSettings:pullSettings shouldUsePullSettings:YES isIncremental:NO];
     
-    XCTAssertEqualObjects(pullRequest, expectedPullRequest, "Incorrect pull request");
+    NSString *topParam = [NSString stringWithFormat:@"$top=%ld", (long) pullSettings.pageSize];
+    
+    NSArray *expectedPullQuery = @[topParam, @"$skip=0", @"__includeDeleted=true", @"__systemProperties=__deleted"];
+    
+    XCTAssertTrue([self checkURL:pullRequest withPath:@"/tables/TodoNoVersion" andQuery:expectedPullQuery],
+                  @"Invalid pull request: %@", pullRequest.absoluteString);
 }
 
 -(void) testVanillaPull_NilPullSettings
 {
-    NSString *pullRequest = [self pullRequestWithSettings:nil shouldUsePullSettings:YES isIncremental:NO];
+    NSURL *pullRequest = [self pullRequestWithSettings:nil shouldUsePullSettings:YES isIncremental:NO];
     
-    NSString *expectedPullRequest = [NSString stringWithFormat:@"https://someUrl/tables/TodoNoVersion?$top=%ld&__includeDeleted=true&$skip=0&__systemProperties=__deleted", (long) [MSPullSettings defaultPageSize]];
+    NSString *topParam = [NSString stringWithFormat:@"$top=%ld", (long) MSPullSettings.defaultPageSize];
     
-    XCTAssertEqualObjects(pullRequest, expectedPullRequest, "Incorrect pull request");
+    NSArray *expectedPullQuery = @[topParam, @"$skip=0", @"__includeDeleted=true", @"__systemProperties=__deleted"];
+    
+    XCTAssertTrue([self checkURL:pullRequest withPath:@"/tables/TodoNoVersion" andQuery:expectedPullQuery],
+                  @"Invalid pull request: %@", pullRequest.absoluteString);
 }
 
 -(void) testVanillaPull_NoPullSettings
 {
-    NSString *pullRequest = [self pullRequestWithSettings:nil shouldUsePullSettings:NO isIncremental:NO];
+    NSURL *pullRequest = [self pullRequestWithSettings:nil shouldUsePullSettings:NO isIncremental:NO];
     
-    NSString *expectedPullRequest = [NSString stringWithFormat:@"https://someUrl/tables/TodoNoVersion?$top=%ld&__includeDeleted=true&$skip=0&__systemProperties=__deleted", (long) [MSPullSettings defaultPageSize]];
+    NSString *topParam = [NSString stringWithFormat:@"$top=%ld", (long) MSPullSettings.defaultPageSize];
     
-    XCTAssertEqualObjects(pullRequest, expectedPullRequest, "Incorrect pull request");
+    NSArray *expectedPullQuery = @[topParam, @"$skip=0", @"__includeDeleted=true", @"__systemProperties=__deleted"];
+    
+    XCTAssertTrue([self checkURL:pullRequest withPath:@"/tables/TodoNoVersion" andQuery:expectedPullQuery],
+                  @"Invalid pull request: %@", pullRequest.absoluteString);
 }
 
 -(void) testIncrementalPull_ValidPullSettings
@@ -1674,38 +1683,47 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     // Set |pageSize| in such a way that it would never match |MSPullSettings.defaultPageSize|.
     pullSettings.pageSize = MSPullSettings.defaultPageSize + 1;
     
-    NSString *pullRequest = [self pullRequestWithSettings:pullSettings shouldUsePullSettings:YES isIncremental:YES];
+    NSURL *pullRequest = [self pullRequestWithSettings:pullSettings shouldUsePullSettings:YES isIncremental:YES];
     
-    NSString *expectedPullRequest = [NSString stringWithFormat:@"https://someUrl/tables/TodoNoVersion?$top=%ld&$filter=(__updatedAt%%20ge%%20datetimeoffset'1970-01-01T00%%3A00%%3A00.000Z')&$skip=0&$orderby=__updatedAt%%20asc&__includeDeleted=true&__systemProperties=__updatedAt%%2C__deleted", (long) pullSettings.pageSize];
+    NSString *topParam = [NSString stringWithFormat:@"$top=%ld", (long) pullSettings.pageSize];
     
-    XCTAssertEqualObjects(pullRequest, expectedPullRequest, "Incorrect pull request");
+    NSArray *expectedPullQuery = @[topParam, @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')", @"$skip=0", @"$orderby=__updatedAt%20asc", @"__includeDeleted=true", @"__systemProperties=__updatedAt%2C__deleted"];
+    
+    XCTAssertTrue([self checkURL:pullRequest withPath:@"/tables/TodoNoVersion" andQuery:expectedPullQuery],
+                  @"Invalid pull request: %@", pullRequest.absoluteString);
 }
 
 -(void) testIncrementalPull_NilPullSettings
 {
-    NSString *pullRequest = [self pullRequestWithSettings:nil shouldUsePullSettings:YES isIncremental:YES];
+    NSURL *pullRequest = [self pullRequestWithSettings:nil shouldUsePullSettings:YES isIncremental:YES];
     
-    NSString *expectedPullRequest = [NSString stringWithFormat:@"https://someUrl/tables/TodoNoVersion?$top=%ld&$filter=(__updatedAt%%20ge%%20datetimeoffset'1970-01-01T00%%3A00%%3A00.000Z')&$skip=0&$orderby=__updatedAt%%20asc&__includeDeleted=true&__systemProperties=__updatedAt%%2C__deleted", (long) [MSPullSettings defaultPageSize]];
+    NSString *topParam = [NSString stringWithFormat:@"$top=%ld", (long) MSPullSettings.defaultPageSize];
     
-    XCTAssertEqualObjects(pullRequest, expectedPullRequest, "Incorrect pull request");
+    NSArray *expectedPullQuery = @[topParam, @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')", @"$skip=0", @"$orderby=__updatedAt%20asc", @"__includeDeleted=true", @"__systemProperties=__updatedAt%2C__deleted"];
+    
+    XCTAssertTrue([self checkURL:pullRequest withPath:@"/tables/TodoNoVersion" andQuery:expectedPullQuery],
+                  @"Invalid pull request: %@", pullRequest.absoluteString);
 }
 
 -(void) testIncrementalPull_NoPullSettings
 {
-    NSString *pullRequest = [self pullRequestWithSettings:nil shouldUsePullSettings:NO isIncremental:YES];
+    NSURL *pullRequest = [self pullRequestWithSettings:nil shouldUsePullSettings:NO isIncremental:YES];
     
-    NSString *expectedPullRequest = [NSString stringWithFormat:@"https://someUrl/tables/TodoNoVersion?$top=%ld&$filter=(__updatedAt%%20ge%%20datetimeoffset'1970-01-01T00%%3A00%%3A00.000Z')&$skip=0&$orderby=__updatedAt%%20asc&__includeDeleted=true&__systemProperties=__updatedAt%%2C__deleted", (long) [MSPullSettings defaultPageSize]];
+    NSString *topParam = [NSString stringWithFormat:@"$top=%ld", (long) MSPullSettings.defaultPageSize];
     
-    XCTAssertEqualObjects(pullRequest, expectedPullRequest, "Incorrect pull request");
+    NSArray *expectedPullQuery = @[topParam, @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')", @"$skip=0", @"$orderby=__updatedAt%20asc", @"__includeDeleted=true", @"__systemProperties=__updatedAt%2C__deleted"];
+    
+    XCTAssertTrue([self checkURL:pullRequest withPath:@"/tables/TodoNoVersion" andQuery:expectedPullQuery],
+                  @"Invalid pull request: %@", pullRequest.absoluteString);
 }
 
--(NSString *) pullRequestWithSettings:(MSPullSettings *)pullSettings shouldUsePullSettings:(BOOL)shouldUsePullSettings isIncremental:(BOOL)isIncremental
+-(NSURL *) pullRequestWithSettings:(MSPullSettings *)pullSettings shouldUsePullSettings:(BOOL)shouldUsePullSettings isIncremental:(BOOL)isIncremental
 {
     MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:nil];
-    __block NSString *pullRequest = nil;
+    __block NSURL *pullRequest;
     
     testFilter.onInspectRequest = ^(NSURLRequest *request) {
-        pullRequest = request.URL.absoluteString;
+        pullRequest = request.URL;
         return request;
     };
     
