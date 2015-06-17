@@ -321,7 +321,7 @@ static NSOperationQueue *pushQueue_;
 }
 
 /// Verify our input is valid and try to pull our data down from the server
-- (NSOperation *) pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId pullSettings:(MSPullSettings *)pullSettings completion:(MSSyncBlock)completion;
+- (NSOperation *) pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId settings:(MSPullSettings *)pullSettings completion:(MSSyncBlock)completion;
 {
     // make a copy since we'll be modifying it internally
     MSQuery *queryCopy = [query copy];

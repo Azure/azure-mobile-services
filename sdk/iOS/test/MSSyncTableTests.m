@@ -1426,7 +1426,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     XCTAssertNotEqual(pullSettings.pageSize, MSPullSettings.defaultPageSize, "This test requires the custom page size to be different from the default page size");
     
-    NSOperation *pull = [todoTable pullWithQuery:query queryId:nil pullSettings:pullSettings completion:^(NSError *error) {
+    NSOperation *pull = [todoTable pullWithQuery:query queryId:nil settings:pullSettings completion:^(NSError *error) {
         XCTAssertNil(error, @"Error found: %@", error.description);
         done = YES;
     }];
@@ -1734,7 +1734,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     NSString *queryId = isIncremental ? @"queryId" : nil;
     
     if (shouldUsePullSettings) {
-        [[todoTable pullWithQuery:query queryId:queryId pullSettings:pullSettings completion:nil] waitUntilFinished];
+        [[todoTable pullWithQuery:query queryId:queryId settings:pullSettings completion:nil] waitUntilFinished];
     }
     else {
         [[todoTable pullWithQuery:query queryId:queryId completion:nil] waitUntilFinished];
