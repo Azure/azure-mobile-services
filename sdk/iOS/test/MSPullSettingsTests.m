@@ -26,24 +26,21 @@
 
 - (void)testPullSettings_NegativePageSize
 {
-    MSPullSettings *pullSettings = [MSPullSettings new];
-    pullSettings.pageSize = -1;
+    MSPullSettings *pullSettings = [[MSPullSettings alloc] initWithPageSize:-1];
 
     XCTAssertEqual(pullSettings.pageSize, MSPullSettings.defaultPageSize, @"Incorrect page size");
 }
 
 - (void)testPullSettings_ZeroPageSize
 {
-    MSPullSettings *pullSettings = [MSPullSettings new];
-    pullSettings.pageSize = 0;
+    MSPullSettings *pullSettings = [[MSPullSettings alloc] initWithPageSize:0];
     
     XCTAssertEqual(pullSettings.pageSize, MSPullSettings.defaultPageSize, @"Incorrect page size");
 }
 
 - (void)testPullSettings_ValidPageSize
 {
-    MSPullSettings *pullSettings = [MSPullSettings new];
-    pullSettings.pageSize = 1;
+    MSPullSettings *pullSettings = [[MSPullSettings alloc] initWithPageSize:1];
     
     XCTAssertEqual(pullSettings.pageSize, 1, @"Incorrect page size");
 }

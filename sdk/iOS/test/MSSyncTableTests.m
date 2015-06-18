@@ -1421,8 +1421,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     query.fetchLimit = 30;
     
-    MSPullSettings *pullSettings = [MSPullSettings new];
-    pullSettings.pageSize = 10;
+    MSPullSettings *pullSettings = [[MSPullSettings alloc] initWithPageSize:10];
     
     XCTAssertNotEqual(pullSettings.pageSize, MSPullSettings.defaultPageSize, @"This test requires the custom page size to be different from the default page size");
     
@@ -1634,11 +1633,11 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 
 -(void) testVanillaPull_ValidPullSettings
 {
-    MSPullSettings *pullSettings = [MSPullSettings new];
-
     // Guard against possible future changes to |MSPullSettings.defaultPageSize|.
     // Set |pageSize| in such a way that it would never match |MSPullSettings.defaultPageSize|.
-    pullSettings.pageSize = MSPullSettings.defaultPageSize + 1;
+    NSInteger pageSize = MSPullSettings.defaultPageSize + 1;
+
+    MSPullSettings *pullSettings = [[MSPullSettings alloc] initWithPageSize:pageSize];
     
     NSURL *pullRequest = [self pullRequestWithSettings:pullSettings shouldUsePullSettings:YES isIncremental:NO];
     
@@ -1676,11 +1675,11 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 
 -(void) testIncrementalPull_ValidPullSettings
 {
-    MSPullSettings *pullSettings = [MSPullSettings new];
-    
     // Guard against possible future changes to |MSPullSettings.defaultPageSize|.
     // Set |pageSize| in such a way that it would never match |MSPullSettings.defaultPageSize|.
-    pullSettings.pageSize = MSPullSettings.defaultPageSize + 1;
+    NSInteger pageSize = MSPullSettings.defaultPageSize + 1;
+
+    MSPullSettings *pullSettings = [[MSPullSettings alloc] initWithPageSize:pageSize];
     
     NSURL *pullRequest = [self pullRequestWithSettings:pullSettings shouldUsePullSettings:YES isIncremental:YES];
     
