@@ -1424,7 +1424,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     MSPullSettings *pullSettings = [MSPullSettings new];
     pullSettings.pageSize = 10;
     
-    XCTAssertNotEqual(pullSettings.pageSize, MSPullSettings.defaultPageSize, "This test requires the custom page size to be different from the default page size");
+    XCTAssertNotEqual(pullSettings.pageSize, MSPullSettings.defaultPageSize, @"This test requires the custom page size to be different from the default page size");
     
     NSOperation *pull = [todoTable pullWithQuery:query queryId:nil settings:pullSettings completion:^(NSError *error) {
         XCTAssertNil(error, @"Error found: %@", error.description);
@@ -2767,7 +2767,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     // Query the operation queue for the inserted item using a different case for the Id
     NSArray *items = [client.syncContext.operationQueue getOperationsForTable:todoTable.name item:@"ITEMID"];
     
-    XCTAssertEqual(items.count, 1, "Expected to find 1 item in the operation queue");
+    XCTAssertEqual(items.count, 1, @"Expected to find 1 item in the operation queue");
 }
 
 -(void)testOperationErrorRelationship

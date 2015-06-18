@@ -29,7 +29,7 @@
     MSPullSettings *pullSettings = [MSPullSettings new];
     pullSettings.pageSize = -1;
 
-    XCTAssertEqual(pullSettings.pageSize, MSPullSettings.defaultPageSize, "Incorrect page size");
+    XCTAssertEqual(pullSettings.pageSize, MSPullSettings.defaultPageSize, @"Incorrect page size");
 }
 
 - (void)testPullSettings_ZeroPageSize
@@ -37,7 +37,7 @@
     MSPullSettings *pullSettings = [MSPullSettings new];
     pullSettings.pageSize = 0;
     
-    XCTAssertEqual(pullSettings.pageSize, MSPullSettings.defaultPageSize, "Incorrect page size");
+    XCTAssertEqual(pullSettings.pageSize, MSPullSettings.defaultPageSize, @"Incorrect page size");
 }
 
 - (void)testPullSettings_ValidPageSize
@@ -45,19 +45,19 @@
     MSPullSettings *pullSettings = [MSPullSettings new];
     pullSettings.pageSize = 1;
     
-    XCTAssertEqual(pullSettings.pageSize, 1, "Incorrect page size");
+    XCTAssertEqual(pullSettings.pageSize, 1, @"Incorrect page size");
 }
 
 - (void)testPullSettings_DefaultPageSize
 {
     MSPullSettings *pullSettings = [MSPullSettings new];
     
-    XCTAssertEqual(pullSettings.pageSize, MSPullSettings.defaultPageSize, "Incorrect page size");
+    XCTAssertEqual(pullSettings.pageSize, MSPullSettings.defaultPageSize, @"Incorrect page size");
 }
 
 - (void)testDefaultPageSizeGreaterThanZero
 {
-    XCTAssertGreaterThan(MSPullSettings.defaultPageSize, 0, "Page size must be > 0");
+    XCTAssertGreaterThan(MSPullSettings.defaultPageSize, 0, @"Page size must be > 0");
 }
 
 @end

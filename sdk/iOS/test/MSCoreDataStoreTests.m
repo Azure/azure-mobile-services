@@ -84,7 +84,7 @@ static NSString *const TableName = @"TodoItem";
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:syncTable predicate:nil];
     MSSyncContextReadResult *result = [self.store readWithQuery:query orError:&error];
     XCTAssertNil(error, @"readWithQuery: failed: %@", error.description);
-    XCTAssertEqual(result.items.count, 1, "Expected exactly one item in the table");
+    XCTAssertEqual(result.items.count, 1, @"Expected exactly one item in the table");
     XCTAssertTrue([result.items[0][@"id"] isEqualToString:updatedItemId], @"Incorrect item id. Did the query return wrong item?");
     XCTAssertTrue([result.items[0][@"text"] isEqualToString:updatedText], @"Incorrect text. Did the query return wrong item?");
 
@@ -95,7 +95,7 @@ static NSString *const TableName = @"TodoItem";
     // Read to ensure the item is actually gone
     result = [self.store readWithQuery:query orError:&error];
     XCTAssertNil(error, @"readWithQuery: failed: %@", error.description);
-    XCTAssertEqual(result.items.count, 0, "Expected the table to be empty");
+    XCTAssertEqual(result.items.count, 0, @"Expected the table to be empty");
 }
 
 
