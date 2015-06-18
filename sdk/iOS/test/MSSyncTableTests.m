@@ -1606,7 +1606,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     [self waitForExpectationsWithTimeout:10 handler:nil];
     
     // Perform a pull
-    pullOperation = [filteredClient.syncContext pullWithQuery:query queryId:nil completion:^(NSError *error) {
+    pullOperation = [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
 
         // Cancellation point 4
         if (requestedCancellationPoint == 4) {
@@ -1663,7 +1663,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     };
     
     // Perform pull
-    NSOperation *pullOperation = [filteredClient.syncContext pullWithQuery:query queryId:nil completion:^(NSError *error) {
+    NSOperation *pullOperation = [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
         XCTAssertNil(error, "Expected successful pull");
     }];
     
