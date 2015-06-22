@@ -163,6 +163,10 @@
 		CF762EC91A1D37A40018C292 /* MSDateOffset.m in Sources */ = {isa = PBXBuildFile; fileRef = CF762EC71A1D36950018C292 /* MSDateOffset.m */; };
 		CFAE6E0A1A3B84D700734128 /* MSTableConfigValue.m in Sources */ = {isa = PBXBuildFile; fileRef = CFAE6E091A3B84D700734128 /* MSTableConfigValue.m */; };
 		CFAE6E0C1A3B84E400734128 /* MSTableConfigValue.h in Headers */ = {isa = PBXBuildFile; fileRef = CFAE6E0B1A3B84E400734128 /* MSTableConfigValue.h */; };
+		D0D3B9361B290D80002A126A /* MSPullSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = D0D3B9351B290D80002A126A /* MSPullSettings.m */; };
+		D0D3B9371B2A267F002A126A /* MSPullSettings.h in Headers */ = {isa = PBXBuildFile; fileRef = D0D3B9341B2906EF002A126A /* MSPullSettings.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D0EFD8571B2F73B0009CF6DA /* MSPullSettingsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D0EFD8551B2F7358009CF6DA /* MSPullSettingsTests.m */; };
+		D0EFD8591B2F785F009CF6DA /* MSPullSettingsInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = D0EFD8581B2F785F009CF6DA /* MSPullSettingsInternal.h */; };
 		E8146642165BE0150038EBE5 /* MSLogin.h in Headers */ = {isa = PBXBuildFile; fileRef = E8146640165BE0150038EBE5 /* MSLogin.h */; };
 		E8146643165BE0150038EBE5 /* MSLogin.m in Sources */ = {isa = PBXBuildFile; fileRef = E8146641165BE0150038EBE5 /* MSLogin.m */; };
 		E8146646165BE2440038EBE5 /* MSLoginSerializer.h in Headers */ = {isa = PBXBuildFile; fileRef = E8146644165BE2440038EBE5 /* MSLoginSerializer.h */; };
@@ -325,6 +329,10 @@
 		CF762EC71A1D36950018C292 /* MSDateOffset.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSDateOffset.m; sourceTree = "<group>"; };
 		CFAE6E091A3B84D700734128 /* MSTableConfigValue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSTableConfigValue.m; sourceTree = "<group>"; };
 		CFAE6E0B1A3B84E400734128 /* MSTableConfigValue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSTableConfigValue.h; sourceTree = "<group>"; };
+		D0D3B9341B2906EF002A126A /* MSPullSettings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSPullSettings.h; sourceTree = "<group>"; };
+		D0D3B9351B290D80002A126A /* MSPullSettings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSPullSettings.m; sourceTree = "<group>"; };
+		D0EFD8551B2F7358009CF6DA /* MSPullSettingsTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSPullSettingsTests.m; sourceTree = "<group>"; };
+		D0EFD8581B2F785F009CF6DA /* MSPullSettingsInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSPullSettingsInternal.h; sourceTree = "<group>"; };
 		E8146640165BE0150038EBE5 /* MSLogin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSLogin.h; sourceTree = "<group>"; };
 		E8146641165BE0150038EBE5 /* MSLogin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSLogin.m; sourceTree = "<group>"; };
 		E8146644165BE2440038EBE5 /* MSLoginSerializer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSLoginSerializer.h; sourceTree = "<group>"; };
@@ -450,6 +458,9 @@
 			isa = PBXGroup;
 			children = (
 				A2ACD539192322760012B1ED /* CoreData */,
+				D0D3B9341B2906EF002A126A /* MSPullSettings.h */,
+				D0EFD8581B2F785F009CF6DA /* MSPullSettingsInternal.h */,
+				D0D3B9351B290D80002A126A /* MSPullSettings.m */,
 				A2C14C6819105D9F00A58609 /* MSSyncContextReadResult.h */,
 				A2C14C6919105D9F00A58609 /* MSSyncContextReadResult.m */,
 				A258890718A19D0B00962F9A /* MSSyncTable.h */,
@@ -515,6 +526,7 @@
 				A258891818A19D1B00962F9A /* MSOfflinePassthroughHelper.h */,
 				A258891918A19D1B00962F9A /* MSOfflinePassthroughHelper.m */,
 				A258891A18A19D1B00962F9A /* MSSyncTableTests.m */,
+				D0EFD8551B2F7358009CF6DA /* MSPullSettingsTests.m */,
 			);
 			name = Offline;
 			sourceTree = "<group>";
@@ -811,6 +823,7 @@
 				A258891618A19D0B00962F9A /* MSSyncTable.h in Headers */,
 				E8E37912161F769D00C13F00 /* MSUser.h in Headers */,
 				A258891418A19D0B00962F9A /* MSSyncContext.h in Headers */,
+				D0D3B9371B2A267F002A126A /* MSPullSettings.h in Headers */,
 				A281900418BB2FF5001B14E7 /* MSTableOperationError.h in Headers */,
 				E8E37913161F769D00C13F00 /* MSFilter.h in Headers */,
 				A2ACD540192322C50012B1ED /* MSCoreDataStore.h in Headers */,
@@ -844,6 +857,7 @@
 				E8C44047170BAD93002FC997 /* MSAPIRequest.h in Headers */,
 				E8EE7842170CAEDC00C2848F /* MSClientInternal.h in Headers */,
 				A24701BF196896F500385DA2 /* MSRegistrationManager.h in Headers */,
+				D0EFD8591B2F785F009CF6DA /* MSPullSettingsInternal.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1064,6 +1078,7 @@
 				CF762EC91A1D37A40018C292 /* MSDateOffset.m in Sources */,
 				E8F33B15161667CE002DD7C6 /* MSClient.m in Sources */,
 				A258890C18A19D0B00962F9A /* MSOperationQueue.m in Sources */,
+				D0D3B9361B290D80002A126A /* MSPullSettings.m in Sources */,
 				E8F33B16161667CE002DD7C6 /* MSError.m in Sources */,
 				7929542919B7C793006A3829 /* MSQueryResult.m in Sources */,
 				E8F33B17161667CE002DD7C6 /* MSQuery.m in Sources */,
@@ -1126,6 +1141,7 @@
 				A24701C6196897A700385DA2 /* MSPushTests.m in Sources */,
 				A28224B3192ACFB700EF8743 /* CoreDataTestModel.xcdatamodeld in Sources */,
 				E8E37904161E2FC500C13F00 /* MSTestFilter.m in Sources */,
+				D0EFD8571B2F73B0009CF6DA /* MSPullSettingsTests.m in Sources */,
 				A22CF3731825914700660C79 /* MSTable+MSTableTestUtilities.m in Sources */,
 				A24701C5196897A700385DA2 /* MSPushHttpTests.m in Sources */,
 				E8E37907161F4D0D00C13F00 /* MSFilterTest.m in Sources */,

@@ -18,6 +18,7 @@
 #import "MSTableOperationError.h"
 #import "MSSyncContextInternal.h"
 #import "MSTableConfigValue.h"
+#import "MSPullSettingsInternal.h"
 #import "MSClientInternal.h"
 
 static NSString *const TodoTableNoVersion = @"TodoNoVersion";
@@ -1605,7 +1606,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     [self waitForExpectationsWithTimeout:10 handler:nil];
     
     // Perform a pull
-    pullOperation = [filteredClient.syncContext pullWithQuery:query queryId:nil completion:^(NSError *error) {
+    pullOperation = [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
 
         // Cancellation point 4
         if (requestedCancellationPoint == 4) {
@@ -1662,7 +1663,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     };
     
     // Perform pull
-    NSOperation *pullOperation = [filteredClient.syncContext pullWithQuery:query queryId:nil completion:^(NSError *error) {
+    NSOperation *pullOperation = [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
         XCTAssertNil(error, "Expected successful pull");
     }];
     
@@ -1947,7 +1948,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     XCTAssertTrue([self waitForTest:30.0], @"Test timed out.");
 }
 
--(void) testPullWithFetchLimit
+-(void) testPullWithFetchLimitGreaterThanDefaultPageSize
 {
     // Pull should make requests with $top=50 until it has pulled all the data up to fetchLimit.
     
@@ -1986,6 +1987,52 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
                   @"Invalid URL: %@", secondRequest.URL.absoluteString);
     
     NSArray *expectedThirdResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=50", @"$skip=100"];
+    XCTAssertTrue([self checkURL:thirdRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedThirdResult],
+                  @"Invalid URL: %@", thirdRequest.URL.absoluteString);
+}
+
+-(void) testPullWithFetchLimitGreaterThanCustomPageSize
+{
+    // Pull should make requests with $top=10 until it has pulled all the data up to fetchLimit.
+    
+    // the ids don't really matter for this test
+    NSString* tenItems = [MSMultiRequestTestFilter testDataWithItemCount:10 startId:0];
+    
+    MSMultiRequestTestFilter *testFilter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[@200, @200, @200] data:@[tenItems, tenItems, tenItems] appendEmptyRequest:NO];
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
+    
+    query.fetchLimit = 30;
+    
+    MSPullSettings *pullSettings = [[MSPullSettings alloc] initWithPageSize:10];
+    
+    XCTAssertNotEqual(pullSettings.pageSize, MSPullSettings.defaultPageSize, @"This test requires the custom page size to be different from the default page size");
+    
+    NSOperation *pull = [todoTable pullWithQuery:query queryId:nil settings:pullSettings completion:^(NSError *error) {
+        XCTAssertNil(error, @"Error found: %@", error.description);
+    }];
+    
+    XCTAssertNotNil(pull);
+    
+    [pull waitUntilFinished];
+    
+    XCTAssertEqual(3, testFilter.actualRequests.count);
+    
+    NSURLRequest *firstRequest = testFilter.actualRequests[0];
+    NSURLRequest *secondRequest = testFilter.actualRequests[1];
+    NSURLRequest *thirdRequest = testFilter.actualRequests[2];
+    
+    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=10", @"$skip=0"];
+    XCTAssertTrue([self checkURL:firstRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedFirstResult],
+                  @"Invalid URL: %@", firstRequest.URL.absoluteString);
+    
+    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=10", @"$skip=10"];
+    XCTAssertTrue([self checkURL:secondRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedSecondResult],
+                  @"Invalid URL: %@", secondRequest.URL.absoluteString);
+    
+    NSArray *expectedThirdResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=10", @"$skip=20"];
     XCTAssertTrue([self checkURL:thirdRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedThirdResult],
                   @"Invalid URL: %@", thirdRequest.URL.absoluteString);
 }
@@ -2167,6 +2214,116 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     NSArray *expectedThirdResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=48", @"$skip=100"];
     XCTAssertTrue([self checkURL:thirdRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedThirdResult],
                   @"Invalid URL: %@", thirdRequest.URL.absoluteString);
+}
+
+-(void) testVanillaPull_ValidPullSettings
+{
+    // Guard against possible future changes to |MSPullSettings.defaultPageSize|.
+    // Set |pageSize| in such a way that it would never match |MSPullSettings.defaultPageSize|.
+    NSInteger pageSize = MSPullSettings.defaultPageSize + 1;
+
+    MSPullSettings *pullSettings = [[MSPullSettings alloc] initWithPageSize:pageSize];
+    
+    NSURL *pullRequest = [self pullRequestWithSettings:pullSettings shouldUsePullSettings:YES isIncremental:NO];
+    
+    NSString *topParam = [NSString stringWithFormat:@"$top=%ld", (long) pullSettings.pageSize];
+    
+    NSArray *expectedPullQuery = @[topParam, @"$skip=0", @"__includeDeleted=true", @"__systemProperties=__deleted"];
+    
+    XCTAssertTrue([self checkURL:pullRequest withPath:@"/tables/TodoNoVersion" andQuery:expectedPullQuery],
+                  @"Invalid pull request: %@", pullRequest.absoluteString);
+}
+
+-(void) testVanillaPull_NilPullSettings
+{
+    NSURL *pullRequest = [self pullRequestWithSettings:nil shouldUsePullSettings:YES isIncremental:NO];
+    
+    NSString *topParam = [NSString stringWithFormat:@"$top=%ld", (long) MSPullSettings.defaultPageSize];
+    
+    NSArray *expectedPullQuery = @[topParam, @"$skip=0", @"__includeDeleted=true", @"__systemProperties=__deleted"];
+    
+    XCTAssertTrue([self checkURL:pullRequest withPath:@"/tables/TodoNoVersion" andQuery:expectedPullQuery],
+                  @"Invalid pull request: %@", pullRequest.absoluteString);
+}
+
+-(void) testVanillaPull_NoPullSettings
+{
+    NSURL *pullRequest = [self pullRequestWithSettings:nil shouldUsePullSettings:NO isIncremental:NO];
+    
+    NSString *topParam = [NSString stringWithFormat:@"$top=%ld", (long) MSPullSettings.defaultPageSize];
+    
+    NSArray *expectedPullQuery = @[topParam, @"$skip=0", @"__includeDeleted=true", @"__systemProperties=__deleted"];
+    
+    XCTAssertTrue([self checkURL:pullRequest withPath:@"/tables/TodoNoVersion" andQuery:expectedPullQuery],
+                  @"Invalid pull request: %@", pullRequest.absoluteString);
+}
+
+-(void) testIncrementalPull_ValidPullSettings
+{
+    // Guard against possible future changes to |MSPullSettings.defaultPageSize|.
+    // Set |pageSize| in such a way that it would never match |MSPullSettings.defaultPageSize|.
+    NSInteger pageSize = MSPullSettings.defaultPageSize + 1;
+
+    MSPullSettings *pullSettings = [[MSPullSettings alloc] initWithPageSize:pageSize];
+    
+    NSURL *pullRequest = [self pullRequestWithSettings:pullSettings shouldUsePullSettings:YES isIncremental:YES];
+    
+    NSString *topParam = [NSString stringWithFormat:@"$top=%ld", (long) pullSettings.pageSize];
+    
+    NSArray *expectedPullQuery = @[topParam, @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')", @"$skip=0", @"$orderby=__updatedAt%20asc", @"__includeDeleted=true", @"__systemProperties=__updatedAt%2C__deleted"];
+    
+    XCTAssertTrue([self checkURL:pullRequest withPath:@"/tables/TodoNoVersion" andQuery:expectedPullQuery],
+                  @"Invalid pull request: %@", pullRequest.absoluteString);
+}
+
+-(void) testIncrementalPull_NilPullSettings
+{
+    NSURL *pullRequest = [self pullRequestWithSettings:nil shouldUsePullSettings:YES isIncremental:YES];
+    
+    NSString *topParam = [NSString stringWithFormat:@"$top=%ld", (long) MSPullSettings.defaultPageSize];
+    
+    NSArray *expectedPullQuery = @[topParam, @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')", @"$skip=0", @"$orderby=__updatedAt%20asc", @"__includeDeleted=true", @"__systemProperties=__updatedAt%2C__deleted"];
+    
+    XCTAssertTrue([self checkURL:pullRequest withPath:@"/tables/TodoNoVersion" andQuery:expectedPullQuery],
+                  @"Invalid pull request: %@", pullRequest.absoluteString);
+}
+
+-(void) testIncrementalPull_NoPullSettings
+{
+    NSURL *pullRequest = [self pullRequestWithSettings:nil shouldUsePullSettings:NO isIncremental:YES];
+    
+    NSString *topParam = [NSString stringWithFormat:@"$top=%ld", (long) MSPullSettings.defaultPageSize];
+    
+    NSArray *expectedPullQuery = @[topParam, @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')", @"$skip=0", @"$orderby=__updatedAt%20asc", @"__includeDeleted=true", @"__systemProperties=__updatedAt%2C__deleted"];
+    
+    XCTAssertTrue([self checkURL:pullRequest withPath:@"/tables/TodoNoVersion" andQuery:expectedPullQuery],
+                  @"Invalid pull request: %@", pullRequest.absoluteString);
+}
+
+-(NSURL *) pullRequestWithSettings:(MSPullSettings *)pullSettings shouldUsePullSettings:(BOOL)shouldUsePullSettings isIncremental:(BOOL)isIncremental
+{
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:nil];
+    __block NSURL *pullRequest;
+    
+    testFilter.onInspectRequest = ^(NSURLRequest *request) {
+        pullRequest = request.URL;
+        return request;
+    };
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
+    
+    NSString *queryId = isIncremental ? @"queryId" : nil;
+    
+    if (shouldUsePullSettings) {
+        [[todoTable pullWithQuery:query queryId:queryId settings:pullSettings completion:nil] waitUntilFinished];
+    }
+    else {
+        [[todoTable pullWithQuery:query queryId:queryId completion:nil] waitUntilFinished];
+    }
+    
+    return pullRequest;
 }
 
 -(void) testPullWithFetchOffset
@@ -3146,7 +3303,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     // Query the operation queue for the inserted item using a different case for the Id
     NSArray *items = [client.syncContext.operationQueue getOperationsForTable:todoTable.name item:@"ITEMID"];
     
-    XCTAssertEqual(items.count, 1, "Expected to find 1 item in the operation queue");
+    XCTAssertEqual(items.count, 1, @"Expected to find 1 item in the operation queue");
 }
 
 -(void)testOperationErrorRelationship
