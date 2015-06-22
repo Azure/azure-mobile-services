@@ -149,7 +149,7 @@ public class OperationErrorList {
     private static TableOperationError deserialize(JsonObject element) throws ParseException {
         String id = element.get("id").getAsString();
         String operationId = element.get("operationId").getAsString();
-        int operationKind = element.get("operationkind").getAsInt();
+        int operationKind = Double.valueOf(element.get("operationkind").getAsString()).intValue();
         String tableName = element.get("tablename").getAsString();
         String itemId = element.get("itemid").getAsString();
         JsonObject clientItem = element.get("clientitem") != null ? element.get("clientitem").getAsJsonObject() : null;

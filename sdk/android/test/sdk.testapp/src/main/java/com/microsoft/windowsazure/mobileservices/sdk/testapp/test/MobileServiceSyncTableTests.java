@@ -47,8 +47,10 @@ import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
 import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceJsonSyncTable;
 import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncTable;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationError;
+import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationKind;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushFailedException;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushStatus;
+import com.microsoft.windowsazure.mobileservices.table.sync.queue.OperationErrorList;
 import com.microsoft.windowsazure.mobileservices.table.sync.synchandler.SimpleSyncHandler;
 
 import org.apache.http.Header;
@@ -728,6 +730,21 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         assertEquals(client.getSyncContext().getPendingOperations(), 0);
     }
 
+    public void testOperationErrorLoadCorrectly() throws Throwable {
+
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+
+        OperationErrorList operationErrorList = OperationErrorList.load(store);
+
+        TableOperationError tableOperationError = new TableOperationError("Id1", TableOperationKind.Update, "Table1", "ItemId", null, "Message", 400, null, null);
+
+        operationErrorList.add(tableOperationError);
+
+        //Load with the previous inserted operation
+        OperationErrorList.load(store);
+
+    }
+
     public void testCancelAndDiscardItem() throws Throwable {
         MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
         final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
@@ -775,7 +792,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             assertEquals(mspfe.getPushCompletionResult().getOperationErrors().size(), 1);
             assertEquals(client.getSyncContext().getPendingOperations(), 1);
 
-            TableOperationError tableOperationError =mspfe.getPushCompletionResult().getOperationErrors().get(0);
+            TableOperationError tableOperationError = mspfe.getPushCompletionResult().getOperationErrors().get(0);
 
             client.getSyncContext().cancelAndDiscardItem(tableOperationError);
 
