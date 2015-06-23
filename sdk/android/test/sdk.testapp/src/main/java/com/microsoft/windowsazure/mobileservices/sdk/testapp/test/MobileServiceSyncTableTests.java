@@ -479,7 +479,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
 
-        Query query = QueryOperations.tableName(table.getName()).top(2);
+        Query query = QueryOperations.field("String").eq("noMatch");
 
         table.pull(query, "QueryKey").get();
 
@@ -487,15 +487,14 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
                 serviceFilterContainer.Requests.get(0).Url,
                 EncodingUtilities
                         .percentEncodeSpaces(
-                                "http://myapp.com/tables/stringidtype?$top=50&$orderby=__updatedAt%20asc,id%20asc&__includeDeleted=true&__systemproperties=__updatedAt,__version,__deleted"));
+                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20('noMatch')&$top=50&$orderby=__updatedAt%20asc&__includeDeleted=true&__systemproperties=__updatedAt,__version,__deleted"));
 
         assertEquals(
                 serviceFilterContainer.Requests.get(1).Url,
                 EncodingUtilities
                         .percentEncodeSpaces(
-                                "http://myapp.com/tables/stringidtype?$filter=__updatedAt%20gt%20(datetimeoffset'" + updatedAt1 +
-                                        "')%20and%20(id%20ne%20('def'))%20and%20(id%20ne%20('def'))%20or%20(__updatedAt%20ge%20(datetimeoffset'" + updatedAt1 +
-                                        "')%20and%20id%20gt%20('def'))&$top=50&$orderby=__updatedAt%20asc,id%20asc&__includeDeleted=true&__systemproperties=__updatedAt,__version,__deleted"));
+                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20('noMatch')%20and%20" +
+                                        "(__updatedAt%20ge%20(datetimeoffset'"+updatedAt1 +"'))&$top=50&$orderby=__updatedAt%20asc&__includeDeleted=true&__systemproperties=__updatedAt,__version,__deleted"));
     }
 
     public void testIncrementalPullSaveLastUpdatedAtDate() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
