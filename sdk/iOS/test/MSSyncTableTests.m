@@ -2189,12 +2189,11 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     NSOperation *pull = [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
         XCTAssertNil(error, @"Error found: %@", error.description);
-        done = YES;
     }];
     
     XCTAssertNotNil(pull);
-    
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+
+    [pull waitUntilFinished];
     
     XCTAssertEqual(3, testFilter.actualRequests.count);
     
@@ -2737,12 +2736,11 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
         XCTAssertNil(error, @"Error found: %@", error.description);
         XCTAssertEqual(offline.upsertCalls, 7);
         XCTAssertEqual(offline.upsertedItems, 11);
-        done = YES;
     }];
     
     XCTAssertNotNil(pull);
     
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    [pull waitUntilFinished];
     
     NSURLRequest *firstRequest = (NSURLRequest *)filter.actualRequests[0];
     NSURLRequest *secondRequest = (NSURLRequest *)filter.actualRequests[1];
@@ -2826,12 +2824,11 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
         XCTAssertNil(error, @"Error found: %@", error.description);
         XCTAssertEqual(offline.upsertCalls, 3);
         XCTAssertEqual(offline.upsertedItems, 4);
-        done = YES;
     }];
     
     XCTAssertNotNil(pull);
     
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    [pull waitUntilFinished];
     XCTAssertEqual(3, filter.actualRequests.count);
     
     NSURLRequest *firstRequest = (NSURLRequest *)filter.actualRequests[0];
