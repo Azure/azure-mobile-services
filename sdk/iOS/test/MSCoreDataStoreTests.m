@@ -260,6 +260,46 @@ static NSString *const TableName = @"TodoItem";
     XCTAssertEqual(error.code, MSSyncTableLocalStoreError);
 }
 
+-(void)testReadTable_RecordWithNullPropertyValue
+{
+    NSError *error;
+    NSArray *testArray = @[@{@"id":@"ABC", @"text": [NSNull null]}];
+    
+    [self.store upsertItems:testArray table:TableName orError:&error];
+    XCTAssertNil(error, @"upsert failed: %@", error.description);
+    
+    NSDictionary *item = [self.store readTable:TableName withItemId:@"ABC" orError:&error];
+    XCTAssertNil(error, @"readTable:withItemId: failed: %@", error.description);
+    
+    XCTAssertNotNil(item, @"item should not have been nil");
+    XCTAssertTrue([item[@"id"] isEqualToString:@"ABC"], @"Incorrect item id");
+    XCTAssertTrue([item.allKeys containsObject:@"text"], @"Failed to read property with null value");
+    XCTAssertEqual(item[@"text"], [NSNull null], @"Incorrect text value. Should have been null");
+}
+
+-(void)testReadWithQuery_RecordWithNullPropertyValue
+{
+    NSError *error;
+    NSArray *testArray = @[@{@"id":@"ABC", @"text": [NSNull null]}];
+    
+    [self.store upsertItems:testArray table:TableName orError:&error];
+    XCTAssertNil(error, @"upsert failed: %@", error.description);
+    
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:TableName client:self.client];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
+    
+    MSSyncContextReadResult *result = [self.store readWithQuery:query orError:&error];
+    XCTAssertNil(error, @"readWithQuery: failed: %@", error.description);
+    XCTAssertEqual(result.items.count, 1);
+    
+    NSDictionary *item = (result.items)[0];
+    
+    XCTAssertNotNil(item, @"item should not have been nil");
+    XCTAssertTrue([item[@"id"] isEqualToString:@"ABC"], @"Incorrect item id");
+    XCTAssertTrue([item.allKeys containsObject:@"text"], @"Failed to read property with null value");
+    XCTAssertEqual(item[@"text"], [NSNull null], @"Incorrect text value. Should have been null");
+}
+
 -(void)testReadWithQuery
 {
     NSError *error;
