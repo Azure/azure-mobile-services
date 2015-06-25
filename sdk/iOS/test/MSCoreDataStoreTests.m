@@ -271,9 +271,6 @@ static NSString *const TableName = @"TodoItem";
     NSDictionary *item = [self.store readTable:TableName withItemId:@"ABC" orError:&error];
     XCTAssertNil(error, @"readTable:withItemId: failed: %@", error.description);
     
-    XCTAssertNotNil(item, @"item should not have been nil");
-    XCTAssertTrue([item[@"id"] isEqualToString:@"ABC"], @"Incorrect item id");
-    XCTAssertTrue([item.allKeys containsObject:@"text"], @"Failed to read property with null value");
     XCTAssertEqual(item[@"text"], [NSNull null], @"Incorrect text value. Should have been null");
 }
 
@@ -294,9 +291,6 @@ static NSString *const TableName = @"TodoItem";
     
     NSDictionary *item = (result.items)[0];
     
-    XCTAssertNotNil(item, @"item should not have been nil");
-    XCTAssertTrue([item[@"id"] isEqualToString:@"ABC"], @"Incorrect item id");
-    XCTAssertTrue([item.allKeys containsObject:@"text"], @"Failed to read property with null value");
     XCTAssertEqual(item[@"text"], [NSNull null], @"Incorrect text value. Should have been null");
 }
 
