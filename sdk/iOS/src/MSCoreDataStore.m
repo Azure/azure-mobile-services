@@ -55,47 +55,40 @@ NSString *const StoreDeleted = @"ms_deleted";
     
     fr.predicate = [NSPredicate predicateWithFormat:@"%K ==[c] %@", MSSystemColumnId, itemId];
     
-    if (asDictionary) {
-        fr.resultType = NSDictionaryResultType;
-    }
-    
     NSArray *results = [self.context executeFetchRequest:fr error:error];
     if (!results || (error && *error)) {
         return nil;
     }
     
-    NSDictionary *item = [results firstObject];
-    if (asDictionary) {
-        // Otherwise this dictionary can't be worked with as user's expect
-        if (item) {
-            return [NSDictionary dictionaryWithDictionary:item];
-        } else {
-            return nil;
-        }
+    NSManagedObject *item = [results firstObject];
+    
+    if (item && asDictionary) {
+        
+        NSDictionary *result = [item dictionaryWithValuesForKeys:nil];
+
+        // The type of |result| is |NSKnownKeysDictionary|, an undocumented subclass of |NSMutableDictionary|.
+        // For it to work like a regular |NSMutableDictionary| we need to copy the contents into an
+        // |NSMutableDictionary| instance OR into an |NSDictionary| instance and then make a mutable copy.
+        return [NSDictionary dictionaryWithDictionary:result];
     }
     
-    return [results firstObject];
+    return item;
 }
 
 +(NSDictionary *) tableItemFromManagedObject:(NSManagedObject *)object
 {
-    NSArray *attributes = [object.entity.attributesByName allKeys];
-    NSMutableDictionary *serverItem = [[object dictionaryWithValuesForKeys:attributes] mutableCopy];
+    return [self tableItemFromManagedObject:object properties:nil];
+}
 
-    // Find all system columns in the item
-    NSSet *systemColumnNames = [serverItem keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
-        NSString *columnName = (NSString *)key;
-        return [columnName hasPrefix:StoreSystemColumnPrefix];
-    }];
-    
-    // Now translate every system column from ms_x to __x
-    for (NSString *columnName in systemColumnNames) {
-        NSString *adjustedName = [MSCoreDataStore externalNameForStoreColumnName:columnName];
-        serverItem[adjustedName] = serverItem[columnName];
-        [serverItem removeObjectForKey:columnName];
++(NSDictionary *) tableItemFromManagedObject:(NSManagedObject *)object properties:(NSArray *)properties
+{
+    if (!properties) {
+        properties = [object.entity.attributesByName allKeys];
     }
     
-    return serverItem;
+    NSMutableDictionary *serverItem = [[object dictionaryWithValuesForKeys:properties] mutableCopy];
+    
+    return [MSCoreDataStore adjustInternalItem:serverItem];
 }
 
 /// Helper function to convert a server (external) item to only contain the appropriate keys for storage
@@ -214,7 +207,6 @@ NSString *const StoreDeleted = @"ms_deleted";
         fr.entity = entity;
         fr.predicate = query.predicate;
         fr.sortDescriptors = query.orderBy;
-        fr.resultType = NSDictionaryResultType;
 
         // Only calculate total count if fetchLimit/Offset is set
         if (query.includeTotalCount && (query.fetchLimit != -1 || query.fetchOffset != -1)) {
@@ -255,12 +247,12 @@ NSString *const StoreDeleted = @"ms_deleted";
                 return [columnName hasPrefix:SystemColumnPrefix];
             }];
             
-            __block bool hasVersion;
+            __block bool hasVersion = false;
+            
             [systemColumnIndexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
                 NSString *columnName = [properties objectAtIndex:idx];
-                if (!hasVersion && versionProperty) {
-                    hasVersion = [columnName isEqualToString:MSSystemColumnVersion];
-                }
+
+                hasVersion = hasVersion || [columnName isEqualToString:MSSystemColumnVersion];
                 
                 [properties replaceObjectAtIndex:idx
                                       withObject:[MSCoreDataStore internalNameForMSColumnName:columnName]];
@@ -270,7 +262,6 @@ NSString *const StoreDeleted = @"ms_deleted";
                 [properties addObject:StoreVersion];
             }
         }
-        fr.propertiesToFetch = properties;
         
         NSArray *rawResult = [self.context executeFetchRequest:fr error:&internalError];
         if (internalError) {
@@ -280,9 +271,11 @@ NSString *const StoreDeleted = @"ms_deleted";
         // Convert NSKeyedDictionary to regular dictionary objects since for now keyed dictionaries don't
         // seem to convert to mutable dictionaries as a user may expect
         NSMutableArray *finalResult = [[NSMutableArray alloc] initWithCapacity:rawResult.count];
+
         [rawResult enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-            NSDictionary *rawItem = [NSDictionary dictionaryWithDictionary:obj];
-            NSDictionary *adjustedItem = [MSCoreDataStore adjustInternalItem:rawItem];
+            
+            NSDictionary *adjustedItem = [MSCoreDataStore tableItemFromManagedObject:obj properties:properties];
+            
             [finalResult addObject:adjustedItem];
         }];
         
