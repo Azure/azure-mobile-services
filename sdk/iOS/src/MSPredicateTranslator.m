@@ -69,6 +69,7 @@ static NSString *const dateTimeConstant = @"datetime'%@'";
 static NSString *const dateTimeOffsetConstant = @"datetimeoffset'%@'";
 static NSString *const alwaysTrueConstant = @"(1 eq 1)";
 static NSString *const alwaysFalseConstant = @"(1 eq 0)";
+static NSString *const guidConstant = @"guid'%@'";
 
 
 #pragma mark * MSPredicateTranslator Implementation
@@ -547,6 +548,9 @@ static NSDictionary *staticFunctionInfoLookup;
         // Except for decimals, all number types and bools will be this case
         result = [MSPredicateTranslator visitNumberConstant:constant];
     }
+    else if ([constant isKindOfClass:[NSUUID class]]) {
+        result = [MSPredicateTranslator visitGuidConstant:constant];
+    }
     
     return result;
 }
@@ -623,6 +627,11 @@ static NSDictionary *staticFunctionInfoLookup;
     } 
 
     return result;
+}
+
++(NSString *) visitGuidConstant:(NSUUID *) guid
+{
+    return [NSString stringWithFormat:guidConstant, guid.UUIDString];
 }
 
 +(NSDictionary *) functionInfoLookup
