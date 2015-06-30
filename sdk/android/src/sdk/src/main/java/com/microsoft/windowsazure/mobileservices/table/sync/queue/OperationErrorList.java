@@ -149,15 +149,25 @@ public class OperationErrorList {
     private static TableOperationError deserialize(JsonObject element) throws ParseException {
         String id = element.get("id").getAsString();
         String operationId = element.get("operationId").getAsString();
-        int operationKind = Double.valueOf(element.get("operationkind").getAsString()).intValue();
+        int operationKind = element.get("operationkind").getAsNumber().intValue();
         String tableName = element.get("tablename").getAsString();
         String itemId = element.get("itemid").getAsString();
-        JsonObject clientItem = element.get("clientitem") != null ? element.get("clientitem").getAsJsonObject() : null;
         String errorMessage = element.get("errormessage").getAsString();
         Integer statusCode = element.get("statuscode") != null ? element.get("statuscode").getAsInt() : null;
         String serverResponse = element.get("serverresponse") != null ? element.get("serverresponse").getAsString() : null;
-        JsonObject serverItem = element.get("serveritem") != null ? element.get("serveritem").getAsJsonObject() : null;
         Date createdAt = DateSerializer.deserialize(element.get("__createdat").getAsString());
+
+        JsonObject clientItem = null;
+
+        if (element.get("clientitem") != null && !element.get("clientitem").isJsonNull()) {
+            clientItem = element.get("clientitem").getAsJsonObject();
+        }
+
+        JsonObject serverItem = null;
+
+        if (element.get("serveritem") != null && !element.get("serveritem").isJsonNull()) {
+            serverItem = element.get("serveritem").getAsJsonObject();
+        }
 
         return TableOperationError.create(id, operationId, TableOperationKind.parse(operationKind), tableName, itemId, clientItem, errorMessage, statusCode, serverResponse,
                 serverItem, createdAt);
