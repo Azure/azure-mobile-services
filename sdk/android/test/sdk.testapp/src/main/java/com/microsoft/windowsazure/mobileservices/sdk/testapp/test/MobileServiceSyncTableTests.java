@@ -555,12 +555,11 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         String updatedAt2 = sdf.format(d);
 
         client = client.withFilter(getTestFilter(serviceFilterContainer, false,
-                "{\"count\":\"6\",\"results\":" +
                         "[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt1 + "\"}," +
-                        "{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt1 + "\"}]}",
-                "[{\"id\":\"abc\",\"String\":\"Hey1\",\"__updatedAt\":\"" + updatedAt1 + "\"}," +
                         "{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt1 + "\"}]",
-                "[{\"id\":\"abc\",\"String\":\"Hey2\",\"__updatedAt\":\"" + updatedAt2 + "\"}," +
+                "[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt1 + "\"}," +
+                        "{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt1 + "\"}]",
+                "[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt2 + "\"}," +
                         "{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt2 + "\"}]"
         ));
 
@@ -568,7 +567,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
 
-        Query query = QueryOperations.tableName(table.getName()).top(2);
+        Query query = QueryOperations.field("String").eq("Hey");
 
         table.pull(query, queryKey).get();
 
@@ -576,17 +575,15 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         assertEquals(
                 serviceFilterContainer.Requests.get(2).Url,
                 EncodingUtilities
-                        .percentEncodeSpaces("http://myapp.com/tables/stringidtype?$filter=__updatedAt%20ge%20" +
-                                "(datetimeoffset'"+updatedAt1 +"')" +
-                                "&$top=50&$skip=2" +
-                                "&$orderby=__updatedAt%20asc&__systemproperties=__updatedAt,__version,__deleted"));
-
+                        .percentEncodeSpaces("http://myapp.com/tables/stringidtype?$filter=String%20eq%20('Hey')%20and%20(__updatedAt%20ge%20(datetimeoffset'"+updatedAt1+"'))" +
+                                "&$top=50&$skip=2&" +
+                                "$orderby=__updatedAt%20asc&__includeDeleted=true&__systemproperties=__updatedAt,__version,__deleted"));
         // Skip removed
         assertEquals(
                 serviceFilterContainer.Requests.get(3).Url,
                 EncodingUtilities
-                        .percentEncodeSpaces("http://myapp.com/tables/stringidtype?$filter=__updatedAt%20ge%20(datetimeoffset'"+updatedAt2+"')" +
-                                "&$top=50&$orderby=__updatedAt%20asc&__systemproperties=__updatedAt,__version,__deleted"));
+                        .percentEncodeSpaces("http://myapp.com/tables/stringidtype?$filter=String%20eq%20('Hey')%20and%20(__updatedAt%20ge%20(datetimeoffset'"+updatedAt2+"'))" +
+                                "&$top=50&$orderby=__updatedAt%20asc&__includeDeleted=true&__systemproperties=__updatedAt,__version,__deleted"));
     }
 
     public void testPurgeDoesNotThrowExceptionWhenThereIsNoOperationInTable() throws MalformedURLException, InterruptedException, ExecutionException {
