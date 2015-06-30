@@ -537,6 +537,58 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         assertEquals(updatedAt2, stringMaxUpdatedDate);
     }
 
+    public void testincrementalSyncUsesSkipWhenMaxUpdateAtIsSame() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
+
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        String queryKey = "QueryKey";
+        String incrementalPullStrategyTable = "__incrementalPullData";
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        Date d = new Date();
+        String updatedAt1 = sdf.format(d);
+        d.setTime(d.getTime() + 1000L);
+        String updatedAt2 = sdf.format(d);
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, false,
+                "{\"count\":\"6\",\"results\":" +
+                        "[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt1 + "\"}," +
+                        "{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt1 + "\"}]}",
+                "[{\"id\":\"abc\",\"String\":\"Hey1\",\"__updatedAt\":\"" + updatedAt1 + "\"}," +
+                        "{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt1 + "\"}]",
+                "[{\"id\":\"abc\",\"String\":\"Hey2\",\"__updatedAt\":\"" + updatedAt2 + "\"}," +
+                        "{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt2 + "\"}]"
+        ));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        Query query = QueryOperations.tableName(table.getName()).top(2);
+
+        table.pull(query, queryKey).get();
+
+        // Skip added
+        assertEquals(
+                serviceFilterContainer.Requests.get(2).Url,
+                EncodingUtilities
+                        .percentEncodeSpaces("http://myapp.com/tables/stringidtype?$filter=__updatedAt%20ge%20" +
+                                "(datetimeoffset'"+updatedAt1 +"')" +
+                                "&$top=50&$skip=2" +
+                                "&$orderby=__updatedAt%20asc&__systemproperties=__updatedAt,__version,__deleted"));
+
+        // Skip removed
+        assertEquals(
+                serviceFilterContainer.Requests.get(3).Url,
+                EncodingUtilities
+                        .percentEncodeSpaces("http://myapp.com/tables/stringidtype?$filter=__updatedAt%20ge%20(datetimeoffset'"+updatedAt2+"')" +
+                                "&$top=50&$orderby=__updatedAt%20asc&__systemproperties=__updatedAt,__version,__deleted"));
+    }
+
     public void testPurgeDoesNotThrowExceptionWhenThereIsNoOperationInTable() throws MalformedURLException, InterruptedException, ExecutionException {
         MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
         ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
