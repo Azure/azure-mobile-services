@@ -45,10 +45,8 @@ import com.microsoft.windowsazure.mobileservices.table.sync.localstore.SQLiteLoc
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.RemoteTableOperationProcessor;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationError;
-import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationKind;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushCompletionResult;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushFailedException;
-import com.microsoft.windowsazure.mobileservices.table.sync.queue.OperationErrorList;
 import com.microsoft.windowsazure.mobileservices.table.sync.synchandler.MobileServiceSyncHandler;
 import com.microsoft.windowsazure.mobileservices.table.sync.synchandler.MobileServiceSyncHandlerException;
 import com.microsoft.windowsazure.mobileservices.table.sync.synchandler.SimpleSyncHandler;
@@ -81,8 +79,8 @@ public class OfflineTests extends TestGroup {
 
         this.addTest(createClearStoreTest());
 
-        this.addTest(createBasicTest("Basic Test"));
 
+        this.addTest(createBasicTest("Basic Test"));
         this.addTest(createNoCollapseInsertOnPreviousPushError("No collapse insert on previous push error"));
 
         this.addTest(createLocallyDeleteAlreadyDeletedElementTest());
@@ -944,6 +942,7 @@ public class OfflineTests extends TestGroup {
 
         return test;
     }
+
 
     private TestCase createDeleteSyncConflict() {
 
