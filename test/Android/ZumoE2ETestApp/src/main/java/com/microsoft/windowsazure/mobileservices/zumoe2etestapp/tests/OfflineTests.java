@@ -81,10 +81,7 @@ public class OfflineTests extends TestGroup {
 
         this.addTest(createClearStoreTest());
 
-
         this.addTest(createBasicTest("Basic Test"));
-
-        this.addTest(testOperationErrorLoadCorrectly());
 
         this.addTest(createNoCollapseInsertOnPreviousPushError("No collapse insert on previous push error"));
 
@@ -1089,62 +1086,6 @@ public class OfflineTests extends TestGroup {
         };
 
         test.setName("Offline - Test delete a locally updated item");
-
-        return test;
-    }
-
-    private TestCase testOperationErrorLoadCorrectly() {
-
-        final TestCase test = new TestCase() {
-
-            @Override
-            protected void executeTest(MobileServiceClient offlineReadyClient, final TestExecutionCallback callback) {
-
-                TestCase testCase = this;
-                TestResult result = new TestResult();
-                result.setStatus(TestStatus.Passed);
-                result.setTestCase(testCase);
-                try {
-
-                    log("Initialize store");
-
-                    SQLiteLocalStore localStore = new SQLiteLocalStore(offlineReadyClient.getContext(), OFFLINE_TABLE_NAME, null, 1);
-
-                    OperationErrorList.initializeStore(localStore);
-
-                    localStore.initialize();
-
-
-                    log("Add two Operation Errors");
-
-                    OperationErrorList operationErrorList = OperationErrorList.load(localStore);
-
-                    TableOperationError tableOperationError = new TableOperationError("Id1", TableOperationKind.Update, "Table1", "ItemId", null, "Message", 400, "ServerResponse", null);
-
-                    operationErrorList.add(tableOperationError);
-
-                    TableOperationError tableOperationError2 = new TableOperationError("Id1", TableOperationKind.Update, "Table1", "ItemId", new JsonObject(), "Message", 400, "ServerResponse", new JsonObject());
-
-                    operationErrorList.add(tableOperationError2);
-
-                    offlineReadyClient.getSyncContext().initialize(localStore, new SimpleSyncHandler()).get();
-
-                    operationErrorList.clear();
-
-                    log("Done");
-
-                    callback.onTestComplete(this, result);
-
-                } catch (Exception e) {
-                    callback.onTestComplete(this, createResultFromException(e));
-                    return;
-                }
-            }
-
-            ;
-        };
-
-        test.setName("Test Operation Error Load Correctly");
 
         return test;
     }
