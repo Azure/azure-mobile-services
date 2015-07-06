@@ -101,6 +101,29 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     XCTAssertEqualObjects(newItem[@"text"], item[@"text"]);
 }
 
+-(void) testInsertItemWithNoIdAndNilIdRecordExistsSuccess
+{
+    XCTestExpectation *expectation = [self expectationWithDescription:self.name];
+
+    // Place record with a id of nil, to ensure the id check is using an actual value for id
+    [offline upsertItems:@[ @{ @"text":@"record with nil id" } ]
+                   table:TodoTableNoVersion
+                 orError:nil];
+    
+    MSSyncTable *todoTable = [client syncTableWithName:TodoTableNoVersion];
+    
+    id item = @{ @"text":@"test name" };
+    [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
+        // If the id check used nil, we would have gotten an error that the id was in use
+        XCTAssertNil(error);
+        XCTAssertNotNil(item[@"id"], @"The item should have an id");
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
+}
+
+
 -(void) testInsertItemWithInvalidId
 {
     XCTestExpectation *expectation = [self expectationWithDescription:self.name];
