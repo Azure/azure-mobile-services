@@ -161,14 +161,14 @@ static NSOperationQueue *pushQueue_;
             switch (action) {
                 case MSTableOperationInsert: {
                     // Check to see if this item already exists
-                    NSString *itemId = item[MSSystemColumnId];
+                    NSString *itemId = itemToSave[MSSystemColumnId];
                     NSDictionary *result = [self syncTable:table readWithId:itemId orError:&error];
                     if (error == nil) {
                         if (result == nil) {
                             [self.dataSource upsertItems:@[itemToSave] table:table orError:&error];
-                        }
-                        else {
-                            error = [self errorWithDescription:@"This item already exists." andErrorCode:MSSyncTableInvalidAction];
+                        } else {
+                            error = [self errorWithDescription:@"This item already exists."
+                                                  andErrorCode:MSSyncTableInvalidAction];
                         }
                     }
                     break;
