@@ -4,6 +4,17 @@
 - [iOS 2.0 SDK](http://aka.ms/gc6fex)
 - [iOS 1.2.4 SDK](http://aka.ms/kymw2g)
 
+### Version 2.2.0
+- Made Id property of records case-insensitive [328aadf](https://github.com/Azure/azure-mobile-services/commit/328aadf)
+- Added support for returning the underlying NSOperation on performing push, pull and purge operations [7c37f60](https://github.com/Azure/azure-mobile-services/commit/7c37f60)
+- Added support for configuring the page size of a pull operation [0c31aa3](https://github.com/Azure/azure-mobile-services/commit/0c31aa3)
+- Added support for NSUUID in PredicateTranslator [24c5a61](https://github.com/Azure/azure-mobile-services/commit/24c5a61)
+- Added support for turning off data store handling of table operations [8568d22](https://github.com/Azure/azure-mobile-services/commit/8568d22)
+- Fixed [issue #699] (https://github.com/Azure/azure-mobile-services/issues/699) that prevented properties with value nil from being pushed [bf41081](https://github.com/Azure/azure-mobile-services/commit/bf41081)
+- Fixed handling of network errors during push operations [1a9fdf4](https://github.com/Azure/azure-mobile-services/commit/1a9fdf4)
+- Fix potential race conditions while performing table operations [15581be](https://github.com/Azure/azure-mobile-services/commit/15581be)
+- Fixed incorrect ID validation during insert operations [f5e44d4](https://github.com/Azure/azure-mobile-services/commit/f5e44d4)
+
 ### Version 2.1.0
 - Fix cancelAndUpdate and cancelAndDiscard actions on the MSTableOperationError class
 - Fix issues with sync operations not firing their completion blocks on the correct queue
