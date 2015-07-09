@@ -21,7 +21,7 @@
 #import "MSDateOffset.h"
 
 #define WindowsAzureMobileServicesSdkMajorVersion 2
-#define WindowsAzureMobileServicesSdkMinorVersion 1
+#define WindowsAzureMobileServicesSdkMinorVersion 2
 #define WindowsAzureMobileServicesSdkBuildVersion 0
 
 #endif
