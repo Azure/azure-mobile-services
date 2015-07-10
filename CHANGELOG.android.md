@@ -1,5 +1,9 @@
 # Azure Mobile Services Android SDK Change Log
 
+### Android SDK: Version 2.0.3
+- Fix in the incremental sync query building logic [#720] (https://github.com/Azure/azure-mobile-services/issues/720) to use correct parentheses and skip logic [c58d4e8](https://github.com/Azure/azure-mobile-services/commit/c58d4e8) 
+- Fix for the deserialization bug [#718] (https://github.com/Azure/azure-mobile-services/issues/718) on OperationErrorList table with datatype mismatch [15e9f9b] (https://github.com/Azure/azure-mobile-services/commit/15e9f9b)
+
 ### Android SDK: Version 2.0.2
 - Support for operation state tracking
 - Fix for type incompatibility from datetime to datetimeoffset 
