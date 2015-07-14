@@ -1,7 +1,7 @@
 # Azure Mobile Services iOS SDK Change Log
 
 ## SDK Downloads
-- [iOS 2.0 SDK](http://aka.ms/gc6fex)
+- [Latest iOS 2.x SDK](http://aka.ms/gc6fex)
 - [iOS 1.2.4 SDK](http://aka.ms/kymw2g)
 
 ### Version 2.2.0
