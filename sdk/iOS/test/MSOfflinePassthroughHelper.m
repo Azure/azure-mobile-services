@@ -6,6 +6,7 @@
 #import "MSQuery.h"
 #import "MSSyncContext.h"
 #import "MSCoreDataStore.h"
+#import "MSSyncContextReadResult.h"
 
 @implementation MSOfflinePassthroughHelper
 
