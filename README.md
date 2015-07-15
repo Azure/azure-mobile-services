@@ -79,7 +79,7 @@ The SDK requires XCode 4.6.3 or greater.
 5. Run the tests using Command-U.
 
 ## Android SDK
-Microsoft Azure Mobile Services can be used with an Android-based device using our Android SDK. You can reference the android SDK in one of the following two ways.
+Microsoft Azure Mobile Services can be used with an Android-based device using our Android SDK. You can get the Android SDK in one of the following two ways or you can download the source code using the instructions above.
 
 1. For an Android studio project, include the line `compile 'com.microsoft.azure:azure-mobile-services-android-sdk:2.0.3'` in the dependencies section of build.gradle file of the app
 2. Eclipse users can [download the Android SDK](https://go.microsoft.com/fwLink/?LinkID=280126&clcid=0x409) directly or can download the source code using the instructions above.
