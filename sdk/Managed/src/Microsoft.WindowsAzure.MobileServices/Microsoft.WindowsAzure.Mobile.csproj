@@ -89,6 +89,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Table\MobileServiceObjectReader.cs" />
+    <Compile Include="Table\Sync\PullOptions.cs" />
     <Compile Include="Table\Sync\Queue\Operations\MobileServiceTableKind.cs" />
     <Compile Include="Table\MobileServiceSystemColumns.cs" />
     <Compile Include="Table\MobileServiceSystemProperties.cs" />

@@ -5,25 +5,25 @@
 #ifndef WindowsAzureMobileServices_WindowsAzureMobileServices_h
 #define WindowsAzureMobileServices_WindowsAzureMobileServices_h
 
-
 #import "MSClient.h"
-#import "MSTable.h"
-#import "MSQuery.h"
-#import "MSUser.h"
-#import "MSFilter.h"
-#import "MSError.h"
-#import "MSTableOperation.h"
-#import "MSSyncContext.h"
-#import "MSSyncTable.h"
-#import "MSTableOperationError.h"
 #import "MSCoreDataStore.h"
-#import "MSPush.h"
 #import "MSDateOffset.h"
-#import "MSSyncContextReadResult.h"
-
+#import "MSError.h"
+#import "MSFilter.h"
 #if TARGET_OS_IPHONE
 #import "MSLoginController.h"
 #endif
+#import "MSPullSettings.h"
+#import "MSPush.h"
+#import "MSQuery.h"
+#import "MSQueryResult.h"
+#import "MSSyncContext.h"
+#import "MSSyncContextReadResult.h"
+#import "MSSyncTable.h"
+#import "MSTable.h"
+#import "MSTableOperation.h"
+#import "MSTableOperationError.h"
+#import "MSUser.h"
 
 #define WindowsAzureMobileServicesSdkMajorVersion 3
 #define WindowsAzureMobileServicesSdkMinorVersion 0
