@@ -26,7 +26,7 @@
 #import "MSUser.h"
 
 #define WindowsAzureMobileServicesSdkMajorVersion 3
-#define WindowsAzureMobileServicesSdkMinorVersion 0
+#define WindowsAzureMobileServicesSdkMinorVersion 1
 #define WindowsAzureMobileServicesSdkBuildVersion 0
 
 #endif
