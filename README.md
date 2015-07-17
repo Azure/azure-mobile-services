@@ -1,15 +1,13 @@
-# Microsoft Azure Mobile Services
+# Azure Mobile Apps
 
-With Microsoft Azure Mobile Services you can add a scalable backend to your connected client applications in minutes.
-To learn more, visit our [Developer Center](http://azure.microsoft.com/en-us/develop/mobile/).
+This branch is for the client libraries for [Azure Mobile Apps](https://azure.microsoft.com/en-us/documentation/services/app-service/mobile/), currently in preview.
 
 ## Getting Started
 
-If you are new to Mobile Services, you can get started by following our tutorials for connecting your Mobile
-Services cloud backend to [Windows Store apps](http://azure.microsoft.com/en-us/documentation/articles/mobile-services-windows-store-get-started/),
-[Windows Phone 8 apps](http://azure.microsoft.com/en-us/documentation/articles/mobile-services-windows-phone-get-started/),
-[iOS apps](http://azure.microsoft.com/en-us/documentation/articles/mobile-services-ios-get-started/),
-and [Android apps](http://azure.microsoft.com/en-us/documentation/articles/mobile-services-android-get-started/).
+If you are new to Azure Mobile Apps, you can get started by following our tutorials for connecting your Mobile
+Apps cloud backend to [Windows apps](https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-dotnet-backend-windows-store-dotnet-get-started-preview/),
+[iOS apps](https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-dotnet-backend-ios-get-started-preview/),
+and [Xamarin apps](https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-dotnet-backend-xamarin-ios-get-started-preview/).
 
 ## Download Source Code
 

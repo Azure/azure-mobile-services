@@ -1,10 +1,9 @@
-# Azure Mobile Services iOS SDK Change Log
+# Azure Mobile Apps iOS SDK Change Log
 
 ## SDK Downloads
-- [Latest iOS 2.x SDK](http://aka.ms/gc6fex)
-- [iOS 1.2.4 SDK](http://aka.ms/kymw2g)
+- [Latest iOS 3.x-beta2 SDK](http://go.microsoft.com/fwlink/?LinkID=529823)
 
-### Version 2.2.0
+### Version 3.0-beta2
 - Updated offline sync logic to do a case-insensitive comparison on the ID column  [328aadf](https://github.com/Azure/azure-mobile-services/commit/328aadf)
 - Added support for returning the underlying NSOperation when performing push, pull and purge operations [7c37f60](https://github.com/Azure/azure-mobile-services/commit/7c37f60)
 - Added support for configuring the page size of a pull operation [0c31aa3](https://github.com/Azure/azure-mobile-services/commit/0c31aa3)
@@ -13,6 +12,11 @@
 - Fixed handling of network errors during push operations [1a9fdf4](https://github.com/Azure/azure-mobile-services/commit/1a9fdf4)
 - Fixed potential race conditions while performing table operations [15581be](https://github.com/Azure/azure-mobile-services/commit/15581be)
 - Fixed incorrect ID validation during insert operations [f5e44d4](https://github.com/Azure/azure-mobile-services/commit/f5e44d4)
+
+### Version 3.0-beta
+
+- Added parameter for authentication gateway to MSClient constructor
+- Changes to methods for push notifications 
 
 ### Version 2.1.0
 - Fix cancelAndUpdate and cancelAndDiscard actions on the MSTableOperationError class
