@@ -84,7 +84,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         public static Task<MobileServiceUser> LoginAsync(this IMobileServiceClient client, string provider, IDictionary<string, string> parameters)
         {
             MobileServiceUIAuthentication auth = new MobileServiceUIAuthentication(client, provider, parameters);
-
             return auth.LoginAsync();
         }
 
@@ -97,7 +96,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// The <see cref="Push"/> object used for registering for notifications.
         /// </returns>
-        public static Push GetPush(this MobileServiceClient client)
+        public static Push GetPush(this IMobileServiceClient client)
         {
             return new Push(client);
         }

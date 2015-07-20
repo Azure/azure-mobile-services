@@ -13,7 +13,7 @@
 /// @{
 
 /// Creates a MSSyncContextReadResult with the given items and total count.
-- initWithCount:(NSInteger)count items:(NSArray *)items;
+- (nonnull instancetype)initWithCount:(NSInteger)count items:(nonnull NSArray *)items;
 
 /// @}
 
@@ -27,7 +27,7 @@
 
 /// An NSArray of NSDictionaries, with each dictionary representing a row
 /// in the table.
-@property (nonatomic, readonly, strong) NSArray *items;
+@property (nonatomic, readonly, strong, nonnull) NSArray *items;
 
 /// @}
 

@@ -72,6 +72,10 @@ extern NSString *const MSErrorPushResultKey;
 /// an item with an id was used with an insert operation.
 #define MSExistingItemIdWithRequest             -1107
 
+/// Indicates that a request to the Microsoft Azure Mobile Service failed because
+/// the request was to a version that did not support the requested feature
+#define MSInvalidBackendVersion                 -1108
+
 /// Indicates that a sync table request failed because an invalid operation was
 /// requested. This can occur due to operations on the same item that can not be
 /// reconciled, such as two inserts on the same record
@@ -180,6 +184,10 @@ extern NSString *const MSErrorPushResultKey;
 
 /// Indicates that the login operation failed because an invalid token was used.
 #define MSLoginInvalidToken                     -1505
+
+/// Indicates that the login operation failed because the gateway URL in the client
+/// was invalid.
+#define MSLoginInvalidURL                       -1506
 
 /// Indicates that a required parameter for push operation was not provided
 #define MSPushRequiredParameter                 -1600

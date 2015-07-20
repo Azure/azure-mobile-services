@@ -24,16 +24,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
         }
 
-        public Registration GetNewNativeRegistration()
-        {
-            return new MpnsRegistration();
-        }
-
-        public Registration GetNewTemplateRegistration()
-        {
-            return new MpnsTemplateRegistration();
-        }
-
         public string GetPlatform()
         {
             return "mpns";

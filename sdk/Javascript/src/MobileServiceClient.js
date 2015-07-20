@@ -11,6 +11,7 @@ var Validate = require('Validate');
 var Platform = require('Platform');
 var MobileServiceTable = require('MobileServiceTable').MobileServiceTable;
 var MobileServiceLogin = require('MobileServiceLogin').MobileServiceLogin;
+
 var Push;
 try {
     Push = require('Push').Push;
@@ -27,7 +28,7 @@ var _zumoFeatures = {
 };
 var _zumoFeaturesHeaderName = "X-ZUMO-FEATURES";
 
-function MobileServiceClient(applicationUrl, applicationKey) {
+function MobileServiceClient(applicationUrl, gatewayUrl, applicationKey) {
     /// <summary>
     /// Initializes a new instance of the MobileServiceClient class.
     /// </summary>
@@ -44,6 +45,7 @@ function MobileServiceClient(applicationUrl, applicationKey) {
 
     this.applicationUrl = applicationUrl;
     this.applicationKey = applicationKey || null;
+    this.gatewayUrl = gatewayUrl || null;
 
     var sdkInfo = Platform.getSdkInfo();
     var osInfo = Platform.getOperatingSystemInfo();
@@ -70,7 +72,7 @@ function MobileServiceClient(applicationUrl, applicationKey) {
     };
 
     if (Push) {
-        this.push = new Push(this);
+        this.push = new Push(this, MobileServiceClient._applicationInstallationId);
     }
 }
 
@@ -129,7 +131,7 @@ MobileServiceClient.prototype.withFilter = function (serviceFilter) {
     Validate.notNull(serviceFilter, 'serviceFilter');
 
     // Clone the current instance
-    var client = new MobileServiceClient(this.applicationUrl, this.applicationKey);
+    var client = new MobileServiceClient(this.applicationUrl, this.gatewayUrl, this.applicationKey);
     client.currentUser = this.currentUser;
 
     // Chain the service filter with any existing filters

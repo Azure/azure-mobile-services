@@ -21,7 +21,7 @@ namespace MicrosoftWindowsAzureMobileiOSTest
 
 	        Harness = new TestHarness();
             Harness.LoadTestAssembly(typeof(MobileServiceSerializerTests).GetTypeInfo().Assembly);
-            Harness.LoadTestAssembly(typeof(PushFunctional).GetTypeInfo().Assembly);
+            Harness.LoadTestAssembly(typeof(PushUnit).GetTypeInfo().Assembly);
 	    }
 
 		public override bool FinishedLaunching (UIApplication app, NSDictionary options)

@@ -18,6 +18,8 @@
 #import "MSTableOperationError.h"
 #import "MSSyncContextInternal.h"
 #import "MSTableConfigValue.h"
+#import "MSOperationQueue.h"
+#import "MSQueryResult.h"
 #import "MSPullSettingsInternal.h"
 #import "MSClientInternal.h"
 

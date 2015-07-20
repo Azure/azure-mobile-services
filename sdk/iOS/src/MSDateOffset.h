@@ -11,7 +11,7 @@
 /// @{
 
 /// The date represented by tne MSDateOffset instance.
-@property (nonatomic, strong) NSDate *date;
+@property (nonatomic, strong, nonnull) NSDate *date;
 
 /// @}
 
@@ -19,10 +19,10 @@
 ///@{
 
 /// Initializes an *MSDateOffset* instance with the given date.
--(id)initWithDate:(NSDate *)date;
+-(nonnull instancetype)initWithDate:(nonnull NSDate *)date;
 
 /// Creates an *MSDateOffset* instance with the given date.
-+(id)offsetFromDate:(NSDate *)date;
++(nonnull instancetype)offsetFromDate:(nonnull NSDate *)date;
 
 /// @}
 

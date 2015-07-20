@@ -9,6 +9,9 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// </summary>
     public class MobileServiceUser
     {
+        private string userId;
+        private string mobileServiceAuthenticationToken;
+
         /// <summary>
         /// Initializes a new instance of the MobileServiceUser class.
         /// </summary>
@@ -17,13 +20,17 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </param>
         public MobileServiceUser(string userId)
         {
-            this.UserId = userId;
+            this.userId = userId;
         }
 
         /// <summary>
         /// Gets or sets the user id of a successfully authenticated user.
         /// </summary>
-        public string UserId { get; set; }
+        public virtual string UserId 
+        {
+            get { return this.userId; }
+            set { this.userId = value; }
+        }
 
         /// <summary>
         /// A Microsoft Azure Mobile Services authentication token for the user given by
@@ -31,7 +38,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// included in all requests made to the Microsoft Azure Mobile Service, allowing 
         /// the client to perform all actions on the Microsoft Azure Mobile Service that 
         /// require authenticated-user level permissions.
-        /// </summary>
-        public string MobileServiceAuthenticationToken { get; set; }
+        /// </summary>        
+        public virtual string MobileServiceAuthenticationToken
+        {
+            get { return this.mobileServiceAuthenticationToken; }
+            set { this.mobileServiceAuthenticationToken = value; }
+        }
     }
 }

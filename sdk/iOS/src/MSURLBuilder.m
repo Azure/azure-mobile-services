@@ -4,7 +4,9 @@
 
 #import "MSURLBuilder.h"
 #import "MSPredicateTranslator.h"
-
+#import "MSTable.h"
+#import "MSClient.h"
+#import "MSQuery.h"
 
 #pragma mark * Query String Constants
 

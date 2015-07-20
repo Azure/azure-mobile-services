@@ -4,6 +4,7 @@
 
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Sync;
+using Microsoft.WindowsAzure.MobileServices.Test.UnitTests;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using Newtonsoft.Json.Linq;
 
@@ -17,7 +18,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task InsertAsync_GeneratesId_WhenNull()
         {
-            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...");
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...");
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
 
             var item = new JObject();

@@ -7,6 +7,7 @@
 #import "MSTestFilter.h"
 #import "MSTable+MSTableTestUtilities.h"
 #import "MSJSONSerializer.h"
+#import "MSQueryResult.h"
 
 @interface MSTableFuncTests : XCTestCase
 @property (nonatomic) BOOL done;

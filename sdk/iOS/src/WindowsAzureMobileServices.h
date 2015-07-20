@@ -10,7 +10,9 @@
 #import "MSDateOffset.h"
 #import "MSError.h"
 #import "MSFilter.h"
+#if TARGET_OS_IPHONE
 #import "MSLoginController.h"
+#endif
 #import "MSPullSettings.h"
 #import "MSPush.h"
 #import "MSQuery.h"
@@ -23,8 +25,8 @@
 #import "MSTableOperationError.h"
 #import "MSUser.h"
 
-#define WindowsAzureMobileServicesSdkMajorVersion 2
-#define WindowsAzureMobileServicesSdkMinorVersion 2
+#define WindowsAzureMobileServicesSdkMajorVersion 3
+#define WindowsAzureMobileServicesSdkMinorVersion 0
 #define WindowsAzureMobileServicesSdkBuildVersion 0
 
 #endif

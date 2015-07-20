@@ -6,7 +6,8 @@
 #import "MSLoginSerializer.h"
 #import "MSJSONSerializer.h"
 #import "MSClientConnection.h"
-
+#import "MSClient.h"
+#import "WindowsAzureMobileServices.h"
 
 #pragma mark * MSLogin Private Interface
 
@@ -43,7 +44,7 @@
 
 #pragma  mark * Public Login Methods
 
-
+#if TARGET_OS_IPHONE
 -(void) loginWithProvider:(NSString *)provider
              controller:(UIViewController *)controller
                  animated:(BOOL)animated
@@ -53,6 +54,16 @@
     __block MSUser *localUser = nil;
     __block NSError *localError = nil;
     __block int allDoneCount = 0;
+  
+    // Verify we have a gateway URL
+    
+    if (![self verifyGatewayURL:self.client.gatewayURL error:&localError]) {
+        if (completion) {
+            completion(nil, localError);
+        }
+        return;
+    }
+
     
     void (^callCompletionIfAllDone)() = ^{
         allDoneCount++;
@@ -103,11 +114,15 @@
 -(MSLoginController *) loginViewControllerWithProvider:(NSString *)provider
                                             completion:(MSClientLoginBlock)completion
 {
+    NSAssert(self.client.gatewayURL != nil, @"The gateway URL is required for login");
+    
     provider = [self normalizeProvider:provider];
     return [[MSLoginController alloc] initWithClient:self.client
                                             provider:provider
                                           completion:completion];
 }
+
+#endif
 
 -(void) loginWithProvider:(NSString *)provider
                 token:(NSDictionary *)token
@@ -180,6 +195,18 @@
 
 #pragma mark * Private Methods
 
+- (BOOL) verifyGatewayURL:(NSURL *)url error:(NSError **)error
+{
+    if (!url) {
+        *error = [NSError errorWithDomain:MSErrorDomain
+                                     code:MSLoginInvalidURL
+                                 userInfo:@{ NSLocalizedDescriptionKey :@"The gateway URL is required for login" }];
+        return NO;
+    }
+    
+    return YES;
+}
+
 -(NSString *) normalizeProvider:(NSString *)provider {
     // Microsoft Azure Active Directory can be specified either in
     // full or with the 'aad' abbreviation. The service REST API
@@ -197,11 +224,15 @@
 {
     NSMutableURLRequest *request = nil;
     
+    if (![self verifyGatewayURL:self.client.gatewayURL error:error]) {
+        return nil;
+    }
+
     NSData *requestBody = [[MSLoginSerializer loginSerializer] dataFromToken:token
                                                                      orError:error];
     if (requestBody) {
     
-        NSURL *URL = [self.client.applicationURL URLByAppendingPathComponent:
+        NSURL *URL = [self.client.gatewayURL URLByAppendingPathComponent:
                              [NSString stringWithFormat:@"login/%@", provider]];
         request = [NSMutableURLRequest requestWithURL:URL];
         request.HTTPMethod = @"POST";

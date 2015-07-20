@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MobileServices.Test.UnitTests;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using Newtonsoft.Json;
 
@@ -38,7 +39,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public async Task DateUri()
         {
             TestHttpHandler hijack = new TestHttpHandler();
-            IMobileServiceClient client = new MobileServiceClient("http://www.test.com", null, hijack);
+            IMobileServiceClient client = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             IMobileServiceTable<DateExample> table = client.GetTable<DateExample>();
 
             hijack.Response = new HttpResponseMessage(HttpStatusCode.OK);
@@ -61,7 +62,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public async Task DateOffsetUri()
         {
             TestHttpHandler hijack = new TestHttpHandler();
-            IMobileServiceClient client = new MobileServiceClient("http://www.test.com", null, hijack);
+            IMobileServiceClient client = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             IMobileServiceTable<DateOffsetExample> table = client.GetTable<DateOffsetExample>();
 
             hijack.Response = new HttpResponseMessage(HttpStatusCode.OK);

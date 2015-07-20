@@ -3,8 +3,8 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import <WindowsAzureMobileServices/WindowsAzureMobileServices.h>
 #import <CoreData/CoreData.h>
+#import "MSSyncContext.h"
 
 /// The MSCoreDataStore class is for use when using the offline capabilities
 /// of mobile services. This class is a local store which manages records and sync
@@ -21,7 +21,7 @@
 /// @{
 
 /// Creates a CoreDataStore with the given managed object context.
--(id) initWithManagedObjectContext:(NSManagedObjectContext *)context;
+-(nonnull instancetype) initWithManagedObjectContext:(nonnull NSManagedObjectContext *)context;
 
 /// @}
 
@@ -37,7 +37,7 @@
 
 /// Converts a managed object from the core data layer back into a dictionary with the
 /// properties expected when using a MSTable or MSSyncTable
-+(NSDictionary *) tableItemFromManagedObject:(NSManagedObject *)object;
++(nonnull NSDictionary *) tableItemFromManagedObject:(nonnull NSManagedObject *)object;
 
 /// @}
 

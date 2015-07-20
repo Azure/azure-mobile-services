@@ -4,7 +4,10 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.WindowsAzure.MobileServices.Test.UnitTests;
+using Microsoft.WindowsAzure.MobileServices.Test.UnitTests.Common;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
+using Microsoft.WindowsAzure.MobileServices.Threading;
 
 namespace Microsoft.WindowsAzure.MobileServices.Test
 {
@@ -12,6 +15,21 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     [Tag("unit")]
     public class MobileServiceUrlBuilderTests : TestBase
     {
+        /// <summary>
+        /// URI of a valid Mobile Application.
+        /// </summary>
+        private const string DefaultMobileApp = "http://www.testgateway.com/testmobileapp/";
+
+        /// <summary>
+        /// URI of the gateway of a valid Mobile Application.
+        /// </summary>
+        private const string DefaultGateway = "http://www.testgateway.com/";
+
+        /// <summary>
+        /// The Slash character.
+        /// </summary>
+        private const char Slash = '/';
+
         [TestMethod]
         public void GetQueryStringTest()
         {
@@ -36,5 +54,19 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual("somePath", MobileServiceUrlBuilder.CombinePathAndQuery("somePath", null));
             Assert.AreEqual("somePath", MobileServiceUrlBuilder.CombinePathAndQuery("somePath", ""));
         }
+
+        [TestMethod]
+        public void AddTrailingSlashTest()
+        {
+            Assert.AreEqual(MobileServiceUrlBuilder.AddTrailingSlash("http://abc"), "http://abc/");
+            Assert.AreEqual(MobileServiceUrlBuilder.AddTrailingSlash("http://abc/"), "http://abc/");
+
+            Assert.AreEqual(MobileServiceUrlBuilder.AddTrailingSlash("http://abc/def"), "http://abc/def/");
+            Assert.AreEqual(MobileServiceUrlBuilder.AddTrailingSlash("http://abc/def/"), "http://abc/def/");
+
+            Assert.AreEqual(MobileServiceUrlBuilder.AddTrailingSlash("http://abc/     "), "http://abc/     /");
+            Assert.AreEqual(MobileServiceUrlBuilder.AddTrailingSlash("http://abc/def/     "), "http://abc/def/     /");
+        }
+
     }
 }

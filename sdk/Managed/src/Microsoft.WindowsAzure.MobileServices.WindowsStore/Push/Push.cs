@@ -11,6 +11,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Newtonsoft.Json.Linq;
     using Windows.Data.Xml.Dom;
 
     /// <summary>
@@ -18,16 +19,16 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// </summary>
     public sealed class Push
     {
-        internal readonly RegistrationManager RegistrationManager;
+        internal readonly PushHttpClient PushHttpClient;
 
         private const string PrimaryChannelId = "$Primary";
 
-        internal Push(MobileServiceClient client)
+        internal Push(IMobileServiceClient client)
             : this(client, string.Empty, null)
         {
         }
 
-        private Push(MobileServiceClient client, string tileId, SecondaryTilesList tiles)
+        private Push(IMobileServiceClient client, string tileId, SecondaryTilesList tiles)
         {
             if (client == null)
             {
@@ -41,10 +42,12 @@ namespace Microsoft.WindowsAzure.MobileServices
                 tileId = PrimaryChannelId;
             }
 
-            string name = string.Format("{0}-PushContainer-{1}-{2}", Package.Current.Id.Name, client.ApplicationUri.Host, tileId);
-            var storageManager = new LocalStorageManager(name);
-            var pushHttpClient = new PushHttpClient(client);
-            this.RegistrationManager = new RegistrationManager(pushHttpClient, storageManager);
+            MobileServiceClient internalClient = (MobileServiceClient)client;
+            if (internalClient == null)
+            {
+                throw new ArgumentException("Client must be a MobileServiceClient object");
+            }
+            this.PushHttpClient = new PushHttpClient(internalClient);
 
             this.SecondaryTiles = tiles ?? new SecondaryTilesList(this);
         }
@@ -59,168 +62,74 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         public IDictionary<string, Push> SecondaryTiles { get; set; }
 
-        private MobileServiceClient Client { get; set; }
+        /// <summary>
+        /// Installation Id used to register the device with Notification Hubs
+        /// </summary>
+        public string InstallationId
+        {
+            get
+            {
+                return this.Client.InstallationId;
+            }
+        }
+
+        private IMobileServiceClient Client { get; set; }
 
         /// <summary>
-        /// Register a particular channelUri
+        /// Register an Installation with particular channelUri
         /// </summary>
         /// <param name="channelUri">The channelUri to register</param>
         /// <returns>Task that completes when registration is complete</returns>
-        public Task RegisterNativeAsync(string channelUri)
+        public Task RegisterAsync(string channelUri)
         {
-            return this.RegisterNativeAsync(channelUri, null);
+            return this.RegisterAsync(channelUri, null, null);
         }
 
         /// <summary>
-        /// Register a particular channelUri
+        /// Register an Installation with particular channelUri and templates
         /// </summary>
         /// <param name="channelUri">The channelUri to register</param>
-        /// <param name="tags">The tags to register to receive notifications from</param>
+        /// <param name="templates">JSON with one more templates to register</param>
         /// <returns>Task that completes when registration is complete</returns>
-        public Task RegisterNativeAsync(string channelUri, IEnumerable<string> tags)
+        public Task RegisterAsync(string channelUri, JObject templates)
+        {
+            return this.RegisterAsync(channelUri, templates, null);
+        }
+
+        /// <summary>
+        /// Register an Installation with particular channelUri, templates and secondaryTiles
+        /// </summary>
+        /// <param name="channelUri">The channelUri to register</param>
+        /// <param name="templates">JSON with one more templates to register</param>
+        /// <param name="secondaryTiles">JSON with one more templates to register secondaryTiles</param>
+        /// <returns>Task that completes when registration is complete</returns>
+        public Task RegisterAsync(string channelUri, JObject templates, JObject secondaryTiles)
         {
             if (string.IsNullOrWhiteSpace(channelUri))
             {
                 throw new ArgumentNullException("channelUri");
             }
-
-            var registration = new WnsRegistration(channelUri, tags);
-            return this.RegistrationManager.RegisterAsync(registration);
-        }
-
-        /// <summary>
-        /// Register a particular channelUri with a template
-        /// </summary>
-        /// <param name="channelUri">The channelUri to register</param>
-        /// <param name="xmlTemplate">The XmlDocument defining the template</param>
-        /// <param name="templateName">The template name</param>
-        /// <returns>Task that completes when registration is complete</returns>
-        public Task RegisterTemplateAsync(string channelUri, XmlDocument xmlTemplate, string templateName)
-        {
-            return this.RegisterTemplateAsync(channelUri, xmlTemplate, templateName, tags: null);
-        }
-
-        /// <summary>
-        /// Register a particular channelUri with a template
-        /// </summary>
-        /// <param name="channelUri">The channelUri to register</param>
-        /// <param name="xmlTemplate">The XmlDocument defining the template</param>
-        /// <param name="templateName">The template name</param>
-        /// <param name="tags">The tags to register to receive notifications from</param>
-        /// <returns>Task that completes when registration is complete</returns>        
-        public Task RegisterTemplateAsync(string channelUri, XmlDocument xmlTemplate, string templateName, IEnumerable<string> tags)
-        {
-            if (xmlTemplate == null)
+            JObject installation = new JObject();
+            installation[PushInstallationProperties.PUSHCHANNEL] = channelUri;
+            installation[PushInstallationProperties.PLATFORM] = Platform.Instance.PushUtility.GetPlatform();
+            if (templates != null)
             {
-                throw new ArgumentNullException("xmlTemplate");
+                installation[PushInstallationProperties.TEMPLATES] = templates;
             }
-
-            return this.RegisterTemplateAsync(channelUri, xmlTemplate.GetXml(), templateName, tags);
+            if (secondaryTiles != null)
+            {
+                installation[PushInstallationProperties.SECONDARYTILES] = secondaryTiles;
+            }
+            return this.PushHttpClient.CreateOrUpdateInstallationAsync(installation);
         }
 
         /// <summary>
-        /// Register a particular channelUri with a template
-        /// </summary>
-        /// <param name="channelUri">The channelUri to register</param>
-        /// <param name="xmlTemplate">The string defining the template</param>
-        /// <param name="templateName">The template name</param>
-        /// <returns>Task that completes when registration is complete</returns>
-        public Task RegisterTemplateAsync(string channelUri, string xmlTemplate, string templateName)
-        {
-            return this.RegisterTemplateAsync(channelUri, xmlTemplate, templateName, null);
-        }
-
-        /// <summary>
-        /// Register a particular channelUri with a template
-        /// </summary>
-        /// <param name="channelUri">The channelUri to register</param>
-        /// <param name="xmlTemplate">The string defining the template</param>
-        /// <param name="templateName">The template name</param>
-        /// <param name="tags">The tags to register to receive notifications from</param>
-        /// <returns>Task that completes when registration is complete</returns>
-        public Task RegisterTemplateAsync(string channelUri, string xmlTemplate, string templateName, IEnumerable<string> tags)
-        {
-            if (string.IsNullOrWhiteSpace(channelUri))
-            {
-                throw new ArgumentNullException("channelUri");
-            }
-
-            if (string.IsNullOrWhiteSpace(xmlTemplate))
-            {
-                throw new ArgumentNullException("xmlTemplate");
-            }
-
-            if (string.IsNullOrWhiteSpace(templateName))
-            {
-                throw new ArgumentNullException("templateName");
-            }
-
-            var registration = new WnsTemplateRegistration(channelUri, xmlTemplate, templateName, tags);
-            return this.RegistrationManager.RegisterAsync(registration);
-        }
-
-        /// <summary>
-        /// Unregister any registrations previously registered from this device
+        /// Unregister any installations previously registered from this device
         /// </summary>
         /// <returns>Task that completes when unregister is complete</returns>
-        public Task UnregisterNativeAsync()
+        public Task UnregisterAsync()
         {
-            return this.UnregisterTemplateAsync(Registration.NativeRegistrationName);
-        }
-
-        /// <summary>
-        /// Unregister any registrations with given templateName registered from this device
-        /// </summary>
-        /// <param name="templateName">The template name</param>
-        /// <returns>Task that completes when unregister is complete</returns>
-        public Task UnregisterTemplateAsync(string templateName)
-        {
-            return this.RegistrationManager.UnregisterAsync(templateName);
-        }
-
-        /// <summary>
-        /// Unregister any registrations with given channelUri
-        /// </summary>
-        /// <param name="channelUri">The channel Uri</param>
-        /// <returns>Task that completes when unregister is complete</returns>
-        public Task UnregisterAllAsync(string channelUri)
-        {
-            if (string.IsNullOrWhiteSpace(channelUri))
-            {
-                throw new ArgumentNullException("channelUri");
-            }
-
-            return this.RegistrationManager.DeleteRegistrationsForChannelAsync(channelUri);
-        }
-
-        /// <summary>
-        /// Register for notifications
-        /// </summary>
-        /// <param name="registration">The object defining the registration</param>
-        /// <returns>Task that will complete when the registration is completed</returns>
-        public Task RegisterAsync(Registration registration)
-        {
-            if (registration == null)
-            {
-                throw new ArgumentNullException("registration");
-            }
-
-            if (string.IsNullOrWhiteSpace(registration.PushHandle))
-            {
-                throw new ArgumentNullException("registration.ChannelUri");
-            }
-
-            return this.RegistrationManager.RegisterAsync(registration);
-        }
-
-        /// <summary>
-        /// DEBUG-ONLY: List the registrations made with the service for a channelUri
-        /// </summary>
-        /// <param name="channelUri">The channelUri to check for</param>
-        /// <returns>List of registrations</returns>
-        public Task<List<Registration>> ListRegistrationsAsync(string channelUri)
-        {
-            return this.RegistrationManager.ListRegistrationsAsync(channelUri);
+            return this.PushHttpClient.DeleteInstallationAsync();
         }
 
         /// <summary>
@@ -234,7 +143,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             internal SecondaryTilesList(Push parent)
             {
                 this.parent = parent;
-            }                        
+            }
 
             public ICollection<string> Keys
             {
@@ -293,7 +202,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             public bool ContainsKey(string tileId)
             {
                 return this.hubForTiles.ContainsKey(tileId);
-            }            
+            }
 
             public bool Remove(string tileId)
             {
@@ -304,7 +213,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             public bool TryGetValue(string tileId, out Push value)
             {
                 return this.hubForTiles.TryGetValue(tileId, out value);
-            }            
+            }
 
             public void Add(KeyValuePair<string, Push> item)
             {
@@ -327,7 +236,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 {
                     array[arrayIndex++] = new KeyValuePair<string, Push>(item.Key, item.Value);
                 }
-            }            
+            }
 
             public bool Remove(KeyValuePair<string, Push> item)
             {

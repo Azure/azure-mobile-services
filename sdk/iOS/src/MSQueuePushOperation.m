@@ -8,6 +8,9 @@
 #import "MSClientInternal.h"
 #import "MSTableOperationInternal.h"
 #import "MSQuery.h"
+#import "MSOperationQueue.h"
+#import "MSSyncTable.h"
+#import "MSSyncContextReadResult.h"
 
 @interface MSQueuePushOperation()
 

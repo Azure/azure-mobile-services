@@ -36,8 +36,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             HardwareButtons.BackPressed += HardwareButtons_BackPressed;
 
             Harness = new TestHarness();
-            Harness.LoadTestAssembly(typeof(MobileServiceSerializerTests).GetTypeInfo().Assembly);            
-            Harness.LoadTestAssembly(typeof(PushFunctional).GetTypeInfo().Assembly);
+            Harness.LoadTestAssembly(typeof(MobileServiceSerializerTests).GetTypeInfo().Assembly);
             //Harness.LoadTestAssembly(typeof(LoginTests).GetTypeInfo().Assembly);
         }
 

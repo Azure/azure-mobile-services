@@ -6,7 +6,7 @@
 #import "MSLoginView.h"
 #import "MSLoginSerializer.h"
 #import "MSJSONSerializer.h"
-
+#import "MSClient.h"
 
 #pragma mark * MSLoginController Private Interface
 
@@ -155,7 +155,7 @@
     if (!loginView) {
         
         // Ensure we are using HTTPS
-        NSURL *baseUrl = self.client.applicationURL;
+        NSURL *baseUrl = self.client.gatewayURL;
         if ([[baseUrl.scheme lowercaseString] isEqualToString:@("http")])
         {
             NSString *baseUrlString = baseUrl.absoluteURL.absoluteString;

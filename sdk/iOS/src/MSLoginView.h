@@ -3,7 +3,8 @@
 // ----------------------------------------------------------------------------
 
 #import <UIKit/UIKit.h>
-#import "MSClient.h"
+
+@class MSClient;
 
 
 #pragma mark * MSLoginViewErrorDomain

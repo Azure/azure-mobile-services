@@ -3,7 +3,9 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSClient.h"
+#import "BlockDefinitions.h"
+
+@class MSClient;
 
 #pragma  mark * MSClient Public Interface
 
@@ -11,58 +13,32 @@
 
 #pragma  mark * Public Initializer Methods
 
+@property (nonatomic, strong, readonly, nonnull) MSClient *client;
+
 ///@name Initializing the MSPush Object
 ///@{
 
 /// Initialize the *MSPush* instance with given *MSClient*
-- (MSPush *)initWithClient:(MSClient *)client;
+- (nonnull instancetype)initWithClient:(nonnull MSClient *)client;
 
 /// @}
 
 #pragma  mark * Public Native Registration Methods
 
-/// @name Working with Native Registrations
+/// @name Working with Registrations
 /// @{
 
-/// Register for notifications with given deviceToken and tags. deviceToken is required.
-- (void)registerNativeWithDeviceToken:(NSData *)deviceToken
-                                 tags:(NSArray *)tags
-                           completion:(MSCompletionBlock)completion;
+/// Gets the installation Id used to register the device with Notification Hubs.
+@property (nonatomic, readonly, nonnull) NSString *installationId;
 
-/// Unregister for native notififications.
-- (void)unregisterNativeWithCompletion:(MSCompletionBlock)completion;
+/// Register for notifications with given a deviceToken.
+-(void)registerDeviceToken:(nonnull NSData *)deviceToken completion:(nullable MSCompletionBlock)completion;
 
-/// @}
+/// Register for notifications with given deviceToken and a template.
+-(void)registerDeviceToken:(nonnull NSData *)deviceToken template:(nullable NSDictionary *)template completion:(nullable MSCompletionBlock)completion;
 
-#pragma  mark * Public Template Registration Methods
-
-/// @name Working with Template Registrations
-/// @{
-
-/// Register for template notififications. deviceToken, name and bodyTemplate are required.
-/// See http://go.microsoft.com/fwlink/?LinkId=401137 for furthur details.
-- (void)registerTemplateWithDeviceToken:(NSData *)deviceToken
-                                   name:(NSString *)name
-                       jsonBodyTemplate:(NSString *)bodyTemplate
-                         expiryTemplate:(NSString *)expiryTemplate
-                                   tags:(NSArray *)tags
-                             completion:(MSCompletionBlock)completion;
-
-/// Unregister for tempalte notifications. name is required.
-- (void)unregisterTemplateWithName:(NSString *)name
-                        completion:(MSCompletionBlock)completion;
-
-/// @}
-
-#pragma  mark * Public Unregister All Registration Methods
-
-/// @name Debug utilities--Unregistering All Registrations
-/// @{
-
-/// Unregister for all native and template registrations. deviceToken is required.
-/// NOT RECOMMENDED FOR USE IN PRODUCTION APPLICATON.
-- (void)unregisterAllWithDeviceToken:(NSData *)deviceToken
-                          completion:(MSCompletionBlock)completion;
+/// Unregister device from all notifications.
+-(void)unregisterWithCompletion:(nullable MSCompletionBlock)completion;
 
 /// @}
 
