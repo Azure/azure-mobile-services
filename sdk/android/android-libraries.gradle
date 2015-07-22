@@ -9,11 +9,11 @@ uploadArchives {
         pom.artifactId = PUBLISH_ARTIFACT_ID
         pom.version = myProject.version
         repository (
-                url: 'https://api.bintray.com/maven/azuremobileservices/SDK/Mobile-Services-Android-SDK'
+                url: 'https://api.bintray.com/maven/microsoftazuremobile/SDK/Mobile-Services-Android-SDK'
         ) {
             authentication(
-                    userName: 'bintray username',
-                    password: 'bintray api key'
+                    userName: 'yuaxu',
+                    password: '54f833f58f5c443a413ce1f7c657c17089387395'
             )
         }
     }

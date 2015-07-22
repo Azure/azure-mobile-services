@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="azure-mobile-services-android-sdk-2.0.2-beta">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.microsoft.azure/azure-mobile-services-android-sdk/2.0.2-beta/a46288e0089b8e0b784135ed7d3d2db0329fc3c5/azure-mobile-services-android-sdk-2.0.2-beta.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.microsoft.azure/azure-mobile-services-android-sdk/2.0.2-beta/e000dc1f6dadbe802784d63b364f563ec61b0ee6/azure-mobile-services-android-sdk-2.0.2-beta-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
