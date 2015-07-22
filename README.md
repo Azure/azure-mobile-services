@@ -1,6 +1,6 @@
 # Microsoft Azure Mobile Services
 
-With Microsoft Azure Mobile Services you can add a scalable backend to your connected client applications in minutes.
+With Microsoft Azure Mobile Services you can add a scalable backend to your connected client applications in minutes. To learn more, visit our [Developer Center](http://azure.microsoft.com/en-us/develop/mobile).
 
 ## Getting Started
 
@@ -10,17 +10,6 @@ Services cloud backend to [Windows Store apps](http://azure.microsoft.com/en-us/
 [iOS apps](http://azure.microsoft.com/en-us/documentation/articles/mobile-services-ios-get-started/),
 and [Android apps](http://azure.microsoft.com/en-us/documentation/articles/mobile-services-android-get-started/).
 
-## Useful Resources
-
-* [Quickstarts on Github](https://github.com/Azure/azure-mobile-services-quickstarts)
-* [E2E Test Suite](https://github.com/Azure/azure-mobile-services-test)
-* [Samples](https://github.com/Azure/mobile-services-samples)
-* Tutorials and product overview are available at [Microsoft Azure Mobile Services Developer Center](http://azure.microsoft.com/en-us/develop/mobile).
-* Our product team actively monitors the [Mobile Services Developer Forum](http://social.msdn.microsoft.com/Forums/en-US/azuremobile/) to assist you with any troubles.
-
-
-*This repo consists of our client SDKs detailed below.*
-
 ## Download Source Code
 
 To get the source code of our SDKs and samples via **git** just type:
@@ -28,13 +17,13 @@ To get the source code of our SDKs and samples via **git** just type:
     git clone https://github.com/Azure/azure-mobile-services.git
     cd ./azure-mobile-services/
 
-## Documentation References
+## SDk Documentation references
 
-### Azure App Service Mobile Apps
+#### Azure App Service Mobile Apps
 * [iOS](http://azure.github.io/azure-mobile-services/ios/v3)
 * [Managed](http://azure.github.io/azure-mobile-services/managed/v2)
 
-### Mobile Services
+#### Mobile Services
 * [iOS](http://azure.github.io/azure-mobile-services/ios/v2)
 * [Managed](http://azure.github.io/azure-mobile-services/managed/v1)
 * [Android](http://azure.github.io/azure-mobile-services/android/v2)
@@ -160,6 +149,14 @@ To run the HTML tests:
 1. Open the ```sdk\JavaScript\Microsoft.WindowsAzure.Mobile.JS.sln``` file in Visual Studio.
 2. In the Solution Explorer, select the Microsoft.WindowsAzure.Mobile.WinJS.Test project and right-click to select 'View in Browser'.
 3. The default browser will launch and run the test HTML application. Some tests may fail because due to an 'Unexpected connection failure'. This is because the test is configured to connect to a Mobile Service that does not exist. These failures can be ignored.
+
+## Useful Resources
+
+* [Quickstarts on Github](https://github.com/Azure/azure-mobile-services-quickstarts)
+* [E2E Test Suite](https://github.com/Azure/azure-mobile-services-test)
+* [Samples](https://github.com/Azure/mobile-services-samples)
+* Tutorials and product overview are available at [Microsoft Azure Mobile Services Developer Center](http://azure.microsoft.com/en-us/develop/mobile).
+* Our product team actively monitors the [Mobile Services Developer Forum](http://social.msdn.microsoft.com/Forums/en-US/azuremobile/) to assist you with any troubles.
 
 ## Contribute Code or Provide Feedback
 
