@@ -64,6 +64,7 @@
     XCTAssertEqualObjects(opError.itemId, @"ABC");
     XCTAssertEqualObjects(opError.table, @"TodoItem");
     XCTAssertEqual(opError.code, MSErrorPreconditionFailed);
+    XCTAssertEqualObjects(opError.domain, MSErrorDomain);
     XCTAssertEqualObjects(opError.description, @"Insert error...");
 }
 
@@ -72,6 +73,7 @@
     NSDictionary *details = @{
         @"id": @"1-2-3",
         @"code": @MSErrorPreconditionFailed,
+        @"domain": MSErrorDomain,
         @"description": @"Insert error...",
         @"table": @"TodoItem",
         @"operation": [NSNumber numberWithInteger:MSTableOperationInsert],
@@ -94,6 +96,7 @@
     XCTAssertEqualObjects(opError.itemId, @"ABC");
     XCTAssertEqualObjects(opError.table, @"TodoItem");
     XCTAssertEqual(opError.code, MSErrorPreconditionFailed);
+    XCTAssertEqualObjects(opError.domain, MSErrorDomain);
     XCTAssertEqualObjects(opError.description, @"Insert error...");
 }
 

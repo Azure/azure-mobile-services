@@ -511,7 +511,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             return this.ExecuteQuery(table, sql, parameters);
         }
 
-        private IList<JObject> ExecuteQuery(TableDefinition table, string sql, IDictionary<string, object> parameters)
+        protected virtual IList<JObject> ExecuteQuery(TableDefinition table, string sql, IDictionary<string, object> parameters)
         {
             table = table ?? new TableDefinition();
             parameters = parameters ?? new Dictionary<string, object>();

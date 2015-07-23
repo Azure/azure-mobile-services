@@ -42,10 +42,10 @@ extern NSString *const MSSystemColumnDeleted;
 ///@{
 
 /// The name of this table.
-@property (nonatomic, copy, readonly)           NSString *name;
+@property (nonatomic, copy, readonly, nonnull)           NSString *name;
 
 /// The client associated with this table.
-@property (nonatomic, strong, readonly)         MSClient *client;
+@property (nonatomic, strong, readonly, nonnull)         MSClient *client;
 
 @property (nonatomic) MSSystemProperties systemProperties;
 ///@}
@@ -56,7 +56,7 @@ extern NSString *const MSSystemColumnDeleted;
 ///@{
 
 /// Initializes an *MSTable* instance with the given name and client.
--(id)initWithName:(NSString *)tableName client:(MSClient *)client;
+-(nonnull instancetype)initWithName:(nonnull NSString *)tableName client:(nonnull MSClient *)client;
 
 ///@}
 
@@ -67,58 +67,58 @@ extern NSString *const MSSystemColumnDeleted;
 
 /// Sends a request to the Microsoft Azure Mobile Service to insert the given
 /// item into the table. The item must not have an id.
--(void)insert:(NSDictionary *)item completion:(MSItemBlock)completion;
+-(void)insert:(nonnull NSDictionary *)item completion:(nullable MSItemBlock)completion;
 
 /// Sends a request to the Microsoft Azure Mobile Service to insert the given
 /// item into the table. Addtional user-defined parameters are sent in the
 /// request query string. The item must not have an id.
--(void)insert:(NSDictionary *)item
-   parameters:(NSDictionary *)parameters
-   completion:(MSItemBlock)completion;
+-(void)insert:(nonnull NSDictionary *)item
+   parameters:(nullable NSDictionary *)parameters
+   completion:(nullable MSItemBlock)completion;
 
 /// Sends a request to the Microsoft Azure Mobile Service to update the given
 /// item in the table. The item must have an id.
--(void)update:(NSDictionary *)item completion:(MSItemBlock)completion;
+-(void)update:(nonnull NSDictionary *)item completion:(nullable MSItemBlock)completion;
 
 /// Sends a request to the Microsoft Azure Mobile Service to update the given
 /// item in the table. Addtional user-defined parameters are sent in the
 /// request query string. The item must have an id.
--(void)update:(NSDictionary *)item
-   parameters:(NSDictionary *)parameters
-   completion:(MSItemBlock)completion;
+-(void)update:(nonnull NSDictionary *)item
+   parameters:(nullable NSDictionary *)parameters
+   completion:(nullable MSItemBlock)completion;
 
 /// Sends a request to the Microsoft Azure Mobile Service to delete the given
 /// item from the table. The item must have an id.
--(void)delete:(NSDictionary *)item completion:(MSDeleteBlock)completion;
+-(void)delete:(nonnull NSDictionary *)item completion:(nullable MSDeleteBlock)completion;
 
 /// Sends a request to the Microsoft Azure Mobile Service to delete the given
 /// item from the table. Addtional user-defined parameters are sent in the
 /// request query string. The item must have an id.
--(void)delete:(NSDictionary *)item
-   parameters:(NSDictionary *)parameters
-   completion:(MSDeleteBlock)completion;
+-(void)delete:(nonnull NSDictionary *)item
+   parameters:(nullable NSDictionary *)parameters
+   completion:(nullable MSDeleteBlock)completion;
 
 /// Sends a request to the Microsoft Azure Mobile Service to delete the item
 /// with the given id in from table.
--(void)deleteWithId:(id)itemId completion:(MSDeleteBlock)completion;
+-(void)deleteWithId:(nonnull id)itemId completion:(nullable MSDeleteBlock)completion;
 
 /// Sends a request to the Microsoft Azure Mobile Service to delete the item
 /// with the given id in from table. Addtional user-defined parameters are
 /// sent in the request query string.
--(void)deleteWithId:(id)itemId
-         parameters:(NSDictionary *)parameters
-         completion:(MSDeleteBlock)completion;
+-(void)deleteWithId:(nonnull id)itemId
+         parameters:(nullable NSDictionary *)parameters
+         completion:(nullable MSDeleteBlock)completion;
 
 /// Sends a request to the Azure Mobile Service to undelete the item
 /// with the given id in from table.
--(void)undelete:(NSDictionary *)item completion:(MSItemBlock)completion;
+-(void)undelete:(nonnull NSDictionary *)item completion:(nullable MSItemBlock)completion;
 
 /// Sends a request to the Azure Mobile Service to undelete the item
 /// with the given id in from table. Addtional user-defined parameters are
 /// sent in the request query string.
--(void)undelete:(NSDictionary *)item
-     parameters:(NSDictionary *)parameters
-     completion:(MSItemBlock)completion;
+-(void)undelete:(nonnull NSDictionary *)item
+     parameters:(nullable NSDictionary *)parameters
+     completion:(nullable MSItemBlock)completion;
 
 ///@}
 
@@ -129,31 +129,31 @@ extern NSString *const MSSystemColumnDeleted;
 
 /// Sends a request to the Microsoft Azure Mobile Service to return the item
 /// with the given id from the table.
--(void)readWithId:(id)itemId completion:(MSItemBlock)completion;
+-(void)readWithId:(nonnull id)itemId completion:(nullable MSItemBlock)completion;
 
 /// Sends a request to the Microsoft Azure Mobile Service to return the item
 /// with the given id from the table. Addtional user-defined parameters are
 /// sent in the request query string.
--(void)readWithId:(id)itemId
-       parameters:(NSDictionary *)parameters
-       completion:(MSItemBlock)completion;
+-(void)readWithId:(nonnull id)itemId
+       parameters:(nullable NSDictionary *)parameters
+       completion:(nullable MSItemBlock)completion;
 
 /// Sends a request to the Microsoft Azure Mobile Service to return all items
 /// fromm the table that meet the conditions of the given query.
 /// You can also use a URI in place of queryString to fetch results from a URI e.g.
 /// result.nextLink gives you URI to next page of results for a query that you can pass here.
--(void)readWithQueryString:(NSString *)queryString
-                completion:(MSReadQueryBlock)completion;
+-(void)readWithQueryString:(nonnull NSString *)queryString
+                completion:(nullable MSReadQueryBlock)completion;
 
 /// Sends a request to the Microsoft Azure Mobile Service to return all items
 /// from the table. The Microsoft Azure Mobile Service will apply a default
 /// limit to the number of items returned.
--(void)readWithCompletion:(MSReadQueryBlock)completion;
+-(void)readWithCompletion:(nullable MSReadQueryBlock)completion;
 
 /// Sends a request to the Microsoft Azure Mobile Service to return all items
 /// from the table that meet the conditions of the given predicate.
--(void)readWithPredicate:(NSPredicate *) predicate
-      completion:(MSReadQueryBlock)completion;
+-(void)readWithPredicate:(nonnull NSPredicate *) predicate
+      completion:(nullable MSReadQueryBlock)completion;
 
 #pragma mark * Public Query Constructor Methods
 
@@ -162,12 +162,12 @@ extern NSString *const MSSystemColumnDeleted;
 /// configured and then executed to retrieve items from the table. An *MSQuery*
 /// instance provides more flexibilty when querying a table than the table
 /// read* methods.
--(MSQuery *)query;
+-(nonnull MSQuery *)query;
 
 /// Returns an *MSQuery* instance associated with the table that uses
 /// the given predicate. An *MSQuery* instance provides more flexibilty when
 /// querying a table than the table read* methods.
--(MSQuery *)queryWithPredicate:(NSPredicate *)predicate;
+-(nonnull MSQuery *)queryWithPredicate:(nonnull NSPredicate *)predicate;
 
 ///@}
 

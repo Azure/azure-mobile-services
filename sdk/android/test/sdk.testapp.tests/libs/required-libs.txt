@@ -1,2 +1,0 @@
-This directory should contain the following JARs:
-	- gson-2.2.2.jar

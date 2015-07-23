@@ -21,9 +21,15 @@
 /// @{
 
 /// Creates a CoreDataStore with the given managed object context.
--(id) initWithManagedObjectContext:(NSManagedObjectContext *)context;
+-(nonnull instancetype) initWithManagedObjectContext:(nonnull NSManagedObjectContext *)context;
 
 /// @}
+
+/// Disables the store from recieving information about the items passed into all sync table
+/// calls (insert, delete, update). If set, the application is responsible for already having
+/// saved the item in the persisten store. This flag is intended to be used when application
+/// code is working directly with NSManagedObjects.
+@property (nonatomic) BOOL handlesSyncTableOperations;
 
 #pragma mark * Helper functions
 
@@ -31,7 +37,7 @@
 
 /// Converts a managed object from the core data layer back into a dictionary with the
 /// properties expected when using a MSTable or MSSyncTable
-+(NSDictionary *) tableItemFromManagedObject:(NSManagedObject *)object;
++(nonnull NSDictionary *) tableItemFromManagedObject:(nonnull NSManagedObject *)object;
 
 /// @}
 

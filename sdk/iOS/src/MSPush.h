@@ -13,13 +13,13 @@
 
 #pragma  mark * Public Initializer Methods
 
-@property (nonatomic, strong, readonly) MSClient *client;
+@property (nonatomic, strong, readonly, nonnull) MSClient *client;
 
 ///@name Initializing the MSPush Object
 ///@{
 
 /// Initialize the *MSPush* instance with given *MSClient*
-- (MSPush *)initWithClient:(MSClient *)client;
+- (nonnull instancetype)initWithClient:(nonnull MSClient *)client;
 
 /// @}
 
@@ -29,16 +29,16 @@
 /// @{
 
 /// Gets the installation Id used to register the device with Notification Hubs.
-@property (nonatomic, readonly) NSString *installationId;
+@property (nonatomic, readonly, nonnull) NSString *installationId;
 
 /// Register for notifications with given a deviceToken.
--(void)registerDeviceToken:(NSData *)deviceToken completion:(MSCompletionBlock)completion;
+-(void)registerDeviceToken:(nonnull NSData *)deviceToken completion:(nullable MSCompletionBlock)completion;
 
 /// Register for notifications with given deviceToken and a template.
--(void)registerDeviceToken:(NSData *)deviceToken template:(NSDictionary *)template completion:(MSCompletionBlock)completion;
+-(void)registerDeviceToken:(nonnull NSData *)deviceToken template:(nullable NSDictionary *)template completion:(nullable MSCompletionBlock)completion;
 
 /// Unregister device from all notifications.
--(void)unregisterWithCompletion:(MSCompletionBlock)completion;
+-(void)unregisterWithCompletion:(nullable MSCompletionBlock)completion;
 
 /// @}
 

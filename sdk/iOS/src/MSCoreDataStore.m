@@ -22,6 +22,7 @@ NSString *const StoreDeleted = @"ms_deleted";
     self = [super init];
     if (self) {
         self.context = context;
+		self.handlesSyncTableOperations = YES;
     }
     return self;
 }
@@ -53,7 +54,7 @@ NSString *const StoreDeleted = @"ms_deleted";
     NSFetchRequest *fr = [[NSFetchRequest alloc] init];
     [fr setEntity:entity];
     
-    fr.predicate = [NSPredicate predicateWithFormat:@"%K == %@", MSSystemColumnId, itemId];
+    fr.predicate = [NSPredicate predicateWithFormat:@"%K ==[c] %@", MSSystemColumnId, itemId];
     
     if (asDictionary) {
         fr.resultType = NSDictionaryResultType;
