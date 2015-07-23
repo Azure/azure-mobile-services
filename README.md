@@ -17,7 +17,7 @@ To get the source code of our SDKs and samples via **git** just type:
     git clone https://github.com/Azure/azure-mobile-services.git
     cd ./azure-mobile-services/
 
-## SDk Documentation references
+## Reference Documentation
 
 #### Azure App Service Mobile Apps
 * [iOS](http://azure.github.io/azure-mobile-services/ios/v3)
@@ -29,22 +29,21 @@ To get the source code of our SDKs and samples via **git** just type:
 * [Android](http://azure.github.io/azure-mobile-services/android/v2)
 * [Javascript](http://azure.github.io/azure-mobile-services/javascript/v1)
 
-## SDK Change log
+## Change log
 
 - [iOS SDK](CHANGELOG.ios.md)
 - [Managed SDK](CHANGELOG.managed.md)
 - [Android SDK](CHANGELOG.android.md)
 - [JavaScript SDK](CHANGELOG.javascript.md)
 
-## Managed Windows 8 and Windows Phone 8 Client SDK
+## Managed Windows Client SDK
 
-Our managed portable library for Windows 8 and Windows Phone 8 Client SDK makes it incredibly easy to use Mobile Services from your Windows Store
-and Windows Phone 8 applications. The [Microsoft Azure Mobile Services SDK](http://nuget.org/packages/WindowsAzure.MobileServices/) is available 
+Our managed portable library for Windows 8, Windows Phone 8, Windows Phone 8.1, and Windows Universal Client SDK makes it incredibly easy to use Mobile Services from your Windows applications. The [Microsoft Azure Mobile Services SDK](http://nuget.org/packages/WindowsAzure.MobileServices/) is available 
 as a Nuget package or you can download the source using the instructions above. The managed portable library also supports the full .NET 4.5 platform.
 
 ### Prerequisites
 
-The SDK requires Visual Studio 2015.
+The SDK requires Visual Studio 2013.
 
 ###Building and Referencing the SDK
 
@@ -152,7 +151,7 @@ To run the HTML tests:
 
 ## Useful Resources
 
-* [Quickstarts on Github](https://github.com/Azure/azure-mobile-services-quickstarts)
+* [Quickstarts](https://github.com/Azure/azure-mobile-services-quickstarts)
 * [E2E Test Suite](https://github.com/Azure/azure-mobile-services-test)
 * [Samples](https://github.com/Azure/mobile-services-samples)
 * Tutorials and product overview are available at [Microsoft Azure Mobile Services Developer Center](http://azure.microsoft.com/en-us/develop/mobile).
