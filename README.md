@@ -21,13 +21,10 @@ To get the source code of our SDKs and samples via **git** just type:
 
 #### Azure App Service Mobile Apps
 * [iOS](http://azure.github.io/azure-mobile-services/ios/v3)
-* [Managed](http://azure.github.io/azure-mobile-services/managed/v2)
 
 #### Mobile Services
 * [iOS](http://azure.github.io/azure-mobile-services/ios/v2)
-* [Managed](http://azure.github.io/azure-mobile-services/managed/v1)
-* [Android](http://azure.github.io/azure-mobile-services/android/v2)
-* [Javascript](http://azure.github.io/azure-mobile-services/javascript/v1)
+* [Android](http://dl.windowsazure.com/androiddocs/)
 
 ## Change log
 
