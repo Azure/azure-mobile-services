@@ -35,7 +35,7 @@ To get the source code of our SDKs and samples via **git** just type:
 
 ## Managed Windows Client SDK
 
-Our managed portable library for Windows 8, Windows Phone 8, Windows Phone 8.1, and Windows Universal Client SDK makes it incredibly easy to use Mobile Services from your Windows applications. The [Microsoft Azure Mobile Services SDK](http://nuget.org/packages/WindowsAzure.MobileServices/) is available 
+Our managed portable library for Windows 8, Windows Phone 8, Windows Phone 8.1, and Windows Runtime Universal C# Client SDK makes it incredibly easy to use Mobile Services from your Windows applications. The [Microsoft Azure Mobile Services SDK](http://nuget.org/packages/WindowsAzure.MobileServices/) is available 
 as a Nuget package or you can download the source using the instructions above. The managed portable library also supports the full .NET 4.5 platform.
 
 ### Prerequisites
