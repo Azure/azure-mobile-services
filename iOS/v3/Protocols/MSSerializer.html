@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>MSSerializer Protocol Reference</title>
+
+	<link rel="stylesheet" href="../css/style.css">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
+	<meta name="generator" content="appledoc 2.2.1 (build 1333)">
+</head>
+<body class="appledoc">
+	<header>
+		<div class="container" class="hide-in-xcode">
+			
+			<h1 id="library-title">
+				<a href="../index.html">Azure Mobile Apps </a>
+			</h1>
+
+			<p id="developer-home">
+				<a href="../index.html">Microsoft</a>
+			</p>
+			
+		</div>
+	</header>
+
+	<aside>
+		<div class="container">
+			<nav>
+				<ul id="header-buttons" role="toolbar">
+					<li><a href="../index.html">Index</a></li>
+<li><a href="../hierarchy.html">Hierarchy</a></li>
+
+					<li id="on-this-page" role="navigation">
+						<label>
+							On This Page
+
+							<div class="chevron">
+								<div class="chevy chevron-left"></div>
+								<div class="chevy chevron-right"></div>
+							</div>
+
+							<select id="jump-to">
+	<option value="top">Jump To&#133;</option>
+	
+
+	
+	
+	<option value="tasks">Tasks</option>
+	
+	
+
+	
+	
+
+	
+
+	
+	<optgroup label="Instance Methods">
+		
+		<option value="//api/name/arrayFromData:orError:">- arrayFromData:orError:</option>
+		
+		<option value="//api/name/dataFromItem:idAllowed:ensureDictionary:removeSystemProperties:orError:">- dataFromItem:idAllowed:ensureDictionary:removeSystemProperties:orError:</option>
+		
+		<option value="//api/name/errorFromData:MIMEType:">- errorFromData:MIMEType:</option>
+		
+		<option value="//api/name/itemFromData:withOriginalItem:ensureDictionary:orError:">- itemFromData:withOriginalItem:ensureDictionary:orError:</option>
+		
+		<option value="//api/name/itemIdFromItem:orError:">- itemIdFromItem:orError:</option>
+		
+		<option value="//api/name/removeSystemProperties:">- removeSystemProperties:</option>
+		
+		<option value="//api/name/stringFromItemId:orError:">- stringFromItemId:orError:</option>
+		
+		<option value="//api/name/stringIdFromItem:orError:">- stringIdFromItem:orError:</option>
+		
+		<option value="//api/name/totalCountAndItems:fromData:orError:">- totalCountAndItems:fromData:orError:</option>
+		
+	</optgroup>
+	
+	
+</select>
+						</label>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</aside>
+
+	<article>
+		<div id="overview_contents" class="container">
+			<div id="content">
+				<main role="main">
+					<h1 class="title">MSSerializer Protocol Reference</h1>
+
+					
+					<div class="section section-specification"><table cellspacing="0"><tbody>
+						<tr>
+	<th>Conforms to</th>
+	<td>NSObject</td>
+</tr><tr>
+	<th>Declared in</th>
+	<td>MSSerializer.h</td>
+</tr>
+						</tbody></table></div>
+					
+
+                    
+
+					
+					
+					<div class="section section-tasks">
+						<a title="Tasks" name="tasks"></a>
+						
+
+						
+						
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/dataFromItem:idAllowed:ensureDictionary:removeSystemProperties:orError:" title="dataFromItem:idAllowed:ensureDictionary:removeSystemProperties:orError:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/dataFromItem:idAllowed:ensureDictionary:removeSystemProperties:orError:">&ndash;&nbsp;dataFromItem:idAllowed:ensureDictionary:removeSystemProperties:orError:</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+
+			<div class="method-subsection method-declaration"><code>- (NSData *)dataFromItem:(id)<em>item</em> idAllowed:(BOOL)<em>idAllowed</em> ensureDictionary:(BOOL)<em>ensureDictionary</em> removeSystemProperties:(BOOL)<em>removeSystemProperties</em> orError:(NSError **)<em>error</em></code></div>
+
+		    
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/itemIdFromItem:orError:" title="itemIdFromItem:orError:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/itemIdFromItem:orError:">&ndash;&nbsp;itemIdFromItem:orError:</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+
+			<div class="method-subsection method-declaration"><code>- (id)itemIdFromItem:(id)<em>item</em> orError:(NSError **)<em>error</em></code></div>
+
+		    
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/stringFromItemId:orError:" title="stringFromItemId:orError:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/stringFromItemId:orError:">&ndash;&nbsp;stringFromItemId:orError:</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+
+			<div class="method-subsection method-declaration"><code>- (NSString *)stringFromItemId:(id)<em>itemId</em> orError:(NSError **)<em>error</em></code></div>
+
+		    
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/stringIdFromItem:orError:" title="stringIdFromItem:orError:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/stringIdFromItem:orError:">&ndash;&nbsp;stringIdFromItem:orError:</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+
+			<div class="method-subsection method-declaration"><code>- (NSString *)stringIdFromItem:(NSDictionary *)<em>item</em> orError:(NSError **)<em>error</em></code></div>
+
+		    
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/itemFromData:withOriginalItem:ensureDictionary:orError:" title="itemFromData:withOriginalItem:ensureDictionary:orError:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/itemFromData:withOriginalItem:ensureDictionary:orError:">&ndash;&nbsp;itemFromData:withOriginalItem:ensureDictionary:orError:</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+
+			<div class="method-subsection method-declaration"><code>- (id)itemFromData:(NSData *)<em>data</em> withOriginalItem:(id)<em>originalItem</em> ensureDictionary:(BOOL)<em>ensureDictionary</em> orError:(NSError **)<em>error</em></code></div>
+
+		    
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/arrayFromData:orError:" title="arrayFromData:orError:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/arrayFromData:orError:">&ndash;&nbsp;arrayFromData:orError:</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+
+			<div class="method-subsection method-declaration"><code>- (NSArray *)arrayFromData:(NSData *)<em>data</em> orError:(NSError **)<em>error</em></code></div>
+
+		    
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/totalCountAndItems:fromData:orError:" title="totalCountAndItems:fromData:orError:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/totalCountAndItems:fromData:orError:">&ndash;&nbsp;totalCountAndItems:fromData:orError:</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+
+			<div class="method-subsection method-declaration"><code>- (NSInteger)totalCountAndItems:(NSArray **)<em>items</em> fromData:(NSData *)<em>data</em> orError:(NSError **)<em>error</em></code></div>
+
+		    
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/errorFromData:MIMEType:" title="errorFromData:MIMEType:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/errorFromData:MIMEType:">&ndash;&nbsp;errorFromData:MIMEType:</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+
+			<div class="method-subsection method-declaration"><code>- (NSError *)errorFromData:(NSData *)<em>data</em> MIMEType:(NSString *)<em>MIMEType</em></code></div>
+
+		    
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/removeSystemProperties:" title="removeSystemProperties:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/removeSystemProperties:">&ndash;&nbsp;removeSystemProperties:</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+
+			<div class="method-subsection method-declaration"><code>- (void)removeSystemProperties:(NSMutableDictionary *)<em>item</em></code></div>
+
+		    
+		</div>
+	</div>
+</div>
+						</div>
+						
+					</div>
+					
+					
+
+                    
+                    
+          
+				</main>
+
+				<footer>
+					<div class="footer-copyright">
+						
+						<p class="copyright">Copyright &copy; 2015 Microsoft. All rights reserved. Updated: 2015-08-04</p>
+						
+						
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>
+						
+					</div>
+				</footer>
+			</div>
+		</div>
+	</article>
+
+	<script src="../js/script.js"></script>
+</body>
+</html>

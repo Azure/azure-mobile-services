@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>MSSyncContextDataSource Protocol Reference</title>
+
+	<link rel="stylesheet" href="../css/style.css">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
+	<meta name="generator" content="appledoc 2.2.1 (build 1333)">
+</head>
+<body class="appledoc">
+	<header>
+		<div class="container" class="hide-in-xcode">
+			
+			<h1 id="library-title">
+				<a href="../index.html">Azure Mobile Apps </a>
+			</h1>
+
+			<p id="developer-home">
+				<a href="../index.html">Microsoft</a>
+			</p>
+			
+		</div>
+	</header>
+
+	<aside>
+		<div class="container">
+			<nav>
+				<ul id="header-buttons" role="toolbar">
+					<li><a href="../index.html">Index</a></li>
+<li><a href="../hierarchy.html">Hierarchy</a></li>
+
+					<li id="on-this-page" role="navigation">
+						<label>
+							On This Page
+
+							<div class="chevron">
+								<div class="chevy chevron-left"></div>
+								<div class="chevy chevron-right"></div>
+							</div>
+
+							<select id="jump-to">
+	<option value="top">Jump To&#133;</option>
+	
+	<option value="overview">Overview</option>
+	
+
+	
+	
+	<option value="tasks">Tasks</option>
+	
+	
+
+	
+	
+	<optgroup label="Properties">
+		
+		<option value="//api/name/handlesSyncTableOperations">handlesSyncTableOperations</option>
+		
+	</optgroup>
+	
+
+	
+
+	
+	<optgroup label="Instance Methods">
+		
+		<option value="//api/name/configTableName">- configTableName</option>
+		
+		<option value="//api/name/deleteItemsWithIds:table:orError:">- deleteItemsWithIds:table:orError:</option>
+		
+		<option value="//api/name/deleteUsingQuery:orError:">- deleteUsingQuery:orError:</option>
+		
+		<option value="//api/name/errorTableName">- errorTableName</option>
+		
+		<option value="//api/name/operationTableName">- operationTableName</option>
+		
+		<option value="//api/name/readTable:withItemId:orError:">- readTable:withItemId:orError:</option>
+		
+		<option value="//api/name/readWithQuery:orError:">- readWithQuery:orError:</option>
+		
+		<option value="//api/name/systemPropertiesForTable:">- systemPropertiesForTable:</option>
+		
+		<option value="//api/name/upsertItems:table:orError:">- upsertItems:table:orError:</option>
+		
+	</optgroup>
+	
+	
+</select>
+						</label>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</aside>
+
+	<article>
+		<div id="overview_contents" class="container">
+			<div id="content">
+				<main role="main">
+					<h1 class="title">MSSyncContextDataSource Protocol Reference</h1>
+
+					
+					<div class="section section-specification"><table cellspacing="0"><tbody>
+						<tr>
+	<th>Conforms to</th>
+	<td>NSObject</td>
+</tr><tr>
+	<th>Declared in</th>
+	<td>MSSyncContext.h</td>
+</tr>
+						</tbody></table></div>
+					
+
+                    
+					
+					<div class="section section-overview">
+						<a title="Overview" name="overview"></a>
+						<h2 class="subtitle subtitle-overview">Overview</h2>
+						<p>The MSSyncContextDataSource controls how data is stored and retrieved on the device. Errors returned from here will abort
+any given sync operation and will be surfaced to the mobile service through push or the delegate.</p>
+					</div>
+					
+					
+
+					
+					
+					<div class="section section-tasks">
+						<a title="Tasks" name="tasks"></a>
+						
+
+						<a title="Controlling Where Data is Stored" name="task_Controlling Where Data is Stored"></a>
+						<h2 class="task-title">Controlling Where Data is Stored</h2>
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/operationTableName" title="operationTableName"></a>
+	<h3 class="method-title"><code><a href="#//api/name/operationTableName">&ndash;&nbsp;operationTableName</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Provides the name of the table to track all table operation meta data</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (nonnull NSString *)operationTableName</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Provides the name of the table to track all table operation meta data</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSSyncContext.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/errorTableName" title="errorTableName"></a>
+	<h3 class="method-title"><code><a href="#//api/name/errorTableName">&ndash;&nbsp;errorTableName</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Provides the name of the table to track all table operation errors until they have been resolved</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (nonnull NSString *)errorTableName</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Provides the name of the table to track all table operation errors until they have been resolved</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSSyncContext.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/configTableName" title="configTableName"></a>
+	<h3 class="method-title"><code><a href="#//api/name/configTableName">&ndash;&nbsp;configTableName</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Provides the name of the table to track configuration data</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (nonnull NSString *)configTableName</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Provides the name of the table to track configuration data</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSSyncContext.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/handlesSyncTableOperations" title="handlesSyncTableOperations"></a>
+	<h3 class="method-title"><code><a href="#//api/name/handlesSyncTableOperations">&nbsp;&nbsp;handlesSyncTableOperations</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Indicates if the items passed to a sync table call should be saved by the SDK, if disabled, the local store will only
+recieve upserts/deletes for data calls originating from the server (pulls &amp; pushes) plus the state tracking on the operation queue.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic) BOOL handlesSyncTableOperations</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Indicates if the items passed to a sync table call should be saved by the SDK, if disabled, the local store will only
+recieve upserts/deletes for data calls originating from the server (pulls &amp; pushes) plus the state tracking on the operation queue.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSSyncContext.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+
+						<a title="Fetching and Retrieving Data" name="task_Fetching and Retrieving Data"></a>
+						<h2 class="task-title">Fetching and Retrieving Data</h2>
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/readWithQuery:orError:" title="readWithQuery:orError:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/readWithQuery:orError:">&ndash;&nbsp;readWithQuery:orError:</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Returns a dictionary containing the items and totalCount</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (nullable MSSyncContextReadResult *)readWithQuery:(nullable MSQuery *)<em>query</em> orError:(NSError *__nullable *__nullable)<em>error</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Returns a dictionary containing the items and totalCount</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSSyncContext.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/readTable:withItemId:orError:" title="readTable:withItemId:orError:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/readTable:withItemId:orError:">&ndash;&nbsp;readTable:withItemId:orError:</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Should retrieve a single item from the local store or nil if item with the given ID does not exist.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (nullable NSDictionary *)readTable:(nonnull NSString *)<em>table</em> withItemId:(nonnull NSString *)<em>itemId</em> orError:(NSError *__nullable *__nullable)<em>error</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Should retrieve a single item from the local store or nil if item with the given ID does not exist.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSSyncContext.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/upsertItems:table:orError:" title="upsertItems:table:orError:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/upsertItems:table:orError:">&ndash;&nbsp;upsertItems:table:orError:</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Should insert/update the given item in the local store as appropriate</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (BOOL)upsertItems:(nullable NSArray *)<em>item</em> table:(nonnull NSString *)<em>table</em> orError:(NSError *__nullable *__nullable)<em>error</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Should insert/update the given item in the local store as appropriate</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSSyncContext.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/deleteItemsWithIds:table:orError:" title="deleteItemsWithIds:table:orError:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/deleteItemsWithIds:table:orError:">&ndash;&nbsp;deleteItemsWithIds:table:orError:</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Should remove the provided item from the local store</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (BOOL)deleteItemsWithIds:(nonnull NSArray *)<em>items</em> table:(nonnull NSString *)<em>table</em> orError:(NSError *__nullable *__nullable)<em>error</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Should remove the provided item from the local store</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSSyncContext.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/deleteUsingQuery:orError:" title="deleteUsingQuery:orError:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/deleteUsingQuery:orError:">&ndash;&nbsp;deleteUsingQuery:orError:</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Should remove all entries from the specified table in the local store</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (BOOL)deleteUsingQuery:(nonnull MSQuery *)<em>query</em> orError:(NSError *__nullable *__nullable)<em>error</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Should remove all entries from the specified table in the local store</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSSyncContext.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/systemPropertiesForTable:" title="systemPropertiesForTable:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/systemPropertiesForTable:">&ndash;&nbsp;systemPropertiesForTable:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Returns the <a href="../Constants/MSSystemProperties.html">MSSystemProperties</a> that should be stored locally (example: <strong>createdAt, </strong>updatedAt)
+If not implemented, the default of __version will be asked for from the server</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (NSUInteger)systemPropertiesForTable:(nonnull NSString *)<em>table</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Returns the <a href="../Constants/MSSystemProperties.html">MSSystemProperties</a> that should be stored locally (example: <strong>createdAt, </strong>updatedAt)
+If not implemented, the default of __version will be asked for from the server</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSSyncContext.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+					</div>
+					
+					
+
+                    
+                    
+          
+				</main>
+
+				<footer>
+					<div class="footer-copyright">
+						
+						<p class="copyright">Copyright &copy; 2015 Microsoft. All rights reserved. Updated: 2015-08-04</p>
+						
+						
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>
+						
+					</div>
+				</footer>
+			</div>
+		</div>
+	</article>
+
+	<script src="../js/script.js"></script>
+</body>
+</html>
