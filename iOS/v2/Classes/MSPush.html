@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>MSPush Class Reference</title>
+
+	<link rel="stylesheet" href="../css/style.css">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
+	<meta name="generator" content="appledoc 2.2.1 (build 1333)">
+</head>
+<body class="appledoc">
+	<header>
+		<div class="container" class="hide-in-xcode">
+			
+			<h1 id="library-title">
+				<a href="../index.html">Azure Mobile Services </a>
+			</h1>
+
+			<p id="developer-home">
+				<a href="../index.html">Microsoft</a>
+			</p>
+			
+		</div>
+	</header>
+
+	<aside>
+		<div class="container">
+			<nav>
+				<ul id="header-buttons" role="toolbar">
+					<li><a href="../index.html">Index</a></li>
+<li><a href="../hierarchy.html">Hierarchy</a></li>
+
+					<li id="on-this-page" role="navigation">
+						<label>
+							On This Page
+
+							<div class="chevron">
+								<div class="chevy chevron-left"></div>
+								<div class="chevy chevron-right"></div>
+							</div>
+
+							<select id="jump-to">
+	<option value="top">Jump To&#133;</option>
+	
+
+	
+	
+	<option value="tasks">Tasks</option>
+	
+	
+
+	
+	
+
+	
+
+	
+	<optgroup label="Instance Methods">
+		
+		<option value="//api/name/initWithClient:">- initWithClient:</option>
+		
+		<option value="//api/name/registerNativeWithDeviceToken:tags:completion:">- registerNativeWithDeviceToken:tags:completion:</option>
+		
+		<option value="//api/name/registerTemplateWithDeviceToken:name:jsonBodyTemplate:expiryTemplate:tags:completion:">- registerTemplateWithDeviceToken:name:jsonBodyTemplate:expiryTemplate:tags:completion:</option>
+		
+		<option value="//api/name/unregisterAllWithDeviceToken:completion:">- unregisterAllWithDeviceToken:completion:</option>
+		
+		<option value="//api/name/unregisterNativeWithCompletion:">- unregisterNativeWithCompletion:</option>
+		
+		<option value="//api/name/unregisterTemplateWithName:completion:">- unregisterTemplateWithName:completion:</option>
+		
+	</optgroup>
+	
+	
+</select>
+						</label>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</aside>
+
+	<article>
+		<div id="overview_contents" class="container">
+			<div id="content">
+				<main role="main">
+					<h1 class="title">MSPush Class Reference</h1>
+
+					
+					<div class="section section-specification"><table cellspacing="0"><tbody>
+						<tr>
+	<th>Inherits from</th>
+	<td>NSObject</td>
+</tr><tr>
+	<th>Declared in</th>
+	<td>MSPush.h</td>
+</tr>
+						</tbody></table></div>
+					
+
+                    
+
+					
+					
+					<div class="section section-tasks">
+						<a title="Tasks" name="tasks"></a>
+						
+
+						<a title="Initializing the MSPush Object" name="task_Initializing the MSPush Object"></a>
+						<h2 class="task-title">Initializing the MSPush Object</h2>
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/initWithClient:" title="initWithClient:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/initWithClient:">&ndash;&nbsp;initWithClient:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Initialize the <em>MSPush</em> instance with given <em><a href="../Classes/MSClient.html">MSClient</a></em></p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (MSPush *)initWithClient:(MSClient *)<em>client</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Initialize the <em>MSPush</em> instance with given <em><a href="../Classes/MSClient.html">MSClient</a></em></p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSPush.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+
+						<a title="Working with Native Registrations" name="task_Working with Native Registrations"></a>
+						<h2 class="task-title">Working with Native Registrations</h2>
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/registerNativeWithDeviceToken:tags:completion:" title="registerNativeWithDeviceToken:tags:completion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/registerNativeWithDeviceToken:tags:completion:">&ndash;&nbsp;registerNativeWithDeviceToken:tags:completion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Register for notifications with given deviceToken and tags. deviceToken is required.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)registerNativeWithDeviceToken:(NSData *)<em>deviceToken</em> tags:(NSArray *)<em>tags</em> completion:(MSCompletionBlock)<em>completion</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Register for notifications with given deviceToken and tags. deviceToken is required.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSPush.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/unregisterNativeWithCompletion:" title="unregisterNativeWithCompletion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/unregisterNativeWithCompletion:">&ndash;&nbsp;unregisterNativeWithCompletion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Unregister for native notififications.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)unregisterNativeWithCompletion:(MSCompletionBlock)<em>completion</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Unregister for native notififications.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSPush.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+
+						<a title="Working with Template Registrations" name="task_Working with Template Registrations"></a>
+						<h2 class="task-title">Working with Template Registrations</h2>
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/registerTemplateWithDeviceToken:name:jsonBodyTemplate:expiryTemplate:tags:completion:" title="registerTemplateWithDeviceToken:name:jsonBodyTemplate:expiryTemplate:tags:completion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/registerTemplateWithDeviceToken:name:jsonBodyTemplate:expiryTemplate:tags:completion:">&ndash;&nbsp;registerTemplateWithDeviceToken:name:jsonBodyTemplate:expiryTemplate:tags:completion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Register for template notififications. deviceToken, name and bodyTemplate are required.
+See <a href="http://go.microsoft.com/fwlink/?LinkId=401137">http://go.microsoft.com/fwlink/?LinkId=401137</a> for furthur details.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)registerTemplateWithDeviceToken:(NSData *)<em>deviceToken</em> name:(NSString *)<em>name</em> jsonBodyTemplate:(NSString *)<em>bodyTemplate</em> expiryTemplate:(NSString *)<em>expiryTemplate</em> tags:(NSArray *)<em>tags</em> completion:(MSCompletionBlock)<em>completion</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Register for template notififications. deviceToken, name and bodyTemplate are required.
+See <a href="http://go.microsoft.com/fwlink/?LinkId=401137">http://go.microsoft.com/fwlink/?LinkId=401137</a> for furthur details.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSPush.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/unregisterTemplateWithName:completion:" title="unregisterTemplateWithName:completion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/unregisterTemplateWithName:completion:">&ndash;&nbsp;unregisterTemplateWithName:completion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Unregister for tempalte notifications. name is required.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)unregisterTemplateWithName:(NSString *)<em>name</em> completion:(MSCompletionBlock)<em>completion</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Unregister for tempalte notifications. name is required.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSPush.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+
+						<a title="Debug utilities--Unregistering All Registrations" name="task_Debug utilities--Unregistering All Registrations"></a>
+						<h2 class="task-title">Debug utilities--Unregistering All Registrations</h2>
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/unregisterAllWithDeviceToken:completion:" title="unregisterAllWithDeviceToken:completion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/unregisterAllWithDeviceToken:completion:">&ndash;&nbsp;unregisterAllWithDeviceToken:completion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Unregister for all native and template registrations. deviceToken is required.
+NOT RECOMMENDED FOR USE IN PRODUCTION APPLICATON.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)unregisterAllWithDeviceToken:(NSData *)<em>deviceToken</em> completion:(MSCompletionBlock)<em>completion</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Unregister for all native and template registrations. deviceToken is required.
+NOT RECOMMENDED FOR USE IN PRODUCTION APPLICATON.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSPush.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+					</div>
+					
+					
+
+                    
+                    
+          
+				</main>
+
+				<footer>
+					<div class="footer-copyright">
+						
+						<p class="copyright">Copyright &copy; 2015 Microsoft. All rights reserved. Updated: 2015-08-03</p>
+						
+						
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>
+						
+					</div>
+				</footer>
+			</div>
+		</div>
+	</article>
+
+	<script src="../js/script.js"></script>
+</body>
+</html>
