@@ -8,3 +8,5 @@ build/
 *.xccheckout
 WindowsAzureMobileServices.framework.zip
 WindowsAzureMobileServices.framework
+appledoc/html
+appledoc/docset

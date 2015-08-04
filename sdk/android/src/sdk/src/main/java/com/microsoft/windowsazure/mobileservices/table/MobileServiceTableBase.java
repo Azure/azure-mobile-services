@@ -35,6 +35,7 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
@@ -357,15 +358,18 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
                     (msExcep.getResponse().getStatus().getStatusCode() == 412 ||
                             msExcep.getResponse().getStatus().getStatusCode() == 409)) {
 
-                String content = msExcep.getResponse().getContent();
-
-                JsonObject serverEntity = null;
-
-                if (content != null) {
-                    serverEntity = new JsonParser().parse(content).getAsJsonObject();
-                }
-
                 if (msExcep.getResponse().getStatus().getStatusCode() == 412) {
+                    String content = msExcep.getResponse().getContent();
+
+                    JsonObject serverEntity = null;
+
+                    if (content != null) {
+                        try {
+                            serverEntity = new JsonParser().parse(content).getAsJsonObject();
+                        }
+                        catch(JsonSyntaxException ex) {}
+                    }
+
                     return new MobileServicePreconditionFailedExceptionJson(msExcep, serverEntity);
                 }
 
