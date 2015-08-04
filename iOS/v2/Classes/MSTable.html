@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>MSTable Class Reference</title>
+
+	<link rel="stylesheet" href="../css/style.css">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
+	<meta name="generator" content="appledoc 2.2.1 (build 1333)">
+</head>
+<body class="appledoc">
+	<header>
+		<div class="container" class="hide-in-xcode">
+			
+			<h1 id="library-title">
+				<a href="../index.html">Azure Mobile Services </a>
+			</h1>
+
+			<p id="developer-home">
+				<a href="../index.html">Microsoft</a>
+			</p>
+			
+		</div>
+	</header>
+
+	<aside>
+		<div class="container">
+			<nav>
+				<ul id="header-buttons" role="toolbar">
+					<li><a href="../index.html">Index</a></li>
+<li><a href="../hierarchy.html">Hierarchy</a></li>
+
+					<li id="on-this-page" role="navigation">
+						<label>
+							On This Page
+
+							<div class="chevron">
+								<div class="chevy chevron-left"></div>
+								<div class="chevy chevron-right"></div>
+							</div>
+
+							<select id="jump-to">
+	<option value="top">Jump To&#133;</option>
+	
+	<option value="overview">Overview</option>
+	
+
+	
+	
+	<option value="tasks">Tasks</option>
+	
+	
+
+	
+	
+	<optgroup label="Properties">
+		
+		<option value="//api/name/client">client</option>
+		
+		<option value="//api/name/name">name</option>
+		
+		<option value="//api/name/systemProperties">systemProperties</option>
+		
+	</optgroup>
+	
+
+	
+
+	
+	<optgroup label="Instance Methods">
+		
+		<option value="//api/name/delete:completion:">- delete:completion:</option>
+		
+		<option value="//api/name/delete:parameters:completion:">- delete:parameters:completion:</option>
+		
+		<option value="//api/name/deleteWithId:completion:">- deleteWithId:completion:</option>
+		
+		<option value="//api/name/deleteWithId:parameters:completion:">- deleteWithId:parameters:completion:</option>
+		
+		<option value="//api/name/initWithName:client:">- initWithName:client:</option>
+		
+		<option value="//api/name/insert:completion:">- insert:completion:</option>
+		
+		<option value="//api/name/insert:parameters:completion:">- insert:parameters:completion:</option>
+		
+		<option value="//api/name/query">- query</option>
+		
+		<option value="//api/name/queryWithPredicate:">- queryWithPredicate:</option>
+		
+		<option value="//api/name/readWithCompletion:">- readWithCompletion:</option>
+		
+		<option value="//api/name/readWithId:completion:">- readWithId:completion:</option>
+		
+		<option value="//api/name/readWithId:parameters:completion:">- readWithId:parameters:completion:</option>
+		
+		<option value="//api/name/readWithPredicate:completion:">- readWithPredicate:completion:</option>
+		
+		<option value="//api/name/readWithQueryString:completion:">- readWithQueryString:completion:</option>
+		
+		<option value="//api/name/undelete:completion:">- undelete:completion:</option>
+		
+		<option value="//api/name/undelete:parameters:completion:">- undelete:parameters:completion:</option>
+		
+		<option value="//api/name/update:completion:">- update:completion:</option>
+		
+		<option value="//api/name/update:parameters:completion:">- update:parameters:completion:</option>
+		
+	</optgroup>
+	
+	
+</select>
+						</label>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</aside>
+
+	<article>
+		<div id="overview_contents" class="container">
+			<div id="content">
+				<main role="main">
+					<h1 class="title">MSTable Class Reference</h1>
+
+					
+					<div class="section section-specification"><table cellspacing="0"><tbody>
+						<tr>
+	<th>Inherits from</th>
+	<td>NSObject</td>
+</tr><tr>
+	<th>Declared in</th>
+	<td>MSTable.h</td>
+</tr>
+						</tbody></table></div>
+					
+
+                    
+					
+					<div class="section section-overview">
+						<a title="Overview" name="overview"></a>
+						<h2 class="subtitle subtitle-overview">Overview</h2>
+						<p>The <em>MSTable</em> class represents a table of a Windows Azure Mobile Service.
+The <em>MSTable</em> class represents a table of a Microsoft Azure Mobile Service.
+Items can be inserted, updated, deleted and read from the table. The table
+can also be queried to retrieve an array of items that meet the given <a href="#//api/name/query">query</a>
+conditions. All table operations result in a request to the Windows Azure
+conditions. All table operations result in a request to the Microsoft Azure
+Mobile Service to perform the given operation.</p>
+					</div>
+					
+					
+
+					
+					
+					<div class="section section-tasks">
+						<a title="Tasks" name="tasks"></a>
+						
+
+						<a title="Properties" name="task_Properties"></a>
+						<h2 class="task-title">Properties</h2>
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/name" title="name"></a>
+	<h3 class="method-title"><code><a href="#//api/name/name">&nbsp;&nbsp;name</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The name of this table.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, copy, readonly) NSString *name</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>The name of this table.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSTable.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/client" title="client"></a>
+	<h3 class="method-title"><code><a href="#//api/name/client">&nbsp;&nbsp;client</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The client associated with this table.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, strong, readonly) MSClient *client</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>The client associated with this table.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSTable.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/systemProperties" title="systemProperties"></a>
+	<h3 class="method-title"><code><a href="#//api/name/systemProperties">&nbsp;&nbsp;systemProperties</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic) MSSystemProperties systemProperties</code></div>
+
+		    
+		</div>
+	</div>
+</div>
+						</div>
+						
+
+						<a title="Initializing the MSTable Object" name="task_Initializing the MSTable Object"></a>
+						<h2 class="task-title">Initializing the MSTable Object</h2>
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/initWithName:client:" title="initWithName:client:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/initWithName:client:">&ndash;&nbsp;initWithName:client:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Initializes an <em>MSTable</em> instance with the given <a href="#//api/name/name">name</a> and <a href="#//api/name/client">client</a>.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (id)initWithName:(NSString *)<em>tableName</em> client:(MSClient *)<em>client</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Initializes an <em>MSTable</em> instance with the given <a href="#//api/name/name">name</a> and <a href="#//api/name/client">client</a>.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSTable.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+
+						<a title="Modifying Items" name="task_Modifying Items"></a>
+						<h2 class="task-title">Modifying Items</h2>
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/insert:completion:" title="insert:completion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/insert:completion:">&ndash;&nbsp;insert:completion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Sends a request to the Microsoft Azure Mobile Service to insert the given
+item into the table. The item must not have an id.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)insert:(NSDictionary *)<em>item</em> completion:(MSItemBlock)<em>completion</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Sends a request to the Microsoft Azure Mobile Service to insert the given
+item into the table. The item must not have an id.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSTable.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/insert:parameters:completion:" title="insert:parameters:completion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/insert:parameters:completion:">&ndash;&nbsp;insert:parameters:completion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Sends a request to the Microsoft Azure Mobile Service to insert the given
+item into the table. Addtional user-defined parameters are sent in the
+request <a href="#//api/name/query">query</a> string. The item must not have an id.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)insert:(NSDictionary *)<em>item</em> parameters:(NSDictionary *)<em>parameters</em> completion:(MSItemBlock)<em>completion</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Sends a request to the Microsoft Azure Mobile Service to insert the given
+item into the table. Addtional user-defined parameters are sent in the
+request <a href="#//api/name/query">query</a> string. The item must not have an id.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSTable.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/update:completion:" title="update:completion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/update:completion:">&ndash;&nbsp;update:completion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Sends a request to the Microsoft Azure Mobile Service to update the given
+item in the table. The item must have an id.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)update:(NSDictionary *)<em>item</em> completion:(MSItemBlock)<em>completion</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Sends a request to the Microsoft Azure Mobile Service to update the given
+item in the table. The item must have an id.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSTable.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/update:parameters:completion:" title="update:parameters:completion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/update:parameters:completion:">&ndash;&nbsp;update:parameters:completion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Sends a request to the Microsoft Azure Mobile Service to update the given
+item in the table. Addtional user-defined parameters are sent in the
+request <a href="#//api/name/query">query</a> string. The item must have an id.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)update:(NSDictionary *)<em>item</em> parameters:(NSDictionary *)<em>parameters</em> completion:(MSItemBlock)<em>completion</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Sends a request to the Microsoft Azure Mobile Service to update the given
+item in the table. Addtional user-defined parameters are sent in the
+request <a href="#//api/name/query">query</a> string. The item must have an id.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSTable.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/delete:completion:" title="delete:completion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/delete:completion:">&ndash;&nbsp;delete:completion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Sends a request to the Microsoft Azure Mobile Service to delete the given
+item from the table. The item must have an id.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)delete:(NSDictionary *)<em>item</em> completion:(MSDeleteBlock)<em>completion</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Sends a request to the Microsoft Azure Mobile Service to delete the given
+item from the table. The item must have an id.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSTable.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/delete:parameters:completion:" title="delete:parameters:completion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/delete:parameters:completion:">&ndash;&nbsp;delete:parameters:completion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Sends a request to the Microsoft Azure Mobile Service to delete the given
+item from the table. Addtional user-defined parameters are sent in the
+request <a href="#//api/name/query">query</a> string. The item must have an id.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)delete:(NSDictionary *)<em>item</em> parameters:(NSDictionary *)<em>parameters</em> completion:(MSDeleteBlock)<em>completion</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Sends a request to the Microsoft Azure Mobile Service to delete the given
+item from the table. Addtional user-defined parameters are sent in the
+request <a href="#//api/name/query">query</a> string. The item must have an id.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSTable.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/deleteWithId:completion:" title="deleteWithId:completion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/deleteWithId:completion:">&ndash;&nbsp;deleteWithId:completion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Sends a request to the Microsoft Azure Mobile Service to delete the item
+with the given id in from table.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)deleteWithId:(id)<em>itemId</em> completion:(MSDeleteBlock)<em>completion</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Sends a request to the Microsoft Azure Mobile Service to delete the item
+with the given id in from table.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSTable.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/deleteWithId:parameters:completion:" title="deleteWithId:parameters:completion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/deleteWithId:parameters:completion:">&ndash;&nbsp;deleteWithId:parameters:completion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Sends a request to the Microsoft Azure Mobile Service to delete the item
+with the given id in from table. Addtional user-defined parameters are
+sent in the request <a href="#//api/name/query">query</a> string.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)deleteWithId:(id)<em>itemId</em> parameters:(NSDictionary *)<em>parameters</em> completion:(MSDeleteBlock)<em>completion</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Sends a request to the Microsoft Azure Mobile Service to delete the item
+with the given id in from table. Addtional user-defined parameters are
+sent in the request <a href="#//api/name/query">query</a> string.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSTable.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/undelete:completion:" title="undelete:completion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/undelete:completion:">&ndash;&nbsp;undelete:completion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Sends a request to the Azure Mobile Service to undelete the item
+with the given id in from table.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)undelete:(NSDictionary *)<em>item</em> completion:(MSItemBlock)<em>completion</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Sends a request to the Azure Mobile Service to undelete the item
+with the given id in from table.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSTable.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/undelete:parameters:completion:" title="undelete:parameters:completion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/undelete:parameters:completion:">&ndash;&nbsp;undelete:parameters:completion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Sends a request to the Azure Mobile Service to undelete the item
+with the given id in from table. Addtional user-defined parameters are
+sent in the request <a href="#//api/name/query">query</a> string.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)undelete:(NSDictionary *)<em>item</em> parameters:(NSDictionary *)<em>parameters</em> completion:(MSItemBlock)<em>completion</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Sends a request to the Azure Mobile Service to undelete the item
+with the given id in from table. Addtional user-defined parameters are
+sent in the request <a href="#//api/name/query">query</a> string.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSTable.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+
+						<a title="Retreiving Items" name="task_Retreiving Items"></a>
+						<h2 class="task-title">Retreiving Items</h2>
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/readWithId:completion:" title="readWithId:completion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/readWithId:completion:">&ndash;&nbsp;readWithId:completion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Sends a request to the Microsoft Azure Mobile Service to return the item
+with the given id from the table.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)readWithId:(id)<em>itemId</em> completion:(MSItemBlock)<em>completion</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Sends a request to the Microsoft Azure Mobile Service to return the item
+with the given id from the table.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSTable.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/readWithId:parameters:completion:" title="readWithId:parameters:completion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/readWithId:parameters:completion:">&ndash;&nbsp;readWithId:parameters:completion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Sends a request to the Microsoft Azure Mobile Service to return the item
+with the given id from the table. Addtional user-defined parameters are
+sent in the request <a href="#//api/name/query">query</a> string.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)readWithId:(id)<em>itemId</em> parameters:(NSDictionary *)<em>parameters</em> completion:(MSItemBlock)<em>completion</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Sends a request to the Microsoft Azure Mobile Service to return the item
+with the given id from the table. Addtional user-defined parameters are
+sent in the request <a href="#//api/name/query">query</a> string.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSTable.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/readWithQueryString:completion:" title="readWithQueryString:completion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/readWithQueryString:completion:">&ndash;&nbsp;readWithQueryString:completion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Sends a request to the Microsoft Azure Mobile Service to return all items
+fromm the table that meet the conditions of the given <a href="#//api/name/query">query</a>.
+You can also use a URI in place of queryString to fetch results from a URI e.g.
+result.nextLink gives you URI to next page of results for a <a href="#//api/name/query">query</a> that you can pass here.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)readWithQueryString:(NSString *)<em>queryString</em> completion:(MSReadQueryBlock)<em>completion</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Sends a request to the Microsoft Azure Mobile Service to return all items
+fromm the table that meet the conditions of the given <a href="#//api/name/query">query</a>.
+You can also use a URI in place of queryString to fetch results from a URI e.g.
+result.nextLink gives you URI to next page of results for a <a href="#//api/name/query">query</a> that you can pass here.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSTable.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/readWithCompletion:" title="readWithCompletion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/readWithCompletion:">&ndash;&nbsp;readWithCompletion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Sends a request to the Microsoft Azure Mobile Service to return all items
+from the table. The Microsoft Azure Mobile Service will apply a default
+limit to the number of items returned.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)readWithCompletion:(MSReadQueryBlock)<em>completion</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Sends a request to the Microsoft Azure Mobile Service to return all items
+from the table. The Microsoft Azure Mobile Service will apply a default
+limit to the number of items returned.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSTable.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/readWithPredicate:completion:" title="readWithPredicate:completion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/readWithPredicate:completion:">&ndash;&nbsp;readWithPredicate:completion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Sends a request to the Microsoft Azure Mobile Service to return all items
+from the table that meet the conditions of the given predicate.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)readWithPredicate:(NSPredicate *)<em>predicate</em> completion:(MSReadQueryBlock)<em>completion</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Sends a request to the Microsoft Azure Mobile Service to return all items
+from the table that meet the conditions of the given predicate.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSTable.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/query" title="query"></a>
+	<h3 class="method-title"><code><a href="#//api/name/query">&ndash;&nbsp;query</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Returns an <em><a href="../Classes/MSQuery.html">MSQuery</a></em> instance associated with the table that can be
+configured and then executed to retrieve items from the table. An <em><a href="../Classes/MSQuery.html">MSQuery</a></em>
+instance provides more flexibilty when querying a table than the table
+read* methods.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (MSQuery *)query</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Returns an <em><a href="../Classes/MSQuery.html">MSQuery</a></em> instance associated with the table that can be
+configured and then executed to retrieve items from the table. An <em><a href="../Classes/MSQuery.html">MSQuery</a></em>
+instance provides more flexibilty when querying a table than the table
+read* methods.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSTable.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/queryWithPredicate:" title="queryWithPredicate:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/queryWithPredicate:">&ndash;&nbsp;queryWithPredicate:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Returns an <em><a href="../Classes/MSQuery.html">MSQuery</a></em> instance associated with the table that uses
+the given predicate. An <em><a href="../Classes/MSQuery.html">MSQuery</a></em> instance provides more flexibilty when
+querying a table than the table read* methods.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (MSQuery *)queryWithPredicate:(NSPredicate *)<em>predicate</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Returns an <em><a href="../Classes/MSQuery.html">MSQuery</a></em> instance associated with the table that uses
+the given predicate. An <em><a href="../Classes/MSQuery.html">MSQuery</a></em> instance provides more flexibilty when
+querying a table than the table read* methods.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSTable.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+					</div>
+					
+					
+
+                    
+                    
+          
+				</main>
+
+				<footer>
+					<div class="footer-copyright">
+						
+						<p class="copyright">Copyright &copy; 2015 Microsoft. All rights reserved. Updated: 2015-08-03</p>
+						
+						
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>
+						
+					</div>
+				</footer>
+			</div>
+		</div>
+	</article>
+
+	<script src="../js/script.js"></script>
+</body>
+</html>
