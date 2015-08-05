@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>MSQuery Class Reference</title>
+
+	<link rel="stylesheet" href="../css/style.css">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
+	<meta name="generator" content="appledoc 2.2.1 (build 1333)">
+</head>
+<body class="appledoc">
+	<header>
+		<div class="container" class="hide-in-xcode">
+			
+			<h1 id="library-title">
+				<a href="../index.html">Azure Mobile Apps </a>
+			</h1>
+
+			<p id="developer-home">
+				<a href="../index.html">Microsoft</a>
+			</p>
+			
+		</div>
+	</header>
+
+	<aside>
+		<div class="container">
+			<nav>
+				<ul id="header-buttons" role="toolbar">
+					<li><a href="../index.html">Index</a></li>
+<li><a href="../hierarchy.html">Hierarchy</a></li>
+
+					<li id="on-this-page" role="navigation">
+						<label>
+							On This Page
+
+							<div class="chevron">
+								<div class="chevy chevron-left"></div>
+								<div class="chevy chevron-right"></div>
+							</div>
+
+							<select id="jump-to">
+	<option value="top">Jump To&#133;</option>
+	
+	<option value="overview">Overview</option>
+	
+
+	
+	
+	<option value="tasks">Tasks</option>
+	
+	
+
+	
+	
+	<optgroup label="Properties">
+		
+		<option value="//api/name/fetchLimit">fetchLimit</option>
+		
+		<option value="//api/name/fetchOffset">fetchOffset</option>
+		
+		<option value="//api/name/includeTotalCount">includeTotalCount</option>
+		
+		<option value="//api/name/orderBy">orderBy</option>
+		
+		<option value="//api/name/parameters">parameters</option>
+		
+		<option value="//api/name/predicate">predicate</option>
+		
+		<option value="//api/name/selectFields">selectFields</option>
+		
+		<option value="//api/name/syncTable">syncTable</option>
+		
+		<option value="//api/name/table">table</option>
+		
+	</optgroup>
+	
+
+	
+
+	
+	<optgroup label="Instance Methods">
+		
+		<option value="//api/name/initWithSyncTable:">- initWithSyncTable:</option>
+		
+		<option value="//api/name/initWithSyncTable:predicate:">- initWithSyncTable:predicate:</option>
+		
+		<option value="//api/name/initWithTable:">- initWithTable:</option>
+		
+		<option value="//api/name/initWithTable:predicate:">- initWithTable:predicate:</option>
+		
+		<option value="//api/name/orderByAscending:">- orderByAscending:</option>
+		
+		<option value="//api/name/orderByDescending:">- orderByDescending:</option>
+		
+		<option value="//api/name/queryStringOrError:">- queryStringOrError:</option>
+		
+		<option value="//api/name/readWithCompletion:">- readWithCompletion:</option>
+		
+	</optgroup>
+	
+	
+</select>
+						</label>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</aside>
+
+	<article>
+		<div id="overview_contents" class="container">
+			<div id="content">
+				<main role="main">
+					<h1 class="title">MSQuery Class Reference</h1>
+
+					
+					<div class="section section-specification"><table cellspacing="0"><tbody>
+						<tr>
+	<th>Inherits from</th>
+	<td>NSObject</td>
+</tr><tr>
+	<th>Conforms to</th>
+	<td>NSCopying</td>
+</tr><tr>
+	<th>Declared in</th>
+	<td>MSQuery.h</td>
+</tr>
+						</tbody></table></div>
+					
+
+                    
+					
+					<div class="section section-overview">
+						<a title="Overview" name="overview"></a>
+						<h2 class="subtitle subtitle-overview">Overview</h2>
+						<p>The <em>MSQuery</em> class represents a query that can be configured and then
+executed against a <a href="#//api/name/table">table</a> of a Microsoft Azure Mobile Service. The query is
+serialized as a query string in the URL of the request. A query can be
+configured and then sent to the Microsoft Azure Mobile Service using the
+<em>readOnSuccess:onError:</em> method. <em>MSQuery</em> instances can be modfied and
+reused, but are not threadsafe.</p>
+					</div>
+					
+					
+
+					
+					
+					<div class="section section-tasks">
+						<a title="Tasks" name="tasks"></a>
+						
+
+						<a title="Initializing the MSQuery object" name="task_Initializing the MSQuery object"></a>
+						<h2 class="task-title">Initializing the MSQuery object</h2>
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/initWithTable:" title="initWithTable:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/initWithTable:">&ndash;&nbsp;initWithTable:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Initializes a <em>MSQuery</em> instance with the given <a href="#//api/name/table">table</a>.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (nonnull instancetype)initWithTable:(nonnull MSTable *)<em>table</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Initializes a <em>MSQuery</em> instance with the given <a href="#//api/name/table">table</a>.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSQuery.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/initWithTable:predicate:" title="initWithTable:predicate:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/initWithTable:predicate:">&ndash;&nbsp;initWithTable:predicate:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Returns a new <em>MSQuery</em> instance with the given <a href="#//api/name/table">table</a> and the given
+<a href="#//api/name/predicate">predicate</a> is used as the filter clause of the query.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (nullable instancetype)initWithTable:(nullable MSTable *)<em>table</em> predicate:(nullable NSPredicate *)<em>predicate</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Returns a new <em>MSQuery</em> instance with the given <a href="#//api/name/table">table</a> and the given
+<a href="#//api/name/predicate">predicate</a> is used as the filter clause of the query.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSQuery.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/initWithSyncTable:" title="initWithSyncTable:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/initWithSyncTable:">&ndash;&nbsp;initWithSyncTable:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Initializes a <em>MSQuery</em> instance with the given <a href="#//api/name/table">table</a>.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (nullable instancetype)initWithSyncTable:(nullable MSSyncTable *)<em>table</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Initializes a <em>MSQuery</em> instance with the given <a href="#//api/name/table">table</a>.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSQuery.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/initWithSyncTable:predicate:" title="initWithSyncTable:predicate:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/initWithSyncTable:predicate:">&ndash;&nbsp;initWithSyncTable:predicate:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Returns a new <em>MSQuery</em> instance with the given <a href="#//api/name/table">table</a> and the given
+<a href="#//api/name/predicate">predicate</a> is used as the filter clause of the query.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (nullable instancetype)initWithSyncTable:(nullable MSSyncTable *)<em>table</em> predicate:(nullable NSPredicate *)<em>predicate</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Returns a new <em>MSQuery</em> instance with the given <a href="#//api/name/table">table</a> and the given
+<a href="#//api/name/predicate">predicate</a> is used as the filter clause of the query.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSQuery.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/predicate" title="predicate"></a>
+	<h3 class="method-title"><code><a href="#//api/name/predicate">&nbsp;&nbsp;predicate</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The predicate used as the filter clause of the query.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, nullable) NSPredicate *predicate</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>The predicate used as the filter clause of the query.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSQuery.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/fetchLimit" title="fetchLimit"></a>
+	<h3 class="method-title"><code><a href="#//api/name/fetchLimit">&nbsp;&nbsp;fetchLimit</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The maximum number of items to return from the query.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic) NSInteger fetchLimit</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>The maximum number of items to return from the query.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSQuery.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/fetchOffset" title="fetchOffset"></a>
+	<h3 class="method-title"><code><a href="#//api/name/fetchOffset">&nbsp;&nbsp;fetchOffset</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The offset from the initial item to use when returning items from a query.
+Can be used with <em><a href="#//api/name/fetchLimit">fetchLimit</a></em> to implement paging.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic) NSInteger fetchOffset</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>The offset from the initial item to use when returning items from a query.
+Can be used with <em><a href="#//api/name/fetchLimit">fetchLimit</a></em> to implement paging.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSQuery.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/orderBy" title="orderBy"></a>
+	<h3 class="method-title"><code><a href="#//api/name/orderBy">&nbsp;&nbsp;orderBy</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The array of NSSortDescriptors used to order the query results</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, copy, nullable) NSArray *orderBy</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>The array of NSSortDescriptors used to order the query results</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSQuery.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/includeTotalCount" title="includeTotalCount"></a>
+	<h3 class="method-title"><code><a href="#//api/name/includeTotalCount">&nbsp;&nbsp;includeTotalCount</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Indicates if the Microsoft Azure Mobile Service should also include the total
+count of items on the server (not just the count of items returned) with
+the query results.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic) BOOL includeTotalCount</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Indicates if the Microsoft Azure Mobile Service should also include the total
+count of items on the server (not just the count of items returned) with
+the query results.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSQuery.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/parameters" title="parameters"></a>
+	<h3 class="method-title"><code><a href="#//api/name/parameters">&nbsp;&nbsp;parameters</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>A dictionary of string key-value pairs that can include user-defined
+parameters to use with the query.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, retain, nullable) NSDictionary *parameters</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>A dictionary of string key-value pairs that can include user-defined
+parameters to use with the query.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSQuery.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/selectFields" title="selectFields"></a>
+	<h3 class="method-title"><code><a href="#//api/name/selectFields">&nbsp;&nbsp;selectFields</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The fields or keys of an item that should be included in the results. A
+value of &ldquo;<em>&rdquo; means all fields should be included. &ldquo;</em>&rdquo; is the default value
+if no select keys are specified.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, retain, nullable) NSArray *selectFields</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>The fields or keys of an item that should be included in the results. A
+value of &ldquo;<em>&rdquo; means all fields should be included. &ldquo;</em>&rdquo; is the default value
+if no select keys are specified.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSQuery.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/orderByAscending:" title="orderByAscending:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/orderByAscending:">&ndash;&nbsp;orderByAscending:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Indicates that the query results should be returned in ascending order
+based on the given field. <em>orderByAscending:</em> and <em><a href="#//api/name/orderByDescending:">orderByDescending:</a></em> can
+each be called multiple times to further specify how the query results
+should be ordered.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)orderByAscending:(nonnull NSString *)<em>field</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Indicates that the query results should be returned in ascending order
+based on the given field. <em>orderByAscending:</em> and <em><a href="#//api/name/orderByDescending:">orderByDescending:</a></em> can
+each be called multiple times to further specify how the query results
+should be ordered.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSQuery.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/orderByDescending:" title="orderByDescending:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/orderByDescending:">&ndash;&nbsp;orderByDescending:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Indicates that the query results should be returned in descending order
+based on the given field. <em><a href="#//api/name/orderByAscending:">orderByAscending:</a></em> and <em>orderByDescending:</em> can
+each be called multiple times to further specify how the query results
+should be ordered.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)orderByDescending:(nonnull NSString *)<em>field</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Indicates that the query results should be returned in descending order
+based on the given field. <em><a href="#//api/name/orderByAscending:">orderByAscending:</a></em> and <em>orderByDescending:</em> can
+each be called multiple times to further specify how the query results
+should be ordered.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSQuery.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+
+						<a title="Executing the query" name="task_Executing the query"></a>
+						<h2 class="task-title">Executing the query</h2>
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/readWithCompletion:" title="readWithCompletion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/readWithCompletion:">&ndash;&nbsp;readWithCompletion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Executes the query by sending a request to the Microsoft Azure Mobile Service.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)readWithCompletion:(nullable MSReadQueryBlock)<em>completion</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Executes the query by sending a request to the Microsoft Azure Mobile Service.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSQuery.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/queryStringOrError:" title="queryStringOrError:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/queryStringOrError:">&ndash;&nbsp;queryStringOrError:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Generates a query string for current state of the <em>MSQuery</em> instance or an
+error if the query string could not be generated.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (nullable NSString *)queryStringOrError:(NSError *__nullable *__nullable)<em>error</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Generates a query string for current state of the <em>MSQuery</em> instance or an
+error if the query string could not be generated.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSQuery.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/table" title="table"></a>
+	<h3 class="method-title"><code><a href="#//api/name/table">&nbsp;&nbsp;table</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The table associated with this query.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, strong, nullable) MSTable *table</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>The table associated with this query.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">MSQuery.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/syncTable" title="syncTable"></a>
+	<h3 class="method-title"><code><a href="#//api/name/syncTable">&nbsp;&nbsp;syncTable</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, strong, nullable) MSSyncTable *syncTable</code></div>
+
+		    
+		</div>
+	</div>
+</div>
+						</div>
+						
+					</div>
+					
+					
+
+                    
+                    
+          
+				</main>
+
+				<footer>
+					<div class="footer-copyright">
+						
+						<p class="copyright">Copyright &copy; 2015 Microsoft. All rights reserved. Updated: 2015-08-04</p>
+						
+						
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>
+						
+					</div>
+				</footer>
+			</div>
+		</div>
+	</article>
+
+	<script src="../js/script.js"></script>
+</body>
+</html>
