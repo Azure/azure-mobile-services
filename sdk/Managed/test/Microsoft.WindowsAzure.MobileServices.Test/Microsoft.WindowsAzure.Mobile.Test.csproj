@@ -42,15 +42,20 @@
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
     <None Include="packages.config" />
+    <Compile Include="Mocks\MobileServiceEventManagerMock.cs" />
     <Compile Include="SerializationTypes\JObjectTypes.cs" />
     <Compile Include="SerializationTypes\TypeWithConstructor.cs" />
     <Compile Include="TestPlatform\TestHttpDelegatingHandler.cs" />
     <Compile Include="UnitTests\Common\UriUtilities.cs" />
+    <Compile Include="UnitTests\Eventing\TestEvent.cs" />
     <Compile Include="UnitTests\Http\HttpUtilityTests.cs" />
     <Compile Include="UnitTests\MobileAppUriValidator.cs" />
     <Compile Include="UnitTests\OData\ODataExpressionParser.Test.cs" />
     <Compile Include="UnitTests\Table\MobileServiceObjectReaderTests.cs" />
+    <Compile Include="UnitTests\Table\Sync\Eventing\LocalStoreChangeTracker.Test.cs" />
+    <Compile Include="UnitTests\Table\Sync\Eventing\StoreChangeTrackerFactoryTest.cs" />
     <Compile Include="UnitTests\Table\Sync\MobileServiceSyncContext.Test.cs" />
+    <Compile Include="UnitTests\Eventing\MobileServiceEventManager.Test.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssertEx.cs" />
@@ -142,6 +147,7 @@
       <HintPath>..\..\packages\Microsoft.Net.Http.2.2.28\lib\portable-net40+sl4+win8+wp71+wpa81\System.Net.Http.Primitives.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <Import Project="..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />
   <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">

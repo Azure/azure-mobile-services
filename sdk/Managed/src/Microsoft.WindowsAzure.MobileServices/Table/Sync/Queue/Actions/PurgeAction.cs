@@ -5,6 +5,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MobileServices.Eventing;
 using Microsoft.WindowsAzure.MobileServices.Query;
 
 namespace Microsoft.WindowsAzure.MobileServices.Sync
@@ -12,6 +13,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     internal class PurgeAction : TableAction
     {
         private bool force;
+        private IMobileServiceEventManager eventManager;
 
         public PurgeAction(MobileServiceTable table,
                            MobileServiceTableKind tableKind,
@@ -20,12 +22,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                            bool force,
                            MobileServiceSyncContext context,
                            OperationQueue operationQueue,
+                           IMobileServiceEventManager eventManager,
                            MobileServiceSyncSettingsManager settings,
                            IMobileServiceLocalStore store,
                            CancellationToken cancellationToken)
             : base(table, tableKind, queryId, query, null, context, operationQueue, settings, store, cancellationToken)
         {
             this.force = force;
+            this.eventManager = eventManager;
         }
 
         protected async override Task<bool> HandleDirtyTable()
@@ -65,6 +69,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 await this.Settings.ResetDeltaTokenAsync(this.Table.TableName, this.QueryId);
             }
             await this.Store.DeleteAsync(this.Query);
+
+            if (!this.Table.TableName.StartsWith(MobileServiceLocalSystemTables.Prefix))
+            {
+                this.eventManager.PublishAsync(new PurgeCompletedEvent(this.Table.TableName));
+            }
         }
     }
 }

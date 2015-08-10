@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MobileServices.Eventing;
 using Microsoft.WindowsAzure.MobileServices.Sync;
 using Newtonsoft.Json.Linq;
 
@@ -47,6 +48,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Returns the application's installation id.
         /// </summary>
         String InstallationId { get; }
+
+        /// The event manager that exposes and manages the event stream used by the mobile services types to 
+        /// publish and consume events.
+        /// </summary>
+        IMobileServiceEventManager EventManager { get; }
 
         /// <summary>
         /// Returns a <see cref="IMobileServiceTable"/> instance, which provides 

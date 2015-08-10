@@ -43,7 +43,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var hijack = new TestHttpHandler();
             IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
             var store = new MobileServiceLocalStoreMock();
-            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
+            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler(), StoreTrackingOptions.None);
 
             IMobileServiceSyncTable table = service.GetSyncTable("someTable");
 
@@ -60,7 +60,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.AddResponseContent("{\"id\":\"def\",\"String\":\"What\"}");
 
             service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
-            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
+            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler(), StoreTrackingOptions.None);
 
             Assert.AreEqual(hijack.Requests.Count, 0);
             await service.SyncContext.PushAsync();
@@ -89,7 +89,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
             var store = new MobileServiceLocalStoreMock();
-            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
+            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler(), StoreTrackingOptions.None);
 
             IMobileServiceSyncTable table = service.GetSyncTable("someTable");
             JObject item1 = new JObject() { { "id", "abc" } };
@@ -105,7 +105,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var hijack = new TestHttpHandler();
             IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
             var store = new MobileServiceLocalStoreMock();
-            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
+            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler(), StoreTrackingOptions.None);
 
             IMobileServiceSyncTable table = service.GetSyncTable("someTable");
             JObject item1 = new JObject() { { "id", "abc" } };
@@ -116,7 +116,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
 
             service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
-            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
+            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler(), StoreTrackingOptions.None);
             await service.SyncContext.PushAsync();
 
             Assert.AreEqual(hijack.Requests[0].Headers.GetValues("X-ZUMO-FEATURES").First(), "TU,OL");
@@ -150,7 +150,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.NotFound));
 
             IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
-            await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandlerMock());
+            await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandlerMock(), StoreTrackingOptions.None);
 
             IMobileServiceSyncTable table = service.GetSyncTable("someTable");
 
@@ -174,7 +174,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             };
 
             IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
-            await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), handler);
+            await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), handler, StoreTrackingOptions.None);
 
             IMobileServiceSyncTable table = service.GetSyncTable("someTable");
 
@@ -200,7 +200,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             };
 
             IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
-            await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), handler);
+            await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), handler, StoreTrackingOptions.None);
 
             IMobileServiceSyncTable table = service.GetSyncTable("someTable");
 
@@ -238,7 +238,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 return null;
             };
             IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
-            await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), handler);
+            await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), handler, StoreTrackingOptions.None);
 
             IMobileServiceSyncTable table = service.GetSyncTable("someTable");
 
@@ -318,7 +318,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             LocalStoreWithDelay mockLocalStore = new LocalStoreWithDelay();
-            await service.SyncContext.InitializeAsync(mockLocalStore, handler);
+            await service.SyncContext.InitializeAsync(mockLocalStore, handler, StoreTrackingOptions.None);
 
             JObject item = null;
 
@@ -383,7 +383,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var client = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
             var store = new MobileServiceLocalStoreMock();
             var context = new MobileServiceSyncContext(client);
-            await context.InitializeAsync(store);
+            await context.InitializeAsync(store, StoreTrackingOptions.None);
 
             string operationId = "abc";
             string itemId = "def";
@@ -427,7 +427,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var client = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
             var store = new MobileServiceLocalStoreMock();
             var context = new MobileServiceSyncContext(client);
-            await context.InitializeAsync(store);
+            await context.InitializeAsync(store, StoreTrackingOptions.None);
 
             string operationId = "abc";
             string itemId = "def";

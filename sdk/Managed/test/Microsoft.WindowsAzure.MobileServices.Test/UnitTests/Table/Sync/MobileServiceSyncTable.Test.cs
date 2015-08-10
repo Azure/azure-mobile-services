@@ -19,7 +19,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public async Task InsertAsync_GeneratesId_WhenNull()
         {
             IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...");
-            await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
+            await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler(), StoreTrackingOptions.None);
 
             var item = new JObject();
             JObject inserted = await service.GetSyncTable("someTable").InsertAsync(item);

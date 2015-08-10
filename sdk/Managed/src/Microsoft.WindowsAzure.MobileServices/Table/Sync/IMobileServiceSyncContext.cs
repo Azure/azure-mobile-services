@@ -36,6 +36,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         Task InitializeAsync(IMobileServiceLocalStore store, IMobileServiceSyncHandler handler);
 
         /// <summary>
+        /// Initializes the sync context.
+        /// </summary>
+        /// <param name="store">An instance of <see cref="IMobileServiceLocalStore"/>.</param>
+        /// <param name="handler">An instance of <see cref="IMobileServiceSyncHandler"/></param>
+        /// <param name="trackingOptions">A <see cref="StoreTrackingOptions"/> value indicating how store operations will be tracked, impacting which store events are raised.</param>
+        /// <returns>A task that completes when sync context has initialized.</returns>
+        Task InitializeAsync(IMobileServiceLocalStore store, IMobileServiceSyncHandler handler, StoreTrackingOptions trackingOptions);
+
+        /// <summary>
         /// Returns the number of pending operations that are not yet pushed to remote table.
         /// </summary>
         /// <returns>Returns the number of pending operations against the remote table.</returns>

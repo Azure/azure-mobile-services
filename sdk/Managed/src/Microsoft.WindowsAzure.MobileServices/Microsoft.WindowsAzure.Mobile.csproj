@@ -47,6 +47,9 @@
     <Compile Include="Collections\MobileServiceCollection.cs" />
     <Compile Include="Collections\MobileServiceCollectionEventArgs.cs" />
     <Compile Include="EnumValueAttribute.cs" />
+    <Compile Include="Table\Sync\Eventing\LocalStoreProxy.cs" />
+    <Compile Include="Table\Sync\Eventing\StoreChangeTrackerFactory.cs" />
+    <Compile Include="Table\Sync\Eventing\StoreChangeEvent.cs" />
     <Compile Include="Exceptions\MobileServiceConflictException.cs" />
     <Compile Include="Exceptions\MobileServiceInvalidOperationException.cs" />
     <Compile Include="Exceptions\MobileServicePreconditionFailedException.cs" />
@@ -89,6 +92,17 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Table\MobileServiceObjectReader.cs" />
+    <Compile Include="Table\Sync\Eventing\PurgeCompletedEvent.cs" />
+    <Compile Include="Table\Sync\Eventing\StoreOperationBatchCompletedEvent.cs" />
+    <Compile Include="Eventing\MobileServiceEventObserver.cs" />
+    <Compile Include="Eventing\IMobileServiceEvent.cs" />
+    <Compile Include="Eventing\IMobileServiceEventManager.cs" />
+    <Compile Include="Eventing\ISubscription.cs" />
+    <Compile Include="Table\Sync\Eventing\LocalStoreChangeTracker.cs" />
+    <Compile Include="Eventing\MobileServiceEventManager.cs" />
+    <Compile Include="Eventing\MobileServiceEvent.cs" />
+    <Compile Include="Table\Sync\Eventing\StoreOperationCompletedEvent.cs" />
+    <Compile Include="Table\Sync\StoreOperationKind.cs" />
     <Compile Include="Table\Sync\PullOptions.cs" />
     <Compile Include="Table\Sync\Queue\Operations\MobileServiceTableKind.cs" />
     <Compile Include="Table\MobileServiceSystemColumns.cs" />
@@ -174,6 +188,11 @@
     <Compile Include="Table\Sync\Queue\Actions\PushAction.cs" />
     <Compile Include="Exceptions\MobileServicePushFailedException.cs" />
     <Compile Include="Table\Sync\MobileServiceLocalSystemTables.cs" />
+    <Compile Include="Table\Sync\StoreOperation.cs" />
+    <Compile Include="Table\Sync\StoreOperationsBatch.cs" />
+    <Compile Include="Table\Sync\StoreOperationSource.cs" />
+    <Compile Include="Table\Sync\Eventing\StoreTrackingOptions.cs" />
+    <Compile Include="Table\Sync\Eventing\StoreTrackingContext.cs" />
     <Compile Include="Threading\ActionBlock.cs" />
     <Compile Include="Threading\AsyncLock.cs" />
     <Compile Include="Threading\AsyncLockDictionary.cs" />
@@ -206,6 +225,7 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <Import Project="..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />
   <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">
