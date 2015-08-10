@@ -70,6 +70,21 @@
     // Get that item and ensure it is accurate
     reg2New = [storage2 getRegistrationIdWithName:@"regName"];
     XCTAssertEqualObjects(reg2New, @"regId4", @"Expected registrationId to be regId4");
+    
+    // Handle nil and NSNull name
+    [storage2 updateRegistrationWithName:nil registrationId:@"regId3" deviceToken:@"token5"];
+    
+    // Get that item using the default name
+    reg2New = [storage2 getRegistrationIdWithName:MSNativeRegistrationName];
+    XCTAssertEqualObjects(reg2New, @"regId3", @"Expected registrationId to be regId3");
+    
+    // Handle NSNull name
+    NSArray* registrations = [NSArray arrayWithObject:@{@"templateName" : [NSNull null], @"registrationId": @"regId5"}];
+    [storage2 updateRegistrations:registrations deviceToken:@"token6"];
+    
+    // Get that item using the default name
+    reg2New = [storage2 getRegistrationIdWithName:MSNativeRegistrationName];
+    XCTAssertEqualObjects(reg2New, @"regId5", @"Expected registrationId to be regId5");
 }
 
 -(void)testBasicState
