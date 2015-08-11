@@ -20,11 +20,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// </summary>
         Insert = 0,
         /// <summary>
-        /// Delete operation
+        /// Update operation
         /// </summary>
         Update = 1,
         /// <summary>
-        /// Update operation
+        /// Delete operation
         /// </summary>
         Delete = 2
     }
