@@ -10,8 +10,11 @@ module.exports = function (grunt) {
             core: [
               'src/Utilities/Extensions.js',
               'src/MobileServiceClient.js',
+              'src/MobileServiceSyncTable.js',
               'src/MobileServiceTable.js',
               'src/MobileServiceLogin.js',
+              'src/MobileServiceMemoryStore.js',
+              'src/MobileServiceSyncContext.js',
               'src/Push/RegistrationManager.js',
               'src/Push/LocalStorageManager.js',
               'src/Push/PushHttpClient.js',
@@ -105,6 +108,10 @@ module.exports = function (grunt) {
                 src: 'src/Generated/MobileServices.js',
                 dest: 'src/Generated/MobileServices.min.js'
             }
+        },
+        watch: {
+            files: ["*.js", "src/*.js", "test/winJS/tests/unit/*.js", "test/winJS/tests/*.js"],
+            tasks: ['concat', 'uglify', 'jshint']
         }
     });
 
@@ -112,6 +119,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.loadNpmTasks('grunt-contrib-watch');
 
     // Default task(s).
     grunt.registerTask('default', ['jshint', 'concat', 'uglify']);

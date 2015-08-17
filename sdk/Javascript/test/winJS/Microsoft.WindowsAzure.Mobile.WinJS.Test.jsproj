@@ -96,6 +96,7 @@
     <Content Include="tests\unit\localStorageManager.js" />
     <Content Include="tests\unit\mobileServicesClient.js" />
     <Content Include="tests\unit\mobileServicesClient._request.js" />
+    <Content Include="tests\unit\mobileServiceSyncTables.js" />
     <Content Include="tests\unit\mobileServiceTables.js" />
     <Content Include="tests\unit\pushHttpClient.js" />
     <Content Include="tests\unit\registrationManager.js" />
