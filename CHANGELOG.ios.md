@@ -4,6 +4,10 @@
 - [Latest iOS 2.x SDK](http://aka.ms/gc6fex)
 - [iOS 1.2.4 SDK](http://aka.ms/kymw2g)
 
+### Version 2.2.1
+- Fixed [issue #768](https://github.com/Azure/azure-mobile-services/issues/768) that was causing a memory leak when using NSURLSession [204f210](https://github.com/Azure/azure-mobile-services/commit/204f210)
+- Fix NSNull templateName [9347390](https://github.com/Azure/azure-mobile-services/commit/9347390)
+
 ### Version 2.2.0
 - Updated offline sync logic to do a case-insensitive comparison on the ID column  [328aadf](https://github.com/Azure/azure-mobile-services/commit/328aadf)
 - Added support for returning the underlying NSOperation when performing push, pull and purge operations [7c37f60](https://github.com/Azure/azure-mobile-services/commit/7c37f60)
