@@ -10,8 +10,10 @@ module.exports = function(grunt) {
       core: [
         'src/Utilities/Extensions.js',
         'src/MobileServiceClient.js',
+        'src/MobileServiceSyncTable.js',
         'src/MobileServiceTable.js',
         'src/MobileServiceLogin.js',
+        'src/MobileServiceSyncContext.js',
         'src/Push/Push.js',
         'src/Utilities/Validate.js',
         'src/External/queryjs/lib/*.js',
@@ -101,13 +103,18 @@ module.exports = function(grunt) {
         src: 'src/Generated/MobileServices.js',
         dest: 'src/Generated/MobileServices.min.js'
       }
-    }
+    },
+    watch: {
+            files: ["*.js", "src/*.js", "test/winJS/tests/unit/*.js", "test/winJS/tests/*.js"],
+            tasks: ['concat', 'uglify', 'jshint']
+	}
   });
 
   // Load the plugin that provides the "uglify" task.
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-contrib-watch');
 
   // Default task(s).
   grunt.registerTask('default', ['jshint', 'concat', 'uglify']);

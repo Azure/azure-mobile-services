@@ -177,6 +177,8 @@
     <Content Include="MobileServiceLogin.js" />
     <Content Include="MobileServices.intellisense.js" />
     <Content Include="MobileServices.priconfig.xml" />
+    <Content Include="MobileServiceSyncContext.js" />
+    <Content Include="MobileServiceSyncTable.js" />
     <Content Include="MobileServiceTable.js" />
     <Content Include="Platforms\Platform.Web.js" />
     <Content Include="Platforms\Platform.WinJS.js" />
