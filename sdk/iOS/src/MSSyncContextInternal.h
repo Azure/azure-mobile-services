@@ -22,7 +22,7 @@
 
 -(void) syncTable:(NSString *)table item:(NSDictionary *)item action:(MSTableOperationTypes)action completion:(MSSyncItemBlock)completion;
 
--(NSDictionary *) syncTable:(NSString *)table readWithId:(NSString *)itemId orError:(NSError **)error;
+-(void) syncTable:(NSString *)table readWithId:(NSString *)itemId completion:(MSItemBlock)completion;
 
 -(void) readWithQuery:(MSQuery *)query completion:(MSReadQueryBlock)completion;
 

@@ -93,11 +93,7 @@
 
 -(void)readWithId:(NSString *)itemId completion:(MSItemBlock)completion
 {
-    NSError *error;
-    NSDictionary *item = [self.client.syncContext syncTable:self.name readWithId:itemId orError:&error];
-    if (completion) {
-        completion(item, error);
-    }
+    [self.client.syncContext syncTable:self.name readWithId:itemId completion:completion];
 }
 
 -(void)readWithCompletion:(MSReadQueryBlock)completion
