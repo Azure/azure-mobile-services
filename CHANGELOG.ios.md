@@ -24,6 +24,7 @@
 
 ### Version 2.0.0
 - GA of offline sync changes from previous betas
+- Now requires iOS 7 or newer to use
 
 ### Version 2.0.0 beta2
 - **[Breaking]** Changed MSReadQueryBlock to return MSQueryResult instead of items and totalCount. See [this blog post](http://azure.microsoft.com/blog/2014/10/07/mobile-services-beta-ios-sdk-released/) for more information.
