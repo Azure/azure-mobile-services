@@ -65,6 +65,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>Task that completes when registration is complete</returns>
         public Task RegisterAsync(string registrationId, JObject templates)
         {
+            if (string.IsNullOrWhiteSpace(registrationId))
+            {
+                throw new ArgumentNullException("registrationId");
+            }
+
             JObject installation = new JObject();
             installation[PushInstallationProperties.PUSHCHANNEL] = registrationId;
             installation[PushInstallationProperties.PLATFORM] = Platform.Instance.PushUtility.GetPlatform();

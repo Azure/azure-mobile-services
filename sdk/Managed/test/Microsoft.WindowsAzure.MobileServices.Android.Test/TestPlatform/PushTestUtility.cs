@@ -12,11 +12,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 {
     class PushTestUtility : IPushTestUtility
     {
-        private const string DefaultChannelUri =
-            "17BA0791499DB908433B80F37C5FBC89B870084B";
-        const string BodyTemplate = "{\"first prop\":\"first value\", \"second prop\":\"($message)\"}";
-        const string DefaultToastTemplateName = "templateForToastGcm";
-        readonly string[] DefaultTags = { "fooGcm", "barGcm" };
+        private const string DefaultChannelUri = "17BA0791499DB908433B80F37C5FBC89B870084B";
 
         public string GetPushHandle()
         {
@@ -50,9 +46,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             msg["msg"] = "$(message)";
             JObject data = new JObject();
             data["data"] = msg;
-            JObject templates = new JObject();
-            templates[DefaultToastTemplateName] = data;
-            return templates;
+            return data;
         }
     }
 }
