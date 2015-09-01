@@ -16,6 +16,7 @@ namespace Microsoft.WindowsAzure.Mobile.Android.Test
 
             Harness.Reporter = Listener;
             Harness.LoadTestAssembly (typeof (MobileServiceSerializerTests).Assembly);
+            Harness.LoadTestAssembly(typeof(PushUnit).Assembly);
         }
 
         public static readonly TestListener Listener = new TestListener();

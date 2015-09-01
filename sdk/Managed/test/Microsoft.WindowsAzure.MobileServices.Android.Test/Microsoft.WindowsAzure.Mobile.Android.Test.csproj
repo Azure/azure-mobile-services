@@ -73,6 +73,7 @@
       <Link>TestPlatform\CurrentTestPlatform.cs</Link>
     </Compile>
     <Compile Include="TestPlatform\PushTestUtility.cs" />
+    <Compile Include="UnitTests\PushUnit.Test.cs" />
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\Layout\Login.axml" />
