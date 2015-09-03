@@ -2,10 +2,18 @@
   "name": "AzureMobileServices",
   "version": "2.0.0-beta",
   "devDependencies": {
+    "browserify": "~11.1.0",
     "grunt": "~0.4.5",
+    "grunt-browserify": "~4.0.1",
+    "grunt-contrib-concat": "~0.5.0",
+    "grunt-contrib-copy": "~0.8.1",
     "grunt-contrib-jshint": "~0.10.0",
     "grunt-contrib-nodeunit": "~0.4.1",
     "grunt-contrib-uglify": "~0.6.0",
-    "grunt-contrib-concat": "~0.5.0"
+    "grunt-contrib-concat": "~0.5.0",
+    "grunt-contrib-copy": "~0.8.1",
+    "grunt-contrib-watch": "~0.6.1",
+    "grunt-exec": "~0.4.6",
+    "qunitjs": "~1.19.0"
   }
 }

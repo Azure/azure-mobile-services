@@ -452,7 +452,7 @@ $testGroup('MobileServiceTables.js',
         var table = client.getTable('books');
         var originalModelObject = { price: 100 };
         return table.insert(originalModelObject, { state: 'CA' }).then(function (results) {
-            var isWinJs = typeof Windows === "object";
+            var isWinJs = Platform.getSdkInfo().language === "WinJS";
             if (isWinJs) {
                 // For backward compatibility, the WinJS client mutates the original model
                 // object by adding/overwriting properties from the server response
@@ -658,7 +658,7 @@ $testGroup('MobileServiceTables.js',
         var table = client.getTable('books');
         var originalModelObject = { id: 2, price: 100 };
         return table.update(originalModelObject, { state: 'AL' }).then(function (results) {
-            var isWinJs = typeof Windows === "object";
+            var isWinJs = Platform.getSdkInfo().language === "WinJS";
             if (isWinJs) {
                 // For backward compatibility, the WinJS client mutates the original model
                 // object by adding/overwriting properties from the server response
@@ -1146,7 +1146,7 @@ $testGroup('MobileServiceTables.js',
                 });
 
                 return client.getTable('books').refresh(originalModelObject).then(function (results) {
-                    var isWinJs = typeof Windows === "object";
+                    var isWinJs = Platform.getSdkInfo().language === "WinJS";
                     if (isWinJs) {
                         // For backward compatibility, the WinJS client mutates the original model
                         // object by adding/overwriting properties from the server response
@@ -1241,7 +1241,7 @@ $testGroup('MobileServiceTables.js',
         var originalModelObject = { id: 2, price: 100 };
 
         return table.refresh(originalModelObject).then(function (results) {
-            var isWinJs = typeof Windows === "object";
+            var isWinJs = Platform.getSdkInfo().language === "WinJS";
             if (isWinJs) {
                 // For backward compatibility, the WinJS client mutates the original model
                 // object by adding/overwriting properties from the server response
@@ -1278,7 +1278,7 @@ $testGroup('MobileServiceTables.js',
         var originalModelObject = { id: 2, price: 100 };
 
         return table.refresh(originalModelObject, {"name":"bob"}).then(function (results) {
-            var isWinJs = typeof Windows === "object";
+            var isWinJs = Platform.getSdkInfo().language === "WinJS";
             if (isWinJs) {
                 // For backward compatibility, the WinJS client mutates the original model
                 // object by adding/overwriting properties from the server response
@@ -1315,7 +1315,7 @@ $testGroup('MobileServiceTables.js',
         var originalModelObject = { id: 2, price: 100 };
 
         return table.refresh(originalModelObject).then(function (results) {
-            var isWinJs = typeof Windows === "object";
+            var isWinJs = Platform.getSdkInfo().language === "WinJS";
             if (isWinJs) {
                 // For backward compatibility, the WinJS client mutates the original model
                 // object by adding/overwriting properties from the server response

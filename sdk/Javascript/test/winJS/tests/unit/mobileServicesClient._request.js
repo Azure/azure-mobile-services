@@ -127,8 +127,8 @@ $testGroup('MobileServiceClient._request',
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/", "http://www.gateway.com/", "123456abcdefg");
         client = client.withFilter(function (req, next, callback) {
-            var isWinJs = typeof Windows === "object",
-                isCordova = window && window.cordova && window.cordova.version;
+            var isWinJs = Platform.getSdkInfo().language === "WinJS",
+                isCordova = Platform.getSdkInfo().language === "Cordova";
 
             if (isWinJs) {
                 $assert.areEqual(0, req.headers['X-ZUMO-VERSION'].indexOf("ZUMO/1.3 (lang=WinJS; os=Windows 8; os_version=--; arch=Neutral; version="));
