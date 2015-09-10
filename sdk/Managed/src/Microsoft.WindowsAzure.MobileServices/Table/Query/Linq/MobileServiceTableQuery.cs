@@ -146,7 +146,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 
             return this.QueryProvider.Create(table,
                                              Queryable.Select(this.Query, selector),
-                                             MobileServiceTable.AddSystemProperties(Table.SystemProperties, this.Parameters),
+                                             this.Parameters,
                                              this.RequestTotalCount);
         }
 

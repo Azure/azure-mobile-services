@@ -41,7 +41,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         public override async Task InitializeAsync()
         {
-            this.table.SystemProperties = this.table.SystemProperties | MobileServiceSystemProperties.UpdatedAt;
             this.maxUpdatedAt = await this.settings.GetDeltaTokenAsync(this.Query.TableName, this.queryId);
             this.UpdateDeltaToken();
 

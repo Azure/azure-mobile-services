@@ -2598,7 +2598,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.OnSendingRequest = req =>
             {
                 Assert.AreEqual(req.Method, HttpMethod.Post);
-                Assert.AreEqual(req.RequestUri.Query, "?__systemproperties=__createdAt%2C__updatedAt%2C__version%2C__deleted");
                 // only id and version should be sent
                 Assert.IsNull(req.Content);
                 Assert.AreEqual(req.Headers.IfMatch.First().Tag, "\"abc\"");
@@ -2972,59 +2971,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             };
 
             await versionTable.InsertAsync(new NotSystemPropertyVersionType() { version = "a version", Id = "an id" });
-        }
-
-        [TestMethod]
-        public void SystemPropertiesPropertySetCorrectly()
-        {
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...");
-
-            IMobileServiceTable<StringIdType> stringIdTable = service.GetTable<StringIdType>();
-            Assert.AreEqual(stringIdTable.SystemProperties, MobileServiceSystemProperties.None);
-
-            IMobileServiceTable<StringType> stringTable = service.GetTable<StringType>();
-            Assert.AreEqual(stringTable.SystemProperties, MobileServiceSystemProperties.None);
-
-            IMobileServiceTable<NotSystemPropertyCreatedAtType> notSystemPropertyTable = service.GetTable<NotSystemPropertyCreatedAtType>();
-            Assert.AreEqual(notSystemPropertyTable.SystemProperties, MobileServiceSystemProperties.None);
-
-            IMobileServiceTable<IntegerIdNotSystemPropertyCreatedAtType> integerIdNotsystemPropertyTable = service.GetTable<IntegerIdNotSystemPropertyCreatedAtType>();
-            Assert.AreEqual(integerIdNotsystemPropertyTable.SystemProperties, MobileServiceSystemProperties.None);
-
-            IMobileServiceTable<NotSystemPropertyUpdatedAtType> notSystemPropertyUpdatedTable = service.GetTable<NotSystemPropertyUpdatedAtType>();
-            Assert.AreEqual(notSystemPropertyUpdatedTable.SystemProperties, MobileServiceSystemProperties.None);
-
-            IMobileServiceTable<NotSystemPropertyVersionType> notSystemPropertyVersionTable = service.GetTable<NotSystemPropertyVersionType>();
-            Assert.AreEqual(notSystemPropertyVersionTable.SystemProperties, MobileServiceSystemProperties.None);
-
-            IMobileServiceTable<IntegerIdWithNamedSystemPropertiesType> integerIdWithNamedSystemPropertyTable = service.GetTable<IntegerIdWithNamedSystemPropertiesType>();
-            Assert.AreEqual(integerIdWithNamedSystemPropertyTable.SystemProperties, MobileServiceSystemProperties.None);
-
-            IMobileServiceTable<LongIdWithNamedSystemPropertiesType> longIdWithNamedSystemPropertyTable = service.GetTable<LongIdWithNamedSystemPropertiesType>();
-            Assert.AreEqual(longIdWithNamedSystemPropertyTable.SystemProperties, MobileServiceSystemProperties.None);
-
-            IMobileServiceTable<CreatedAtType> createdAtTable = service.GetTable<CreatedAtType>();
-            Assert.AreEqual(createdAtTable.SystemProperties, MobileServiceSystemProperties.CreatedAt);
-
-            IMobileServiceTable<DoubleNamedSystemPropertiesType> doubleNamedCreatedAtTable = service.GetTable<DoubleNamedSystemPropertiesType>();
-            Assert.AreEqual(doubleNamedCreatedAtTable.SystemProperties, MobileServiceSystemProperties.CreatedAt);
-
-            IMobileServiceTable<NamedSystemPropertiesType> namedCreatedAtTable = service.GetTable<NamedSystemPropertiesType>();
-            Assert.AreEqual(namedCreatedAtTable.SystemProperties, MobileServiceSystemProperties.CreatedAt);
-
-            IMobileServiceTable<NamedDifferentCasingSystemPropertiesType> namedDifferentCasingCreatedAtTable = service.GetTable<NamedDifferentCasingSystemPropertiesType>();
-            Assert.AreEqual(namedDifferentCasingCreatedAtTable.SystemProperties, MobileServiceSystemProperties.CreatedAt);
-
-            IMobileServiceTable<UpdatedAtType> updatedAtTable = service.GetTable<UpdatedAtType>();
-            Assert.AreEqual(updatedAtTable.SystemProperties, MobileServiceSystemProperties.UpdatedAt);
-
-            IMobileServiceTable<VersionType> versionTable = service.GetTable<VersionType>();
-            Assert.AreEqual(versionTable.SystemProperties, MobileServiceSystemProperties.Version);
-
-            IMobileServiceTable<AllSystemPropertiesType> allsystemPropertiesTable = service.GetTable<AllSystemPropertiesType>();
-            Assert.AreEqual(allsystemPropertiesTable.SystemProperties, MobileServiceSystemProperties.Version |
-                                                                       MobileServiceSystemProperties.CreatedAt |
-                                                                       MobileServiceSystemProperties.UpdatedAt);
         }
 
         [TestMethod]

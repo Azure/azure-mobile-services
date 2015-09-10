@@ -66,8 +66,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         {
             await CreatePullStrategy();
 
-            this.Table.SystemProperties |= MobileServiceSystemProperties.Deleted;
-
             QueryResult result;
             do
             {
