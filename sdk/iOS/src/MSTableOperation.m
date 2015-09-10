@@ -79,12 +79,6 @@
     MSTable *table = [self.client tableWithName:self.tableName];
     table.features = MSFeatureOffline;
     
-    if ([self.dataSource respondsToSelector:@selector(systemPropertiesForTable:)]) {
-        table.systemProperties = [self.dataSource systemPropertiesForTable:self.tableName];
-    } else {
-        table.systemProperties = MSSystemPropertyVersion;
-    }
-  
     if (self.type == MSTableOperationInsert) {
         [table insert:self.item completion:completion];
     } else if (self.type == MSTableOperationUpdate) {

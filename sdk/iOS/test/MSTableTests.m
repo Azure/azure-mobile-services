@@ -267,7 +267,7 @@
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
--(void) testInsertStripsSystemProperties
+-(void) testInsertKeepsSystemProperties
 {
     NSString* stringData = @"{\"id\": \"A\", \"name\":\"test name\", \"__version\":\"ABC\", \"__createdAt\":\"12-01-01\",\"__unknown\":123}";
     
@@ -289,35 +289,7 @@
     id item = @{ @"name":@"test name" };
     
     // Insert the item
-    XCTestExpectation *testExpectation1 = [self expectationWithDescription:@"Insert: No properties"];
-    [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
-        XCTAssertNil(error);
-        XCTAssertNotNil(item);
-
-        XCTAssertNil(item[MSSystemColumnVersion]);
-        XCTAssertNil(item[MSSystemColumnCreatedAt]);
-        XCTAssertNil(item[@"__unknown"]);
-
-        [testExpectation1 fulfill];
-    }];
-    
-    // Allow some through table enum
-    XCTestExpectation *testExpectation2 = [self expectationWithDescription:@"Insert: Created & Version"];
-    todoTable.systemProperties = MSSystemPropertyCreatedAt | MSSystemPropertyVersion;
-    [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
-        XCTAssertNil(error);
-        XCTAssertNotNil(item);
-        
-        XCTAssertNotNil(item[MSSystemColumnVersion]);
-        XCTAssertNotNil(item[MSSystemColumnCreatedAt]);
-        XCTAssertNil(item[@"__unknown"]);
-        
-        [testExpectation2 fulfill];
-    }];
-    
-    // Allow all now
-    XCTestExpectation *testExpectation3 = [self expectationWithDescription:@"Insert: All"];
-    todoTable.systemProperties = MSSystemPropertyAll;
+    XCTestExpectation *testExpectation = [self expectationWithDescription:@"Insert: All"];
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
         XCTAssertNil(error);
         XCTAssertNotNil(item);
@@ -326,38 +298,7 @@
         XCTAssertNotNil(item[MSSystemColumnCreatedAt]);
         XCTAssertNotNil(item[@"__unknown"]);
         
-        [testExpectation3 fulfill];
-    }];
-    
-    // Now using the querystring instead
-    XCTestExpectation *testExpectation4 = [self expectationWithDescription:@"Insert: Keep Created By Querystring"];
-    todoTable.systemProperties = MSSystemPropertyNone;
-    [todoTable insert:item
-           parameters:@{@"__systemProperties":MSSystemColumnCreatedAt}
-           completion:^(NSDictionary *item, NSError *error) {
-        XCTAssertNil(error);
-        XCTAssertNotNil(item);
-        
-        XCTAssertNil(item[MSSystemColumnVersion]);
-        XCTAssertNotNil(item[MSSystemColumnCreatedAt]);
-        XCTAssertNil(item[@"__unknown"]);
-        
-        [testExpectation4 fulfill];
-    }];
-    
-    // And check int Ids keep them all still
-    XCTestExpectation *testExpectation5 = [self expectationWithDescription:@"Insert: Int Ids Keep All"];
-    stringData = @"{\"id\": 123, \"name\":\"test name\", \"__version\":\"ABC\", \"__createdAt\":\"12-01-01\",\"__unknown\":123}";
-    testFilter.dataToUse = [stringData dataUsingEncoding:NSUTF8StringEncoding];
-    [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
-        XCTAssertNil(error);
-        XCTAssertNotNil(item);
-
-        XCTAssertNotNil(item[MSSystemColumnVersion]);
-        XCTAssertNotNil(item[MSSystemColumnCreatedAt]);
-        XCTAssertNotNil(item[@"__unknown"]);
-
-        [testExpectation5 fulfill];
+        [testExpectation fulfill];
     }];
     
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
@@ -601,26 +542,21 @@
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
--(void) testUpdateStripsSystemProperties
+-(void) testUpdateKeepsSystemProperties
 {
-    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    NSString* stringData = @"{\"id\": \"A\", \"name\":\"test name\", \"__version\":\"ABC\", \"__createdAt\":\"12-01-01\",\"__unknown\":123}";
     
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:stringData];
     MSInspectRequestBlock inspectBlock = ^NSURLRequest *(NSURLRequest *request) {
         testFilter.responseToUse = [[NSHTTPURLResponse alloc]
                                     initWithURL:request.URL
                                     statusCode:200
-                                    HTTPVersion:nil headerFields:@{@"Etag":@"\"AAAAAAAALNU=\""}];
+                                    HTTPVersion:nil headerFields:@{ @"Etag" : @"\"AAAAAAAALNU=\"" }];
         
         return request;
     };
-    
-    NSString* stringData = @"{\"id\": \"A\", \"name\":\"test name\", \"__version\":\"ABC\", \"__createdAt\":\"12-01-01\",\"__unknown\":123}";
-    NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
-    
-    //testFilter.responseToUse = response;
-    testFilter.dataToUse = data;
-    testFilter.ignoreNextFilter = YES;
     testFilter.onInspectRequest =  [inspectBlock copy];
+
     
     MSClient *filteredClient = [client clientWithFilter:testFilter];
     MSTable *todoTable = [filteredClient tableWithName:@"NoSuchTable"];
@@ -628,37 +564,8 @@
     // Create the item
     id item = @{ @"id": @"A", @"name":@"test name" };
     
-    // Insert the item
-    [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
-        XCTAssertNil(error);
-        XCTAssertNotNil(item);
-        
-        XCTAssertNil(item[MSSystemColumnVersion]);
-        XCTAssertNil(item[MSSystemColumnCreatedAt]);
-        XCTAssertNil(item[@"__unknown"]);
-        
-        done = YES;
-    }];
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-    done = NO;
-    
-    // Allow some through table enum
-    todoTable.systemProperties = MSSystemPropertyCreatedAt | MSSystemPropertyVersion;
-    [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
-        XCTAssertNil(error);
-        XCTAssertNotNil(item);
-        
-        XCTAssertNotNil(item[MSSystemColumnVersion]);
-        XCTAssertNotNil(item[MSSystemColumnCreatedAt]);
-        XCTAssertNil(item[@"__unknown"]);
-        
-        done = YES;
-    }];
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-    done = NO;
-    
     // Allow all now
-    todoTable.systemProperties = MSSystemPropertyAll;
+    XCTestExpectation *testExpectation = [self expectationWithDescription:@"Insert: All"];
     [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
         XCTAssertNil(error);
         XCTAssertNotNil(item);
@@ -667,44 +574,10 @@
         XCTAssertNotNil(item[MSSystemColumnCreatedAt]);
         XCTAssertNotNil(item[@"__unknown"]);
         
-        done = YES;
-    }];
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-    done = NO;
-    
-    // Now using the querystring instead
-    todoTable.systemProperties = MSSystemPropertyNone;
-    [todoTable update:item
-           parameters:@{@"__systemProperties":MSSystemColumnCreatedAt}
-           completion:^(NSDictionary *item, NSError *error) {
-               XCTAssertNil(error);
-               XCTAssertNotNil(item);
-               
-               XCTAssertNil(item[MSSystemColumnVersion]);
-               XCTAssertNotNil(item[MSSystemColumnCreatedAt]);
-               XCTAssertNil(item[@"__unknown"]);
-               
-               done = YES;
-           }];
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-    done = NO;
-    
-    // And check int Ids keep them all still
-    stringData = @"{\"id\": 123, \"name\":\"test name\", \"__version\":\"ABC\", \"__createdAt\":\"12-01-01\",\"__unknown\":123}";
-    item = @{ @"id": @123, @"name":@"test name" };
-    testFilter.dataToUse = [stringData dataUsingEncoding:NSUTF8StringEncoding];
-    [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
-        XCTAssertNil(error);
-        XCTAssertNotNil(item);
-        
-        XCTAssertNotNil(item[MSSystemColumnVersion]);
-        XCTAssertNotNil(item[MSSystemColumnCreatedAt]);
-        XCTAssertNotNil(item[@"__unknown"]);
-        
-        done = YES;
+        [testExpectation fulfill];
     }];
     
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 
@@ -1651,7 +1524,6 @@
         
         MSClient *filteredClient = [client clientWithFilter:testFilter];
         MSTable *todoTable = [filteredClient tableWithName:@"someTable"];
-        todoTable.systemProperties = MSSystemPropertyAll;
         
         NSDictionary *itemToInsert = @{@"id": @"an id", @"string": @"What?", property: @"a value"};
         [todoTable insert:itemToInsert completion:^(NSDictionary *item, NSError *error) {
@@ -1691,7 +1563,6 @@
         
         MSClient *filteredClient = [client clientWithFilter:testFilter];
         MSTable *todoTable = [filteredClient tableWithName:@"someTable"];
-        todoTable.systemProperties = MSSystemPropertyAll;
         
         NSDictionary *itemToInsert = @{@"id": [NSNull null], @"string": @"What?", property: @"a value"};
         [todoTable insert:itemToInsert completion:^(NSDictionary *item, NSError *error) {
@@ -1967,230 +1838,9 @@
     XCTAssertEqualObjects(featuresHeader, @"TR,LH");
 }
 
--(void) testTableOperationSystemPropertiesQueryStringIsCorrect
-{
-    __block NSURLRequest *actualRequest = nil;
-    NSArray *testSystemProperties = [MSTable testSystemProperties];
-    
-    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
-    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
-                                   initWithURL:nil
-                                   statusCode:200
-                                   HTTPVersion:nil headerFields:nil];
-    testFilter.responseToUse = response;
-    testFilter.ignoreNextFilter = YES;
-    testFilter.onInspectRequest =  ^(NSURLRequest *request) {
-        actualRequest = request;
-        return request;
-    };
-    
-    MSClient *filteredClient = [client clientWithFilter:testFilter];
-    MSTable *todoTable = [filteredClient tableWithName:@"someTable"];
-    
-    for (NSNumber *systemPropertyAsNumber in testSystemProperties)
-    {
-        NSUInteger systemProperty = [systemPropertyAsNumber unsignedIntegerValue];
-        todoTable.systemProperties = systemProperty;
-
-        // String Id (Insert, Update, ReadWithId, Delete)
-
-        done = NO;
-        NSDictionary *item = @{@"id":@"an id",@"String":@"what?"};
-        testFilter.dataToUse = [@"{\"id\":\"an id\",\"String\":\"Hey\"}" dataUsingEncoding:NSUTF8StringEncoding];
-        [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
-            XCTAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error for property %lu with url: %@", (unsigned long)systemProperty, [[actualRequest URL] query]);
-            done = YES;
-        }];
-        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-        
-        done = NO;
-        [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
-            XCTAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
-            done = YES;
-        }];
-        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-        
-        done = NO;
-        [todoTable readWithId:item completion:^(NSDictionary *item, NSError *error) {
-            XCTAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
-            done = YES;
-        }];
-        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-        
-        done = NO;
-        [todoTable delete:item completion:^(id itemId, NSError *error) {
-            XCTAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
-            done = YES;
-        }];
-        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-        
-        // Integer Id
-        done = NO;
-        item = @{@"String": @"what?"};
-        testFilter.dataToUse = [@"{\"id\":5,\"String\":\"Hey\"}" dataUsingEncoding:NSUTF8StringEncoding];
-        [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
-            XCTAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
-            done = YES;
-        }];
-        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-        
-        done = NO;
-        item = @{@"id": @5, @"String": @"what?"};
-        [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
-            XCTAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
-            done = YES;
-        }];
-        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-        
-        done = NO;
-        [todoTable readWithId:item completion:^(NSDictionary *item, NSError *error) {
-            XCTAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
-            done = YES;
-        }];
-        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-        
-        done = NO;
-        [todoTable delete:item completion:^(id itemId, NSError *error) {
-            XCTAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
-            done = YES;
-        }];
-        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-
-        // Query
-        
-        done = NO;
-        [todoTable readWithQueryString:@"$filter=id eq 5" completion:^(MSQueryResult *result, NSError *error) {
-            XCTAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
-            done = YES;
-        }];
-        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-
-        done = NO;
-        [todoTable readWithQueryString:@"$select=id,String" completion:^(MSQueryResult *result, NSError *error) {
-            XCTAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
-            done = YES;
-        }];
-        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-    }
-}
-
--(void) testTableOperationUserParameterWithSystemPropertyQueryStringIsCorrect
-{
-    __block NSURLRequest *actualRequest = nil;
-    NSArray *testSystemProperties = [MSTable testSystemProperties];
-    
-    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
-    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
-                                   initWithURL:nil
-                                   statusCode:200
-                                   HTTPVersion:nil headerFields:nil];
-    testFilter.responseToUse = response;
-    testFilter.ignoreNextFilter = YES;
-    testFilter.onInspectRequest =  ^(NSURLRequest *request) {
-        actualRequest = request;
-        return request;
-    };
-    
-    MSClient *filteredClient = [client clientWithFilter:testFilter];
-    MSTable *todoTable = [filteredClient tableWithName:@"someTable"];
-    
-    for (NSNumber *systemProperty in testSystemProperties)
-    {
-        todoTable.systemProperties = [systemProperty integerValue];
-        
-        done = NO;
-        NSDictionary *item = @{@"id":@"an id", @"string":@"what?"};
-        
-        testFilter.dataToUse = [@"{\"id\":\"an id\",\"String\":\"Hey\"}" dataUsingEncoding:NSUTF8StringEncoding];
-        [todoTable insert:item parameters:@{ @"__systemProperties": @"__createdAt"} completion:^(NSDictionary *item, NSError *error) {
-            NSString *url = [[actualRequest URL] query];
-            XCTAssertTrue([url rangeOfString:@"__systemProperties=__createdAt"].location != NSNotFound, @"Incorrect query: %@", url);
-            done = YES;
-        }];
-        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-        
-        done = NO;
-        [todoTable update:item parameters:@{ @"__systemProperties": @"createdAt"} completion:^(NSDictionary *item, NSError *error) {
-            NSString *url = [[actualRequest URL] query];
-            XCTAssertTrue([url rangeOfString:@"__systemProperties=createdAt"].location != NSNotFound, @"Incorrect query: %@", url);
-            done = YES;
-        }];
-        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-        
-        done = NO;
-        [todoTable readWithId:@"an id" parameters:@{ @"__systemProperties": @"CreatedAt"} completion:^(NSDictionary *item, NSError *error) {
-            NSString *url = [[actualRequest URL] query];
-            XCTAssertTrue([url rangeOfString:@"__systemProperties=CreatedAt"].location != NSNotFound, @"Incorrect query: %@", url);
-            done = YES;
-        }];
-        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-        
-        done = NO;
-        [todoTable delete:item parameters:@{ @"__systemProperties": @"unknown"} completion:^(id itemId, NSError *error) {
-            NSString *url = [[actualRequest URL] query];
-            XCTAssertTrue([url rangeOfString:@"__systemProperties=unknown"].location != NSNotFound, @"Incorrect query: %@", url);
-            done = YES;
-        }];
-        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-        
-        // Integer Id
-        done = NO;
-        item = @{@"string":@"what?"};
-        testFilter.dataToUse = [@"{\"id\":5,\"String\":\"Hey\"}" dataUsingEncoding:NSUTF8StringEncoding];
-        [todoTable insert:item parameters:@{ @"__systemProperties": @"__createdAt"} completion:^(NSDictionary *item, NSError *error) {
-            NSString *url = [[actualRequest URL] query];
-            XCTAssertTrue([url rangeOfString:@"__systemProperties=__createdAt"].location != NSNotFound, @"Incorrect query: %@", url);
-            done = YES;
-        }];
-        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-        
-        done = NO;
-        item = @{@"id":@5, @"string":@"what?"};
-        [todoTable update:item parameters:@{ @"__systemProperties": @"createdAt"} completion:^(NSDictionary *item, NSError *error) {
-            NSString *url = [[actualRequest URL] query];
-            XCTAssertTrue([url rangeOfString:@"__systemProperties=createdAt"].location != NSNotFound, @"Incorrect query: %@", url);
-            done = YES;
-        }];
-        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-        
-        done = NO;
-        [todoTable readWithId:@5 parameters:@{ @"__systemProperties": @"CreatedAt"} completion:^(NSDictionary *item, NSError *error) {
-            NSString *url = [[actualRequest URL] query];
-            XCTAssertTrue([url rangeOfString:@"__systemProperties=CreatedAt"].location != NSNotFound, @"Incorrect query: %@", url);
-            done = YES;
-        }];
-        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-        
-        done = NO;
-        [todoTable delete:item parameters:@{ @"__systemProperties": @"unknown"} completion:^(id itemId, NSError *error) {
-            NSString *url = [[actualRequest URL] query];
-            XCTAssertTrue([url rangeOfString:@"__systemProperties=unknown"].location != NSNotFound, @"Incorrect query: %@", url);
-            done = YES;
-        }];
-        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-        
-        // Query
-        
-        done = NO;
-        [todoTable readWithQueryString:@"$filter=id%20eq%205&__systemproperties=__createdAt" completion:^(MSQueryResult *result, NSError *error) {
-            NSString *url = [[actualRequest URL] query];
-            XCTAssertEqualObjects(@"$filter=id%20eq%205&__systemproperties=__createdAt", url, @"Incorrect query: %@", url);
-            done = YES;
-        }];
-        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-        
-        done = NO;
-        [todoTable readWithQueryString:@"$select=id,String&__systemProperties=__CreatedAt" completion:^(MSQueryResult *result, NSError *error) {
-            NSString *url = [[actualRequest URL] query];
-            XCTAssertEqualObjects(@"$select=id,String&__systemProperties=__CreatedAt", url, @"Incorrect query: %@", url);
-            done = YES;
-        }];
-        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
-    }
-}
-
 
 #pragma mark * Telemetry Features Header Tests
+
 
 -(void) testQueryAddsProperFeaturesHeader {
     __block NSURLRequest *actualRequest = nil;
@@ -2261,7 +1911,6 @@
 
     MSClient *filteredClient = [client clientWithFilter:testFilter];
     MSTable *todoTable = [filteredClient tableWithName:@"NoSuchTable"];
-    todoTable.systemProperties = MSSystemPropertyVersion;
 
     // Create the item
     id item = @{ @"id":@"the-id", @"name":@"test name" };
