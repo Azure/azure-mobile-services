@@ -10,3 +10,4 @@ packages/*
 tools/JSBuild/queryjs/*
 tools/JSBuild/esprima/*
 node_modules
+.vs/
