@@ -69,8 +69,6 @@ function MobileServiceTable(tableName, client) {
         /// </returns>
         return client;
     };
-
-    this.systemProperties = 0;
 }
 
 // Export the MobileServiceTable class
@@ -161,7 +159,6 @@ MobileServiceTable.prototype._read = function (query, parameters, callback) {
     addQueryParametersFeaturesIfApplicable(features, parameters);
 
     // Add any user-defined query string parameters
-    parameters = addSystemProperties(parameters, this.systemProperties, queryString);
     if (!_.isNull(parameters)) {
         var userDefinedQueryString = _.url.getQueryString(parameters);
         if (!_.isNullOrEmpty(queryString)) {
@@ -293,7 +290,6 @@ MobileServiceTable.prototype.insert = Platform.async(
 
         // Construct the URL
         var urlFragment = _.url.combinePathSegments(tableRouteSeperatorName, this.getTableName());
-        parameters = addSystemProperties(parameters, this.systemProperties);
         if (!_.isNull(parameters)) {
             var queryString = _.url.getQueryString(parameters);
             urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
@@ -364,7 +360,6 @@ MobileServiceTable.prototype.update = Platform.async(
         }
 
         features = addQueryParametersFeaturesIfApplicable(features, parameters);
-        parameters = addSystemProperties(parameters, this.systemProperties);
 
         // Construct the URL
         var urlFragment =  _.url.combinePathSegments(
@@ -521,7 +516,6 @@ MobileServiceTable.prototype.lookup = Platform.async(
 
         var features = addQueryParametersFeaturesIfApplicable([], parameters);
 
-        parameters = addSystemProperties(parameters, this.systemProperties);
         if (!_.isNull(parameters)) {
             var queryString = _.url.getQueryString(parameters);
             urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
@@ -582,7 +576,6 @@ MobileServiceTable.prototype.del = Platform.async(
 
         features = addQueryParametersFeaturesIfApplicable(features, parameters);
 
-        parameters = addSystemProperties(parameters, this.systemProperties);
         if (!_.isNull(parameters)) {
             Validate.isValidParametersObject(parameters);
         }
@@ -658,38 +651,6 @@ function removeSystemProperties(instance) {
         }
     }
     return copy;
-}
-
-function addSystemProperties(parameters, properties, querystring) {
-    if (properties === MobileServiceSystemProperties.None || (typeof querystring === 'string' && querystring.toLowerCase().indexOf('__systemproperties') >= 0)) {
-        return parameters;
-    }
-
-    // Initialize an object if none passed in
-    parameters = parameters || {};
-
-    // Don't override system properties if already set
-    if(!_.isNull(parameters.__systemProperties)) {
-        return parameters;
-    }
-
-    if (properties === MobileServiceSystemProperties.All) {
-        parameters.__systemProperties = '*';
-    } else {
-        var options = [];
-        if (MobileServiceSystemProperties.CreatedAt & properties) {
-            options.push(MobileServiceSystemColumns.CreatedAt);
-        }
-        if (MobileServiceSystemProperties.UpdatedAt & properties) {
-            options.push(MobileServiceSystemColumns.UpdatedAt);
-        }
-        if (MobileServiceSystemProperties.Version & properties) {
-            options.push(MobileServiceSystemColumns.Version);
-        }
-        parameters.__systemProperties = options.join(',');
-    }
-
-    return parameters;
 }
 
 // Add double quotes and unescape any internal quotes

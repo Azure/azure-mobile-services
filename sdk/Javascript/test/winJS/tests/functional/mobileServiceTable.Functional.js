@@ -556,7 +556,6 @@ $testGroup('Mobile Service Table Tests')
 
         $test('AsyncTableOperationsWithAllSystemProperties')
         .tag('SystemProperties')
-        .tag('dotNet_not_supported') 
         .checkAsync(function () {
 
             var client = $getClient(),
@@ -564,8 +563,6 @@ $testGroup('Mobile Service Table Tests')
                 savedItem,
                 savedVersion,
                 savedUpdatedAt;
-
-            table.systemProperties = WindowsAzure.MobileServiceTable.SystemProperties.All;  //All
 
             return $chain(
                 function () {
@@ -653,16 +650,12 @@ $testGroup('Mobile Service Table Tests')
                 });
         }),
 
-        $test('AsyncTableOperationsWithSystemPropertiesSetExplicitly')
+        $test('AsyncTableOperationsWithSystemProperties')
         .tag('SystemProperties')
-        .tag('dotNet_not_supported') // .NET apps always return all system properties on insert operation
         .checkAsync(function () {
 
             var client = $getClient(),
-                table = client.getTable('StringIdJavascriptTable'),
-                props = WindowsAzure.MobileServiceTable.SystemProperties;
-
-            table.systemProperties = props.Version | props.CreatedAt | props.UpdatedAt;
+                table = client.getTable('StringIdJavascriptTable');
 
             return $chain(
                 function () {
@@ -676,282 +669,17 @@ $testGroup('Mobile Service Table Tests')
                     $assert.isNotNull(item.__updatedAt);
                     $assert.isNotNull(item.__version);
 
-                    table.systemProperties = props.Version | props.CreatedAt;
-                    return table.insert({ string: 'a value' });
-                },
-                function (item) {
-                    $assert.isNotNull(item.__createdAt);
-                    $assert.isNotNull(item.__version);
-                    $assert.isNull(item.__updatedAt);
-
-                    table.systemProperties = props.Version | props.UpdatedAt;
-                    return table.insert({ string: 'a value' });
-                },
-                function (item) {
-                    $assert.isNull(item.__createdAt);
-                    $assert.isNotNull(item.__updatedAt);
-                    $assert.isNotNull(item.__version);
-
-                    table.systemProperties = props.UpdatedAt | props.CreatedAt;
-                    return table.insert({ string: 'a value' });
-                },
-                function (item) {
-                    $assert.isNotNull(item.__createdAt);
-                    $assert.isNotNull(item.__updatedAt);
-                    $assert.isNull(item.__version);
-
-                    table.systemProperties = props.UpdatedAt;
-                    return table.insert({ string: 'a value' });
-                }, function (item) {
-                    $assert.isNull(item.__createdAt);
-                    $assert.isNotNull(item.__updatedAt);
-                    $assert.isNull(item.__version);
-
                     return emptyTable(table);
-                });
-        }),
-
-        $test('AsyncTableOperationsWithAllSystemPropertiesUsingCustomSystemParameters')
-        .tag('SystemProperties')
-        .tag('dotNet_not_supported') // .NET apps don't support filtering system properties
-        .checkAsync(function () {
-            var client = $getClient(),
-                table = client.getTable('StringIdJavascriptTable'),
-                savedItem;
-
-            return $chain(
-                function () {
-                    return emptyTable(table);
-                },
-                function () {
-                    var commands = [];
-                    testData.testValidSystemPropertyQueryStrings.forEach(function (systemProperties) {
-                        var systemPropertiesKeyValue = systemProperties.split('='),
-                            userParams = {},
-                            savedVersion;
-
-                        userParams[systemPropertiesKeyValue[0]] = systemPropertiesKeyValue[1];
-
-                        var lowerCaseSysProperties = systemProperties.toLowerCase(),
-                            shouldHaveCreatedAt = lowerCaseSysProperties.indexOf('created') !== -1,
-                            shouldHaveUpdatedAt = lowerCaseSysProperties.indexOf('updated') !== -1,
-                            shouldHaveVersion = lowerCaseSysProperties.indexOf('version') !== -1;
-
-                        if (lowerCaseSysProperties.indexOf('*') !== -1) {
-                            shouldHaveCreatedAt = shouldHaveUpdatedAt = shouldHaveVersion = true;
-                        }
-
-                        commands.push(function () {
-                            return $chain(
-                                function () {
-                                    return table.insert({ id: 'an id', string: 'a value' }, userParams);
-                                },
-                                function (item) {
-                                    $assert.areEqual(shouldHaveCreatedAt, item.__createdAt !== undefined);
-                                    $assert.areEqual(shouldHaveUpdatedAt, item.__updatedAt !== undefined);
-                                    $assert.areEqual(shouldHaveVersion, item.__version !== undefined);
-                                    savedItem = item;
-
-                                    return table.read('', userParams);
-                                },
-                                function (items) {
-                                    $assert.areEqual(1, items.length);
-
-                                    var item = items[0];
-                                    $assert.areEqual(shouldHaveCreatedAt, item.__createdAt !== undefined);
-                                    $assert.areEqual(shouldHaveUpdatedAt, item.__updatedAt !== undefined);
-                                    $assert.areEqual(shouldHaveVersion, item.__version !== undefined);
-
-                                    return table.where({ __version: savedItem.__version }).read(userParams);
-                                },
-                                function (items) {
-                                    if (shouldHaveVersion) {
-                                        $assert.areEqual(1, items.length);
-                                        var item = items[0];
-                                        $assert.areEqual(shouldHaveCreatedAt, item.__createdAt !== undefined);
-                                        $assert.areEqual(shouldHaveUpdatedAt, item.__updatedAt !== undefined);
-                                        $assert.areEqual(shouldHaveVersion, item.__version !== undefined);
-                                    } else {
-                                        $assert.areEqual(0, items.length);
-                                    }
-
-                                    return table.where({ __createdAt: savedItem.__createdAt }).read(userParams);
-                                },
-                               function (items) {
-                                   if (shouldHaveCreatedAt) {
-                                       $assert.areEqual(1, items.length);
-                                       var item = items[0];
-                                       $assert.areEqual(shouldHaveCreatedAt, item.__createdAt !== undefined);
-                                       $assert.areEqual(shouldHaveUpdatedAt, item.__updatedAt !== undefined);
-                                       $assert.areEqual(shouldHaveVersion, item.__version !== undefined);
-                                   } else {
-                                       $assert.areEqual(0, items.length);
-                                   }
-
-                                   return table.where({ __updatedAt: savedItem.__updatedAt }).read(userParams);
-                               },
-                               function (items) {
-                                   if (shouldHaveUpdatedAt) {
-                                       $assert.areEqual(1, items.length);
-                                       var item = items[0];
-                                       $assert.areEqual(shouldHaveCreatedAt, item.__createdAt !== undefined);
-                                       $assert.areEqual(shouldHaveUpdatedAt, item.__updatedAt !== undefined);
-                                       $assert.areEqual(shouldHaveVersion, item.__version !== undefined);
-                                   } else {
-                                       $assert.areEqual(0, items.length);
-                                   }
-
-                                   return table.lookup(savedItem.id, userParams);
-                               },
-                               function (item) {
-                                   $assert.areEqual(shouldHaveCreatedAt, item.__createdAt !== undefined);
-                                   $assert.areEqual(shouldHaveUpdatedAt, item.__updatedAt !== undefined);
-                                   $assert.areEqual(shouldHaveVersion, item.__version !== undefined);
-
-                                   savedItem.string = 'Hello!';
-                                   savedVersion = item.__version;
-                                   return table.update(savedItem, userParams);
-                               },
-                               function (item) {
-                                   $assert.areEqual(shouldHaveCreatedAt, item.__createdAt !== undefined);
-                                   $assert.areEqual(shouldHaveUpdatedAt, item.__updatedAt !== undefined);
-                                   $assert.areEqual(shouldHaveVersion, item.__version !== undefined);
-                                   if (shouldHaveVersion) {
-                                       $assert.areNotEqual(item.__version, savedVersion);
-                                   }
-
-                                   return table.del(item);
-                               });
-                        });
-                    });
-                    return $chain.apply(null, commands);
-                });
-        }),
-
-        $test('AsyncTableOperationsWithInvalidSystemPropertiesQuerystring')
-        .tag('SystemProperties')
-        .tag('dotNet_not_supported') // .NET runtime apps always get items whatever you put into __systemproperties
-        .checkAsync(function () {
-            var client = $getClient(),
-                table = client.getTable('StringIdJavascriptTable'),
-                commands = [];
-
-            testData.testInvalidSystemPropertyQueryStrings.forEach(function (systemProperties) {
-                var systemPropertiesKeyValue = systemProperties.split('='),
-                    userParams = {};
-
-                userParams[systemPropertiesKeyValue[0]] = systemPropertiesKeyValue[1];
-
-                commands.push(
-                    function () {
-                        $log('querystring: ' + systemProperties);
-                        return table.insert({ id: 'an id', string: 'a value' }, userParams).then(
-                            function (item) {
-                                $assert.fail('Should have failed');
-                            }, function (error) {
-                                //$assert.contains(error.message, "is not a supported system property.");
-                            });
-                    },
-                    function () {
-                        return table.read('', userParams).then(function (items) {
-                            $assert.fail('Should have failed');
-                        }, function (error) {
-                            //$assert.contains(error.message, "is not a supported system property.");
-                        });
-                    }, function () {
-                        return table.where({ __version: 'AAA' }).read(userParams).then(function (items) {
-                            $assert.fail('Should have failed');
-                        }, function (error) {
-                            //$assert.contains(error.message, "is not a supported system property.");
-                        });
-                    }, function () {
-                        return table.lookup('an id', userParams).then(function (items) {
-                            $assert.fail('Should have failed');
-                        }, function (error) {
-                            //$assert.contains(error.message, "is not a supported system property.");
-                        });
-                    }, function () {
-                        return table.update({ id: 'an id', string: 'new value' }, userParams).then(function (items) {
-                            $assert.fail('Should have failed');
-                        }, function (error) {
-                            //$assert.contains(error.message, "is not a supported system property.");
-                        });
-                    });
-            });
-
-            return $chain.apply(null, commands);
-        }),
-
-        $test('AsyncTableOperationsWithInvalidSystemParameterQueryString')
-        .description('test table ops with invalid querystrings')
-        .tag('SystemProperties')
-        .tag('dotNet_not_supported') // .NET apps don't support filtering system properties
-        .checkAsync(function () {
-            var client = $getClient(),
-                table = client.getTable('StringIdJavascriptTable'),
-                savedItem,
-                systemPropertiesKeyValue = testData.testInvalidSystemParameterQueryString.split('='),
-                userParams = {},
-                savedVersion;
-
-            userParams[systemPropertiesKeyValue[0]] = systemPropertiesKeyValue[1];
-
-            return $chain(
-                function () {
-                    return emptyTable(table);
-                },
-                function () {
-                    return table.insert({ id: 'an id', string: 'a value' }, userParams).then(
-                        function (item) {
-                            $assert.fail('Should have failed');
-                        }, function (error) {
-                            //$assert.contains(error.message, 'Custom query parameter names must start with a letter.');
-                        });
-                },
-                function () {
-                    return table.read('', userParams).then(
-                        function (item) {
-                            $assert.fail('Should have failed');
-                        }, function (error) {
-                            //$assert.contains(error.message, 'Custom query parameter names must start with a letter.');
-                        });
-                },
-                function () {
-                    return table.where({ __version: 'AAA'}).read(userParams).then(
-                        function (item) {
-                            $assert.fail('Should have failed');
-                        }, function (error) {
-                            //$assert.contains(error.message, 'Custom query parameter names must start with a letter.');
-                        });
-                },
-                function () {
-                    return table.lookup('an id', userParams).then(
-                        function (item) {
-                            $assert.fail('Should have failed');
-                        }, function (error) {
-                            //$assert.contains(error.message, 'Custom query parameter names must start with a letter.');
-                        });
-                },
-                function () {
-                    return table.update({ id: 'an id', string: 'new value'}, userParams).then(
-                        function (item) {
-                            $assert.fail('Should have failed');
-                        }, function (error) {
-                            //$assert.contains(error.message, 'Custom query parameter names must start with a letter.');
-                        });
                 });
         }),
 
         $test('AsyncFilterSelectOrderingOperationsNotImpactedBySystemProperties')
         .description('test table sorting with various system properties')
         .tag('SystemProperties')
-        .tag('dotNet_not_supported') // .NET apps don't support filtering system properties
         .checkAsync(function () {
             var client = $getClient(),
                 table = client.getTable('StringIdJavascriptTable'),
                 savedItems = [];
-
-            table.systemProperties = WindowsAzure.MobileServiceTable.SystemProperties.All;
 
             return $chain(
                 function () {
@@ -1057,8 +785,6 @@ $testGroup('Mobile Service Table Tests')
                 savedVersion,
                 correctVersion;
 
-            table.systemProperties = WindowsAzure.MobileServiceTable.SystemProperties.All;
-
             return $chain(function () {
                 return emptyTable(table);
             }, function () {
@@ -1099,8 +825,6 @@ $testGroup('Mobile Service Table Tests')
                 table = client.getTable('StringIdJavascriptTable'),
                 savedVersion,
                 correctVersion;
-
-            table.systemProperties = WindowsAzure.MobileServiceTable.SystemProperties.All;
 
             return $chain(function () {
                 return emptyTable(table);
