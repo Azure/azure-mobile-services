@@ -18,6 +18,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         IMobileServiceLocalStore Store { get; }
 
         /// <summary>
+        /// A flag indicating which store tracking options are currently enabled.
+        /// </summary>
+        StoreTrackingOptions StoreTrackingOptions { get; }
+
+        /// <summary>
         /// An instance of <see cref="IMobileServiceSyncHandler"/>
         /// </summary>
         IMobileServiceSyncHandler Handler { get; }

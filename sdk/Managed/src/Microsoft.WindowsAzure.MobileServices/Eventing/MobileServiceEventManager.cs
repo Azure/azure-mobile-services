@@ -45,20 +45,26 @@ namespace Microsoft.WindowsAzure.MobileServices.Eventing
                 TypeInfo messageType = mobileServiceEvent.GetType().GetTypeInfo();
 
                 this.subscriptionLock.EnterReadLock();
+
+                IList<ISubscription> subscriptionMatches = null;
+
                 try
                 {
-                    foreach (var subscription in this.subscriptions.Where(s => s.TargetMessageType.GetTypeInfo().IsAssignableFrom(messageType)))
-                    {
-                        try
-                        {
-                            subscription.OnNext(mobileServiceEvent);
-                        }
-                        catch { }
-                    }
+                    subscriptionMatches = this.subscriptions.Where(s => s.TargetMessageType.GetTypeInfo()
+                        .IsAssignableFrom(messageType)).ToList();
                 }
                 finally
                 {
                     this.subscriptionLock.ExitReadLock();
+                }
+
+                foreach (var subscription in subscriptionMatches)
+                {
+                    try
+                    {
+                        subscription.OnNext(mobileServiceEvent);
+                    }
+                    catch { }
                 }
             });
         }
@@ -107,15 +113,18 @@ namespace Microsoft.WindowsAzure.MobileServices.Eventing
 
         private void Unsubscribe(ISubscription subscription)
         {
-            this.subscriptionLock.EnterWriteLock();
-            try
+            Task.Run(() =>
             {
-                this.subscriptions.Remove(subscription);
-            }
-            finally
-            {
-                this.subscriptionLock.ExitWriteLock();
-            }
+                this.subscriptionLock.EnterWriteLock();
+                try
+                {
+                    this.subscriptions.Remove(subscription);
+                }
+                finally
+                {
+                    this.subscriptionLock.ExitWriteLock();
+                }
+            });
         }
 
         private Type GetMessageType(IObserver<IMobileServiceEvent> observer)

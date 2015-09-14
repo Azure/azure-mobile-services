@@ -87,9 +87,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
         }
 
+        public StoreTrackingOptions StoreTrackingOptions
+        {
+            get { return this.storeTrackingOptions; }
+        }
+
         public Task InitializeAsync(IMobileServiceLocalStore store, IMobileServiceSyncHandler handler)
         {
-            return InitializeAsync(store, handler, StoreTrackingOptions.AllNotificationsAndChangeDetection);
+            return InitializeAsync(store, handler, StoreTrackingOptions.None);
         }
 
         public async Task InitializeAsync(IMobileServiceLocalStore store, IMobileServiceSyncHandler handler, StoreTrackingOptions trackingOptions)

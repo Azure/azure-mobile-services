@@ -32,6 +32,27 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests.Eventing
         }
 
         [TestMethod]
+        public void Subscribe_OnHandler_Succeeds()
+        {
+            var eventManager = new MobileServiceEventManager();
+
+            var mobileServiceEvent = new MobileServiceEvent<bool>("msevent", false);
+            bool eventHandled = false;
+            IDisposable innerSubscription = null;
+            IDisposable outerSubscription = eventManager
+                .Subscribe<IMobileServiceEvent>(e => innerSubscription = eventManager.Subscribe<IMobileServiceEvent>(b => eventHandled = true));
+
+
+            bool result = eventManager.PublishAsync(mobileServiceEvent).Wait(1000);
+            Assert.IsTrue(result, "Subscribe failed");
+
+            outerSubscription.Dispose();
+
+            eventManager.PublishAsync(mobileServiceEvent).Wait(1000);
+            Assert.IsTrue(eventHandled, "Subscribe failed");
+        }
+
+        [TestMethod]
         public void Subscribe_FiltersOnObserverGenericType()
         {
             var eventManager = new MobileServiceEventManager();
