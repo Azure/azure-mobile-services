@@ -99,8 +99,8 @@ static NSString *const httpDelete = @"DELETE";
 
 
 -(void) setIfMatchVersion:(NSString *)version
-{
-    if (!version) {
+ {
+    if (version == nil) {
         return;
     }
     
@@ -117,8 +117,12 @@ static NSString *const httpDelete = @"DELETE";
 +(NSString *) versionFromItem:(NSDictionary *)item ItemId:(id)itemId
 {
     if([itemId isKindOfClass:[NSString class]]) {
-        return item[MSSystemColumnVersion];
+        id version = item[MSSystemColumnVersion];
+        if ([version isKindOfClass:[NSString class]]) {
+            return version;
+        }
     }
+    
     return nil;
 }
 
