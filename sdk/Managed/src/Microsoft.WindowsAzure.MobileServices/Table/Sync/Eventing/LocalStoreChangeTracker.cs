@@ -145,7 +145,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             {
                 foreach (var id in recordIds)
                 {
-                    TrackStoreOperationAsync(query.TableName, id, StoreOperationKind.Delete);
+                    TrackStoreOperationAsync(query.TableName, id, LocalStoreOperationKind.Delete);
                 }
             }
         }
@@ -176,7 +176,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
                 foreach (var id in notificationIds)
                 {
-                    TrackStoreOperationAsync(tableName, id, StoreOperationKind.Delete);
+                    TrackStoreOperationAsync(tableName, id, LocalStoreOperationKind.Delete);
                 }
             }
             else
@@ -241,13 +241,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 foreach (var item in items)
                 {
                     string itemId = this.objectReader.GetId(item);
-                    StoreOperationKind operationKind = StoreOperationKind.Upsert;
+                    LocalStoreOperationKind operationKind = LocalStoreOperationKind.Upsert;
 
                     if (analyzeUpserts)
                     {
                         if (existingRecords.ContainsKey(itemId))
                         {
-                            operationKind = StoreOperationKind.Update;
+                            operationKind = LocalStoreOperationKind.Update;
 
                             // If the update isn't a result of a local operation, check if the item exposes a version property
                             // and if we truly have a new version (an actual change) before tracking the change. 
@@ -261,7 +261,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                         }
                         else
                         {
-                            operationKind = StoreOperationKind.Insert;
+                            operationKind = LocalStoreOperationKind.Insert;
                         }
                     }
 
@@ -299,7 +299,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 rec => includeVersion ? rec[MobileServiceSystemColumns.Version].ToString() : null));
         }
 
-        private async Task TrackStoreOperationAsync(string tableName, string itemId, StoreOperationKind operationKind)
+        private async Task TrackStoreOperationAsync(string tableName, string itemId, LocalStoreOperationKind operationKind)
         {
             var operation = new StoreOperation(tableName, itemId, operationKind, this.trackingContext.Source, this.trackingContext.BatchId);
 

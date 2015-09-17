@@ -15,7 +15,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     /// </summary>
     public class StoreOperation
     {
-        public StoreOperation(string tableName, string recordId, StoreOperationKind kind, StoreOperationSource source, string batchId)
+        public StoreOperation(string tableName, string recordId, LocalStoreOperationKind kind, StoreOperationSource source, string batchId)
         {
             if (tableName == null)
             {
@@ -43,7 +43,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         public string RecordId { get; set; }
 
-        public StoreOperationKind Kind { get; set; }
+        public LocalStoreOperationKind Kind { get; set; }
 
         public StoreOperationSource Source { get; set; }
     }

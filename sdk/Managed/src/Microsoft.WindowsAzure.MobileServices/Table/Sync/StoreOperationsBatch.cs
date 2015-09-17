@@ -20,14 +20,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     {
         private string batchId;
         private StoreOperationSource source;
-        private Dictionary<StoreOperationKind, int> operationsCountByType;
+        private Dictionary<LocalStoreOperationKind, int> operationsCountByType;
         private SemaphoreSlim operationsCountSemaphore = new SemaphoreSlim(1);
 
         public StoreOperationsBatch(string batchId, StoreOperationSource source)
         {
             this.batchId = batchId;
             this.source = source;
-            this.operationsCountByType = new Dictionary<StoreOperationKind, int>();
+            this.operationsCountByType = new Dictionary<LocalStoreOperationKind, int>();
         }
 
         public string BatchId
@@ -48,7 +48,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
         }
 
-        public int GetOperationCountByKind(StoreOperationKind operationKind)
+        public int GetOperationCountByKind(LocalStoreOperationKind operationKind)
         {
             if (this.operationsCountByType.ContainsKey(operationKind))
             {
@@ -58,7 +58,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return 0;
         }
 
-        internal async Task IncrementOperationCount(StoreOperationKind operationKind)
+        internal async Task IncrementOperationCount(LocalStoreOperationKind operationKind)
         {
             try
             {

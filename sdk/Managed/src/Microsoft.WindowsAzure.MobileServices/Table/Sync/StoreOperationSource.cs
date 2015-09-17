@@ -25,8 +25,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// </summary>
         LocalPurge,
         /// <summary>
-        /// The operation was triggered by a Pull action and reflects a newer version of the record from the server or 
-        /// the result of a conflict resolution handled on the client.
+        /// The operation was triggered by a Pull action and reflects a newer version of the record from the server.
         /// </summary>
         ServerPull,
         /// <summary>

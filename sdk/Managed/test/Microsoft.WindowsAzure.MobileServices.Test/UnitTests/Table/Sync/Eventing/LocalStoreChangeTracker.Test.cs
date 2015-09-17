@@ -76,9 +76,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests.Table.Sync.Eventi
 
             Assert.IsNotNull(batchEvent);
             Assert.AreEqual(batchEvent.Batch.OperationCount, 3);
-            Assert.AreEqual(batchEvent.Batch.GetOperationCountByKind(StoreOperationKind.Update), 1);
-            Assert.AreEqual(batchEvent.Batch.GetOperationCountByKind(StoreOperationKind.Insert), 1);
-            Assert.AreEqual(batchEvent.Batch.GetOperationCountByKind(StoreOperationKind.Delete), 1);
+            Assert.AreEqual(batchEvent.Batch.GetOperationCountByKind(LocalStoreOperationKind.Update), 1);
+            Assert.AreEqual(batchEvent.Batch.GetOperationCountByKind(LocalStoreOperationKind.Insert), 1);
+            Assert.AreEqual(batchEvent.Batch.GetOperationCountByKind(LocalStoreOperationKind.Delete), 1);
         }
 
         [AsyncTestMethod]
@@ -116,7 +116,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests.Table.Sync.Eventi
             await changeTracker.DeleteAsync("test", "123");
 
             Assert.IsNotNull(operationEvent);
-            Assert.AreEqual(operationEvent.Operation.Kind, StoreOperationKind.Delete);
+            Assert.AreEqual(operationEvent.Operation.Kind, LocalStoreOperationKind.Delete);
             Assert.AreEqual(operationEvent.Operation.RecordId, "123");
             Assert.AreEqual(operationEvent.Operation.TableName, "test");
         }
@@ -145,7 +145,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests.Table.Sync.Eventi
             await changeTracker.DeleteAsync(query);
 
             Assert.IsNotNull(operationEvent);
-            Assert.AreEqual(operationEvent.Operation.Kind, StoreOperationKind.Delete);
+            Assert.AreEqual(operationEvent.Operation.Kind, LocalStoreOperationKind.Delete);
             Assert.AreEqual(operationEvent.Operation.RecordId, "123");
             Assert.AreEqual(operationEvent.Operation.TableName, "test");
         }

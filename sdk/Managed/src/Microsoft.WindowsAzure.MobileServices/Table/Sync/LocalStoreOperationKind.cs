@@ -10,22 +10,25 @@ using System.Threading.Tasks;
 
 namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
-    public enum StoreOperationKind
+    /// <summary>
+    /// Defines the kinds of operations performed against the local store.
+    /// </summary>
+    public enum LocalStoreOperationKind
     {
         /// <summary>
-        /// Insert operation.
+        /// Insert operation against the local store.
         /// </summary>
         Insert,
         /// <summary>
-        /// Update operation.
+        /// Update operation against the local store.
         /// </summary>
         Update,
         /// <summary>
-        /// Update or insert operation.
+        /// Update or insert operation against the local store.
         /// </summary>
         Upsert,
         /// <summary>
-        /// Delete operation.
+        /// Delete operation against the local store.
         /// </summary>
         Delete,
     }
