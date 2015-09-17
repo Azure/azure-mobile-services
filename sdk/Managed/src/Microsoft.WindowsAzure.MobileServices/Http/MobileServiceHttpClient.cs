@@ -12,6 +12,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
@@ -214,6 +215,126 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         /// <summary>
         /// Makes an HTTP request that includes the standard Mobile Services
+        /// headers. It will use an HttpClient with user-defined http handlers.
+        /// </summary>
+        /// <param name="method">
+        /// The HTTP method used to request the resource.
+        /// </param>
+        /// <param name="uriPathAndQuery">
+        /// The URI of the resource to request (relative to the Mobile Services
+        /// runtime).
+        /// </param>
+        /// <param name="user">
+        /// The object representing the user on behalf of whom the request will be sent.
+        /// </param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
+        /// <param name="content">
+        /// Optional content to send to the resource.
+        /// </param>
+        /// <param name="ensureResponseContent">
+        /// Optional parameter to indicate if the response should include content.
+        /// </param>
+        /// <param name="requestHeaders">
+        /// Additional request headers to include with the request.
+        /// </param>
+        /// <param name="features">
+        /// Value indicating which features of the SDK are being used in this call. Useful for telemetry.
+        /// </param>
+        /// <returns>
+        /// The response.
+        /// </returns>
+        public Task<MobileServiceHttpResponse> RequestAsync(HttpMethod method,
+                                                             string uriPathAndQuery,
+                                                             MobileServiceUser user,
+                                                             CancellationToken cancellationToken,
+                                                             string content = null,
+                                                             bool ensureResponseContent = true,
+                                                             IDictionary<string, string> requestHeaders = null,
+                                                             MobileServiceFeatures features = MobileServiceFeatures.None)
+        {
+            requestHeaders = FeaturesHelper.AddFeaturesHeader(requestHeaders, features);
+            return this.RequestAsync(true, method, uriPathAndQuery, user, content, ensureResponseContent, requestHeaders);
+        }
+
+        /// <summary>
+        /// Makes an HTTP request that includes the standard Mobile Services
+        /// headers. It will use an HttpClient that optionally has user-defined 
+        /// http handlers.
+        /// </summary>
+        /// <param name="UseHandlers">Determines if the HttpClient will use user-defined http handlers</param>
+        /// <param name="method">
+        /// The HTTP method used to request the resource.
+        /// </param>
+        /// <param name="uriPathAndQuery">
+        /// The URI of the resource to request (relative to the Mobile Services
+        /// runtime).
+        /// </param>
+        /// <param name="user">
+        /// The object representing the user on behalf of whom the request will be sent.
+        /// </param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
+        /// <param name="content">
+        /// Optional content to send to the resource.
+        /// </param>
+        /// <param name="ensureResponseContent">
+        /// Optional parameter to indicate if the response should include content.
+        /// </param>
+        /// <param name="requestHeaders">
+        /// Additional request headers to include with the request.
+        /// </param>
+        /// <returns>
+        /// The content of the response as a string.
+        /// </returns>
+        private async Task<MobileServiceHttpResponse> RequestAsync(bool UseHandlers,
+                                                        HttpMethod method,
+                                                        string uriPathAndQuery,
+                                                        MobileServiceUser user,
+                                                        CancellationToken cancellationToken,
+                                                        string content = null,
+                                                        bool ensureResponseContent = true,
+                                                        IDictionary<string, string> requestHeaders = null)
+        {
+            Debug.Assert(method != null);
+            Debug.Assert(!string.IsNullOrEmpty(uriPathAndQuery));
+
+            // Create the request
+            HttpContent httpContent = CreateHttpContent(content);
+            HttpRequestMessage request = this.CreateHttpRequestMessage(method, uriPathAndQuery, requestHeaders, httpContent, user);
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(RequestJsonContentType));
+
+            // Get the response
+            HttpClient client;
+            if (UseHandlers)
+            {
+                client = this.httpClient;
+            }
+            else
+            {
+                client = this.httpClientSansHandlers;
+            }
+            HttpResponseMessage response = await this.SendRequestAsync(client, request, ensureResponseContent, cancellationToken);
+            string responseContent = await GetResponseContent(response);
+            string etag = null;
+            if (response.Headers.ETag != null)
+            {
+                etag = response.Headers.ETag.Tag;
+            }
+
+            LinkHeaderValue link = null;
+            if (response.Headers.Contains("Link"))
+            {
+                link = LinkHeaderValue.Parse(response.Headers.GetValues("Link").FirstOrDefault());
+            }
+
+            // Dispose of the request and response
+            request.Dispose();
+            response.Dispose();
+
+            return new MobileServiceHttpResponse(responseContent, etag, link);
+        }
+
+        /// <summary>
+        /// Makes an HTTP request that includes the standard Mobile Services
         /// headers. It will use an HttpClient that optionally has user-defined 
         /// http handlers.
         /// </summary>
@@ -327,6 +448,55 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             return response;
         }
+
+        /// <summary>
+        /// Makes an HTTP request that includes the standard Mobile Services
+        /// headers. It will use an HttpClient with user-defined http handlers.
+        /// </summary>
+        /// <param name="method">
+        /// The HTTP method used to request the resource.
+        /// </param>
+        /// <param name="uriPathAndQuery">
+        /// The URI of the resource to request (relative to the Mobile Services
+        /// runtime).
+        /// </param>
+        /// <param name="user">
+        /// The object representing the user on behalf of whom the request will be sent.
+        /// </param>
+        /// <param name="content">
+        /// Content to send to the resource.
+        /// </param>
+        /// <param name="requestHeaders">
+        /// Additional request headers to include with the request.
+        /// </param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
+        /// <param name="features">
+        /// Value indicating which features of the SDK are being used in this call. Useful for telemetry.
+        /// </param>
+        /// <returns>
+        /// An <see cref="HttpResponseMessage"/>.
+        /// </returns>
+        public async Task<HttpResponseMessage> RequestAsync(HttpMethod method, 
+                                                            string uriPathAndQuery, 
+                                                            MobileServiceUser user, 
+                                                            HttpContent content, 
+                                                            IDictionary<string, string> requestHeaders, 
+                                                            CancellationToken cancellationToken,
+                                                            MobileServiceFeatures features = MobileServiceFeatures.None)
+        {
+            Debug.Assert(method != null);
+            Debug.Assert(!string.IsNullOrEmpty(uriPathAndQuery));
+
+            requestHeaders = FeaturesHelper.AddFeaturesHeader(requestHeaders, features);
+            // Create the request
+            HttpRequestMessage request = this.CreateHttpRequestMessage(method, uriPathAndQuery, requestHeaders, content, user);
+
+            // Get the response
+            HttpResponseMessage response = await this.SendRequestAsync(httpClient, request, ensureResponseContent: false, cancellationToken: cancellationToken);
+
+            return response;
+        }
+
 
         /// <summary>
         /// Implemenation of <see cref="IDisposable"/>
@@ -563,6 +733,57 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             return request;
+        }
+
+        /// <summary>
+        /// Sends the <paramref name="request"/> with the given <paramref name="client"/>.
+        /// </summary>
+        /// <param name="client">
+        /// The <see cref="HttpClient"/> to send the request with.
+        /// </param>
+        /// <param name="request">
+        /// The <see cref="HttpRequestMessage"/> to be sent.
+        /// </param>
+        /// <param name="ensureResponseContent">
+        /// Optional parameter to indicate if the response should include content.
+        /// </param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
+        /// <returns>
+        /// An <see cref="HttpResponseMessage"/>.
+        /// </returns>
+        private async Task<HttpResponseMessage> SendRequestAsync(HttpClient client, 
+                                                                 HttpRequestMessage request, 
+                                                                 bool ensureResponseContent,
+                                                                 CancellationToken cancellationToken)
+        {
+            Debug.Assert(client != null);
+            Debug.Assert(request != null);
+
+            // Send the request and get the response back as string
+            HttpResponseMessage response = await client.SendAsync(request, cancellationToken);
+
+            // Throw errors for any failing responses
+            if (!response.IsSuccessStatusCode)
+            {
+                await ThrowInvalidResponse(request, response);
+            }
+
+            // If there was supposed to be response content and there was not, throw
+            if (ensureResponseContent)
+            {
+                long? contentLength = null;
+                if (response.Content != null)
+                {
+                    contentLength = response.Content.Headers.ContentLength;
+                }
+
+                if (contentLength == null || contentLength <= 0)
+                {
+                    throw new MobileServiceInvalidOperationException("The server did not provide a response with the expected content.", request, response);
+                }
+            }
+
+            return response;
         }
 
         /// <summary>
