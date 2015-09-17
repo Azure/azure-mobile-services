@@ -4,6 +4,10 @@
 - [Latest iOS 2.x SDK](http://aka.ms/gc6fex)
 - [iOS 1.2.4 SDK](http://aka.ms/kymw2g)
 
+### Version 2.2.2
+- Fixed issue with MSCoreDataStore.h that prevented it from bring used as part of a cocapod
+- Updated build tooling to use XCode 7 and include BitCode [issue #794](https://github.com/Azure/azure-mobile-services/issues/794)
+
 ### Version 2.2.1
 - Fixed [issue #768](https://github.com/Azure/azure-mobile-services/issues/768) that was causing a memory leak when using NSURLSession [204f210](https://github.com/Azure/azure-mobile-services/commit/204f210)
 - Fix NSNull templateName [9347390](https://github.com/Azure/azure-mobile-services/commit/9347390)
@@ -54,7 +58,7 @@
 
 ### Version 1.2.3
 - Fix issue with const when using both Azure Messaging and Mobile Services frameworks
-- Fix issue [#306](https://github.com/Azure/azure-mobile-services/issues/306) with how arrays passed as query string params to table and custom APIs are converted 
+- Fix issue [#306](https://github.com/Azure/azure-mobile-services/issues/306) with how arrays passed as query string params to table and custom APIs are converted
 - Fix issue where system properties (__version, __updatedAt, etc) were returned to the caller when they were not requested
 
 ### Version 1.2.2
@@ -69,7 +73,7 @@
 
 ### Version 1.1.2
 - Supports the arm64 architecture
-- Now requires iOS 6 or newer to use 
+- Now requires iOS 6 or newer to use
 
 ### Version 1.1.1
 - Support for optimistic concurrency (version / ETag) validation
@@ -78,4 +82,3 @@
 
 ### Version 1.1.0
 - Support for tables with string ids
-
