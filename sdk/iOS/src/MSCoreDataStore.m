@@ -3,6 +3,11 @@
 // ----------------------------------------------------------------------------
 
 #import "MSCoreDataStore.h"
+#import "MSTable.h"
+#import "MSSyncTable.h"
+#import "MSQuery.h"
+#import "MSSyncContextReadResult.h"
+#import "MSError.h"
 
 NSString *const SystemColumnPrefix = @"__";
 NSString *const StoreSystemColumnPrefix = @"ms_";
