@@ -21,7 +21,7 @@ if [ "$SET_BUILD_VERSION" == "YES" ]; then
 fi
 
 # Build the framework
-xcodebuild OTHER_CFLAGS="-fembed-bitcode" -target Framework OBJROOT=./Build SYMROOT=./Build
+xcodebuild OTHER_CFLAGS="-fembed-bitcode -miphoneos-version-min=7.0" -target Framework OBJROOT=./Build SYMROOT=./Build
 
 # Move back to the original WindowsAzureMobileServices.h file
 if [ "$SET_BUILD_VERSION" == "YES" ]; then
