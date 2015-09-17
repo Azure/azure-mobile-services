@@ -21,7 +21,7 @@ if [ "$SET_BUILD_VERSION" == "YES" ]; then
 fi
 
 # Build the framework
-xcodebuild -target Framework OBJROOT=./Build SYMROOT=./Build
+xcodebuild OTHER_CFLAGS="-fembed-bitcode" -target Framework OBJROOT=./Build SYMROOT=./Build
 
 # Move back to the original WindowsAzureMobileServices.h file
 if [ "$SET_BUILD_VERSION" == "YES" ]; then
@@ -35,7 +35,7 @@ rsync -rlK ../../sdk/iOS/Build/Release-iphoneos/WindowsAzureMobileServices.frame
 cp license.rtf WindowsAzureMobileServices.framework
 
 # Zip the framework
-zip -r WindowsAzureMobileServices.framework.zip WindowsAzureMobileServices.framework 
+zip -r WindowsAzureMobileServices.framework.zip WindowsAzureMobileServices.framework
 
 # Lastly, copy to the build share
 if [ "$COPY_TO_SHARE" == "YES" ]; then
@@ -44,4 +44,4 @@ if [ "$COPY_TO_SHARE" == "YES" ]; then
   do
     rsync -rlK WindowsAzureMobileServices.framework.zip $SHARE_PATH
   done
-fi 
+fi
