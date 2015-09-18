@@ -47,8 +47,10 @@ import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
 import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceJsonSyncTable;
 import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncTable;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationError;
+import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationKind;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushFailedException;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushStatus;
+import com.microsoft.windowsazure.mobileservices.table.sync.queue.OperationErrorList;
 import com.microsoft.windowsazure.mobileservices.table.sync.synchandler.SimpleSyncHandler;
 
 import org.apache.http.Header;
@@ -479,7 +481,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
 
-        Query query = QueryOperations.tableName(table.getName()).top(2);
+        Query query = QueryOperations.field("String").eq("noMatch");
 
         table.pull(query, "QueryKey").get();
 
@@ -487,15 +489,14 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
                 serviceFilterContainer.Requests.get(0).Url,
                 EncodingUtilities
                         .percentEncodeSpaces(
-                                "http://myapp.com/tables/stringidtype?$top=50&$orderby=__updatedAt%20asc,id%20asc&__includeDeleted=true&__systemproperties=__updatedAt,__version,__deleted"));
+                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20('noMatch')&$top=50&$orderby=__updatedAt%20asc&__includeDeleted=true&__systemproperties=__updatedAt,__version,__deleted"));
 
         assertEquals(
                 serviceFilterContainer.Requests.get(1).Url,
                 EncodingUtilities
                         .percentEncodeSpaces(
-                                "http://myapp.com/tables/stringidtype?$filter=__updatedAt%20gt%20(datetimeoffset'" + updatedAt1 +
-                                        "')%20and%20(id%20ne%20('def'))%20and%20(id%20ne%20('def'))%20or%20(__updatedAt%20ge%20(datetimeoffset'" + updatedAt1 +
-                                        "')%20and%20id%20gt%20('def'))&$top=50&$orderby=__updatedAt%20asc,id%20asc&__includeDeleted=true&__systemproperties=__updatedAt,__version,__deleted"));
+                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20('noMatch')%20and%20" +
+                                        "(__updatedAt%20ge%20(datetimeoffset'"+updatedAt1 +"'))&$top=50&$orderby=__updatedAt%20asc&__includeDeleted=true&__systemproperties=__updatedAt,__version,__deleted"));
     }
 
     public void testIncrementalPullSaveLastUpdatedAtDate() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
@@ -536,6 +537,55 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
                 .get("maxupdateddate").getAsString();
 
         assertEquals(updatedAt2, stringMaxUpdatedDate);
+    }
+
+    public void testincrementalSyncUsesSkipWhenMaxUpdateAtIsSame() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
+
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+        ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
+        String queryKey = "QueryKey";
+        String incrementalPullStrategyTable = "__incrementalPullData";
+
+        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        Date d = new Date();
+        String updatedAt1 = sdf.format(d);
+        d.setTime(d.getTime() + 1000L);
+        String updatedAt2 = sdf.format(d);
+
+        client = client.withFilter(getTestFilter(serviceFilterContainer, false,
+                        "[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt1 + "\"}," +
+                        "{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt1 + "\"}]",
+                "[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt1 + "\"}," +
+                        "{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt1 + "\"}]",
+                "[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt2 + "\"}," +
+                        "{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt2 + "\"}]"
+        ));
+
+        client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+        MobileServiceSyncTable<StringIdType> table = client.getSyncTable(StringIdType.class);
+
+        Query query = QueryOperations.field("String").eq("Hey");
+
+        table.pull(query, queryKey).get();
+
+        // Skip added
+        assertEquals(
+                serviceFilterContainer.Requests.get(2).Url,
+                EncodingUtilities
+                        .percentEncodeSpaces("http://myapp.com/tables/stringidtype?$filter=String%20eq%20('Hey')%20and%20(__updatedAt%20ge%20(datetimeoffset'"+updatedAt1+"'))" +
+                                "&$top=50&$skip=2&" +
+                                "$orderby=__updatedAt%20asc&__includeDeleted=true&__systemproperties=__updatedAt,__version,__deleted"));
+        // Skip removed
+        assertEquals(
+                serviceFilterContainer.Requests.get(3).Url,
+                EncodingUtilities
+                        .percentEncodeSpaces("http://myapp.com/tables/stringidtype?$filter=String%20eq%20('Hey')%20and%20(__updatedAt%20ge%20(datetimeoffset'"+updatedAt2+"'))" +
+                                "&$top=50&$orderby=__updatedAt%20asc&__includeDeleted=true&__systemproperties=__updatedAt,__version,__deleted"));
     }
 
     public void testPurgeDoesNotThrowExceptionWhenThereIsNoOperationInTable() throws MalformedURLException, InterruptedException, ExecutionException {
@@ -728,6 +778,21 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         assertEquals(client.getSyncContext().getPendingOperations(), 0);
     }
 
+    public void testOperationErrorLoadCorrectly() throws Throwable {
+
+        MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+
+        OperationErrorList operationErrorList = OperationErrorList.load(store);
+
+        TableOperationError tableOperationError = new TableOperationError("Id1", TableOperationKind.Update, "Table1", "ItemId", null, "Message", 400, null, null);
+
+        operationErrorList.add(tableOperationError);
+
+        //Load with the previous inserted operation
+        OperationErrorList.load(store);
+
+    }
+
     public void testCancelAndDiscardItem() throws Throwable {
         MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
         final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
@@ -775,7 +840,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             assertEquals(mspfe.getPushCompletionResult().getOperationErrors().size(), 1);
             assertEquals(client.getSyncContext().getPendingOperations(), 1);
 
-            TableOperationError tableOperationError =mspfe.getPushCompletionResult().getOperationErrors().get(0);
+            TableOperationError tableOperationError = mspfe.getPushCompletionResult().getOperationErrors().get(0);
 
             client.getSyncContext().cancelAndDiscardItem(tableOperationError);
 

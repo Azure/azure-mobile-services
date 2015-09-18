@@ -5,6 +5,7 @@
 #import <Foundation/Foundation.h>
 #import "MSSyncContext.h"
 #import "MSTableOperation.h"
+#import "MSPullSettings.h"
 
 @class MSClient;
 @class MSOperationQueue;
@@ -29,7 +30,7 @@
 
 -(void) readWithQuery:(MSQuery *)query completion:(MSReadQueryBlock)completion;
 
--(NSOperation *) pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion;
+-(NSOperation *) pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId settings:(MSPullSettings *)pullSettings completion:(MSSyncBlock)completion;
 
 -(NSOperation *) purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion;
 

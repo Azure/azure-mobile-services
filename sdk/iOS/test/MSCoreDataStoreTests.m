@@ -84,7 +84,7 @@ static NSString *const TableName = @"TodoItem";
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:syncTable predicate:nil];
     MSSyncContextReadResult *result = [self.store readWithQuery:query orError:&error];
     XCTAssertNil(error, @"readWithQuery: failed: %@", error.description);
-    XCTAssertEqual(result.items.count, 1, "Expected exactly one item in the table");
+    XCTAssertEqual(result.items.count, 1, @"Expected exactly one item in the table");
     XCTAssertTrue([result.items[0][@"id"] isEqualToString:updatedItemId], @"Incorrect item id. Did the query return wrong item?");
     XCTAssertTrue([result.items[0][@"text"] isEqualToString:updatedText], @"Incorrect text. Did the query return wrong item?");
 
@@ -95,7 +95,7 @@ static NSString *const TableName = @"TodoItem";
     // Read to ensure the item is actually gone
     result = [self.store readWithQuery:query orError:&error];
     XCTAssertNil(error, @"readWithQuery: failed: %@", error.description);
-    XCTAssertEqual(result.items.count, 0, "Expected the table to be empty");
+    XCTAssertEqual(result.items.count, 0, @"Expected the table to be empty");
 }
 
 
@@ -258,6 +258,40 @@ static NSString *const TableName = @"TodoItem";
 
     XCTAssertNotNil(error, @"upsert failed: %@", error.description);
     XCTAssertEqual(error.code, MSSyncTableLocalStoreError);
+}
+
+-(void)testReadTable_RecordWithNullPropertyValue
+{
+    NSError *error;
+    NSArray *testArray = @[@{@"id":@"ABC", @"text": [NSNull null]}];
+    
+    [self.store upsertItems:testArray table:TableName orError:&error];
+    XCTAssertNil(error, @"upsert failed: %@", error.description);
+    
+    NSDictionary *item = [self.store readTable:TableName withItemId:@"ABC" orError:&error];
+    XCTAssertNil(error, @"readTable:withItemId: failed: %@", error.description);
+    
+    XCTAssertEqual(item[@"text"], [NSNull null], @"Incorrect text value. Should have been null");
+}
+
+-(void)testReadWithQuery_RecordWithNullPropertyValue
+{
+    NSError *error;
+    NSArray *testArray = @[@{@"id":@"ABC", @"text": [NSNull null]}];
+    
+    [self.store upsertItems:testArray table:TableName orError:&error];
+    XCTAssertNil(error, @"upsert failed: %@", error.description);
+    
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:TableName client:self.client];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
+    
+    MSSyncContextReadResult *result = [self.store readWithQuery:query orError:&error];
+    XCTAssertNil(error, @"readWithQuery: failed: %@", error.description);
+    XCTAssertEqual(result.items.count, 1);
+    
+    NSDictionary *item = (result.items)[0];
+    
+    XCTAssertEqual(item[@"text"], [NSNull null], @"Incorrect text value. Should have been null");
 }
 
 -(void)testReadWithQuery

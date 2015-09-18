@@ -33,7 +33,32 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </exception>
         public static Task PullAsync(this IMobileServiceSyncTable table, string queryId, string query)
         {
-            return table.PullAsync(queryId, query, null, CancellationToken.None);
+            return table.PullAsync(queryId, query, null, CancellationToken.None, pullOptions: null);
+        }
+
+        /// <summary>
+        /// Pulls all items that match the given query from the associated remote table. Supports incremental sync.
+        /// </summary>
+        /// <param name="table">The instance of table to execute pull on.</param>
+        /// <param name="queryId">
+        /// A string that uniquely identifies this query and is used to keep track of its sync state. Supplying this parameter enables incremental sync whenever the same key is used again. Must be 25 characters or less and contain only alphanumeric characters, dash, and underscore.
+        /// </param>
+        /// <param name="query">
+        /// An OData query that determines which items to 
+        /// pull from the remote table.
+        /// </param>
+        /// <param name="pullOptions">
+        /// PullOptions that determine how to pull data from the remote table
+        /// </param>
+        /// <returns>
+        /// A task that completes when pull operation has finished.
+        /// </returns>
+        /// <exception cref="System.ArgumentException">
+        /// Thrown when <paramref name="queryId"/> does not match the regular expression <value>[a-zA-Z][a-zA-Z0-9_-]{0,24}</value>.
+        /// </exception>
+        public static Task PullAsync(this IMobileServiceSyncTable table, string queryId, string query, PullOptions pullOptions)
+        {
+            return table.PullAsync(queryId, query, null, CancellationToken.None, pullOptions);
         }
 
 
@@ -62,9 +87,68 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </exception>
         public static Task PullAsync(this IMobileServiceSyncTable table, string queryId, string query, IDictionary<string, string> parameters, CancellationToken cancellationToken)
         {
-            return table.PullAsync(queryId, query, parameters, true, cancellationToken: cancellationToken);
+            return table.PullAsync(queryId, query, parameters, true, cancellationToken: cancellationToken, pullOptions: null);
         }
 
+        /// <summary>
+        /// Pulls all items that match the given query from the associated remote table. Supports incremental sync.
+        /// </summary>
+        /// <param name="table">The instance of table to execute pull on.</param>
+        /// <param name="queryId">
+        /// A string that uniquely identifies this query and is used to keep track of its sync state. Supplying this parameter enables incremental sync whenever the same key is used again. Must be 25 characters or less and contain only alphanumeric characters, dash, and underscore.
+        /// </param>
+        /// <param name="query">
+        /// An OData query that determines which items to 
+        /// pull from the remote table.
+        /// </param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in 
+        /// the request URI query string.
+        /// </param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe
+        /// </param>
+        /// <param name="pullOptions">
+        /// PullOptions that determine how to pull data from the remote table
+        /// </param>
+        /// <returns>
+        /// A task that completes when pull operation has finished.
+        /// </returns>
+        /// <exception cref="System.ArgumentException">
+        /// Thrown when <paramref name="queryId"/> does not match the regular expression <value>[a-zA-Z][a-zA-Z0-9_-]{0,24}</value>.
+        /// </exception>
+        public static Task PullAsync(this IMobileServiceSyncTable table, string queryId, string query, IDictionary<string, string> parameters, CancellationToken cancellationToken, PullOptions pullOptions)
+        {
+            return table.PullAsync(queryId, query, parameters, true, cancellationToken: cancellationToken, pullOptions: pullOptions);
+        }
+
+        /// <summary>
+        /// Pulls all items that match the given query from the associated remote table. Supports incremental sync.
+        /// </summary>
+        /// <param name="queryId">
+        /// A string that uniquely identifies this query and is used to keep track of its sync state. Supplying this parameter enables incremental sync whenever the same key is used again.
+        /// </param>
+        /// <param name="query">
+        /// An OData query that determines which items to 
+        /// pull from the remote table.
+        /// </param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in 
+        /// the request URI query string.
+        /// </param>
+        /// <param name="pushOtherTables">
+        /// Push other tables if this table is dirty.
+        /// </param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe
+        /// </param>
+        /// <returns>
+        /// A task that completes when pull operation has finished.
+        /// </returns>
+        public static Task PullAsync(this IMobileServiceSyncTable table, string queryId, string query,
+            IDictionary<string, string> parameters, bool pushOtherTables, CancellationToken cancellationToken)
+        {
+            return table.PullAsync(queryId, query, parameters, pushOtherTables, cancellationToken, pullOptions:null);
+        }
+        
         /// <summary>
         /// Pulls all items that match the given query from the associated remote table.
         /// </summary>
@@ -86,7 +170,34 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </exception>
         public static Task PullAsync<T, U>(this IMobileServiceSyncTable<T> table, string queryId, IMobileServiceTableQuery<U> query, CancellationToken cancellationToken)
         {
-            return table.PullAsync(queryId, query, pushOtherTables: true, cancellationToken: cancellationToken);
+            return table.PullAsync(queryId, query, pushOtherTables: true, cancellationToken: cancellationToken, pullOptions: null);
+        }
+
+        /// <summary>
+        /// Pulls all items that match the given query from the associated remote table.
+        /// </summary>
+        /// <param name="table">The instance of table to execute pull on.</param>
+        /// <param name="queryId">
+        /// A string that uniquely identifies this query and is used to keep track of its sync state. Supplying this parameter enables incremental sync whenever the same key is used again. Must be 25 characters or less and contain only alphanumeric characters, dash, and underscore.
+        /// </param>
+        /// <param name="query">
+        /// An OData query that determines which items to 
+        /// pull from the remote table.
+        /// </param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe
+        /// </param>
+        /// <param name="pullOptions">
+        /// PullOptions that determine how to pull data from the remote table
+        /// </param>
+        /// <returns>
+        /// A task that completes when pull operation has finished.
+        /// </returns>
+        /// <exception cref="System.ArgumentException">
+        /// Thrown when <paramref name="queryId"/> does not match the regular expression <value>[a-zA-Z][a-zA-Z0-9_-]{0,24}</value>.
+        /// </exception>
+        public static Task PullAsync<T, U>(this IMobileServiceSyncTable<T> table, string queryId, IMobileServiceTableQuery<U> query, CancellationToken cancellationToken, PullOptions pullOptions)
+        {
+            return table.PullAsync(queryId, query, pushOtherTables: true, cancellationToken: cancellationToken, pullOptions: pullOptions);
         }
 
         /// <summary>
@@ -109,7 +220,57 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </exception>
         public static Task PullAsync<T, U>(this IMobileServiceSyncTable<T> table, string queryId, IMobileServiceTableQuery<U> query)
         {
-            return table.PullAsync(queryId, query, cancellationToken: CancellationToken.None);
+            return table.PullAsync(queryId, query, cancellationToken: CancellationToken.None, pullOptions: null);
+        }
+
+        /// <summary>
+        /// Pulls all items that match the given query
+        /// from the associated remote table.
+        /// </summary>
+        /// <param name="table">The instance of table to execute pull on.</param>
+        /// <param name="queryId">
+        /// A string that uniquely identifies this query and is used to keep track of its sync state. Supplying this parameter enables incremental sync whenever the same key is used again. Must be 25 characters or less and contain only alphanumeric characters, dash, and underscore.
+        /// </param>
+        /// <param name="query">
+        /// An OData query that determines which items to 
+        /// pull from the remote table.
+        /// </param>
+        /// <param name="pullOptions">
+        /// PullOptions that determine how to pull data from the remote table
+        /// </param>
+        /// <returns>
+        /// A task that completes when pull operation has finished.
+        /// </returns>
+        /// <exception cref="System.ArgumentException">
+        /// Thrown when <paramref name="queryId"/> does not match the regular expression <value>[a-zA-Z][a-zA-Z0-9_-]{0,24}</value>.
+        /// </exception>
+        public static Task PullAsync<T, U>(this IMobileServiceSyncTable<T> table, string queryId, IMobileServiceTableQuery<U> query, PullOptions pullOptions)
+        {
+            return table.PullAsync(queryId, query, cancellationToken: CancellationToken.None, pullOptions: pullOptions);
+        }
+
+        /// <summary>
+        /// Pulls all items that match the given query from the associated remote table.
+        /// </summary>
+        /// <param name="queryId">
+        /// A string that uniquely identifies this query and is used to keep track of its sync state. Supplying this parameter enables incremental sync whenever the same key is used again.
+        /// </param>
+        /// <param name="query">
+        /// An OData query that determines which items to 
+        /// pull from the remote table.
+        /// </param>
+        /// <param name="pushOtherTables">
+        /// Push other tables if this table is dirty
+        /// </param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe
+        /// </param>
+        /// <returns>
+        /// A task that completes when pull operation has finished.
+        /// </returns>
+        public static Task PullAsync<T, U>(this IMobileServiceSyncTable<T> table, string queryId,
+            IMobileServiceTableQuery<U> query, bool pushOtherTables, CancellationToken cancellationToken)
+        {
+            return table.PullAsync(queryId, query, pushOtherTables, cancellationToken, pullOptions: null);
         }
 
         /// <summary>

@@ -183,6 +183,8 @@ static NSOperationQueue *delegateQueue;
 		NSURLSession *session = [self sessionWithDelegate:delegate delegateQueue:taskQueue];
 		NSURLSessionDataTask *task = [session dataTaskWithRequest:request];
 		[task resume];
+        
+        [session finishTasksAndInvalidate];
     }
     else {
         

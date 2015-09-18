@@ -3,8 +3,8 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import <WindowsAzureMobileServices/WindowsAzureMobileServices.h>
 #import <CoreData/CoreData.h>
+#import "MSSyncContext.h"
 
 /// The MSCoreDataStore class is for use when using the offline capabilities
 /// of mobile services. This class is a local store which manages records and sync

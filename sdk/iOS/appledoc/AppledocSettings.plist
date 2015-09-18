@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>--company-id</key>
+	<string>com.microsoft</string>
+	<key>--create-docset</key>
+	<true/>
+	<key>--install-docset</key>
+	<false/>
+	<key>--create-html</key>
+	<true/>
+	<key>--ignore</key>
+	<array>
+		<string>.m</string>
+		<string>*Internal.h</string>
+		<string>MSAPIConnection.h</string>
+		<string>MSAPIRequest.h</string>
+		<string>MSClientConnection.h</string>
+		<string>MSJSONSerializer.h</string>
+		<string>MSLocalStorage.h</string>
+		<string>MSLogin.h</string>
+		<string>MSLoginSerializer.h</string>
+		<string>MSLoginView.h</string>
+		<string>MSNaiveISODateFormatter.h</string>
+		<string>MSOperationQueue.h</string>
+		<string>MSPredicateTranslator.h</string>
+		<string>MSPushHttp.h</string>
+		<string>MSPushRequest.h</string>
+		<string>MSQueuePullOperation.h</string>
+		<string>MSQueuePurgeOperation.h</string>
+		<string>MSQueuePushOperation.h</string>
+		<string>MSRegistrationManager.h</string>
+		<string>MSSDKFeatures.h</string>
+		<string>MSTableConfigValue.h</string>
+		<string>MSTableConnection.h</string>
+		<string>MSTableDeleteRequest.h</string>
+		<string>MSTableItemRequest.h</string>
+		<string>MSTableReadQueryRequest.h</string>
+		<string>MSTableRequest.h</string>
+		<string>MSURLBuilder.h</string>
+		<string>MSUserAgentBuilder.h</string>
+	</array>
+	<key>--docset-platform-family</key>
+	<string>iphoneos</string>
+	<key>--output</key>
+	<string>appledoc</string>
+	<key>--project-company</key>
+	<string>Microsoft</string>
+	<key>--project-name</key>
+	<string>Azure Mobile Services</string>
+	<key>--keep-undocumented-objects</key>
+	<true/>
+	<key>--keep-undocumented-members</key>
+	<true/>
+	<key>--warn-undocumented-object</key>
+	<false/>
+	<key>--warn-undocumented-member</key>
+	<false/>
+	<key>--warn-empty-description</key>
+	<true/>
+	<key>--warn-missing-arg</key>
+	<true/>
+	<key>--warn-unknown-directive</key>
+	<true/>
+	<key>--logformat</key>
+	<string>xcode</string>
+	<key>--exit-threshold</key>
+	<integer>2</integer>
+	<key>--keep-intermediate-files</key>
+	<true/>
+</dict>
+</plist>

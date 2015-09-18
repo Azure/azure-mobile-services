@@ -163,6 +163,7 @@
     <Compile Include="Platform\ApplicationStorage.cs" />
     <Compile Include="Platform\CurrentPlatform.cs" />
     <Compile Include="Platform\PlatformInformation.cs" />
+    <Compile Include="Push\Push.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.WindowsAzure.MobileServices\Microsoft.WindowsAzure.Mobile.csproj">

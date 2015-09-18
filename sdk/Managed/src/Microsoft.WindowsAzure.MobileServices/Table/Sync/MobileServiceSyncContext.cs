@@ -172,10 +172,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <param name="reader">An instance of <see cref="MobileServiceObjectReader"/></param>
         /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe
         /// </param>
+        /// <param name="pullOptions">
+        /// PullOptions that determine how to pull data from the remote table
+        /// </param>
         /// <returns>
         /// A task that completes when pull operation has finished.
         /// </returns>
-        public async Task PullAsync(string tableName, MobileServiceTableKind tableKind, string queryId, string query, MobileServiceRemoteTableOptions options, IDictionary<string, string> parameters, IEnumerable<string> relatedTables, MobileServiceObjectReader reader, CancellationToken cancellationToken)
+        public async Task PullAsync(string tableName, MobileServiceTableKind tableKind, string queryId, string query, MobileServiceRemoteTableOptions options, IDictionary<string, string> parameters, IEnumerable<string> relatedTables, MobileServiceObjectReader reader, CancellationToken cancellationToken, PullOptions pullOptions)
         {
             await this.EnsureInitializedAsync();
 
@@ -233,7 +236,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             // let us not burden the server to calculate the count when we don't need it for pull
             queryDescription.IncludeTotalCount = false;
 
-            var action = new PullAction(table, tableKind, this, queryId, queryDescription, parameters, relatedTables, this.opQueue, this.settings, this.Store, options, reader, cancellationToken);
+            var action = new PullAction(table, tableKind, this, queryId, queryDescription, parameters, relatedTables,
+                this.opQueue, this.settings, this.Store, options, pullOptions, reader, cancellationToken);
             await this.ExecuteSyncAction(action);
         }
 

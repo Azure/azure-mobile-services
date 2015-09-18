@@ -26,8 +26,6 @@
     dispatch_queue_t writeOperationQueue;
 }
 
-NSInteger const defaultFetchLimit = 50;
-
 static NSOperationQueue *pushQueue_;
 
 @synthesize delegate = delegate_;
@@ -168,14 +166,14 @@ static NSOperationQueue *pushQueue_;
             switch (action) {
                 case MSTableOperationInsert: {
                     // Check to see if this item already exists
-                    NSString *itemId = item[MSSystemColumnId];
+                    NSString *itemId = itemToSave[MSSystemColumnId];
                     NSDictionary *result = [self syncTable:table readWithId:itemId orError:&error];
                     if (error == nil) {
                         if (result == nil) {
                             [self.dataSource upsertItems:@[itemToSave] table:table orError:&error];
-                        }
-                        else {
-                            error = [self errorWithDescription:@"This item already exists." andErrorCode:MSSyncTableInvalidAction];
+                        } else {
+                            error = [self errorWithDescription:@"This item already exists."
+                                                  andErrorCode:MSSyncTableInvalidAction];
                         }
                     }
                     break;
@@ -328,10 +326,14 @@ static NSOperationQueue *pushQueue_;
 }
 
 /// Verify our input is valid and try to pull our data down from the server
-- (NSOperation *) pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion;
+- (NSOperation *) pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId settings:(MSPullSettings *)pullSettings completion:(MSSyncBlock)completion;
 {
     // make a copy since we'll be modifying it internally
     MSQuery *queryCopy = [query copy];
+    
+    if (!pullSettings) {
+        pullSettings = [MSPullSettings new];
+    }
     
     // We want to throw on unsupported fields so we can change this decision later
     NSError *error;
@@ -406,9 +408,9 @@ static NSOperationQueue *pushQueue_;
     }
     
     // For a Pull we treat fetchLimit as the total records we should pull by paging. If there is no fetchLimit, we pull everything.
-    // We enforce a page size of 50.
+    // We enforce a page size of |pullSettings.pageSize|
     NSInteger maxRecords = query.fetchLimit >= 0 ? query.fetchLimit : NSIntegerMax;
-    queryCopy.fetchLimit = MIN(maxRecords, defaultFetchLimit);
+    queryCopy.fetchLimit = MIN(maxRecords, pullSettings.pageSize);
     
     // Begin the actual pull request
     return [self pullWithQueryInternal:queryCopy queryId:queryId maxRecords:maxRecords completion:completion];

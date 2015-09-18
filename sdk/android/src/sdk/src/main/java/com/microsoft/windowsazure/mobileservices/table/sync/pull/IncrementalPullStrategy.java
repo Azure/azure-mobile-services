@@ -16,7 +16,6 @@ import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileSer
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +30,6 @@ public class IncrementalPullStrategy extends PullStrategy {
 
     private MobileServiceLocalStore mStore;
     private DateTimeOffset maxUpdatedAt;
-    private String lastElementId;
     private DateTimeOffset deltaToken;
     private String queryId;
     private Query originalQuery;
@@ -90,7 +88,7 @@ public class IncrementalPullStrategy extends PullStrategy {
             this.query.skip(-1);
             this.query.top(defaultTop);
 
-            setupQuery(maxUpdatedAt, null);
+            setupQuery(maxUpdatedAt);
 
         } catch (MobileServiceLocalStoreException e) {
             throw new RuntimeException(e);
@@ -109,8 +107,6 @@ public class IncrementalPullStrategy extends PullStrategy {
 
         maxUpdatedAt = getDateFromString(lastElementUpdatedAt);
 
-        lastElementId = lastElement.get(MobileServiceSystemColumns.Id).getAsString();
-
         saveMaxUpdatedDate(lastElementUpdatedAt);
     }
 
@@ -125,7 +121,7 @@ public class IncrementalPullStrategy extends PullStrategy {
 
             this.query.skip(-1);
 
-            setupQuery(maxUpdatedAt, lastElementId);
+            setupQuery(maxUpdatedAt);
 
             return true;
         }
@@ -147,8 +143,9 @@ public class IncrementalPullStrategy extends PullStrategy {
         }
     }
 
-    private void setupQuery(DateTimeOffset maxUpdatedAt, String lastItemId) {
+    private void setupQuery(DateTimeOffset maxUpdatedAt) {
 
+        totalRead = 0;
         this.query = originalQuery.deepClone();
 
         if (query.getOrderBy().size() > 0) {
@@ -156,34 +153,12 @@ public class IncrementalPullStrategy extends PullStrategy {
         }
 
         if (maxUpdatedAt != null) {
+            Query filterQuery = QueryOperations.field(MobileServiceSystemColumns.UpdatedAt).ge(this.maxUpdatedAt);
 
             if (this.query.getQueryNode() != null) {
-                this.query = query.and();
-            }
-
-            if (lastItemId != null) {
-
-                Query notEqualsLastId = QueryOperations.field(MobileServiceSystemColumns.Id)
-                        .ne(lastItemId);
-
-                this.query = query.field(MobileServiceSystemColumns.UpdatedAt)
-                        .gt(this.maxUpdatedAt)
-                        .and(notEqualsLastId);
-
-                Query maxUpdatedAndIdFilter = QueryOperations.field(MobileServiceSystemColumns.UpdatedAt)
-                        .ge(maxUpdatedAt)
-                        .and()
-                        .field(MobileServiceSystemColumns.Id)
-                        .gt(lastItemId);
-
-
-                this.query.and(notEqualsLastId);
-
-                this.query.or(maxUpdatedAndIdFilter);
+                this.query = this.query.and(filterQuery);
             } else {
-
-                this.query = query.field(MobileServiceSystemColumns.UpdatedAt)
-                        .gt(this.maxUpdatedAt);
+                this.query = filterQuery;
             }
         }
 
@@ -192,7 +167,6 @@ public class IncrementalPullStrategy extends PullStrategy {
         this.query.getOrderBy().clear();
 
         this.query.orderBy(MobileServiceSystemColumns.UpdatedAt, QueryOrder.Ascending);
-        this.query.orderBy(MobileServiceSystemColumns.Id, QueryOrder.Ascending);
     }
 
     private DateTimeOffset getDateFromString(String stringValue) {

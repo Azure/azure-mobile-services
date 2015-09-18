@@ -1,8 +1,22 @@
 # Azure Mobile Services iOS SDK Change Log
 
 ## SDK Downloads
-- [iOS 2.0 SDK](http://aka.ms/gc6fex)
+- [Latest iOS 2.x SDK](http://aka.ms/gc6fex)
 - [iOS 1.2.4 SDK](http://aka.ms/kymw2g)
+
+### Version 2.2.1
+- Fixed [issue #768](https://github.com/Azure/azure-mobile-services/issues/768) that was causing a memory leak when using NSURLSession [204f210](https://github.com/Azure/azure-mobile-services/commit/204f210)
+- Fix NSNull templateName [9347390](https://github.com/Azure/azure-mobile-services/commit/9347390)
+
+### Version 2.2.0
+- Updated offline sync logic to do a case-insensitive comparison on the ID column  [328aadf](https://github.com/Azure/azure-mobile-services/commit/328aadf)
+- Added support for returning the underlying NSOperation when performing push, pull and purge operations [7c37f60](https://github.com/Azure/azure-mobile-services/commit/7c37f60)
+- Added support for configuring the page size of a pull operation [0c31aa3](https://github.com/Azure/azure-mobile-services/commit/0c31aa3)
+- Added support for NSUUID in PredicateTranslator [24c5a61](https://github.com/Azure/azure-mobile-services/commit/24c5a61)
+- Fixed [issue #699] (https://github.com/Azure/azure-mobile-services/issues/699) that prevented properties with value nil from being sent to server [bf41081](https://github.com/Azure/azure-mobile-services/commit/bf41081)
+- Fixed handling of network errors during push operations [1a9fdf4](https://github.com/Azure/azure-mobile-services/commit/1a9fdf4)
+- Fixed potential race conditions while performing table operations [15581be](https://github.com/Azure/azure-mobile-services/commit/15581be)
+- Fixed incorrect ID validation during insert operations [f5e44d4](https://github.com/Azure/azure-mobile-services/commit/f5e44d4)
 
 ### Version 2.1.0
 - Fix cancelAndUpdate and cancelAndDiscard actions on the MSTableOperationError class
