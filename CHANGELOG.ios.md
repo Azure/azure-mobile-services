@@ -2,11 +2,13 @@
 
 ## SDK Downloads
 - [Latest iOS 2.x SDK](http://aka.ms/gc6fex)
+ - **requires XCode 7**
 - [iOS 1.2.4 SDK](http://aka.ms/kymw2g)
 
 ### Version 2.2.2
-- Fixed issue with MSCoreDataStore.h that prevented it from bring used as part of a cocapod
 - Updated build tooling to use XCode 7 and include BitCode [issue #794](https://github.com/Azure/azure-mobile-services/issues/794)
+ - Note: Framework now requires using XCode 7
+- Fixed issue with MSCoreDataStore.h that prevented it from bring used as part of a cocoapod
 
 ### Version 2.2.1
 - Fixed [issue #768](https://github.com/Azure/azure-mobile-services/issues/768) that was causing a memory leak when using NSURLSession [204f210](https://github.com/Azure/azure-mobile-services/commit/204f210)
