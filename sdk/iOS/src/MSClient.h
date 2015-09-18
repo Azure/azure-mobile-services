@@ -7,12 +7,12 @@
 #import "MSError.h"
 #import "MSFilter.h"
 #import "MSLoginController.h"
-#import "MSSyncContext.h"
 
 @class MSTable;
 @class MSUser;
 @class MSSyncTable;
 @class MSPush;
+@class MSSyncContext;
 
 
 #pragma mark * Block Type Definitions
