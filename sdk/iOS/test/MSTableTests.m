@@ -1730,41 +1730,6 @@
     }
 }
 
-- (BOOL) checkRequestURL:(NSURL *)url SystemProperty:(MSSystemProperties) property
-{
-    NSString *query = [url query];
-    
-    BOOL result = YES;
-    if (property == MSSystemPropertyNone)
-    {
-        return query == nil || [query rangeOfString:@"__systemProperties"].location == NSNotFound;
-    } else if (property == MSSystemPropertyAll) {
-        return [query rangeOfString:@"__systemProperties=%2A"].location != NSNotFound;
-    }
-    
-    // Check individual combinations
-    if(query == nil || [query rangeOfString:@"__systemProperties"].location == NSNotFound) {
-        return NO;
-    }
-    
-    if (property & MSSystemPropertyCreatedAt)
-    {
-        result = result && [query rangeOfString:@"__createdAt"].location != NSNotFound;
-    }
-    
-    if (property & MSSystemPropertyUpdatedAt)
-    {
-        result = result &&  [query rangeOfString:@"__updatedAt"].location != NSNotFound;
-    }
-    
-    if (property & MSSystemPropertyVersion)
-    {
-        result = result &&  [query rangeOfString:@"__version"].location != NSNotFound;
-    }
-    
-    return result;
-}
-
 - (void) testReadWithQueryString_ReturnsLinkHeader_IfPresent
 {
     [self verifyLinkHeaderOnRead:@"https://contoso.com; rel=next" expectedLink:@"https://contoso.com"];
