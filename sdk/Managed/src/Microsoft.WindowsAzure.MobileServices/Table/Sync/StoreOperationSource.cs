@@ -21,6 +21,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// </summary>
         Local,
         /// <summary>
+        /// The operation was triggered by a local conflict resolution action taken against an operation error.
+        /// </summary>
+        LocalConflictResolution,
+        /// <summary>
         /// The operation was triggered by a local purge action.
         /// </summary>
         LocalPurge,

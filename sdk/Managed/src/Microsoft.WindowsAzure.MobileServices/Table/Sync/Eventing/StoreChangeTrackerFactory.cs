@@ -32,13 +32,16 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             {
                 case StoreOperationSource.Local:
                 case StoreOperationSource.LocalPurge:
-                    result = trackingOptions.HasFlag(StoreTrackingOptions.NotifyLocalRecordOperations);
+                    result = trackingOptions.HasFlag(StoreTrackingOptions.NotifyLocalOperations);
+                    break;
+                case StoreOperationSource.LocalConflictResolution:
+                    result = trackingOptions.HasFlag(StoreTrackingOptions.NotifyLocalConflictResolutionOperations);
                     break;
                 case StoreOperationSource.ServerPull:
-                    result = (trackingOptions & (StoreTrackingOptions.NotifyServerPullBatch | StoreTrackingOptions.NotifyServerPullRecordOperations)) != StoreTrackingOptions.None;
+                    result = (trackingOptions & (StoreTrackingOptions.NotifyServerPullBatch | StoreTrackingOptions.NotifyServerPullOperations)) != StoreTrackingOptions.None;
                     break;
                 case StoreOperationSource.ServerPush:
-                    result = (trackingOptions & (StoreTrackingOptions.NotifyServerPushBatch | StoreTrackingOptions.NotifyServerPushRecordOperations)) != StoreTrackingOptions.None;
+                    result = (trackingOptions & (StoreTrackingOptions.NotifyServerPushBatch | StoreTrackingOptions.NotifyServerPushOperations)) != StoreTrackingOptions.None;
                     break;
                 default:
                     throw new InvalidOperationException("Unknown store operation source.");

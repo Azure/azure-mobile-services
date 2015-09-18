@@ -86,6 +86,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             {
                 case StoreOperationSource.Local:
                 case StoreOperationSource.LocalPurge:
+                case StoreOperationSource.LocalConflictResolution:
                     // No batch notifications for local operations
                     break;
                 case StoreOperationSource.ServerPull:
@@ -109,13 +110,16 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             {
                 case StoreOperationSource.Local:
                 case StoreOperationSource.LocalPurge:
-                    result = this.trackingContext.TrackingOptions.HasFlag(StoreTrackingOptions.NotifyLocalRecordOperations);
+                    result = this.trackingContext.TrackingOptions.HasFlag(StoreTrackingOptions.NotifyLocalOperations);
+                    break;
+                case StoreOperationSource.LocalConflictResolution:
+                    result = this.trackingContext.TrackingOptions.HasFlag(StoreTrackingOptions.NotifyLocalConflictResolutionOperations);
                     break;
                 case StoreOperationSource.ServerPull:
-                    result = this.trackingContext.TrackingOptions.HasFlag(StoreTrackingOptions.NotifyServerPullRecordOperations);
+                    result = this.trackingContext.TrackingOptions.HasFlag(StoreTrackingOptions.NotifyServerPullOperations);
                     break;
                 case StoreOperationSource.ServerPush:
-                    result = this.trackingContext.TrackingOptions.HasFlag(StoreTrackingOptions.NotifyServerPushRecordOperations);
+                    result = this.trackingContext.TrackingOptions.HasFlag(StoreTrackingOptions.NotifyServerPushOperations);
                     break;
                 default:
                     throw new InvalidOperationException("Unknown tracking source");

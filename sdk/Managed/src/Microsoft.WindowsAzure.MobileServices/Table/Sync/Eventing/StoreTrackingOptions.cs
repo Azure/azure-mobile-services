@@ -17,31 +17,35 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <summary>
         /// Generates notifications for local record operations.
         /// </summary>
-        NotifyLocalRecordOperations = 0x01,
+        NotifyLocalOperations = 0x01,
+        /// <summary>
+        /// Generates notifications for local conflict resolution record operations.
+        /// </summary>
+        NotifyLocalConflictResolutionOperations = 0x02,
         /// <summary>
         /// Generates notifications for operations triggered by a server pull.
         /// </summary>
-        NotifyServerPullRecordOperations = 0x02,
+        NotifyServerPullOperations = 0x04,
         /// <summary>
         /// Generates notifiactions for operations triggered by a server push.
         /// </summary>
-        NotifyServerPushRecordOperations = 0x04,
+        NotifyServerPushOperations = 0x08,
         /// <summary>
         /// Generates notifications for operations triggerd by a server pull or a server push.
         /// </summary>
-        NotifyServerRecordOperations = NotifyServerPullRecordOperations | NotifyServerPushRecordOperations,
+        NotifyServerOperations = NotifyServerPullOperations | NotifyServerPushOperations,
         /// <summary>
         /// Generates notifications for local and server (pull or push) record operations.
         /// </summary>
-        NotifyLocalAndServerRecordOperations = NotifyLocalRecordOperations | NotifyServerRecordOperations,
+        NotifyLocalAndServerOperations = NotifyLocalOperations | NotifyLocalConflictResolutionOperations | NotifyServerOperations,
         /// <summary>
         /// Generates a notification at the end of an operation batch triggered by a server pull.
         /// </summary>
-        NotifyServerPullBatch = 0x08,
+        NotifyServerPullBatch = 0x10,
         /// <summary>
         /// Generates a notification at the end of an operation batch triggered by a server push.
         /// </summary>
-        NotifyServerPushBatch = 0x10,
+        NotifyServerPushBatch = 0x20,
         /// <summary>
         /// Generates a notification at the end of an operation batch triggered by a server pull or a server push.
         /// </summary>
@@ -49,16 +53,16 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <summary>
         /// Enable "upsert" analysis to detect if the record is being created or updated.
         /// </summary>
-        DetectInsertsAndUpdates = 0x20,
+        DetectInsertsAndUpdates = 0x40,
         /// <summary>
         /// On updates, enable change detection on records and only generates notifications if data changes are detected.
         /// This automatically enables inserts and updates analysis.
         /// </summary>
-        DetectRecordChanges = 0x40 | DetectInsertsAndUpdates,
+        DetectRecordChanges = 0x80 | DetectInsertsAndUpdates,
         /// <summary>
         /// Generates all record operations and batch notifications.
         /// </summary>
-        AllNotifications = NotifyLocalAndServerRecordOperations | NotifyServerBatch,
+        AllNotifications = NotifyLocalAndServerOperations | NotifyServerBatch,
         /// <summary>
         /// Generates all record operation notifications, batch notifications, insert and updates detection and record change detection.
         /// </summary>

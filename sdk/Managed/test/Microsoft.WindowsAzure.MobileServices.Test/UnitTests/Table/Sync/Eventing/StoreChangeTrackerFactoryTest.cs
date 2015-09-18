@@ -17,7 +17,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests.Table.Sync.Eventi
         [TestMethod]
         public void CreateTrackedStore_ReturnsUntrackedProxyForLocalSource_WhenNoNotificationsAreEnabledForSource()
         {
-            StoreTrackingOptions trackingOptions = StoreTrackingOptions.AllNotificationsAndChangeDetection & ~StoreTrackingOptions.NotifyLocalRecordOperations;
+            StoreTrackingOptions trackingOptions = StoreTrackingOptions.AllNotificationsAndChangeDetection & ~StoreTrackingOptions.NotifyLocalOperations;
 
             AssertUntrackedStoreForSourceWithOptions(StoreOperationSource.Local, trackingOptions);
         }
@@ -25,7 +25,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests.Table.Sync.Eventi
         [TestMethod]
         public void CreateTrackedStore_ReturnsUntrackedProxyForServerPullSource_WhenNoNotificationsAreEnabledForSource()
         {
-            StoreTrackingOptions trackingOptions = StoreTrackingOptions.AllNotificationsAndChangeDetection & ~(StoreTrackingOptions.NotifyServerPullBatch | StoreTrackingOptions.NotifyServerPullRecordOperations);
+            StoreTrackingOptions trackingOptions = StoreTrackingOptions.AllNotificationsAndChangeDetection & ~(StoreTrackingOptions.NotifyServerPullBatch | StoreTrackingOptions.NotifyServerPullOperations);
 
             AssertUntrackedStoreForSourceWithOptions(StoreOperationSource.ServerPull, trackingOptions);
         }
@@ -33,9 +33,17 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests.Table.Sync.Eventi
         [TestMethod]
         public void CreateTrackedStore_ReturnsUntrackedProxyForServerPushSource_WhenNoNotificationsAreEnabledForSource()
         {
-            StoreTrackingOptions trackingOptions = StoreTrackingOptions.AllNotificationsAndChangeDetection & ~(StoreTrackingOptions.NotifyServerPushBatch| StoreTrackingOptions.NotifyServerPushRecordOperations);
+            StoreTrackingOptions trackingOptions = StoreTrackingOptions.AllNotificationsAndChangeDetection & ~(StoreTrackingOptions.NotifyServerPushBatch| StoreTrackingOptions.NotifyServerPushOperations);
 
             AssertUntrackedStoreForSourceWithOptions(StoreOperationSource.ServerPush, trackingOptions);
+        }
+
+        [TestMethod]
+        public void CreateTrackedStore_ReturnsUntrackedProxyForLocalConflictResolutionSource_WhenNoNotificationsAreEnabledForSource()
+        {
+            StoreTrackingOptions trackingOptions = StoreTrackingOptions.AllNotificationsAndChangeDetection & ~StoreTrackingOptions.NotifyLocalConflictResolutionOperations;
+
+            AssertUntrackedStoreForSourceWithOptions(StoreOperationSource.LocalConflictResolution, trackingOptions);
         }
 
         private void AssertUntrackedStoreForSourceWithOptions(StoreOperationSource source, StoreTrackingOptions trackingOptions)

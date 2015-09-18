@@ -40,10 +40,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// </summary>
         private OperationQueue opQueue;
 
+        private StoreTrackingOptions storeTrackingOptions; 
+        
         private IMobileServiceLocalStore localOperationsStore;
-
-        private StoreTrackingOptions storeTrackingOptions;
-
+        
         public IMobileServiceSyncHandler Handler { get; private set; }
 
         public IMobileServiceLocalStore Store
@@ -327,7 +327,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return this.ExecuteOperationSafeAsync(itemId, error.TableName, async () =>
             {
                 await this.TryCancelOperation(error);
-                await this.localOperationsStore.UpsertAsync(error.TableName, item, fromServer: true);
+                using (var trackedStore = StoreChangeTrackerFactory.CreateTrackedStore(this.Store, StoreOperationSource.LocalConflictResolution, this.storeTrackingOptions, this.client.EventManager, this.settings))
+                {
+                    await trackedStore.UpsertAsync(error.TableName, item, fromServer: true);
+                }
             });
         }
 
@@ -337,7 +340,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return this.ExecuteOperationSafeAsync(itemId, error.TableName, async () =>
             {
                 await this.TryCancelOperation(error);
-                await this.localOperationsStore.DeleteAsync(error.TableName, itemId);
+                using (var trackedStore = StoreChangeTrackerFactory.CreateTrackedStore(this.Store, StoreOperationSource.LocalConflictResolution, this.storeTrackingOptions, this.client.EventManager, this.settings))
+                {
+                    await trackedStore.DeleteAsync(error.TableName, itemId);
+                }
             });
         }
 
