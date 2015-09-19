@@ -49,16 +49,10 @@
 		5A4FAC8F1B05E5250027011D /* MSUser.h in Headers */ = {isa = PBXBuildFile; fileRef = E8F33B12161667CE002DD7C6 /* MSUser.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		5A4FAC901B05E52C0027011D /* MSUser.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B13161667CE002DD7C6 /* MSUser.m */; };
 		5A4FAC911B05E5300027011D /* MSFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = E8E378FF161E14E800C13F00 /* MSFilter.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		5A4FAC921B05E5360027011D /* MSLocalStorage.h in Headers */ = {isa = PBXBuildFile; fileRef = A24701AD196896F500385DA2 /* MSLocalStorage.h */; };
-		5A4FAC931B05E53B0027011D /* MSLocalStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = A24701AE196896F500385DA2 /* MSLocalStorage.m */; };
 		5A4FAC941B05E53F0027011D /* MSPush.h in Headers */ = {isa = PBXBuildFile; fileRef = A24701AF196896F500385DA2 /* MSPush.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		5A4FAC951B05E5460027011D /* MSPush.m in Sources */ = {isa = PBXBuildFile; fileRef = A24701B0196896F500385DA2 /* MSPush.m */; };
-		5A4FAC961B05E5490027011D /* MSPushHttp.h in Headers */ = {isa = PBXBuildFile; fileRef = A24701B1196896F500385DA2 /* MSPushHttp.h */; };
-		5A4FAC971B05E54D0027011D /* MSPushHttp.m in Sources */ = {isa = PBXBuildFile; fileRef = A24701B2196896F500385DA2 /* MSPushHttp.m */; };
 		5A4FAC981B05E5500027011D /* MSPushRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = A24701B3196896F500385DA2 /* MSPushRequest.h */; };
 		5A4FAC991B05E5540027011D /* MSPushRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = A24701B4196896F500385DA2 /* MSPushRequest.m */; };
-		5A4FAC9A1B05E5580027011D /* MSRegistrationManager.h in Headers */ = {isa = PBXBuildFile; fileRef = A24701B5196896F500385DA2 /* MSRegistrationManager.h */; };
-		5A4FAC9B1B05E55C0027011D /* MSRegistrationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = A24701B6196896F500385DA2 /* MSRegistrationManager.m */; };
 		5A4FAC9C1B05E5620027011D /* MSCoreDataStore.h in Headers */ = {isa = PBXBuildFile; fileRef = A2ACD53E192322C50012B1ED /* MSCoreDataStore.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		5A4FAC9D1B05E5670027011D /* MSCoreDataStore.m in Sources */ = {isa = PBXBuildFile; fileRef = A2ACD53F192322C50012B1ED /* MSCoreDataStore.m */; };
 		5A4FAC9E1B05E56A0027011D /* MSSyncContextReadResult.h in Headers */ = {isa = PBXBuildFile; fileRef = A2C14C6819105D9F00A58609 /* MSSyncContextReadResult.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -147,6 +141,17 @@
 		A2ADF7E91914481B0078BB16 /* MSTableOperationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A2ADF7E81914481B0078BB16 /* MSTableOperationTests.m */; };
 		A2C14C6A19105D9F00A58609 /* MSSyncContextReadResult.h in Headers */ = {isa = PBXBuildFile; fileRef = A2C14C6819105D9F00A58609 /* MSSyncContextReadResult.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A2C14C6B19105D9F00A58609 /* MSSyncContextReadResult.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C14C6919105D9F00A58609 /* MSSyncContextReadResult.m */; };
+		A31E6CF41BACD35D00364A2C /* MSQueryInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 8790D2BF199EA5950000DC4E /* MSQueryInternal.h */; settings = {ASSET_TAGS = (); }; };
+		A31E6CF51BACD35E00364A2C /* MSQueryInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 8790D2BF199EA5950000DC4E /* MSQueryInternal.h */; settings = {ASSET_TAGS = (); }; };
+		A31E6CF61BACD36500364A2C /* MSTableInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 8790D2BE199C5D510000DC4E /* MSTableInternal.h */; settings = {ASSET_TAGS = (); }; };
+		A31E6CF71BACD36500364A2C /* MSTableInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 8790D2BE199C5D510000DC4E /* MSTableInternal.h */; settings = {ASSET_TAGS = (); }; };
+		A31E6CF81BACD38D00364A2C /* MSPushConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = A202C3451AA25F730005A8AE /* MSPushConnection.m */; settings = {ASSET_TAGS = (); }; };
+		A31E6CF91BACD39100364A2C /* MSPushConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = A202C3441AA25F730005A8AE /* MSPushConnection.h */; settings = {ASSET_TAGS = (); }; };
+		A31E6CFA1BACD3A700364A2C /* MSPullSettings.h in Headers */ = {isa = PBXBuildFile; fileRef = D0D3B9341B2906EF002A126A /* MSPullSettings.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A31E6CFB1BACD3AE00364A2C /* MSPullSettingsInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = D0EFD8581B2F785F009CF6DA /* MSPullSettingsInternal.h */; settings = {ASSET_TAGS = (); }; };
+		A31E6CFC1BACD3B300364A2C /* MSPullSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = D0D3B9351B290D80002A126A /* MSPullSettings.m */; settings = {ASSET_TAGS = (); }; };
+		A31E6CFD1BACD3C600364A2C /* MSQueuePullOperationInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = F3EA41DC1B0E62F40014B587 /* MSQueuePullOperationInternal.h */; settings = {ASSET_TAGS = (); }; };
+		A31E6CFE1BACD40000364A2C /* BlockDefinitions.h in Headers */ = {isa = PBXBuildFile; fileRef = F3C002331AF7F7450028AB81 /* BlockDefinitions.h */; };
 		CF1D74591A5D85C60074789F /* MSQueuePurgeOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = CF1D74581A5D85C60074789F /* MSQueuePurgeOperation.m */; };
 		CF1D745B1A5D9CAB0074789F /* MSQueuePurgeOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = CF1D745A1A5D85D80074789F /* MSQueuePurgeOperation.h */; };
 		CF4D49861A2E5C96006AEB70 /* MSQueuePullOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = CF4D49851A2E5C96006AEB70 /* MSQueuePullOperation.h */; };
@@ -220,19 +225,19 @@
 		E8F33B3D1616694C002DD7C6 /* MSQueryTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B3A161668ED002DD7C6 /* MSQueryTests.m */; };
 		E8F33B3E16166956002DD7C6 /* MSJSONSerializerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B36161668DA002DD7C6 /* MSJSONSerializerTests.m */; };
 		E8F33B3F1616695E002DD7C6 /* MSPredicateTranslatorTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B38161668E4002DD7C6 /* MSPredicateTranslatorTests.m */; };
+		F3C002341AF7F7450028AB81 /* BlockDefinitions.h in Headers */ = {isa = PBXBuildFile; fileRef = F3C002331AF7F7450028AB81 /* BlockDefinitions.h */; };
 		F3EA41DD1B0E63470014B587 /* MSQueuePullOperationInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = F3EA41DC1B0E62F40014B587 /* MSQueuePullOperationInternal.h */; };
-		F3C002341AF7F7450028AB81 /* BlockDefinitions.h in Headers */ = {isa = PBXBuildFile; fileRef = F3C002331AF7F7450028AB81 /* BlockDefinitions.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		E8E3797B161F8EB400C13F00 /* PBXContainerItemProxy */ = {
+		A38AE79B1BACD69E00B3596B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = E8F33AD21616659C002DD7C6 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = E8F33ADA1616659C002DD7C6;
 			remoteInfo = WindowsAzureMobileServices;
 		};
-		E8F33AF21616659C002DD7C6 /* PBXContainerItemProxy */ = {
+		E8E3797B161F8EB400C13F00 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = E8F33AD21616659C002DD7C6 /* Project object */;
 			proxyType = 1;
@@ -382,8 +387,8 @@
 		E8F33B36161668DA002DD7C6 /* MSJSONSerializerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSJSONSerializerTests.m; sourceTree = "<group>"; };
 		E8F33B38161668E4002DD7C6 /* MSPredicateTranslatorTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSPredicateTranslatorTests.m; sourceTree = "<group>"; };
 		E8F33B3A161668ED002DD7C6 /* MSQueryTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSQueryTests.m; sourceTree = "<group>"; };
-		F3EA41DC1B0E62F40014B587 /* MSQueuePullOperationInternal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSQueuePullOperationInternal.h; sourceTree = "<group>"; };
 		F3C002331AF7F7450028AB81 /* BlockDefinitions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BlockDefinitions.h; sourceTree = "<group>"; };
+		F3EA41DC1B0E62F40014B587 /* MSQueuePullOperationInternal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSQueuePullOperationInternal.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -752,9 +757,8 @@
 				5A4FAC891B05E4FE0027011D /* MSError.h in Headers */,
 				5A4FACA61B05E6000027011D /* MSQueuePullOperation.h in Headers */,
 				5A4FAC851B05E4E90027011D /* MSClient.h in Headers */,
-				5A4FAC9A1B05E5580027011D /* MSRegistrationManager.h in Headers */,
+				A31E6CFE1BACD40000364A2C /* BlockDefinitions.h in Headers */,
 				5A4FACC71B05E6920027011D /* MSPredicateTranslator.h in Headers */,
-				5A4FAC921B05E5360027011D /* MSLocalStorage.h in Headers */,
 				5A4FAC8B1B05E5080027011D /* MSQuery.h in Headers */,
 				5A4FACC41B05E6870027011D /* MSSerializer.h in Headers */,
 				5A4FACBE1B05E6730027011D /* MSURLBuilder.h in Headers */,
@@ -762,14 +766,17 @@
 				5A4FAC981B05E5500027011D /* MSPushRequest.h in Headers */,
 				5A4FACC51B05E68C0027011D /* MSJSONSerializer.h in Headers */,
 				5A4FAC791B05E47F0027011D /* MSLoginSerializer.h in Headers */,
-				5A4FAC961B05E5490027011D /* MSPushHttp.h in Headers */,
+				A31E6CFA1BACD3A700364A2C /* MSPullSettings.h in Headers */,
 				5A4FAC911B05E5300027011D /* MSFilter.h in Headers */,
 				5A4FAC7B1B05E48C0027011D /* MSLogin.h in Headers */,
 				5A4FAC7F1B05E49B0027011D /* MSLoginController.h in Headers */,
 				5A4FACB01B05E62C0027011D /* MSTableOperationError.h in Headers */,
+				A31E6CF71BACD36500364A2C /* MSTableInternal.h in Headers */,
 				5A4FACBC1B05E66C0027011D /* MSSDKFeatures.h in Headers */,
+				A31E6CF91BACD39100364A2C /* MSPushConnection.h in Headers */,
 				5A4FAC841B05E4DF0027011D /* MSQueryResult.h in Headers */,
 				5A4FAC8F1B05E5250027011D /* MSUser.h in Headers */,
+				A31E6CF51BACD35E00364A2C /* MSQueryInternal.h in Headers */,
 				5A4FACA81B05E60A0027011D /* MSQueuePurgeOperation.h in Headers */,
 				5A4FACAE1B05E6230027011D /* MSTableOperation.h in Headers */,
 				5A4FACA01B05E5740027011D /* MSSyncTable.h in Headers */,
@@ -779,6 +786,7 @@
 				5A4FACA21B05E57D0027011D /* MSSyncContext.h in Headers */,
 				5A4FACB41B05E6510027011D /* MSTableConnection.h in Headers */,
 				5A4FAC771B05E40F0027011D /* WindowsAzureMobileServices.h in Headers */,
+				A31E6CFD1BACD3C600364A2C /* MSQueuePullOperationInternal.h in Headers */,
 				5A4FACC01B05E67A0027011D /* MSUserAgentBuilder.h in Headers */,
 				5A4FACC21B05E6810027011D /* MSNaiveISODateFormatter.h in Headers */,
 				5A4FACBA1B05E6650027011D /* MSAPIRequest.h in Headers */,
@@ -789,6 +797,7 @@
 				5A4FACB21B05E6460027011D /* MSClientConnection.h in Headers */,
 				5A4FAC871B05E4F40027011D /* MSDateOffset.h in Headers */,
 				5A4FACAC1B05E61D0027011D /* MSTableConfigValue.h in Headers */,
+				A31E6CFB1BACD3AE00364A2C /* MSPullSettingsInternal.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -803,6 +812,7 @@
 				E8E3790E161F769D00C13F00 /* MSClient.h in Headers */,
 				E8E37911161F769D00C13F00 /* MSTable.h in Headers */,
 				A24701BD196896F500385DA2 /* MSPushRequest.h in Headers */,
+				A31E6CF41BACD35D00364A2C /* MSQueryInternal.h in Headers */,
 				E8E37910161F769D00C13F00 /* MSQuery.h in Headers */,
 				A258890F18A19D0B00962F9A /* MSTableOperation.h in Headers */,
 				A258891618A19D0B00962F9A /* MSSyncTable.h in Headers */,
@@ -823,6 +833,7 @@
 				E8E37915161F769D00C13F00 /* MSTableConnection.h in Headers */,
 				A2818FFC18BB0660001B14E7 /* MSQueuePushOperation.h in Headers */,
 				A258891118A19D0B00962F9A /* MSTableOperationInternal.h in Headers */,
+				A31E6CF61BACD36500364A2C /* MSTableInternal.h in Headers */,
 				E8E37916161F769D00C13F00 /* MSTableRequest.h in Headers */,
 				CF4D49861A2E5C96006AEB70 /* MSQueuePullOperation.h in Headers */,
 				E8E37917161F769D00C13F00 /* MSURLBuilder.h in Headers */,
@@ -898,7 +909,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				E8F33AF31616659C002DD7C6 /* PBXTargetDependency */,
+				A38AE79C1BACD69E00B3596B /* PBXTargetDependency */,
 			);
 			name = WindowsAzureMobileServicesTests;
 			productName = WindowsAzureMobileServicesTests;
@@ -1021,6 +1032,7 @@
 				5A4FACC61B05E68F0027011D /* MSJSONSerializer.m in Sources */,
 				5A4FACC31B05E6840027011D /* MSNaiveISODateFormatter.m in Sources */,
 				5A4FAC831B05E4DB0027011D /* MSQueryResult.m in Sources */,
+				A31E6CFC1BACD3B300364A2C /* MSPullSettings.m in Sources */,
 				5A4FACBF1B05E6770027011D /* MSURLBuilder.m in Sources */,
 				5A4FAC781B05E4790027011D /* MSLoginSerializer.m in Sources */,
 				5A4FACC81B05E6950027011D /* MSPredicateTranslator.m in Sources */,
@@ -1031,13 +1043,12 @@
 				5A4FACC11B05E67E0027011D /* MSUserAgentBuilder.m in Sources */,
 				5A4FACAB1B05E6160027011D /* MSQueuePushOperation.m in Sources */,
 				5A4FACAF1B05E6280027011D /* MSTableOperation.m in Sources */,
+				A31E6CF81BACD38D00364A2C /* MSPushConnection.m in Sources */,
 				5A4FAC7A1B05E4890027011D /* MSLogin.m in Sources */,
 				5A4FACBB1B05E6680027011D /* MSAPIRequest.m in Sources */,
 				5A4FAC861B05E4F00027011D /* MSClient.m in Sources */,
 				5A4FACB51B05E6550027011D /* MSTableConnection.m in Sources */,
-				5A4FAC9B1B05E55C0027011D /* MSRegistrationManager.m in Sources */,
 				5A4FAC8A1B05E5040027011D /* MSError.m in Sources */,
-				5A4FAC971B05E54D0027011D /* MSPushHttp.m in Sources */,
 				5A4FACB11B05E6320027011D /* MSTableOperationError.m in Sources */,
 				5A4FACA71B05E6060027011D /* MSQueuePullOperation.m in Sources */,
 				5A4FAC8C1B05E5110027011D /* MSQuery.m in Sources */,
@@ -1047,7 +1058,6 @@
 				5A4FACA51B05E5F60027011D /* MSOperationQueue.m in Sources */,
 				5A4FACB91B05E6620027011D /* MSTableRequest.m in Sources */,
 				5A4FACAD1B05E6200027011D /* MSTableConfigValue.m in Sources */,
-				5A4FAC931B05E53B0027011D /* MSLocalStorage.m in Sources */,
 				5A4FACA91B05E60F0027011D /* MSQueuePurgeOperation.m in Sources */,
 				5A4FACA11B05E57A0027011D /* MSSyncTable.m in Sources */,
 				5A4FAC9D1B05E5670027011D /* MSCoreDataStore.m in Sources */,
@@ -1135,15 +1145,15 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		A38AE79C1BACD69E00B3596B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E8F33ADA1616659C002DD7C6 /* WindowsAzureMobileServices */;
+			targetProxy = A38AE79B1BACD69E00B3596B /* PBXContainerItemProxy */;
+		};
 		E8E3797C161F8EB400C13F00 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = E8F33ADA1616659C002DD7C6 /* WindowsAzureMobileServices */;
 			targetProxy = E8E3797B161F8EB400C13F00 /* PBXContainerItemProxy */;
-		};
-		E8F33AF31616659C002DD7C6 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = E8F33ADA1616659C002DD7C6 /* WindowsAzureMobileServices */;
-			targetProxy = E8F33AF21616659C002DD7C6 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1174,6 +1184,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_PREFIX_HEADER = "src/WindowsAzureMobileServices-Prefix.pch";
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				INFOPLIST_FILE = src/Info.plist;
@@ -1207,6 +1218,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_PREFIX_HEADER = "src/WindowsAzureMobileServices-Prefix.pch";
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				INFOPLIST_FILE = src/Info.plist;
