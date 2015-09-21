@@ -22,7 +22,7 @@ static NSString *const stringIdPattern = @"[+?`\"/\\\\]|[\\u0000-\\u001F]|[\\u00
 @implementation MSJSONSerializer
 
 static MSJSONSerializer *staticJSONSerializerSingleton;
-static NSArray *allIdKeys;
+static NSArray<NSString *> *allIdKeys;
 
 #pragma mark * Public Static Singleton Constructor
 
@@ -35,7 +35,7 @@ static NSArray *allIdKeys;
     return  staticJSONSerializerSingleton;
 }
 
-+(NSArray *) AllIdKeys
++(NSArray<NSString *> *) AllIdKeys
 {
     if (allIdKeys == nil) {
         allIdKeys = [NSArray arrayWithObjects:idKey, @"Id", @"ID", @"iD", nil];
@@ -460,7 +460,7 @@ static NSArray *allIdKeys;
 
 - (void) removeSystemProperties:(NSMutableDictionary *) item
 {
-    NSSet *systemProperties = [item keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
+    NSSet<NSString *> *systemProperties = [item keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
         return [[key substringToIndex:2] isEqualToString:@"__"];
     }];
     

@@ -61,7 +61,7 @@ NSString *const StoreDeleted = @"ms_deleted";
     
     fr.predicate = [NSPredicate predicateWithFormat:@"%K ==[c] %@", MSSystemColumnId, itemId];
     
-    NSArray *results = [self.context executeFetchRequest:fr error:error];
+    NSArray<__kindof NSManagedObject *> *results = [self.context executeFetchRequest:fr error:error];
     if (!results || (error && *error)) {
         return nil;
     }
@@ -86,7 +86,7 @@ NSString *const StoreDeleted = @"ms_deleted";
     return [self tableItemFromManagedObject:object properties:nil];
 }
 
-+(NSDictionary *) tableItemFromManagedObject:(NSManagedObject *)object properties:(NSArray *)properties
++(NSDictionary *) tableItemFromManagedObject:(NSManagedObject *)object properties:(NSArray<NSString *> *)properties
 {
     if (!properties) {
         properties = [object.entity.attributesByName allKeys];
@@ -105,7 +105,7 @@ NSString *const StoreDeleted = @"ms_deleted";
     NSMutableDictionary *modifiedItem = [item mutableCopy];
 
     // Find all system columns in the item
-    NSSet *systemColumnNames = [modifiedItem keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
+    NSSet<NSString *> *systemColumnNames = [modifiedItem keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
         NSString *columnName = (NSString *)key;
         return [columnName hasPrefix:SystemColumnPrefix];
     }];
@@ -130,7 +130,7 @@ NSString *const StoreDeleted = @"ms_deleted";
 +(NSDictionary *) adjustInternalItem:(NSDictionary *)item {
     NSMutableDictionary *externalItem = [item mutableCopy];
     
-    NSSet *internalSystemColumns = [externalItem keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
+    NSSet<NSString *> *internalSystemColumns = [externalItem keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
         NSString *columnName = (NSString *)key;
         return [columnName hasPrefix:StoreSystemColumnPrefix];
     }];
@@ -199,7 +199,7 @@ NSString *const StoreDeleted = @"ms_deleted";
 -(MSSyncContextReadResult *)readWithQuery:(MSQuery *)query orError:(NSError *__autoreleasing *)error
 {
     __block NSInteger totalCount = -1;
-    __block NSArray *results;
+    __block NSArray<NSDictionary *> *results;
     __block NSError *internalError;
     [self.context performBlockAndWait:^{
         // Create the entity description
@@ -269,14 +269,14 @@ NSString *const StoreDeleted = @"ms_deleted";
             }
         }
         
-        NSArray *rawResult = [self.context executeFetchRequest:fr error:&internalError];
+        NSArray<__kindof NSManagedObject *> *rawResult = [self.context executeFetchRequest:fr error:&internalError];
         if (internalError) {
             return;
         }
         
         // Convert NSKeyedDictionary to regular dictionary objects since for now keyed dictionaries don't
         // seem to convert to mutable dictionaries as a user may expect
-        NSMutableArray *finalResult = [[NSMutableArray alloc] initWithCapacity:rawResult.count];
+        NSMutableArray<NSDictionary *> *finalResult = [[NSMutableArray alloc] initWithCapacity:rawResult.count];
 
         [rawResult enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
             
@@ -303,7 +303,7 @@ NSString *const StoreDeleted = @"ms_deleted";
     }
 }
 
--(BOOL) upsertItems:(NSArray *)items table:(NSString *)table orError:(NSError *__autoreleasing *)error
+-(BOOL) upsertItems:(NSArray<NSDictionary *> *)items table:(NSString *)table orError:(NSError *__autoreleasing *)error
 {
     __block BOOL success;
     [self.context performBlockAndWait:^{
@@ -342,7 +342,7 @@ NSString *const StoreDeleted = @"ms_deleted";
     return success;
 }
 
--(BOOL) deleteItemsWithIds:(NSArray *)items table:(NSString *)table orError:(NSError **)error
+-(BOOL) deleteItemsWithIds:(NSArray<NSString *> *)items table:(NSString *)table orError:(NSError **)error
 {
     __block BOOL success;
     [self.context performBlockAndWait:^{
@@ -394,7 +394,7 @@ NSString *const StoreDeleted = @"ms_deleted";
         
         fr.includesPropertyValues = NO;
         
-        NSArray *array = [self.context executeFetchRequest:fr error:error];
+        NSArray<__kindof NSManagedObject *> *array = [self.context executeFetchRequest:fr error:error];
         for (NSManagedObject *object in array) {
             [self.context deleteObject:object];
         }

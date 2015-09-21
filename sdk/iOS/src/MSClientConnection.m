@@ -160,7 +160,7 @@ static NSOperationQueue *delegateQueue;
 # pragma mark * Private Static Methods
 
 
-+(void) invokeNextFilter:(NSArray *)filters
++(void) invokeNextFilter:(NSArray<id<MSFilter>> *)filters
               withClient:(MSClient *)client
              withRequest:(NSURLRequest *)request
                completion:(MSFilterResponseBlock)completion
@@ -191,7 +191,7 @@ static NSOperationQueue *delegateQueue;
         // Since we have at least one more filter, construct the nextBlock
         // for it and then invoke the filter
         id<MSFilter> nextFilter = [filters objectAtIndex:0];
-        NSArray *nextFilters = [filters subarrayWithRange:
+        NSArray<id<MSFilter>> *nextFilters = [filters subarrayWithRange:
                                 NSMakeRange(1, filters.count - 1)];
     
         MSFilterNextBlock onNext =

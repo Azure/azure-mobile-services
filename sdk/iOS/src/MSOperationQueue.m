@@ -55,7 +55,7 @@
 
 /// Load up all operations for a given table and optionally a specific item on that table
 /// and return the list to the caller
--(NSArray *) getOperationsForTable:(NSString *)table item:(NSString *)item
+-(NSArray<MSTableOperation *> *) getOperationsForTable:(NSString *)table item:(NSString *)item
 {
     NSError *error;
     MSSyncTable *syncTable = [[MSSyncTable alloc] initWithName:self.dataSource.operationTableName client:self.client];
@@ -180,7 +180,7 @@
     }
     
     // Look up the second possible operation
-    NSArray *operations = [self getOperationsForTable:operation.tableName item:operation.itemId];
+    NSArray<MSTableOperation *> *operations = [self getOperationsForTable:operation.tableName item:operation.itemId];
     if (operations == nil || operations.count < 2) {
         return NO;
     }

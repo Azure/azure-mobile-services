@@ -26,7 +26,7 @@
 -(BOOL) condenseOperation:(MSTableOperation *)operation orError:(NSError **)error;
 
 /// Gets a list of all operations in the queue for a given table (and optionally item)
--(NSArray *) getOperationsForTable:(NSString *) table item:(NSString *)item;
+-(NSArray<MSTableOperation *> *) getOperationsForTable:(NSString *) table item:(NSString *)item;
 
 /// Returns the topmost operation
 -(id) peek;

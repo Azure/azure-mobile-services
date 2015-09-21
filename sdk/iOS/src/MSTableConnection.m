@@ -283,7 +283,7 @@ static NSString *const nextLinkPattern = @"^(.*?);\\s*rel\\s*=\\s*(\\w+)\\s*"; /
         return;
     }
     
-    NSSet *systemProperties = [item keysOfEntriesPassingTest:^BOOL(NSString *key, id obj, BOOL *stop) {
+    NSSet<NSString *> *systemProperties = [item keysOfEntriesPassingTest:^BOOL(NSString *key, id obj, BOOL *stop) {
         return [key hasPrefix:@"__"];
     }];
     

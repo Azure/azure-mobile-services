@@ -145,7 +145,7 @@ static NSOperationQueue *pushQueue_;
         
         // Check if this table-item pair already has a pending operation and if so, how the new action
         // should be combined with the previous one
-        NSArray *pendingActions = [self.operationQueue getOperationsForTable:table item:itemId];
+        NSArray<MSTableOperation *> *pendingActions = [self.operationQueue getOperationsForTable:table item:itemId];
         MSTableOperation *operation = [pendingActions lastObject];
         if (operation) {
             condenseAction = [MSTableOperation condenseAction:action withExistingOperation:operation];
@@ -432,7 +432,7 @@ static NSOperationQueue *pushQueue_;
     
     dispatch_async(writeOperationQueue, ^{
         // Before we can pull from the remote, we need to make sure out table doesn't having pending operations
-        NSArray *tableOps = [self.operationQueue getOperationsForTable:query.table.name item:nil];
+        NSArray<MSTableOperation *> *tableOps = [self.operationQueue getOperationsForTable:query.table.name item:nil];
         if (tableOps.count > 0) {
             NSOperation *push = [self pushWithCompletion:^(NSError *error) {
                 // For now we just abort the pull if the push failed to complete successfully

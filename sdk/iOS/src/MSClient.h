@@ -51,7 +51,7 @@
 /// responses sent and received by the client. The property is readonly and the
 /// array is not-mutable. To apply a filter to a client, use the withFilter:
 /// method.
-@property (nonatomic, strong, readonly, nullable) NSArray *filters;
+@property (nonatomic, strong, readonly, nullable) NSArray<id<MSFilter>> *filters;
 
 /// A sync context that defines how offline data is synced and allows for manually
 /// syncing data on demand

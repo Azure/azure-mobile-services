@@ -9,7 +9,7 @@
 @synthesize totalCount = totalCount_;
 @synthesize items = items_;
 
-- (id)initWithCount:(NSInteger)count items:(NSArray *)items;
+- (id)initWithCount:(NSInteger)count items:(NSArray<NSDictionary *> *)items;
 {
     self = [super init];
     if (self) {
