@@ -11,7 +11,7 @@
 #import "MSError.h"
 #import "MSFilter.h"
 #if TARGET_OS_IPHONE
-#import <WindowsAzureMobileServices/MSLoginController.h>
+#import "MSLoginController.h"
 #endif
 #import "MSPullSettings.h"
 #import "MSPush.h"
