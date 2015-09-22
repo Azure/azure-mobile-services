@@ -141,6 +141,11 @@
 		A2ADF7E91914481B0078BB16 /* MSTableOperationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A2ADF7E81914481B0078BB16 /* MSTableOperationTests.m */; };
 		A2C14C6A19105D9F00A58609 /* MSSyncContextReadResult.h in Headers */ = {isa = PBXBuildFile; fileRef = A2C14C6819105D9F00A58609 /* MSSyncContextReadResult.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A2C14C6B19105D9F00A58609 /* MSSyncContextReadResult.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C14C6919105D9F00A58609 /* MSSyncContextReadResult.m */; };
+		A3FD2DB01BB1C3F300624DA0 /* MSQueryInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 8790D2BF199EA5950000DC4E /* MSQueryInternal.h */; settings = {ASSET_TAGS = (); }; };
+		A3FD2DB11BB1C3FA00624DA0 /* MSTableInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 8790D2BE199C5D510000DC4E /* MSTableInternal.h */; settings = {ASSET_TAGS = (); }; };
+		A3FD2DB21BB1C40900624DA0 /* MSPullSettingsInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = D0EFD8581B2F785F009CF6DA /* MSPullSettingsInternal.h */; settings = {ASSET_TAGS = (); }; };
+		A3FD2DB31BB1C42300624DA0 /* MSQueuePullOperationInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = F3EA41DC1B0E62F40014B587 /* MSQueuePullOperationInternal.h */; settings = {ASSET_TAGS = (); }; };
+		A3FD2DB41BB1C76600624DA0 /* MSTableOperationInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = A258890218A19D0B00962F9A /* MSTableOperationInternal.h */; settings = {ASSET_TAGS = (); }; };
 		CF1D74591A5D85C60074789F /* MSQueuePurgeOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = CF1D74581A5D85C60074789F /* MSQueuePurgeOperation.m */; };
 		CF1D745B1A5D9CAB0074789F /* MSQueuePurgeOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = CF1D745A1A5D85D80074789F /* MSQueuePurgeOperation.h */; };
 		CF4D49861A2E5C96006AEB70 /* MSQueuePullOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = CF4D49851A2E5C96006AEB70 /* MSQueuePullOperation.h */; };
@@ -286,7 +291,6 @@
 		F3C0028F1AF7FFF70028AB81 /* MSTableConfigValue.h in Headers */ = {isa = PBXBuildFile; fileRef = CFAE6E0B1A3B84E400734128 /* MSTableConfigValue.h */; };
 		F3C002901AF7FFF70028AB81 /* MSTableOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = A258890018A19D0B00962F9A /* MSTableOperation.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F3C002911AF7FFF70028AB81 /* MSTableOperationError.h in Headers */ = {isa = PBXBuildFile; fileRef = A281900218BB2FF5001B14E7 /* MSTableOperationError.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		F3C002921AF7FFF70028AB81 /* MSTableOperationInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = A258890218A19D0B00962F9A /* MSTableOperationInternal.h */; };
 		F3C002951AF7FFF70028AB81 /* MSLogin.h in Headers */ = {isa = PBXBuildFile; fileRef = E8146640165BE0150038EBE5 /* MSLogin.h */; };
 		F3C002961AF7FFF70028AB81 /* MSLoginSerializer.h in Headers */ = {isa = PBXBuildFile; fileRef = E8146644165BE2440038EBE5 /* MSLoginSerializer.h */; };
 		F3C002971AF7FFF70028AB81 /* MSClientConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = E8F33B1E16166822002DD7C6 /* MSClientConnection.h */; };
@@ -950,6 +954,7 @@
 				E8E3790E161F769D00C13F00 /* MSClient.h in Headers */,
 				E8E37911161F769D00C13F00 /* MSTable.h in Headers */,
 				A24701BD196896F500385DA2 /* MSPushRequest.h in Headers */,
+				A3FD2DB01BB1C3F300624DA0 /* MSQueryInternal.h in Headers */,
 				E8E37910161F769D00C13F00 /* MSQuery.h in Headers */,
 				A258890F18A19D0B00962F9A /* MSTableOperation.h in Headers */,
 				A258891618A19D0B00962F9A /* MSSyncTable.h in Headers */,
@@ -970,6 +975,7 @@
 				E8E37915161F769D00C13F00 /* MSTableConnection.h in Headers */,
 				A2818FFC18BB0660001B14E7 /* MSQueuePushOperation.h in Headers */,
 				A258891118A19D0B00962F9A /* MSTableOperationInternal.h in Headers */,
+				A3FD2DB11BB1C3FA00624DA0 /* MSTableInternal.h in Headers */,
 				E8E37916161F769D00C13F00 /* MSTableRequest.h in Headers */,
 				CF4D49861A2E5C96006AEB70 /* MSQueuePullOperation.h in Headers */,
 				E8E37917161F769D00C13F00 /* MSURLBuilder.h in Headers */,
@@ -1020,6 +1026,7 @@
 				F3C0028D1AF7FFF70028AB81 /* MSQueuePurgeOperation.h in Headers */,
 				F3C0028E1AF7FFF70028AB81 /* MSQueuePushOperation.h in Headers */,
 				F3C0028F1AF7FFF70028AB81 /* MSTableConfigValue.h in Headers */,
+				A3FD2DB31BB1C42300624DA0 /* MSQueuePullOperationInternal.h in Headers */,
 				F3C002951AF7FFF70028AB81 /* MSLogin.h in Headers */,
 				F3C002961AF7FFF70028AB81 /* MSLoginSerializer.h in Headers */,
 				F3C002971AF7FFF70028AB81 /* MSClientConnection.h in Headers */,
@@ -1038,8 +1045,9 @@
 				F3C0027A1AF7FFF60028AB81 /* MSClientInternal.h in Headers */,
 				F3C0027E1AF7FFF60028AB81 /* MSQueryInternal.h in Headers */,
 				F3C002801AF7FFF60028AB81 /* MSTableInternal.h in Headers */,
+				A3FD2DB21BB1C40900624DA0 /* MSPullSettingsInternal.h in Headers */,
 				F3C0028A1AF7FFF70028AB81 /* MSSyncContextInternal.h in Headers */,
-				F3C002921AF7FFF70028AB81 /* MSTableOperationInternal.h in Headers */,
+				A3FD2DB41BB1C76600624DA0 /* MSTableOperationInternal.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
