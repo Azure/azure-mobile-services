@@ -65,7 +65,8 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// provide telemetry data.
         /// </summary>
         public string InstallationId { get; private set; }
-        
+
+        /// <summary>
         /// The event manager that exposes and manages the event stream used by the mobile services types to 
         /// publish and consume events.
         /// </summary>

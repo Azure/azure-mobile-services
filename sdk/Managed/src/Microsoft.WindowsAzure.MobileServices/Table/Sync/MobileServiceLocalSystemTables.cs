@@ -22,17 +22,17 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         public static readonly string Prefix = "__";
 
         /// <summary>
-        /// Table that stores operation queue items
+        /// Name of the table that stores operation queue items
         /// </summary>
         public static readonly string OperationQueue = Prefix + "operations";
 
         /// <summary>
-        /// Table that stores sync errors
+        /// Name of the table that stores sync errors
         /// </summary>
         public static readonly string SyncErrors = Prefix + "errors";
 
         /// <summary>
-        /// Configuration settings related to sync framework
+        /// Name of the table that stores configuration settings related to sync framework
         /// </summary>
         public static readonly string Config = Prefix + "config";
 

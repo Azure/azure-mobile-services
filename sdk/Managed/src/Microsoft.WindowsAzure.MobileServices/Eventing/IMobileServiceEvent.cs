@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 
 namespace Microsoft.WindowsAzure.MobileServices.Eventing
 {
+    /// <summary>
+    /// Represents a mobile service event.
+    /// </summary>
     public interface IMobileServiceEvent
     {
         /// <summary>

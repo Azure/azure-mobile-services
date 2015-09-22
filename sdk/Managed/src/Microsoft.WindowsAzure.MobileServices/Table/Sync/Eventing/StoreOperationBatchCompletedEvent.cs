@@ -13,11 +13,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     /// <summary>
     /// A mobile service event that is published when an operations batch against the local store is completed.
     /// </summary>
-    public sealed class StoreOperationBatchCompletedEvent : StoreChangeEvent
+    public sealed class StoreOperationsBatchCompletedEvent : StoreChangeEvent
     {
         public const string EventName = "MobileServices.StoreOperationBatchCompleted";
 
-        public StoreOperationBatchCompletedEvent(StoreOperationsBatch batch)
+        public StoreOperationsBatchCompletedEvent(StoreOperationsBatch batch)
         {
             if (batch == null)
             {

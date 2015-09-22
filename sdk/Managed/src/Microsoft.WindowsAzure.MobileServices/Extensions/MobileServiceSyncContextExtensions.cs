@@ -40,6 +40,8 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         /// <param name="context">An instance of <see cref="IMobileServiceSyncContext"/>.</param>
         /// <param name="store">An instance of <see cref="IMobileServiceLocalStore"/>.</param>
+        /// <param name="trackingOptions">The traking options that should be enabled on this instance of <see cref="IMobileServiceSyncContext"/>.</param>
+        /// <returns>A task that completes when the initialization when initialization has finished.</returns>
         public static Task InitializeAsync(this IMobileServiceSyncContext context, IMobileServiceLocalStore store, StoreTrackingOptions trackingOptions)
         {
             return context.InitializeAsync(store, new MobileServiceSyncHandler(), trackingOptions);

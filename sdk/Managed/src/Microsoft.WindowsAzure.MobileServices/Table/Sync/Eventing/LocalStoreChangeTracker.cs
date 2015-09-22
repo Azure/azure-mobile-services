@@ -299,8 +299,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
             QueryResult result = await this.store.QueryAsync(query);
 
-            return new Dictionary<string, string>(result.Values.ToDictionary(t => this.objectReader.GetId((JObject)t),
-                rec => includeVersion ? rec[MobileServiceSystemColumns.Version].ToString() : null));
+            return result.Values.ToDictionary(t => this.objectReader.GetId((JObject)t), rec => includeVersion ? rec[MobileServiceSystemColumns.Version].ToString() : null);
         }
 
         private async Task TrackStoreOperationAsync(string tableName, string itemId, LocalStoreOperationKind operationKind)
@@ -337,7 +336,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             {
                 if (this.trackBatches)
                 {
-                    this.eventManager.PublishAsync(new StoreOperationBatchCompletedEvent(this.operationsBatch));
+                    this.eventManager.PublishAsync(new StoreOperationsBatchCompletedEvent(this.operationsBatch));
                 }
             }
         }

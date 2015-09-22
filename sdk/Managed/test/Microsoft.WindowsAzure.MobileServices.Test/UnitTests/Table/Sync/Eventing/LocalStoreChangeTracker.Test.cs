@@ -37,10 +37,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests.Table.Sync.Eventi
             var eventManager = new MobileServiceEventManagerMock<IMobileServiceEvent>();
             var settings = new MobileServiceSyncSettingsManager(store);
 
-            StoreOperationBatchCompletedEvent batchEvent = null;
+            StoreOperationsBatchCompletedEvent batchEvent = null;
             eventManager.PublishAsyncFunc = e =>
             {
-                batchEvent = e as StoreOperationBatchCompletedEvent;
+                batchEvent = e as StoreOperationsBatchCompletedEvent;
                 return Task.FromResult(0);
             };
 
@@ -65,10 +65,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests.Table.Sync.Eventi
             await changeTracker.UpsertAsync("test", new JObject() { { "id", "456" }, { "__version", "2" } }, true); // Insert
             await changeTracker.DeleteAsync("test", "789"); // Delete
 
-            StoreOperationBatchCompletedEvent batchEvent = null;
+            StoreOperationsBatchCompletedEvent batchEvent = null;
             eventManager.PublishAsyncFunc = e =>
             {
-                batchEvent = e as StoreOperationBatchCompletedEvent;
+                batchEvent = e as StoreOperationsBatchCompletedEvent;
                 return Task.FromResult(0);
             };
 

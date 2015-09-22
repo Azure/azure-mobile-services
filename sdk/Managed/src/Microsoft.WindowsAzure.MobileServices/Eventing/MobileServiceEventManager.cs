@@ -20,7 +20,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Eventing
 
         static MobileServiceEventManager()
         {
-            observerTypeDefinition = typeof(IObserver<IMobileServiceEvent>).GetTypeInfo().GetGenericTypeDefinition();
+            observerTypeDefinition = typeof(IEventObserver<IMobileServiceEvent>).GetTypeInfo().GetGenericTypeDefinition();
         }
 
         public MobileServiceEventManager()
@@ -60,11 +60,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Eventing
 
                 foreach (var subscription in subscriptionMatches)
                 {
-                    try
-                    {
-                        subscription.OnNext(mobileServiceEvent);
-                    }
-                    catch { }
+                    subscription.OnNext(mobileServiceEvent);
                 }
             });
         }

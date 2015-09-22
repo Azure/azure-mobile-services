@@ -30,16 +30,25 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             this.operationsCountByType = new Dictionary<LocalStoreOperationKind, int>();
         }
 
+        /// <summary>
+        /// The ID of the batch this operation belongs to.
+        /// </summary>
         public string BatchId
         {
             get { return this.batchId; }
         }
 
+        /// <summary>
+        /// Describes the source this operation was triggered from.
+        /// </summary>
         public StoreOperationSource Source
         {
             get { return this.source; }
         }
 
+        /// <summary>
+        /// The number of operations executed within this batch.
+        /// </summary>
         public int OperationCount 
         { 
             get 
@@ -48,6 +57,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
         }
 
+        /// <summary>
+        /// Gets the number of operations matching the provided operation kind executed within this batch.
+        /// </summary>
+        /// <param name="operationKind">The kind of operation.</param>
+        /// <returns>The number of operations matching the provided count.</returns>
         public int GetOperationCountByKind(LocalStoreOperationKind operationKind)
         {
             if (this.operationsCountByType.ContainsKey(operationKind))

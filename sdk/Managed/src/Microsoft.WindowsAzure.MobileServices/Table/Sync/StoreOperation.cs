@@ -37,14 +37,29 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             this.BatchId = batchId;
         }
 
+        /// <summary>
+        /// The ID of the batch this operation belongs to.
+        /// </summary>
         public string BatchId { get; set; }
 
+        /// <summary>
+        /// The name of the table this operation was executed against.
+        /// </summary>
         public string TableName { get; set; }
 
+        /// <summary>
+        /// The ID of the record this operation that was the target of this operation.
+        /// </summary>
         public string RecordId { get; set; }
 
+        /// <summary>
+        /// The kind of operation.
+        /// </summary>
         public LocalStoreOperationKind Kind { get; set; }
 
+        /// <summary>
+        /// Describes the source this operation was triggered from.
+        /// </summary>
         public StoreOperationSource Source { get; set; }
     }
 }

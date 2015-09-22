@@ -486,9 +486,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             await TestOperationModifiedException(true, (error, context) => context.CancelAndDiscardItemAsync(error));
         }
-
-
-
+        
         private async Task TestOperationModifiedException(bool operationExists, Func<MobileServiceTableOperationError, MobileServiceSyncContext, Task> action)
         {
             var client = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);

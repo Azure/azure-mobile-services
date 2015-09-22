@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Eventing;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
@@ -32,7 +33,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests.Eventing
         }
 
         [TestMethod]
-        public void Subscribe_OnHandler_Succeeds()
+        public void Subscribe_OnSubscriptionHandler_Succeeds()
         {
             var eventManager = new MobileServiceEventManager();
 
@@ -52,23 +53,33 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests.Eventing
             Assert.IsTrue(eventHandled, "Subscribe failed");
         }
 
-        [TestMethod]
-        public void Subscribe_FiltersOnObserverGenericType()
+        [AsyncTestMethod]
+        public async Task Subscribe_FiltersOnObserverGenericType()
         {
             var eventManager = new MobileServiceEventManager();
 
             var testEvent = new TestEvent<bool>(false);
             var mobileServiceEvent = new MobileServiceEvent<bool>("msevent", false);
 
-            var observer = new MobileServiceEventObserver<TestEvent<bool>>(e=>e.Payload = true);
+            var mre = new ManualResetEventSlim();
+
+            var observer = new MobileServiceEventObserver<TestEvent<bool>>(e=>{
+                e.Payload = true;
+                mre.Set();
+            });
 
             IDisposable testEventSubscription = eventManager.Subscribe(observer);
 
-            eventManager.PublishAsync(testEvent).Wait(1000);
-            eventManager.PublishAsync(mobileServiceEvent).Wait(1000);
-
+            await eventManager.PublishAsync(testEvent);
+            bool eventSet =  mre.Wait(500);
+            Assert.IsTrue(eventSet);
             Assert.IsTrue(testEvent.Payload, "Test event was not handled");
-            Assert.IsFalse(mobileServiceEvent.Payload, "Mobile service event was not filtered");
+
+            mre.Reset();
+            await eventManager.PublishAsync(mobileServiceEvent);
+            eventSet = mre.Wait(500);
+            Assert.IsFalse(eventSet);
+            Assert.IsFalse(mobileServiceEvent.Payload);
 
             testEventSubscription.Dispose();
         }
