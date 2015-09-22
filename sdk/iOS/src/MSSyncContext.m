@@ -366,6 +366,8 @@ static NSOperationQueue *pushQueue_;
     NSError *error;
     NSDictionary *isDeletedParams = [MSSyncContext dictionary:queryCopy.parameters entriesForCaseInsensitiveKey:@"__includedeleted"];
     if (queryCopy.selectFields) {
+        // Note: when this restriction is enabled, we may want to check that the select includes
+        // system properties like __version for OC enabled tables, etc
         error = [self errorWithDescription:@"Use of selectFields in not supported in pullWithQuery:"
                               andErrorCode:MSInvalidParameter];
     }
@@ -380,9 +382,6 @@ static NSOperationQueue *pushQueue_;
     else if (queryId && (queryCopy.fetchOffset >= 0 || queryCopy.fetchLimit >= 0)) {
         error = [self errorWithDescription: @"Properties fetchOffset and fetchLimit are not supported when queryId is specified"
                               andErrorCode:MSInvalidParameter];
-    }
-    else if ([MSSyncContext dictionary:queryCopy.parameters containsCaseInsensitiveKey:@"__systemproperties"]) {
-        error = [self errorWithDescription:@"Use of '__systemProperties' is not supported in pullWithQuery parameters:" andErrorCode:MSInvalidParameter];
     }
     else if (queryCopy.syncTable) {
         // Otherwise we convert the sync table to a normal table
@@ -410,13 +409,6 @@ static NSOperationQueue *pushQueue_;
         return nil;
     }
     
-    // Get the required system properties from the Store
-    if ([self.dataSource respondsToSelector:@selector(systemPropertiesForTable:)]) {
-        queryCopy.table.systemProperties = [self.dataSource systemPropertiesForTable:queryCopy.table.name];
-    } else {
-        queryCopy.table.systemProperties = MSSystemPropertyVersion;
-    }
-    
     // add __includeDeleted
     if (!queryCopy.parameters) {
         queryCopy.parameters = @{@"__includeDeleted" : @"true"};
@@ -426,10 +418,7 @@ static NSOperationQueue *pushQueue_;
         queryCopy.parameters = mutableParameters;
     }
     
-    queryCopy.table.systemProperties |= MSSystemPropertyDeleted;
-    
     if (queryId) {
-        queryCopy.table.systemProperties |= MSSystemPropertyUpdatedAt;
         NSSortDescriptor *orderByUpdatedAt = [NSSortDescriptor sortDescriptorWithKey:MSSystemColumnUpdatedAt ascending:YES];
         queryCopy.orderBy = @[orderByUpdatedAt];
     }

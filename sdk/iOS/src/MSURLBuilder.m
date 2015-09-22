@@ -30,40 +30,6 @@ static NSString *const inlineCountAllPage = @"allpages";
 
 #pragma mark * Public URL Builder Methods
 
-+ (NSURL *) addTableSystemProperties:(MSTable *)table toURL:(NSURL *)url
-{
-    if (table.systemProperties == MSSystemPropertyNone) {
-        return url;
-    }
-
-    if(url.query != nil && [url.query rangeOfString:@"__systemProperties" options:NSCaseInsensitiveSearch].location != NSNotFound) {
-        return url;
-    }
-                               
-    NSString *value = @"";
-    if(table.systemProperties == MSSystemPropertyAll) {
-        value = encodeToPercentEscapeString(@"*");
-    } else {
-        NSMutableArray *properties = [NSMutableArray array];
-        if (table.systemProperties & MSSystemPropertyCreatedAt) {
-            [properties addObject:MSSystemColumnCreatedAt];
-        }
-        if (table.systemProperties & MSSystemPropertyUpdatedAt) {
-            [properties addObject:MSSystemColumnUpdatedAt];
-        }
-        if (table.systemProperties & MSSystemPropertyDeleted) {
-            [properties addObject:MSSystemColumnDeleted];
-        }
-        if (table.systemProperties & MSSystemPropertyVersion) {
-            [properties addObject:MSSystemColumnVersion];
-        }
-        // Join the properties with "%2C" which is URL Friendly
-        value = [properties componentsJoinedByString:@"%2C"];
-    }
-    
-    return [MSURLBuilder URLByAppendingQueryString:[@"__systemProperties=" stringByAppendingString:value] toURL:url];
-}
-
 +(NSURL *) URLForTable:(MSTable *)table
             parameters:(NSDictionary *)parameters
                  query:( NSString *)query
@@ -87,9 +53,6 @@ static NSString *const inlineCountAllPage = @"allpages";
         // Add the query parameters if any
         url = [MSURLBuilder URLByAppendingQueryParameters:parameters
                                                     toURL:url];
-        
-        // Check if we should add in system properties
-        url = [MSURLBuilder addTableSystemProperties:table toURL:url];
     }
     
     return url;

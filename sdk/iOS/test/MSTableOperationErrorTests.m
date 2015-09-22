@@ -153,6 +153,7 @@
 -(void) testCancelAndUpdate_NoItem {
     MSTableOperationError *opError = [self createErrorAndPendingOpForDefaultItem];
     
+    
     // Cancel our pending operation and update the stored value
     XCTestExpectation *expectation = [self expectationWithDescription:@"CancelAndUpdateOperation"];
     [opError cancelOperationAndUpdateItem:nil completion:^(NSError *error) {

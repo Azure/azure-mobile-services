@@ -17,11 +17,11 @@ typedef NS_OPTIONS(NSUInteger, MSSystemProperties) {
     MSSystemPropertyAll         = 0xFFFF
 };
 
-extern NSString * _Nonnull  const MSSystemColumnId;
-extern NSString * _Nonnull const MSSystemColumnCreatedAt;
-extern NSString * _Nonnull const MSSystemColumnUpdatedAt;
-extern NSString * _Nonnull const MSSystemColumnVersion;
-extern NSString * _Nonnull const MSSystemColumnDeleted;
+extern NSString * __nonnull const MSSystemColumnId;
+extern NSString * __nonnull const MSSystemColumnCreatedAt;
+extern NSString * __nonnull const MSSystemColumnUpdatedAt;
+extern NSString * __nonnull const MSSystemColumnVersion;
+extern NSString * __nonnull const MSSystemColumnDeleted;
 
 #pragma mark * MSTable Public Interface
 
@@ -47,7 +47,6 @@ extern NSString * _Nonnull const MSSystemColumnDeleted;
 /// The client associated with this table.
 @property (nonatomic, strong, readonly, nonnull)         MSClient *client;
 
-@property (nonatomic) MSSystemProperties systemProperties;
 ///@}
 
 #pragma mark * Public Initializers
