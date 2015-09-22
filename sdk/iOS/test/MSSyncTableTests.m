@@ -24,6 +24,7 @@
 #import "MSClientInternal.h"
 
 static NSString *const TodoTableNoVersion = @"TodoNoVersion";
+static NSString *const TodoTable = @"TodoItem";
 static NSString *const AllColumnTypesTable = @"ColumnTypes";
 static NSString *const SyncContextQueueName = @"Sync Context: Operation Callbacks";
 
@@ -990,6 +991,25 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 
 #pragma mark Read Tests
 
+-(void) testReadWithIDSucces
+{
+    NSArray *items = @[ @{ @"id": @"123", @"text": @"hello" },
+                        @{ @"id": @"456", @"text": @"goodbye" } ];
+    [offline upsertItems:items table:TodoTable orError:nil];
+    
+    MSSyncTable *todoTable = [client syncTableWithName:TodoTable];
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Read"];
+    
+    [todoTable readWithId:@"123" completion:^(NSDictionary *item, NSError *error) {
+        XCTAssertNotNil(item);
+        XCTAssertNil(error);
+        
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:10.0 handler:nil];
+}
 
 -(void) testReadWithIdNoItemSuccess
 {
@@ -1001,6 +1021,56 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
         XCTAssertNil(item, @"No item should have been found");
         XCTAssertNil(error, @"No error should have been returned");
     }];
+}
+
+
+-(void) testReadWithCompletionSuccess
+{
+    NSArray *items = @[ @{ @"id": @"123", @"text": @"hello" },
+                        @{ @"id": @"456", @"text": @"goodbye" } ];
+    [offline upsertItems:items table:TodoTable orError:nil];
+    
+    MSSyncTable *todoTable = [client syncTableWithName:TodoTable];
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Read"];
+    
+    [todoTable readWithCompletion:^(MSQueryResult *result, NSError *error) {
+        XCTAssertNil(error);
+        XCTAssertNotNil(result);
+        XCTAssertEqual(result.items.count, 2);
+        XCTAssertEqual(result.totalCount, -1);
+        
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:10.0 handler:nil];
+}
+
+-(void) testReadWithPredicateSuccess
+{
+    NSArray *items = @[
+        @{ @"id": @"123", @"text": @"hello" },
+        @{ @"id": @"456", @"text": @"hi" },
+        @{ @"id": @"789", @"text": @"goodbye" }
+    ];
+    
+    [offline upsertItems:items table:TodoTable orError:nil];
+    
+    MSSyncTable *todoTable = [client syncTableWithName:TodoTable];
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Read"];
+
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"text BEGINSWITH 'h'"];
+    [todoTable readWithPredicate:predicate completion:^(MSQueryResult *result, NSError *error) {
+        XCTAssertNil(error);
+        XCTAssertNotNil(result);
+        XCTAssertEqual(result.items.count, 2);
+        XCTAssertEqual(result.totalCount, -1);
+        
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:10.0 handler:nil];
 }
 
 
