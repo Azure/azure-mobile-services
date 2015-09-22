@@ -253,11 +253,12 @@ static NSString *const inlineCountAllPage = @"allpages";
 
 
 #pragma mark * Private Methods
-
-
 // This is for 'strict' URL encoding that will encode even reserved URL
 // characters.  It should be used only on URL pieces, not full URLs.
 NSString* encodeToPercentEscapeString(NSString *string) {
+    //Solves deprecation issue, but fails the tests. Must study it.
+//    return [string stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet characterSetWithCharactersInString:@"!*;:@&=+/?%#[]"]];
+
     return (__bridge_transfer NSString *)
     CFURLCreateStringByAddingPercentEscapes(NULL,
                                             (CFStringRef) string,

@@ -70,6 +70,9 @@ NSString *const StoreDeleted = @"ms_deleted";
     
     if (item && asDictionary) {
         
+        //Someone, please, test this. Solves the warning, but I don't know it it will work as intended.
+//        NSDictionary *result = [item dictionaryWithValuesForKeys:[[[item entity] attributesByName] allKeys]];
+        
         NSDictionary *result = [item dictionaryWithValuesForKeys:nil];
 
         // The type of |result| is |NSKnownKeysDictionary|, an undocumented subclass of |NSMutableDictionary|.

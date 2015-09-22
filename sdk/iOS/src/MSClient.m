@@ -80,8 +80,8 @@
 {
     // NSURL will be nil for non-percent escaped url strings so we have to
     // percent escape here
-    NSString  *urlStringEncoded =
-    [urlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    NSString  *urlStringEncoded = [urlString stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
+//    [urlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     
     NSURL *url = [NSURL URLWithString:urlStringEncoded];
     return [MSClient clientWithApplicationURL:url applicationKey:key];

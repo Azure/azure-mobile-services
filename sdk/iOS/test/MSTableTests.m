@@ -1828,7 +1828,7 @@
     {
         MSTestFilter *testFilter = [[MSTestFilter alloc] init];
         NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
-                                       initWithURL:nil
+                                       initWithURL:nil //nil URL is not allowed!!!
                                        statusCode:200
                                        HTTPVersion:nil headerFields:nil];
         testFilter.responseToUse = response;
@@ -1865,9 +1865,11 @@
     BOOL result = YES;
     if (property == MSSystemPropertyNone)
     {
-        return query == nil || [query rangeOfString:@"__systemProperties"].location == NSNotFound;
+        result = query == nil || [query rangeOfString:@"__systemProperties"].location == NSNotFound;
+        return result;
     } else if (property == MSSystemPropertyAll) {
-        return [query rangeOfString:@"__systemProperties=%2A"].location != NSNotFound;
+        result = [query rangeOfString:@"__systemProperties=%2A"].location != NSNotFound;
+        return result;
     }
     
     // Check individual combinations
