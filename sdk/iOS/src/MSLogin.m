@@ -7,7 +7,10 @@
 #import "MSJSONSerializer.h"
 #import "MSClientConnection.h"
 #import "MSClient.h"
-#import "WindowsAzureMobileServices.h"
+
+#if TARGET_OS_IPHONE
+#import "MSLoginController.h"
+#endif
 
 #pragma mark * MSLogin Private Interface
 

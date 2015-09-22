@@ -3,12 +3,14 @@
 // ----------------------------------------------------------------------------
 
 #import "MSCoreDataStore+TestHelper.h"
+#import "TodoItem.h"
 
 @implementation MSCoreDataStore (TestHelper)
 
 + (NSManagedObjectContext *)inMemoryManagedObjectContext
 {
-    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+	// Had to use T
+    NSBundle *bundle = [NSBundle bundleForClass:[TodoItem class]];
     NSURL *url = [bundle URLForResource:@"CoreDataTestModel" withExtension:@"momd"];
     NSManagedObjectModel *model = [[NSManagedObjectModel alloc] initWithContentsOfURL:url];
     
