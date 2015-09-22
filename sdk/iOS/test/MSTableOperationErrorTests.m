@@ -50,17 +50,9 @@
 }
 
 -(void) testBasicInit {
-    MSTableOperation *tableOp = [[MSTableOperation alloc] initWithTable:@"TodoItem" type:MSTableOperationInsert itemId:@"ABC"];
-    NSDictionary *item = @{@"id": @"ABC", @"text": @"item one", @"complete": @NO};
+    MSTableOperationError *opError = [self createErrorAndPendingOpForDefaultItem];
+
     
-    NSError *error = [NSError errorWithDomain:MSErrorDomain
-                                         code:MSErrorPreconditionFailed
-                                     userInfo:@{NSLocalizedDescriptionKey: @"Insert error..."}];
-    
-    MSTableOperationError *opError = [[MSTableOperationError alloc] initWithOperation:tableOp
-                                                                                 item:item
-                                                                              context:client.syncContext
-                                                                                error:error];
     XCTAssertNotNil(opError);
     
     XCTAssertEqualObjects(opError.itemId, @"ABC");
@@ -103,12 +95,8 @@
 }
 
 -(void) testCancelAndDiscard {
-    NSDictionary *item = @{@"id": @"ABC", @"text": @"initial value" };
-    MSTableOperation *tableOp = [self createPendingOperationForItem:item];
-    MSTableOperationError *opError = [[MSTableOperationError alloc] initWithOperation:tableOp
-                                                                                 item:item
-                                                                              context:client.syncContext
-                                                                                error:nil];
+    MSTableOperationError *opError = [self createErrorAndPendingOpForDefaultItem];
+
     // Cancel our operation now
     XCTestExpectation *cancelExpectation = [self expectationWithDescription:@"CancelAndDiscard"];
     [opError cancelOperationAndDiscardItemWithCompletion:^(NSError *error) {
@@ -133,12 +121,7 @@
 }
 
 -(void) testCancelAndUpdate {
-    NSDictionary *item = @{@"id": @"ABC", @"text": @"initial value" };
-    MSTableOperation *tableOp = [self createPendingOperationForItem:item];
-    MSTableOperationError *opError = [[MSTableOperationError alloc] initWithOperation:tableOp
-                                                                                 item:item
-                                                                              context:client.syncContext
-                                                                                error:nil];
+    MSTableOperationError *opError = [self createErrorAndPendingOpForDefaultItem];
     
     // Cancel our pending operation and update the stored value
     XCTestExpectation *expectation = [self expectationWithDescription:@"CancelAndUpdateOperation"];
@@ -168,12 +151,7 @@
 }
 
 -(void) testCancelAndUpdate_NoItem {
-    NSDictionary *item = @{@"id": @"ABC", @"text": @"initial value" };
-    MSTableOperation *tableOp = [self createPendingOperationForItem:item];
-    MSTableOperationError *opError = [[MSTableOperationError alloc] initWithOperation:tableOp
-                                                                                 item:item
-                                                                              context:client.syncContext
-                                                                                error:nil];
+    MSTableOperationError *opError = [self createErrorAndPendingOpForDefaultItem];
     
     // Cancel our pending operation and update the stored value
     XCTestExpectation *expectation = [self expectationWithDescription:@"CancelAndUpdateOperation"];
@@ -190,6 +168,22 @@
     XCTAssertNil(error);
     XCTAssertEqual(allOps.count, 1);
     
+}
+
+- (MSTableOperationError *) createErrorAndPendingOpForDefaultItem
+{
+    NSDictionary *item = @{ @"id": @"ABC", @"text": @"initial value" };
+    
+    MSTableOperation *tableOp = [self createPendingOperationForItem:item];
+    
+    NSError *error = [NSError errorWithDomain:MSErrorDomain
+                                        code:MSErrorPreconditionFailed
+                                    userInfo:@{NSLocalizedDescriptionKey: @"Insert error..."}];
+    
+    return [[MSTableOperationError alloc] initWithOperation:tableOp
+                                                       item:item
+                                                    context:client.syncContext
+                                                      error:error];
 }
 
 - (MSTableOperation *) createPendingOperationForItem:(NSDictionary *)item

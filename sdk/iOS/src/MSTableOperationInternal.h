@@ -7,6 +7,10 @@
 #import "MSTableOperation.h"
 #import "MSSyncContext.h"
 
+@class MSClient;
+@protocol MSSyncContextDataSource;
+@protocol MSSyncContextDelegate;
+
 @interface MSTableOperation()
 
 @property (nonatomic) NSInteger operationId;

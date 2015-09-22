@@ -17,11 +17,11 @@ typedef NS_OPTIONS(NSUInteger, MSSystemProperties) {
     MSSystemPropertyAll         = 0xFFFF
 };
 
-extern NSString *const MSSystemColumnId;
-extern NSString *const MSSystemColumnCreatedAt;
-extern NSString *const MSSystemColumnUpdatedAt;
-extern NSString *const MSSystemColumnVersion;
-extern NSString *const MSSystemColumnDeleted;
+extern NSString * _Nonnull  const MSSystemColumnId;
+extern NSString * _Nonnull const MSSystemColumnCreatedAt;
+extern NSString * _Nonnull const MSSystemColumnUpdatedAt;
+extern NSString * _Nonnull const MSSystemColumnVersion;
+extern NSString * _Nonnull const MSSystemColumnDeleted;
 
 #pragma mark * MSTable Public Interface
 
