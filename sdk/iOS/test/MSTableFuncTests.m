@@ -368,7 +368,6 @@
     NSString *myid = @"an id";
     
     NSDictionary *item = @{ @"id": myid, @"string": @"a value" };
-    self.table.systemProperties = MSSystemPropertyAll;
     self.done = NO;
     [self.table insert:item completion:^(NSDictionary *item, NSError *error) {
         XCTAssertNotNil(item[MSSystemColumnCreatedAt], @"Missing property");
@@ -466,248 +465,8 @@
     [self waitForTest:30.0];
 }
 
--(void) testAsyncTableOperationsWithSystemPropertiesSetExplicitly
-{
-    NSDictionary *item = @{ @"string": @"a value" };
-    
-    self.table.systemProperties = MSSystemPropertyVersion | MSSystemPropertyCreatedAt | MSSystemPropertyUpdatedAt;
-    [self.table insert:item completion:^(NSDictionary *item, NSError *error) {
-        XCTAssertNotNil(item[MSSystemColumnCreatedAt], @"Missing property");
-        XCTAssertNotNil(item[MSSystemColumnUpdatedAt], @"Missing property");
-        XCTAssertNotNil(item[MSSystemColumnVersion], @"Missing property");
-        self.done = YES;
-    }];
-    [self waitForTest:30.0];
-    
-    // Explicit System Properties insert
-    self.done = NO;
-    self.table.systemProperties = MSSystemPropertyVersion | MSSystemPropertyCreatedAt;
-    [self.table insert:item completion:^(NSDictionary *item, NSError *error) {
-        XCTAssertNotNil(item[MSSystemColumnCreatedAt], @"Missing property");
-        XCTAssertNil(item[MSSystemColumnUpdatedAt], @"Shouldn't have had updated");
-        XCTAssertNotNil(item[MSSystemColumnVersion], @"Missing property");
-        self.done = YES;
-    }];
-    [self waitForTest:30.0];
-
-    self.done = NO;
-    __block NSString *savedItemId;
-    self.table.systemProperties = MSSystemPropertyUpdatedAt | MSSystemPropertyCreatedAt;
-    [self.table readWithCompletion:^(MSQueryResult *result, NSError *error) {
-        NSDictionary *item = result.items[0];
-        XCTAssertNotNil(item[MSSystemColumnCreatedAt], @"Missing property");
-        XCTAssertNotNil(item[MSSystemColumnUpdatedAt], @"Missing property");
-        XCTAssertNil(item[MSSystemColumnVersion], @"Has extra property");
-        savedItemId = item[@"id"];
-        self.done = YES;
-    }];
-    [self waitForTest:30.0];
-
-    self.done = NO;
-    self.table.systemProperties = MSSystemPropertyUpdatedAt;
-    [self.table readWithId:savedItemId completion:^(NSDictionary *item, NSError *error) {
-        XCTAssertNil(item[MSSystemColumnCreatedAt], @"Has extra property");
-        XCTAssertNotNil(item[MSSystemColumnUpdatedAt], @"Missing property");
-        XCTAssertNil(item[MSSystemColumnVersion], @"Has extra property");
-        self.done = YES;
-    }];
-    [self waitForTest:30.0];
-}
-
--(void) testAsyncTableOperationsWithAllSystemPropertiesUsingCustomSystemParameters
-{
-    NSCharacterSet *equals = [NSCharacterSet characterSetWithCharactersInString:@"="];
-    for (NSString *systemProperties in [MSTable testValidSystemPropertyQueryStrings])
-    {
-        NSArray *systemPropertiesKeyValue = [systemProperties componentsSeparatedByCharactersInSet:equals];
-        NSDictionary *userParams = @{systemPropertiesKeyValue[0]: systemPropertiesKeyValue[1]};
-        __block id savedItem;
-        
-        BOOL shouldHaveCreatedAt = [systemProperties rangeOfString:@"created" options:NSCaseInsensitiveSearch].location != NSNotFound;
-        BOOL shouldHaveUpdatedAt = [systemProperties rangeOfString:@"updated" options:NSCaseInsensitiveSearch].location != NSNotFound;
-        BOOL shouldHaveVersion = [systemProperties rangeOfString:@"version" options:NSCaseInsensitiveSearch].location != NSNotFound;
-        if([systemProperties rangeOfString:@"*" options:NSCaseInsensitiveSearch].location != NSNotFound) {
-            shouldHaveCreatedAt = shouldHaveUpdatedAt = shouldHaveVersion = YES;
-        }
-        
-        NSString *myId = @"an id";
-        NSDictionary *item = @{ @"id": myId, @"string": @"a value" };
-        
-        self.done = NO;
-        [self.table insert:item parameters:userParams completion:^(NSDictionary *item, NSError *error) {
-            XCTAssertEqual(shouldHaveCreatedAt, (BOOL)(item[MSSystemColumnCreatedAt] != nil), @"Property invalid: %@", systemProperties);
-            XCTAssertEqual(shouldHaveUpdatedAt, (BOOL)(item[MSSystemColumnUpdatedAt] != nil), @"Property invalid: %@", systemProperties);
-            XCTAssertEqual(shouldHaveVersion, (BOOL)(item[MSSystemColumnVersion] != nil), @"Property invalid: %@", systemProperties);
-            savedItem = item;
-            self.done = YES;
-        }];
-        [self waitForTest:30.0];
-        
-        self.done = NO;
-        MSQuery *query = self.table.query;
-        query.parameters = userParams;
-        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
-            XCTAssertTrue(result.items.count == 1, @"Should have had results");
-            NSDictionary *item = result.items[0];
-            XCTAssertEqual(shouldHaveCreatedAt, (BOOL)(item[MSSystemColumnCreatedAt] != nil), @"Property invalid: %@", systemProperties);
-            XCTAssertEqual(shouldHaveUpdatedAt, (BOOL)(item[MSSystemColumnUpdatedAt] != nil), @"Property invalid: %@", systemProperties);
-            XCTAssertEqual(shouldHaveVersion, (BOOL)(item[MSSystemColumnVersion] != nil), @"Property invalid: %@", systemProperties);
-            self.done = YES;
-        }];
-        [self waitForTest:30.0];
-        
-        self.done = NO;
-        query.predicate = [NSPredicate predicateWithFormat:@"__version == %@", savedItem[MSSystemColumnVersion]];
-        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
-            if (shouldHaveVersion) {
-                XCTAssertTrue(result.items.count == 1, @"Should have had results");
-                NSDictionary *item = result.items[0];
-                XCTAssertEqual(shouldHaveCreatedAt, (BOOL)(item[MSSystemColumnCreatedAt] != nil), @"Property invalid: %@", systemProperties);
-                XCTAssertEqual(shouldHaveUpdatedAt, (BOOL)(item[MSSystemColumnUpdatedAt] != nil), @"Property invalid: %@", systemProperties);
-                XCTAssertEqual(shouldHaveVersion, (BOOL)(item[MSSystemColumnVersion] != nil), @"Property invalid: %@", systemProperties);
-            } else {
-                XCTAssertTrue(result.items.count == 0, @"Shouldn't have had results");
-            }
-            self.done = YES;
-        }];
-        [self waitForTest:30.0];
-        
-        self.done = NO;
-        query.predicate = [NSPredicate predicateWithFormat:@"__createdAt == %@", savedItem[MSSystemColumnCreatedAt]];
-        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
-            if (shouldHaveCreatedAt) {
-                XCTAssertTrue(result.items.count == 1, @"Should have had results");
-                NSDictionary *item = result.items[0];
-                XCTAssertEqual(shouldHaveCreatedAt, (BOOL)(item[MSSystemColumnCreatedAt] != nil), @"Property invalid: %@", systemProperties);
-                XCTAssertEqual(shouldHaveUpdatedAt, (BOOL)(item[MSSystemColumnUpdatedAt] != nil), @"Property invalid: %@", systemProperties);
-                XCTAssertEqual(shouldHaveVersion, (BOOL)(item[MSSystemColumnVersion] != nil), @"Property invalid: %@", systemProperties);
-            } else {
-                XCTAssertTrue(result.items.count == 0, @"Shouldn't have had results");
-            }
-            self.done = YES;
-        }];
-        [self waitForTest:30.0];
-        
-        self.done = NO;
-        query.predicate = [NSPredicate predicateWithFormat:@"__updatedAt == %@", savedItem[MSSystemColumnUpdatedAt]];
-        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
-            if (shouldHaveUpdatedAt) {
-                XCTAssertTrue(result.items.count == 1, @"Should have had results");
-                NSDictionary *item = result.items[0];
-                XCTAssertEqual(shouldHaveCreatedAt, (BOOL)(item[MSSystemColumnCreatedAt] != nil), @"Property invalid: %@", systemProperties);
-                XCTAssertEqual(shouldHaveUpdatedAt, (BOOL)(item[MSSystemColumnUpdatedAt] != nil), @"Property invalid: %@", systemProperties);
-                XCTAssertEqual(shouldHaveVersion, (BOOL)(item[MSSystemColumnVersion] != nil), @"Property invalid: %@", systemProperties);
-            } else {
-                XCTAssertTrue(result.items.count == 0, @"Shouldn't have had results");
-            }
-            self.done = YES;
-        }];
-        [self waitForTest:30.0];
-        
-        self.done = NO;
-        [self.table readWithId:myId parameters:userParams completion:^(NSDictionary *item, NSError *error) {
-            XCTAssertEqual(shouldHaveCreatedAt, (BOOL)(item[MSSystemColumnCreatedAt] != nil), @"Property invalid: %@", systemProperties);
-            XCTAssertEqual(shouldHaveUpdatedAt, (BOOL)(item[MSSystemColumnUpdatedAt] != nil), @"Property invalid: %@", systemProperties);
-            XCTAssertEqual(shouldHaveVersion, (BOOL)(item[MSSystemColumnVersion] != nil), @"Property invalid: %@", systemProperties);
-            self.done = YES;
-        }];
-        [self waitForTest:30.0];
-        
-        self.done = NO;
-        [savedItem setValue:@"Hello!" forKey:@"string"];
-        [self.table update:savedItem parameters:userParams completion:^(NSDictionary *item, NSError *error) {
-            XCTAssertEqual(shouldHaveCreatedAt, (BOOL)(item[MSSystemColumnCreatedAt] != nil), @"Property invalid: %@", systemProperties);
-            XCTAssertEqual(shouldHaveUpdatedAt, (BOOL)(item[MSSystemColumnUpdatedAt] != nil), @"Property invalid: %@", systemProperties);
-            XCTAssertEqual(shouldHaveVersion, (BOOL)(item[MSSystemColumnVersion] != nil), @"Property invalid: %@", systemProperties);
-            if (shouldHaveVersion) {
-                XCTAssertFalse([savedItem[MSSystemColumnVersion] isEqualToString:item[MSSystemColumnVersion]], @"Invalid version");
-            }
-            self.done = YES;
-        }];
-        [self waitForTest:30.0];
-        
-        self.done = NO;
-        [self.table delete:item completion:^(id itemId, NSError *error) {
-            self.done = YES;
-        }];
-        [self waitForTest:30.0];
-    }
-}
-
--(void) testAsyncTableOperationsWithInvalidSystemPropertiesQuerystring
-{
-    NSDictionary *item = @{@"id":@"an id", @"string":@"a value"};
-    
-    __block NSDictionary *savedItem;
-    [self.table insert:item completion:^(NSDictionary *item, NSError *error) {
-        savedItem = item;
-        self.done = YES;
-    }];
-    [self waitForTest:30.0];
-
-    NSCharacterSet *equals = [NSCharacterSet characterSetWithCharactersInString:@"="];
-    for (NSString *systemProperties in [MSTable testInvalidSystemPropertyQueryStrings])
-    {
-        NSArray *systemPropertiesKeyValue = [systemProperties componentsSeparatedByCharactersInSet:equals];
-        NSDictionary *userParams = @{systemPropertiesKeyValue[0]: systemPropertiesKeyValue[1]};
-        
-        self.done = NO;
-        [self.table insert:item parameters:userParams completion:^(NSDictionary *item, NSError *error) {
-            XCTAssertNotNil(error, @"An error should have occurred");
-            XCTAssertEqual(error.code, [@MSErrorMessageErrorCode integerValue], @"Unexpected error %ld", (long)error.code);
-            XCTAssertTrue([error.localizedDescription rangeOfString:@"is not a supported system property."].location != NSNotFound, @"Unexpected message %@", error.localizedDescription);
-            self.done = YES;
-        }];
-        [self waitForTest:30.0];
-        
-        // Read
-        self.done = NO;
-        MSQuery *query = [[MSQuery alloc] initWithTable:self.table];
-        query.parameters = userParams;
-        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
-            XCTAssertNotNil(error, @"An error should have occurred");
-            XCTAssertEqual(error.code, [@MSErrorMessageErrorCode integerValue], @"Unexpected error %ld", (long)error.code);
-            XCTAssertTrue([error.localizedDescription rangeOfString:@"is not a supported system property."].location != NSNotFound, @"Unexpected message %@", error.localizedDescription);
-            self.done = YES;
-            }];
-        [self waitForTest:30.0];
-        
-        self.done = NO;
-        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"__version == %@", savedItem[MSSystemColumnVersion]];
-        query.predicate = predicate;
-        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
-            XCTAssertNotNil(error, @"An error should have occurred");
-            XCTAssertEqual(error.code, [@MSErrorMessageErrorCode integerValue], @"Unexpected error %ld", (long)error.code);
-            XCTAssertTrue([error.localizedDescription rangeOfString:@"is not a supported system property."].location != NSNotFound, @"Unexpected message %@", error.localizedDescription);
-            self.done = YES;
-        }];
-        [self waitForTest:30.0];
-        
-        self.done = NO;
-        [self.table readWithId:@"an id" parameters:userParams completion:^(NSDictionary *item, NSError *error) {
-            XCTAssertNotNil(error, @"An error should have occurred");
-            XCTAssertEqual(error.code, [@MSErrorMessageErrorCode integerValue], @"Unexpected error %ld", (long)error.code);
-            XCTAssertTrue([error.localizedDescription rangeOfString:@"is not a supported system property."].location != NSNotFound, @"Unexpected message %@", error.localizedDescription);
-            self.done = YES;
-        }];
-        [self waitForTest:30.0];
-        
-        self.done = NO;
-        [savedItem setValue:@"Hello!" forKey:@"string"];
-        [self.table update:savedItem parameters:userParams completion:^(NSDictionary *item, NSError *error) {
-            XCTAssertNotNil(error, @"An error should have occurred");
-            XCTAssertEqual(error.code, [@MSErrorMessageErrorCode integerValue], @"Unexpected error %ld", (long)error.code);
-            XCTAssertTrue([error.localizedDescription rangeOfString:@"is not a supported system property."].location != NSNotFound, @"Unexpected message %@", error.localizedDescription);
-            self.done = YES;
-        }];
-        [self waitForTest:30.0];
-    }
-}
-
 -(void) testAsyncFilterSelectOrderingOperationsNotImpactedBySystemProperties
 {
-    self.table.systemProperties = MSSystemPropertyAll;
-    
     __block NSMutableArray *savedItems = [NSMutableArray array];
     for(NSUInteger i = 1; i < 6; i++)
     {
@@ -725,113 +484,107 @@
         [self waitForTest:30.0];
     }
     
-    //testSystemProperties
-    for (NSNumber *systemProperties in [MSTable testSystemProperties])
-    {
-        self.table.systemProperties = [systemProperties unsignedIntegerValue];
-        MSQuery *query = self.table.query;
-        [query orderByAscending:MSSystemColumnCreatedAt];
-        self.done = NO;
-        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
-            for (NSUInteger i = 0; i < result.items.count - 1; i++) {
-                NSInteger idOne = [result.items[i][@"id"] integerValue];
-                NSInteger idTwo = [result.items[i+1][@"id"] integerValue];
-                XCTAssertTrue(idOne < idTwo, @"Incorrect order");
-            }
-            self.done = YES;
-        }];
-        [self waitForTest:30.0];
-        
-        self.done = NO;
-        query = self.table.query;
-        [query orderByAscending:MSSystemColumnUpdatedAt];
-        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
-            for (NSUInteger i = 0; i < result.items.count - 1; i++) {
-                NSInteger idOne = [result.items[i][@"id"] integerValue];
-                NSInteger idTwo = [result.items[i+1][@"id"] integerValue];
-                XCTAssertTrue(idOne < idTwo, @"Incorrect order");
-            }
-            self.done = YES;
-        }];
-        [self waitForTest:30.0];
+    MSQuery *query = self.table.query;
+    [query orderByAscending:MSSystemColumnCreatedAt];
+    self.done = NO;
+    [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
+        for (NSUInteger i = 0; i < result.items.count - 1; i++) {
+            NSInteger idOne = [result.items[i][@"id"] integerValue];
+            NSInteger idTwo = [result.items[i+1][@"id"] integerValue];
+            XCTAssertTrue(idOne < idTwo, @"Incorrect order");
+        }
+        self.done = YES;
+    }];
+    [self waitForTest:30.0];
+    
+    self.done = NO;
+    query = self.table.query;
+    [query orderByAscending:MSSystemColumnUpdatedAt];
+    [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
+        for (NSUInteger i = 0; i < result.items.count - 1; i++) {
+            NSInteger idOne = [result.items[i][@"id"] integerValue];
+            NSInteger idTwo = [result.items[i+1][@"id"] integerValue];
+            XCTAssertTrue(idOne < idTwo, @"Incorrect order");
+        }
+        self.done = YES;
+    }];
+    [self waitForTest:30.0];
 
-        self.done = NO;
-        query = self.table.query;
-        [query orderByAscending:MSSystemColumnVersion];
-        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
-            for (NSUInteger i = 0; i < result.items.count - 1; i++) {
-                NSInteger idOne = [result.items[i][@"id"] integerValue];
-                NSInteger idTwo = [result.items[i+1][@"id"] integerValue];
-                XCTAssertTrue(idOne < idTwo, @"Incorrect order");
-            }
-            self.done = YES;
-        }];
-        [self waitForTest:30.0];
-        
-        // Filtering
-        self.done = NO;
-        query = [self.table queryWithPredicate:[NSPredicate predicateWithFormat:@"__createdAt >= %@", savedItems[3][MSSystemColumnCreatedAt]]];
-        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
-            XCTAssertTrue(result.items.count == 2, @"Incorrect results");
-            self.done = YES;
-        }];
-        [self waitForTest:30.0];
+    self.done = NO;
+    query = self.table.query;
+    [query orderByAscending:MSSystemColumnVersion];
+    [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
+        for (NSUInteger i = 0; i < result.items.count - 1; i++) {
+            NSInteger idOne = [result.items[i][@"id"] integerValue];
+            NSInteger idTwo = [result.items[i+1][@"id"] integerValue];
+            XCTAssertTrue(idOne < idTwo, @"Incorrect order");
+        }
+        self.done = YES;
+    }];
+    [self waitForTest:30.0];
+    
+    // Filtering
+    self.done = NO;
+    query = [self.table queryWithPredicate:[NSPredicate predicateWithFormat:@"__createdAt >= %@", savedItems[3][MSSystemColumnCreatedAt]]];
+    [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
+        XCTAssertTrue(result.items.count == 2, @"Incorrect results");
+        self.done = YES;
+    }];
+    [self waitForTest:30.0];
 
-        self.done = NO;
-        query = [self.table queryWithPredicate:[NSPredicate predicateWithFormat:@"__updatedAt >= %@", savedItems[3][MSSystemColumnUpdatedAt]]];
-        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
-            XCTAssertTrue(result.items.count == 2, @"Incorrect results");
-            self.done = YES;
-        }];
-        [self waitForTest:30.0];
-        
-        self.done = NO;
-        query = [self.table queryWithPredicate:[NSPredicate predicateWithFormat:@"__version == %@", savedItems[3][MSSystemColumnVersion]]];
-        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
-            XCTAssertTrue(result.items.count == 1, @"Incorrect results");
-            self.done = YES;
-        }];
-        [self waitForTest:30.0];
-        
-        self.done = NO;
-        query = self.table.query;
-        query.selectFields = @[@"id", MSSystemColumnCreatedAt];
-        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
-            for (NSDictionary *item in result.items) {
-                XCTAssertNotNil(item[MSSystemColumnCreatedAt], @"Missing createdAt");
-            }
-            self.done = YES;
-        }];
-        [self waitForTest:30.0];
-        
-        self.done = NO;
-        query = self.table.query;
-        query.selectFields = @[@"id", MSSystemColumnUpdatedAt];
-        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
-            for (NSDictionary *item in result.items) {
-                XCTAssertNotNil(item[MSSystemColumnUpdatedAt], @"Missing updatedAt");
-            }
-            self.done = YES;
-        }];
-        [self waitForTest:30.0];
-        
-        self.done = NO;
-        query = self.table.query;
-        query.selectFields = @[@"id", MSSystemColumnVersion];
-        [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
-            for (NSDictionary *item in result.items) {
-                XCTAssertNotNil(item[MSSystemColumnVersion], @"Missing version");
-            }
-            self.done = YES;
-        }];
-        [self waitForTest:30.0];
-    }
+    self.done = NO;
+    query = [self.table queryWithPredicate:[NSPredicate predicateWithFormat:@"__updatedAt >= %@", savedItems[3][MSSystemColumnUpdatedAt]]];
+    [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
+        XCTAssertTrue(result.items.count == 2, @"Incorrect results");
+        self.done = YES;
+    }];
+    [self waitForTest:30.0];
+    
+    self.done = NO;
+    query = [self.table queryWithPredicate:[NSPredicate predicateWithFormat:@"__version == %@", savedItems[3][MSSystemColumnVersion]]];
+    [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
+        XCTAssertTrue(result.items.count == 1, @"Incorrect results");
+        self.done = YES;
+    }];
+    [self waitForTest:30.0];
+    
+    self.done = NO;
+    query = self.table.query;
+    query.selectFields = @[@"id", MSSystemColumnCreatedAt];
+    [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
+        for (NSDictionary *item in result.items) {
+            XCTAssertNotNil(item[MSSystemColumnCreatedAt], @"Missing createdAt");
+        }
+        self.done = YES;
+    }];
+    [self waitForTest:30.0];
+    
+    self.done = NO;
+    query = self.table.query;
+    query.selectFields = @[@"id", MSSystemColumnUpdatedAt];
+    [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
+        for (NSDictionary *item in result.items) {
+            XCTAssertNotNil(item[MSSystemColumnUpdatedAt], @"Missing updatedAt");
+        }
+        self.done = YES;
+    }];
+    [self waitForTest:30.0];
+    
+    self.done = NO;
+    query = self.table.query;
+    query.selectFields = @[@"id", MSSystemColumnVersion];
+    [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
+        for (NSDictionary *item in result.items) {
+            XCTAssertNotNil(item[MSSystemColumnVersion], @"Missing version");
+        }
+        self.done = YES;
+    }];
+    [self waitForTest:30.0];
 }
 
 -(void) testUpdateAsyncWithWithMergeConflict
 {
     NSDictionary *item = @{ @"id": @"an id", @"string": @"a value" };
-    self.table.systemProperties = MSSystemPropertyAll;
     __block NSDictionary *savedItem;
     [self.table insert:item completion:^(NSDictionary *item, NSError *error) {
         savedItem = item;

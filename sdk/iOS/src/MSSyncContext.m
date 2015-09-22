@@ -24,6 +24,7 @@
 
 @implementation MSSyncContext {
     dispatch_queue_t writeOperationQueue;
+    dispatch_queue_t readOperationQueue;
 }
 
 static NSOperationQueue *pushQueue_;
@@ -38,7 +39,7 @@ static NSOperationQueue *pushQueue_;
 {
     client_ = client;
     operationQueue_ = [[MSOperationQueue alloc] initWithClient:client_ dataSource:self.dataSource];
-    
+
     // We don't need to wait for this, and all operation creation goes onto this queue so its
     // guaranteed to happen only after this is populated.
     dispatch_async(writeOperationQueue, ^{
@@ -57,7 +58,8 @@ static NSOperationQueue *pushQueue_;
     if (self)
     {
         writeOperationQueue = dispatch_queue_create("WriteOperationQueue", DISPATCH_QUEUE_SERIAL);
-        
+        readOperationQueue = dispatch_queue_create("ReadOperationQueue",  DISPATCH_QUEUE_CONCURRENT);
+
         callbackQueue_ = callbackQueue;
         if (!callbackQueue_) {
             callbackQueue_ = [[NSOperationQueue alloc] init];
@@ -167,7 +169,7 @@ static NSOperationQueue *pushQueue_;
                 case MSTableOperationInsert: {
                     // Check to see if this item already exists
                     NSString *itemId = itemToSave[MSSystemColumnId];
-                    NSDictionary *result = [self syncTable:table readWithId:itemId orError:&error];
+                    NSDictionary *result = [self.dataSource readTable:table withItemId:itemId orError:&error];
                     if (error == nil) {
                         if (result == nil) {
                             [self.dataSource upsertItems:@[itemToSave] table:table orError:&error];
@@ -236,9 +238,31 @@ static NSOperationQueue *pushQueue_;
 }
 
 /// Simple passthrough to the local storage data source to retrive a single item using its Id
-- (NSDictionary *) syncTable:(NSString *)table readWithId:(NSString *)itemId orError:(NSError **)error;
-{
-    return [self.dataSource readTable:table withItemId:itemId orError:error];
+- (void) syncTable:(NSString *)table readWithId:(NSString *)itemId completion:(MSItemBlock)completion {
+    NSError *error;
+    if (!self.dataSource) {
+        error = [self errorWithDescription:@"Missing required datasource for MSSyncContext"
+                              andErrorCode:MSSyncContextInvalid];
+    }
+    
+    if (error) {
+        if (completion) {
+            [self.callbackQueue addOperationWithBlock:^{
+                completion(nil, error);
+            }];
+        }
+        return;
+    }
+    
+    dispatch_async(readOperationQueue, ^{
+        NSError *error;
+        NSDictionary *item = [self.dataSource readTable:table withItemId:itemId orError:&error];
+        if (completion) {
+            [self.callbackQueue addOperationWithBlock:^{
+                completion(item, error);
+            }];
+        }
+    });
 }
 
 /// Assumes running with access to the operation queue
@@ -249,23 +273,26 @@ static NSOperationQueue *pushQueue_;
     return error;
 }
 
+
 /// Simple passthrough to the local storage data source to retrive a list of items
 -(void)readWithQuery:(MSQuery *)query completion:(MSReadQueryBlock)completion {
-    NSError *error;
-    MSSyncContextReadResult *result = [self.dataSource readWithQuery:query orError:&error];
-    
-    if (completion) {
-        [self.callbackQueue addOperationWithBlock:^{
-            if (error) {
-                completion(nil, error);
-            } else {
-                MSQueryResult *queryResult = [[MSQueryResult alloc] initWithItems:result.items
-                                                                       totalCount:result.totalCount
-                                                                         nextLink:nil];
-                completion(queryResult, nil);
-            }
-        }];
-    }
+    dispatch_async(readOperationQueue, ^{
+        NSError *error;
+        MSSyncContextReadResult *result = [self.dataSource readWithQuery:query orError:&error];
+        
+        if (completion) {
+            [self.callbackQueue addOperationWithBlock:^{
+                if (error) {
+                    completion(nil, error);
+                } else {
+                    MSQueryResult *queryResult = [[MSQueryResult alloc] initWithItems:result.items
+                                                                           totalCount:result.totalCount
+                                                                             nextLink:nil];
+                    completion(queryResult, nil);
+                }
+            }];
+        }
+    });
 }
 
 /// Given a pending operation in the queue, removes it from the queue and updates the local store
@@ -339,6 +366,8 @@ static NSOperationQueue *pushQueue_;
     NSError *error;
     NSDictionary *isDeletedParams = [MSSyncContext dictionary:queryCopy.parameters entriesForCaseInsensitiveKey:@"__includedeleted"];
     if (queryCopy.selectFields) {
+        // Note: when this restriction is enabled, we may want to check that the select includes
+        // system properties like __version for OC enabled tables, etc
         error = [self errorWithDescription:@"Use of selectFields in not supported in pullWithQuery:"
                               andErrorCode:MSInvalidParameter];
     }
@@ -353,9 +382,6 @@ static NSOperationQueue *pushQueue_;
     else if (queryId && (queryCopy.fetchOffset >= 0 || queryCopy.fetchLimit >= 0)) {
         error = [self errorWithDescription: @"Properties fetchOffset and fetchLimit are not supported when queryId is specified"
                               andErrorCode:MSInvalidParameter];
-    }
-    else if ([MSSyncContext dictionary:queryCopy.parameters containsCaseInsensitiveKey:@"__systemproperties"]) {
-        error = [self errorWithDescription:@"Use of '__systemProperties' is not supported in pullWithQuery parameters:" andErrorCode:MSInvalidParameter];
     }
     else if (queryCopy.syncTable) {
         // Otherwise we convert the sync table to a normal table
@@ -383,13 +409,6 @@ static NSOperationQueue *pushQueue_;
         return nil;
     }
     
-    // Get the required system properties from the Store
-    if ([self.dataSource respondsToSelector:@selector(systemPropertiesForTable:)]) {
-        queryCopy.table.systemProperties = [self.dataSource systemPropertiesForTable:queryCopy.table.name];
-    } else {
-        queryCopy.table.systemProperties = MSSystemPropertyVersion;
-    }
-    
     // add __includeDeleted
     if (!queryCopy.parameters) {
         queryCopy.parameters = @{@"__includeDeleted" : @"true"};
@@ -399,10 +418,7 @@ static NSOperationQueue *pushQueue_;
         queryCopy.parameters = mutableParameters;
     }
     
-    queryCopy.table.systemProperties |= MSSystemPropertyDeleted;
-    
     if (queryId) {
-        queryCopy.table.systemProperties |= MSSystemPropertyUpdatedAt;
         NSSortDescriptor *orderByUpdatedAt = [NSSortDescriptor sortDescriptorWithKey:MSSystemColumnUpdatedAt ascending:YES];
         queryCopy.orderBy = @[orderByUpdatedAt];
     }

@@ -24,6 +24,7 @@
 #import "MSClientInternal.h"
 
 static NSString *const TodoTableNoVersion = @"TodoNoVersion";
+static NSString *const TodoTable = @"TodoItem";
 static NSString *const AllColumnTypesTable = @"ColumnTypes";
 static NSString *const SyncContextQueueName = @"Sync Context: Operation Callbacks";
 
@@ -823,7 +824,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     testFilter.ignoreNextFilter = YES;
     testFilter.onInspectRequest =  ^(NSURLRequest *request) {
         XCTAssertEqualObjects(request.HTTPMethod, @"DELETE", @"Incorrect operation (%@) sent to server", request.HTTPMethod);
-        XCTAssertEqualObjects(request.URL.absoluteString, @"https://someUrl/tables/TodoNoVersion/test1?__systemProperties=__version");
+        XCTAssertEqualObjects(request.URL.absoluteString, @"https://someUrl/tables/TodoNoVersion/test1");
         callsToServer++;
         return request;
     };
@@ -990,6 +991,25 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 
 #pragma mark Read Tests
 
+-(void) testReadWithIDSucces
+{
+    NSArray *items = @[ @{ @"id": @"123", @"text": @"hello" },
+                        @{ @"id": @"456", @"text": @"goodbye" } ];
+    [offline upsertItems:items table:TodoTable orError:nil];
+    
+    MSSyncTable *todoTable = [client syncTableWithName:TodoTable];
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Read"];
+    
+    [todoTable readWithId:@"123" completion:^(NSDictionary *item, NSError *error) {
+        XCTAssertNotNil(item);
+        XCTAssertNil(error);
+        
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:10.0 handler:nil];
+}
 
 -(void) testReadWithIdNoItemSuccess
 {
@@ -1001,6 +1021,56 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
         XCTAssertNil(item, @"No item should have been found");
         XCTAssertNil(error, @"No error should have been returned");
     }];
+}
+
+
+-(void) testReadWithCompletionSuccess
+{
+    NSArray *items = @[ @{ @"id": @"123", @"text": @"hello" },
+                        @{ @"id": @"456", @"text": @"goodbye" } ];
+    [offline upsertItems:items table:TodoTable orError:nil];
+    
+    MSSyncTable *todoTable = [client syncTableWithName:TodoTable];
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Read"];
+    
+    [todoTable readWithCompletion:^(MSQueryResult *result, NSError *error) {
+        XCTAssertNil(error);
+        XCTAssertNotNil(result);
+        XCTAssertEqual(result.items.count, 2);
+        XCTAssertEqual(result.totalCount, -1);
+        
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:10.0 handler:nil];
+}
+
+-(void) testReadWithPredicateSuccess
+{
+    NSArray *items = @[
+        @{ @"id": @"123", @"text": @"hello" },
+        @{ @"id": @"456", @"text": @"hi" },
+        @{ @"id": @"789", @"text": @"goodbye" }
+    ];
+    
+    [offline upsertItems:items table:TodoTable orError:nil];
+    
+    MSSyncTable *todoTable = [client syncTableWithName:TodoTable];
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Read"];
+
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"text BEGINSWITH 'h'"];
+    [todoTable readWithPredicate:predicate completion:^(MSQueryResult *result, NSError *error) {
+        XCTAssertNil(error);
+        XCTAssertNotNil(result);
+        XCTAssertEqual(result.items.count, 2);
+        XCTAssertEqual(result.totalCount, -1);
+        
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:10.0 handler:nil];
 }
 
 
@@ -1309,7 +1379,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     // Read from the table
     [client.syncContext readWithQuery:query completion:^(MSQueryResult *result, NSError *error) {
         
-        numSynchronizedItems = result.items.count;
+        numSynchronizedItems = (int) result.items.count;
         [readExpectation fulfill];
         
     }];
@@ -1722,11 +1792,11 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     NSURLRequest *firstRequest = (NSURLRequest *)filter.actualRequests[0];
     NSURLRequest *secondRequest = (NSURLRequest *)filter.actualRequests[1];
     
-    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted%2C__version", @"$top=50", @"$skip=0"];
+    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"$top=50", @"$skip=0"];
     XCTAssertTrue([self checkURL:firstRequest.URL withPath:@"/tables/TodoItem" andQuery:expectedFirstResult],
                   @"Invalid URL: %@", firstRequest.URL.absoluteString);
 
-    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted%2C__version", @"$top=50", @"$skip=2"];
+    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"$top=50", @"$skip=2"];
     XCTAssertTrue([self checkURL:secondRequest.URL withPath:@"/tables/TodoItem" andQuery:expectedSecondResult],
                   @"Invalid URL: %@", secondRequest.URL.absoluteString);
 }
@@ -1758,11 +1828,11 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     NSURLRequest *firstRequest = (NSURLRequest *)filter.actualRequests[0];
     NSURLRequest *secondRequest = (NSURLRequest *)filter.actualRequests[1];
     
-    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=50", @"$skip=0"];
+    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"$top=50", @"$skip=0"];
     XCTAssertTrue([self checkURL:firstRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedFirstResult],
                   @"Invalid URL: %@", firstRequest.URL.absoluteString);
     
-    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=50", @"$skip=2"];
+    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"$top=50", @"$skip=2"];
     XCTAssertTrue([self checkURL:secondRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedSecondResult],
                   @"Invalid URL: %@", secondRequest.URL.absoluteString);
 }
@@ -1792,10 +1862,10 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     NSURLRequest *firstRequest = testFilter.actualRequests[0];
     NSURLRequest *secondRequest = testFilter.actualRequests[1];
     
-    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=50", @"$skip=0"];
+    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"$top=50", @"$skip=0"];
     XCTAssertTrue([self checkURL:firstRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedFirstResult],
                   @"Invalid URL: %@", firstRequest.URL.absoluteString);
-    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=50", @"$skip=3"];
+    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"$top=50", @"$skip=3"];
     XCTAssertTrue([self checkURL:secondRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedSecondResult],
                   @"Invalid URL: %@", secondRequest.URL.absoluteString);
 }
@@ -1832,13 +1902,13 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     NSURLRequest *insertRequest = testFilter.actualRequests[0];
     NSURLRequest *firstPullRequest = testFilter.actualRequests[1];
     NSURLRequest *secondPullRequest = testFilter.actualRequests[2];
-    XCTAssertEqualObjects(insertRequest.URL.absoluteString, @"https://someUrl/tables/TodoNoVersion?__systemProperties=__version");
+    XCTAssertEqualObjects(insertRequest.URL.absoluteString, @"https://someUrl/tables/TodoNoVersion");
     
-    NSArray *expectedFirstPullResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=50", @"$skip=0"];
+    NSArray *expectedFirstPullResult = @[@"__includeDeleted=true", @"$top=50", @"$skip=0"];
     XCTAssertTrue([self checkURL:firstPullRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedFirstPullResult],
                   @"Invalid URL: %@", firstPullRequest.URL.absoluteString);
     
-    NSArray *expectedSecondPullResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=50", @"$skip=2"];
+    NSArray *expectedSecondPullResult = @[@"__includeDeleted=true", @"$top=50", @"$skip=2"];
     XCTAssertTrue([self checkURL:secondPullRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedSecondPullResult],
                   @"Invalid URL: %@", secondPullRequest.URL.absoluteString);
 }
@@ -1933,44 +2003,13 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     NSURLRequest *firstRequest = testFilter.actualRequests[0];
     NSURLRequest *secondRequest = testFilter.actualRequests[1];
     
-    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=50", @"mykey=myvalue", @"$skip=0"];
+    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"$top=50", @"mykey=myvalue", @"$skip=0"];
     XCTAssertTrue([self checkURL:firstRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedFirstResult],
                   @"Invalid URL: %@", firstRequest.URL.absoluteString);
     
-    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=50", @"$skip=2", @"mykey=myvalue"];
+    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"$top=50", @"$skip=2", @"mykey=myvalue"];
     XCTAssertTrue([self checkURL:secondRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedSecondResult],
                   @"Invalid URL: %@", secondRequest.URL.absoluteString);
-}
-
--(void) testPullWithSystemPropertiesFails
-{
-    NSString* stringData = @"[{\"id\": \"one\", \"text\":\"first item\"},{\"id\": \"two\", \"text\":\"second item\"}]";
-    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:stringData];
-    
-    __block NSURLRequest *actualRequest = nil;
-    testFilter.onInspectRequest = ^(NSURLRequest *request) {
-        actualRequest = request;
-        return request;
-    };
-    
-    offline.upsertCalls = 0;
-    
-    MSClient *filteredClient = [client clientWithFilter:testFilter];
-    MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
-    MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
-    query.parameters = @{@"__systemProperties": @"__createdAt%2C__somethingRandom"};
-    
-    NSOperation *pull = [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
-        XCTAssertNotNil(error);
-        XCTAssertEqual(error.code, MSInvalidParameter);
-        XCTAssertEqual((int)offline.upsertCalls, 0, @"Unexpected number of upsert calls");
-        XCTAssertEqual((int)offline.upsertedItems, 0, @"Unexpected number of upsert calls");
-        done = YES;
-    }];
-    
-    XCTAssertNil(pull);
-    
-    XCTAssertTrue([self waitForTest:30.0], @"Test timed out.");
 }
 
 -(void) testPullWithFetchLimitGreaterThanDefaultPageSize
@@ -2003,15 +2042,15 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     NSURLRequest *secondRequest = testFilter.actualRequests[1];
     NSURLRequest *thirdRequest = testFilter.actualRequests[2];
     
-    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=50", @"$skip=0"];
+    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"$top=50", @"$skip=0"];
     XCTAssertTrue([self checkURL:firstRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedFirstResult],
                   @"Invalid URL: %@", firstRequest.URL.absoluteString);
 
-    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=50", @"$skip=50"];
+    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"$top=50", @"$skip=50"];
     XCTAssertTrue([self checkURL:secondRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedSecondResult],
                   @"Invalid URL: %@", secondRequest.URL.absoluteString);
     
-    NSArray *expectedThirdResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=50", @"$skip=100"];
+    NSArray *expectedThirdResult = @[@"__includeDeleted=true", @"$top=50", @"$skip=100"];
     XCTAssertTrue([self checkURL:thirdRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedThirdResult],
                   @"Invalid URL: %@", thirdRequest.URL.absoluteString);
 }
@@ -2049,15 +2088,15 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     NSURLRequest *secondRequest = testFilter.actualRequests[1];
     NSURLRequest *thirdRequest = testFilter.actualRequests[2];
     
-    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=10", @"$skip=0"];
+    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"$top=10", @"$skip=0"];
     XCTAssertTrue([self checkURL:firstRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedFirstResult],
                   @"Invalid URL: %@", firstRequest.URL.absoluteString);
     
-    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=10", @"$skip=10"];
+    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"$top=10", @"$skip=10"];
     XCTAssertTrue([self checkURL:secondRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedSecondResult],
                   @"Invalid URL: %@", secondRequest.URL.absoluteString);
     
-    NSArray *expectedThirdResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=10", @"$skip=20"];
+    NSArray *expectedThirdResult = @[@"__includeDeleted=true", @"$top=10", @"$skip=20"];
     XCTAssertTrue([self checkURL:thirdRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedThirdResult],
                   @"Invalid URL: %@", thirdRequest.URL.absoluteString);
 }
@@ -2094,19 +2133,19 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     NSURLRequest *thirdRequest = testFilter.actualRequests[2];
     NSURLRequest *fourthRequest = testFilter.actualRequests[3];
     
-    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=50", @"$skip=0"];
+    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"$top=50", @"$skip=0"];
     XCTAssertTrue([self checkURL:firstRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedFirstResult],
                   @"Invalid URL: %@", firstRequest.URL.absoluteString);
     
-    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=50", @"$skip=50"];
+    NSArray *expectedSecondResult = @[@"__includeDeleted=true",  @"$top=50", @"$skip=50"];
     XCTAssertTrue([self checkURL:secondRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedSecondResult],
                   @"Invalid URL: %@", secondRequest.URL.absoluteString);
     
-    NSArray *expectedThirdResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=50", @"$skip=100"];
+    NSArray *expectedThirdResult = @[@"__includeDeleted=true", @"$top=50", @"$skip=100"];
     XCTAssertTrue([self checkURL:thirdRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedThirdResult],
                   @"Invalid URL: %@", thirdRequest.URL.absoluteString);
     
-    NSArray *expectedFourthResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=50", @"$skip=125"];
+    NSArray *expectedFourthResult = @[@"__includeDeleted=true", @"$top=50", @"$skip=125"];
     XCTAssertTrue([self checkURL:fourthRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedFourthResult],
                   @"Invalid URL: %@", fourthRequest.URL.absoluteString);
 }
@@ -2141,7 +2180,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     NSURLRequest *firstRequest = testFilter.actualRequests[0];
     
-    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=25", @"$skip=0"];
+    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"$top=25", @"$skip=0"];
     XCTAssertTrue([self checkURL:firstRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedFirstResult],
                   @"Invalid URL: %@", firstRequest.URL.absoluteString);
 }
@@ -2179,19 +2218,19 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     NSURLRequest *thirdRequest = testFilter.actualRequests[2];
     NSURLRequest *fourthRequest = testFilter.actualRequests[3];
     
-    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=50", @"$skip=0"];
+    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"$top=50", @"$skip=0"];
     XCTAssertTrue([self checkURL:firstRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedFirstResult],
                   @"Invalid URL: %@", firstRequest.URL.absoluteString);
     
-    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=50", @"$skip=25"];
+    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"$top=50", @"$skip=25"];
     XCTAssertTrue([self checkURL:secondRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedSecondResult],
                   @"Invalid URL: %@", secondRequest.URL.absoluteString);
     
-    NSArray *expectedThirdResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=50", @"$skip=50"];
+    NSArray *expectedThirdResult = @[@"__includeDeleted=true", @"$top=50", @"$skip=50"];
     XCTAssertTrue([self checkURL:thirdRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedThirdResult],
                   @"Invalid URL: %@", thirdRequest.URL.absoluteString);
     
-    NSArray *expectedFourthResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=40", @"$skip=60"];
+    NSArray *expectedFourthResult = @[@"__includeDeleted=true", @"$top=40", @"$skip=60"];
     XCTAssertTrue([self checkURL:fourthRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedFourthResult],
                   @"Invalid URL: %@", fourthRequest.URL.absoluteString);
 }
@@ -2228,15 +2267,15 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     NSURLRequest *secondRequest = testFilter.actualRequests[1];
     NSURLRequest *thirdRequest = testFilter.actualRequests[2];
     
-    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=50", @"$skip=0"];
+    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"$top=50", @"$skip=0"];
     XCTAssertTrue([self checkURL:firstRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedFirstResult],
                   @"Invalid URL: %@", firstRequest.URL.absoluteString);
     
-    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=50", @"$skip=50"];
+    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"$top=50", @"$skip=50"];
     XCTAssertTrue([self checkURL:secondRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedSecondResult],
                   @"Invalid URL: %@", secondRequest.URL.absoluteString);
     
-    NSArray *expectedThirdResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=48", @"$skip=100"];
+    NSArray *expectedThirdResult = @[@"__includeDeleted=true", @"$top=48", @"$skip=100"];
     XCTAssertTrue([self checkURL:thirdRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedThirdResult],
                   @"Invalid URL: %@", thirdRequest.URL.absoluteString);
 }
@@ -2253,7 +2292,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     NSString *topParam = [NSString stringWithFormat:@"$top=%ld", (long) pullSettings.pageSize];
     
-    NSArray *expectedPullQuery = @[topParam, @"$skip=0", @"__includeDeleted=true", @"__systemProperties=__deleted"];
+    NSArray *expectedPullQuery = @[topParam, @"$skip=0", @"__includeDeleted=true"];
     
     XCTAssertTrue([self checkURL:pullRequest withPath:@"/tables/TodoNoVersion" andQuery:expectedPullQuery],
                   @"Invalid pull request: %@", pullRequest.absoluteString);
@@ -2265,7 +2304,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     NSString *topParam = [NSString stringWithFormat:@"$top=%ld", (long) MSPullSettings.defaultPageSize];
     
-    NSArray *expectedPullQuery = @[topParam, @"$skip=0", @"__includeDeleted=true", @"__systemProperties=__deleted"];
+    NSArray *expectedPullQuery = @[topParam, @"$skip=0", @"__includeDeleted=true"];
     
     XCTAssertTrue([self checkURL:pullRequest withPath:@"/tables/TodoNoVersion" andQuery:expectedPullQuery],
                   @"Invalid pull request: %@", pullRequest.absoluteString);
@@ -2277,7 +2316,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     NSString *topParam = [NSString stringWithFormat:@"$top=%ld", (long) MSPullSettings.defaultPageSize];
     
-    NSArray *expectedPullQuery = @[topParam, @"$skip=0", @"__includeDeleted=true", @"__systemProperties=__deleted"];
+    NSArray *expectedPullQuery = @[topParam, @"$skip=0", @"__includeDeleted=true"];
     
     XCTAssertTrue([self checkURL:pullRequest withPath:@"/tables/TodoNoVersion" andQuery:expectedPullQuery],
                   @"Invalid pull request: %@", pullRequest.absoluteString);
@@ -2295,7 +2334,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     NSString *topParam = [NSString stringWithFormat:@"$top=%ld", (long) pullSettings.pageSize];
     
-    NSArray *expectedPullQuery = @[topParam, @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')", @"$skip=0", @"$orderby=__updatedAt%20asc", @"__includeDeleted=true", @"__systemProperties=__updatedAt%2C__deleted"];
+    NSArray *expectedPullQuery = @[topParam, @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')", @"$skip=0", @"$orderby=__updatedAt%20asc", @"__includeDeleted=true"];
     
     XCTAssertTrue([self checkURL:pullRequest withPath:@"/tables/TodoNoVersion" andQuery:expectedPullQuery],
                   @"Invalid pull request: %@", pullRequest.absoluteString);
@@ -2307,7 +2346,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     NSString *topParam = [NSString stringWithFormat:@"$top=%ld", (long) MSPullSettings.defaultPageSize];
     
-    NSArray *expectedPullQuery = @[topParam, @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')", @"$skip=0", @"$orderby=__updatedAt%20asc", @"__includeDeleted=true", @"__systemProperties=__updatedAt%2C__deleted"];
+    NSArray *expectedPullQuery = @[topParam, @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')", @"$skip=0", @"$orderby=__updatedAt%20asc", @"__includeDeleted=true"];
     
     XCTAssertTrue([self checkURL:pullRequest withPath:@"/tables/TodoNoVersion" andQuery:expectedPullQuery],
                   @"Invalid pull request: %@", pullRequest.absoluteString);
@@ -2319,7 +2358,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     NSString *topParam = [NSString stringWithFormat:@"$top=%ld", (long) MSPullSettings.defaultPageSize];
     
-    NSArray *expectedPullQuery = @[topParam, @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')", @"$skip=0", @"$orderby=__updatedAt%20asc", @"__includeDeleted=true", @"__systemProperties=__updatedAt%2C__deleted"];
+    NSArray *expectedPullQuery = @[topParam, @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')", @"$skip=0", @"$orderby=__updatedAt%20asc", @"__includeDeleted=true"];
     
     XCTAssertTrue([self checkURL:pullRequest withPath:@"/tables/TodoNoVersion" andQuery:expectedPullQuery],
                   @"Invalid pull request: %@", pullRequest.absoluteString);
@@ -2383,15 +2422,15 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     NSURLRequest *secondRequest = testFilter.actualRequests[1];
     NSURLRequest *thirdRequest = testFilter.actualRequests[2];
     
-    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=50", @"$skip=12"];
+    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"$top=50", @"$skip=12"];
     XCTAssertTrue([self checkURL:firstRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedFirstResult],
                   @"Invalid URL: %@", firstRequest.URL.absoluteString);
     
-    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=50", @"$skip=62"];
+    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"$top=50", @"$skip=62"];
     XCTAssertTrue([self checkURL:secondRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedSecondResult],
                   @"Invalid URL: %@", secondRequest.URL.absoluteString);
     
-    NSArray *expectedThirdResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=50", @"$skip=100"];
+    NSArray *expectedThirdResult = @[@"__includeDeleted=true", @"$top=50", @"$skip=100"];
     XCTAssertTrue([self checkURL:thirdRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedThirdResult],
                   @"Invalid URL: %@", thirdRequest.URL.absoluteString);
 }
@@ -2430,15 +2469,15 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     NSURLRequest *secondRequest = testFilter.actualRequests[1];
     NSURLRequest *thirdRequest = testFilter.actualRequests[2];
 
-    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=50", @"$skip=12"];
+    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"$top=50", @"$skip=12"];
     XCTAssertTrue([self checkURL:firstRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedFirstResult],
                   @"Invalid URL: %@", firstRequest.URL.absoluteString);
     
-    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=50", @"$skip=62"];
+    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"$top=50", @"$skip=62"];
     XCTAssertTrue([self checkURL:secondRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedSecondResult],
                   @"Invalid URL: %@", secondRequest.URL.absoluteString);
     
-    NSArray *expectedThirdResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=10", @"$skip=112"];
+    NSArray *expectedThirdResult = @[@"__includeDeleted=true", @"$top=10", @"$skip=112"];
     XCTAssertTrue([self checkURL:thirdRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedThirdResult],
                   @"Invalid URL: %@", thirdRequest.URL.absoluteString);
 }
@@ -2523,7 +2562,6 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     NSURLRequest *thirdRequest = (NSURLRequest *)filter.actualRequests[2];
 
     NSArray *expectedfirstRequestQuery = @[@"__includeDeleted=true",
-                                           @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                            @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')",
                                            @"$orderby=__updatedAt%20asc",
                                            @"$skip=0",
@@ -2534,7 +2572,6 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
                   @"Invalue URL: %@", firstRequest.URL.absoluteString);
     
     NSArray *expectedSecondRequestQuery = @[@"__includeDeleted=true",
-                                            @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                             @"$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-03T15%3A44%3A29.000Z')",
                                             @"$orderby=__updatedAt%20asc",
                                             @"$skip=0",
@@ -2546,7 +2583,6 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 
     
     NSArray *expectedThirdRequestQuery = @[@"__includeDeleted=true",
-                                           @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                            @"$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-04T16%3A44%3A59.000Z')",
                                            @"$orderby=__updatedAt%20asc",
                                            @"$skip=0",
@@ -2578,7 +2614,6 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     NSURLRequest *fourthRequest = (NSURLRequest *)filter.actualRequests[3];
 
     NSArray *expectedFourthRequestQuery = @[@"__includeDeleted=true",
-                                            @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                             @"$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-04T16%3A44%3A59.000Z')",
                                             @"$orderby=__updatedAt%20asc",
                                             @"$skip=0",
@@ -2617,7 +2652,6 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     NSURLRequest *firstRequest = (NSURLRequest *)filter.actualRequests[0];
     
     NSArray *expectedFirstRequestQuery = @[@"__includeDeleted=true",
-                                           @"__systemProperties=__deleted%2C__version",
                                            @"$orderby=id%20desc",
                                            @"$skip=0",
                                            @"$top=50"];
@@ -2721,7 +2755,6 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     NSURLRequest *thirdPullRequest = (NSURLRequest *)filter.actualRequests[1];
     
     NSArray *expectedFirstPullRequestQuery = @[@"__includeDeleted=true",
-                                               @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                                @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')",
                                                @"$orderby=__updatedAt%20asc",
                                                @"$top=50",
@@ -2732,7 +2765,6 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
                   @"Invalue URL: %@", firstPullRequest.URL.absoluteString);
 
     NSArray *expectedSecondPullRequestQuery = @[@"__includeDeleted=true",
-                                                @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                                 @"$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-03T15%3A44%3A29.000Z')",
                                                 @"$orderby=__updatedAt%20asc",
                                                 @"$top=50",
@@ -2744,7 +2776,6 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
 
     NSArray *expectedThirdPullRequestQuery = @[@"__includeDeleted=true",
-                                               @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                                @"$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-07T15%3A44%3A28.000Z')",
                                                @"$orderby=__updatedAt%20asc",
                                                @"$top=50",
@@ -2862,9 +2893,8 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     NSURLRequest *secondPullRequest = (NSURLRequest *)filter.actualRequests[1];
     NSURLRequest *thirdPullRequest = (NSURLRequest *)filter.actualRequests[2];
     
-    XCTAssertEqualObjects(insertRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem?__systemProperties=__version");
+    XCTAssertEqualObjects(insertRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem");
     NSArray *expectedfirstPullRequest = @[@"__includeDeleted=true",
-                                          @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                           @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')",
                                           @"$orderby=__updatedAt%20asc",
                                           @"$top=50",
@@ -2875,7 +2905,6 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 
     
     NSArray *expectedSecondPullRequest = @[@"__includeDeleted=true",
-                                           @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                            @"$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-03T15%3A44%3A29.000Z')",
                                            @"$orderby=__updatedAt%20asc",
                                            @"$top=50",
@@ -2884,7 +2913,6 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
                   @"Invalid URL: %@", secondPullRequest.URL.absoluteString);
 
     NSArray *expectedThirdPullRequest = @[@"__includeDeleted=true",
-                                          @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                           @"$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-07T15%3A44%3A28.000Z')",
                                           @"$orderby=__updatedAt%20asc",
                                           @"$top=50",
@@ -2934,7 +2962,6 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     XCTAssertEqual(6, filter.actualRequests.count);
 
     NSArray *expectedFirstRequest = @[@"__includeDeleted=true",
-                                      @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                       @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')",
                                       @"$orderby=__updatedAt%20asc",
                                       @"$top=50",
@@ -2943,7 +2970,6 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
                   @"Invalid URL: %@", firstRequest.URL.absoluteString);
     
     NSArray *expectedSecondRequest = @[@"__includeDeleted=true",
-                                       @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                        @"$filter=(__updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z')",
                                        @"$orderby=__updatedAt%20asc",
                                        @"$top=50",
@@ -2953,7 +2979,6 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     // TODO: why does the ordering of $orderby and __includeDeleted change here?
     NSArray *expectedThirdRequest = @[@"__includeDeleted=true",
-                                      @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                       @"$filter=(__updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z')",
                                       @"$orderby=__updatedAt%20asc",
                                       @"$skip=2",
@@ -2963,7 +2988,6 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 
     // TODO: why does the ordering of $orderby and __includeDeleted change here?
     NSArray *expectedFourthRequest = @[@"__includeDeleted=true",
-                                       @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                        @"$filter=(__updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z')",
                                        @"$orderby=__updatedAt%20asc",
                                        @"$skip=4",
@@ -2972,7 +2996,6 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
                   @"Invalid URL: %@", fourthRequest.URL.absoluteString);
     
     NSArray *expectedFifthRequest = @[@"__includeDeleted=true",
-                                      @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                       @"$filter=(__updatedAt%20ge%20datetimeoffset'2000-01-02T00%3A00%3A00.000Z')",
                                       @"$orderby=__updatedAt%20asc",
                                       @"$top=50",
@@ -2981,7 +3004,6 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
                   @"Invalid URL: %@", fifthRequest.URL.absoluteString);
 
     NSArray *expectedSixthRequest = @[@"__includeDeleted=true",
-                                      @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                       @"$filter=(__updatedAt%20ge%20datetimeoffset'2000-01-02T00%3A00%3A00.000Z')",
                                       @"$orderby=__updatedAt%20asc",
                                       @"$skip=1",
@@ -3018,7 +3040,6 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     NSURLRequest *thirdRequest = (NSURLRequest *)filter.actualRequests[2];
     
     NSArray *expectedFirstRequest = @[@"__includeDeleted=true",
-                                      @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                       @"$filter=((text%20eq%20'MATCH')%20and%20(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z'))",
                                       @"$orderby=__updatedAt%20asc",
                                       @"$top=50",
@@ -3027,7 +3048,6 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
                   @"Invalid URL: %@", firstRequest.URL.absoluteString);
 
     NSArray *expectedSecondRequest = @[@"__includeDeleted=true",
-                                       @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                        @"$filter=((text%20eq%20'MATCH')%20and%20(__updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z'))",
                                        @"$orderby=__updatedAt%20asc",
                                        @"$top=50",
@@ -3037,7 +3057,6 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
 
     NSArray *expectedThirdRequest = @[@"__includeDeleted=true",
-                                      @"__systemProperties=__updatedAt%2C__deleted%2C__version",
                                       @"$filter=((text%20eq%20'MATCH')%20and%20(__updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z'))",
                                       @"$orderby=__updatedAt%20asc",
                                       @"$skip=1",

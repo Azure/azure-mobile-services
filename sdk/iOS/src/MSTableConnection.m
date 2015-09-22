@@ -65,9 +65,6 @@ static NSString *const nextLinkPattern = @"^(.*?);\\s*rel\\s*=\\s*(\\w+)\\s*"; /
                         }
                         [item setValue:[version stringByReplacingOccurrencesOfString:@"\\\"" withString:@"\""] forKey:MSSystemColumnVersion];
                     }
-                    
-                    // Remove unasked for system columns
-                    [MSTableConnection removeSystemColumnsFromItem:item ifNotInQuery:response.URL.query];
                 }
             }
             

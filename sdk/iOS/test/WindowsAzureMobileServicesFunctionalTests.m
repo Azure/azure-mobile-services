@@ -186,7 +186,7 @@
         
         XCTAssertNotNil(item, @"item should not have been nil.");
         
-        [todoTable readWithQueryString:nil completion:query5AfterQuery4];
+        [todoTable readWithCompletion:query5AfterQuery4];
     };
     
     id query3AfterQuery2 = ^(MSQueryResult *result, NSError *error) {
