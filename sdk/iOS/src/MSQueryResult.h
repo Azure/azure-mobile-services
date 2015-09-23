@@ -10,7 +10,7 @@
 ///@{
 
 /// The result from a successful read
-@property (nonatomic, strong, readonly, nonnull)           NSArray<NSDictionary *> *items;
+@property (nonatomic, strong, readonly, nullable)           NSArray<NSDictionary *> *items;
 
 /// there was not an error, then the *items* array will always be non-nil
 /// If the query included a
@@ -30,7 +30,7 @@
 ///@{
 
 /// Initializes an *MSTable* instance with the given name and client.
--(nonnull instancetype)initWithItems:(nonnull NSArray<NSDictionary *> *)items
+-(nonnull instancetype)initWithItems:(nullable NSArray<NSDictionary *> *)items
         totalCount:(NSInteger) totalCount
         nextLink: (nullable NSString *) nextLink;
 
