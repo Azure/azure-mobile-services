@@ -44,7 +44,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Eventing
     public class MobileServiceEvent<T> : MobileServiceEvent
     {
         /// <summary>
-        /// Initializes an instance of the <see cref="MobileServiceEvent<T>"/> using the specified event name and payload.
+        /// Initializes an instance of the MobileServiceEvent using the specified event name and payload.
         /// </summary>
         /// <param name="name">The event name.</param>
         /// <param name="payload">The payload associated with this event.</param>

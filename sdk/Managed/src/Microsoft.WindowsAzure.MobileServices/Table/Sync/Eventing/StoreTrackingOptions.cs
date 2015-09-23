@@ -10,9 +10,15 @@ using System.Threading.Tasks;
 
 namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
+    /// <summary>
+    /// A flags enumeration for the available store tracking options available.
+    /// </summary>
     [Flags]
     public enum StoreTrackingOptions
     {
+        /// <summary>
+        /// No tracking options.
+        /// </summary>
         None = 0x00,
         /// <summary>
         /// Generates notifications for local record operations.

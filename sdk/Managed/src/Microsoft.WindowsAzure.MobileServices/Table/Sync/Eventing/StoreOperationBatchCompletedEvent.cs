@@ -15,6 +15,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     /// </summary>
     public sealed class StoreOperationsBatchCompletedEvent : StoreChangeEvent
     {
+        /// <summary>
+        /// The store operation batch completed event name.
+        /// </summary>
         public const string EventName = "MobileServices.StoreOperationBatchCompleted";
 
         public StoreOperationsBatchCompletedEvent(StoreOperationsBatch batch)
@@ -26,6 +29,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             
             Batch = batch;
         }
+
+        /// <summary>
+        /// Gets the event name.
+        /// </summary>
         public override string Name
         {
             get { return EventName; }
