@@ -14,7 +14,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync
             foreach (var queryId in testCases)
             {
                 var ex = AssertEx.Throws<ArgumentException>(() => MobileServiceSyncTable.ValidateQueryId(queryId));
-                Assert.AreEqual(ex.Message, "The query id must not contain pipe character and should be less than 50 characters in length.");
+                Assert.AreEqual(ex.Message, "The query id must not contain pipe character and should be less than 50 characters in length.\r\nParameter name: queryId");
             }
         }
 

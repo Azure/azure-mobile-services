@@ -291,7 +291,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             hijack.AddResponseContent("[]");
 
             await table.PullAsync(queryId: "todoItems", query: table.CreateQuery());
-            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.0000000%2B00%3A00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__deleted");
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.0000000%2B00%3A00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true");
 
 
             pullResult = "[{\"id\":\"b\",\"String\":\"Updated\",\"__version\":\"def\", \"__updatedAt\":\"2014-02-27T23:01:33.444Z\"}]";
@@ -302,8 +302,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
             var item = await table.LookupAsync("b");
             Assert.AreEqual(item.String, "Updated");
-            AssertEx.QueryEquals(hijack.Requests[2].RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetimeoffset'2014-01-30T23%3A01%3A33.4440000%2B00%3A00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__deleted");
-
+            AssertEx.QueryEquals(hijack.Requests[2].RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetimeoffset'2014-01-30T23%3A01%3A33.4440000%2B00%3A00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true");
         }
 
         [AsyncTestMethod]
@@ -319,7 +318,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             hijack.AddResponseContent("[]");
 
             await table.PullAsync(queryId: "todoItems", query: table.CreateQuery());
-            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.0000000%2B00%3A00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__deleted");
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.0000000%2B00%3A00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true");
 
             table = await GetSynctable<ToDoWithStringId>(hijack);
 
@@ -332,7 +331,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
             var item = await table.LookupAsync("b");
             Assert.AreEqual(item.String, "Updated");
-            AssertEx.QueryEquals(hijack.Requests[2].RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetimeoffset'2014-01-30T23%3A01%3A33.4440000%2B00%3A00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__deleted");
+            AssertEx.QueryEquals(hijack.Requests[2].RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetimeoffset'2014-01-30T23%3A01%3A33.4440000%2B00%3A00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true");
         }
 
         [AsyncTestMethod]
@@ -357,7 +356,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             Assert.AreEqual(item.UpdatedAt.ToUniversalTime(), new DateTime(2014, 01, 30, 23, 1, 33, 444, DateTimeKind.Utc));
 
             // we request all the system properties present on DefineTable<> object
-            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.Query, "?$skip=0&$top=50&__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt%2C__version%2C__deleted");
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.Query, "?$skip=0&$top=50&__includeDeleted=true");
         }
 
         [AsyncTestMethod]
@@ -610,9 +609,6 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
             hijack.OnSendingRequest = async req =>
             {
-                // we request all the system properties present on DefineTable<> object
-                Assert.AreEqual(req.RequestUri.Query, "?__systemproperties=__createdAt%2C__updatedAt%2C__version%2C__deleted");
-
                 string content = await req.Content.ReadAsStringAsync();
                 Assert.AreEqual(content, @"{""id"":""b"",""String"":""Hey""}"); // the system properties are not sent to server
                 return req;
