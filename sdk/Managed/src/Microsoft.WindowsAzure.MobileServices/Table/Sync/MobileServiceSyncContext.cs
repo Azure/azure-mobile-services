@@ -188,16 +188,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 {
                     throw new ArgumentException("The key '{0}' is reserved and cannot be specified as a query parameter.".FormatInvariant(MobileServiceTable.IncludeDeletedParameterName));
                 }
-
-                if (parameters.Keys.Any(k => k.Equals(MobileServiceTable.SystemPropertiesQueryParameterName, StringComparison.OrdinalIgnoreCase)))
-                {
-                    throw new ArgumentException("The key '{0}' is reserved and cannot be specified as a query parameter.".FormatInvariant(MobileServiceTable.SystemPropertiesQueryParameterName));
-                }
             }
 
             var table = await this.GetTable(tableName);
             var queryDescription = MobileServiceTableQueryDescription.Parse(this.client.MobileAppUri, tableName, query);
-
 
             // local schema should be same as remote schema otherwise push can't function
             if (queryDescription.Selection.Any() || queryDescription.Projections.Any())
@@ -287,7 +281,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             await this.EnsureInitializedAsync();
 
             var table = this.client.GetTable(tableName) as MobileServiceTable;
-            table.SystemProperties = await settings.GetSystemPropertiesAsync(tableName);
             table.Features = MobileServiceFeatures.Offline;
 
             return table;

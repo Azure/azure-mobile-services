@@ -32,11 +32,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         private static readonly HttpMethod patchHttpMethod = new HttpMethod("PATCH");
 
         /// <summary>
-        /// The name of the system properties query string parameter
-        /// </summary>
-        public const string SystemPropertiesQueryParameterName = "__systemproperties";
-
-        /// <summary>
         /// The name of the include deleted query string parameter
         /// </summary>
         public const string IncludeDeletedParameterName = "__includeDeleted";
@@ -51,11 +46,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Gets the name of the table.
         /// </summary>
         public string TableName { get; private set; }
-
-        /// <summary>
-        /// The Mobile Service system properties to be included with items.
-        /// </summary>
-        public MobileServiceSystemProperties SystemProperties { get; set; }
 
         /// <summary>
         /// Feature which are sent as telemetry information to the service for all
@@ -79,7 +69,6 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             this.TableName = tableName;
             this.MobileServiceClient = client;
-            this.SystemProperties = MobileServiceSystemProperties.None;
         }
 
         /// <summary>
@@ -145,7 +134,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         internal virtual async Task<QueryResult> ReadAsync(string query, IDictionary<string, string> parameters, MobileServiceFeatures features)
         {
             features = this.AddRequestFeatures(features, parameters);
-            parameters = AddSystemProperties(this.SystemProperties, parameters);
 
             string uriPath;
             Uri uri;
@@ -265,110 +253,15 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             features = this.AddRequestFeatures(features, parameters);
-            parameters = AddSystemProperties(this.SystemProperties, parameters);
             string uriString = GetUri(this.TableName, null, parameters);
 
             return await this.TransformHttpException(async () =>
             {
                 MobileServiceHttpResponse response = await this.MobileServiceClient.MobileAppHttpClient.RequestAsync(HttpMethod.Post, uriString, this.MobileServiceClient.CurrentUser, instance.ToString(Formatting.None), true, features: this.Features | features);
-                var result = GetJTokenFromResponse(response);
-                return RemoveUnrequestedSystemProperties(result, parameters, response.Etag);
+                return GetJTokenFromResponse(response);
             });
         }
 
-        /// <summary>
-        /// Removes system properties from the passed in item
-        /// </summary>
-        /// <param name="item">
-        /// The item returned from the server
-        /// </param>
-        /// <param name="parameters">
-        /// A dictionary of user-defined parameters and values to include in 
-        /// the request URI query string.
-        /// </param>
-        /// <param name="version">
-        /// Set to the value of the version system property before it is removed.
-        /// </param>
-        /// <returns>
-        /// An item that only contains normal fields and the requested system properties
-        /// </returns>
-        private JToken RemoveUnrequestedSystemProperties(JToken item, IDictionary<string, string> parameters, string version)
-        {
-            object id = null;
-
-            if (item == null)
-            {
-                return null;
-            }
-
-            MobileServiceSerializer.TryGetId(item as JObject, true, out id);
-            if (id == null || MobileServiceSerializer.IsIntegerId(id))
-            {
-                return item;
-            }
-
-            var actualSystemProperties = GetRequestedSystemProperties(parameters);
-            if (actualSystemProperties == MobileServiceSystemProperties.All)
-            {
-                return item;
-            }
-
-            string ignoredVersion = null;
-            var cleanedItem = MobileServiceSerializer.RemoveSystemProperties(item as JObject, out ignoredVersion, actualSystemProperties);
-
-            if (version != null)
-            {
-                cleanedItem[MobileServiceSerializer.VersionSystemPropertyString] = GetValueFromEtag(version);
-            }
-
-            return cleanedItem;
-        }
-
-        /// <summary>
-        /// Calculates the requested system properties from the server
-        /// </summary>
-        /// <param name="parameters">
-        /// A dictionary of user-defined parameters and values to include in 
-        /// the request URI query string.
-        /// </param>
-        /// <returns>
-        /// The calculated system properties value
-        /// </returns>
-        private MobileServiceSystemProperties GetRequestedSystemProperties(IDictionary<string, string> parameters)
-        {
-            var requestedSystemProperties = MobileServiceSystemProperties.None;
-
-            // Parse dictionary for system properties override
-            if (parameters != null && parameters.ContainsKey(SystemPropertiesQueryParameterName))
-            {
-                var sysProps = parameters[SystemPropertiesQueryParameterName];
-                if (sysProps.IndexOf("*") >= 0)
-                {
-                    requestedSystemProperties = MobileServiceSystemProperties.All;
-                }
-                else
-                {
-                    if (sysProps.IndexOf(MobileServiceSystemProperties.Version.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
-                    {
-                        requestedSystemProperties |= MobileServiceSystemProperties.Version;
-                    }
-                    if (sysProps.IndexOf(MobileServiceSystemProperties.UpdatedAt.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
-                    {
-                        requestedSystemProperties |= MobileServiceSystemProperties.UpdatedAt;
-                    }
-                    if (sysProps.IndexOf(MobileServiceSystemProperties.CreatedAt.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
-                    {
-                        requestedSystemProperties |= MobileServiceSystemProperties.CreatedAt;
-                    }
-                }
-            }
-            else
-            {
-                requestedSystemProperties = this.SystemProperties;
-            }
-
-            return requestedSystemProperties;
-        }
 
         /// <summary>
         /// Updates an <paramref name="instance"/> in the table.
@@ -434,8 +327,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             return await this.TransformHttpException(async () =>
             {
                 MobileServiceHttpResponse response = await this.MobileServiceClient.MobileAppHttpClient.RequestAsync(patchHttpMethod, uriString, this.MobileServiceClient.CurrentUser, content, true, headers, this.Features | features);
-                var result = GetJTokenFromResponse(response);
-                return RemoveUnrequestedSystemProperties(result, parameters, response.Etag);
+                return GetJTokenFromResponse(response);
             });
         }
 
@@ -480,8 +372,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             return await this.TransformHttpException(async () =>
             {
                 MobileServiceHttpResponse response = await this.MobileServiceClient.MobileAppHttpClient.RequestAsync(HttpMethod.Post, uriString, this.MobileServiceClient.CurrentUser, null, true, headers, this.Features | features);
-                var result = GetJTokenFromResponse(response);
-                return RemoveUnrequestedSystemProperties(result, parameters, response.Etag);
+                return GetJTokenFromResponse(response);
             });
         }
 
@@ -548,8 +439,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             return await TransformHttpException(async () =>
             {
                 MobileServiceHttpResponse response = await this.MobileServiceClient.MobileAppHttpClient.RequestAsync(HttpMethod.Delete, uriString, this.MobileServiceClient.CurrentUser, null, false, headers, this.Features | features);
-                var result = GetJTokenFromResponse(response);
-                return RemoveUnrequestedSystemProperties(result, parameters, response.Etag);
+                return GetJTokenFromResponse(response);
             });
         }
 
@@ -606,25 +496,10 @@ namespace Microsoft.WindowsAzure.MobileServices
             MobileServiceSerializer.EnsureValidId(id);
 
             features = this.AddRequestFeatures(features, parameters);
-            parameters = AddSystemProperties(this.SystemProperties, parameters);
 
             string uriString = GetUri(this.TableName, id, parameters);
             MobileServiceHttpResponse response = await this.MobileServiceClient.MobileAppHttpClient.RequestAsync(HttpMethod.Get, uriString, this.MobileServiceClient.CurrentUser, null, true, features: this.Features | features);
             return GetJTokenFromResponse(response);
-        }
-
-        /// <summary>
-        /// Adds the tables requested system properties to the parameters collection.
-        /// </summary>
-        /// <param name="systemProperties">The sytem properties to add.</param>
-        /// <param name="parameters">The parameters collection.</param>
-        /// <returns>
-        /// The parameters collection with any requested system properties included.
-        /// </returns>
-        internal static IDictionary<string, string> AddSystemProperties(MobileServiceSystemProperties systemProperties, IDictionary<string, string> parameters)
-        {
-            string systemPropertiesString = GetSystemPropertiesString(systemProperties);
-            return AddSystemParameter(parameters, SystemPropertiesQueryParameterName, systemPropertiesString);
         }
 
         /// <summary>
@@ -843,7 +718,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 instance = MobileServiceSerializer.RemoveSystemProperties(instance, out version);
             }
-            parameters = AddSystemProperties(this.SystemProperties, parameters);
+
             Dictionary<string, string> headers = AddIfMatchHeader(version);
             return headers;
         }

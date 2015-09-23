@@ -983,26 +983,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
-        public async Task InsertAsyncWithStringId_StripsSystemProperties()
-        {
-            var userDefinedParameters = new Dictionary<string, string>() { { "state", "AL" } };
-
-            TestHttpHandler hijack = new TestHttpHandler();
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
-            IMobileServiceTable table = service.GetTable("tests");
-
-            JObject obj = JToken.Parse("{\"value\":\"new\"}") as JObject;
-            hijack.SetResponseContent("{\"id\":\"A\",\"value\":\"new\", \"__version\":\"XYZ\",\"__unknown\":12,\"__CREATEDat\":\"12-02-02\"}");
-            JToken newObj = await table.InsertAsync(obj, userDefinedParameters);
-
-            Assert.AreEqual("A", (string)newObj["id"]);
-            Assert.AreNotEqual(newObj, obj);
-            Assert.IsNull(newObj["__version"]);
-            Assert.IsNull(newObj["__unknown"]);
-            Assert.IsNull(newObj["__CREATEDat"]);
-        }
-
-        [AsyncTestMethod]
         public async Task InsertAsyncWithStringId_KeepsSystemProperties()
         {
             var userDefinedParameters = new Dictionary<string, string>() { { "__systemproperties", "__createdAt" } };
@@ -1010,7 +990,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             TestHttpHandler hijack = new TestHttpHandler();
             IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
             IMobileServiceTable table = service.GetTable("tests");
-            table.SystemProperties = MobileServiceSystemProperties.CreatedAt;
 
             JObject obj = JToken.Parse("{\"value\":\"new\"}") as JObject;
             hijack.SetResponseContent("{\"id\":\"A\",\"value\":\"new\", \"__version\":\"XYZ\",\"__unknown\":12,\"__CREATEDat\":\"12-02-02\"}");
@@ -1018,18 +997,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.AreEqual("A", (string)newObj["id"]);
             Assert.AreNotEqual(newObj, obj);
-            Assert.IsNull(newObj["__version"]);
-            Assert.IsNull(newObj["__unknown"]);
-            Assert.IsNotNull(newObj["__CREATEDat"]);
-
-            table.SystemProperties = MobileServiceSystemProperties.None;
-            hijack.SetResponseContent("{\"id\":\"A\",\"value\":\"new\", \"__version\":\"XYZ\",\"__unknown\":12,\"__CREATEDat\":\"12-02-02\"}");
-            newObj = await table.InsertAsync(obj, userDefinedParameters);
-
-            Assert.AreEqual("A", (string)newObj["id"]);
-            Assert.AreNotEqual(newObj, obj);
-            Assert.IsNull(newObj["__version"]);
-            Assert.IsNull(newObj["__unknown"]);
+            Assert.IsNotNull(newObj["__version"]);
+            Assert.IsNotNull(newObj["__unknown"]);
             Assert.IsNotNull(newObj["__CREATEDat"]);
         }
 
@@ -1415,54 +1384,20 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
-        public async Task UpdateAsyncWithStringId_StripsSystemProperties()
-        {
-            var userDefinedParameters = new Dictionary<string, string>() { { "state", "AL" } };
-
-            TestHttpHandler hijack = new TestHttpHandler();
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
-            IMobileServiceTable table = service.GetTable("tests");
-
-            JObject obj = JToken.Parse("{\"id\":\"A\", \"value\":\"new\"}") as JObject;
-            hijack.SetResponseContent("{\"id\":\"A\",\"value\":\"new\", \"__version\":\"XYZ\",\"__unknown\":12,\"__CREATEDat\":\"12-02-02\"}");
-
-            JToken newObj = await table.UpdateAsync(obj, userDefinedParameters);
-
-            Assert.AreEqual("A", (string)newObj["id"]);
-            Assert.AreNotEqual(newObj, obj);
-            Assert.IsNull(newObj["__version"]);
-            Assert.IsNull(newObj["__unknown"]);
-            Assert.IsNull(newObj["__CREATEDat"]);
-        }
-
-        [AsyncTestMethod]
         public async Task UpdateAsyncWithStringId_KeepsSystemProperties()
         {
-            var userDefinedParameters = new Dictionary<string, string>() { { "__systemproperties", "__createdAt" } };
-
             TestHttpHandler hijack = new TestHttpHandler();
             IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
             IMobileServiceTable table = service.GetTable("tests");
-            table.SystemProperties = MobileServiceSystemProperties.CreatedAt;
 
             JObject obj = JToken.Parse("{\"id\":\"A\",\"value\":\"new\"}") as JObject;
             hijack.SetResponseContent("{\"id\":\"A\",\"value\":\"new\", \"__version\":\"XYZ\",\"__unknown\":12,\"__CREATEDat\":\"12-02-02\"}");
-            JToken newObj = await table.UpdateAsync(obj);
+            var newObj = await table.UpdateAsync(obj);
 
             Assert.AreEqual("A", (string)newObj["id"]);
             Assert.AreNotEqual(newObj, obj);
-            Assert.IsNull(newObj["__version"]);
-            Assert.IsNull(newObj["__unknown"]);
-            Assert.IsNotNull(newObj["__CREATEDat"]);
-
-            table.SystemProperties = MobileServiceSystemProperties.None;
-            hijack.SetResponseContent("{\"id\":\"A\",\"value\":\"new\", \"__version\":\"XYZ\",\"__unknown\":12,\"__CREATEDat\":\"12-02-02\"}");
-            newObj = await table.UpdateAsync(obj, userDefinedParameters);
-
-            Assert.AreEqual("A", (string)newObj["id"]);
-            Assert.AreNotEqual(newObj, obj);
-            Assert.IsNull(newObj["__version"]);
-            Assert.IsNull(newObj["__unknown"]);
+            Assert.IsNotNull(newObj["__version"]);
+            Assert.IsNotNull(newObj["__unknown"]);
             Assert.IsNotNull(newObj["__CREATEDat"]);
         }
 
@@ -1886,27 +1821,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
-        public async Task DeleteAsyncWithStringId_StripsSystemProperties()
-        {
-            var userDefinedParameters = new Dictionary<string, string>() { { "state", "AL" } };
-
-            TestHttpHandler hijack = new TestHttpHandler();
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
-            IMobileServiceTable table = service.GetTable("tests");
-
-            JObject obj = JToken.Parse("{\"id\":\"A\", \"value\":\"new\"}") as JObject;
-            hijack.SetResponseContent("{\"id\":\"A\",\"value\":\"new\", \"__version\":\"XYZ\",\"__unknown\":12,\"__CREATEDat\":\"12-02-02\"}");
-
-            JToken newObj = await table.DeleteAsync(obj, userDefinedParameters);
-
-            Assert.AreEqual("A", (string)newObj["id"]);
-            Assert.AreNotEqual(newObj, obj);
-            Assert.IsNull(newObj["__version"]);
-            Assert.IsNull(newObj["__unknown"]);
-            Assert.IsNull(newObj["__CREATEDat"]);
-        }
-
-        [AsyncTestMethod]
         public async Task DeleteAsyncWithStringId_KeepsSystemProperties()
         {
             var userDefinedParameters = new Dictionary<string, string>() { { "__systemproperties", "__createdAt" } };
@@ -1914,7 +1828,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             TestHttpHandler hijack = new TestHttpHandler();
             IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
             IMobileServiceTable table = service.GetTable("tests");
-            table.SystemProperties = MobileServiceSystemProperties.CreatedAt;
 
             JObject obj = JToken.Parse("{\"id\":\"A\",\"value\":\"new\"}") as JObject;
             hijack.SetResponseContent("{\"id\":\"A\",\"value\":\"new\", \"__version\":\"XYZ\",\"__unknown\":12,\"__CREATEDat\":\"12-02-02\"}");
@@ -1922,18 +1835,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.AreEqual("A", (string)newObj["id"]);
             Assert.AreNotEqual(newObj, obj);
-            Assert.IsNull(newObj["__version"]);
-            Assert.IsNull(newObj["__unknown"]);
-            Assert.IsNotNull(newObj["__CREATEDat"]);
-
-            table.SystemProperties = MobileServiceSystemProperties.None;
-            hijack.SetResponseContent("{\"id\":\"A\",\"value\":\"new\", \"__version\":\"XYZ\",\"__unknown\":12,\"__CREATEDat\":\"12-02-02\"}");
-            newObj = await table.DeleteAsync(obj, userDefinedParameters);
-
-            Assert.AreEqual("A", (string)newObj["id"]);
-            Assert.AreNotEqual(newObj, obj);
-            Assert.IsNull(newObj["__version"]);
-            Assert.IsNull(newObj["__unknown"]);
+            Assert.IsNotNull(newObj["__version"]);
+            Assert.IsNotNull(newObj["__unknown"]);
             Assert.IsNotNull(newObj["__CREATEDat"]);
         }
 
@@ -2187,162 +2090,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
                 JObject itemToUpdate = JToken.Parse("{\"id\":5,\"String\":\"what?\",\"" + testSystemProperty + "\":\"a value\"}") as JObject;
                 await table.UpdateAsync(itemToUpdate);
-            }
-        }
-
-        [AsyncTestMethod]
-        public async Task TableOperationSystemPropertiesQueryStringIsCorrect()
-        {
-            MobileServiceSystemProperties[] testSystemProperties = SystemPropertiesTestData.SystemProperties;
-
-            Action<MobileServiceSystemProperties, string> ValidateUri = (testSystemProperty, requestUri) =>
-            {
-                if (testSystemProperty != MobileServiceSystemProperties.None)
-                {
-                    Assert.IsTrue(requestUri.Contains("__systemproperties"));
-                }
-                else
-                {
-                    Assert.IsFalse(requestUri.Contains("__systemproperties"));
-                }
-
-                if (testSystemProperty == MobileServiceSystemProperties.All)
-                {
-                    Assert.IsTrue(requestUri.Contains("__systemproperties=*"));
-                }
-                else if ((testSystemProperty & MobileServiceSystemProperties.CreatedAt) == MobileServiceSystemProperties.CreatedAt)
-                {
-                    Assert.IsTrue(requestUri.Contains("__createdAt"));
-                }
-                else if ((testSystemProperty & MobileServiceSystemProperties.UpdatedAt) == MobileServiceSystemProperties.UpdatedAt)
-                {
-                    Assert.IsTrue(requestUri.Contains("__updatedAt"));
-                }
-                else if ((testSystemProperty & MobileServiceSystemProperties.Version) == MobileServiceSystemProperties.Version)
-                {
-                    Assert.IsTrue(requestUri.Contains("__version"));
-                }
-                else if ((testSystemProperty & MobileServiceSystemProperties.Deleted) == MobileServiceSystemProperties.Deleted)
-                {
-                    Assert.IsTrue(requestUri.Contains("__deleted"));
-                }
-            };
-
-            foreach (MobileServiceSystemProperties testSystemProperty in testSystemProperties)
-            {
-                TestHttpHandler hijack = new TestHttpHandler();
-                IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
-
-                IMobileServiceTable table = service.GetTable("someTable");
-                table.SystemProperties = testSystemProperty;
-
-                // string id
-                JObject item = JToken.Parse("{\"id\":\"an id\",\"String\":\"what?\"}") as JObject;
-                hijack.SetResponseContent("{\"id\":\"an id\",\"String\":\"Hey\"}");
-                await table.InsertAsync(item);
-                ValidateUri(testSystemProperty, hijack.Request.RequestUri.ToString());
-
-                hijack.SetResponseContent("{\"id\":\"an id\",\"String\":\"Hey\"}");
-                await table.UpdateAsync(item);
-                ValidateUri(testSystemProperty, hijack.Request.RequestUri.ToString());
-
-                hijack.SetResponseContent("{\"id\":5,\"String\":\"Hey\"}");
-                await table.LookupAsync("an id");
-                ValidateUri(testSystemProperty, hijack.Request.RequestUri.ToString());
-
-                hijack.SetResponseContent("{\"id\":\"an id\",\"String\":\"Hey\"}");
-                await table.DeleteAsync(item);
-                ValidateUri(testSystemProperty, hijack.Request.RequestUri.ToString());
-
-                // int id
-                hijack.SetResponseContent("{\"id\":5,\"String\":\"Hey\"}");
-                item = JToken.Parse("{\"String\":\"what?\"}") as JObject;
-                await table.InsertAsync(item);
-                ValidateUri(testSystemProperty, hijack.Request.RequestUri.ToString());
-
-                hijack.SetResponseContent("{\"id\":5,\"String\":\"Hey\"}");
-                item = JToken.Parse("{\"id\":5,\"String\":\"what?\"}") as JObject;
-                await table.UpdateAsync(item);
-                ValidateUri(testSystemProperty, hijack.Request.RequestUri.ToString());
-
-                hijack.SetResponseContent("{\"id\":5,\"String\":\"Hey\"}");
-                await table.LookupAsync(5);
-                ValidateUri(testSystemProperty, hijack.Request.RequestUri.ToString());
-
-                hijack.SetResponseContent("{\"id\":5,\"String\":\"Hey\"}");
-                await table.DeleteAsync(item);
-                ValidateUri(testSystemProperty, hijack.Request.RequestUri.ToString());
-
-                // query
-                hijack.SetResponseContent("[{\"id\":5,\"String\":\"Hey\"}]");
-                await table.ReadAsync("$filter=id eq 5");
-                ValidateUri(testSystemProperty, hijack.Request.RequestUri.ToString());
-
-                hijack.SetResponseContent("[{\"id\":5,\"String\":\"Hey\"}]");
-                await table.ReadAsync("$select=id,String");
-                ValidateUri(testSystemProperty, hijack.Request.RequestUri.ToString());
-            }
-        }
-
-        [AsyncTestMethod]
-        public async Task TableOperationUserParameterWithsystemPropertyQueryStringIsCorrect()
-        {
-            MobileServiceSystemProperties[] testSystemProperties = SystemPropertiesTestData.SystemProperties;
-
-
-            foreach (MobileServiceSystemProperties testSystemProperty in testSystemProperties)
-            {
-                TestHttpHandler hijack = new TestHttpHandler();
-                IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
-
-                IMobileServiceTable table = service.GetTable("someTable");
-                table.SystemProperties = testSystemProperty;
-
-                // string id
-                JObject item = JToken.Parse("{\"id\":\"an id\",\"String\":\"what?\"}") as JObject;
-                hijack.SetResponseContent("{\"id\":\"an id\",\"String\":\"Hey\"}");
-                await table.InsertAsync(item, new Dictionary<string, string>() { { "__systemproperties", "__createdAt" } });
-                Assert.IsTrue(hijack.Request.RequestUri.ToString().Contains("__systemproperties=__createdAt"));
-
-                hijack.SetResponseContent("{\"id\":\"an id\",\"String\":\"Hey\"}");
-                await table.UpdateAsync(item, new Dictionary<string, string>() { { "__systemproperties", "createdAt" } });
-                Assert.IsTrue(hijack.Request.RequestUri.ToString().Contains("__systemproperties=createdAt"));
-
-                hijack.SetResponseContent("{\"id\":5,\"String\":\"Hey\"}");
-                await table.LookupAsync("an id", new Dictionary<string, string>() { { "__systemproperties", "CreatedAt" } });
-                Assert.IsTrue(hijack.Request.RequestUri.ToString().Contains("__systemproperties=CreatedAt"));
-
-                hijack.SetResponseContent("{\"id\":\"an id\",\"String\":\"Hey\"}");
-                await table.DeleteAsync(item, new Dictionary<string, string>() { { "__systemproperties", "unknown" } });
-                Assert.IsTrue(hijack.Request.RequestUri.ToString().Contains("__systemproperties=unknown"));
-
-                // int id
-                hijack.SetResponseContent("{\"id\":5,\"String\":\"Hey\"}");
-                item = JToken.Parse("{\"String\":\"what?\"}") as JObject;
-                await table.InsertAsync(item, new Dictionary<string, string>() { { "__systemproperties", "__createdAt" } });
-                Assert.IsTrue(hijack.Request.RequestUri.ToString().Contains("__systemproperties=__createdAt"));
-
-                hijack.SetResponseContent("{\"id\":5,\"String\":\"Hey\"}");
-                item = JToken.Parse("{\"id\":5,\"String\":\"what?\"}") as JObject;
-                await table.UpdateAsync(item, new Dictionary<string, string>() { { "__systemproperties", "__createdAt" } });
-                Assert.IsTrue(hijack.Request.RequestUri.ToString().Contains("__systemproperties=__createdAt"));
-
-                hijack.SetResponseContent("{\"id\":5,\"String\":\"Hey\"}");
-                await table.LookupAsync(5, new Dictionary<string, string>() { { "__systemproperties", "__createdAt" } });
-                Assert.IsTrue(hijack.Request.RequestUri.ToString().Contains("__systemproperties=__createdAt"));
-
-                hijack.SetResponseContent("{\"id\":5,\"String\":\"Hey\"}");
-                await table.DeleteAsync(item, new Dictionary<string, string>() { { "__systemproperties", "__createdAt" } });
-                Assert.IsTrue(hijack.Request.RequestUri.ToString().Contains("__systemproperties=__createdAt"));
-
-                // query
-                hijack.SetResponseContent("[{\"id\":5,\"String\":\"Hey\"}]");
-                await table.ReadAsync("$filter=id eq 5", new Dictionary<string, string>() { { "__systemproperties", "__createdAt" } });
-                Assert.IsTrue(hijack.Request.RequestUri.ToString().Contains("__systemproperties=__createdAt"));
-
-                hijack.SetResponseContent("[{\"id\":5,\"String\":\"Hey\"}]");
-                await table.ReadAsync("$select=id,String", new Dictionary<string, string>() { { "__systemproperties", "__createdAt" } });
-                Assert.IsTrue(hijack.Request.RequestUri.ToString().Contains("__systemproperties=__createdAt"));
             }
         }
 

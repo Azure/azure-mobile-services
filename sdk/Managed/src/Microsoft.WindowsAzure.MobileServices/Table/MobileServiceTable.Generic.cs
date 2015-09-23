@@ -40,7 +40,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             : base(tableName, client)
         {
             this.queryProvider = new MobileServiceTableQueryProvider();
-            this.SystemProperties = client.Serializer.GetSystemProperties(typeof(T));
             Type idType = client.Serializer.GetIdPropertyType<T>(throwIfNotFound: false);
             this.hasIntegerId = idType == null || MobileServiceSerializer.IsIntegerId(idType);
         }
