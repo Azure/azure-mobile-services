@@ -15,6 +15,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     /// </summary>
     public class StoreOperation
     {
+        /// <summary>
+        /// Creates an instance of <see cref="StoreOperation"/> class.
+        /// </summary>
+        /// <param name="tableName">The name of the table that is the target of this operation.</param>
+        /// <param name="recordId">The target record identifier.</param>
+        /// <param name="kind">The kind of operation.</param>
+        /// <param name="source">The source that triggered this operation.</param>
+        /// <param name="batchId">The id of the batch this operation belongs to.</param>
         public StoreOperation(string tableName, string recordId, LocalStoreOperationKind kind, StoreOperationSource source, string batchId)
         {
             if (tableName == null)

@@ -49,6 +49,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         String InstallationId { get; }
 
+        /// <summary>
         /// The event manager that exposes and manages the event stream used by the mobile services types to 
         /// publish and consume events.
         /// </summary>

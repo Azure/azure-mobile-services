@@ -15,6 +15,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     /// </summary>
     public sealed class PurgeCompletedEvent : StoreChangeEvent
     {
+        /// <summary>
+        /// The purge completed event name.
+        /// </summary>
         public const string EventName = "MobileServices.PurgeCompleted";
 
         public PurgeCompletedEvent(string tableName)
