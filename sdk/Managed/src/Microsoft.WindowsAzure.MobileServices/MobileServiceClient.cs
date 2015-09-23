@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MobileServices.Eventing;
 using Microsoft.WindowsAzure.MobileServices.Sync;
 using Newtonsoft.Json.Linq;
 
@@ -64,6 +65,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// provide telemetry data.
         /// </summary>
         public string InstallationId { get; private set; }
+
+        /// <summary>
+        /// The event manager that exposes and manages the event stream used by the mobile services types to 
+        /// publish and consume events.
+        /// </summary>
+        public IMobileServiceEventManager EventManager { get; private set; }
 
         /// <summary>
         /// Gets or sets the settings used for serialization.
@@ -264,6 +271,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             this.Serializer = new MobileServiceSerializer();
+            this.EventManager = new MobileServiceEventManager();
             this.SyncContext = new MobileServiceSyncContext(this);
         }
 

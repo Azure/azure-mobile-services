@@ -486,7 +486,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             await TestOperationModifiedException(true, (error, context) => context.CancelAndDiscardItemAsync(error));
         }
-
+        
         private async Task TestOperationModifiedException(bool operationExists, Func<MobileServiceTableOperationError, MobileServiceSyncContext, Task> action)
         {
             var client = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
@@ -520,6 +520,62 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var ex = await ThrowsAsync<InvalidOperationException>(() => action(error, context));
 
             Assert.AreEqual(ex.Message, "The operation has been updated and cannot be cancelled.");
+        }
+
+        [AsyncTestMethod]
+        public async Task CancelAndDiscardItemAsync_WithNotificationsEnabled_UsesTheCorrectStoreOperationSource()
+        {
+            await ConflictOperation_WithNotificationsEnabled_UsesTheCorrectStoreOperationSource(
+                async (context, error) => await context.CancelAndDiscardItemAsync(error));
+        }
+
+        [AsyncTestMethod]
+        public async Task CancelAndUpdateItemAsync_WithNotificationsEnabled_UsesTheCorrectStoreOperationSource()
+        {
+            await ConflictOperation_WithNotificationsEnabled_UsesTheCorrectStoreOperationSource(
+                async (context, error) => await context.CancelAndUpdateItemAsync(error, new JObject() { { "id", string.Empty } }));
+        }
+
+        private async Task ConflictOperation_WithNotificationsEnabled_UsesTheCorrectStoreOperationSource(Func<MobileServiceSyncContext, MobileServiceTableOperationError, Task> handler)
+        {
+            var client = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
+            var store = new MobileServiceLocalStoreMock();
+            var context = new MobileServiceSyncContext(client);
+            var manualResetEvent = new ManualResetEventSlim();
+
+            await context.InitializeAsync(store, StoreTrackingOptions.NotifyLocalConflictResolutionOperations);
+
+            string operationId = "abc";
+            string itemId = string.Empty;
+            string tableName = "test";
+
+            store.TableMap[MobileServiceLocalSystemTables.OperationQueue].Add(operationId, new JObject() { { "version", 1 } });
+
+
+            var error = new MobileServiceTableOperationError(operationId,
+                                                             1,
+                                                             MobileServiceTableOperationKind.Update,
+                                                             HttpStatusCode.Conflict,
+                                                             tableName,
+                                                             item: new JObject() { { "id", itemId } },
+                                                             rawResult: "{}",
+                                                             result: new JObject());
+
+
+            bool sourceIsLocalConflict = false;
+            IDisposable subscription = client.EventManager.Subscribe<StoreOperationCompletedEvent>(o =>
+            {
+                sourceIsLocalConflict = o.Operation.Source == StoreOperationSource.LocalConflictResolution;
+                manualResetEvent.Set();
+            });
+
+            await handler(context, error);
+
+            bool resetEventSignaled = manualResetEvent.Wait(1000);
+            subscription.Dispose();
+
+            Assert.IsTrue(resetEventSignaled);
+            Assert.IsTrue(sourceIsLocalConflict);
         }
     }
 }

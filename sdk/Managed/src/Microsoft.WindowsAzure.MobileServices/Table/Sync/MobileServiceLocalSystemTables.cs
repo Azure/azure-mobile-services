@@ -17,19 +17,24 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     public static class MobileServiceLocalSystemTables
     {
         /// <summary>
-        /// Table that stores operation queue items
+        /// Prefix used on system table names
         /// </summary>
-        public static readonly string OperationQueue = "__operations";
+        public static readonly string Prefix = "__";
 
         /// <summary>
-        /// Table that stores sync errors
+        /// Name of the table that stores operation queue items
         /// </summary>
-        public static readonly string SyncErrors = "__errors";
+        public static readonly string OperationQueue = Prefix + "operations";
 
         /// <summary>
-        /// Configuration settings related to sync framework
+        /// Name of the table that stores sync errors
         /// </summary>
-        public static readonly string Config = "__config";
+        public static readonly string SyncErrors = Prefix + "errors";
+
+        /// <summary>
+        /// Name of the table that stores configuration settings related to sync framework
+        /// </summary>
+        public static readonly string Config = Prefix + "config";
 
         /// <summary>
         /// Returns the names of all system tables
