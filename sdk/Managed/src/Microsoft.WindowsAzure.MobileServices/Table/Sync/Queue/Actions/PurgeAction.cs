@@ -72,7 +72,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
             if (!this.Table.TableName.StartsWith(MobileServiceLocalSystemTables.Prefix))
             {
-                this.eventManager.PublishAsync(new PurgeCompletedEvent(this.Table.TableName));
+                this.eventManager.BackgroundPublish(new PurgeCompletedEvent(this.Table.TableName));
             }
         }
     }
