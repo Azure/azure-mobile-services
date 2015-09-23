@@ -149,7 +149,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             {
                 foreach (var id in recordIds)
                 {
-                    TrackStoreOperationAsync(query.TableName, id, LocalStoreOperationKind.Delete);
+                    TrackStoreOperation(query.TableName, id, LocalStoreOperationKind.Delete);
                 }
             }
         }
@@ -180,7 +180,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
                 foreach (var id in notificationIds)
                 {
-                    TrackStoreOperationAsync(tableName, id, LocalStoreOperationKind.Delete);
+                    TrackStoreOperation(tableName, id, LocalStoreOperationKind.Delete);
                 }
             }
             else
@@ -269,7 +269,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                         }
                     }
 
-                    await TrackStoreOperationAsync(tableName, itemId, operationKind);
+                    TrackStoreOperation(tableName, itemId, operationKind);
                 }
             }
             else
@@ -302,18 +302,19 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return result.Values.ToDictionary(t => this.objectReader.GetId((JObject)t), rec => includeVersion ? rec[MobileServiceSystemColumns.Version].ToString() : null);
         }
 
-        private async Task TrackStoreOperationAsync(string tableName, string itemId, LocalStoreOperationKind operationKind)
+        private void TrackStoreOperation(string tableName, string itemId, LocalStoreOperationKind operationKind)
         {
             var operation = new StoreOperation(tableName, itemId, operationKind, this.trackingContext.Source, this.trackingContext.BatchId);
 
             if (this.trackBatches)
             {
-                await this.operationsBatch.IncrementOperationCount(operationKind);
+               this.operationsBatch.IncrementOperationCount(operationKind)
+                   .ContinueWith(t => t.Exception.Handle(e => true), TaskContinuationOptions.OnlyOnFaulted);
             }
 
             if (this.trackRecordOperations)
             {
-                await this.eventManager.PublishAsync(new StoreOperationCompletedEvent(operation));
+                this.eventManager.BackgroundPublish(new StoreOperationCompletedEvent(operation));
             }
         }
 
