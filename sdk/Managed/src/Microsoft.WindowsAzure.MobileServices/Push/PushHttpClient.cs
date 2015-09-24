@@ -6,6 +6,7 @@ using System;
 using System.Net.Http;
 
 using Newtonsoft.Json;
+using System.Threading;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
@@ -21,16 +22,16 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.client = client;
         }
 
-        public async Task<IEnumerable<Registration>> ListRegistrationsAsync(string deviceId)
+		public async Task<IEnumerable<Registration>> ListRegistrationsAsync(string deviceId, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var response = await this.client.HttpClient.RequestAsync(HttpMethod.Get, string.Format("/push/registrations?deviceId={0}&platform={1}", Uri.EscapeUriString(deviceId), Uri.EscapeUriString(Platform.Instance.PushUtility.GetPlatform())), this.client.CurrentUser);
+			var response = await this.client.HttpClient.RequestAsync(HttpMethod.Get, string.Format("/push/registrations?deviceId={0}&platform={1}", Uri.EscapeUriString(deviceId), Uri.EscapeUriString(Platform.Instance.PushUtility.GetPlatform())), this.client.CurrentUser, cancellationToken: cancellationToken);
 
             return JsonConvert.DeserializeObject<IEnumerable<Registration>>(response.Content, new JsonConverter[] { new RegistrationConverter() });
         }
 
-        public Task UnregisterAsync(string registrationId)
+		public Task UnregisterAsync(string registrationId, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return this.client.HttpClient.RequestAsync(HttpMethod.Delete, string.Format("/push/registrations/{0}", Uri.EscapeUriString(registrationId)), this.client.CurrentUser, ensureResponseContent: false);
+			return this.client.HttpClient.RequestAsync(HttpMethod.Delete, string.Format("/push/registrations/{0}", Uri.EscapeUriString(registrationId)), this.client.CurrentUser, ensureResponseContent: false, cancellationToken: cancellationToken);
         }
 
         public async Task<string> CreateRegistrationIdAsync()
@@ -40,7 +41,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             return locationPath.Substring(locationPath.LastIndexOf('/') + 1);
         }
 
-        public async Task CreateOrUpdateRegistrationAsync(Registration registration)
+		public async Task CreateOrUpdateRegistrationAsync(Registration registration, CancellationToken cancellationToken = default(CancellationToken))
         {
             var regId = registration.RegistrationId;
 
@@ -48,7 +49,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             registration.RegistrationId = null;
 
             var content = JsonConvert.SerializeObject(registration);
-            await this.client.HttpClient.RequestAsync(HttpMethod.Put, string.Format("/push/registrations/{0}", Uri.EscapeUriString(regId)), this.client.CurrentUser, content, ensureResponseContent: false);
+			await this.client.HttpClient.RequestAsync(HttpMethod.Put, string.Format("/push/registrations/{0}", Uri.EscapeUriString(regId)), this.client.CurrentUser, content, ensureResponseContent: false, cancellationToken: cancellationToken);
             
             // Ensure local storage is updated properly
             registration.RegistrationId = regId;
