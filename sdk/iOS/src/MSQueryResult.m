@@ -9,7 +9,7 @@
 @synthesize items = items_;
 @synthesize nextLink = nextLink_;
 
--(id)initWithItems:(NSArray *)items
+-(id)initWithItems:(NSArray<NSDictionary *> *)items
         totalCount:(NSInteger) totalCount
           nextLink: (NSString *) nextLink
 {

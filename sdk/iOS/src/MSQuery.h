@@ -55,7 +55,7 @@
 @property (nonatomic) NSInteger fetchOffset;
 
 /// The array of NSSortDescriptors used to order the query results
-@property (nonatomic, copy, nullable) NSArray *orderBy;
+@property (nonatomic, copy, nullable) NSArray<NSSortDescriptor *> *orderBy;
 
 /// Indicates if the Microsoft Azure Mobile Service should also include the total
 /// count of items on the server (not just the count of items returned) with
@@ -69,7 +69,7 @@
 /// The fields or keys of an item that should be included in the results. A
 /// value of "*" means all fields should be included. "*" is the default value
 /// if no select keys are specified.
-@property (nonatomic, retain, nullable) NSArray *selectFields;
+@property (nonatomic, retain, nullable) NSArray<NSString *> *selectFields;
 
 #pragma mark * Public OrderBy Methods
 /// Indicates that the query results should be returned in ascending order

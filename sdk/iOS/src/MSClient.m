@@ -21,7 +21,7 @@
 @interface MSClient ()
 
 // Public readonly, private readwrite properties
-@property (nonatomic, strong, readwrite) NSArray *filters;
+@property (nonatomic, strong, readwrite) NSArray<id<MSFilter>> *filters;
 
 // Private properties
 @property (nonatomic, strong, readonly) MSLogin *login;
