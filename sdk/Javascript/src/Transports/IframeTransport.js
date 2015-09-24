@@ -10,12 +10,12 @@
 // a same-domain Ajax request to the runtime. To associate postMessage replies with the original
 // request, we track an array of promises that eventually time out if not resolved (see PostMessageExchange).
 
-var Promises = require('Promises'),
-    PostMessageExchange = require('PostMessageExchange'),
+var Promises = require('../Utilities/Promises'),
+    PostMessageExchange = require('../Utilities/PostMessageExchange'),
     loadBridgeFramePromises = [], // One per target proto/host/port triplet
     messageExchange = PostMessageExchange.instance;
 
-exports.name = "IframeTransport";
+exports.name = "../../Transports/IframeTransport";
 
 exports.supportsCurrentRuntime = function () {
     /// <summary>

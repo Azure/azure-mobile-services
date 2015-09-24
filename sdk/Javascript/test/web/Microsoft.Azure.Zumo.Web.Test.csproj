@@ -71,7 +71,6 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Tests.library" />
     <Content Include="promiseTests\package.json" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -108,7 +107,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>47631</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:21123/</IISUrl>
+          <IISUrl>http://localhost:21125/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>
@@ -125,9 +124,6 @@
     <Message Importance="high" Text="Copying over dependencies from the src project" />
     <Copy SourceFiles="..\..\src\Generated\MobileServices.Web.Internals.js" DestinationFolder="js" />
     <Copy SourceFiles="..\..\src\MobileServices.intellisense.js" DestinationFolder="js" />
-    <!-- Merge the modules into a library -->
-    <Message Importance="high" Text="Generating Test Library" />
-    <MergeJSModules LibraryDefinitions="Tests.library" />
   </Target>
   <PropertyGroup>
     <BuildDependsOn>

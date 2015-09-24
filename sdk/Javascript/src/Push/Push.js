@@ -1,9 +1,9 @@
 ﻿// ----------------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
-var Validate = require('Validate'),
-    Platform = require('Platform'),
-    _ = require('Extensions');
+var Validate = require('../Utilities/Validate'),
+    Platform = require('Platforms/Platform'),
+    _ = require('../Utilities/Extensions');
 
 exports.Push = Push;
 

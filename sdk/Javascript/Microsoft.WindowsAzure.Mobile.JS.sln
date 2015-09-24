@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.JS", "src\Microsoft.WindowsAzure.Mobile.JS.csproj", "{0D39CF6F-4884-4D43-8744-2CEB723629C8}"
 EndProject
@@ -16,8 +16,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.WinJS.TestFramework", "test\framework\Microsoft.WindowsAzure.Mobile.WinJS.TestFramework.csproj", "{6445515D-9E58-4812-BAD6-BC81DAF1C0EE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{8F22488F-603B-4BA2-9AA0-DBC7D4487978}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.JSBuild", "tools\JSBuild\Microsoft.WindowsAzure.Mobile.JSBuild.csproj", "{FFD91CC6-07FF-4D69-A064-2A911E2B4087}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Azure.Zumo.Web.Test", "test\web\Microsoft.Azure.Zumo.Web.Test.csproj", "{5AA504E2-10A2-4179-9645-47E5CF857DDF}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -158,25 +156,6 @@ Global
 		{6445515D-9E58-4812-BAD6-BC81DAF1C0EE}.Signed|x64.Build.0 = Signed|x64
 		{6445515D-9E58-4812-BAD6-BC81DAF1C0EE}.Signed|x86.ActiveCfg = Signed|x86
 		{6445515D-9E58-4812-BAD6-BC81DAF1C0EE}.Signed|x86.Build.0 = Signed|x86
-		{FFD91CC6-07FF-4D69-A064-2A911E2B4087}.BuildTools|Any CPU.ActiveCfg = BuildTools|Any CPU
-		{FFD91CC6-07FF-4D69-A064-2A911E2B4087}.BuildTools|Any CPU.Build.0 = BuildTools|Any CPU
-		{FFD91CC6-07FF-4D69-A064-2A911E2B4087}.BuildTools|ARM.ActiveCfg = BuildTools|Any CPU
-		{FFD91CC6-07FF-4D69-A064-2A911E2B4087}.BuildTools|x64.ActiveCfg = BuildTools|Any CPU
-		{FFD91CC6-07FF-4D69-A064-2A911E2B4087}.BuildTools|x86.ActiveCfg = BuildTools|Any CPU
-		{FFD91CC6-07FF-4D69-A064-2A911E2B4087}.Debug|Any CPU.ActiveCfg = BuildTools|Any CPU
-		{FFD91CC6-07FF-4D69-A064-2A911E2B4087}.Debug|ARM.ActiveCfg = BuildTools|Any CPU
-		{FFD91CC6-07FF-4D69-A064-2A911E2B4087}.Debug|x64.ActiveCfg = BuildTools|Any CPU
-		{FFD91CC6-07FF-4D69-A064-2A911E2B4087}.Debug|x86.ActiveCfg = BuildTools|Any CPU
-		{FFD91CC6-07FF-4D69-A064-2A911E2B4087}.Release|Any CPU.ActiveCfg = BuildTools|Any CPU
-		{FFD91CC6-07FF-4D69-A064-2A911E2B4087}.Release|Any CPU.Build.0 = BuildTools|Any CPU
-		{FFD91CC6-07FF-4D69-A064-2A911E2B4087}.Release|ARM.ActiveCfg = BuildTools|Any CPU
-		{FFD91CC6-07FF-4D69-A064-2A911E2B4087}.Release|x64.ActiveCfg = BuildTools|Any CPU
-		{FFD91CC6-07FF-4D69-A064-2A911E2B4087}.Release|x86.ActiveCfg = BuildTools|Any CPU
-		{FFD91CC6-07FF-4D69-A064-2A911E2B4087}.Signed|Any CPU.ActiveCfg = BuildTools|Any CPU
-		{FFD91CC6-07FF-4D69-A064-2A911E2B4087}.Signed|Any CPU.Build.0 = BuildTools|Any CPU
-		{FFD91CC6-07FF-4D69-A064-2A911E2B4087}.Signed|ARM.ActiveCfg = BuildTools|Any CPU
-		{FFD91CC6-07FF-4D69-A064-2A911E2B4087}.Signed|x64.ActiveCfg = BuildTools|Any CPU
-		{FFD91CC6-07FF-4D69-A064-2A911E2B4087}.Signed|x86.ActiveCfg = BuildTools|Any CPU
 		{5AA504E2-10A2-4179-9645-47E5CF857DDF}.BuildTools|Any CPU.ActiveCfg = BuildTools|Any CPU
 		{5AA504E2-10A2-4179-9645-47E5CF857DDF}.BuildTools|ARM.ActiveCfg = BuildTools|Any CPU
 		{5AA504E2-10A2-4179-9645-47E5CF857DDF}.BuildTools|x64.ActiveCfg = BuildTools|Any CPU
@@ -204,7 +183,6 @@ Global
 		{0D39CF6F-4884-4D43-8744-2CEB723629C8} = {2BDD39FE-2E9F-4B97-8173-02037CF765AA}
 		{96B18D27-DFF3-47A2-835B-EF1E6AF1A39C} = {F52A1420-8C01-42ED-8EF2-71F83EE49A87}
 		{6445515D-9E58-4812-BAD6-BC81DAF1C0EE} = {F52A1420-8C01-42ED-8EF2-71F83EE49A87}
-		{FFD91CC6-07FF-4D69-A064-2A911E2B4087} = {8F22488F-603B-4BA2-9AA0-DBC7D4487978}
 		{5AA504E2-10A2-4179-9645-47E5CF857DDF} = {F52A1420-8C01-42ED-8EF2-71F83EE49A87}
 	EndGlobalSection
 EndGlobal

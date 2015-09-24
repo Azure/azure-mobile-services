@@ -1,52 +1,76 @@
+var remapify = require('remapify');
+
+function definePlatformMappings(mappings) {
+    return function(b) {
+        b.plugin(remapify, mappings);
+    };
+}
+
+var sdkExports = {
+    web: [ 
+        ['./src/Utilities/Extensions.js', {expose: 'Extensions'}],
+        ['./src/Utilities/Validate.js', {expose: 'Validate'}],
+        // Expose Platform.js as Platforms/Platform to be consistent with how it is referenced within the SDK bundle
+        ['./src/Platforms/web/Platform.js', {expose: 'Platforms/Platform'}] 
+    ],
+    winjs: [ 
+        ['./src/Utilities/Extensions.js', {expose: 'Extensions'}],
+        ['./src/Utilities/Validate.js', {expose: 'Validate'}],
+        // Expose Platform.js as Platforms/Platform to be consistent with how it is referenced within the SDK bundle
+        ['./src/Platforms/winjs/Platform.js', {expose: 'Platforms/Platform'}] 
+    ]
+};
+
+var sdkImports = [
+    'Extensions',
+    'Validate',
+    'Platforms/Platform'
+];
+
+var sdkBrowserifyOptions = {
+    web: {
+        preBundleCB: definePlatformMappings( [ { src: '**/*.js', cwd: __dirname + '/src/Platforms/web', expose: 'Platforms' } ] )
+    },
+    cordova: {
+        preBundleCB: definePlatformMappings( [ { src: '**/*.js', cwd: __dirname + '/src/Platforms/web', expose: 'Platforms' } ] )
+    },
+    winjs: {
+        preBundleCB: definePlatformMappings( [ { src: '**/*.js', cwd: __dirname + '/src/Platforms/winjs', expose: 'Platforms' } ] )
+    }
+};
+
 /// <vs BeforeBuild='default' />
 module.exports = function(grunt) {
   // Project configuration.
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     files: {
-      resources: [
-        'src/Strings/**/Resources.resjson'
-      ],
       core: [
-        'src/Utilities/Extensions.js',
         'src/MobileServiceClient.js',
-        'src/MobileServiceSyncTable.js',
-        'src/MobileServiceTable.js',
-        'src/MobileServiceLogin.js',
-        'src/MobileServiceSyncContext.js',
-        'src/Push/Push.js',
-        'src/Utilities/Validate.js',
-        'src/External/queryjs/lib/*.js',
-        'src/External/esprima/esprima.js'
       ],
-      //TODO(shrirs): Create a Cordova target
       web: [
-        'src/Platforms/Platform.Web.js',
+        '<%= files.core %>',
+      ],
+      cordova: [
         'src/Platforms/cordova/MobileServiceSQLiteStore.js',
-        'src/Generated/MobileServices.Core.js',
-        'src/Transports/*.js',
-        'src/LoginUis/*.js',
-        'src/Utilities/PostMessageExchange.js',
-        'src/Utilities/Promises.js'
+        '<%= files.core %>',
       ],
       winjs: [
-        'src/LoginUis/WebAuthBroker.js',
-        'src/Platforms/Platform.WinJS.js',
+        '<%= files.core %>',
       ],
-      node: [
-        'src/Internals/NodeExports.js',
-      ],
-      Internals: [
-        'src/Internals/InternalsVisible.js',
-      ],
-      Intellisense: [
+      intellisense: [
         'src/Internals/DevIntellisense.js',
+      ],
+      testcore: [
+          'test/winJS/tests/utilities/*.js',
+          'test/winJS/tests/unit/*.js',
+          'test/winJS/tests/functional/*.js',
       ],
       all: [
         'Gruntfile.js',
         'src/**/*.js',
         'test/**/*.js',
-        '!**/Generated/*.js',
+        '!**/[gG]enerated/*.js',
         '!test/cordova/platforms/**',
         '!test/**/bin/**',
         '!test/**/plugins/**',
@@ -59,50 +83,16 @@ module.exports = function(grunt) {
         all: '<%= files.all %>'
     },    
     concat: {
-      options: {
-        stripBanners: true,
-        banner: header,
-        process: wrapModule,
-        footer: footer
-      },
-      resources: {
+      constants: {
         options: {
-          banner: '\n\t$__modules__.Resources = { };\n\n',
+          banner: header + 
+                  '\nexports.FileVersion = \'<%= pkg.version %>\';\n' +
+                  '\nexports.Resources = {};\n',
           process: wrapResourceFile,
-          footer: ''
         },
-        src: ['<%= files.resources %>'],
-        dest: 'src/Generated/Resources.js'
+        src: ['src/Strings/**/Resources.resjson'],
+        dest: 'src/Generated/Constants.js'
       },
-      web: {
-        src: ['src/Require.js', 'src/Generated/Resources.js', '<%= files.core %>', '<%= files.web %>'],
-        dest: 'src/Generated/MobileServices.Web.js'
-      },
-      webinternals: {
-        options: {
-          footer: '\n\trequire(\'InternalsVisible\');' + footer
-        },
-        src: ['src/Require.js', 'src/Generated/Resources.js', '<%= files.Internals %>', '<%= files.core %>', '<%= files.web %>'],
-        dest: 'src/Generated/MobileServices.Web.Internals.js'
-      },
-      winjs: {
-        src: ['src/Require.js', '<%= files.core %>', '<%= files.winjs %>'],
-        dest: 'src/Generated/MobileServices.js'
-      },    
-      winjsinternals: {
-        options: {
-          footer: '\n\trequire(\'InternalsVisible\');' + footer
-        },
-        src: ['src/Require.js', '<%= files.Internals %>', '<%= files.core %>', '<%= files.winjs %>'],
-        dest: 'src/Generated/MobileServices.Internals.js'
-      },
-      Intellisense: {
-        options: {
-          footer: '\n\trequire(\'DevIntellisense\');' + footer
-        },
-        src: ['src/Require.js', '<%= files.core %>', '<%= files.winjs %>', '<%= files.Intellisense %>'],
-        dest: 'src/Generated/MobileServices.DevIntellisense.js'
-      }
     },
     uglify: {
       options: {
@@ -122,33 +112,93 @@ module.exports = function(grunt) {
       cordovaTest: {
         files: [
           {src: ['src/Generated/MobileServices.Web.Internals.js'], dest: 'test/cordova/www/js/Generated/MobileServices.Web.Internals.js'},
-          {src: ['test/web/js/TestFrameworkAdapter.js'], dest: 'test/cordova/www/js/Generated/TestFrameworkAdapter.js'},
-          {src: ['test/web/js/TestClientHelper.js'], dest: 'test/cordova/www/js/Generated/TestClientHelper.js'},
           {src: ['test/web/css/styles.css'], dest: 'test/cordova/www/css/Generated/styles.css'},
           {src: ['**'], dest: 'test/cordova/www/js/External/qunit/', cwd: 'node_modules/qunitjs/qunit', expand: true}
         ]
       }
     },
     browserify: {
+        options: {
+            banner: header
+        },
+        web: {
+            src: '<%= files.web %>',
+            dest: './src/Generated/MobileServices.Web.js',
+            options: sdkBrowserifyOptions.web
+        },
+        webInternals: {
+            src: '<%= files.web %>',
+            dest: './src/Generated/MobileServices.Web.Internals.js',
+            options: {
+                preBundleCB: sdkBrowserifyOptions.web.preBundleCB,
+                require: sdkExports.web
+            }
+        },
+        cordova: {
+            src: '<%= files.cordova %>',
+            dest: './src/Generated/MobileServices.Cordova.js',
+            options: sdkBrowserifyOptions.cordova
+        },
+        cordovaInternals: {
+            src: '<%= files.cordova %>',
+            dest: './src/Generated/MobileServices.Cordova.Internals.js',
+            options: {
+                preBundleCB: sdkBrowserifyOptions.cordova.preBundleCB,
+                require: sdkExports.web
+            }
+        },
+        winjs: {
+            src: '<%= files.winjs %>',
+            dest: './src/Generated/MobileServices.js',
+            options: sdkBrowserifyOptions.winjs
+        },
+        winjsInternals: {
+            src: '<%= files.winjs %>',
+            dest: './src/Generated/MobileServices.Internals.js',
+            options: {
+                preBundleCB: sdkBrowserifyOptions.winjs.preBundleCB,
+                require: sdkExports.winjs,
+            }
+        },
+        intellisense: {
+            src: [
+                '<%= files.winjs %>',
+                '<%= files.intellisense %>'
+            ],
+            dest: './src/Generated/MobileServices.DevIntellisense.js',
+            options: sdkBrowserifyOptions.winjs
+        },
+        webTest: {
+            src: [
+                './test/web/js/TestFrameworkAdapter.js',
+                './test/web/js/TestClientHelper.js',
+                '<%= files.testcore %>'
+            ],
+            dest: './test/web/Generated/Tests.js',
+            options: {
+                external: sdkImports,
+            }
+        },
         cordovaTest: {
             src: [
-                'test/winJS/tests/utilities/*.js',
-                'test/winJS/tests/unit/*.js',
-                'test/winJS/tests/functional/*.js',
+                './test/web/js/TestFrameworkAdapter.js',
+                './test/web/js/TestClientHelper.js',
+                '<%= files.testcore %>'
             ],
             dest: './test/cordova/www/js/Generated/Tests.js',
             options: {
-                alias: {
-                    // Browserify maps require('constants') to its internal constants.json file. This is a workaround to avoid that.
-                    // A better fix in the long term would be to specify path overrides.
-                    'constants' : './test/winJS/tests/utilities/constants.js'
-                },
-                browserifyOptions: {
-                    paths: "./test/winJS/tests/utilities",
-                    "browser": {
-                        "./node_modules/browserify/node_modules/constants-browserify/constants.json": false
-                    }
-                },
+                external: sdkImports,
+            }
+        },
+        winjsTest: {
+            src: [
+                'test/winJS/tests/TestFramework.js',
+                'test/winJS/tests/TestInterface.js',
+                '<%= files.testcore %>'
+            ],
+            dest: './test/winJS/Generated/Tests.js',
+            options: {
+                external: sdkImports,
             }
         }
     },
@@ -165,45 +215,15 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-contrib-watch');
-
+    
   // Default task(s).
-  grunt.registerTask('default', ['concat', 'uglify', 'copy', 'browserify', 'jshint']);
+  grunt.registerTask('default', ['concat', 'browserify', 'uglify', 'copy', 'jshint']);
 };
 
 var header = '// ----------------------------------------------------------------------------\n' +
              '// Copyright (c) Microsoft Corporation. All rights reserved\n' +
              '// <%= pkg.name %> - v<%= pkg.version %>\n' +
-             '// ----------------------------------------------------------------------------\n' +
-             '\n' +
-             '(function (global) {\n' +
-             '\tvar $__fileVersion__ = \'<%= pkg.version %>\';\n',
-    footer = '\n\trequire(\'MobileServiceClient\');\n' + 
-             '})(this || exports);';
-
-function wrapModule(src, filepath) {
-  /// <summary>
-  /// Takes a file, and if it should be a module, wraps the code in a module block
-  /// </summary>
-  /// <param name="src">
-  /// Source code of a module file
-  /// </param>
-  /// <param name="filepath">
-  /// Sile path of the module (i.e. src/MobileServicesClient.js)
-  /// </param>
-
-  var lastSlash = filepath.lastIndexOf('/'),
-      name = filepath.substr(lastSlash+1);
-
-  name = name.substring(0, name.indexOf('.'));
-  if (name == 'Require' || name == 'Resources') {
-    return src;
-  }
-
-  var newSrc = src.replace(/\/\/\/\s<[\w\s=":\\().]+\/>\n/g, '');
-  newSrc = '\t\t' + newSrc.replace(/\n/g, '\n\t\t');
-
-  return '\n\t$__modules__.' + name + ' = function (exports) {\n' + newSrc + '\n\t};';
-}
+             '// ----------------------------------------------------------------------------\n';
 
 function wrapResourceFile(src, filepath) {
   /// <summary>
@@ -218,8 +238,9 @@ function wrapResourceFile(src, filepath) {
   /// The file name must be in format of <directories>/<locale>/Resources.resjson
   /// </param>
 
-  var language = filepath.replace('src/Strings/', '').replace('/Resources.resjson', ''),
-      newSrc = src.replace(/\n/g, '\n\t\t');
+  var language = filepath.replace('src/Strings/', '').replace('/Resources.resjson', '');
 
-  return '\t$__modules__.Resources[\'' + language + '\'] = ' + newSrc + ';';
+  return '\nexports.Resources[\'' + language + '\'] = ' +
+         src + ';';
 }
+

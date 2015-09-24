@@ -5,10 +5,10 @@
 /// <reference path="..\Generated\MobileServices.DevIntellisense.js" />
 /*global $__fileVersion__:false, $__version__:false */
 
-var _ = require('Extensions');
-var Validate = require('Validate');
-var Promises = require('Promises');
-var Resources = require('Resources');
+var _ = require('../../Utilities/Extensions');
+var Validate = require('../../Utilities/Validate');
+var Promises = require('../../Utilities/Promises');
+var Constants = require('../../Generated/Constants');
 var inMemorySettingStore = {};
 
 try {
@@ -22,13 +22,13 @@ try {
 
 var bestAvailableTransport = null;
 var knownTransports = [ // In order of preference
-    require('DirectAjaxTransport'),
-    require('IframeTransport')
+    require('../../Transports/DirectAjaxTransport'),
+    require('../../Transports/IframeTransport')
 ];
 var knownLoginUis = [ // In order of preference
-    require('WebAuthBroker'),
-    require('CordovaPopup'),
-    require('BrowserPopup')
+    require('../../LoginUis/WebAuthBroker'),
+    require('../../LoginUis/CordovaPopup'),
+    require('../../LoginUis/BrowserPopup')
 ];
 
 // Matches an ISO date and separates out the fractional part of the seconds
@@ -163,7 +163,7 @@ exports.getSdkInfo = function () {
 
     return {
         language: isCordovaEnvironment ? "Cordova" : "Web",
-        fileVersion: $__fileVersion__
+        fileVersion: Constants.FileVersion
     };
 };
 
@@ -242,7 +242,7 @@ exports.tryParseIsoDateString = function (text) {
 
 exports.getResourceString = function (resourceName) {
     // For now, we'll just always use English
-    return Resources["en-US"][resourceName];
+    return Constants.Resources["en-US"][resourceName];
 };
 
 

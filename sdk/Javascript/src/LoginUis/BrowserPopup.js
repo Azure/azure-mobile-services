@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-var PostMessageExchange = require('PostMessageExchange');
+var PostMessageExchange = require('../Utilities/PostMessageExchange');
 
 exports.supportsCurrentRuntime = function () {
     /// <summary>

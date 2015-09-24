@@ -81,7 +81,6 @@
     <Content Include="js\MobileServices.intellisense.js" />
     <Content Include="js\MobileServices.Internals.js" />
     <Content Include="js\MobileServices.pri" />
-    <Content Include="Tests.library" />
     <Content Include="tests\functional\basics.js" />
     <Content Include="tests\functional\blogging.js" />
     <Content Include="tests\functional\dates.js" />
@@ -119,9 +118,6 @@
     <Copy SourceFiles="..\..\src\Generated\MobileServices.Internals.js" DestinationFolder="js" />
     <Copy SourceFiles="..\..\src\MobileServices.intellisense.js" DestinationFolder="js" />
     <Copy SourceFiles="..\..\src\Generated\MobileServices.pri" DestinationFolder="js" />
-    <!-- Merge the modules into a library -->
-    <Message Importance="high" Text="Generating Test Library" />
-    <MergeJSModules LibraryDefinitions="Tests.library" />
   </Target>
   <PropertyGroup>
     <BuildDependsOn>
