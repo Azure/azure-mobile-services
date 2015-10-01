@@ -1,0 +1,91 @@
+﻿<!DOCTYPE html>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html>
+    <head>
+        <title>Azure Mobile Apps SDK Cordova UTs</title>
+        <link rel="stylesheet" type="text/css" href="js/External/qunit/qunit.css">
+        <link rel="stylesheet" type="text/css" href="css/Generated/styles.css">
+    </head>
+
+    <body>
+
+        <button id="edit-test-config">Configure</button>
+        <form id="test-config">
+            <fieldset>
+                <legend>Configuration</legend>
+                <p>
+                    <label>Runtime URI:</label>
+                    <input id="runtime-uri" name="runtime-uri" />
+                </p>
+                <button type="submit">Update</button>
+            </fieldset>
+        </form>
+
+        <!--
+        QUnit dynamically creates a toolbar and adds DOM nodes to it. However, adding dynamic
+        content is not supported on Windows 8.1 (Details: http://go.microsoft.com/fwlink/?LinkID=247104).
+        MSApp.execUnsafeLocalFunction() can be used to disable script filtering, but that will need changing QUnit code.
+
+        As a workaround, we add a div to filter calls to QUnit's toolbar. We do this by setting the id of the filter
+        div same as the id of QUnit's toolbar div and position it before QUnit's div in the DOM. 
+        The appendChild() method of the toolbar filter invokes appendChild() on QUnit's toolbar in a safe manner.
+
+        Note: Do not change the order of the following 2 divs.
+        -->
+        <div id='qunit-testrunner-toolbar'></div>
+        <div id="qunit"></div>
+
+        <script>
+            function id(name) {
+                return this.window.document.getElementById(name);
+            }
+
+            var toolbarId = "qunit-testrunner-toolbar",
+                toolbarFilter = id(toolbarId);
+
+            toolbarFilter.appendChild = function () {
+                var child = arguments[0];
+
+                // Safely add the child to the QUnit toolbar
+                MSApp.execUnsafeLocalFunction(function () {
+                    // Lookup QUnit's toolbar by setting the ID of the filter to ""
+                    toolbarFilter.id = "";
+                    var qunitToolbar = id("qunit-testrunner-toolbar");
+
+                    // Append the child to qunit's toolbar
+                    qunitToolbar.appendChild(child);
+
+                    // Start filtering method calls to the QUnit toolbar again
+                    toolbarFilter.id = toolbarId;
+                });
+            };
+        </script>
+
+        <script src="js/index.js"></script>
+
+        <script src="./js/External/qunit/qunit.js"></script>
+        <script src="cordova.js"></script>
+
+        <script src="js/generated/MobileServices.Web.Internals.js"></script>
+        <script src="js/generated/TestFrameworkAdapter.js"></script>
+        <script src="js/generated/TestClientHelper.js"></script>
+        <script src="js/generated/Tests.js"></script>
+    </body>
+</html>

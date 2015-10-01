@@ -14,7 +14,16 @@
 
     global.$testGroup = function (groupName /*, test1, test2, ... */) {
         var testsArray = arguments.length > 1 ? Array.prototype.slice.call(arguments, 1) : null;
-        return new TestGroup(groupName, testsArray);
+        var testGroup = new TestGroup(groupName, testsArray);
+        global.$testGroups.push(testGroup);
+
+        return testGroup;
+    };
+
+    global.$run = function () {
+        for (var index = 0; index < global.$testGroups.length; index++) {
+            global.$testGroups[index].exec();
+        }
     };
 
     global.$assert = {
@@ -104,6 +113,8 @@
         return formatString;
     };
 
+    global.$testGroups = [];
+
     // ------------------------------------------------------------------------------
     // Test represents a single test
     function Test(testName) {
@@ -182,12 +193,15 @@
     TestGroup.prototype.functional = function () { return this; }; // Not used in browser - ignored
 
     TestGroup.prototype.tests = function (/* test1, test2, ... */) {
-        var testsArray = Array.prototype.slice.call(arguments, 0);
-        qunit.module(this.groupName);
-        for (var i = 0; i < testsArray.length; i++) {
-            testsArray[i].exec();
-        }
+        this.testsArray = Array.prototype.slice.call(arguments, 0);
         return this;
+    };
+
+    TestGroup.prototype.exec = function() {
+        qunit.module(this.groupName);
+        for (var i = 0; i < this.testsArray.length; i++) {
+            this.testsArray[i].exec();
+        }
     };
 
 })(this, this.QUnit);

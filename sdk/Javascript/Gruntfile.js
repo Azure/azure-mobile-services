@@ -10,15 +10,19 @@ module.exports = function(grunt) {
       core: [
         'src/Utilities/Extensions.js',
         'src/MobileServiceClient.js',
+        'src/MobileServiceSyncTable.js',
         'src/MobileServiceTable.js',
         'src/MobileServiceLogin.js',
+        'src/MobileServiceSyncContext.js',
         'src/Push/Push.js',
         'src/Utilities/Validate.js',
         'src/External/queryjs/lib/*.js',
         'src/External/esprima/esprima.js'
       ],
+      //TODO(shrirs): Create a Cordova target
       web: [
         'src/Platforms/Platform.Web.js',
+        'src/Platforms/cordova/MobileServiceSQLiteStore.js',
         'src/Generated/MobileServices.Core.js',
         'src/Transports/*.js',
         'src/LoginUis/*.js',
@@ -38,9 +42,21 @@ module.exports = function(grunt) {
       Intellisense: [
         'src/Internals/DevIntellisense.js',
       ],
+      all: [
+        'Gruntfile.js',
+        'src/**/*.js',
+        'test/**/*.js',
+        '!**/Generated/*.js',
+        '!test/cordova/platforms/**',
+        '!test/**/bin/**',
+        '!test/**/plugins/**',
+        '!**/node_modules/**',
+        '!**/MobileServices.*.js',
+        '!**/External/**'
+      ]
     },    
     jshint: {
-        all: ['Gruntfile.js', 'src/**/*.js', '!src/External/**/*.js', '!src/Generated/*.js', 'test/**/*.js', '!test/**/bin/**', '!**/MobileServices.*.js']
+        all: '<%= files.all %>'
     },    
     concat: {
       options: {
@@ -101,6 +117,44 @@ module.exports = function(grunt) {
         src: 'src/Generated/MobileServices.js',
         dest: 'src/Generated/MobileServices.min.js'
       }
+    },
+    copy: {
+      cordovaTest: {
+        files: [
+          {src: ['src/Generated/MobileServices.Web.Internals.js'], dest: 'test/cordova/www/js/Generated/MobileServices.Web.Internals.js'},
+          {src: ['test/web/js/TestFrameworkAdapter.js'], dest: 'test/cordova/www/js/Generated/TestFrameworkAdapter.js'},
+          {src: ['test/web/js/TestClientHelper.js'], dest: 'test/cordova/www/js/Generated/TestClientHelper.js'},
+          {src: ['test/web/css/styles.css'], dest: 'test/cordova/www/css/Generated/styles.css'},
+          {src: ['**'], dest: 'test/cordova/www/js/External/qunit/', cwd: 'node_modules/qunitjs/qunit', expand: true}
+        ]
+      }
+    },
+    browserify: {
+        cordovaTest: {
+            src: [
+                'test/winJS/tests/utilities/*.js',
+                'test/winJS/tests/unit/*.js',
+                'test/winJS/tests/functional/*.js',
+            ],
+            dest: './test/cordova/www/js/Generated/Tests.js',
+            options: {
+                alias: {
+                    // Browserify maps require('constants') to its internal constants.json file. This is a workaround to avoid that.
+                    // A better fix in the long term would be to specify path overrides.
+                    'constants' : './test/winJS/tests/utilities/constants.js'
+                },
+                browserifyOptions: {
+                    paths: "./test/winJS/tests/utilities",
+                    "browser": {
+                        "./node_modules/browserify/node_modules/constants-browserify/constants.json": false
+                    }
+                },
+            }
+        }
+    },
+    watch: {
+        files: '<%= files.all %>',
+        tasks: ['concat', 'uglify', 'copy', 'browserify', 'jshint']
     }
   });
 
@@ -108,9 +162,12 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-browserify');
+  grunt.loadNpmTasks('grunt-contrib-watch');
 
   // Default task(s).
-  grunt.registerTask('default', ['jshint', 'concat', 'uglify']);
+  grunt.registerTask('default', ['concat', 'uglify', 'copy', 'browserify', 'jshint']);
 };
 
 var header = '// ----------------------------------------------------------------------------\n' +
