@@ -7,7 +7,7 @@
 @implementation TodoItem
 
 @dynamic id;
-@dynamic ms_version;
+@dynamic version;
 @dynamic sort;
 @dynamic text;
 

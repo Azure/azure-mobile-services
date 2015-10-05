@@ -97,14 +97,6 @@ static NSArray<NSString *> *allIdKeys;
     if (!localError)
     {
         // Convert any NSDate instances into strings formatted with the date.
-        if (removeSystemProperties) {
-            id itemIdField = nil;
-            if([item isKindOfClass:[NSDictionary class]]) {
-                itemIdField = [item objectForKey:idKey];
-            }
-            removeSystemProperties = [itemIdField isKindOfClass:[NSString class]];
-        }
-        
         item = [self preSerializeItem:item RemoveSystemProperties:removeSystemProperties];
 
         // ... then make sure the |NSJSONSerializer| can serialize it, otherwise
@@ -460,11 +452,14 @@ static NSArray<NSString *> *allIdKeys;
 
 - (void) removeSystemProperties:(NSMutableDictionary *) item
 {
-    NSSet<NSString *> *systemProperties = [item keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
-        return [[key substringToIndex:2] isEqualToString:@"__"];
-    }];
+    NSArray<NSString *> *systemProperties = @[
+         @"version",
+         @"updatedAt",
+         @"createdAt",
+         @"deleted"
+    ];
     
-    [item removeObjectsForKeys:[systemProperties allObjects]];
+    [item removeObjectsForKeys:systemProperties];
     
     return;
 }
