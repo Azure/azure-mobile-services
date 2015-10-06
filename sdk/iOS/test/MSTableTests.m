@@ -1828,7 +1828,7 @@
     {
         MSTestFilter *testFilter = [[MSTestFilter alloc] init];
         NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
-                                       initWithURL:nil //nil URL is not allowed!!!
+                                       initWithURL:nil
                                        statusCode:200
                                        HTTPVersion:nil headerFields:nil];
         testFilter.responseToUse = response;

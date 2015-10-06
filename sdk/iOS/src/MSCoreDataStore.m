@@ -69,16 +69,7 @@ NSString *const StoreDeleted = @"ms_deleted";
     NSManagedObject *item = [results firstObject];
     
     if (item && asDictionary) {
-        
-        //Someone, please, test this. Solves the warning, but I don't know it it will work as intended.
-//        NSDictionary *result = [item dictionaryWithValuesForKeys:[[[item entity] attributesByName] allKeys]];
-        
-        NSDictionary *result = [item dictionaryWithValuesForKeys:nil];
-
-        // The type of |result| is |NSKnownKeysDictionary|, an undocumented subclass of |NSMutableDictionary|.
-        // For it to work like a regular |NSMutableDictionary| we need to copy the contents into an
-        // |NSMutableDictionary| instance OR into an |NSDictionary| instance and then make a mutable copy.
-        return [NSDictionary dictionaryWithDictionary:result];
+        return [MSCoreDataStore tableItemFromManagedObject:item];
     }
     
     return item;

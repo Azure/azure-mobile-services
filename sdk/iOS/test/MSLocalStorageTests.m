@@ -17,10 +17,10 @@
     
     // Clear storage
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    for (NSString* key in [[defaults dictionaryRepresentation] allKeys]) {
-        [defaults removeObjectForKey:key];
-    }
+    [[NSUserDefaults standardUserDefaults] removePersistentDomainForName:@"xctest"];
     [defaults synchronize];
+    
+    [NSUserDefaults resetStandardUserDefaults];
 }
 
 -(void)testInitialLoadUpdateGetAndReload

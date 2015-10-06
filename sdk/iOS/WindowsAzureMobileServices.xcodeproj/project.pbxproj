@@ -106,7 +106,6 @@
 		5A4FACC81B05E6950027011D /* MSPredicateTranslator.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B2C1616684F002DD7C6 /* MSPredicateTranslator.m */; };
 		7929542819B7C793006A3829 /* MSQueryResult.h in Headers */ = {isa = PBXBuildFile; fileRef = 7929542619B7C793006A3829 /* MSQueryResult.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		7929542919B7C793006A3829 /* MSQueryResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 7929542719B7C793006A3829 /* MSQueryResult.m */; };
-		7929542A19B7C793006A3829 /* MSQueryResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 7929542719B7C793006A3829 /* MSQueryResult.m */; };
 		870C0C9C199C246700A134DD /* MSSDKFeatures.h in Headers */ = {isa = PBXBuildFile; fileRef = 870C0C9A199C246700A134DD /* MSSDKFeatures.h */; };
 		870C0C9D199C246700A134DD /* MSSDKFeatures.m in Sources */ = {isa = PBXBuildFile; fileRef = 870C0C9B199C246700A134DD /* MSSDKFeatures.m */; };
 		A214410C182631A500C2E762 /* MSTableFuncTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A214410B182631A500C2E762 /* MSTableFuncTests.m */; };
@@ -153,11 +152,13 @@
 		A2ADF7E91914481B0078BB16 /* MSTableOperationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A2ADF7E81914481B0078BB16 /* MSTableOperationTests.m */; };
 		A2C14C6A19105D9F00A58609 /* MSSyncContextReadResult.h in Headers */ = {isa = PBXBuildFile; fileRef = A2C14C6819105D9F00A58609 /* MSSyncContextReadResult.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A2C14C6B19105D9F00A58609 /* MSSyncContextReadResult.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C14C6919105D9F00A58609 /* MSSyncContextReadResult.m */; };
+		A38A856F1BC35C8F005D63DF /* MSPullSettingsInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = D0EFD8581B2F785F009CF6DA /* MSPullSettingsInternal.h */; settings = {ASSET_TAGS = (); }; };
+		A38A85701BC35CA1005D63DF /* MSQueuePullOperationInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = F3EA41DC1B0E62F40014B587 /* MSQueuePullOperationInternal.h */; settings = {ASSET_TAGS = (); }; };
+		A38A85711BC35CE5005D63DF /* MSTestWaiter.m in Sources */ = {isa = PBXBuildFile; fileRef = CF4D498B1A3253E2006AEB70 /* MSTestWaiter.m */; settings = {ASSET_TAGS = (); }; };
 		CF1D74591A5D85C60074789F /* MSQueuePurgeOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = CF1D74581A5D85C60074789F /* MSQueuePurgeOperation.m */; };
 		CF1D745B1A5D9CAB0074789F /* MSQueuePurgeOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = CF1D745A1A5D85D80074789F /* MSQueuePurgeOperation.h */; };
 		CF4D49861A2E5C96006AEB70 /* MSQueuePullOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = CF4D49851A2E5C96006AEB70 /* MSQueuePullOperation.h */; };
 		CF4D498A1A2E5CF8006AEB70 /* MSQueuePullOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = CF4D49891A2E5CF8006AEB70 /* MSQueuePullOperation.m */; };
-		CF4D498C1A3253E2006AEB70 /* MSTestWaiter.m in Sources */ = {isa = PBXBuildFile; fileRef = CF4D498B1A3253E2006AEB70 /* MSTestWaiter.m */; };
 		CF4D49921A363537006AEB70 /* settings.plist in Resources */ = {isa = PBXBuildFile; fileRef = CF4D49911A36334C006AEB70 /* settings.plist */; };
 		CF762EC61A1D366E0018C292 /* MSDateOffset.h in Headers */ = {isa = PBXBuildFile; fileRef = CF762EC51A1D366E0018C292 /* MSDateOffset.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CF762EC91A1D37A40018C292 /* MSDateOffset.m in Sources */ = {isa = PBXBuildFile; fileRef = CF762EC71A1D36950018C292 /* MSDateOffset.m */; };
@@ -612,8 +613,8 @@
 		E8F33AE01616659C002DD7C6 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				7929542719B7C793006A3829 /* MSQueryResult.m */,
 				7929542619B7C793006A3829 /* MSQueryResult.h */,
+				7929542719B7C793006A3829 /* MSQueryResult.m */,
 				E8F33B14161667CE002DD7C6 /* WindowsAzureMobileServices.h */,
 				E8F33B0A161667CE002DD7C6 /* MSClient.h */,
 				E8EE7841170CAEDC00C2848F /* MSClientInternal.h */,
@@ -781,6 +782,7 @@
 				5A4FAC791B05E47F0027011D /* MSLoginSerializer.h in Headers */,
 				EB446B6E1BAB83BB002F4A27 /* MSPullSettings.h in Headers */,
 				5A4FAC961B05E5490027011D /* MSPushHttp.h in Headers */,
+				A38A85701BC35CA1005D63DF /* MSQueuePullOperationInternal.h in Headers */,
 				5A4FAC911B05E5300027011D /* MSFilter.h in Headers */,
 				5A4FAC7B1B05E48C0027011D /* MSLogin.h in Headers */,
 				5A4FAC7F1B05E49B0027011D /* MSLoginController.h in Headers */,
@@ -793,6 +795,7 @@
 				5A4FACA01B05E5740027011D /* MSSyncTable.h in Headers */,
 				5A4FACB81B05E65E0027011D /* MSTableRequest.h in Headers */,
 				5A4FAC941B05E53F0027011D /* MSPush.h in Headers */,
+				A38A856F1BC35C8F005D63DF /* MSPullSettingsInternal.h in Headers */,
 				5A4FAC821B05E4BA0027011D /* MSClientInternal.h in Headers */,
 				5A4FACA21B05E57D0027011D /* MSSyncContext.h in Headers */,
 				5A4FACB41B05E6510027011D /* MSTableConnection.h in Headers */,
@@ -1113,7 +1116,6 @@
 				E8C44043170BAD49002FC997 /* MSAPIConnection.m in Sources */,
 				A24701BC196896F500385DA2 /* MSPushHttp.m in Sources */,
 				E8C44048170BAD93002FC997 /* MSAPIRequest.m in Sources */,
-				CF4D498C1A3253E2006AEB70 /* MSTestWaiter.m in Sources */,
 				CF1D74591A5D85C60074789F /* MSQueuePurgeOperation.m in Sources */,
 				A2818FFD18BB0660001B14E7 /* MSQueuePushOperation.m in Sources */,
 				A24701B8196896F500385DA2 /* MSLocalStorage.m in Sources */,
@@ -1134,7 +1136,6 @@
 				E8F33B3E16166956002DD7C6 /* MSJSONSerializerTests.m in Sources */,
 				A258891F18A1A30500962F9A /* MSOfflinePassthroughHelper.m in Sources */,
 				A24701C8196897B300385DA2 /* MSLocalStorageTests.m in Sources */,
-				7929542A19B7C793006A3829 /* MSQueryResult.m in Sources */,
 				E8F33B3F1616695E002DD7C6 /* MSPredicateTranslatorTests.m in Sources */,
 				A2ADF7E91914481B0078BB16 /* MSTableOperationTests.m in Sources */,
 				A258891E18A1A30000962F9A /* MSSyncTableTests.m in Sources */,
@@ -1153,6 +1154,7 @@
 				A295B2B3192AB2040067562E /* MSCoreDataStoreTests.m in Sources */,
 				A29F44A31953CBF30063C0C1 /* MSCoreDataStore+TestHelper.m in Sources */,
 				E84CA4D6162373E2009B2588 /* MSUserAgentBuilderTests.m in Sources */,
+				A38A85711BC35CE5005D63DF /* MSTestWaiter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

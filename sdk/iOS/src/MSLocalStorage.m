@@ -99,7 +99,7 @@ static NSString *const storageVersion = @"v1.0.0";
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     
     self.deviceToken = [defaults stringForKey:self.deviceTokenKey];
-    
+
     NSString *version = [defaults stringForKey:self.versionKey];
     self.isRefreshNeeded = version == nil || ![version isEqualToString:storageVersion];
     if(self.isRefreshNeeded) {

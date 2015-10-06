@@ -275,7 +275,7 @@ static NSString *const nextLinkPattern = @"^(.*?);\\s*rel\\s*=\\s*(\\w+)\\s*"; /
             requestedSystemProperties = [query substringToIndex:endOfSystemProperties.location];
         }
     }
-//    requestedSystemProperties = [requestedSystemProperties stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    
     requestedSystemProperties = [requestedSystemProperties stringByRemovingPercentEncoding];
     
     if (requestedSystemProperties && [requestedSystemProperties rangeOfString:@"*"].location != NSNotFound) {
