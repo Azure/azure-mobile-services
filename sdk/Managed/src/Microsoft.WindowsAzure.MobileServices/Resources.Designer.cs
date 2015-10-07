@@ -323,15 +323,6 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot work with a MobileServiceClient that does not specify a gateway URI..
-        /// </summary>
-        internal static string MobileServicesAuthentication_MobileServiceClientDefinesNoGateway {
-            get {
-                return ResourceManager.GetString("MobileServicesAuthentication_MobileServiceClientDefinesNoGateway", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The casing of the &apos;{0}&apos; property is invalid..
         /// </summary>
         internal static string MobileServiceSerializer_IdCasingIncorrect {

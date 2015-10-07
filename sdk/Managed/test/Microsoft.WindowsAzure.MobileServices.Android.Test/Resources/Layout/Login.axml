@@ -13,11 +13,6 @@
     <EditText
         p1:layout_width="fill_parent"
         p1:layout_height="wrap_content"
-        p1:id="@+id/ServiceKey"
-        p1:hint="@string/MobileServiceKey" />
-    <EditText
-        p1:layout_width="fill_parent"
-        p1:layout_height="wrap_content"
         p1:id="@+id/ServiceTags"
         p1:hint="@string/Tags" />
     <Button

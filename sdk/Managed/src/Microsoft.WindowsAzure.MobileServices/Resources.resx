@@ -138,9 +138,6 @@
   <data name="MobileServicesAuthentication_LoginAlreadyInProgress" xml:space="preserve">
     <value>Cannot start a login operation because login is already in progress.</value>
   </data>
-  <data name="MobileServicesAuthentication_MobileServiceClientDefinesNoGateway" xml:space="preserve">
-    <value>Cannot work with a MobileServiceClient that does not specify a gateway URI.</value>
-  </data>
   <data name="IAuthenticationBroker_LoginFailed" xml:space="preserve">
     <value>Login failed: {0}</value>
   </data>

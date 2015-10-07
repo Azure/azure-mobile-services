@@ -63,11 +63,6 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("providerName");
             }
 
-            if (client.GatewayUri == null)
-            {
-                throw new ArgumentException(Resources.MobileServicesAuthentication_MobileServiceClientDefinesNoGateway, "client");
-            }
-
             this.Client = client;
             this.Parameters = parameters;
             this.ProviderName = providerName;
@@ -76,8 +71,8 @@ namespace Microsoft.WindowsAzure.MobileServices
             string queryString = MobileServiceUrlBuilder.GetQueryString(parameters, useTableAPIRules: false);
             string pathAndQuery = MobileServiceUrlBuilder.CombinePathAndQuery(path, queryString);
 
-            this.StartUri = new Uri(this.Client.GatewayUri, pathAndQuery);
-            this.EndUri = new Uri(this.Client.GatewayUri, MobileServiceAuthentication.LoginAsyncDoneUriFragment);
+            this.StartUri = new Uri(this.Client.MobileAppUri, pathAndQuery);
+            this.EndUri = new Uri(this.Client.MobileAppUri, MobileServiceAuthentication.LoginAsyncDoneUriFragment);
         }
 
         /// <summary>

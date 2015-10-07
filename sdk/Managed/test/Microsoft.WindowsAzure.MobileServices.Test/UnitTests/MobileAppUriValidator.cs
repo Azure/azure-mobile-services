@@ -14,12 +14,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
         /// <summary>
         /// URI for a dummy mobile app.
         /// </summary>
-        public const string DummyMobileApp = "http://www.testgateway.com/testmobileapp/";
-
-        /// <summary>
-        /// URI for a dummy mobile app.
-        /// </summary>
-        public const string DummyGateway = "http://www.testgateway.com/";
+        public const string DummyMobileApp = "http://www.test.com/testmobileapp/";
 
         /// <summary>
         /// Table component in a valid table URI.

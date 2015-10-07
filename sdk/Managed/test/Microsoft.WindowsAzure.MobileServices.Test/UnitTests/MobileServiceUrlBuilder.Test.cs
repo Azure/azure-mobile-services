@@ -18,12 +18,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         /// <summary>
         /// URI of a valid Mobile Application.
         /// </summary>
-        private const string DefaultMobileApp = "http://www.testgateway.com/testmobileapp/";
-
-        /// <summary>
-        /// URI of the gateway of a valid Mobile Application.
-        /// </summary>
-        private const string DefaultGateway = "http://www.testgateway.com/";
+        private const string DefaultMobileApp = "http://www.test.com/testmobileapp/";
 
         /// <summary>
         /// The Slash character.

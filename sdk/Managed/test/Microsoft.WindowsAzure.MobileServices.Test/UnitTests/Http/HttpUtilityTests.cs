@@ -19,14 +19,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                     ServiceUri = MobileAppUriValidator.DummyMobileApp, 
                     Query = "/about?$filter=a eq b&$orderby=c", 
                     Absolute = false,
-                    Result = "http://www.testgateway.com/about?$filter=a eq b&$orderby=c"
+                    Result = "http://www.test.com/about?$filter=a eq b&$orderby=c"
                 },
                 new 
                 {
                     ServiceUri = MobileAppUriValidator.DummyMobileApp, 
-                    Query = "http://www.testgateway.com/about?$filter=a eq b&$orderby=c", 
+                    Query = "http://www.test.com/about?$filter=a eq b&$orderby=c", 
                     Absolute = true,
-                    Result = "http://www.testgateway.com/about?$filter=a eq b&$orderby=c"
+                    Result = "http://www.test.com/about?$filter=a eq b&$orderby=c"
                 }
             };
 
@@ -49,13 +49,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 {
                     ServiceUri = MobileAppUriValidator.DummyMobileApp, 
                     Query = "about?$filter=a eq b&$orderby=c", 
-                    Result = "http://www.testgateway.com/about?$filter=a eq b&$orderby=c"
+                    Result = "http://www.test.com/about?$filter=a eq b&$orderby=c"
                 },
                 new 
                 {
                     ServiceUri = MobileAppUriValidator.DummyMobileApp, 
                     Query = "$filter=a eq b&$orderby=c", 
-                    Result = "http://www.testgateway.com/about?$filter=a eq b&$orderby=c"
+                    Result = "http://www.test.com/about?$filter=a eq b&$orderby=c"
                 }
             };
 
