@@ -141,6 +141,8 @@
 		A2ADF7E91914481B0078BB16 /* MSTableOperationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A2ADF7E81914481B0078BB16 /* MSTableOperationTests.m */; };
 		A2C14C6A19105D9F00A58609 /* MSSyncContextReadResult.h in Headers */ = {isa = PBXBuildFile; fileRef = A2C14C6819105D9F00A58609 /* MSSyncContextReadResult.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A2C14C6B19105D9F00A58609 /* MSSyncContextReadResult.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C14C6919105D9F00A58609 /* MSSyncContextReadResult.m */; };
+		A3514E3D1BCC62380032B74C /* MSClientConnectionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A3514E3C1BCC62380032B74C /* MSClientConnectionTests.m */; settings = {ASSET_TAGS = (); }; };
+		A3514E3E1BCC64AB0032B74C /* MSClientConnectionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A3514E3C1BCC62380032B74C /* MSClientConnectionTests.m */; settings = {ASSET_TAGS = (); }; };
 		A3FD2DB01BB1C3F300624DA0 /* MSQueryInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 8790D2BF199EA5950000DC4E /* MSQueryInternal.h */; settings = {ASSET_TAGS = (); }; };
 		A3FD2DB11BB1C3FA00624DA0 /* MSTableInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 8790D2BE199C5D510000DC4E /* MSTableInternal.h */; settings = {ASSET_TAGS = (); }; };
 		A3FD2DB21BB1C40900624DA0 /* MSPullSettingsInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = D0EFD8581B2F785F009CF6DA /* MSPullSettingsInternal.h */; settings = {ASSET_TAGS = (); }; };
@@ -430,6 +432,7 @@
 		A2ADF7E81914481B0078BB16 /* MSTableOperationTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSTableOperationTests.m; sourceTree = "<group>"; };
 		A2C14C6819105D9F00A58609 /* MSSyncContextReadResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSSyncContextReadResult.h; sourceTree = "<group>"; };
 		A2C14C6919105D9F00A58609 /* MSSyncContextReadResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSSyncContextReadResult.m; sourceTree = "<group>"; };
+		A3514E3C1BCC62380032B74C /* MSClientConnectionTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSClientConnectionTests.m; sourceTree = "<group>"; };
 		CF1D74581A5D85C60074789F /* MSQueuePurgeOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSQueuePurgeOperation.m; sourceTree = "<group>"; };
 		CF1D745A1A5D85D80074789F /* MSQueuePurgeOperation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSQueuePurgeOperation.h; sourceTree = "<group>"; };
 		CF4D49851A2E5C96006AEB70 /* MSQueuePullOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSQueuePullOperation.h; sourceTree = "<group>"; };
@@ -865,6 +868,7 @@
 			children = (
 				E8EA24BE161CFC6400BE055D /* MSURLbuilderTests.m */,
 				E84CA4D5162373E2009B2588 /* MSUserAgentBuilderTests.m */,
+				A3514E3C1BCC62380032B74C /* MSClientConnectionTests.m */,
 			);
 			name = Connection;
 			sourceTree = "<group>";
@@ -1381,6 +1385,7 @@
 				E87BB01C161A28FC008053F9 /* MSClientTests.m in Sources */,
 				E87BB022161B57C8008053F9 /* MSUserTests.m in Sources */,
 				E87BB025161B5A4D008053F9 /* MSTableTests.m in Sources */,
+				A3514E3D1BCC62380032B74C /* MSClientConnectionTests.m in Sources */,
 				E8EA24C0161CFCF400BE055D /* MSURLbuilderTests.m in Sources */,
 				A24701C6196897A700385DA2 /* MSPushTests.m in Sources */,
 				A28224B3192ACFB700EF8743 /* CoreDataTestModel.xcdatamodeld in Sources */,
@@ -1445,6 +1450,7 @@
 				F3EBE0111BAC312500D82B10 /* CoreDataTestModel.xcdatamodeld in Sources */,
 				F3EBDFFA1BAC311D00D82B10 /* MSURLbuilderTests.m in Sources */,
 				F3EBDFFB1BAC311D00D82B10 /* MSUserAgentBuilderTests.m in Sources */,
+				A3514E3E1BCC64AB0032B74C /* MSClientConnectionTests.m in Sources */,
 				F3EBDFFC1BAC311D00D82B10 /* MSMultiRequestTestFilter.m in Sources */,
 				F3EBDFFD1BAC311D00D82B10 /* MSTestFilter.m in Sources */,
 				F3EBDFFE1BAC311D00D82B10 /* MSTable+MSTableTestUtilities.m in Sources */,
