@@ -22,24 +22,24 @@ namespace Microsoft.WindowsAzure.MobileServices
     internal class MobileServiceSerializer
     {
         /// <summary>
-        /// The string prefix used to indicate system properties
+        /// The version system property as a string
         /// </summary>
-        internal const string SystemPropertyPrefix = "__";
+        internal static readonly string VersionSystemPropertyString = MobileServiceSystemProperties.Version.ToString().ToLowerInvariant();
 
         /// <summary>
-        /// The version system property as a string with the prefix.
+        /// The version system property as a string
         /// </summary>
-        internal static readonly string VersionSystemPropertyString = String.Format("{0}{1}", MobileServiceSerializer.SystemPropertyPrefix, MobileServiceSystemProperties.Version.ToString()).ToLowerInvariant();
+        internal static readonly string UpdatedAtSystemPropertyString = MobileServiceSystemProperties.UpdatedAt.ToString().ToLowerInvariant();
 
         /// <summary>
-        /// The version system property as a string with the prefix.
+        /// The version system property as a string
         /// </summary>
-        internal static readonly string UpdatedAtSystemPropertyString = String.Format("{0}{1}", MobileServiceSerializer.SystemPropertyPrefix, MobileServiceSystemProperties.UpdatedAt.ToString().ToLowerInvariant());
+        internal static readonly string CreatedAtSystemPropertyString = MobileServiceSystemProperties.CreatedAt.ToString().ToLowerInvariant();
 
         /// <summary>
-        /// The version system property as a string with the prefix.
+        /// The deleted system property as a string
         /// </summary>
-        internal static readonly string CreatedAtSystemPropertyString = String.Format("{0}{1}", MobileServiceSerializer.SystemPropertyPrefix, MobileServiceSystemProperties.CreatedAt.ToString().ToLowerInvariant());
+        internal static readonly string DeletedSystemPropertyString = MobileServiceSystemProperties.Deleted.ToString().ToLowerInvariant();
 
         /// <summary>
         /// A regex for validating string ids
@@ -200,11 +200,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         public static JObject RemoveSystemProperties(JObject instance, out string version, MobileServiceSystemProperties propertiesToKeep = MobileServiceSystemProperties.None)
         {
             version = null;
+            var systemProperties = new String[]{MobileServiceSerializer.CreatedAtSystemPropertyString, MobileServiceSerializer.DeletedSystemPropertyString, MobileServiceSerializer.VersionSystemPropertyString, MobileServiceSerializer.UpdatedAtSystemPropertyString}.AsEnumerable<String>();
 
             bool haveCloned = false;
             foreach (JProperty property in instance.Properties())
             {
-                if (property.Name.StartsWith(MobileServiceSerializer.SystemPropertyPrefix))
+                if (systemProperties.Contains(property.Name))
                 {
                     // We don't want to alter the original jtoken passed in by the caller
                     // so if we find a system property to remove, we have to clone first

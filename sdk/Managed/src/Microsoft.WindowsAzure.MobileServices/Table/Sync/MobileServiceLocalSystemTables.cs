@@ -11,6 +11,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
+    //TODO: Fix for removal of prefix
     /// <summary>
     /// Names of tables in local store that are reserved by sync framework
     /// </summary>
@@ -24,17 +25,17 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <summary>
         /// Name of the table that stores operation queue items
         /// </summary>
-        public static readonly string OperationQueue = Prefix + "operations";
+        public static readonly string OperationQueue = "operations";
 
         /// <summary>
         /// Name of the table that stores sync errors
         /// </summary>
-        public static readonly string SyncErrors = Prefix + "errors";
+        public static readonly string SyncErrors = "errors";
 
         /// <summary>
         /// Name of the table that stores configuration settings related to sync framework
         /// </summary>
-        public static readonly string Config = Prefix + "config";
+        public static readonly string Config = "config";
 
         /// <summary>
         /// Returns the names of all system tables

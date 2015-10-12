@@ -566,7 +566,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 string property = systemProperties[i].Trim();
                 char firstLetterAsLower = char.ToLowerInvariant(property[0]);
-                systemProperties[i] = MobileServiceSerializer.SystemPropertyPrefix + firstLetterAsLower + property.Substring(1);
+                systemProperties[i] = firstLetterAsLower + property.Substring(1);
             }
 
             string systemPropertiesString = string.Join(",", systemProperties);

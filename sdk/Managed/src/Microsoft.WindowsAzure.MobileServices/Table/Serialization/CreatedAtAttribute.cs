@@ -8,7 +8,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 {
     /// <summary>
     /// Attribute applied to a member of a type to specify that it represents
-    /// the __createdAt system property.
+    /// the createdAt system property.
     /// </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
     public class CreatedAtAttribute :  Attribute, ISystemPropertyAttribute

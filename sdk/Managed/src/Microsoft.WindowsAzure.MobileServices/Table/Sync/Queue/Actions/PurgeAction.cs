@@ -62,6 +62,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return true;
         }
 
+        //TODO: Fix for removal of prefix
         protected override async Task ProcessTableAsync()
         {
             if (!String.IsNullOrEmpty(this.QueryId))
