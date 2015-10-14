@@ -1039,18 +1039,18 @@ $testGroup('MobileServiceTables.js',
             $assert.areEqual(req.headers['If-Match'], '"test\\"qu\\"oteAnd\\\\""');
             callback(null, {
                 status: 412,
-                responseText: '{"id":"abc", "title":"test", "__version":"apple"}'
+                responseText: '{"id":"abc", "title":"test", "version":"apple"}'
             });
         });
 
         var table = client.getTable('books');
         table.systemProperties = WindowsAzure.MobileServiceTable.SystemProperties.Version;
 
-        return table.del({ id: 'my id', value: 'A', __version: 'test"qu"oteAnd\\"' })
+        return table.del({ id: 'my id', value: 'A', version: 'test"qu"oteAnd\\"' })
                     .then(function (result) {
                         $assert.fail('Should have failed');
                     }, function (error) {
-                        $assert.areEqual(error.serverInstance.__version, 'apple');
+                        $assert.areEqual(error.serverInstance.version, 'apple');
                     });
     }),
 
@@ -1070,7 +1070,7 @@ $testGroup('MobileServiceTables.js',
         var table = client.getTable('books');
         table.systemProperties = WindowsAzure.MobileServiceTable.SystemProperties.Version;
 
-        return table.del({ id: 'my id', value: 'A', __version: 'test"qu"oteAnd\\"' })
+        return table.del({ id: 'my id', value: 'A', version: 'test"qu"oteAnd\\"' })
                     .then(function (result) {
                         $assert.fail('Should have failed');
                     }, function (error) {
@@ -1671,19 +1671,19 @@ $testGroup('MobileServiceTables.js',
         return $chain.apply(null, testCases);
     }),
 
-    $test('testUpdateIntegerIdNoPropertiesRemovedFromRequest')
+    $test('testUpdateIntegerIdSystemPropertiesRemovedFromRequest')
     .tag('SystemProperties')
     .description('Verify system properties are not removed for updates on integer ids')
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
-            testProperties = testData.testNonSystemProperties.concat(testData.testValidSystemProperties),
+            testProperties = testData.testValidSystemProperties,
             testCases = [];
 
         testProperties.forEach(function (testProperty) {
             testCases.push(function () {
                 client = client.withFilter(function (req, next, callback) {
                     // check serialization of object
-                    var serializedItem = '{"id":5,"string":"What?","' + testProperty + '":"a value"}';
+                    var serializedItem = '{"id":5,"string":"What?"}';
                     $assert.areEqual(req.data, serializedItem);
                     callback(null, { status: 200, responseText: req.data });
                 });
@@ -1692,7 +1692,7 @@ $testGroup('MobileServiceTables.js',
                 item[testProperty] = 'a value';
 
                 return client.getTable('someTable').update(item).then(function (result) {
-                    $assert.areEqual(item[testProperty], result[testProperty]);
+                    // do nothing
                 }, function (error) {
                     $assert.fail('should not have failed');
                 });
@@ -1703,19 +1703,19 @@ $testGroup('MobileServiceTables.js',
 
     $test('testETagUpdateEncoding')
     .tag('SystemProperties')
-    .description('Verify eTag is encoded/decoded and overrides passed down __version')
+    .description('Verify eTag is encoded/decoded and overrides passed down version')
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
 
         client = client.withFilter(function (req, next, callback) {
             $assert.areEqual(req.headers['If-Match'], '"test\\"qu\\"oteAnd\\\\""');
-            callback(null, { status: 200, getResponseHeader: function () { return '"nowrapping\\\"OrEscaped"Quotes"'; }, responseText: '{"id":null, "title":"test", "__version":"apple"}' });
+            callback(null, { status: 200, getResponseHeader: function () { return '"nowrapping\\\"OrEscaped"Quotes"'; }, responseText: '{"id":null, "title":"test", "version":"apple"}' });
         });
 
         var table = client.getTable('books');
 
-        return table.update({ id: 'my id', value: 'A', __version: 'test"qu"oteAnd\\"' }).then(function (result) {
-            $assert.areEqual(result.__version, 'nowrapping"OrEscaped"Quotes');
+        return table.update({ id: 'my id', value: 'A', version: 'test"qu"oteAnd\\"' }).then(function (result) {
+            $assert.areEqual(result.version, 'nowrapping"OrEscaped"Quotes');
         });
     })
 );

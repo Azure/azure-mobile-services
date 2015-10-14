@@ -572,66 +572,66 @@ $testGroup('Mobile Service Table Tests')
                     return table.insert({ id: 'an id', string: 'a value' });
                 },
                 function (item) {
-                    $assert.isNotNull(item.__createdAt);
-                    $assert.isNotNull(item.__updatedAt);
-                    $assert.isNotNull(item.__version);
+                    $assert.isNotNull(item.createdAt);
+                    $assert.isNotNull(item.updatedAt);
+                    $assert.isNotNull(item.version);
 
                     return table.read();
                 },
                 function (items) {
                     $assert.areEqual(1, items.length);
                     var item = items[0];
-                    $assert.isNotNull(item.__createdAt);
-                    $assert.isNotNull(item.__updatedAt);
-                    $assert.isNotNull(item.__version);
+                    $assert.isNotNull(item.createdAt);
+                    $assert.isNotNull(item.updatedAt);
+                    $assert.isNotNull(item.version);
                     savedItem = item;
 
-                    return table.where(function (value) { return this.__version == value; }, item.__version).read();
+                    return table.where(function (value) { return this.version == value; }, item.version).read();
                 },
                 function (items) {
                     $assert.areEqual(1, items.length);
                     var item = items[0];
-                    $assert.isNotNull(item.__createdAt);
-                    $assert.isNotNull(item.__updatedAt);
-                    $assert.isNotNull(item.__version);
+                    $assert.isNotNull(item.createdAt);
+                    $assert.isNotNull(item.updatedAt);
+                    $assert.isNotNull(item.version);
 
-                    return table.where(function (value) { return this.__createdAt == value; }, savedItem.__createdAt).read();
+                    return table.where(function (value) { return this.createdAt == value; }, savedItem.createdAt).read();
                 },
                 function (items) {
                     $assert.areEqual(1, items.length);
                     var item = items[0];
-                    $assert.isNotNull(item.__createdAt);
-                    $assert.isNotNull(item.__updatedAt);
-                    $assert.isNotNull(item.__version);
+                    $assert.isNotNull(item.createdAt);
+                    $assert.isNotNull(item.updatedAt);
+                    $assert.isNotNull(item.version);
 
-                    return table.where(function (value) { return this.__updatedAt == value; }, savedItem.__updatedAt).read();
+                    return table.where(function (value) { return this.updatedAt == value; }, savedItem.updatedAt).read();
                 },
                 function (items) {
                     $assert.areEqual(1, items.length);
                     var item = items[0];
-                    $assert.isNotNull(item.__createdAt);
-                    $assert.isNotNull(item.__updatedAt);
-                    $assert.isNotNull(item.__version);
+                    $assert.isNotNull(item.createdAt);
+                    $assert.isNotNull(item.updatedAt);
+                    $assert.isNotNull(item.version);
 
                     return table.lookup(savedItem.id);
                 },
                 function (item) {
                     $assert.areEqual(item.id, savedItem.id);
-                    $assert.areEqual(item.__updatedAt.valueOf(), savedItem.__updatedAt.valueOf());
-                    $assert.areEqual(item.__createdAt.valueOf(), savedItem.__createdAt.valueOf());
-                    $assert.areEqual(item.__version, savedItem.__version);
+                    $assert.areEqual(item.updatedAt.valueOf(), savedItem.updatedAt.valueOf());
+                    $assert.areEqual(item.createdAt.valueOf(), savedItem.createdAt.valueOf());
+                    $assert.areEqual(item.version, savedItem.version);
 
                     savedItem.string = 'Hello';
-                    savedVersion = savedItem.__version; //WinJS Mutates
-                    savedUpdatedAt = savedItem.__updatedAt.valueOf();
+                    savedVersion = savedItem.version; //WinJS Mutates
+                    savedUpdatedAt = savedItem.updatedAt.valueOf();
 
                     return table.update(savedItem);
                 },
                 function (item) {
                     $assert.areEqual(item.id, savedItem.id);
-                    $assert.areEqual(item.__createdAt.valueOf(), savedItem.__createdAt.valueOf());
-                    $assert.areNotEqual(item.__version, savedVersion);
-                    $assert.areNotEqual(item.__updatedAt.valueOf(), savedUpdatedAt);
+                    $assert.areEqual(item.createdAt.valueOf(), savedItem.createdAt.valueOf());
+                    $assert.areNotEqual(item.version, savedVersion);
+                    $assert.areNotEqual(item.updatedAt.valueOf(), savedUpdatedAt);
                     savedItem = item;
 
                     return table.read();
@@ -639,9 +639,9 @@ $testGroup('Mobile Service Table Tests')
                 function (items) {
                     var item = items[0];
                     $assert.areEqual(item.id, savedItem.id);
-                    $assert.areEqual(item.__updatedAt.valueOf(), savedItem.__updatedAt.valueOf());
-                    $assert.areEqual(item.__createdAt.valueOf(), savedItem.__createdAt.valueOf());
-                    $assert.areEqual(item.__version, savedItem.__version);
+                    $assert.areEqual(item.updatedAt.valueOf(), savedItem.updatedAt.valueOf());
+                    $assert.areEqual(item.createdAt.valueOf(), savedItem.createdAt.valueOf());
+                    $assert.areEqual(item.version, savedItem.version);
 
                     return table.del(savedItem);
                 },
@@ -665,9 +665,9 @@ $testGroup('Mobile Service Table Tests')
                     return table.insert({ string: 'a value'  });
                 },
                 function (item) {
-                    $assert.isNotNull(item.__createdAt);
-                    $assert.isNotNull(item.__updatedAt);
-                    $assert.isNotNull(item.__version);
+                    $assert.isNotNull(item.createdAt);
+                    $assert.isNotNull(item.updatedAt);
+                    $assert.isNotNull(item.version);
 
                     return emptyTable(table);
                 });
@@ -708,69 +708,66 @@ $testGroup('Mobile Service Table Tests')
                     savedItems.push(item);
 
                     var commands = [];
-                    testData.testSystemProperties.forEach(function (systemProperties) {
-                        table.systemProperties = systemProperties;
-                        commands.push(function () {
-                            return $chain(
-                                function () {
-                                    $log('testing properties: ' + systemProperties);
-                                    return table.orderBy('__createdAt').read();
-                                },
-                                function (items) {
-                                    for (var i = 0; i < items.length - 1; i++) {
-                                        $assert.isTrue(items[i].id <  items[i + 1].id);
-                                    }
-                                    return table.orderBy('__updatedAt').read();
-                                },
-                                function (items) {
-                                    for (var i = 0; i < items.length - 1; i++) {
-                                        $assert.isTrue(items[i].id < items[i + 1].id);
-                                    }
-                                    return table.orderBy('__version').read();
-                                },
-                                function (items) {
-                                    for (var i = 0; i < items.length - 1; i++) {
-                                        $assert.isTrue(items[i].id < items[i + 1].id);
-                                    }
+                    commands.push(function () {
+                        return $chain(
+                            function () {
+                                $log('testing properties: ' + systemProperties);
+                                return table.orderBy('createdAt').read();
+                            },
+                            function (items) {
+                                for (var i = 0; i < items.length - 1; i++) {
+                                    $assert.isTrue(items[i].id <  items[i + 1].id);
+                                }
+                                return table.orderBy('updatedAt').read();
+                            },
+                            function (items) {
+                                for (var i = 0; i < items.length - 1; i++) {
+                                    $assert.isTrue(items[i].id < items[i + 1].id);
+                                }
+                                return table.orderBy('version').read();
+                            },
+                            function (items) {
+                                for (var i = 0; i < items.length - 1; i++) {
+                                    $assert.isTrue(items[i].id < items[i + 1].id);
+                                }
 
-                                    return table.where(function (value) { return this.__createdAt >= value; }, savedItems[3].__createdAt).read();
-                                },
-                                function (items) {
-                                    $assert.areEqual(2, items.length);
+                                return table.where(function (value) { return this.createdAt >= value; }, savedItems[3].createdAt).read();
+                            },
+                            function (items) {
+                                $assert.areEqual(2, items.length);
 
-                                    return table.where(function (value) { return this.__updatedAt >= value; }, savedItems[3].__updatedAt).read();
-                                },
-                                function (items) {
-                                    $assert.areEqual(2, items.length);
+                                return table.where(function (value) { return this.updatedAt >= value; }, savedItems[3].updatedAt).read();
+                            },
+                            function (items) {
+                                $assert.areEqual(2, items.length);
 
-                                    return table.where({ __version: savedItems[3].__version }).read();
-                                },
-                                function (items) {
-                                    $assert.areEqual(1, items.length);
+                                return table.where({ version: savedItems[3].version }).read();
+                            },
+                            function (items) {
+                                $assert.areEqual(1, items.length);
 
-                                    return table.select('id', '__createdAt').read();
-                                },
-                                function (items) {
-                                    for (var i = 0; i < items.length; i++) {
-                                        $assert.isNotNull(items[i].__createdAt);
-                                    }
+                                return table.select('id', 'createdAt').read();
+                            },
+                            function (items) {
+                                for (var i = 0; i < items.length; i++) {
+                                    $assert.isNotNull(items[i].createdAt);
+                                }
 
-                                    return table.select('id', '__updatedAt').read();
-                                },
-                                function (items) {
-                                    for (var i = 0; i < items.length; i++) {
-                                        $assert.isNotNull(items[i].__updatedAt);
-                                    }
+                                return table.select('id', 'updatedAt').read();
+                            },
+                            function (items) {
+                                for (var i = 0; i < items.length; i++) {
+                                    $assert.isNotNull(items[i].updatedAt);
+                                }
 
-                                    return table.select('id', '__version').read();
-                                },
-                                function (items) {
-                                    for (var i = 0; i < items.length; i++) {
-                                        $assert.isNotNull(items[i].__version);
-                                    }
+                                return table.select('id', 'version').read();
+                            },
+                            function (items) {
+                                for (var i = 0; i < items.length; i++) {
+                                    $assert.isNotNull(items[i].version);
+                                }
 
-                                });
-                        });
+                            });
                     });
                     return $chain.apply(null, commands);
                 });
@@ -790,30 +787,30 @@ $testGroup('Mobile Service Table Tests')
             }, function () {
                 return table.insert({ id: 'an id', string: 'a value'});
             }, function (item) {
-                savedVersion = item.__version;
+                savedVersion = item.version;
 
                 item.string = 'Hello!';
                 return table.update(item);
             }, function (item) {
-                $assert.areNotEqual(item.__version, savedVersion);
+                $assert.areNotEqual(item.version, savedVersion);
 
                 item.string = 'But Wait!';
-                correctVersion = item.__version;
-                item.__version = savedVersion;
+                correctVersion = item.version;
+                item.version = savedVersion;
 
                 return table.update(item).then(function (item) {
                     $assert.fail('Should have failed');
                 }, function (error) {
                     $assert.areEqual(412, error.request.status);
                     $assert.contains(error.message, "Precondition Failed");
-                    $assert.areEqual(error.serverInstance.__version, correctVersion);
+                    $assert.areEqual(error.serverInstance.version, correctVersion);
                     $assert.areEqual(error.serverInstance.string, 'Hello!');
 
-                    item.__version = correctVersion;
+                    item.version = correctVersion;
                     return table.update(item);
                 });
             }, function (item) {
-                $assert.areNotEqual(item.__version, correctVersion);
+                $assert.areNotEqual(item.version, correctVersion);
             });
         }),
 
@@ -831,26 +828,26 @@ $testGroup('Mobile Service Table Tests')
             }, function () {
                 return table.insert({ id: 'an id', String: 'a value' });
             }, function (item) {
-                savedVersion = item.__version;
+                savedVersion = item.version;
 
                 item.String = 'Hello!';
                 return table.update(item);
             }, function (item) {
-                $assert.areNotEqual(item.__version, savedVersion);
+                $assert.areNotEqual(item.version, savedVersion);
 
                 item.String = 'But Wait!';
-                correctVersion = item.__version;
-                item.__version = savedVersion;
+                correctVersion = item.version;
+                item.version = savedVersion;
 
                 return table.del(item).then(function (item) {
                     $assert.fail('Should have failed');
                 }, function (error) {
                     $assert.areEqual(412, error.request.status);
                     $assert.contains(error.message, "Precondition Failed");
-                    $assert.areEqual(error.serverInstance.__version, correctVersion);
+                    $assert.areEqual(error.serverInstance.version, correctVersion);
                     $assert.areEqual(error.serverInstance.String, 'Hello!');
 
-                    item.__version = correctVersion;
+                    item.version = correctVersion;
                     return table.del(item);
                 });
             });
