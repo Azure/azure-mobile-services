@@ -424,7 +424,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 
 -(void) testInsertItemWithValidIdConflict
 {
-    NSString* stringData = @"{\"id\": \"test1\", \"text\":\"servers name\", \"__version\":\"1\" }";
+    NSString* stringData = @"{\"id\": \"test1\", \"text\":\"servers name\", \"version\":\"1\" }";
     MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:412 data:stringData];
     
     NSInteger __block serverCalls = 0;
@@ -1112,8 +1112,8 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 {
     NSArray *codes = @[ @412, @200, @0 ];
     NSArray *data = @[
-        @"{\"id\": \"test1\", \"name\":\"servers name\", \"__version\":\"1\" }",
-        @"{\"id\": \"test2\", \"name\":\"test name2\", \"__version\":\"2\" }",
+        @"{\"id\": \"test1\", \"name\":\"servers name\", \"version\":\"1\" }",
+        @"{\"id\": \"test2\", \"name\":\"test name2\", \"version\":\"2\" }",
         [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorTimedOut userInfo:nil]
     ];
     
@@ -1769,7 +1769,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 
 -(void) testPullSuccess
 {
-    NSString* stringData = @"[{\"id\": \"one\", \"text\":\"first item\", \"__updatedAt\":\"1999-12-03T15:44:29.0Z\"},{\"id\": \"two\", \"text\":\"second item\", \"__updatedAt\":\"1999-12-03T15:44:29.0Z\"}]";
+    NSString* stringData = @"[{\"id\": \"one\", \"text\":\"first item\", \"updatedAt\":\"1999-12-03T15:44:29.0Z\"},{\"id\": \"two\", \"text\":\"second item\", \"updatedAt\":\"1999-12-03T15:44:29.0Z\"}]";
     MSMultiRequestTestFilter *filter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[@200] data:@[stringData] appendEmptyRequest:YES];
     
     MSClient *filteredClient = [client clientWithFilter:filter];
@@ -1839,7 +1839,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 
 -(void) testPullSuccessWithDeleted
 {
-    NSString* stringData = @"[{\"id\": \"one\", \"text\":\"first item\", \"__deleted\":false},{\"id\": \"two\", \"text\":\"second item\", \"__deleted\":true}, {\"id\": \"three\", \"text\":\"third item\", \"__deleted\":null}]";
+    NSString* stringData = @"[{\"id\": \"one\", \"text\":\"first item\", \"deleted\":false},{\"id\": \"two\", \"text\":\"second item\", \"deleted\":true}, {\"id\": \"three\", \"text\":\"third item\", \"deleted\":null}]";
     MSMultiRequestTestFilter *testFilter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[@200] data:@[stringData] appendEmptyRequest:YES];
     
     MSClient *filteredClient = [client clientWithFilter:testFilter];
@@ -2334,7 +2334,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     NSString *topParam = [NSString stringWithFormat:@"$top=%ld", (long) pullSettings.pageSize];
     
-    NSArray *expectedPullQuery = @[topParam, @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')", @"$skip=0", @"$orderby=__updatedAt%20asc", @"__includeDeleted=true"];
+    NSArray *expectedPullQuery = @[topParam, @"$filter=(updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')", @"$skip=0", @"$orderby=updatedAt%20asc", @"__includeDeleted=true"];
     
     XCTAssertTrue([self checkURL:pullRequest withPath:@"/tables/TodoNoVersion" andQuery:expectedPullQuery],
                   @"Invalid pull request: %@", pullRequest.absoluteString);
@@ -2346,7 +2346,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     NSString *topParam = [NSString stringWithFormat:@"$top=%ld", (long) MSPullSettings.defaultPageSize];
     
-    NSArray *expectedPullQuery = @[topParam, @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')", @"$skip=0", @"$orderby=__updatedAt%20asc", @"__includeDeleted=true"];
+    NSArray *expectedPullQuery = @[topParam, @"$filter=(updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')", @"$skip=0", @"$orderby=updatedAt%20asc", @"__includeDeleted=true"];
     
     XCTAssertTrue([self checkURL:pullRequest withPath:@"/tables/TodoNoVersion" andQuery:expectedPullQuery],
                   @"Invalid pull request: %@", pullRequest.absoluteString);
@@ -2358,7 +2358,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     NSString *topParam = [NSString stringWithFormat:@"$top=%ld", (long) MSPullSettings.defaultPageSize];
     
-    NSArray *expectedPullQuery = @[topParam, @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')", @"$skip=0", @"$orderby=__updatedAt%20asc", @"__includeDeleted=true"];
+    NSArray *expectedPullQuery = @[topParam, @"$filter=(updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')", @"$skip=0", @"$orderby=updatedAt%20asc", @"__includeDeleted=true"];
     
     XCTAssertTrue([self checkURL:pullRequest withPath:@"/tables/TodoNoVersion" andQuery:expectedPullQuery],
                   @"Invalid pull request: %@", pullRequest.absoluteString);
@@ -2527,8 +2527,8 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 
 -(void) testIncrementalPullSuccess
 {
-    NSString* stringData1 = @"[{\"id\": \"one\", \"text\":\"first item\",\"__version\":\"AAAAAAAAHzg=\",\"__deleted\":false,\"__updatedAt\":\"1999-12-03T15:44:29.0Z\"},{\"id\": \"two\", \"text\":\"second item\", \"__updatedAt\":\"1999-12-03T15:44:29.0Z\"}]";
-    NSString* stringData2 = @"[{\"id\": \"three\", \"text\":\"first item\", \"__updatedAt\":\"1999-12-04T16:44:29.0Z\"},{\"id\": \"four\", \"text\":\"second item\", \"__updatedAt\":\"1999-12-04T16:44:59.0Z\"}]";
+    NSString* stringData1 = @"[{\"id\": \"one\", \"text\":\"first item\",\"version\":\"AAAAAAAAHzg=\",\"deleted\":false,\"updatedAt\":\"1999-12-03T15:44:29.0Z\"},{\"id\": \"two\", \"text\":\"second item\", \"updatedAt\":\"1999-12-03T15:44:29.0Z\"}]";
+    NSString* stringData2 = @"[{\"id\": \"three\", \"text\":\"first item\", \"updatedAt\":\"1999-12-04T16:44:29.0Z\"},{\"id\": \"four\", \"text\":\"second item\", \"updatedAt\":\"1999-12-04T16:44:59.0Z\"}]";
     MSMultiRequestTestFilter *filter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[@200,@200,@200] data:@[stringData1,stringData2,@"[]"] appendEmptyRequest:YES];
     
     MSClient *filteredClient = [client clientWithFilter:filter];
@@ -2562,8 +2562,8 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     NSURLRequest *thirdRequest = (NSURLRequest *)filter.actualRequests[2];
 
     NSArray *expectedfirstRequestQuery = @[@"__includeDeleted=true",
-                                           @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')",
-                                           @"$orderby=__updatedAt%20asc",
+                                           @"$filter=(updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')",
+                                           @"$orderby=updatedAt%20asc",
                                            @"$skip=0",
                                            @"$top=50"];
     XCTAssertTrue([self checkURL:firstRequest.URL
@@ -2572,8 +2572,8 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
                   @"Invalue URL: %@", firstRequest.URL.absoluteString);
     
     NSArray *expectedSecondRequestQuery = @[@"__includeDeleted=true",
-                                            @"$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-03T15%3A44%3A29.000Z')",
-                                            @"$orderby=__updatedAt%20asc",
+                                            @"$filter=(updatedAt%20ge%20datetimeoffset'1999-12-03T15%3A44%3A29.000Z')",
+                                            @"$orderby=updatedAt%20asc",
                                             @"$skip=0",
                                             @"$top=50"];
     XCTAssertTrue([self checkURL:secondRequest.URL
@@ -2583,8 +2583,8 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 
     
     NSArray *expectedThirdRequestQuery = @[@"__includeDeleted=true",
-                                           @"$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-04T16%3A44%3A59.000Z')",
-                                           @"$orderby=__updatedAt%20asc",
+                                           @"$filter=(updatedAt%20ge%20datetimeoffset'1999-12-04T16%3A44%3A59.000Z')",
+                                           @"$orderby=updatedAt%20asc",
                                            @"$skip=0",
                                            @"$top=50"];
     XCTAssertTrue([self checkURL:thirdRequest.URL
@@ -2614,8 +2614,8 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     NSURLRequest *fourthRequest = (NSURLRequest *)filter.actualRequests[3];
 
     NSArray *expectedFourthRequestQuery = @[@"__includeDeleted=true",
-                                            @"$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-04T16%3A44%3A59.000Z')",
-                                            @"$orderby=__updatedAt%20asc",
+                                            @"$filter=(updatedAt%20ge%20datetimeoffset'1999-12-04T16%3A44%3A59.000Z')",
+                                            @"$orderby=updatedAt%20asc",
                                             @"$skip=0",
                                             @"$top=50"];
     XCTAssertTrue([self checkURL:fourthRequest.URL
@@ -2713,8 +2713,8 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 -(void) testIncrementalPullWithInsert
 {
     // insert in the middle of a Pull should ignore the Insert and continue
-    NSString *firstPullData = @"[{\"id\": \"one\", \"text\":\"first item\", \"__updatedAt\":\"1999-12-03T15:44:29.0Z\"},{\"id\": \"two\", \"text\":\"second item\", \"__updatedAt\":\"1999-12-03T15:44:28.0Z\"}]";
-    NSString *secondPullData = @"[{\"id\": \"three\", \"text\":\"third item\", \"__updatedAt\":\"1999-12-03T15:44:29.0Z\"},{\"id\": \"four\", \"text\":\"fourth item\", \"__updatedAt\":\"1999-12-07T15:44:28.0Z\"}]";
+    NSString *firstPullData = @"[{\"id\": \"one\", \"text\":\"first item\", \"updatedAt\":\"1999-12-03T15:44:29.0Z\"},{\"id\": \"two\", \"text\":\"second item\", \"updatedAt\":\"1999-12-03T15:44:28.0Z\"}]";
+    NSString *secondPullData = @"[{\"id\": \"three\", \"text\":\"third item\", \"updatedAt\":\"1999-12-03T15:44:29.0Z\"},{\"id\": \"four\", \"text\":\"fourth item\", \"updatedAt\":\"1999-12-07T15:44:28.0Z\"}]";
     MSMultiRequestTestFilter *filter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[@200,@200] data:@[firstPullData,secondPullData] appendEmptyRequest:YES];
     
     MSClient *filteredClient = [client clientWithFilter:filter];
@@ -2755,8 +2755,8 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     NSURLRequest *thirdPullRequest = (NSURLRequest *)filter.actualRequests[1];
     
     NSArray *expectedFirstPullRequestQuery = @[@"__includeDeleted=true",
-                                               @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')",
-                                               @"$orderby=__updatedAt%20asc",
+                                               @"$filter=(updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')",
+                                               @"$orderby=updatedAt%20asc",
                                                @"$top=50",
                                                @"$skip=0"];
     XCTAssertTrue([self checkURL:firstPullRequest.URL
@@ -2765,8 +2765,8 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
                   @"Invalue URL: %@", firstPullRequest.URL.absoluteString);
 
     NSArray *expectedSecondPullRequestQuery = @[@"__includeDeleted=true",
-                                                @"$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-03T15%3A44%3A29.000Z')",
-                                                @"$orderby=__updatedAt%20asc",
+                                                @"$filter=(updatedAt%20ge%20datetimeoffset'1999-12-03T15%3A44%3A29.000Z')",
+                                                @"$orderby=updatedAt%20asc",
                                                 @"$top=50",
                                                 @"$skip=0"];
     XCTAssertTrue([self checkURL:secondPullRequest.URL
@@ -2776,8 +2776,8 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
 
     NSArray *expectedThirdPullRequestQuery = @[@"__includeDeleted=true",
-                                               @"$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-07T15%3A44%3A28.000Z')",
-                                               @"$orderby=__updatedAt%20asc",
+                                               @"$filter=(updatedAt%20ge%20datetimeoffset'1999-12-07T15%3A44%3A28.000Z')",
+                                               @"$orderby=updatedAt%20asc",
                                                @"$top=50",
                                                @"$skip=0"];
     XCTAssertTrue([self checkURL:thirdPullRequest.URL
@@ -2792,7 +2792,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 -(void)testPullKeepsPendingChangesWithDifferentCasedId
 {
     // Response of a pull operation
-    NSString *firstPullData = @"[{\"id\": \"one\", \"text\":\"first item\", \"__updatedAt\":\"1999-12-03T15:44:29.0Z\"},{\"id\": \"two\", \"text\":\"second item\", \"__updatedAt\":\"1999-12-03T15:44:28.0Z\"}]";
+    NSString *firstPullData = @"[{\"id\": \"one\", \"text\":\"first item\", \"updatedAt\":\"1999-12-03T15:44:29.0Z\"},{\"id\": \"two\", \"text\":\"second item\", \"updatedAt\":\"1999-12-03T15:44:28.0Z\"}]";
 
     // Setup filter to get the pull response
     MSMultiRequestTestFilter *filter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[@200] data:@[firstPullData] appendEmptyRequest:YES];
@@ -2839,9 +2839,9 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 
 -(void) testIncrementalPullWithUpdateSkipsUpdatedItem
 {
-    NSString *insertResponse = @"{\"id\": \"one\", \"text\":\"first item\", \"__updatedAt\":\"1999-12-03T15:44:29.0Z\"}";
-    NSString *firstPullData = @"[{\"id\": \"one\", \"text\":\"first item\", \"__updatedAt\":\"1999-12-03T15:44:29.0Z\"},{\"id\": \"two\", \"text\":\"second item\", \"__updatedAt\":\"1999-12-03T15:44:28.0Z\"}]";
-    NSString *secondPullData = @"[{\"id\": \"three\", \"text\":\"third item\", \"__updatedAt\":\"1999-12-03T15:44:29.0Z\"},{\"id\": \"four\", \"text\":\"fourth item\", \"__updatedAt\":\"1999-12-07T15:44:28.0Z\"}]";
+    NSString *insertResponse = @"{\"id\": \"one\", \"text\":\"first item\", \"updatedAt\":\"1999-12-03T15:44:29.0Z\"}";
+    NSString *firstPullData = @"[{\"id\": \"one\", \"text\":\"first item\", \"updatedAt\":\"1999-12-03T15:44:29.0Z\"},{\"id\": \"two\", \"text\":\"second item\", \"updatedAt\":\"1999-12-03T15:44:28.0Z\"}]";
+    NSString *secondPullData = @"[{\"id\": \"three\", \"text\":\"third item\", \"updatedAt\":\"1999-12-03T15:44:29.0Z\"},{\"id\": \"four\", \"text\":\"fourth item\", \"updatedAt\":\"1999-12-07T15:44:28.0Z\"}]";
     MSMultiRequestTestFilter *filter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[@201,@200,@200] data:@[insertResponse,firstPullData,secondPullData] appendEmptyRequest:YES];
     
     MSClient *filteredClient = [client clientWithFilter:filter];
@@ -2895,8 +2895,8 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     XCTAssertEqualObjects(insertRequest.URL.absoluteString, @"https://someUrl/tables/TodoItem");
     NSArray *expectedfirstPullRequest = @[@"__includeDeleted=true",
-                                          @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')",
-                                          @"$orderby=__updatedAt%20asc",
+                                          @"$filter=(updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')",
+                                          @"$orderby=updatedAt%20asc",
                                           @"$top=50",
                                           @"$skip=0"];
 
@@ -2905,16 +2905,16 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 
     
     NSArray *expectedSecondPullRequest = @[@"__includeDeleted=true",
-                                           @"$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-03T15%3A44%3A29.000Z')",
-                                           @"$orderby=__updatedAt%20asc",
+                                           @"$filter=(updatedAt%20ge%20datetimeoffset'1999-12-03T15%3A44%3A29.000Z')",
+                                           @"$orderby=updatedAt%20asc",
                                            @"$top=50",
                                            @"$skip=0"];
     XCTAssertTrue([self checkURL:secondPullRequest.URL withPath:@"/tables/TodoItem" andQuery:expectedSecondPullRequest],
                   @"Invalid URL: %@", secondPullRequest.URL.absoluteString);
 
     NSArray *expectedThirdPullRequest = @[@"__includeDeleted=true",
-                                          @"$filter=(__updatedAt%20ge%20datetimeoffset'1999-12-07T15%3A44%3A28.000Z')",
-                                          @"$orderby=__updatedAt%20asc",
+                                          @"$filter=(updatedAt%20ge%20datetimeoffset'1999-12-07T15%3A44%3A28.000Z')",
+                                          @"$orderby=updatedAt%20asc",
                                           @"$top=50",
                                           @"$skip=0"];
     XCTAssertTrue([self checkURL:thirdPullRequest.URL withPath:@"/tables/TodoItem" andQuery:expectedThirdPullRequest],
@@ -2928,14 +2928,14 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 {
     // the first response has different _updatedAts so the deltaToken is adjusted with no skip
     // the second response has the same _updatedAts so it should fall back to skip
-    // the third response also has the same __updatedAts so it should use skip
-    // the fourth response has different __updatedAts so it should move back to use deltaToken with no skip
+    // the third response also has the same updatedAts so it should use skip
+    // the fourth response has different updatedAts so it should move back to use deltaToken with no skip
     // the fifth response has used >= __updateAt so it returns the seventh item alone, which we've already seen
-    NSString* stringData1 = @"[{\"id\":\"one\",\"text\":\"first item\",\"__version\":\"1\",\"__deleted\":false,\"__updatedAt\":\"1999-12-03T15:44:29.0Z\"},{\"id\":\"two\",\"__version\":\"1\",\"__deleted\":false,\"text\":\"second item\", \"__updatedAt\":\"2000-01-01T00:00:00.0Z\"}]";
-    NSString* stringData2 = @"[{\"id\": \"two\",\"text\":\"second item\",\"__version\":\"1\",\"__deleted\":false,\"__updatedAt\":\"2000-01-01T00:00:00.0Z\"},{\"id\": \"three\",\"text\":\"third item\",\"__version\":\"1\",\"__deleted\":false,\"__updatedAt\":\"2000-01-01T00:00:00.0Z\"}]";
-    NSString* stringData3 = @"[{\"id\": \"four\",\"text\":\"fourth item\",\"__version\":\"1\",\"__deleted\":false,\"__updatedAt\":\"2000-01-01T00:00:00.0Z\"},{\"id\": \"five\",\"text\":\"fifth item\",\"__version\":\"1\",\"__deleted\":false,\"__updatedAt\":\"2000-01-01T00:00:00.0Z\"}]";
-    NSString* stringData4 = @"[{\"id\": \"six\",\"text\":\"sixth item\",\"__version\":\"1\",\"__deleted\":false,\"__updatedAt\":\"2000-01-01T00:00:00.0Z\"},{\"id\": \"seven\",\"text\":\"seventh item\",\"__version\":\"1\",\"__deleted\":false,\"__updatedAt\":\"2000-01-02T00:00:00.0Z\"}]";
-    NSString* stringData5 = @"[{\"id\": \"seven\",\"text\":\"seventh item\",\"__version\":\"1\",\"__deleted\":false,\"__updatedAt\":\"2000-01-02T00:00:00.0Z\"}]";
+    NSString* stringData1 = @"[{\"id\":\"one\",\"text\":\"first item\",\"version\":\"1\",\"deleted\":false,\"updatedAt\":\"1999-12-03T15:44:29.0Z\"},{\"id\":\"two\",\"version\":\"1\",\"deleted\":false,\"text\":\"second item\", \"updatedAt\":\"2000-01-01T00:00:00.0Z\"}]";
+    NSString* stringData2 = @"[{\"id\": \"two\",\"text\":\"second item\",\"version\":\"1\",\"deleted\":false,\"updatedAt\":\"2000-01-01T00:00:00.0Z\"},{\"id\": \"three\",\"text\":\"third item\",\"version\":\"1\",\"deleted\":false,\"updatedAt\":\"2000-01-01T00:00:00.0Z\"}]";
+    NSString* stringData3 = @"[{\"id\": \"four\",\"text\":\"fourth item\",\"version\":\"1\",\"deleted\":false,\"updatedAt\":\"2000-01-01T00:00:00.0Z\"},{\"id\": \"five\",\"text\":\"fifth item\",\"version\":\"1\",\"deleted\":false,\"updatedAt\":\"2000-01-01T00:00:00.0Z\"}]";
+    NSString* stringData4 = @"[{\"id\": \"six\",\"text\":\"sixth item\",\"version\":\"1\",\"deleted\":false,\"updatedAt\":\"2000-01-01T00:00:00.0Z\"},{\"id\": \"seven\",\"text\":\"seventh item\",\"version\":\"1\",\"deleted\":false,\"updatedAt\":\"2000-01-02T00:00:00.0Z\"}]";
+    NSString* stringData5 = @"[{\"id\": \"seven\",\"text\":\"seventh item\",\"version\":\"1\",\"deleted\":false,\"updatedAt\":\"2000-01-02T00:00:00.0Z\"}]";
     MSMultiRequestTestFilter *filter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[@200,@200,@200,@200,@200] data:@[stringData1,stringData2,stringData3,stringData4,stringData5] appendEmptyRequest:YES];
     
     MSClient *filteredClient = [client clientWithFilter:filter];
@@ -2962,16 +2962,16 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     XCTAssertEqual(6, filter.actualRequests.count);
 
     NSArray *expectedFirstRequest = @[@"__includeDeleted=true",
-                                      @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')",
-                                      @"$orderby=__updatedAt%20asc",
+                                      @"$filter=(updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')",
+                                      @"$orderby=updatedAt%20asc",
                                       @"$top=50",
                                       @"$skip=0"];
     XCTAssertTrue([self checkURL:firstRequest.URL withPath:@"/tables/TodoItem" andQuery:expectedFirstRequest],
                   @"Invalid URL: %@", firstRequest.URL.absoluteString);
     
     NSArray *expectedSecondRequest = @[@"__includeDeleted=true",
-                                       @"$filter=(__updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z')",
-                                       @"$orderby=__updatedAt%20asc",
+                                       @"$filter=(updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z')",
+                                       @"$orderby=updatedAt%20asc",
                                        @"$top=50",
                                        @"$skip=0"];
     XCTAssertTrue([self checkURL:secondRequest.URL withPath:@"/tables/TodoItem" andQuery:expectedSecondRequest],
@@ -2979,8 +2979,8 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     // TODO: why does the ordering of $orderby and __includeDeleted change here?
     NSArray *expectedThirdRequest = @[@"__includeDeleted=true",
-                                      @"$filter=(__updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z')",
-                                      @"$orderby=__updatedAt%20asc",
+                                      @"$filter=(updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z')",
+                                      @"$orderby=updatedAt%20asc",
                                       @"$skip=2",
                                       @"$top=50"];
     XCTAssertTrue([self checkURL:thirdRequest.URL withPath:@"/tables/TodoItem" andQuery:expectedThirdRequest],
@@ -2988,24 +2988,24 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 
     // TODO: why does the ordering of $orderby and __includeDeleted change here?
     NSArray *expectedFourthRequest = @[@"__includeDeleted=true",
-                                       @"$filter=(__updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z')",
-                                       @"$orderby=__updatedAt%20asc",
+                                       @"$filter=(updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z')",
+                                       @"$orderby=updatedAt%20asc",
                                        @"$skip=4",
                                        @"$top=50"];
     XCTAssertTrue([self checkURL:fourthRequest.URL withPath:@"/tables/TodoItem" andQuery:expectedFourthRequest],
                   @"Invalid URL: %@", fourthRequest.URL.absoluteString);
     
     NSArray *expectedFifthRequest = @[@"__includeDeleted=true",
-                                      @"$filter=(__updatedAt%20ge%20datetimeoffset'2000-01-02T00%3A00%3A00.000Z')",
-                                      @"$orderby=__updatedAt%20asc",
+                                      @"$filter=(updatedAt%20ge%20datetimeoffset'2000-01-02T00%3A00%3A00.000Z')",
+                                      @"$orderby=updatedAt%20asc",
                                       @"$top=50",
                                       @"$skip=0"];
     XCTAssertTrue([self checkURL:fifthRequest.URL withPath:@"/tables/TodoItem" andQuery:expectedFifthRequest],
                   @"Invalid URL: %@", fifthRequest.URL.absoluteString);
 
     NSArray *expectedSixthRequest = @[@"__includeDeleted=true",
-                                      @"$filter=(__updatedAt%20ge%20datetimeoffset'2000-01-02T00%3A00%3A00.000Z')",
-                                      @"$orderby=__updatedAt%20asc",
+                                      @"$filter=(updatedAt%20ge%20datetimeoffset'2000-01-02T00%3A00%3A00.000Z')",
+                                      @"$orderby=updatedAt%20asc",
                                       @"$skip=1",
                                       @"$top=50"];
     
@@ -3015,8 +3015,8 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 
 -(void) testIncrementalPullAppendsFilter
 {
-    NSString* stringData1 = @"[{\"id\":\"one\",\"text\":\"MATCH\",\"__version\":\"1\",\"__deleted\":false,\"__updatedAt\":\"1999-12-03T15:44:29.0Z\"},{\"id\":\"two\",\"__version\":\"1\",\"__deleted\":false,\"text\":\"MATCH\", \"__updatedAt\":\"2000-01-01T00:00:00.0Z\"}]";
-    NSString* stringData2 = @"[{\"id\":\"two\",\"__version\":\"1\",\"__deleted\":false,\"text\":\"MATCH\", \"__updatedAt\":\"2000-01-01T00:00:00.0Z\"}]";
+    NSString* stringData1 = @"[{\"id\":\"one\",\"text\":\"MATCH\",\"version\":\"1\",\"deleted\":false,\"updatedAt\":\"1999-12-03T15:44:29.0Z\"},{\"id\":\"two\",\"version\":\"1\",\"deleted\":false,\"text\":\"MATCH\", \"updatedAt\":\"2000-01-01T00:00:00.0Z\"}]";
+    NSString* stringData2 = @"[{\"id\":\"two\",\"version\":\"1\",\"deleted\":false,\"text\":\"MATCH\", \"updatedAt\":\"2000-01-01T00:00:00.0Z\"}]";
     MSMultiRequestTestFilter *filter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[@200,@200] data:@[stringData1,stringData2] appendEmptyRequest:YES];
     
     MSClient *filteredClient = [client clientWithFilter:filter];
@@ -3040,16 +3040,16 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     NSURLRequest *thirdRequest = (NSURLRequest *)filter.actualRequests[2];
     
     NSArray *expectedFirstRequest = @[@"__includeDeleted=true",
-                                      @"$filter=((text%20eq%20'MATCH')%20and%20(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z'))",
-                                      @"$orderby=__updatedAt%20asc",
+                                      @"$filter=((text%20eq%20'MATCH')%20and%20(updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z'))",
+                                      @"$orderby=updatedAt%20asc",
                                       @"$top=50",
                                       @"$skip=0"];
     XCTAssertTrue([self checkURL:firstRequest.URL withPath:@"/tables/TodoItem" andQuery:expectedFirstRequest],
                   @"Invalid URL: %@", firstRequest.URL.absoluteString);
 
     NSArray *expectedSecondRequest = @[@"__includeDeleted=true",
-                                       @"$filter=((text%20eq%20'MATCH')%20and%20(__updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z'))",
-                                       @"$orderby=__updatedAt%20asc",
+                                       @"$filter=((text%20eq%20'MATCH')%20and%20(updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z'))",
+                                       @"$orderby=updatedAt%20asc",
                                        @"$top=50",
                                        @"$skip=0"];
     XCTAssertTrue([self checkURL:secondRequest.URL withPath:@"/tables/TodoItem" andQuery:expectedSecondRequest],
@@ -3057,8 +3057,8 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
 
     NSArray *expectedThirdRequest = @[@"__includeDeleted=true",
-                                      @"$filter=((text%20eq%20'MATCH')%20and%20(__updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z'))",
-                                      @"$orderby=__updatedAt%20asc",
+                                      @"$filter=((text%20eq%20'MATCH')%20and%20(updatedAt%20ge%20datetimeoffset'2000-01-01T00%3A00%3A00.000Z'))",
+                                      @"$orderby=updatedAt%20asc",
                                       @"$skip=1",
                                       @"$top=50"];
     XCTAssertTrue([self checkURL:thirdRequest.URL withPath:@"/tables/TodoItem" andQuery:expectedThirdRequest],

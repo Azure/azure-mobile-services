@@ -194,12 +194,12 @@
 
 +(NSArray *) testValidSystemProperties
 {
-    return @[@"__createdAt", @"__updatedAt", @"__version", @"__CreatedAt", @"__futureSystemProperty"];
+    return @[@"createdAt", @"updatedAt", @"version", @"deleted"];
 }
 
 +(NSArray *) testNonSystemProperties
 {
-    return @[ @"someProperty", @"createdAt", @"updatedAt", @"version", @"_createdAt", @"_updatedAt", @"_version", @"X__createdAt"];
+    return @[ @"someProperty", @"_createdAt", @"_updatedAt", @"_version", @"X__createdAt"];
 }
 
 @end

@@ -37,7 +37,7 @@
 
 /// Converts a managed object from the core data layer back into a dictionary with the
 /// properties expected when using a MSTable or MSSyncTable
-+(nonnull NSDictionary *) tableItemFromManagedObject:(nonnull NSManagedObject *)object;
+-(nonnull NSDictionary *) tableItemFromManagedObject:(nonnull NSManagedObject *)object;
 
 /// @}
 

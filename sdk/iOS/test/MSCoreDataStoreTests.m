@@ -197,7 +197,7 @@ static NSString *const TableName = @"TodoItem";
                                MSSystemColumnVersion: @"AAAAAAAAjlg=",
                                MSSystemColumnCreatedAt: testDate,
                                MSSystemColumnUpdatedAt: now,
-                               @"__meaningOfLife": @42,
+                               @"meaningOfLife": @42,
                                MSSystemColumnDeleted : @NO
                            };
     
@@ -215,7 +215,7 @@ static NSString *const TableName = @"TodoItem";
     XCTAssertEqualObjects(item[MSSystemColumnUpdatedAt], originalItem[MSSystemColumnUpdatedAt], @"Incorrect updated at");
     XCTAssertEqualObjects(item[MSSystemColumnCreatedAt], originalItem[MSSystemColumnCreatedAt], @"Incorrect created at");
     XCTAssertEqualObjects(item[MSSystemColumnDeleted], originalItem[MSSystemColumnDeleted], @"Incorrect deleted");
-    XCTAssertEqualObjects(item[@"__meaningOfLife"], originalItem[@"__meaningOfLife"], @"Incorrect meaning of life");
+    XCTAssertEqualObjects(item[@"meaningOfLife"], originalItem[@"meaningOfLife"], @"Incorrect meaning of life");
     
     NSSet *msKeys = [item keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
         *stop = [(NSString *)key hasPrefix:@"ms_"];
@@ -240,7 +240,7 @@ static NSString *const TableName = @"TodoItem";
     XCTAssertEqualObjects(item[MSSystemColumnUpdatedAt], originalItem[MSSystemColumnUpdatedAt]);
     XCTAssertEqualObjects(item[MSSystemColumnCreatedAt], originalItem[MSSystemColumnCreatedAt]);
     XCTAssertEqualObjects(item[MSSystemColumnDeleted], originalItem[MSSystemColumnDeleted]);
-    XCTAssertEqualObjects(item[@"__meaningOfLife"], originalItem[@"__meaningOfLife"]);
+    XCTAssertEqualObjects(item[@"meaningOfLife"], originalItem[@"meaningOfLife"]);
     
     msKeys = [item keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
         *stop = [(NSString *)key hasPrefix:@"ms_"];
@@ -388,7 +388,7 @@ static NSString *const TableName = @"TodoItem";
     XCTAssertNotNil(item[@"text"]);
     
     // NOTE: to not break oc, you get version regardless
-    XCTAssertNotNil(item[@"__version"]);
+    XCTAssertNotNil(item[@"version"]);
 }
 
 -(void)testReadWithQuery_Select_SystemColumns
@@ -396,9 +396,9 @@ static NSString *const TableName = @"TodoItem";
     NSError *error;
     
     NSArray *testData = @[
-      @{ MSSystemColumnId:@"A", @"text": @"t1", MSSystemColumnVersion: @"AAAAAAAAjlg=", @"__meaningOfLife": @42},
-      @{ MSSystemColumnId:@"B", @"text": @"t2", MSSystemColumnVersion: @"AAAAAAAAjlh=", @"__meaningOfLife": @43},
-      @{ MSSystemColumnId:@"C", @"text": @"t3", MSSystemColumnVersion: @"AAAAAAAAjli=", @"__meaningOfLife": @44}
+      @{ MSSystemColumnId:@"A", @"text": @"t1", MSSystemColumnVersion: @"AAAAAAAAjlg=", @"meaningOfLife": @42},
+      @{ MSSystemColumnId:@"B", @"text": @"t2", MSSystemColumnVersion: @"AAAAAAAAjlh=", @"meaningOfLife": @43},
+      @{ MSSystemColumnId:@"C", @"text": @"t3", MSSystemColumnVersion: @"AAAAAAAAjli=", @"meaningOfLife": @44}
     ];
     
     [self.store upsertItems:testData table:@"ManySystemColumns" orError:&error];
@@ -408,7 +408,7 @@ static NSString *const TableName = @"TodoItem";
     MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"ManySystemColumns"
                                                        client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
-    query.selectFields = @[@"text", @"__version", @"__meaningOfLife"];
+    query.selectFields = @[@"text", @"version", @"meaningOfLife"];
     
     MSSyncContextReadResult *result = [self.store readWithQuery:query orError:&error];
     XCTAssertNil(error, @"readWithQuery: failed: %@", error.description);
@@ -417,7 +417,7 @@ static NSString *const TableName = @"TodoItem";
     
     NSDictionary *item = (result.items)[0];
     XCTAssertNotNil(item[@"text"]);
-    XCTAssertNotNil(item[@"__meaningOfLife"]);
+    XCTAssertNotNil(item[@"meaningOfLife"]);
     XCTAssertNotNil(item[MSSystemColumnVersion]);
     XCTAssertEqual(item.count, 3, @"Select returned extra columns");
 }
@@ -562,15 +562,13 @@ static NSString *const TableName = @"TodoItem";
     
     TodoItem *toDoItemObject = results[0];
     // Confirm we are using an internal version column
-    XCTAssertEqualObjects(toDoItemObject.ms_version, @"APPLE");
+    XCTAssertEqualObjects(toDoItemObject.version, @"APPLE");
     
-    NSDictionary *todoItemDictionary = [MSCoreDataStore tableItemFromManagedObject:toDoItemObject];
+    NSDictionary *todoItemDictionary = [self.store tableItemFromManagedObject:toDoItemObject];
 
     XCTAssertNotNil(todoItemDictionary);
     XCTAssertEqual(todoItemDictionary.count, 4);
     XCTAssertEqualObjects(todoItemDictionary[MSSystemColumnId], @"A");
-    // Confirm version was remapped
-    XCTAssertNil(todoItemDictionary[@"ms_version"]);
     XCTAssertEqualObjects(todoItemDictionary[MSSystemColumnVersion], @"APPLE");
     XCTAssertEqualObjects(todoItemDictionary[@"text"], @"test1");
     
@@ -580,9 +578,9 @@ static NSString *const TableName = @"TodoItem";
 - (void) populateTestData
 {
     NSError *error;
-    NSArray *testArray = @[@{@"id":@"A", @"text": @"test1", @"sort":@10, @"__version":@"APPLE"},
-                          @{@"id":@"B", @"text": @"test2", @"sort":@15, @"__version":@"APPLE"},
-                          @{@"id":@"C", @"text": @"test3", @"sort":@5, @"__version":@"APPLE"}];
+    NSArray *testArray = @[@{@"id":@"A", @"text": @"test1", @"sort":@10, @"version":@"APPLE"},
+                          @{@"id":@"B", @"text": @"test2", @"sort":@15, @"version":@"APPLE"},
+                          @{@"id":@"C", @"text": @"test3", @"sort":@5, @"version":@"APPLE"}];
     
     [self.store upsertItems:testArray table:TableName orError:&error];
     XCTAssertNil(error, @"upsert failed: %@", error.description);

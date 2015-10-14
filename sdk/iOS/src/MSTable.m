@@ -14,10 +14,10 @@
 #pragma mark * MSTable Implementation
 
 NSString *const MSSystemColumnId = @"id";
-NSString *const MSSystemColumnCreatedAt = @"__createdAt";
-NSString *const MSSystemColumnUpdatedAt = @"__updatedAt";
-NSString *const MSSystemColumnVersion = @"__version";
-NSString *const MSSystemColumnDeleted = @"__deleted";
+NSString *const MSSystemColumnCreatedAt = @"createdAt";
+NSString *const MSSystemColumnUpdatedAt = @"updatedAt";
+NSString *const MSSystemColumnVersion = @"version";
+NSString *const MSSystemColumnDeleted = @"deleted";
 
 @implementation MSTable
 

@@ -892,7 +892,7 @@
 -(void)testSystemPropertiesRemovedWithStringId
 {
     NSError *error;
-    NSDictionary *item = @{@"id": @"one", @"__Prop1": @6, @"__prop4": @"help"};
+    NSDictionary *item = @{@"id": @"one", @"version": @6, @"createdAt": @"help", @"updatedAt": @6, @"deleted": @NO};
     NSData *data = [serializer dataFromItem:item idAllowed:YES ensureDictionary:NO removeSystemProperties:YES orError:&error];
     
     XCTAssertNil(error, @"An error occurred: %@", error.localizedDescription);
