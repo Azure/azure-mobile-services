@@ -59,28 +59,33 @@
 #pragma mark * Public Local Storage Management commands
 
 
--(void)pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion
+-(NSOperation *)pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId completion:(MSSyncBlock)completion
 {
-    [self.client.syncContext pullWithQuery:query queryId:queryId completion:completion];
+    return [self pullWithQuery:query queryId:queryId settings:nil completion:completion];
 }
 
--(void)purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion
+-(NSOperation *)pullWithQuery:(MSQuery *)query queryId:(NSString *)queryId settings:(id)pullSettings completion:(MSSyncBlock)completion
+{
+    return [self.client.syncContext pullWithQuery:query queryId:queryId settings:pullSettings completion:completion];
+}
+
+-(NSOperation *)purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion
 {
     // If no query, purge all records in the table by default
     if (query == nil) {
         MSQuery *allRecords = [[MSQuery alloc] initWithSyncTable:self];
-        [self.client.syncContext purgeWithQuery:allRecords completion:completion];
+        return [self.client.syncContext purgeWithQuery:allRecords completion:completion];
         
     } else {
-        [self.client.syncContext purgeWithQuery:query completion:completion];
+        return [self.client.syncContext purgeWithQuery:query completion:completion];
     }
 }
 
 /// Purges all data, pending operations, operation errors, and metadata for the
 /// MSSyncTable from the local store.
--(void)forcePurgeWithCompletion:(MSSyncBlock)completion
+-(NSOperation *)forcePurgeWithCompletion:(MSSyncBlock)completion
 {
-    [self.client.syncContext forcePurgeWithTable:self completion:completion];
+    return [self.client.syncContext forcePurgeWithTable:self completion:completion];
 }
 
 #pragma mark * Public Read Methods
@@ -88,11 +93,7 @@
 
 -(void)readWithId:(NSString *)itemId completion:(MSItemBlock)completion
 {
-    NSError *error;
-    NSDictionary *item = [self.client.syncContext syncTable:self.name readWithId:itemId orError:&error];
-    if (completion) {
-        completion(item, error);
-    }
+    [self.client.syncContext syncTable:self.name readWithId:itemId completion:completion];
 }
 
 -(void)readWithCompletion:(MSReadQueryBlock)completion

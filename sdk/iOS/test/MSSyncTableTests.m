@@ -18,8 +18,11 @@
 #import "MSTableOperationError.h"
 #import "MSSyncContextInternal.h"
 #import "MSTableConfigValue.h"
+#import "MSPullSettingsInternal.h"
+#import "MSClientInternal.h"
 
 static NSString *const TodoTableNoVersion = @"TodoNoVersion";
+static NSString *const TodoTable = @"TodoItem";
 static NSString *const AllColumnTypesTable = @"ColumnTypes";
 static NSString *const SyncContextQueueName = @"Sync Context: Operation Callbacks";
 
@@ -100,6 +103,29 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     XCTAssertNotNil(newItem);
     XCTAssertEqualObjects(newItem[@"text"], item[@"text"]);
 }
+
+-(void) testInsertItemWithNoIdAndNilIdRecordExistsSuccess
+{
+    XCTestExpectation *expectation = [self expectationWithDescription:self.name];
+
+    // Place record with a id of nil, to ensure the id check is using an actual value for id
+    [offline upsertItems:@[ @{ @"text":@"record with nil id" } ]
+                   table:TodoTableNoVersion
+                 orError:nil];
+    
+    MSSyncTable *todoTable = [client syncTableWithName:TodoTableNoVersion];
+    
+    id item = @{ @"text":@"test name" };
+    [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
+        // If the id check used nil, we would have gotten an error that the id was in use
+        XCTAssertNil(error);
+        XCTAssertNotNil(item[@"id"], @"The item should have an id");
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
+}
+
 
 -(void) testInsertItemWithInvalidId
 {
@@ -271,12 +297,14 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     // Now try sending the pending operation to the server
     expectation = [self expectationWithDescription:@"Push for Valid Item"];
     
-    [client.syncContext pushWithCompletion:^(NSError *error) {
+    NSOperation *push = [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(insertRanToServer, @"the insert call didn't go to the server");
         XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
         [expectation fulfill];
     }];
+    
+    XCTAssertNotNil(push);
     
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
@@ -333,12 +361,13 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     // Now push this item to the server
     expectation = [self expectationWithDescription:@"Push with many column types"];
     
-    [client.syncContext pushWithCompletion:^(NSError *error) {
+    NSOperation *push = [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(insertRanToServer, @"the insert call didn't go to the server");
         XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
         [expectation fulfill];
     }];
+    XCTAssertNotNil(push);
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
@@ -371,7 +400,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     // Now verify that the item is invalid for the server to handle
     expectation = [self expectationWithDescription:@"Push with Binary data in it"];
-    [client.syncContext pushWithCompletion:^(NSError *error) {
+    NSOperation *push = [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertFalse(insertRanToServer);
         XCTAssertNotNil(error);
         XCTAssertEqual(error.code, MSPushCompleteWithErrors);
@@ -387,6 +416,9 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
         [expectation fulfill];
         
     }];
+    
+    XCTAssertNotNil(push);
+    
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
@@ -416,12 +448,13 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     // Now push the first item to the server
     expectation = [self expectationWithDescription:@"Pushing First Insert"];
-    [client.syncContext pushWithCompletion:^(NSError *error) {
+        NSOperation *push = [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(serverCalls == 1, @"the insert call didn't go to the server");
         
         [expectation fulfill];
     }];
+    XCTAssertNotNil(push);
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
     
     // Create the a new item and insert it
@@ -436,7 +469,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 
     // Finally, push the second item to server
     expectation = [self expectationWithDescription:@"Pushing Second Insert"];
-    [client.syncContext pushWithCompletion:^(NSError *error) {
+    push = [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(serverCalls == 2, @"the insert call didn't go to the server");
         XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
@@ -444,6 +477,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
         
         [expectation fulfill];
     }];
+    XCTAssertNotNil(push);
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
@@ -474,7 +508,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     // Now try to push and trigger a conflict response
     expectation = [self expectationWithDescription:@"Push with server conflict"];
-    [client.syncContext pushWithCompletion:^(NSError *error) {
+    NSOperation *push = [client.syncContext pushWithCompletion:^(NSError *error) {
         // Verify the call went to the server
         XCTAssertEqual(serverCalls, 1, @"the insert call didn't go to the server");
         
@@ -503,6 +537,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
         
         [expectation fulfill];
     }];
+    XCTAssertNotNil(push);
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
@@ -548,13 +583,14 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     // Push queue to server
     expectation = [self expectationWithDescription:self.name];
-    [client.syncContext pushWithCompletion:^(NSError *error) {
+    NSOperation *push = [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(callsToServer == 1, @"only one call to server should have been made");
         XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
         [expectation fulfill];
         
     }];
+    XCTAssertNotNil(push);
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
@@ -591,13 +627,14 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     // Push to server (no calls expected)
     expectation = [self expectationWithDescription:@"Pushing (expecting no items)"];
-    [client.syncContext pushWithCompletion:^(NSError *error) {
+    NSOperation *push = [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(callsToServer == 0, @"no calls to server should have been made");
         XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
         [expectation fulfill];
         
     }];
+    XCTAssertNotNil(push);
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
@@ -764,12 +801,13 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     
     done = NO;
-    [client.syncContext pushWithCompletion:^(NSError *error) {
+    NSOperation *push = [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(updateSentToServer, @"the update call didn't go to the server");
         XCTAssertEqualObjects([NSOperationQueue currentQueue].name, SyncContextQueueName);
         done = YES;
     }];
+    XCTAssertNotNil(push);
     XCTAssertTrue([self waitForTest:2000.1], @"Test timed out.");
 }
 
@@ -828,11 +866,12 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     
     done = NO;
-    [client.syncContext pushWithCompletion:^(NSError *error) {
+    NSOperation *push = [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(callsToServer == 1, @"expected only 1 call to the server");
         done = YES;
     }];
+    XCTAssertNotNil(push);
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
@@ -869,11 +908,12 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     
     done = NO;
-    [client.syncContext pushWithCompletion:^(NSError *error) {
+    NSOperation *push = [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(callsToServer == 1, @"expected only 1 call to the server");
         done = YES;
     }];
+    XCTAssertNotNil(push);
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
@@ -911,11 +951,12 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     
     done = NO;
-    [client.syncContext pushWithCompletion:^(NSError *error) {
+    NSOperation *push = [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(deleteSentToServer, @"the delete call didn't go to the server");
         done = YES;
     }];
+    XCTAssertNotNil(push);
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
@@ -949,11 +990,12 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     XCTAssertTrue([self waitForTest:1000.1], @"Test timed out.");
     
     done = NO;
-    [client.syncContext pushWithCompletion:^(NSError *error) {
+    NSOperation *push = [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertTrue(deleteSentToServer, @"the delete call didn't go to the server");
         done = YES;
     }];
+    XCTAssertNotNil(push);
     XCTAssertTrue([self waitForTest:2000.1], @"Test timed out.");
 }
 
@@ -1008,6 +1050,25 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
 
 #pragma mark Read Tests
 
+-(void) testReadWithIDSucces
+{
+    NSArray *items = @[ @{ @"id": @"123", @"text": @"hello" },
+                        @{ @"id": @"456", @"text": @"goodbye" } ];
+    [offline upsertItems:items table:TodoTable orError:nil];
+    
+    MSSyncTable *todoTable = [client syncTableWithName:TodoTable];
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Read"];
+    
+    [todoTable readWithId:@"123" completion:^(NSDictionary *item, NSError *error) {
+        XCTAssertNotNil(item);
+        XCTAssertNil(error);
+        
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:10.0 handler:nil];
+}
 
 -(void) testReadWithIdNoItemSuccess
 {
@@ -1019,6 +1080,56 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
         XCTAssertNil(item, @"No item should have been found");
         XCTAssertNil(error, @"No error should have been returned");
     }];
+}
+
+
+-(void) testReadWithCompletionSuccess
+{
+    NSArray *items = @[ @{ @"id": @"123", @"text": @"hello" },
+                        @{ @"id": @"456", @"text": @"goodbye" } ];
+    [offline upsertItems:items table:TodoTable orError:nil];
+    
+    MSSyncTable *todoTable = [client syncTableWithName:TodoTable];
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Read"];
+    
+    [todoTable readWithCompletion:^(MSQueryResult *result, NSError *error) {
+        XCTAssertNil(error);
+        XCTAssertNotNil(result);
+        XCTAssertEqual(result.items.count, 2);
+        XCTAssertEqual(result.totalCount, -1);
+        
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:10.0 handler:nil];
+}
+
+-(void) testReadWithPredicateSuccess
+{
+    NSArray *items = @[
+        @{ @"id": @"123", @"text": @"hello" },
+        @{ @"id": @"456", @"text": @"hi" },
+        @{ @"id": @"789", @"text": @"goodbye" }
+    ];
+    
+    [offline upsertItems:items table:TodoTable orError:nil];
+    
+    MSSyncTable *todoTable = [client syncTableWithName:TodoTable];
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Read"];
+
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"text BEGINSWITH 'h'"];
+    [todoTable readWithPredicate:predicate completion:^(MSQueryResult *result, NSError *error) {
+        XCTAssertNil(error);
+        XCTAssertNotNil(result);
+        XCTAssertEqual(result.items.count, 2);
+        XCTAssertEqual(result.totalCount, -1);
+        
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:10.0 handler:nil];
 }
 
 
@@ -1127,9 +1238,593 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     XCTAssertEqual(filteredClient.syncContext.pendingOperationsCount, 3);
 }
 
+// Tests cancellation of the push operation at various stages of a push workflow.
+// - Verifies that a push following a cancelled push operation works as expected
+// - Verifies that cancelling a push operation finishes the push NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pushed to the server
+-(void) testPushCancellability_SuccessfulPush_CancelBeforeSendingPushRequest
+{
+    XCTAssertEqual([self performPushWithCancellationPoint:0 serverResponseCode:200], 0, "Push cancellation failed at cancellation point 0");
+}
+
+// Tests cancellation of the push operation at various stages of a push workflow.
+// - Verifies that a push following a cancelled push operation works as expected
+// - Verifies that cancelling a push operation finishes the push NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pushed to the server
+-(void) testPushCancellability_SuccessfulPush_CancelWhileProcessingPushreponse
+{
+    XCTAssertEqual([self performPushWithCancellationPoint:1 serverResponseCode:200], 0, "Push cancellation failed at cancellation point 1");
+}
+
+// Tests cancellation of the push operation at various stages of a push workflow.
+// - Verifies that a push following a cancelled push operation works as expected
+// - Verifies that cancelling a push operation finishes the push NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pushed to the server
+-(void) testPushCancellability_SuccessfulPush_CancelFromCompletionBlock
+{
+    XCTAssertEqual([self performPushWithCancellationPoint:2 serverResponseCode:200], 1, "Push cancellation failed at cancellation point 2");
+}
+
+// Tests cancellation of the push operation at various stages of a push workflow.
+// - Verifies that a push following a cancelled push operation works as expected
+// - Verifies that cancelling a push operation finishes the push NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pushed to the server
+-(void) testPushCancellability_SuccessfulPush_CancelRightAfterPushWithCompletionReturns
+{
+    XCTAssertEqual([self performPushWithCancellationPoint:3 serverResponseCode:200], 0, "Push cancellation failed at cancellation point 3");
+}
+
+// Tests cancellation of the push operation at various stages of a push workflow.
+// - Verifies that a push following a cancelled push operation works as expected
+// - Verifies that cancelling a push operation finishes the push NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pushed to the server
+-(void) testPushCancellability_UnsuccessfulPush_CancelBeforeSendingPushRequest
+{
+    XCTAssertEqual([self performPushWithCancellationPoint:0 serverResponseCode:500], 0, "Push cancellation failed at cancellation point 0");
+}
+
+
+// Tests cancellation of the push operation at various stages of a push workflow.
+// - Verifies that a push following a cancelled push operation works as expected
+// - Verifies that cancelling a push operation finishes the push NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pushed to the server
+-(void) testPushCancellability_UnsuccessfulPush_CancelWhileProcessingPushreponse
+{
+    XCTAssertEqual([self performPushWithCancellationPoint:1 serverResponseCode:500], 0, "Push cancellation failed at cancellation point 1");
+}
+
+// Tests cancellation of the push operation at various stages of a push workflow.
+// - Verifies that a push following a cancelled push operation works as expected
+// - Verifies that cancelling a push operation finishes the push NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pushed to the server
+-(void) testPushCancellability_UnsuccessfulPush_CancelFromCompletionBlock
+{
+    XCTAssertEqual([self performPushWithCancellationPoint:2 serverResponseCode:500], 0, "Push cancellation failed at cancellation point 2");
+}
+
+// Tests cancellation of the push operation at various stages of a push workflow.
+// - Verifies that a push following a cancelled push operation works as expected
+// - Verifies that cancelling a push operation finishes the push NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pushed to the server
+-(void) testPushCancellability_UnsuccessfulPush_CancelRightAfterPushWithCompletionReturns
+{
+    XCTAssertEqual([self performPushWithCancellationPoint:3 serverResponseCode:500], 0, "Push cancellation failed at cancellation point 3");
+}
+
+// Performs push and cancels it at the specified cancellation point.
+// - Verifies that a push operation following a cancelled push operation works as expected
+// - Verifies that cancelling a push finishes the push NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pushed to the server
+// - Returns the number of items pushed to the server.
+// Cancellation point 0: just before the push request is sent to the server
+// Cancellation point 1: while processing the push response
+// Cancellation point 2: while executing the push completion block
+// Cancellation point 4: immediately after the push NSOperation is returned by pushWithCompletion:
+-(int) performPushWithCancellationPoint:(int) requestedCancellationPoint serverResponseCode:(NSInteger)serverResponseCode
+{
+    // Initialization
+    MSTestFilter *filter = [MSTestFilter testFilterWithStatusCode:serverResponseCode data:@"{\"id\": \"id1\", \"text\":\"server\"}"];
+    MSClient *filteredClient = [client clientWithFilter:filter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
+
+    __block NSOperation *pushOperation;
+
+    // Define the filter
+    filter.onInspectRequest = ^(NSURLRequest *request) {
+
+        // Cancellation point 0
+        if (requestedCancellationPoint == 0) {
+            [pushOperation cancel];
+        }
+        
+        return request;
+    };
+    
+    filter.onInspectResponseData = ^(NSURLRequest *request, NSData *data) {
+
+        // Cancellation point 1
+        if (requestedCancellationPoint == 1) {
+            [pushOperation cancel];
+        }
+        
+        return data;
+    };
+    
+    // Perform an insert
+    XCTestExpectation *insertExpectation = [self expectationWithDescription:@"insert expectation"];
+    [todoTable insert:@{ @"id" : @"id1", @"text" : @"client" } completion:^(NSDictionary *item, NSError *error) {
+        [insertExpectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:10 handler:nil];
+    
+    // Perform a push
+    pushOperation = [filteredClient.syncContext pushWithCompletion:^(NSError *error) {
+        
+        // Cancellation point 2
+        if (requestedCancellationPoint == 2) {
+            [pushOperation cancel];
+        }
+    }];
+    
+    // Cancellation point 3
+    if (requestedCancellationPoint == 3) {
+        [pushOperation cancel];
+    }
+
+    [self verifyFinished:pushOperation];
+
+    int synchronizedItemCount = [self synchronizedItemCount];
+
+    // Perform another insert
+    insertExpectation = [self expectationWithDescription:@"insert expectation"];
+    [todoTable insert:@{ @"id" : @"id2", @"text" : @"client" } completion:^(NSDictionary *item, NSError *error) {
+        [insertExpectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:10 handler:nil];
+
+    XCTAssertEqual([self performFollowupPushWithClient:client], 2, "Expected all inserted items to have been pushed to the server by now");
+
+    return synchronizedItemCount;
+}
+
+// Performs a push operation and returns the count of all client items pushed so far
+-(int) performFollowupPushWithClient:(MSClient *)pushClient
+{
+    // Define a filter that returns an appropriate server response for the requested item
+    MSTestFilter *filter = [MSTestFilter new];
+    MSClient *filteredClient = [pushClient clientWithFilter:filter];
+
+    filter.ignoreNextFilter = YES;
+    filter.onInspectResponseData = ^(NSURLRequest *request, NSData *data) {
+        NSError *error = nil;
+        
+        NSDictionary *item = [filteredClient.serializer itemFromData:request.HTTPBody withOriginalItem:nil ensureDictionary:YES orError:&error];
+        XCTAssertNil(error);
+        
+        NSString *responseString = [NSString stringWithFormat:@"{\"id\": \"%@\", \"text\":\"server\"}", item[@"id"]];
+        NSData *pushResponse = [responseString dataUsingEncoding:NSUTF8StringEncoding];
+
+        return pushResponse;
+    };
+
+    // Perform push
+    XCTestExpectation *pushExpectation = [self expectationWithDescription:@"push expectation"];
+    [filteredClient.syncContext pushWithCompletion:^(NSError *error) {
+        XCTAssertNil(error, "Expected successful push");
+        [pushExpectation fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:10 handler:nil];
+    
+    return [self synchronizedItemCount];
+}
+
+// Returns the number of synchronized items, i.e. items that are present on the server as well as the client.
+// An item is synchronized if it was successfully pushed to the server from the client OR
+// if it was successfully pulled from the server to the client.
+-(int) synchronizedItemCount
+{
+    // Initialization
+    MSSyncTable *todoTable = [client syncTableWithName:TodoTableNoVersion];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
+    query.predicate = [NSPredicate predicateWithFormat:@"text == 'server'"];
+
+    // Number synchronized items
+    __block int numSynchronizedItems = 0;
+    
+    XCTestExpectation *readExpectation = [self expectationWithDescription:@"read expectation"];
+    
+    // Read from the table
+    [client.syncContext readWithQuery:query completion:^(MSQueryResult *result, NSError *error) {
+        
+        numSynchronizedItems = result.items.count;
+        [readExpectation fulfill];
+        
+    }];
+    
+    [self waitForExpectationsWithTimeout:10 handler:nil];
+    
+    return numSynchronizedItems;
+}
+
+// Verify that the specified NSOperation has finished
+-(void) verifyFinished:(NSOperation *)operation
+{
+    XCTestExpectation *completionExpectation = [self expectationWithDescription:@"Completion expectation"];
+    
+    // Define an operation and make it dependent on blockingOperation
+    NSOperation *dependentOperation = [NSBlockOperation blockOperationWithBlock:^{
+        [completionExpectation fulfill];
+    }];
+
+    // Add the dependentOperation to the queue after configuring dependencies
+    [dependentOperation addDependency:operation];
+    [[NSOperationQueue new] addOperation:dependentOperation];
+    
+    [self waitForExpectationsWithTimeout:10 handler:nil];
+}
 
 #pragma mark Pull Tests
 
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_SuccessfulPush_SuccessfulPull_CancelBeforeSendingPushRequest
+{
+    XCTAssertEqual([self performPullWithCancellationPoint:0 serverPushResponseCode:@200 serverPullResponseCode:@200], 1, "Pull cancellation failed at cancellation point 0");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_SuccessfulPush_SuccessfulPull_CancelWhileProcessingPushResponse
+
+{
+    XCTAssertEqual([self performPullWithCancellationPoint:1 serverPushResponseCode:@200 serverPullResponseCode:@200], 1, "Pull cancellation failed at cancellation point 1");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_SuccessfulPush_SuccessfulPull_CancelBeforeSendingPullReuest
+{
+    XCTAssertEqual([self performPullWithCancellationPoint:2 serverPushResponseCode:@200 serverPullResponseCode:@200], 1, "Pull cancellation failed at cancellation point 2");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_SuccessfulPush_SuccessfulPull_CancelWhileProcessingPullResponse
+{
+    XCTAssertEqual([self performPullWithCancellationPoint:3 serverPushResponseCode:@200 serverPullResponseCode:@200], 1, "Pull cancellation failed at cancellation point 3");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_SuccessfulPush_SuccessfulPull_CancelFromCompletionBlock
+{
+
+    XCTAssertEqual([self performPullWithCancellationPoint:4 serverPushResponseCode:@200 serverPullResponseCode:@200], 2, "Pull cancellation failed at cancellation point 4");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_SuccessfulPush_SuccessfulPull_CancelRightAfterPullWithQueryReturns
+{
+    XCTAssertEqual([self performPullWithCancellationPoint:5 serverPushResponseCode:@200 serverPullResponseCode:@200], 1, "Pull cancellation failed at cancellation point 5");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_SuccessfulPush_UnsuccessfulPull_CancelBeforeSendingPushRequest
+{
+    XCTAssertEqual([self performPullWithCancellationPoint:0 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed at cancellation point 0");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_SuccessfulPush_UnsuccessfulPull_CancelWhileProcessingPushResponse
+{
+
+    XCTAssertEqual([self performPullWithCancellationPoint:1 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed at cancellation point 1");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_SuccessfulPush_UnsuccessfulPull_CancelBeforeSendingPullReuest
+{
+    XCTAssertEqual([self performPullWithCancellationPoint:2 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed at cancellation point 2");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_SuccessfulPush_UnsuccessfulPull_CancelWhileProcessingPullResponse
+{
+    XCTAssertEqual([self performPullWithCancellationPoint:3 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed at cancellation point 3");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_SuccessfulPush_UnsuccessfulPull_CancelFromCompletionBlock
+{
+    XCTAssertEqual([self performPullWithCancellationPoint:4 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed at cancellation point 4");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_SuccessfulPush_UnsuccessfulPull_CancelRightAfterPullWithQueryReturns
+{
+    XCTAssertEqual([self performPullWithCancellationPoint:5 serverPushResponseCode:@200 serverPullResponseCode:@500], 1, "Pull cancellation failed at cancellation point 5");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_UnsuccessfulPush_SuccessfulPull_CancelBeforeSendingPushRequest
+{
+    XCTAssertEqual([self performPullWithCancellationPoint:0 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed at cancellation point 0");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_UnsuccessfulPush_SuccessfulPull_CancelWhileProcessingPushResponse
+
+{
+    XCTAssertEqual([self performPullWithCancellationPoint:1 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed at cancellation point 1");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_UnsuccessfulPush_SuccessfulPull_CancelBeforeSendingPullReuest
+{
+    XCTAssertEqual([self performPullWithCancellationPoint:2 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed at cancellation point 2");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_UnsuccessfulPush_SuccessfulPull_CancelWhileProcessingPullResponse
+{
+    XCTAssertEqual([self performPullWithCancellationPoint:3 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed at cancellation point 3");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_UnsuccessfulPush_SuccessfulPull_CancelFromCompletionBlock
+{
+    XCTAssertEqual([self performPullWithCancellationPoint:4 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed at cancellation point 4");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_UnsuccessfulPush_SuccessfulPull_CancelRightAfterPullWithQueryReturns
+{
+    XCTAssertEqual([self performPullWithCancellationPoint:5 serverPushResponseCode:@500 serverPullResponseCode:@200], 0, "Pull cancellation failed at cancellation point 5");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_UnsuccessfulPush_UnsuccessfulPull_CancelBeforeSendingPushRequest
+{
+    XCTAssertEqual([self performPullWithCancellationPoint:0 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed at cancellation point 0");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_UnsuccessfulPush_UnsuccessfulPull
+{
+    XCTAssertEqual([self performPullWithCancellationPoint:1 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed at cancellation point 1");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_UnsuccessfulPush_UnsuccessfulPull_CancelBeforeSendingPullReuest
+{
+    XCTAssertEqual([self performPullWithCancellationPoint:2 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed at cancellation point 2");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_UnsuccessfulPush_UnsuccessfulPull_CancelWhileProcessingPullResponse
+{
+    XCTAssertEqual([self performPullWithCancellationPoint:3 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed at cancellation point 3");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_UnsuccessfulPush_UnsuccessfulPull_CancelFromCompletionBlock
+{
+    XCTAssertEqual([self performPullWithCancellationPoint:4 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed at cancellation point 4");
+}
+
+// Tests cancellation of the pull operation at various stages of the pull workflow
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pulled from the server
+-(void) testPullCancellability_UnsuccessfulPush_UnsuccessfulPull_CancelRightAfterPullWithQueryReturns
+{
+    XCTAssertEqual([self performPullWithCancellationPoint:5 serverPushResponseCode:@500 serverPullResponseCode:@500], 0, "Pull cancellation failed at cancellation point 5");
+}
+
+// Performs pull and cancels it at the specified cancellation point.
+// - Verifies that a pull operation following a cancelled pull operation works as expected
+// - Verifies that cancelling a pull operation finishes the pull NSOperation regardless of the cancellation point
+// - Verifies that the expected number of items are pull from the server
+// - Returns the number of items pulled from the server.
+// Cancellation point 0: just before the push request initiated by the pull is sent to the server
+// Cancellation point 1: immediately after receiving response for the push initiated by the pull operation
+// Cancellation point 2: just before the pull request is sent to the server
+// Cancellation point 3: immediately after receiving response for the pull request
+// Cancellation point 4: while executing the pull completion block
+// Cancellation point 5: immediately after the pull NSOperation is returned by pullWithQuery:queryId:completion:
+-(int) performPullWithCancellationPoint:(int) requestedCancellationPoint serverPushResponseCode:(NSNumber *)serverPushResponseCode serverPullResponseCode:(NSNumber *)serverPullResponseCode
+{
+    // Initialization
+    NSString *serverPushData = @"{\"id\": \"id1\", \"text\":\"server\"}";
+    NSString *serverPullData = @"[{\"id\": \"id1\", \"text\":\"server\"}, {\"id\": \"id2\", \"text\":\"server\"}]";
+    MSMultiRequestTestFilter *filter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[serverPushResponseCode, serverPullResponseCode] data:@[serverPushData, serverPullData] appendEmptyRequest:YES];
+    MSClient *filteredClient = [client clientWithFilter:filter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
+    
+    __block NSOperation *pullOperation;
+    
+    // Define filters
+    ((MSTestFilter *)filter.testFilters[0]).onInspectRequest = ^(NSURLRequest *request) {
+        
+        // Cancellation point 0
+        if (requestedCancellationPoint == 0) {
+            [pullOperation cancel];
+        }
+        
+        return request;
+    };
+    
+    ((MSTestFilter *)filter.testFilters[0]).onInspectResponseData = ^(NSURLRequest *request, NSData *data) {
+        
+        // Cancellation point 1
+        if (requestedCancellationPoint == 1) {
+            [pullOperation cancel];
+        }
+        
+        return data;
+    };
+    
+    ((MSTestFilter *)filter.testFilters[1]).onInspectRequest = ^(NSURLRequest *request) {
+        
+        // Cancellation point 2
+        if (requestedCancellationPoint == 2) {
+            [pullOperation cancel];
+        }
+        
+        return request;
+    };
+    
+    ((MSTestFilter *)filter.testFilters[1]).onInspectResponseData = ^(NSURLRequest *request, NSData *data) {
+        
+        // Cancellation point 3
+        if (requestedCancellationPoint == 3) {
+            [pullOperation cancel];
+        }
+        
+        return data;
+    };
+    
+    // Insert an item
+    XCTestExpectation *insertExpectation = [self expectationWithDescription:@"insert expectation"];
+    [todoTable insert:@{ @"id" : @"id1", @"text" : @"client" } completion:^(NSDictionary *item, NSError *error) {
+        [insertExpectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:10 handler:nil];
+    
+    // Perform a pull
+    pullOperation = [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
+
+        // Cancellation point 4
+        if (requestedCancellationPoint == 4) {
+            [pullOperation cancel];
+        }
+    }];
+
+    // Cancellation point 5
+    if (requestedCancellationPoint == 5) {
+        [pullOperation cancel];
+    }
+
+    [self verifyFinished:pullOperation];
+    
+    int synchronizedItemCount = [self synchronizedItemCount];
+    
+    XCTAssertEqual([self performFollowupPullWithClient:client], 3, "Expected all server items to have been pulled to the client by now");
+    
+    return synchronizedItemCount;
+}
+
+// Performs a pull operation and returns the count of all the server items pulled so far
+-(int) performFollowupPullWithClient:(MSClient *)pullClient
+{
+    // Initialization
+    MSTestFilter *filter = [MSTestFilter new];
+    MSClient *filteredClient = [pullClient clientWithFilter:filter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
+
+    __block bool isFirstPullRequest = true;
+    filter.ignoreNextFilter = YES;
+    filter.onInspectResponseData = ^(NSURLRequest *request, NSData *data) {
+
+        NSDictionary *item = [filteredClient.serializer itemFromData:request.HTTPBody withOriginalItem:nil ensureDictionary:YES orError:nil];
+        
+        NSString *responseString;
+        if (item != nil) // This means it is a push request
+        {
+            responseString = [NSString stringWithFormat:@"{\"id\": \"%@\", \"text\":\"server\"}", item[@"id"]];
+        }
+        else if (isFirstPullRequest) // First pull request
+        {
+            responseString = @"[{\"id\": \"id1\", \"text\":\"server\"}, {\"id\": \"id2\", \"text\":\"server\"}, {\"id\": \"id3\", \"text\":\"server\"}]";
+            isFirstPullRequest = false;
+        }
+        else // Second pull request
+        {
+            responseString = @"[]";
+        }
+        
+        NSData *pushResponse = [responseString dataUsingEncoding:NSUTF8StringEncoding];
+        return pushResponse;
+    };
+    
+    // Perform pull
+    NSOperation *pullOperation = [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
+        XCTAssertNil(error, "Expected successful pull");
+    }];
+    
+    [self verifyFinished:pullOperation];
+    
+    return [self synchronizedItemCount];
+}
 
 -(void) testPullSuccess
 {
@@ -1140,12 +1835,14 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     MSSyncTable *todoTable = [filteredClient syncTableWithName:@"TodoItem"];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
     
-    [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
+    NSOperation *pull = [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
         XCTAssertNil(error, @"Error found: %@", error.description);
         XCTAssertEqual(offline.upsertCalls, 1);
         XCTAssertEqual(offline.upsertedItems, 2);
         done = YES;
     }];
+    
+    XCTAssertNotNil(pull);
     
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     
@@ -1174,12 +1871,14 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
     
-    [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
+    NSOperation *pull = [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
         XCTAssertNil(error, @"Error found: %@", error.description);
         XCTAssertEqual((int)offline.upsertCalls, 1, @"Unexpected number of upsert calls");
         XCTAssertEqual((int)offline.upsertedItems, 2, @"Unexpected number of upsert calls");
         done = YES;
     }];
+    
+    XCTAssertNotNil(pull);
     
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     
@@ -1206,7 +1905,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
     
-    [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
+    NSOperation *pull = [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
         XCTAssertNil(error, @"Error occurred: %@", error.description);
         XCTAssertEqual((int)offline.upsertCalls, 1, @"Unexpected number of upsert calls");
         XCTAssertEqual((int)offline.upsertedItems, 2, @"Unexpected number of upsert calls");
@@ -1214,6 +1913,8 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
         XCTAssertEqual((int)offline.deletedItems, 1, @"Unexpected number of upsert calls");
         done = YES;
     }];
+    
+    XCTAssertNotNil(pull);
     
     XCTAssertTrue([self waitForTest:30.0], @"Test timed out.");
     
@@ -1245,13 +1946,16 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     done = NO;
     
-    [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
+    NSOperation *pull = [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
         XCTAssertNil(error, @"Unexpected error: %@", error.description);
         XCTAssertEqual(offline.upsertCalls, 4);
         XCTAssertEqual(offline.upsertedItems, 5);
         
         done = YES;
     }];
+    
+    XCTAssertNotNil(pull);
+    
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     
     NSURLRequest *insertRequest = testFilter.actualRequests[0];
@@ -1283,7 +1987,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     MSSyncTable *todoTable = [filteredClient syncTableWithName:@"TodoItem"];
     MSQuery *query = [todoTable query];
     
-    [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
+    NSOperation *pull = [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
         XCTAssertNil(error, @"Unexpected error: %@", error.description);
         XCTAssertNotNil(actualRequest);
         
@@ -1294,6 +1998,8 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
         
         done = YES;
     }];
+    
+    XCTAssertNotNil(pull);
     
     XCTAssertTrue([self waitForTest:30.0], @"Test timed out.");
 }
@@ -1313,7 +2019,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     MSSyncTable *todoTable = [filteredClient syncTableWithName:@"TodoItem"];
     MSQuery *query = [todoTable query];
     
-    [todoTable pullWithQuery:query queryId:@"something" completion:^(NSError *error) {
+    NSOperation *pull = [todoTable pullWithQuery:query queryId:@"something" completion:^(NSError *error) {
         XCTAssertNil(error, @"Unexpected error: %@", error.description);
         XCTAssertNotNil(actualRequest);
         
@@ -1324,6 +2030,8 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
         
         done = YES;
     }];
+    
+    XCTAssertNotNil(pull);
     
     XCTAssertTrue([self waitForTest:30.0], @"Test timed out.");
 }
@@ -1340,12 +2048,14 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
     query.parameters = @{@"mykey": @"myvalue"};
     
-    [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
+    NSOperation *pull = [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
         XCTAssertNil(error, @"Error found: %@", error.description);
         XCTAssertEqual((int)offline.upsertCalls, 1, @"Unexpected number of upsert calls");
         XCTAssertEqual((int)offline.upsertedItems, 2, @"Unexpected number of upsert calls");
         done = YES;
     }];
+    
+    XCTAssertNotNil(pull);
     
     XCTAssertTrue([self waitForTest:30.0], @"Test timed out.");
     
@@ -1379,7 +2089,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
     query.parameters = @{@"__systemProperties": @"__createdAt%2C__somethingRandom"};
     
-    [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
+    NSOperation *pull = [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
         XCTAssertNotNil(error);
         XCTAssertEqual(error.code, MSInvalidParameter);
         XCTAssertEqual((int)offline.upsertCalls, 0, @"Unexpected number of upsert calls");
@@ -1387,10 +2097,12 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
         done = YES;
     }];
     
+    XCTAssertNil(pull);
+    
     XCTAssertTrue([self waitForTest:30.0], @"Test timed out.");
 }
 
--(void) testPullWithFetchLimit
+-(void) testPullWithFetchLimitGreaterThanDefaultPageSize
 {
     // Pull should make requests with $top=50 until it has pulled all the data up to fetchLimit.
     
@@ -1405,10 +2117,12 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     query.fetchLimit = 150;
     
-    [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
+    NSOperation *pull = [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
         XCTAssertNil(error, @"Error found: %@", error.description);
         done = YES;
     }];
+    
+    XCTAssertNotNil(pull);
     
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     
@@ -1431,6 +2145,52 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
                   @"Invalid URL: %@", thirdRequest.URL.absoluteString);
 }
 
+-(void) testPullWithFetchLimitGreaterThanCustomPageSize
+{
+    // Pull should make requests with $top=10 until it has pulled all the data up to fetchLimit.
+    
+    // the ids don't really matter for this test
+    NSString* tenItems = [MSMultiRequestTestFilter testDataWithItemCount:10 startId:0];
+    
+    MSMultiRequestTestFilter *testFilter = [MSMultiRequestTestFilter testFilterWithStatusCodes:@[@200, @200, @200] data:@[tenItems, tenItems, tenItems] appendEmptyRequest:NO];
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
+    
+    query.fetchLimit = 30;
+    
+    MSPullSettings *pullSettings = [[MSPullSettings alloc] initWithPageSize:10];
+    
+    XCTAssertNotEqual(pullSettings.pageSize, MSPullSettings.defaultPageSize, @"This test requires the custom page size to be different from the default page size");
+    
+    NSOperation *pull = [todoTable pullWithQuery:query queryId:nil settings:pullSettings completion:^(NSError *error) {
+        XCTAssertNil(error, @"Error found: %@", error.description);
+    }];
+    
+    XCTAssertNotNil(pull);
+    
+    [pull waitUntilFinished];
+    
+    XCTAssertEqual(3, testFilter.actualRequests.count);
+    
+    NSURLRequest *firstRequest = testFilter.actualRequests[0];
+    NSURLRequest *secondRequest = testFilter.actualRequests[1];
+    NSURLRequest *thirdRequest = testFilter.actualRequests[2];
+    
+    NSArray *expectedFirstResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=10", @"$skip=0"];
+    XCTAssertTrue([self checkURL:firstRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedFirstResult],
+                  @"Invalid URL: %@", firstRequest.URL.absoluteString);
+    
+    NSArray *expectedSecondResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=10", @"$skip=10"];
+    XCTAssertTrue([self checkURL:secondRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedSecondResult],
+                  @"Invalid URL: %@", secondRequest.URL.absoluteString);
+    
+    NSArray *expectedThirdResult = @[@"__includeDeleted=true", @"__systemProperties=__deleted", @"$top=10", @"$skip=20"];
+    XCTAssertTrue([self checkURL:thirdRequest.URL withPath:@"/tables/TodoNoVersion" andQuery:expectedThirdResult],
+                  @"Invalid URL: %@", thirdRequest.URL.absoluteString);
+}
+
 -(void) testPullWithFetchLimitLargerThanItems
 {
     // Pull should make requests with $top=50 until it finds an empty result.
@@ -1447,10 +2207,12 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     query.fetchLimit = 1000;
     
-    [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
+    NSOperation *pull = [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
         XCTAssertNil(error, @"Error found: %@", error.description);
         done = YES;
     }];
+    
+    XCTAssertNotNil(pull);
     
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     
@@ -1495,10 +2257,12 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     // we'd expect 4 calls ($top=25)
     query.fetchLimit = 25;
     
-    [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
+    NSOperation *pull = [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
         XCTAssertNil(error, @"Error found: %@", error.description);
         done = YES;
     }];
+    
+    XCTAssertNotNil(pull);
     
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     
@@ -1528,10 +2292,12 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     // we'd expect 4 calls ($top=50, 50, 50, 50) ($skip=0, 25, 50, 60)
     query.fetchLimit = 100;
     
-    [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
+    NSOperation *pull = [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
         XCTAssertNil(error, @"Error found: %@", error.description);
         done = YES;
     }];
+    
+    XCTAssertNotNil(pull);
     
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     
@@ -1576,10 +2342,12 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     // we'd expect 4 calls ($top=50, 50, 50, 50) ($skip=0, 25, 50, 60)
     query.fetchLimit = 148;
     
-    [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
+    NSOperation *pull = [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
         XCTAssertNil(error, @"Error found: %@", error.description);
         done = YES;
     }];
+    
+    XCTAssertNotNil(pull);
     
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     
@@ -1602,6 +2370,116 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
                   @"Invalid URL: %@", thirdRequest.URL.absoluteString);
 }
 
+-(void) testVanillaPull_ValidPullSettings
+{
+    // Guard against possible future changes to |MSPullSettings.defaultPageSize|.
+    // Set |pageSize| in such a way that it would never match |MSPullSettings.defaultPageSize|.
+    NSInteger pageSize = MSPullSettings.defaultPageSize + 1;
+
+    MSPullSettings *pullSettings = [[MSPullSettings alloc] initWithPageSize:pageSize];
+    
+    NSURL *pullRequest = [self pullRequestWithSettings:pullSettings shouldUsePullSettings:YES isIncremental:NO];
+    
+    NSString *topParam = [NSString stringWithFormat:@"$top=%ld", (long) pullSettings.pageSize];
+    
+    NSArray *expectedPullQuery = @[topParam, @"$skip=0", @"__includeDeleted=true", @"__systemProperties=__deleted"];
+    
+    XCTAssertTrue([self checkURL:pullRequest withPath:@"/tables/TodoNoVersion" andQuery:expectedPullQuery],
+                  @"Invalid pull request: %@", pullRequest.absoluteString);
+}
+
+-(void) testVanillaPull_NilPullSettings
+{
+    NSURL *pullRequest = [self pullRequestWithSettings:nil shouldUsePullSettings:YES isIncremental:NO];
+    
+    NSString *topParam = [NSString stringWithFormat:@"$top=%ld", (long) MSPullSettings.defaultPageSize];
+    
+    NSArray *expectedPullQuery = @[topParam, @"$skip=0", @"__includeDeleted=true", @"__systemProperties=__deleted"];
+    
+    XCTAssertTrue([self checkURL:pullRequest withPath:@"/tables/TodoNoVersion" andQuery:expectedPullQuery],
+                  @"Invalid pull request: %@", pullRequest.absoluteString);
+}
+
+-(void) testVanillaPull_NoPullSettings
+{
+    NSURL *pullRequest = [self pullRequestWithSettings:nil shouldUsePullSettings:NO isIncremental:NO];
+    
+    NSString *topParam = [NSString stringWithFormat:@"$top=%ld", (long) MSPullSettings.defaultPageSize];
+    
+    NSArray *expectedPullQuery = @[topParam, @"$skip=0", @"__includeDeleted=true", @"__systemProperties=__deleted"];
+    
+    XCTAssertTrue([self checkURL:pullRequest withPath:@"/tables/TodoNoVersion" andQuery:expectedPullQuery],
+                  @"Invalid pull request: %@", pullRequest.absoluteString);
+}
+
+-(void) testIncrementalPull_ValidPullSettings
+{
+    // Guard against possible future changes to |MSPullSettings.defaultPageSize|.
+    // Set |pageSize| in such a way that it would never match |MSPullSettings.defaultPageSize|.
+    NSInteger pageSize = MSPullSettings.defaultPageSize + 1;
+
+    MSPullSettings *pullSettings = [[MSPullSettings alloc] initWithPageSize:pageSize];
+    
+    NSURL *pullRequest = [self pullRequestWithSettings:pullSettings shouldUsePullSettings:YES isIncremental:YES];
+    
+    NSString *topParam = [NSString stringWithFormat:@"$top=%ld", (long) pullSettings.pageSize];
+    
+    NSArray *expectedPullQuery = @[topParam, @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')", @"$skip=0", @"$orderby=__updatedAt%20asc", @"__includeDeleted=true", @"__systemProperties=__updatedAt%2C__deleted"];
+    
+    XCTAssertTrue([self checkURL:pullRequest withPath:@"/tables/TodoNoVersion" andQuery:expectedPullQuery],
+                  @"Invalid pull request: %@", pullRequest.absoluteString);
+}
+
+-(void) testIncrementalPull_NilPullSettings
+{
+    NSURL *pullRequest = [self pullRequestWithSettings:nil shouldUsePullSettings:YES isIncremental:YES];
+    
+    NSString *topParam = [NSString stringWithFormat:@"$top=%ld", (long) MSPullSettings.defaultPageSize];
+    
+    NSArray *expectedPullQuery = @[topParam, @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')", @"$skip=0", @"$orderby=__updatedAt%20asc", @"__includeDeleted=true", @"__systemProperties=__updatedAt%2C__deleted"];
+    
+    XCTAssertTrue([self checkURL:pullRequest withPath:@"/tables/TodoNoVersion" andQuery:expectedPullQuery],
+                  @"Invalid pull request: %@", pullRequest.absoluteString);
+}
+
+-(void) testIncrementalPull_NoPullSettings
+{
+    NSURL *pullRequest = [self pullRequestWithSettings:nil shouldUsePullSettings:NO isIncremental:YES];
+    
+    NSString *topParam = [NSString stringWithFormat:@"$top=%ld", (long) MSPullSettings.defaultPageSize];
+    
+    NSArray *expectedPullQuery = @[topParam, @"$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.000Z')", @"$skip=0", @"$orderby=__updatedAt%20asc", @"__includeDeleted=true", @"__systemProperties=__updatedAt%2C__deleted"];
+    
+    XCTAssertTrue([self checkURL:pullRequest withPath:@"/tables/TodoNoVersion" andQuery:expectedPullQuery],
+                  @"Invalid pull request: %@", pullRequest.absoluteString);
+}
+
+-(NSURL *) pullRequestWithSettings:(MSPullSettings *)pullSettings shouldUsePullSettings:(BOOL)shouldUsePullSettings isIncremental:(BOOL)isIncremental
+{
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:nil];
+    __block NSURL *pullRequest;
+    
+    testFilter.onInspectRequest = ^(NSURLRequest *request) {
+        pullRequest = request.URL;
+        return request;
+    };
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
+    
+    NSString *queryId = isIncremental ? @"queryId" : nil;
+    
+    if (shouldUsePullSettings) {
+        [[todoTable pullWithQuery:query queryId:queryId settings:pullSettings completion:nil] waitUntilFinished];
+    }
+    else {
+        [[todoTable pullWithQuery:query queryId:queryId completion:nil] waitUntilFinished];
+    }
+    
+    return pullRequest;
+}
+
 -(void) testPullWithFetchOffset
 {
     // Pull should start with a $skip and the skip should be incremented by the number of records pulled
@@ -1620,12 +2498,13 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     // we'd expect 3 calls ($top=50, 50, 50) ($skip=12, 62, 100)
     query.fetchOffset = 12;
     
-    [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
+    NSOperation *pull = [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
         XCTAssertNil(error, @"Error found: %@", error.description);
-        done = YES;
     }];
     
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertNotNil(pull);
+
+    [pull waitUntilFinished];
     
     XCTAssertEqual(3, testFilter.actualRequests.count);
     
@@ -1665,10 +2544,12 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     query.fetchOffset = 12;
     query.fetchLimit = 110;
     
-    [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
+    NSOperation *pull = [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
         XCTAssertNil(error, @"Error found: %@", error.description);
         done = YES;
     }];
+    
+    XCTAssertNotNil(pull);
     
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     
@@ -1719,7 +2600,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     done = NO;
     actualRequest = nil;
-    [client.syncContext pushWithCompletion:^(NSError *error) {
+    NSOperation *push = [client.syncContext pushWithCompletion:^(NSError *error) {
         XCTAssertNil(error, @"error should have been nil.");
         XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
         
@@ -1730,6 +2611,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
         
         done = YES;
     }];
+    XCTAssertNotNil(push);
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
@@ -1746,7 +2628,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     // Verifies that we allow __includeDeleted=YES
     // query.parameters = @{@"__includeDeleted":@YES};
     
-    [todoTable pullWithQuery:query queryId:@"test_1" completion:^(NSError *error) {
+    NSOperation *pull = [todoTable pullWithQuery:query queryId:@"test_1" completion:^(NSError *error) {
         XCTAssertNil(error, @"Error found: %@", error.description);
         XCTAssertEqual(offline.upsertCalls, 4);
         XCTAssertEqual(offline.upsertedItems, 6);
@@ -1758,6 +2640,8 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
         XCTAssertEqual(offline.readTableCalls, 0);
         done = YES;
     }];
+    
+    XCTAssertNotNil(pull);
     
     XCTAssertTrue([self waitForTest:1000.1], @"Test timed out.");
     done = NO;
@@ -1804,7 +2688,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     // now try again and make sure we start with the same deltaToken
     [offline resetCounts];
-    [todoTable pullWithQuery:query queryId:@"test_1" completion:^(NSError *error) {
+    pull = [todoTable pullWithQuery:query queryId:@"test_1" completion:^(NSError *error) {
         XCTAssertNil(error, @"Error found: %@", error.description);
         XCTAssertEqual(offline.upsertCalls, 0);
         XCTAssertEqual(offline.upsertedItems, 0);
@@ -1814,6 +2698,8 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
         XCTAssertEqual(offline.readTableCalls, 0);
         done = YES;
     }];
+    
+    XCTAssertNotNil(pull);
     
     XCTAssertTrue([self waitForTest:10000.1], @"Test timed out.");
     XCTAssertEqual(4, filter.actualRequests.count);
@@ -1843,13 +2729,15 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     query.orderBy = @[orderByText];
     
     // without queryId, it should work
-    [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
+    NSOperation *pull = [todoTable pullWithQuery:query queryId:nil completion:^(NSError *error) {
         XCTAssertNil(error, @"Error found: %@", error.description);
         XCTAssertEqual(offline.upsertCalls, 0);
         XCTAssertEqual(offline.upsertedItems, 0);
         XCTAssertEqual(offline.readTableCalls, 0);
         done = YES;
     }];
+    
+    XCTAssertNotNil(pull);
     
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     done = NO;
@@ -1869,7 +2757,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     [offline resetCounts];
     // with queryId, this should produce an error
-    [todoTable pullWithQuery:query queryId:@"test_1" completion:^(NSError *error) {
+    pull = [todoTable pullWithQuery:query queryId:@"test_1" completion:^(NSError *error) {
         XCTAssertNotNil(error);
         XCTAssertEqual(MSInvalidParameter, error.code);
         XCTAssertEqual(offline.upsertCalls, 0);
@@ -1878,6 +2766,8 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
         XCTAssertEqual(offline.readTableCalls, 0);
         done = YES;
     }];
+    
+    XCTAssertNil(pull);
     
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     XCTAssertEqual(1, filter.actualRequests.count);
@@ -1898,17 +2788,20 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
         done = YES;
     };
     
-    [todoTable pullWithQuery:query queryId:nil completion:completion];
+    NSOperation *pull = [todoTable pullWithQuery:query queryId:nil completion:completion];
+    XCTAssertNil(pull);
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     done = NO;
     
     query.parameters = @{@"__includeDeleted":@YES, @"__INCLUDEDELETED":@NO};
-    [todoTable pullWithQuery:query queryId:nil completion:completion];
+    pull = [todoTable pullWithQuery:query queryId:nil completion:completion];
+    XCTAssertNil(pull);
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     done = NO;
     
     query.parameters = @{@"__includeDeleted":@"NONSENSE"};
-    [todoTable pullWithQuery:query queryId:nil completion:completion];
+    pull = [todoTable pullWithQuery:query queryId:nil completion:completion];
+    XCTAssertNil(pull);
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
@@ -1940,13 +2833,15 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
         return request;
     };
     
-    [todoTable pullWithQuery:query queryId:@"test-1" completion:^(NSError *error) {
+    NSOperation *pull = [todoTable pullWithQuery:query queryId:@"test-1" completion:^(NSError *error) {
         XCTAssertNil(error, @"Error found: %@", error.description);
         XCTAssertEqual(offline.upsertCalls, 6);
         XCTAssertEqual(offline.upsertedItems, 8);
         NSLog(@"done pull");
         done = YES;
     }];
+    
+    XCTAssertNotNil(pull);
     
     XCTAssertTrue([self waitForTest:30.0], @"Test timed out.");
     
@@ -2077,7 +2972,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
         return request;
     };
     
-    [todoTable pullWithQuery:query queryId:@"test-1" completion:^(NSError *error) {
+    NSOperation *pull = [todoTable pullWithQuery:query queryId:@"test-1" completion:^(NSError *error) {
         XCTAssertNil(error, @"Error found: %@", error.description);
         XCTAssertEqual(offline.upsertCalls, 9);
         XCTAssertEqual(offline.upsertedItems, 10);
@@ -2086,6 +2981,8 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
         XCTAssertEqual(offline.deletedItems, 1);
         done = YES;
     }];
+    
+    XCTAssertNotNil(pull);
     
     XCTAssertTrue([self waitForTest:30.0], @"Test timed out.");
     
@@ -2146,14 +3043,15 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     MSSyncTable *todoTable = [filteredClient syncTableWithName:@"TodoItem"];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
     
-    [todoTable pullWithQuery:query queryId:@"test_1" completion:^(NSError *error) {
+    NSOperation *pull = [todoTable pullWithQuery:query queryId:@"test_1" completion:^(NSError *error) {
         XCTAssertNil(error, @"Error found: %@", error.description);
         XCTAssertEqual(offline.upsertCalls, 7);
         XCTAssertEqual(offline.upsertedItems, 11);
-        done = YES;
     }];
     
-    XCTAssertTrue([self waitForTest:5.0], @"Test timed out.");
+    XCTAssertNotNil(pull);
+    
+    [pull waitUntilFinished];
     
     NSURLRequest *firstRequest = (NSURLRequest *)filter.actualRequests[0];
     NSURLRequest *secondRequest = (NSURLRequest *)filter.actualRequests[1];
@@ -2233,14 +3131,15 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
     query.predicate = [NSPredicate predicateWithFormat:@"text == 'MATCH'"];
     
-    [todoTable pullWithQuery:query queryId:@"test_1" completion:^(NSError *error) {
+    NSOperation *pull = [todoTable pullWithQuery:query queryId:@"test_1" completion:^(NSError *error) {
         XCTAssertNil(error, @"Error found: %@", error.description);
         XCTAssertEqual(offline.upsertCalls, 3);
         XCTAssertEqual(offline.upsertedItems, 4);
-        done = YES;
     }];
     
-    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertNotNil(pull);
+    
+    [pull waitUntilFinished];
     XCTAssertEqual(3, filter.actualRequests.count);
     
     NSURLRequest *firstRequest = (NSURLRequest *)filter.actualRequests[0];
@@ -2291,12 +3190,14 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     // before the bug was fixed, an error would call the completion but continue to call the pull.
     // this fails with the bug but passes now that it's been fixed.
     __block BOOL alreadyCalled = NO;
-    [todoTable pullWithQuery:query queryId:@"something" completion:^(NSError *error) {
+    NSOperation *pull = [todoTable pullWithQuery:query queryId:@"something" completion:^(NSError *error) {
         XCTAssertNotNil(error);
         XCTAssertFalse(alreadyCalled);
         alreadyCalled = YES;
         done = YES;
     }];
+    
+    XCTAssertNotNil(pull);
     
     XCTAssertTrue([self waitForTest:0.1]);
     done = NO;
@@ -2319,19 +3220,22 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     
     // verify error if fetchOffset is set
     query.fetchOffset = 10;
-    [todoTable pullWithQuery:query queryId:@"todo" completion:completion];
+    NSOperation *pull = [todoTable pullWithQuery:query queryId:@"todo" completion:completion];
+    XCTAssertNil(pull);
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     done = NO;
     
     // verify error if both fetchLimit and fetchOffset are set
     query.fetchLimit = 10;
-    [todoTable pullWithQuery:query queryId:@"todo" completion:completion];
+    pull = [todoTable pullWithQuery:query queryId:@"todo" completion:completion];
+    XCTAssertNil(pull);
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     done = NO;
     
     // now reset fetchOffset back to -1 and verify error if only fetchLimit is set
     query.fetchOffset = -1;
-    [todoTable pullWithQuery:query queryId:@"todo" completion:completion];
+    pull = [todoTable pullWithQuery:query queryId:@"todo" completion:completion];
+    XCTAssertNil(pull);
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
@@ -2351,7 +3255,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
                  orError:&storageError];
     XCTAssertNil(storageError);
     
-    [todoTable purgeWithQuery:query completion:^(NSError *error) {
+    NSOperation *purge = [todoTable purgeWithQuery:query completion:^(NSError *error) {
         XCTAssertNil(error, @"Unexpected error: %@", error.description);
         
         XCTAssertEqual(offline.deleteCalls, 1);
@@ -2368,6 +3272,8 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
         
         done = YES;
     }];
+    
+    XCTAssertNotNil(purge);
     
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
@@ -2389,7 +3295,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
     
     [testTable insert:@{ @"name": @"test one"} completion:^(NSDictionary *item, NSError *error) {
-        [todoTable purgeWithQuery:nil completion:^(NSError *error) {
+        NSOperation *purge = [todoTable purgeWithQuery:nil completion:^(NSError *error) {
             XCTAssertNil(error, @"Unexpected error: %@", error.description);
             
             XCTAssertEqual(offline.deleteCalls, 1);
@@ -2403,8 +3309,8 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
             
             done = YES;
         }];
+        XCTAssertNotNil(purge);
     }];
-    
     
     XCTAssertTrue([self waitForTest:30.0], @"Test timed out.");
 }
@@ -2516,7 +3422,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
     
     [todoTable insert:@{ @"name": @"test one"} completion:^(NSDictionary *item, NSError *error) {
-        [todoTable purgeWithQuery:query completion:^(NSError *error) {
+        NSOperation *purge = [todoTable purgeWithQuery:query completion:^(NSError *error) {
             XCTAssertNotNil(error);
             XCTAssertEqual(error.code, MSPurgeAbortedPendingChanges);
             XCTAssertEqual(offline.deleteCalls, 0);
@@ -2524,6 +3430,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
             
             done = YES;
         }];
+        XCTAssertNotNil(purge);
     }];
     
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
@@ -2547,7 +3454,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     // Query the operation queue for the inserted item using a different case for the Id
     NSArray *items = [client.syncContext.operationQueue getOperationsForTable:todoTable.name item:@"ITEMID"];
     
-    XCTAssertEqual(items.count, 1, "Expected to find 1 item in the operation queue");
+    XCTAssertEqual(items.count, 1, @"Expected to find 1 item in the operation queue");
 }
 
 -(void)testOperationErrorRelationship

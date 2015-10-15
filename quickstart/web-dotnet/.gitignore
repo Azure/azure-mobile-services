@@ -1,6 +1,0 @@
-bin/
-bld/
-obj/
-*.user
-*.suo
-packages/*

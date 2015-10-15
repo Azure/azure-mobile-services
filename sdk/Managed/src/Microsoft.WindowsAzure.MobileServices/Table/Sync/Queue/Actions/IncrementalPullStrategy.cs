@@ -27,8 +27,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                                        string queryId,
                                        MobileServiceSyncSettingsManager settings,
                                        PullCursor cursor,
-                                       MobileServiceRemoteTableOptions options)
-            : base(query, cursor, options)
+                                       MobileServiceRemoteTableOptions options,
+                                       PullOptions pullOptions)
+            : base(query, cursor, options, pullOptions)
         {
             this.table = table;
             this.originalFilter = query.Filter;
