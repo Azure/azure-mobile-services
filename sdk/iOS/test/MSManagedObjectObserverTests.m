@@ -214,7 +214,9 @@
 		XCTFail(@"Should not observe any changes for insert in this entity");
 	}];
 	
-	NSManagedObjectContext *todoNoVersion = [NSEntityDescription insertNewObjectForEntityForName:@"TodoNoVersion" inManagedObjectContext:self.context];
+	NSManagedObjectContext *todoNoVersion = (NSManagedObjectContext *)[NSEntityDescription
+                                                                       insertNewObjectForEntityForName:@"TodoNoVersion"
+                                                                       inManagedObjectContext:self.context];
 	[todoNoVersion setValue:@"ABC" forKey:@"id"];
 	[todoNoVersion setValue:@"Test text" forKey:@"text"];
 	

@@ -5,6 +5,7 @@
 #import "MSManagedObjectObserver.h"
 #import "MSCoreDataStore.h"
 #import "MSClient.h"
+#import "MSSyncTable.h"
 #import <CoreData/CoreData.h>
 
 @interface MSManagedObjectObserver()
