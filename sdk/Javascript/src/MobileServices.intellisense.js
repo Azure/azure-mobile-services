@@ -70,9 +70,6 @@ intellisense.annotate(WindowsAzure, {
         /// <param name="applicationUrl" type="string" mayBeNull="false">
         /// The URL of the mobile service..
         /// </param>
-        /// <param name="applicationKey" type="string" mayBeNull="false">
-        /// The application key of the mobile service..
-        /// </param>
         ///</signature>		
     },
     MobileServiceTable: function () {
@@ -89,8 +86,6 @@ WindowsAzure.MobileServiceClient = (function () {
     var wrapper = function () {
         var instance = new _client();
         intellisense.annotate(instance, {
-            /// <field name="applicationKey" type="string">The application key</field>
-            applicationKey: String,
             /// <field name="currentUser" type="UserObject">The current user</field>
             currentUser: undefined,
             /// <field name="applicationUrl" type="string">The application Url</field>

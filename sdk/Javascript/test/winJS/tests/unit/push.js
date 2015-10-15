@@ -37,7 +37,7 @@
 );
 
 function client(tests) {
-    return new WindowsAzure.MobileServiceClient("http://www.test.com", "http://www.gateway.com/", "applicationKey")
+    return new WindowsAzure.MobileServiceClient("http://www.test.com")
         .withFilter(function (req, next, callback) {
             tests(req);
             callback(null, { status: 200 });

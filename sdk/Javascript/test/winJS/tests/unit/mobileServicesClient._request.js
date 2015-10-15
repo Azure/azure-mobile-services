@@ -15,7 +15,7 @@ $testGroup('MobileServiceClient._request',
     $test('get')
     .description('Verify get uses the right method.')
     .checkAsync(function () {
-        var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/", "http://www.gateway.com/", "123456abcdefg");
+        var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/");
         client = client.withFilter(function (req, next, callback) {
             $assert.areEqual(req.type, 'GET');
             callback(null, { status: 200, responseText: null });
@@ -27,7 +27,7 @@ $testGroup('MobileServiceClient._request',
     $test('post')
     .description('Verify post uses the right method.')
     .checkAsync(function () {
-        var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/", "http://www.gateway.com/", "123456abcdefg");
+        var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/");
         client = client.withFilter(function (req, next, callback) {
             $assert.areEqual(req.type, 'POST');
             callback(null, { status: 200, responseText: null });
@@ -39,7 +39,7 @@ $testGroup('MobileServiceClient._request',
     $test('patch')
     .description('Verify patch uses the right method.')
     .checkAsync(function () {
-        var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/", "http://www.gateway.com/", "123456abcdefg");
+        var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/");
         client = client.withFilter(function (req, next, callback) {
             $assert.areEqual(req.type, 'PATCH');
             callback(null, { status: 200, responseText: null });
@@ -51,7 +51,7 @@ $testGroup('MobileServiceClient._request',
     $test('Delete')
     .description('Verify WebRequest.Delete uses the right method.')
     .checkAsync(function () {
-        var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/", "http://www.gateway.com/", "123456abcdefg");
+        var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/");
         client = client.withFilter(function (req, next, callback) {
             $assert.areEqual(req.type, 'DELETE');
             callback(null, { status: 200, responseText: null });
@@ -63,7 +63,7 @@ $testGroup('MobileServiceClient._request',
     $test('no content')
     .description('Verify _request sets no Content-Type header for no content')
     .checkAsync(function () {
-        var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/", "http://www.gateway.com/", "123456abcdefg");
+        var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/");
         client = client.withFilter(function (req, next, callback) {
             $assert.areEqual(req.headers['Content-Type'], undefined);
             $assert.areEqual(req.data, undefined);
@@ -76,7 +76,7 @@ $testGroup('MobileServiceClient._request',
     $test('content')
     .description('Verify WebRequest.requestAsync sets a Content-Type header')
     .checkAsync(function () {
-        var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/", "http://www.gateway.com/", "123456abcdefg");
+        var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/");
         client = client.withFilter(function (req, next, callback) {
             $assert.areEqual(req.headers['Content-Type'], 'application/json');
             $assert.areEqual(req.data, '{"a":1}');
@@ -89,21 +89,9 @@ $testGroup('MobileServiceClient._request',
     $test('url')
     .description('Verify WebRequest.requestAsync creates an absolute url')
     .checkAsync(function () {
-        var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/", "http://www.gateway.com/", "123456abcdefg");
+        var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/");
         client = client.withFilter(function (req, next, callback) {
             $assert.areEqual(req.url, 'http://www.windowsazure.com/foo');
-            callback(null, { status: 200, responseText: null });
-        });
-
-        return Platform.async(client._request).call(client, 'POST', 'foo', null);
-    }),
-
-    $test('application header')
-    .description('Verify WebRequest.requestAsync provides an application header')
-    .checkAsync(function () {
-        var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/", "http://www.gateway.com/", "123456abcdefg");
-        client = client.withFilter(function (req, next, callback) {
-            $assert.areEqual(req.headers['X-ZUMO-APPLICATION'], '123456abcdefg');
             callback(null, { status: 200, responseText: null });
         });
 
@@ -113,7 +101,7 @@ $testGroup('MobileServiceClient._request',
     $test('installation id header')
     .description('Verify WebRequest.requestAsync provides an installation ID header')
     .checkAsync(function () {
-        var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/", "http://www.gateway.com/", "123456abcdefg");
+        var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/");
         client = client.withFilter(function (req, next, callback) {
             $assert.areEqual(req.headers['X-ZUMO-INSTALLATION-ID'], WindowsAzure.MobileServiceClient._applicationInstallationId);
             callback(null, { status: 200, responseText: null });
@@ -125,17 +113,17 @@ $testGroup('MobileServiceClient._request',
     $test('VersionHeader')
     .description('Verify WebRequest.requestAsync provides an X-ZUMO-VERSION header')
     .checkAsync(function () {
-        var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/", "http://www.gateway.com/", "123456abcdefg");
+        var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/");
         client = client.withFilter(function (req, next, callback) {
             var isWinJs = typeof Windows === "object",
                 isCordova = window && window.cordova && window.cordova.version;
 
             if (isWinJs) {
-                $assert.areEqual(0, req.headers['X-ZUMO-VERSION'].indexOf("ZUMO/1.3 (lang=WinJS; os=Windows 8; os_version=--; arch=Neutral; version="));
+                $assert.areEqual(0, req.headers['X-ZUMO-VERSION'].indexOf("ZUMO/2.0 (lang=WinJS; os=Windows 8; os_version=--; arch=Neutral; version="));
             } else if (isCordova) {
-                $assert.areEqual(0, req.headers['X-ZUMO-VERSION'].indexOf("ZUMO/1.3 (lang=Cordova; os=--; os_version=--; arch=--; version="));
+                $assert.areEqual(0, req.headers['X-ZUMO-VERSION'].indexOf("ZUMO/2.0 (lang=Cordova; os=--; os_version=--; arch=--; version="));
             } else {
-                $assert.areEqual(0, req.headers['X-ZUMO-VERSION'].indexOf("ZUMO/1.3 (lang=Web; os=--; os_version=--; arch=--; version="));
+                $assert.areEqual(0, req.headers['X-ZUMO-VERSION'].indexOf("ZUMO/2.0 (lang=Web; os=--; os_version=--; arch=--; version="));
             }
             callback(null, { status: 200, responseText: null });
         });
@@ -147,7 +135,7 @@ $testGroup('MobileServiceClient._request',
     .description('Verify WebRequest.requestAsync provides an auth header when logged in')
     .checkAsync(function () {
         var auth = '123';
-        var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/", "http://www.gateway.com/", "123456abcdefg");
+        var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/");
         client.currentUser = { mobileServiceAuthenticationToken: auth };
         client = client.withFilter(function (req, next, callback) {
             $assert.areEqual(req.headers['X-ZUMO-AUTH'], auth);
@@ -160,7 +148,7 @@ $testGroup('MobileServiceClient._request',
     $test('no auth header')
     .description('Verify WebRequest.requestAsync provides no auth header when not logged in')
     .checkAsync(function () {
-        var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/", "http://www.gateway.com/", "123456abcdefg");
+        var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/");
         client = client.withFilter(function (req, next, callback) {
             $assert.areEqual(req.headers['X-ZUMO-AUTH'], undefined);
             callback(null, { status: 200, responseText: null });
@@ -172,7 +160,7 @@ $testGroup('MobileServiceClient._request',
     $test('Passes back response')
     .description('Verify WebRequest.requestAsync passes back the response.')
     .checkAsync(function () {
-        var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/", "http://www.gateway.com/", "123456abcdefg");
+        var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/");
         client = client.withFilter(function (req, next, callback) {
             callback(null, { status: 200, responseText: '{"message":"test"}' });
         });
@@ -186,7 +174,7 @@ $testGroup('MobileServiceClient._request',
     $test('400 throws')
     .description('Verify WebRequest.requestAsync throws on a 400 response.')
     .checkAsync(function () {
-        var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/", "http://www.gateway.com/", "123456abcdefg");
+        var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/");
         client = client.withFilter(function (req, next, callback) {
             callback(null, { status: 400, responseText: '{"error":"test"}' });
         });

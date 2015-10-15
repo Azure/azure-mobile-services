@@ -28,24 +28,18 @@ var _zumoFeatures = {
 };
 var _zumoFeaturesHeaderName = "X-ZUMO-FEATURES";
 
-function MobileServiceClient(applicationUrl, gatewayUrl, applicationKey) {
+function MobileServiceClient(applicationUrl) {
     /// <summary>
     /// Initializes a new instance of the MobileServiceClient class.
     /// </summary>
     /// <param name="applicationUrl" type="string" mayBeNull="false">
     /// The URL to the Mobile Services application.
     /// </param>
-    /// <param name="applicationKey" type="string" mayBeNull="false">
-    /// The Mobile Service application's key.
-    /// </param>
 
     Validate.isString(applicationUrl, 'applicationUrl');
     Validate.notNullOrEmpty(applicationUrl, 'applicationUrl');
-    Validate.isString(applicationKey, 'applicationKey');
 
     this.applicationUrl = applicationUrl;
-    this.applicationKey = applicationKey || null;
-    this.gatewayUrl = gatewayUrl || null;
 
     var sdkInfo = Platform.getSdkInfo();
     var osInfo = Platform.getOperatingSystemInfo();
@@ -131,7 +125,7 @@ MobileServiceClient.prototype.withFilter = function (serviceFilter) {
     Validate.notNull(serviceFilter, 'serviceFilter');
 
     // Clone the current instance
-    var client = new MobileServiceClient(this.applicationUrl, this.gatewayUrl, this.applicationKey);
+    var client = new MobileServiceClient(this.applicationUrl);
     client.currentUser = this.currentUser;
 
     // Chain the service filter with any existing filters
@@ -193,7 +187,7 @@ MobileServiceClient.prototype._request = function (method, uriFragment, content,
         callback = ignoreFilters;
         ignoreFilters = false;
     }
-    
+
     if (_.isNull(callback) && (typeof content === 'function')) {
         callback = content;
         content = null;
@@ -219,9 +213,6 @@ MobileServiceClient.prototype._request = function (method, uriFragment, content,
         _.extend(options.headers, headers);
     }
     options.headers["X-ZUMO-INSTALLATION-ID"] = MobileServiceClient._applicationInstallationId;
-    if (!_.isNullOrEmpty(this.applicationKey)) {
-        options.headers["X-ZUMO-APPLICATION"] = this.applicationKey;
-    }
     if (this.currentUser && !_.isNullOrEmpty(this.currentUser.mobileServiceAuthenticationToken)) {
         options.headers["X-ZUMO-AUTH"] = this.currentUser.mobileServiceAuthenticationToken;
     }
@@ -244,7 +235,7 @@ MobileServiceClient.prototype._request = function (method, uriFragment, content,
             options.data = content;
         }
 
-        if(!_.hasProperty(options.headers, ['Content-Type','content-type','CONTENT-TYPE','Content-type'])) {
+        if (!_.hasProperty(options.headers, ['Content-Type', 'content-type', 'CONTENT-TYPE', 'Content-type'])) {
             options.headers['Content-Type'] = 'application/json';
         }
     } else {
@@ -298,7 +289,7 @@ MobileServiceClient.prototype.loginWithOptions = Platform.async(
          /// Optional callback accepting (error, user) parameters.
          /// </param>
          this._login.loginWithOptions(provider, options, callback);
-});
+     });
 
 MobileServiceClient.prototype.login = Platform.async(
     function (provider, token, useSingleSignOn, callback) {
@@ -337,7 +328,7 @@ MobileServiceClient.prototype.logout = function () {
 };
 
 MobileServiceClient.prototype.invokeApi = Platform.async(
-    function (apiName, options, callback) {   
+    function (apiName, options, callback) {
         /// <summary>
         /// Invokes the specified custom api and returns a response object.
         /// </summary>
@@ -428,7 +419,7 @@ MobileServiceClient.prototype.invokeApi = Platform.async(
                     if (!contentType) {
                         try {
                             response.result = _.fromJson(response.responseText);
-                        } catch(e) {
+                        } catch (e) {
                             // Do nothing, since we don't know the content-type, failing may be ok
                         }
                     } else if (contentType.toLowerCase().indexOf('json') !== -1) {
