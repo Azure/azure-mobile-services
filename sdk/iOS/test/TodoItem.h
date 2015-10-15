@@ -8,7 +8,7 @@
 @interface TodoItem : NSManagedObject
 
 @property (nonatomic, retain) NSString * id;
-@property (nonatomic, retain) NSString * ms_version;
+@property (nonatomic, retain) NSString * version;
 @property (nonatomic, retain) NSNumber * sort;
 @property (nonatomic, retain) NSString * text;
 

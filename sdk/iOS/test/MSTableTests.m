@@ -269,7 +269,7 @@
 
 -(void) testInsertKeepsSystemProperties
 {
-    NSString* stringData = @"{\"id\": \"A\", \"name\":\"test name\", \"__version\":\"ABC\", \"__createdAt\":\"12-01-01\",\"__unknown\":123}";
+    NSString* stringData = @"{\"id\": \"A\", \"name\":\"test name\", \"version\":\"ABC\", \"createdAt\":\"12-01-01\",\"__unknown\":123}";
     
     MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:stringData];
     MSInspectRequestBlock inspectBlock = ^NSURLRequest *(NSURLRequest *request) {
@@ -544,7 +544,7 @@
 
 -(void) testUpdateKeepsSystemProperties
 {
-    NSString* stringData = @"{\"id\": \"A\", \"name\":\"test name\", \"__version\":\"ABC\", \"__createdAt\":\"12-01-01\",\"__unknown\":123}";
+    NSString* stringData = @"{\"id\": \"A\", \"name\":\"test name\", \"version\":\"ABC\", \"createdAt\":\"12-01-01\",\"__unknown\":123}";
     
     MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:stringData];
     MSInspectRequestBlock inspectBlock = ^NSURLRequest *(NSURLRequest *request) {
@@ -1161,7 +1161,7 @@
 
 -(void) testUnDeleteItemWithParametersWithStringId
 {
-    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:@"{\"id\":\"an id\",\"String\":\"Hey\", \"__version\":\"def\"}"];
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:@"{\"id\":\"an id\",\"String\":\"Hey\", \"version\":\"def\"}"];
     
     __block NSURLRequest *actualRequest;
     testFilter.onInspectRequest =  ^(NSURLRequest *request) {
@@ -1225,18 +1225,9 @@
 
 -(void) testReadItemWithIntId
 {
-    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
-    
-    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
-                                   initWithURL:nil
-                                   statusCode:200
-                                   HTTPVersion:nil headerFields:nil];
     NSString* stringData = @"{\"id\": 120, \"name\":\"test name\"}";
-    NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
-    
-    testFilter.responseToUse = response;
-    testFilter.dataToUse = data;
-    testFilter.ignoreNextFilter = YES;
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200
+                                                                 data:stringData];
     
     MSClient *filteredClient = [client clientWithFilter:testFilter];
     MSTable *todoTable = [filteredClient tableWithName:@"NoSuchTable"];
@@ -1690,11 +1681,10 @@
     }
 }
 
--(void) testUpdateIntegerIdNoPropertiesRemovedFromRequest
+-(void) testUpdateIntegerIdPropertiesRemovedFromRequest
 {
     __block NSURLRequest *actualRequest = nil;
-    NSArray *testProperties = [MSTable testNonSystemProperties];
-    testProperties = [testProperties arrayByAddingObjectsFromArray:[MSTable testValidSystemProperties]];
+    NSArray *testProperties = [MSTable testValidSystemProperties];
     
     for (NSString *property in testProperties)
     {
@@ -1721,7 +1711,7 @@
             NSData *actualBody = actualRequest.HTTPBody;
             NSString *bodyString = [[NSString alloc] initWithData:actualBody
                                                          encoding:NSUTF8StringEncoding];
-            XCTAssertTrue([bodyString rangeOfString:property].location != NSNotFound,
+            XCTAssertTrue([bodyString rangeOfString:property].location == NSNotFound,
                          @"The body was not serialized as expected: %@", bodyString);
             XCTAssertEqualObjects(@"a value", item[property], @"Property %@ was removed", property);
             done = YES;
@@ -1867,7 +1857,7 @@
 
 -(void) testInsertUpdateDeleteAddsProperFeaturesHeader {
     __block NSURLRequest *actualRequest = nil;
-    NSString* response = @"{\"id\": \"A\", \"name\":\"test name\", \"__version\":\"ABC\"}";
+    NSString* response = @"{\"id\": \"A\", \"name\":\"test name\", \"version\":\"ABC\"}";
     MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:response];
     testFilter.onInspectRequest = ^(NSURLRequest *request) {
         actualRequest = request;
@@ -1907,7 +1897,7 @@
     actualRequest = nil;
     done = NO;
 
-    // Update with no __version or parameters has no features header
+    // Update with no version or parameters has no features header
     [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
         XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
         XCTAssertNil(error, @"error should have been nil.");
@@ -1920,8 +1910,8 @@
     actualRequest = nil;
     done = NO;
 
-    // Update with __version has OC features header
-    NSDictionary *itemWithVersion = @{@"id":@"the-id",@"name":@"value",@"__version":@"abc"};
+    // Update with version has OC features header
+    NSDictionary *itemWithVersion = @{@"id":@"the-id",@"name":@"value",@"version":@"abc"};
     [todoTable update:itemWithVersion completion:^(NSDictionary *item, NSError *error) {
         XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
         XCTAssertNil(error, @"error should have been nil.");
@@ -1952,7 +1942,7 @@
     actualRequest = nil;
     done = NO;
 
-    // Delete with no __version or parameters has no features header
+    // Delete with no version or parameters has no features header
     [todoTable delete:item completion:^(id itemId, NSError *error) {
         XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
         XCTAssertNil(error, @"error should have been nil.");
@@ -1965,7 +1955,7 @@
     actualRequest = nil;
     done = NO;
 
-    // Delete with __version has OC features header
+    // Delete with version has OC features header
     [todoTable delete:itemWithVersion completion:^(id itemId, NSError *error) {
         XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
         XCTAssertNil(error, @"error should have been nil.");

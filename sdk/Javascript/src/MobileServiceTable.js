@@ -29,9 +29,10 @@ var MobileServiceSystemProperties = {
 };
 
 var MobileServiceSystemColumns = {
-    CreatedAt: "__createdAt",
-    UpdatedAt: "__updatedAt",
-    Version: "__version"
+    CreatedAt: "createdAt",
+    UpdatedAt: "updatedAt",
+    Version: "version",
+    Deleted: "deleted"
 };
 
 Platform.addToMobileServicesClientNamespace({
@@ -347,12 +348,8 @@ MobileServiceTable.prototype.update = Platform.async(
         }
         Validate.notNull(callback, 'callback');
 
-        if (_.isString(instance[idPropertyName])) {
-            version = instance.__version;
-            serverInstance = removeSystemProperties(instance);
-        } else {
-            serverInstance = instance;
-        }
+        version = instance[MobileServiceSystemColumns.Version];
+        serverInstance = removeSystemProperties(instance);
 
         if (!_.isNullOrEmpty(version)) {
             headers['If-Match'] = getEtagFromVersion(version);
@@ -568,8 +565,8 @@ MobileServiceTable.prototype.del = Platform.async(
         var headers = {};
         var features = [];
         if (_.isString(instance[idPropertyName])) {
-            if (!_.isNullOrEmpty(instance.__version)) {
-                headers['If-Match'] = getEtagFromVersion(instance.__version);
+            if (!_.isNullOrEmpty(instance[MobileServiceSystemColumns.Version])) {
+                headers['If-Match'] = getEtagFromVersion(instance[MobileServiceSystemColumns.Version]);
                 features.push(WindowsAzure.MobileServiceClient._zumoFeatures.OptimisticConcurrency);
             }
         }
@@ -645,8 +642,12 @@ for (; i < queryOperators.length; i++) {
 // Table system properties
 function removeSystemProperties(instance) {
     var copy = {};
-    for(var property in instance) {
-        if (property.substr(0, 2) !== '__') {
+    for (var property in instance) {
+        if ((property != MobileServiceSystemColumns.Version) &&
+            (property != MobileServiceSystemColumns.UpdatedAt) &&
+            (property != MobileServiceSystemColumns.CreatedAt) &&
+            (property != MobileServiceSystemColumns.Deleted))
+        {
             copy[property] = instance[property];
         }
     }
@@ -659,7 +660,7 @@ function getItemFromResponse(response) {
     if (response.getResponseHeader) {
         var eTag = response.getResponseHeader('ETag');
         if (!_.isNullOrEmpty(eTag)) {
-            result.__version = getVersionFromEtag(eTag);
+            result[MobileServiceSystemColumns.Version] = getVersionFromEtag(eTag);
         }
     }
     return result;
