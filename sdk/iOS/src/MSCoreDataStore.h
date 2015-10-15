@@ -44,13 +44,4 @@ extern NSString *const StoreVersion;
 /// properties expected when using a MSTable or MSSyncTable
 +(NSDictionary *) tableItemFromManagedObject:(NSManagedObject *)object;
 
-/// @}
-
-/// @{name Working with multiple ManagedObjectContext
-
-/// Function to subscribe a given context to all MOC saves. These will be used to generate sync table
-/// calls.
-
-/// @}
-
 @end
