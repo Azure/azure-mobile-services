@@ -25,17 +25,17 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <summary>
         /// Name of the table that stores operation queue items
         /// </summary>
-        public static readonly string OperationQueue = "operations";
+        public static readonly string OperationQueue = Prefix + "operations";
 
         /// <summary>
         /// Name of the table that stores sync errors
         /// </summary>
-        public static readonly string SyncErrors = "errors";
+        public static readonly string SyncErrors = Prefix + "errors";
 
         /// <summary>
         /// Name of the table that stores configuration settings related to sync framework
         /// </summary>
-        public static readonly string Config = "config";
+        public static readonly string Config = Prefix + "config";
 
         /// <summary>
         /// Returns the names of all system tables

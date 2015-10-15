@@ -188,7 +188,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// Removes all system properties (name start with '__') from the instance
+        /// Removes all system properties from the instance
         /// if the instance is determined to have a string id and therefore be for table that
         /// supports system properties.
         /// </summary>

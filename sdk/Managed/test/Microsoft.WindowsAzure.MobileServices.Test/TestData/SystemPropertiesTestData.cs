@@ -26,20 +26,20 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         };
 
         public static string[] ValidSystemProperties = new string[] {
-            "__createdAt",
-            "__updatedAt",
-            "__version",
-            "__deleted",
-            "__CreatedAt",
-            "__futureSystemProperty"
-        };
-
-        public static string[] NonSystemProperties = new string[] {
-            "someProperty",
             "createdAt",
             "updatedAt",
             "version",
             "deleted",
+            "CreatedAt",
+            "futureSystemProperty"
+        };
+
+        public static string[] NonSystemProperties = new string[] {
+            "someProperty",
+            "__createdAt",
+            "__updatedAt",
+            "__version",
+            "__deleted",
             "_createdAt",
             "_updatedAt",
             "_version",
@@ -49,51 +49,51 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public static string[] ValidSystemPropertyQueryStrings = new string[] {
             // General
             "__systemProperties=*",
-            "__systemProperties=__createdAt",
-            "__systemProperties=__createdAt,__updatedAt",
-            "__systemProperties=__createdAt,__version",
-            "__systemProperties=__createdAt,__updatedAt,__version",
-            "__systemProperties=__createdAt,__version,__updatedAt",
-            "__systemProperties=__createdAt,__version,__updatedAt,__deleted",
-            "__systemProperties=__updatedAt",
-            "__systemProperties=__updatedAt,__createdAt",
-            "__systemProperties=__updatedAt,__createdAt,__version",
-            "__systemProperties=__updatedAt,__version",
-            "__systemProperties=__updatedAt,__version, __createdAt",
-            "__systemProperties=__version",
-            "__systemProperties=__version,__createdAt",
-            "__systemProperties=__version,__createdAt,__updatedAt",
-            "__systemProperties=__version,__updatedAt",
-            "__systemProperties=__version,__updatedAt, __createdAt",
+            "__systemProperties=createdAt",
+            "__systemProperties=createdAt,updatedAt",
+            "__systemProperties=createdAt,version",
+            "__systemProperties=createdAt,updatedAt,version",
+            "__systemProperties=createdAt,version,updatedAt",
+            "__systemProperties=createdAt,version,updatedAt,deleted",
+            "__systemProperties=updatedAt",
+            "__systemProperties=updatedAt,createdAt",
+            "__systemProperties=updatedAt,createdAt,version",
+            "__systemProperties=updatedAt,version",
+            "__systemProperties=updatedAt,version, createdAt",
+            "__systemProperties=version",
+            "__systemProperties=version,createdAt",
+            "__systemProperties=version,createdAt,updatedAt",
+            "__systemProperties=version,updatedAt",
+            "__systemProperties=version,updatedAt, createdAt",
 
             // Trailing commas, extra commas
-            "__systemProperties=__createdAt,",
-            "__systemProperties=__createdAt,__updatedAt,",
-            "__systemProperties=__createdAt,__updatedAt,__version,",
-            "__systemProperties=,__createdAt",
-            "__systemProperties=__createdAt,,__updatedAt",
-            "__systemProperties=__createdAt, ,__updatedAt,__version",
-            "__systemProperties=__createdAt,,",
-            "__systemProperties=__createdAt, ,",
+            "__systemProperties=createdAt,",
+            "__systemProperties=createdAt,updatedAt,",
+            "__systemProperties=createdAt,updatedAt,version,",
+            "__systemProperties=,createdAt",
+            "__systemProperties=createdAt,,updatedAt",
+            "__systemProperties=createdAt, ,updatedAt,version",
+            "__systemProperties=createdAt,,",
+            "__systemProperties=createdAt, ,",
 
             // Trailing, leading whitespace
             "__systemProperties= *",
             "__systemProperties=\t*\t",
-            "__systemProperties= __createdAt ",
-            "__systemProperties=\t__createdAt,\t__updatedAt\t",
-            "__systemProperties=\r__createdAt,\r__updatedAt,\t__version\r",
-            "__systemProperties=\n__createdAt\n",
-            "__systemProperties=__createdAt,\n__updatedAt",
-            "__systemProperties=__createdAt, __updatedAt, __version",
+            "__systemProperties= createdAt ",
+            "__systemProperties=\tcreatedAt,\tupdatedAt\t",
+            "__systemProperties=\rcreatedAt,\rupdatedAt,\tversion\r",
+            "__systemProperties=\ncreatedAt\n",
+            "__systemProperties=createdAt,\nupdatedAt",
+            "__systemProperties=createdAt, updatedAt, version",
 
             // Different casing
             "__SystemProperties=*",
-            "__SystemProperties=__createdAt",
-            "__SYSTEMPROPERTIES=__createdAt,__updatedAt",
-            "__systemproperties=__createdAt,__updatedAt,__version",
-            "__SystemProperties=__CreatedAt",
-            "__SYSTEMPROPERTIES=__createdAt,__UPDATEDAT",
-            "__systemproperties=__createdat,__UPDATEDAT,__veRsion",
+            "__SystemProperties=createdAt",
+            "__SYSTEMPROPERTIES=createdAt,updatedAt",
+            "__systemproperties=createdAt,updatedAt,version",
+            "__SystemProperties=CreatedAt",
+            "__SYSTEMPROPERTIES=createdAt,UPDATEDAT",
+            "__systemproperties=createdat,UPDATEDAT,veRsion",
 
             // Sans __ prefix
             "__systemProperties=createdAt",
@@ -102,8 +102,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             "__systemProperties=updatedAt,version,createdAt",
 
             // Combinations of above
-            "__SYSTEMPROPERTIES=__createdAt, updatedat",
-            "__systemProperties=__CreatedAt,,\t__VERSION",
+            "__SYSTEMPROPERTIES=createdAt, updatedat",
+            "__systemProperties=CreatedAt,,\tVERSION",
             "__systemProperties= updatedat ,,"
         };
 
@@ -115,16 +115,16 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             "__systemProperties=_version",
 
             // System properties not comma separated
-            "__systemProperties=__createdAt __updatedAt",
-            "__systemProperties=__createdAt\t__version",
+            "__systemProperties=createdAt updatedAt",
+            "__systemProperties=createdAt\tversion",
             "__systemProperties=createdAt updatedAt version",
-            "__systemProperties=__createdAt__version",
+            "__systemProperties=createdAtversion",
             
             // All and individual system properties requested
-            "__systemProperties=*,__updatedAt",
+            "__systemProperties=*,updatedAt",
         };
 
         // Missing ‘__’ prefix to systemProperties query string parameter
-        public static string InvalidSystemParameterQueryString = "_systemProperties=__createdAt,__version";
+        public static string InvalidSystemParameterQueryString = "_systemProperties=createdAt,version";
     }
 }

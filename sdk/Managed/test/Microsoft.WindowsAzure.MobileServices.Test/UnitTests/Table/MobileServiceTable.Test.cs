@@ -985,21 +985,21 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task InsertAsyncWithStringId_KeepsSystemProperties()
         {
-            var userDefinedParameters = new Dictionary<string, string>() { { "__systemproperties", "__createdAt" } };
+            var userDefinedParameters = new Dictionary<string, string>() { { "__systemproperties", "createdAt" } };
 
             TestHttpHandler hijack = new TestHttpHandler();
             IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
             IMobileServiceTable table = service.GetTable("tests");
 
             JObject obj = JToken.Parse("{\"value\":\"new\"}") as JObject;
-            hijack.SetResponseContent("{\"id\":\"A\",\"value\":\"new\", \"__version\":\"XYZ\",\"__unknown\":12,\"__CREATEDat\":\"12-02-02\"}");
+            hijack.SetResponseContent("{\"id\":\"A\",\"value\":\"new\", \"version\":\"XYZ\",\"__unknown\":12,\"CREATEDat\":\"12-02-02\"}");
             JToken newObj = await table.InsertAsync(obj);
 
             Assert.AreEqual("A", (string)newObj["id"]);
             Assert.AreNotEqual(newObj, obj);
-            Assert.IsNotNull(newObj["__version"]);
+            Assert.IsNotNull(newObj["version"]);
             Assert.IsNotNull(newObj["__unknown"]);
-            Assert.IsNotNull(newObj["__CREATEDat"]);
+            Assert.IsNotNull(newObj["CREATEDat"]);
         }
 
         [AsyncTestMethod]
@@ -1012,14 +1012,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             IMobileServiceTable table = service.GetTable("tests");
 
             JObject obj = JToken.Parse("{\"value\":\"new\"}") as JObject;
-            hijack.SetResponseContent("{\"id\":12,\"value\":\"new\", \"__version\":\"XYZ\",\"__unknown\":12,\"__CREATEDat\":\"12-02-02\"}");
+            hijack.SetResponseContent("{\"id\":12,\"value\":\"new\", \"version\":\"XYZ\",\"__unknown\":12,\"CREATEDat\":\"12-02-02\"}");
             JToken newObj = await table.InsertAsync(obj, userDefinedParameters);
 
             Assert.AreEqual(12, (int)newObj["id"]);
             Assert.AreNotEqual(newObj, obj);
-            Assert.IsNotNull(newObj["__version"]);
+            Assert.IsNotNull(newObj["version"]);
             Assert.IsNotNull(newObj["__unknown"]);
-            Assert.IsNotNull(newObj["__CREATEDat"]);
+            Assert.IsNotNull(newObj["CREATEDat"]);
         }
 
         [AsyncTestMethod]
@@ -1391,14 +1391,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             IMobileServiceTable table = service.GetTable("tests");
 
             JObject obj = JToken.Parse("{\"id\":\"A\",\"value\":\"new\"}") as JObject;
-            hijack.SetResponseContent("{\"id\":\"A\",\"value\":\"new\", \"__version\":\"XYZ\",\"__unknown\":12,\"__CREATEDat\":\"12-02-02\"}");
+            hijack.SetResponseContent("{\"id\":\"A\",\"value\":\"new\", \"version\":\"XYZ\",\"__unknown\":12,\"CREATEDat\":\"12-02-02\"}");
             var newObj = await table.UpdateAsync(obj);
 
             Assert.AreEqual("A", (string)newObj["id"]);
             Assert.AreNotEqual(newObj, obj);
-            Assert.IsNotNull(newObj["__version"]);
+            Assert.IsNotNull(newObj["version"]);
             Assert.IsNotNull(newObj["__unknown"]);
-            Assert.IsNotNull(newObj["__CREATEDat"]);
+            Assert.IsNotNull(newObj["CREATEDat"]);
         }
 
         [AsyncTestMethod]
@@ -1411,14 +1411,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             IMobileServiceTable table = service.GetTable("tests");
 
             JObject obj = JToken.Parse("{\"id\":12,\"value\":\"new\"}") as JObject;
-            hijack.SetResponseContent("{\"id\":12,\"value\":\"new\", \"__version\":\"XYZ\",\"__unknown\":12,\"__CREATEDat\":\"12-02-02\"}");
+            hijack.SetResponseContent("{\"id\":12,\"value\":\"new\", \"version\":\"XYZ\",\"__unknown\":12,\"CREATEDat\":\"12-02-02\"}");
             JToken newObj = await table.UpdateAsync(obj, userDefinedParameters);
 
             Assert.AreEqual(12, (int)newObj["id"]);
             Assert.AreNotEqual(newObj, obj);
-            Assert.IsNotNull(newObj["__version"]);
+            Assert.IsNotNull(newObj["version"]);
             Assert.IsNotNull(newObj["__unknown"]);
-            Assert.IsNotNull(newObj["__CREATEDat"]);
+            Assert.IsNotNull(newObj["CREATEDat"]);
         }
 
         [AsyncTestMethod]
@@ -1813,7 +1813,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             IMobileServiceTable table = service.GetTable("someTable");
 
-            var obj = JToken.Parse("{\"id\":\"id\",\"value\":\"new\", \"blah\":\"doh\", \"__version\": \"abc\"}") as JObject;
+            var obj = JToken.Parse("{\"id\":\"id\",\"value\":\"new\", \"blah\":\"doh\", \"version\": \"abc\"}") as JObject;
             JObject item = await table.UndeleteAsync(obj, parameters) as JObject;
 
             Assert.AreEqual("an id", (string)item["id"]);
@@ -1823,21 +1823,21 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task DeleteAsyncWithStringId_KeepsSystemProperties()
         {
-            var userDefinedParameters = new Dictionary<string, string>() { { "__systemproperties", "__createdAt" } };
+            var userDefinedParameters = new Dictionary<string, string>() { { "__systemproperties", "createdAt" } };
 
             TestHttpHandler hijack = new TestHttpHandler();
             IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
             IMobileServiceTable table = service.GetTable("tests");
 
             JObject obj = JToken.Parse("{\"id\":\"A\",\"value\":\"new\"}") as JObject;
-            hijack.SetResponseContent("{\"id\":\"A\",\"value\":\"new\", \"__version\":\"XYZ\",\"__unknown\":12,\"__CREATEDat\":\"12-02-02\"}");
+            hijack.SetResponseContent("{\"id\":\"A\",\"value\":\"new\", \"version\":\"XYZ\",\"__unknown\":12,\"CREATEDat\":\"12-02-02\"}");
             JToken newObj = await table.DeleteAsync(obj);
 
             Assert.AreEqual("A", (string)newObj["id"]);
             Assert.AreNotEqual(newObj, obj);
-            Assert.IsNotNull(newObj["__version"]);
+            Assert.IsNotNull(newObj["version"]);
             Assert.IsNotNull(newObj["__unknown"]);
-            Assert.IsNotNull(newObj["__CREATEDat"]);
+            Assert.IsNotNull(newObj["CREATEDat"]);
         }
 
         [AsyncTestMethod]
@@ -1850,14 +1850,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             IMobileServiceTable table = service.GetTable("tests");
 
             JObject obj = JToken.Parse("{\"id\":12,\"value\":\"new\"}") as JObject;
-            hijack.SetResponseContent("{\"id\":12,\"value\":\"new\", \"__version\":\"XYZ\",\"__unknown\":12,\"__CREATEDat\":\"12-02-02\"}");
+            hijack.SetResponseContent("{\"id\":12,\"value\":\"new\", \"version\":\"XYZ\",\"__unknown\":12,\"CREATEDat\":\"12-02-02\"}");
             JToken newObj = await table.DeleteAsync(obj, userDefinedParameters);
 
             Assert.AreEqual(12, (int)newObj["id"]);
             Assert.AreNotEqual(newObj, obj);
-            Assert.IsNotNull(newObj["__version"]);
+            Assert.IsNotNull(newObj["version"]);
             Assert.IsNotNull(newObj["__unknown"]);
-            Assert.IsNotNull(newObj["__CREATEDat"]);
+            Assert.IsNotNull(newObj["CREATEDat"]);
         }
 
         [AsyncTestMethod]
