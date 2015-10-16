@@ -191,6 +191,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual("secret...", hijack.Request.Headers.GetValues("X-ZUMO-APPLICATION").First());
             Assert.AreEqual("application/json", hijack.Request.Headers.Accept.First().MediaType);
             Assert.AreEqual("Not rhubarb", hijack.Request.Headers.GetValues("X-ZUMO-AUTH").First());
+            Assert.IsNotNull(hijack.Request.Headers.GetValues("ZUMO-API-VERSION").First());
 
             // Workaround mono bug https://bugzilla.xamarin.com/show_bug.cgi?id=15128
             // use commented line below once the bug fix has hit stable channel for xamarin.iOS
