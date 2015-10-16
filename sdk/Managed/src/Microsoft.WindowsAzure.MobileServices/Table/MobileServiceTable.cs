@@ -543,37 +543,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// Gets the system properties header value from the <see cref="MobileServiceSystemProperties"/>.
-        /// </summary>
-        /// <param name="properties">The system properties to set in the system properties header.</param>
-        /// <returns>
-        /// The system properties header value. Returns null if the systemProperty value is None.
-        /// </returns>
-        private static string GetSystemPropertiesString(MobileServiceSystemProperties properties)
-        {
-            if (properties == MobileServiceSystemProperties.None)
-            {
-                return null;
-            }
-            if (properties == MobileServiceSystemProperties.All)
-            {
-                return "*";
-            }
-
-            string[] systemProperties = properties.ToString().Split(',');
-
-            for (int i = 0; i < systemProperties.Length; i++)
-            {
-                string property = systemProperties[i].Trim();
-                char firstLetterAsLower = char.ToLowerInvariant(property[0]);
-                systemProperties[i] = firstLetterAsLower + property.Substring(1);
-            }
-
-            string systemPropertiesString = string.Join(",", systemProperties);
-            return systemPropertiesString;
-        }
-
-        /// <summary>
         /// Parses body of the <paramref name="response"/> as JToken
         /// </summary>
         /// <param name="response">The http response message.</param>
@@ -714,10 +683,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         private Dictionary<string, string> StripSystemPropertiesAndAddVersionHeader(ref JObject instance, ref IDictionary<string, string> parameters, object id)
         {
             string version = null;
-            if (!MobileServiceSerializer.IsIntegerId(id))
-            {
-                instance = MobileServiceSerializer.RemoveSystemProperties(instance, out version);
-            }
+            instance = MobileServiceSerializer.RemoveSystemProperties(instance, out version);
 
             Dictionary<string, string> headers = AddIfMatchHeader(version);
             return headers;

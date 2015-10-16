@@ -25,7 +25,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     internal class MobileServiceTable<T> : MobileServiceTable, IMobileServiceTable<T>
     {
         private MobileServiceTableQueryProvider queryProvider;
-        private bool hasIntegerId;
+        //private bool hasIntegerId;
 
         /// <summary>
         /// Initializes a new instance of the MobileServiceTables class.
@@ -40,8 +40,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             : base(tableName, client)
         {
             this.queryProvider = new MobileServiceTableQueryProvider();
-            Type idType = client.Serializer.GetIdPropertyType<T>(throwIfNotFound: false);
-            this.hasIntegerId = idType == null || MobileServiceSerializer.IsIntegerId(idType);
         }
 
         /// <summary>
@@ -138,11 +136,9 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             MobileServiceSerializer serializer = this.MobileServiceClient.Serializer;
             JObject value = serializer.Serialize(instance) as JObject;
-            if (!this.hasIntegerId)
-            {
-                string unused;
-                value = MobileServiceSerializer.RemoveSystemProperties(value, out unused);
-            }
+            
+            string unused;
+            value = MobileServiceSerializer.RemoveSystemProperties(value, out unused);
 
             JToken insertedValue = await TransformHttpException(serializer, () => this.InsertAsync(value, parameters, MobileServiceFeatures.TypedTable));
 
