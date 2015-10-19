@@ -169,6 +169,18 @@ $testGroup('MobileServiceClient._request',
         return Platform.async(client._request).call(client, 'POST', 'foo', null);
     }),
 
+    $test('api version header')
+    .description('Verify WebRequest.requestAsync provides an Zumo API Version header')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.windowsazure.com/", "http://www.gateway.com/", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.headers['ZUMO-API-VERSION'], "2.0.0");
+            callback(null, { status: 200, responseText: null });
+        });
+
+        return Platform.async(client._request).call(client, 'POST', 'foo', null);
+    }),
+
     $test('Passes back response')
     .description('Verify WebRequest.requestAsync passes back the response.')
     .checkAsync(function () {

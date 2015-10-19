@@ -231,6 +231,7 @@ MobileServiceClient.prototype._request = function (method, uriFragment, content,
     if (!_.isNullOrEmpty["X-ZUMO-VERSION"]) {
         options.headers["X-ZUMO-VERSION"] = this.version;
     }
+    options.headers["ZUMO-API-VERSION"] = "2.0.0";
 
     if (_.isNull(options.headers[_zumoFeaturesHeaderName]) && features && features.length) {
         options.headers[_zumoFeaturesHeaderName] = features.join(',');
