@@ -337,20 +337,36 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task PullAsync_Supports_AbsoluteAndRelativeUri()
         {
-            var data = new string[] 
+            var data = new[]
             {
-                "http://www.test.com/api/todoitem",
-                "/api/todoitem"
+                new 
+                {
+                    ServiceUri = MobileAppUriValidator.DummyMobileApp, 
+                    QueryUri = MobileAppUriValidator.DummyMobileApp+"api/todoitem", 
+                    Result = MobileAppUriValidator.DummyMobileApp + "api/todoitem"
+                },
+                new 
+                {
+                    ServiceUri = MobileAppUriValidator.DummyMobileAppWithoutTralingSlash, 
+                    QueryUri = "/api/todoitem", 
+                    Result = MobileAppUriValidator.DummyMobileAppWithoutTralingSlash + "/api/todoitem"
+                },
+                new 
+                {
+                    ServiceUri = MobileAppUriValidator.DummyMobileAppUriWithFolder,
+                    QueryUri = MobileAppUriValidator.DummyMobileAppUriWithFolder + "api/todoitem", 
+                    Result = MobileAppUriValidator.DummyMobileAppUriWithFolder + "api/todoitem"
+                }
             };
-
-            foreach (string uri in data)
+            
+            foreach (var item in data)
             {
                 var hijack = new TestHttpHandler();
                 hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"How\"}]"); // first page
                 hijack.AddResponseContent("[]");
 
                 var store = new MobileServiceLocalStoreMock();
-                IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
+                IMobileServiceClient service = new MobileServiceClient(item.ServiceUri, hijack);
                 MobileAppUriValidator mobileAppUriValidator = new MobileAppUriValidator(service);
                 await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
@@ -358,12 +374,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
                 Assert.IsFalse(store.TableMap.ContainsKey("stringId_test_table"));
 
-                await table.PullAsync(null, uri);
+                await table.PullAsync(null, item.QueryUri);
 
                 Assert.AreEqual(store.TableMap["stringId_test_table"].Count, 2);
 
-                AssertEx.MatchUris(hijack.Requests, "http://www.test.com/api/todoitem?$skip=0&$top=50&__includeDeleted=true",
-                                                    "http://www.test.com/api/todoitem?$skip=2&$top=50&__includeDeleted=true");
+                AssertEx.MatchUris(hijack.Requests, item.Result + "?$skip=0&$top=50&__includeDeleted=true",
+                                                    item.Result + "?$skip=2&$top=50&__includeDeleted=true");
 
                 Assert.AreEqual("QS,OL", hijack.Requests[0].Headers.GetValues("X-ZUMO-FEATURES").First());
                 Assert.AreEqual("QS,OL", hijack.Requests[1].Headers.GetValues("X-ZUMO-FEATURES").First());

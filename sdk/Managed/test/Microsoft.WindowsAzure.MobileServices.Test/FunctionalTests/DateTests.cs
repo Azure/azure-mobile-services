@@ -144,7 +144,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         //[AsyncTestMethod]
         //public async Task ChangeCulture()
         //{
-        //    IMobileServiceTable<DateExample> table = GetClient().GetTable<DateExample>();
+        //    IMobileServiceTable<DateExample> table = GetDummyMobileAppClient().GetTable<DateExample>();
 
         //    CultureInfo threadCulture = CultureInfo.DefaultThreadCurrentCulture;
         //    CultureInfo threadUICulture = CultureInfo.DefaultThreadCurrentUICulture;

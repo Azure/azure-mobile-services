@@ -158,5 +158,33 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             return uri;
         }
+
+        /// <summary>
+        /// Prepends a slash ('/') to <paramref name="uri"/> if it is missing a leading slash.
+        /// </summary>
+        /// <param name="uri">
+        /// URI to add a leading slash to.
+        /// </param>
+        /// <returns>
+        /// Uri with a leading slash<paramref name="uri"/> if it is missing one.
+        /// Else, <paramref name="uri"/> is returned unchanged.
+        /// </returns>
+        /// <remarks>
+        /// No validation of the uri is performed.
+        /// </remarks>
+        public static string AddLeadingSlash(string uri)
+        {
+            if (uri == null)
+            {
+                throw new ArgumentNullException("uri");
+            }
+
+            if (!uri.StartsWith(Slash.ToString()))
+            {
+                uri = Slash + uri;
+            }
+
+            return uri;
+        }
     }
 }

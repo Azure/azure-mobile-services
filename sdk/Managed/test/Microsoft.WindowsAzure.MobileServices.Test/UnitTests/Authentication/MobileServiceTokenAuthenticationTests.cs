@@ -40,7 +40,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
             {
                 { "display", "popup" },
                 { "scope", "email,birthday" }
-            }, MobileAppUriValidator.DummyMobileApp+"login/microsoftaccount?display=popup&scope=email%2Cbirthday");
+            }, MobileAppUriValidator.DummyMobileApp + "login/microsoftaccount?display=popup&scope=email%2Cbirthday");
         }
 
         [TestMethod]

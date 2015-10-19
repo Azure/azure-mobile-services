@@ -99,7 +99,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Gets the <see cref="MobileServiceHttpClient"/> associated with the Azure Mobile App.
         /// </summary>
-        internal MobileServiceHttpClient MobileAppHttpClient { get; private set; }
+        internal MobileServiceHttpClient HttpClient { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the MobileServiceClient class.
@@ -150,7 +150,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.InstallationId = GetApplicationInstallationId();
 
             handlers = handlers ?? EmptyHttpMessageHandlers;
-            this.MobileAppHttpClient = new MobileServiceHttpClient(handlers, this.MobileAppUri, this.InstallationId);
+            this.HttpClient = new MobileServiceHttpClient(handlers, this.MobileAppUri, this.InstallationId);
             this.Serializer = new MobileServiceSerializer();
             this.EventManager = new MobileServiceEventManager();
             this.SyncContext = new MobileServiceSyncContext(this);
@@ -496,7 +496,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 features |= MobileServiceFeatures.AdditionalQueryParameters;
             }
 
-            MobileServiceHttpResponse response = await this.MobileAppHttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), this.CurrentUser, content, false, features: features);
+            MobileServiceHttpResponse response = await this.HttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), this.CurrentUser, content, false, features: features);
             return response.Content;
         }
 
@@ -531,7 +531,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         public async Task<HttpResponseMessage> InvokeApiAsync(string apiName, HttpContent content, HttpMethod method, IDictionary<string, string> requestHeaders, IDictionary<string, string> parameters)
         {
             method = method ?? defaultHttpMethod;
-            HttpResponseMessage response = await this.MobileAppHttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), this.CurrentUser, content, requestHeaders: requestHeaders, features: MobileServiceFeatures.GenericApiCall);
+            HttpResponseMessage response = await this.HttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), this.CurrentUser, content, requestHeaders: requestHeaders, features: MobileServiceFeatures.GenericApiCall);
             return response;
         }
 
@@ -558,7 +558,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 ((MobileServiceSyncContext)this.SyncContext).Dispose();
                 // free managed resources
-                this.MobileAppHttpClient.Dispose();
+                this.HttpClient.Dispose();
             }
         }
 

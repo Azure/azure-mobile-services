@@ -16,11 +16,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     public class MobileServiceUrlBuilderTests : TestBase
     {
         /// <summary>
-        /// URI of a valid Mobile Application.
-        /// </summary>
-        private const string DefaultMobileApp = "http://www.test.com/testmobileapp/";
-
-        /// <summary>
         /// The Slash character.
         /// </summary>
         private const char Slash = '/';

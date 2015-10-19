@@ -37,15 +37,21 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [TestMethod]
         public void Construction()
         {
-            string appUrl = MobileAppUriValidator.DummyMobileApp;
-
-            MobileServiceClient service = new MobileServiceClient(appUrl);
-            Assert.AreEqual(appUrl, service.MobileAppUri.ToString());
+            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
+            Assert.AreEqual(MobileAppUriValidator.DummyMobileApp, service.MobileAppUri.ToString());
 
             // No Mobile Application URI null or invalid
             Throws<ArgumentNullException>(() => new MobileServiceClient(mobileAppUri: (string)null));
             Throws<ArgumentNullException>(() => new MobileServiceClient(mobileAppUri: (Uri)null));
             Throws<FormatException>(() => new MobileServiceClient("not a valid uri!!!@#!@#"));
+
+            // Mobile Application URI without trailing Slash
+            service = new MobileServiceClient(UriUtilities.RemoveTrailingSlash(MobileAppUriValidator.DummyMobileApp));
+
+            Assert.IsNotNull(service.MobileAppUri);
+            Assert.IsTrue(service.MobileAppUri.IsAbsoluteUri);
+            Assert.IsTrue(service.MobileAppUri.AbsoluteUri.EndsWith(UriUtilities.Slash.ToString()));
+            Assert.IsNotNull(service.HttpClient);
         }
 
         [AsyncTestMethod]
@@ -99,7 +105,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             ComplexDelegatingHandler secondHandler = new ComplexDelegatingHandler(secondBeforeMessage, secondAfterMessage);
 
             IMobileServiceClient service =
-                new MobileServiceClient(appUrl, handlers: new HttpMessageHandler[] {firstHandler, secondHandler, hijack});
+                new MobileServiceClient(appUrl, handlers: new HttpMessageHandler[] { firstHandler, secondHandler, hijack });
 
             // Validate that handlers are properly chained
             Assert.AreSame(hijack, secondHandler.InnerHandler);
@@ -168,7 +174,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             string query = "$filter=id eq 12";
 
             TestHttpHandler hijack = new TestHttpHandler();
-            IMobileServiceClient service = new MobileServiceClient(appUrl,hijack);
+            IMobileServiceClient service = new MobileServiceClient(appUrl, hijack);
             MobileAppUriValidator mobileAppUriValidator = new MobileAppUriValidator(service);
 
             // Verify the error message is correctly pulled out
@@ -330,7 +336,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             TestHttpHandler hijack = new TestHttpHandler();
             MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             MobileAppUriValidator mobileAppUriValidator = new MobileAppUriValidator(service);
-            
+
             hijack.SetResponseContent("{\"id\":3}");
 
             IntType expected = await service.InvokeApiAsync<IntType>("calculator/add?a=1&b=2");
@@ -420,7 +426,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             TestHttpHandler hijack = new TestHttpHandler();
             MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             MobileAppUriValidator mobileAppUriValidator = new MobileAppUriValidator(service);
-            
+
             hijack.SetResponseContent("{\"id\":3}");
 
             IntType expected = await service.InvokeApiAsync<IntType>("calculator/add?a=1&b=2", HttpMethod.Get, null);
@@ -463,7 +469,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             TestHttpHandler hijack = new TestHttpHandler();
             hijack.SetResponseContent("{\"id\":3}");
-            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp,  hijack);
+            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
 
             var myParams = new Dictionary<string, string>() { { "a", "1" }, { "b", "2" } };
             IntType expected = await service.InvokeApiAsync<IntType>("calculator/add", HttpMethod.Get, myParams);
@@ -476,7 +482,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             TestHttpHandler hijack = new TestHttpHandler();
             hijack.SetResponseContent("{\"id\":3}");
-            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp,  hijack);
+            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
 
             var myParams = new Dictionary<string, string>() { { "a", "1" }, { "b", "2" } };
             JToken expected = await service.InvokeApiAsync("calculator/add", HttpMethod.Get, myParams);
@@ -489,7 +495,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             TestHttpHandler hijack = new TestHttpHandler();
             hijack.SetResponseContent("{\"id\":3}");
-            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp,  hijack);
+            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
 
             var myParams = new Dictionary<string, string>() { { "$select", "one,two" }, { "$take", "1" } };
             IntType expected = await service.InvokeApiAsync<IntType>("calculator/add", HttpMethod.Get, myParams);
@@ -502,7 +508,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             TestHttpHandler hijack = new TestHttpHandler();
             hijack.SetResponseContent("{\"id\":3}");
-            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp,  hijack);
+            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
 
             var myParams = new Dictionary<string, string>() { { "$select", "one,two" } };
             JToken expected = await service.InvokeApiAsync("calculator/add", HttpMethod.Get, myParams);
@@ -515,7 +521,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             TestHttpHandler hijack = new TestHttpHandler();
             hijack.SetResponseContent("{\"id\":3}");
-            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp,  hijack);
+            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
 
             var myParams = new Dictionary<string, string>() { { "a", "1" }, { "b", "2" } };
             var body = "{\"test\" : \"one\"}";
@@ -530,7 +536,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             TestHttpHandler hijack = new TestHttpHandler();
             hijack.SetResponseContent("{\"id\":3}");
-            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp,  hijack);
+            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
 
             var myParams = new Dictionary<string, string>() { { "a", "1" }, { "b", "2" } };
             JObject body = JToken.Parse("{\"test\":\"one\"}") as JObject;
@@ -548,7 +554,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.Response = new HttpResponseMessage(System.Net.HttpStatusCode.Accepted);
             hijack.Response.Content = new StringContent("{\"id\":\"2\"}", Encoding.UTF8, "application/json");
 
-            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp,  hijack);
+            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             MobileAppUriValidator mobileAppUriValidator = new MobileAppUriValidator(service);
             HttpResponseMessage response = await service.InvokeApiAsync("calculator/add?a=1&b=2", null, HttpMethod.Post, null, null);
 
@@ -566,9 +572,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.Response.Content = new StringContent("{\"id\":\"2\"}", Encoding.UTF8, "application/json");
             var myParams = new Dictionary<string, string>() { { "a", "1" }, { "b", "2" } };
 
-            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp,  hijack);
+            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             MobileAppUriValidator mobileAppUriValidator = new MobileAppUriValidator(service);
-            
+
             HttpResponseMessage response = await service.InvokeApiAsync("calculator/add", null, HttpMethod.Post, null, myParams);
 
             Assert.AreEqual(hijack.Request.RequestUri.LocalPath, mobileAppUriValidator.GetApiUriPath("calculator/add"));
@@ -587,7 +593,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var myParams = new Dictionary<string, string>() { { "a", "1" }, { "b", "2" } };
 
             HttpContent content = new StringContent("{\"test\" : \"one\"}", Encoding.UTF8, "application/json");
-            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp,  hijack);
+            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             MobileAppUriValidator mobileAppUriValidator = new MobileAppUriValidator(service);
 
             var myHeaders = new Dictionary<string, string>() { { "x-zumo-test", "test" } };
@@ -612,7 +618,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.Response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
             hijack.Response.Content = new StringContent("", Encoding.UTF8, "application/json");
 
-            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp,  hijack);
+            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             MobileAppUriValidator mobileAppUriValidator = new MobileAppUriValidator(service);
 
             JToken expected = await service.InvokeApiAsync("testapi");
@@ -628,7 +634,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.Response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
             hijack.Response.Content = null;
 
-            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp,  hijack);
+            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             MobileAppUriValidator mobileAppUriValidator = new MobileAppUriValidator(service);
 
             IntType expected = await service.InvokeApiAsync<IntType>("testapi");
@@ -644,7 +650,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.Response = new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest);
             hijack.Response.Content = new StringContent("{ error: \"message\"}", Encoding.UTF8, "application/json");
 
-            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp,  hijack);
+            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
 
             try
             {
@@ -665,7 +671,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.Response = new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest);
             hijack.Response.Content = new StringContent("\"message\"", Encoding.UTF8, "application/json");
 
-            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp,  hijack);
+            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
 
             try
             {
@@ -686,7 +692,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.Response = new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest);
             hijack.Response.Content = new StringContent("message", Encoding.UTF8, "text/html");
 
-            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp,  hijack);
+            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
 
             try
             {
@@ -708,7 +714,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.Response.Content = new StringContent("message", Encoding.UTF8, null);
             hijack.Response.Content.Headers.ContentType = null;
 
-            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp,  hijack);
+            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
 
             try
             {
@@ -731,7 +737,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 return Task.FromResult(request);
             };
 
-            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp,  hijack);
+            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
 
             hijack.SetResponseContent("{\"hello\":\"world\"}");
             await service.InvokeApiAsync("apiName");
@@ -763,7 +769,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 return Task.FromResult(request);
             };
 
-            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp,  hijack);
+            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
 
             hijack.SetResponseContent("{\"id\":3}");
             await service.InvokeApiAsync<IntType>("apiName");
@@ -858,7 +864,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 return Task.FromResult(request);
             };
 
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp,  hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
 
             hijack.SetResponseContent("{\"id\":3}");
             await operation(service);
