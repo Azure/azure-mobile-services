@@ -7,8 +7,7 @@
 /// <reference path="..\..\js\Zumo.Internals.js" />
 /// <reference path="..\..\generated\Tests.js" />
 
-// Declare JSHint globals
-/*global Validate:false */
+var Validate = require('Validate');
 
 $testGroup('Validate.js',
 

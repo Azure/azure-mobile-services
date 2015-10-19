@@ -14,7 +14,7 @@
 
 // Require the TestFramework module so we can pull in various utilities like
 // $fmt to make generating the interface markup easier.
-require('TestFramework');
+require('./TestFramework');
 
 function getResultsElement() {
     return document.getElementById('testResults');

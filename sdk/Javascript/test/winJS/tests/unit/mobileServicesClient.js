@@ -8,7 +8,9 @@
 /// <reference path="..\..\generated\Tests.js" />
 
 // Declare JSHint globals
-/*global MobileServiceClient:false, Platform:false, Windows:false, Resources:false */
+/*global MobileServiceClient:false, Windows:false */
+
+var Platform = require('Platforms/Platform');
 
 $testGroup('MobileServiceClient.js',
 
@@ -287,7 +289,7 @@ $testGroup('MobileServiceClient.js',
     $test('CustomAPI - string content')
     .description('Verify sending string content')
     .check(function () {
-        var client = new MobileServiceClient.MobileServiceClient("http://www.test.com", "http://www.gateway.com", "123456abcdefg");
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "http://www.gateway.com", "123456abcdefg");
         client = client.withFilter(function (req, next, callback) {
             $assert.areEqual(req.data, 'apples');
             callback(null, { status: 200, responseText: '{"result":3}', getResponseHeader: function () { return 'application/json'; } });
@@ -302,7 +304,7 @@ $testGroup('MobileServiceClient.js',
     $test('CustomAPI - boolean content')
     .description('Verify sending boolean content')
     .check(function () {
-        var client = new MobileServiceClient.MobileServiceClient("http://www.test.com", "http://www.gateway.com", "123456abcdefg");
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "http://www.gateway.com", "123456abcdefg");
         client = client.withFilter(function (req, next, callback) {
             $assert.areEqual(req.data, "true");
             callback(null, { status: 200, responseText: '{"result":3}', getResponseHeader: function () { return 'application/json'; } });
@@ -317,7 +319,7 @@ $testGroup('MobileServiceClient.js',
     $test('CustomAPI - date object')
     .description('Verify sending date object')
     .check(function () {
-        var client = new MobileServiceClient.MobileServiceClient("http://www.test.com", "http://www.gateway.com", "123456abcdefg");
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "http://www.gateway.com", "123456abcdefg");
         client = client.withFilter(function (req, next, callback) {
             $assert.areEqual(req.data, "\"2013-04-14T06:01:59.000Z\"");
             callback(null, { status: 200, responseText: '{"result":3}', getResponseHeader: function () { return 'application/json'; } });
@@ -333,7 +335,7 @@ $testGroup('MobileServiceClient.js',
     $test('CustomAPI - array content')
     .description('Verify sending array content')
     .check(function () {
-        var client = new MobileServiceClient.MobileServiceClient("http://www.test.com", "http://www.gateway.com", "123456abcdefg");
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "http://www.gateway.com", "123456abcdefg");
         client = client.withFilter(function (req, next, callback) {
             $assert.areEqual(req.data, '[\"a\",\"b\",\"c\"]');
             callback(null, { status: 200, responseText: '{"result":3 }', getResponseHeader: function () { return 'application/json'; } });

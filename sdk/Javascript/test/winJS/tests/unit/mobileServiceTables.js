@@ -10,7 +10,8 @@
 // Declare JSHint globals
 /*global MobileServiceClient:false */
 
-var testData = require("constants");
+var testData = require('../utilities/constants');
+var Platform = require('Platforms/Platform');
 
 function checkRequestURL(url, property)
 {

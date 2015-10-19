@@ -9,8 +9,8 @@
 // Declare JSHint globals
 /*global XMLHttpRequest:false */
 
-var Validate = require('Validate');
-var Platform = require('Platform');
+var Validate = require('./Validate');
+var Platform = require('Platforms/Platform');
 var _ = exports;
 
 exports.isNull = function (value) {

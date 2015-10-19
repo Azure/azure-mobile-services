@@ -7,8 +7,7 @@
 /// <reference path="..\..\js\MobileServices.Internals.js" />
 /// <reference path="..\..\generated\Tests.js" />
 
-// Declare JSHint globals
-/*global Extensions:false */
+var Extensions = require('Extensions');
 
 $testGroup('Extensions.js',
 

@@ -9,9 +9,10 @@
 // Declare JSHint globals
 /*global WinJS:false, Windows:false, $__fileVersion__:false, $__version__:false */
 
-var _ = require('Extensions'),
-    Validate = require('Validate'),
-    WebAuthBroker = require('WebAuthBroker');
+var _ = require('../../Utilities/Extensions'),
+    Validate = require('../../Utilities/Validate'),
+    WebAuthBroker = require('../../LoginUis/WebAuthBroker'),
+    Constants = require('../../Generated/Constants.js');
 
 exports.async = function async(func) {
     /// <summary>
@@ -183,7 +184,7 @@ exports.getOperatingSystemInfo = function () {
 exports.getSdkInfo = function () {
     return {
         language: "WinJS",
-        fileVersion: $__fileVersion__        
+        fileVersion: Constants.FileVersion
     };
 };
 

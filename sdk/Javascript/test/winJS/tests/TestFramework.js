@@ -84,7 +84,7 @@ var harness = new Microsoft.Azure.Zumo.Win8.Test.TestHarness();
 global.$harness = harness;
 
 // Setup the test interface
-harness.reporter = require('TestInterface').Reporter;
+harness.reporter = require('./TestInterface').Reporter;
 
 global.$testGroup = function (name) {
     /// <summary>
@@ -400,5 +400,5 @@ global.$getTableHelper = function () {
     global.$assert.isTrue(
         global.$harness.settings.custom.MobileServiceRuntimeUrl,
         'TableHelper should only be called from functional tests!');
-    return new (require("TableHelper")).TableHelper(global.$isDotNet);
+    return new (require('./Utilities/TableHelper')).TableHelper(global.$isDotNet);
 };

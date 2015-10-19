@@ -8,7 +8,9 @@
 /// <reference path="..\..\generated\Tests.js" />
 
 // Declare JSHint globals
-/*global MobileServiceClient:false, Platform:false */
+/*global MobileServiceClient:false */
+
+var Platform = require('Platforms/Platform');
 
 $testGroup('MobileServiceClient._request',
 

@@ -8,7 +8,7 @@
 /// <reference path="..\..\generated\Tests.js" />
 
 // Declare JSHint globals
-/*global MobileServiceClient:false, Platform:false */
+/*global MobileServiceClient:false */
 
 $testGroup('Dates')
     .tests(

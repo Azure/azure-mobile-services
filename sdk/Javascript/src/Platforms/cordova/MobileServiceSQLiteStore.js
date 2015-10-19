@@ -2,9 +2,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-var Platform = require('Platform');
-var Validate = require('Validate');
-var _ = require('Extensions');
+var Platform = require('Platforms/Platform');
+var Validate = require('../../Utilities/Validate');
+var _ = require('../../Utilities/Extensions');
 
 var idPropertyName = "id";
 var tables = {};

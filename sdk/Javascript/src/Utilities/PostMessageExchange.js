@@ -5,7 +5,7 @@
 // window.postMessage does not have a concept of responses, so this class associates messages
 // with IDs so that we can identify which message a reply refers to.
 
-var Promises = require('Promises'),
+var Promises = require('./Promises'),
     messageTimeoutDuration = 5 * 60 * 1000; // If no reply after 5 mins, surely there will be no reply
 
 function PostMessageExchange() {
