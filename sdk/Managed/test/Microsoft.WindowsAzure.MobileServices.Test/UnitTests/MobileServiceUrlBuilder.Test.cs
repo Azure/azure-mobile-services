@@ -4,10 +4,7 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.WindowsAzure.MobileServices.Test.UnitTests;
-using Microsoft.WindowsAzure.MobileServices.Test.UnitTests.Common;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
-using Microsoft.WindowsAzure.MobileServices.Threading;
 
 namespace Microsoft.WindowsAzure.MobileServices.Test
 {
