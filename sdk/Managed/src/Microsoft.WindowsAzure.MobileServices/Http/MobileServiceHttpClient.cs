@@ -199,7 +199,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Value indicating which features of the SDK are being used in this call. Useful for telemetry.
         /// </param>
 		/// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
-        /// <returns>
+        /// <returns> 
         /// The response.
         /// </returns>
         public Task<MobileServiceHttpResponse> RequestAsync(HttpMethod method,
