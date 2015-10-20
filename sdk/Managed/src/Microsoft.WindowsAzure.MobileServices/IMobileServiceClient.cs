@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Sync;
 using Newtonsoft.Json.Linq;
+using System.Threading;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
@@ -157,8 +158,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         /// <typeparam name="T">The type of instance returned from the Microsoft Azure Mobile Service.</typeparam>    
         /// <param name="apiName">The name of the custom API.</param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
         /// <returns>The response content from the custom api invocation.</returns>
-        Task<T> InvokeApiAsync<T>(string apiName);
+        Task<T> InvokeApiAsync<T>(string apiName, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Invokes a user-defined custom API of a Microsoft Azure Mobile Service using an HTTP POST with
@@ -168,8 +170,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <typeparam name="U">The type of instance returned from the Microsoft Azure Mobile Service.</typeparam>    
         /// <param name="apiName">The name of the custom API.</param>
         /// <param name="body">The value to be sent as the HTTP body.</param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
         /// <returns>The response content from the custom api invocation.</returns>
-        Task<U> InvokeApiAsync<T, U>(string apiName, T body);
+        Task<U> InvokeApiAsync<T, U>(string apiName, T body, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Invokes a user-defined custom API of a Microsoft Azure Mobile Service using the specified HTTP Method.
@@ -181,8 +184,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="parameters">
         /// A dictionary of user-defined parameters and values to include in the request URI query string.
         /// </param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
         /// <returns>The response content from the custom api invocation.</returns>
-        Task<T> InvokeApiAsync<T>(string apiName, HttpMethod method, IDictionary<string, string> parameters);
+        Task<T> InvokeApiAsync<T>(string apiName, HttpMethod method, IDictionary<string, string> parameters, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Invokes a user-defined custom API of a Microsoft Azure Mobile Service using the specified HTTP Method.
@@ -196,15 +200,17 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="parameters">
         /// A dictionary of user-defined parameters and values to include in the request URI query string.
         /// </param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
         /// <returns>The response content from the custom api invocation.</returns>
-        Task<U> InvokeApiAsync<T, U>(string apiName, T body, HttpMethod method, IDictionary<string, string> parameters);
+        Task<U> InvokeApiAsync<T, U>(string apiName, T body, HttpMethod method, IDictionary<string, string> parameters, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Invokes a user-defined custom API of a Microsoft Azure Mobile Service using an HTTP POST.
         /// </summary>
         /// <param name="apiName">The name of the custom API.</param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
         /// <returns></returns>
-        Task<JToken> InvokeApiAsync(string apiName);
+        Task<JToken> InvokeApiAsync(string apiName, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Invokes a user-defined custom API of a Microsoft Azure Mobile Service using an HTTP POST, with
@@ -212,8 +218,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         /// <param name="apiName">The name of the custom API.</param>
         /// <param name="body">The value to be sent as the HTTP body.</param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
         /// <returns></returns>
-        Task<JToken> InvokeApiAsync(string apiName, JToken body);
+        Task<JToken> InvokeApiAsync(string apiName, JToken body, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Invokes a user-defined custom API of a Microsoft Azure Mobile Service using the specified HTTP Method.
@@ -224,8 +231,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="parameters">
         /// A dictionary of user-defined parameters and values to include in the request URI query string.
         /// </param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
         /// <returns>The response content from the custom api invocation.</returns>
-        Task<JToken> InvokeApiAsync(string apiName, HttpMethod method, IDictionary<string, string> parameters);
+        Task<JToken> InvokeApiAsync(string apiName, HttpMethod method, IDictionary<string, string> parameters, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Invokes a user-defined custom API of a Microsoft Azure Mobile Service using the specified HTTP method.
@@ -237,9 +245,10 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="parameters">
         /// A dictionary of user-defined parameters and values to include in the request URI query string.
         /// </param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
         /// <returns>The response content from the custom api invocation.</returns>
-        Task<JToken> InvokeApiAsync(string apiName, JToken body, HttpMethod method, IDictionary<string, string> parameters);
-        
+        Task<JToken> InvokeApiAsync(string apiName, JToken body, HttpMethod method, IDictionary<string, string> parameters, CancellationToken cancellationToken = default(CancellationToken));
+
         /// <summary>
         /// Invokes a user-defined custom API of a Microsoft Azure Mobile Service using the specified HttpMethod.
         /// Additional data can be sent though the HTTP content or the query string. 
@@ -253,8 +262,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="parameters">
         /// A dictionary of user-defined parameters and values to include in the request URI query string.
         /// </param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
         /// <returns>The HTTP Response from the custom api invocation.</returns>
-        Task<HttpResponseMessage> InvokeApiAsync(string apiName, HttpContent content, HttpMethod method, IDictionary<string, string> requestHeaders, IDictionary<string, string> parameters);
+        Task<HttpResponseMessage> InvokeApiAsync(string apiName, HttpContent content, HttpMethod method, IDictionary<string, string> requestHeaders, IDictionary<string, string> parameters, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Gets or sets the settings used for serialization.
