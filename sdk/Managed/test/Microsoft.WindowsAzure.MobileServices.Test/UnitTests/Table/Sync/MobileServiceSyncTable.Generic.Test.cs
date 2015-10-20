@@ -342,7 +342,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 new 
                 {
                     ServiceUri = MobileAppUriValidator.DummyMobileApp, 
-                    QueryUri = MobileAppUriValidator.DummyMobileApp+"api/todoitem", 
+                    QueryUri = MobileAppUriValidator.DummyMobileApp + "api/todoitem", 
                     Result = MobileAppUriValidator.DummyMobileApp + "api/todoitem"
                 },
                 new 
@@ -356,9 +356,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                     ServiceUri = MobileAppUriValidator.DummyMobileAppUriWithFolder,
                     QueryUri = MobileAppUriValidator.DummyMobileAppUriWithFolder + "api/todoitem", 
                     Result = MobileAppUriValidator.DummyMobileAppUriWithFolder + "api/todoitem"
+                },
+                new 
+                {
+                    ServiceUri = MobileAppUriValidator.DummyMobileAppUriWithFolderWithoutTralingSlash, 
+                    QueryUri = "/api/todoitem", 
+                    Result = MobileAppUriValidator.DummyMobileAppUriWithFolderWithoutTralingSlash + "/api/todoitem"
                 }
             };
-            
+
             foreach (var item in data)
             {
                 var hijack = new TestHttpHandler();
@@ -448,7 +454,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             AssertEx.MatchUris(hijack.Requests, mobileAppUriValidator.GetTableUri("stringId_test_table?$top=50&__includeDeleted=true"));
         }
-        
+
         [AsyncTestMethod]
         public async Task PullAsync_UsesTopInQuery_IfLessThanMaxPageSize()
         {
@@ -508,7 +514,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             AssertEx.MatchUris(hijack.Requests, mobileAppUriValidator.GetTableUri("stringId_test_table?$skip=0&$top=50&__includeDeleted=true"),
                                         mobileAppUriValidator.GetTableUri("stringId_test_table?$skip=2&$top=49&__includeDeleted=true"));
         }
-        
+
         [AsyncTestMethod]
         public async Task PullAsync_DoesNotFollowLink_IfMaxRecordsAreRetrieved()
         {

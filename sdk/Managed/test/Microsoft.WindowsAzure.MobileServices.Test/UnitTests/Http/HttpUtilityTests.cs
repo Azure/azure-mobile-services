@@ -38,6 +38,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                     Query = MobileAppUriValidator.DummyMobileAppUriWithFolder + "about?$filter=a eq b&$orderby=c", 
                     Absolute = true,
                     Result = MobileAppUriValidator.DummyMobileAppUriWithFolder + "about?$filter=a eq b&$orderby=c"
+                },
+                new 
+                {
+                    ServiceUri = MobileAppUriValidator.DummyMobileAppUriWithFolderWithoutTralingSlash,
+                    Query = MobileAppUriValidator.DummyMobileAppUriWithFolderWithoutTralingSlash + "/about?$filter=a eq b&$orderby=c", 
+                    Absolute = true,
+                    Result = MobileAppUriValidator.DummyMobileAppUriWithFolderWithoutTralingSlash + "/about?$filter=a eq b&$orderby=c"
                 }
             };
 
@@ -73,6 +80,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                     ServiceUri = MobileAppUriValidator.DummyMobileAppUriWithFolder, 
                     Query = "$filter=a eq b&$orderby=c", 
                     Result = MobileAppUriValidator.DummyMobileAppUriWithFolder + "about?$filter=a eq b&$orderby=c"
+                },
+                new 
+                {
+                    ServiceUri = MobileAppUriValidator.DummyMobileAppUriWithFolderWithoutTralingSlash, 
+                    Query = "$filter=a eq b&$orderby=c", 
+                    Result = MobileAppUriValidator.DummyMobileAppUriWithFolderWithoutTralingSlash + "/about?$filter=a eq b&$orderby=c"
                 }
             };
 

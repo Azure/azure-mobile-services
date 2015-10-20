@@ -27,6 +27,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
         public const string DummyMobileAppWithoutTralingSlash = "http://www.test.com";
 
         /// <summary>
+        /// URI for a dummy mobile app with a folder without trailing slash
+        /// </summary>
+        public const string DummyMobileAppUriWithFolderWithoutTralingSlash = "http://www.test.com/testmobileapp";
+
+        /// <summary>
         /// Table component in a valid table URI.
         /// </summary>
         private const string TableComponentInUri = "tables/";
