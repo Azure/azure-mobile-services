@@ -58,6 +58,13 @@ public class MobileServiceHttpClient {
     MobileServiceClient mClient;
 
     /**
+     * Get client associated with this HTTP caller.
+     * @return MobileServiceClient
+     */
+    public MobileServiceClient getClient(){
+        return mClient;
+    }
+    /**
      * Constructor
      *
      * @param client The client associated with this HTTP caller.

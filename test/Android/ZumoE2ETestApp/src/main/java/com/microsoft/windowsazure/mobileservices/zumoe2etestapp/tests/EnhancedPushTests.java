@@ -77,6 +77,7 @@ public class EnhancedPushTests extends TestGroup {
 
         String json = "'Notification Hub test notification'".replace('\'', '\"');
         this.addTest(createNativePushTestWithRefresh("Native Notification Roundtrip - Simple payload - With Refresh", "tag1", json));
+        this.addTest(createV2PushTestWithRefresh("V2 - With Refresh", null, json));
 
         json = "'Notification Hub test notification'".replace('\'', '\"');
         this.addTest(createNativePushTest("Native Notification Roundtrip - Simple payload", "tag1", json));
@@ -1207,6 +1208,67 @@ public class EnhancedPushTests extends TestGroup {
                     final MobileServicePush mobileServicePush2 = client2.getPush();
 
                     register(this, mobileServicePush2, registrationId, tags);
+
+                    GCMMessageManager.instance.clearPushMessages();
+                    MobileServiceJsonTable table = client.getTable(tableName);
+                    JsonObject item = new JsonObject();
+                    item.addProperty("method", "send");
+                    item.addProperty("tag", tag);
+                    JsonObject sentPayload = new JsonObject();
+                    sentPayload.add("data", payload);
+                    item.add("payload", sentPayload);
+                    item.addProperty("usingNH", true);
+
+                    JsonObject jsonObject = table.insert(item).get();
+
+                    this.log("OnCompleted: " + jsonObject.toString());
+                    TestExecutionCallback nativeUnregisterTestExecutionCallback = getNativeUnregisterTestExecutionCallback(client, tag, payload, callback);
+                    GCMMessageManager.instance.waitForPushMessage(20000, GCMMessageHelper.getPushCallback(this, payload, nativeUnregisterTestExecutionCallback));
+
+                } catch (Exception e) {
+                    callback.onTestComplete(this, createResultFromException(e));
+                    return;
+                }
+            }
+        };
+
+        result.setName(testName);
+
+        return result;
+    }
+
+    private TestCase createV2PushTestWithRefresh(String testName, final String tag, String jsonPayload) {
+        final JsonElement orginalPayload = new JsonParser().parse(jsonPayload);
+
+        JsonObject newPayload;
+        if (orginalPayload.isJsonObject()) {
+            newPayload = orginalPayload.getAsJsonObject();
+        } else {
+            newPayload = new JsonObject();
+            newPayload.add("message", orginalPayload);
+        }
+
+        final JsonObject payload = newPayload;
+
+        TestCase result = new TestCase(testName) {
+
+            @Override
+            protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
+
+                try {
+
+                    final MobileServicePush mobileServicePush = client.getPush();
+                    String[] tags = tag != null ? new String[]{tag} : null;
+
+                    unregisterAll(this, mobileServicePush, registrationId);
+
+                    removeStorageVersion();
+
+                    MobileServiceClient client2 = new MobileServiceClient(client);
+
+                    final MobileServicePush mobileServicePush2 = client2.getPush();
+
+                    mobileServicePush2.createOrUpdateInstallation(PushTests.registrationId);
 
                     GCMMessageManager.instance.clearPushMessages();
                     MobileServiceJsonTable table = client.getTable(tableName);
