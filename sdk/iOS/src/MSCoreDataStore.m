@@ -69,13 +69,7 @@ NSString *const StoreDeleted = @"ms_deleted";
     NSManagedObject *item = [results firstObject];
     
     if (item && asDictionary) {
-        
-        NSDictionary *result = [item dictionaryWithValuesForKeys:nil];
-
-        // The type of |result| is |NSKnownKeysDictionary|, an undocumented subclass of |NSMutableDictionary|.
-        // For it to work like a regular |NSMutableDictionary| we need to copy the contents into an
-        // |NSMutableDictionary| instance OR into an |NSDictionary| instance and then make a mutable copy.
-        return [NSDictionary dictionaryWithDictionary:result];
+        return [MSCoreDataStore tableItemFromManagedObject:item];
     }
     
     return item;

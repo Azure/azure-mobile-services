@@ -6,6 +6,7 @@
 #import "MSClient.h"
 #import "MSTable.h"
 #import "MSPullSettings.h"
+#import "MSSyncContext.h"
 
 @class MSQueuePullOperation;
 @class MSQueuePurgeOperation;
