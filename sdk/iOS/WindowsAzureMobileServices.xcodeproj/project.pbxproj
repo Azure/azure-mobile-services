@@ -100,7 +100,6 @@
 		5A4FACC81B05E6950027011D /* MSPredicateTranslator.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B2C1616684F002DD7C6 /* MSPredicateTranslator.m */; };
 		7929542819B7C793006A3829 /* MSQueryResult.h in Headers */ = {isa = PBXBuildFile; fileRef = 7929542619B7C793006A3829 /* MSQueryResult.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		7929542919B7C793006A3829 /* MSQueryResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 7929542719B7C793006A3829 /* MSQueryResult.m */; };
-		7929542A19B7C793006A3829 /* MSQueryResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 7929542719B7C793006A3829 /* MSQueryResult.m */; };
 		870C0C9C199C246700A134DD /* MSSDKFeatures.h in Headers */ = {isa = PBXBuildFile; fileRef = 870C0C9A199C246700A134DD /* MSSDKFeatures.h */; };
 		870C0C9D199C246700A134DD /* MSSDKFeatures.m in Sources */ = {isa = PBXBuildFile; fileRef = 870C0C9B199C246700A134DD /* MSSDKFeatures.m */; };
 		A202C3461AA25F730005A8AE /* MSPushConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = A202C3441AA25F730005A8AE /* MSPushConnection.h */; };
@@ -141,13 +140,13 @@
 		A2ADF7E91914481B0078BB16 /* MSTableOperationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A2ADF7E81914481B0078BB16 /* MSTableOperationTests.m */; };
 		A2C14C6A19105D9F00A58609 /* MSSyncContextReadResult.h in Headers */ = {isa = PBXBuildFile; fileRef = A2C14C6819105D9F00A58609 /* MSSyncContextReadResult.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A2C14C6B19105D9F00A58609 /* MSSyncContextReadResult.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C14C6919105D9F00A58609 /* MSSyncContextReadResult.m */; };
-		A3514E3D1BCC62380032B74C /* MSClientConnectionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A3514E3C1BCC62380032B74C /* MSClientConnectionTests.m */; settings = {ASSET_TAGS = (); }; };
-		A3514E3E1BCC64AB0032B74C /* MSClientConnectionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A3514E3C1BCC62380032B74C /* MSClientConnectionTests.m */; settings = {ASSET_TAGS = (); }; };
-		A3FD2DB01BB1C3F300624DA0 /* MSQueryInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 8790D2BF199EA5950000DC4E /* MSQueryInternal.h */; settings = {ASSET_TAGS = (); }; };
-		A3FD2DB11BB1C3FA00624DA0 /* MSTableInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 8790D2BE199C5D510000DC4E /* MSTableInternal.h */; settings = {ASSET_TAGS = (); }; };
-		A3FD2DB21BB1C40900624DA0 /* MSPullSettingsInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = D0EFD8581B2F785F009CF6DA /* MSPullSettingsInternal.h */; settings = {ASSET_TAGS = (); }; };
-		A3FD2DB31BB1C42300624DA0 /* MSQueuePullOperationInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = F3EA41DC1B0E62F40014B587 /* MSQueuePullOperationInternal.h */; settings = {ASSET_TAGS = (); }; };
-		A3FD2DB41BB1C76600624DA0 /* MSTableOperationInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = A258890218A19D0B00962F9A /* MSTableOperationInternal.h */; settings = {ASSET_TAGS = (); }; };
+		A3514E3D1BCC62380032B74C /* MSClientConnectionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A3514E3C1BCC62380032B74C /* MSClientConnectionTests.m */; };
+		A3514E3E1BCC64AB0032B74C /* MSClientConnectionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A3514E3C1BCC62380032B74C /* MSClientConnectionTests.m */; };
+		A3FD2DB01BB1C3F300624DA0 /* MSQueryInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 8790D2BF199EA5950000DC4E /* MSQueryInternal.h */; };
+		A3FD2DB11BB1C3FA00624DA0 /* MSTableInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 8790D2BE199C5D510000DC4E /* MSTableInternal.h */; };
+		A3FD2DB21BB1C40900624DA0 /* MSPullSettingsInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = D0EFD8581B2F785F009CF6DA /* MSPullSettingsInternal.h */; };
+		A3FD2DB31BB1C42300624DA0 /* MSQueuePullOperationInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = F3EA41DC1B0E62F40014B587 /* MSQueuePullOperationInternal.h */; };
+		A3FD2DB41BB1C76600624DA0 /* MSTableOperationInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = A258890218A19D0B00962F9A /* MSTableOperationInternal.h */; };
 		CF1D74591A5D85C60074789F /* MSQueuePurgeOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = CF1D74581A5D85C60074789F /* MSQueuePurgeOperation.m */; };
 		CF1D745B1A5D9CAB0074789F /* MSQueuePurgeOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = CF1D745A1A5D85D80074789F /* MSQueuePurgeOperation.h */; };
 		CF4D49861A2E5C96006AEB70 /* MSQueuePullOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = CF4D49851A2E5C96006AEB70 /* MSQueuePullOperation.h */; };
@@ -226,9 +225,9 @@
 		F331FBE71BB003C5004E777C /* MSPullSettingsInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = D0EFD8581B2F785F009CF6DA /* MSPullSettingsInternal.h */; };
 		F331FBE81BB003C5004E777C /* MSQueuePullOperationInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = F3EA41DC1B0E62F40014B587 /* MSQueuePullOperationInternal.h */; };
 		F331FBE91BB003C5004E777C /* BlockDefinitions.h in Headers */ = {isa = PBXBuildFile; fileRef = F3C002331AF7F7450028AB81 /* BlockDefinitions.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		F3B70FAA1BAC33E50018AE8D /* MSPullSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = D0D3B9351B290D80002A126A /* MSPullSettings.m */; settings = {ASSET_TAGS = (); }; };
-		F3B70FAB1BAC33EE0018AE8D /* MSPushConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = A202C3451AA25F730005A8AE /* MSPushConnection.m */; settings = {ASSET_TAGS = (); }; };
-		F3B70FAC1BAC34090018AE8D /* MSPushConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = A202C3441AA25F730005A8AE /* MSPushConnection.h */; settings = {ASSET_TAGS = (); }; };
+		F3B70FAA1BAC33E50018AE8D /* MSPullSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = D0D3B9351B290D80002A126A /* MSPullSettings.m */; };
+		F3B70FAB1BAC33EE0018AE8D /* MSPushConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = A202C3451AA25F730005A8AE /* MSPushConnection.m */; };
+		F3B70FAC1BAC34090018AE8D /* MSPushConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = A202C3441AA25F730005A8AE /* MSPushConnection.h */; };
 		F3B70FAE1BAC34B30018AE8D /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3B70FAD1BAC34B30018AE8D /* CoreData.framework */; };
 		F3C002341AF7F7450028AB81 /* BlockDefinitions.h in Headers */ = {isa = PBXBuildFile; fileRef = F3C002331AF7F7450028AB81 /* BlockDefinitions.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F3C002451AF7FF4A0028AB81 /* WindowsAzureMobileServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3C0023A1AF7FF490028AB81 /* WindowsAzureMobileServices.framework */; };
@@ -309,7 +308,7 @@
 		F3C002A21AF7FFF80028AB81 /* MSPredicateTranslator.h in Headers */ = {isa = PBXBuildFile; fileRef = E8F33B2B1616684F002DD7C6 /* MSPredicateTranslator.h */; };
 		F3C002A31AF7FFF80028AB81 /* BlockDefinitions.h in Headers */ = {isa = PBXBuildFile; fileRef = F3C002331AF7F7450028AB81 /* BlockDefinitions.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F3EA41DD1B0E63470014B587 /* MSQueuePullOperationInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = F3EA41DC1B0E62F40014B587 /* MSQueuePullOperationInternal.h */; };
-		F3EBDFF41BAC305700D82B10 /* MSPullSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = D0D3B9351B290D80002A126A /* MSPullSettings.m */; settings = {ASSET_TAGS = (); }; };
+		F3EBDFF41BAC305700D82B10 /* MSPullSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = D0D3B9351B290D80002A126A /* MSPullSettings.m */; };
 		F3EBDFF51BAC305D00D82B10 /* MSPullSettings.h in Headers */ = {isa = PBXBuildFile; fileRef = D0D3B9341B2906EF002A126A /* MSPullSettings.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F3EBDFF61BAC306200D82B10 /* MSPullSettings.h in Headers */ = {isa = PBXBuildFile; fileRef = D0D3B9341B2906EF002A126A /* MSPullSettings.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F3EBDFF71BAC30EC00D82B10 /* CoreDataTestModel.xcdatamodeld in Resources */ = {isa = PBXBuildFile; fileRef = A28224B1192ACFB700EF8743 /* CoreDataTestModel.xcdatamodeld */; };
@@ -1103,7 +1102,6 @@
 				E8F33AE71616659C002DD7C6 /* Sources */,
 				E8F33AE81616659C002DD7C6 /* Frameworks */,
 				E8F33AE91616659C002DD7C6 /* Resources */,
-				E8F33AEA1616659C002DD7C6 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -1158,7 +1156,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastTestingUpgradeCheck = 0510;
-				LastUpgradeCheck = 0500;
+				LastUpgradeCheck = 0710;
 				ORGANIZATIONNAME = "Windows Azure";
 				TargetAttributes = {
 					F3C002391AF7FF490028AB81 = {
@@ -1261,19 +1259,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "# Exit immediately on any errors\nset -e\n\n# Set some variables\nOUTPUT=${BUILT_PRODUCTS_DIR}\nWAMS=\"WindowsAzureMobileServices\"\nWAMS_FRAMEWORK=\"${WAMS}.framework\"\nWAMS_LIB=\"lib${WAMS}.a\"\nHEADERS=\"Headers\"\n\n# Create the needed directories for the framework\nmkdir -p \"${OUTPUT}/${WAMS_FRAMEWORK}/Versions/A\"\nmkdir -p \"${OUTPUT}/${WAMS_FRAMEWORK}/Versions/A/Headers\"\n\n# Add the headers and lib to the framework\ncp -a \"${OUTPUT}/${HEADERS}/\" \"${OUTPUT}/${WAMS_FRAMEWORK}/Versions/A/Headers\"\nlipo -create \"${OUTPUT}/${WAMS_LIB}\" -output \"${OUTPUT}/${WAMS_FRAMEWORK}/Versions/A/${WAMS}\"\n\n# Set up the links to complete the framework\nln -sf Versions/Current/Headers \"${OUTPUT}/${WAMS_FRAMEWORK}/Headers\"\nln -sf \"Versions/Current/${WAMS}\" \"${OUTPUT}/${WAMS_FRAMEWORK}/${WAMS}\"\nln -sf A \"${OUTPUT}/${WAMS_FRAMEWORK}/Versions/Current\"";
-		};
-		E8F33AEA1616659C002DD7C6 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -1378,7 +1363,6 @@
 				E8F33B3D1616694C002DD7C6 /* MSQueryTests.m in Sources */,
 				E8F33B3E16166956002DD7C6 /* MSJSONSerializerTests.m in Sources */,
 				A258891F18A1A30500962F9A /* MSOfflinePassthroughHelper.m in Sources */,
-				7929542A19B7C793006A3829 /* MSQueryResult.m in Sources */,
 				E8F33B3F1616695E002DD7C6 /* MSPredicateTranslatorTests.m in Sources */,
 				A2ADF7E91914481B0078BB16 /* MSTableOperationTests.m in Sources */,
 				A258891E18A1A30000962F9A /* MSSyncTableTests.m in Sources */,
@@ -1528,6 +1512,7 @@
 				INFOPLIST_FILE = src/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "Microsoft.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = WindowsAzureMobileServices;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1562,6 +1547,7 @@
 				INFOPLIST_FILE = src/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "Microsoft.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = WindowsAzureMobileServices;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1603,11 +1589,15 @@
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -1632,7 +1622,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
@@ -1640,10 +1629,13 @@
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -1707,6 +1699,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "src/WindowsAzureMobileServices-Prefix.pch";
 				INFOPLIST_FILE = "test/WindowsAzureMobileServicesTests-Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "Microsoft.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -1722,6 +1715,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "src/WindowsAzureMobileServices-Prefix.pch";
 				INFOPLIST_FILE = "test/WindowsAzureMobileServicesTests-Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "Microsoft.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -1755,6 +1749,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "Microsoft.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = WindowsAzureMobileServices;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -1789,6 +1784,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = "Microsoft.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = WindowsAzureMobileServices;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -1823,6 +1819,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.Microsoft.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 			};
@@ -1853,6 +1850,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.Microsoft.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 			};

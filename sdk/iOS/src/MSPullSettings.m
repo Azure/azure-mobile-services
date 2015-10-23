@@ -2,7 +2,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-#import "MSPullSettings.h"
+//#import "MSPullSettings.h"
+#import "MSPullSettingsInternal.h"
 
 #pragma mark * MSPullSettings Implementation
 

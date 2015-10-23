@@ -15,15 +15,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         static ODataExpressionParser()
         {
             keywords = new Dictionary<string, QueryNode>()
-			{
-				{ "true", new ConstantNode(true) },
-				{ "false", new ConstantNode(false) },
-				{ "null", new ConstantNode(null) },
-				{ "datetime", null }, // type constructed dynamically,
+            {
+                { "true", new ConstantNode(true) },
+                { "false", new ConstantNode(false) },
+                { "null", new ConstantNode(null) },
+                { "datetime", null }, // type constructed dynamically,
                 { "datetimeoffset", null }, // type constructed dynamically
                 { "guid", null } // type constructed dynamically
                  
-			};
+            };
         }
 
         private ODataExpressionParser(string expression)
