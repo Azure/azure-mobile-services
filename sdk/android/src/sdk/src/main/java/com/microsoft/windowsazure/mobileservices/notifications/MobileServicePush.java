@@ -42,6 +42,7 @@ import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceApplication;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
+import com.microsoft.windowsazure.mobileservices.MobileServiceFeatures;
 import com.microsoft.windowsazure.mobileservices.http.MobileServiceConnection;
 import com.microsoft.windowsazure.mobileservices.http.MobileServiceHttpClient;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
@@ -53,6 +54,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -395,7 +397,7 @@ public class MobileServicePush {
 
         String installationId = MobileServiceApplication.getInstallationId(mHttpClient.getClient().getContext());
 
-        String path = PNS_API_URL + "/installations/{0}" + installationId;
+        String path = PNS_API_URL + "/installations/" + installationId;
 
         ListenableFuture<ServiceFilterResponse> serviceFilterFuture = mHttpClient.request(path, null, "DELETE", null, null);
 
@@ -432,18 +434,26 @@ public class MobileServicePush {
 
         String installationId = MobileServiceApplication.getInstallationId(mHttpClient.getClient().getContext());
 
-        String path = PNS_API_URL+ "/installations/{0}" + installationId;
+        String path = PNS_API_URL+ "/installations/" + installationId;
 
-        ListenableFuture<ServiceFilterResponse> serviceFilterFuture = mHttpClient.request(path, installation.getAsString(), "PUT", null, null, null);
+        List<Pair<String, String>> headers = new ArrayList<Pair<String, String>>();
+
+        Pair<String, String> header = new Pair<String, String>("Content-Type", "application/json");
+
+        headers.add(header);
+
+        ListenableFuture<ServiceFilterResponse> serviceFilterFuture = mHttpClient.request(path, installation.toString(), "PUT", headers, null, EnumSet.noneOf(MobileServiceFeatures.class));
 
         Futures.addCallback(serviceFilterFuture, new FutureCallback<ServiceFilterResponse>() {
             @Override
             public void onFailure(Throwable exception) {
+
                 resultFuture.setException(exception);
             }
 
             @Override
             public void onSuccess(ServiceFilterResponse response) {
+
                 resultFuture.set(null);
             }
         });
