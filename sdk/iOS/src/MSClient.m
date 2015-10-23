@@ -78,6 +78,12 @@
     return [MSClient clientWithApplicationURLString:urlString
                                    gatewayURLString:nil
                                      applicationKey:key];
+    // NSURL will be nil for non-percent escaped url strings so we have to percent escape here
+    NSMutableCharacterSet *set = [[NSCharacterSet URLPathAllowedCharacterSet] mutableCopy];
+    [set formUnionWithCharacterSet:[NSCharacterSet URLHostAllowedCharacterSet]];
+    [set formUnionWithCharacterSet:[NSCharacterSet URLQueryAllowedCharacterSet]];
+    
+    NSString *urlStringEncoded = [urlString stringByAddingPercentEncodingWithAllowedCharacters:set];
 }
 
 

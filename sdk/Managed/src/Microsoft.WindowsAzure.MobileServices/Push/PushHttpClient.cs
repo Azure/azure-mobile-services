@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------
+//------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //------------------------------------------------------------
 
@@ -29,5 +29,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             return this.client.MobileAppHttpClient.RequestAsync(HttpMethod.Put, string.Format("push/installations/{0}", Uri.EscapeUriString(this.client.InstallationId)), this.client.CurrentUser, installation.ToString(), ensureResponseContent: false);
         }
+            await this.client.HttpClient.RequestAsync(HttpMethod.Put, string.Format("/push/registrations/{0}", Uri.EscapeUriString(regId)), this.client.CurrentUser, content, ensureResponseContent: false, cancellationToken: cancellationToken);
+
     }
 }
