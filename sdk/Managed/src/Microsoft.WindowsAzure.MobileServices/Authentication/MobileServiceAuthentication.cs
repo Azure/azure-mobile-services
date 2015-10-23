@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
@@ -24,12 +25,22 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Relative URI fragment of the login endpoint.
         /// </summary>
-        protected const string LoginAsyncUriFragment = "login";
+        protected const string LoginAsyncUriFragment = "/.auth/login";
+
+        /// <summary>
+        /// Relative URI fragment of the legacy login endpoint.
+        /// </summary>
+        protected const string LegacyLoginAsyncUriFragment = "/login";
 
         /// <summary>
         /// Relative URI fragment of the login/done endpoint.
         /// </summary>
-        protected const string LoginAsyncDoneUriFragment = "login/done";
+        protected const string LoginAsyncDoneUriFragment = "/.auth/login/done";
+
+        /// <summary>
+        /// Relative URI fragment of the legacy login/done endpoint.
+        /// </summary>
+        protected const string LegacyLoginAsyncDoneUriFragment = "/login/done";
 
         /// <summary>
         /// Name of the authentication provider as expected by the service REST API.
@@ -66,13 +77,25 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.Client = client;
             this.Parameters = parameters;
             this.ProviderName = providerName;
-
             string path = MobileServiceUrlBuilder.CombinePaths(LoginAsyncUriFragment, this.ProviderName);
+            string loginAsyncDoneUriFragment = MobileServiceAuthentication.LoginAsyncDoneUriFragment;
+            if (this.Client.UseLegacyAuth)
+            {
+                path = MobileServiceUrlBuilder.CombinePaths(LegacyLoginAsyncUriFragment, this.ProviderName);
+                loginAsyncDoneUriFragment = MobileServiceAuthentication.LegacyLoginAsyncDoneUriFragment;
+            }
             string queryString = MobileServiceUrlBuilder.GetQueryString(parameters, useTableAPIRules: false);
             string pathAndQuery = MobileServiceUrlBuilder.CombinePathAndQuery(path, queryString);
 
             this.StartUri = new Uri(this.Client.MobileAppUri, pathAndQuery);
-            this.EndUri = new Uri(this.Client.MobileAppUri, MobileServiceAuthentication.LoginAsyncDoneUriFragment);
+            this.EndUri = new Uri(this.Client.MobileAppUri, loginAsyncDoneUriFragment);
+
+            Uri alternateLoginUri;
+            if(Uri.TryCreate(this.Client.AlternateLoginUri,UriKind.Absolute, out alternateLoginUri))
+            {
+                this.StartUri = new Uri(alternateLoginUri, pathAndQuery);
+                this.EndUri = new Uri(alternateLoginUri, loginAsyncDoneUriFragment);
+            }
         }
 
         /// <summary>

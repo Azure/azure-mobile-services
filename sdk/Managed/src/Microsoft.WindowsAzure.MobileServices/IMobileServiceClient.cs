@@ -27,7 +27,17 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// MobileServiceClient.Login().
         /// </summary>
         MobileServiceUser CurrentUser { get; set; }
-        
+
+        /// <summary>
+        /// Determines the login endpoints. 
+        /// </summary>
+        Boolean UseLegacyAuth { get; set; }
+
+        /// <summary>
+        /// Alternate URI for login
+        /// </summary>
+        String AlternateLoginUri { get; set; }
+
         /// <summary>
         /// Returns a <see cref="IMobileServiceSyncContext"/> instance.
         /// </summary>

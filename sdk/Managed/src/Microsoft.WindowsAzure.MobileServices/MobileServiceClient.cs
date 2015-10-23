@@ -50,6 +50,39 @@ namespace Microsoft.WindowsAzure.MobileServices
         public MobileServiceUser CurrentUser { get; set; }
 
         /// <summary>
+        /// Determines the login endpoints. 
+        /// </summary>
+        public bool UseLegacyAuth { get; set; }
+
+        private string alternateLoginUri;
+
+        /// <summary>
+        /// Alternate URI for login
+        /// </summary>
+        public string AlternateLoginUri
+        {
+            get
+            {
+                return alternateLoginUri;
+            }
+            set
+            {
+                Uri loginUri = new Uri(value);
+                if (loginUri.IsAbsoluteUri && loginUri.Segments.Length == 1)
+                {
+                    alternateLoginUri = MobileServiceUrlBuilder.AddTrailingSlash(value);
+                }
+                else
+                {
+                    throw new ArgumentException(
+                        string.Format(CultureInfo.InvariantCulture, Resources.MobileServiceClient_InvalidAlternateLoginURI, value),
+                        "alternateLoginUri");
+                }
+                this.AlternateAuthHttpClient = new MobileServiceHttpClient(EmptyHttpMessageHandlers, new Uri(alternateLoginUri, UriKind.Absolute), this.InstallationId);
+            }
+        }
+
+        /// <summary>
         /// The id used to identify this installation of the application to 
         /// provide telemetry data.
         /// </summary>
@@ -100,6 +133,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Gets the <see cref="MobileServiceHttpClient"/> associated with the Azure Mobile App.
         /// </summary>
         internal MobileServiceHttpClient HttpClient { get; private set; }
+
+        /// <summary>
+        /// Gets the <see cref="MobileServiceHttpClient"/> associated with the Alternate login
+        /// Azure Mobile App.
+        /// </summary>
+        internal MobileServiceHttpClient AlternateAuthHttpClient { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the MobileServiceClient class.

@@ -213,6 +213,9 @@
   <data name="MobileServiceClient_NotAnAbsoluteURI" xml:space="preserve">
     <value>{0} is not an absolute URI.</value>
   </data>
+  <data name="MobileServiceClient_InvalidAlternateLoginURI" xml:space="preserve">
+    <value>{0} is invalid.AlternateLoginURI should be a valid URI with hostname only</value>
+  </data>
   <data name="MobileServiceClient_NoResponseContent" xml:space="preserve">
     <value>The server did not provide a response with the expected content.</value>
   </data>

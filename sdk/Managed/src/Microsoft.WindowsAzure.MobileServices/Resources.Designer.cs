@@ -197,6 +197,15 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} is invalid.AlternateLoginURI should be a valid URI with hostname only.
+        /// </summary>
+        internal static string MobileServiceClient_InvalidAlternateLoginURI {
+            get {
+                return ResourceManager.GetString("MobileServiceClient_InvalidAlternateLoginURI", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The server did not provide a response with the expected content..
         /// </summary>
         internal static string MobileServiceClient_NoResponseContent {
