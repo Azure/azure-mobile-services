@@ -931,8 +931,14 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
                 if (content == null) {
                     future.set(null);
                 } else {
-                    JsonObject newEntityJson = new JsonParser().parse(content).getAsJsonObject();
-                    future.set(Pair.create(newEntityJson, result));
+
+                    if (content != null && !content.isEmpty()){
+                        JsonObject newEntityJson = new JsonParser().parse(content).getAsJsonObject();
+                        future.set(Pair.create(newEntityJson, result));
+                    } else {
+                        future.set(null);
+                    }
+
                 }
             }
         });
