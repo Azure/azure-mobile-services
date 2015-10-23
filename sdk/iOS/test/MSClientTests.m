@@ -36,80 +36,36 @@
 #pragma mark * Static Constructor Method Tests
 
 
--(void) testStaticConstructor1ReturnsClient
+-(void) testStaticConstructorWithStringReturnsClient
 {
-    MSClient *client =
-    [MSClient clientWithApplicationURLString:@"http://someURL.com"];
+    MSClient *client = [MSClient clientWithApplicationURLString:@"http://someURL.com"];
     
     XCTAssertNotNil(client, @"client should not be nil.");
     
     XCTAssertNotNil(client.applicationURL, @"client.applicationURL should not be nil.");
+    
     NSString *urlString = [client.applicationURL absoluteString];
     XCTAssertTrue([urlString isEqualToString:@"http://someURL.com"],
                  @"The client should be using the url it was created with.");
-    
-    XCTAssertNil(client.applicationKey, @"client.applicationKey should be nil.");
 }
 
--(void) testStaticConstructor2ReturnsClient
-{
-    MSClient *client =
-    [MSClient clientWithApplicationURLString:@"http://someURL.com"
-                          applicationKey:@"here is some key"];
-    
-    XCTAssertNotNil(client, @"client should not be nil.");
-    
-    XCTAssertNotNil(client.applicationURL, @"client.applicationURL should not be nil.");
-    NSString *urlString = [client.applicationURL absoluteString];
-    XCTAssertTrue([urlString isEqualToString:@"http://someURL.com"],
-                 @"The client should be using the url it was created with.");
-    
-    XCTAssertNotNil(client.applicationKey, @"client.applicationKey should not be nil.");
-    XCTAssertTrue([client.applicationKey isEqualToString:@"here is some key"],
-                 @"The client should be using the url it was created with.");
-}
-
--(void) testStaticConstructor3ReturnsClient
+-(void) testStaticConstructorWithURLReturnsClient
 {
     NSURL *appURL = [NSURL URLWithString:@"http://someURL.com"];
     
-    MSClient *client =
-    [MSClient clientWithApplicationURL:appURL];
+    MSClient *client = [MSClient clientWithApplicationURL:appURL];
     
     XCTAssertNotNil(client, @"client should not be nil.");
     
     XCTAssertNotNil(client.applicationURL, @"client.applicationURL should not be nil.");
     NSString *urlString = [client.applicationURL absoluteString];
     XCTAssertTrue([urlString isEqualToString:@"http://someURL.com"],
-                 @"The client should be using the url it was created with.");
-    
-    XCTAssertNil(client.applicationKey, @"client.applicationKey should be nil.");
-}
-
--(void) testStaticConstructor4ReturnsClient
-{
-    NSURL *appURL = [NSURL URLWithString:@"http://someURL.com"];
-    
-    MSClient *client =
-    [MSClient clientWithApplicationURL:appURL
-                    applicationKey:@"here is some key"];
-    
-    XCTAssertNotNil(client, @"client should not be nil.");
-    
-    XCTAssertNotNil(client.applicationURL, @"client.applicationURL should not be nil.");
-    NSString *urlString = [client.applicationURL absoluteString];
-    XCTAssertTrue([urlString isEqualToString:@"http://someURL.com"],
-                 @"The client should be using the url it was created with.");
-    
-    XCTAssertNotNil(client.applicationKey, @"client.applicationKey should not be nil.");
-    XCTAssertTrue([client.applicationKey isEqualToString:@"here is some key"],
                  @"The client should be using the url it was created with.");
 }
 
 -(void) testStaticConstructorPercentEncodesURL
 {
-    MSClient *client =
-        [MSClient clientWithApplicationURLString:@"http://yeah! .com"];
+    MSClient *client = [MSClient clientWithApplicationURLString:@"http://yeah! .com"];
     
     NSString *urlString = [client.applicationURL absoluteString];
     XCTAssertTrue([urlString isEqualToString:@"http://yeah!%20.com"],
@@ -145,26 +101,57 @@
     XCTAssertNil(client.applicationKey, @"client.applicationKey should be nil.");
 }
 
--(void) testInitWithApplicationURLAndApplicationKey
+
+#pragma mark * Login Method Tests
+
+-(void) testLoginHostSuccess
 {
-    NSURL *appURL = [NSURL URLWithString:@"http://someURL.com"];
+    MSClient *client = [[MSClient alloc] initWithApplicationURL:[NSURL URLWithString:@"http://someURL.com"]];
+    XCTAssertEqualObjects(client.loginHost.absoluteString, @"https://someURL.com");
     
-    MSClient *client =
-    [[MSClient alloc] initWithApplicationURL:appURL
-                    applicationKey:@"here is some key"];
-    
-    XCTAssertNotNil(client, @"client should not be nil.");
-    
-    XCTAssertNotNil(client.applicationURL, @"client.applicationURL should not be nil.");
-    NSString *urlString = [client.applicationURL absoluteString];
-    XCTAssertTrue([urlString isEqualToString:@"http://someURL.com"],
-                 @"The client should be using the url it was created with.");
-    
-    XCTAssertNotNil(client.applicationKey, @"client.applicationKey should not be nil.");
-    XCTAssertTrue([client.applicationKey isEqualToString:@"here is some key"],
-                 @"The client should be using the url it was created with.");
+    client.loginHost = [NSURL URLWithString:@"https://anotherURL.com"];
+    XCTAssertEqualObjects(client.loginHost.absoluteString, @"https://anotherURL.com");
 }
 
+-(void) testLoginHostEncodingSuccess
+{
+    MSClient *client = [MSClient clientWithApplicationURLString:@"http://yeah! .com"];
+    XCTAssertEqualObjects(client.loginHost.absoluteString, @"https://yeah!%20.com");
+    
+    client.loginHost = [NSURL URLWithString:@"https://no!%20.com"];
+    XCTAssertEqualObjects(client.loginHost.absoluteString, @"https://no!%20.com");
+}
+
+-(void) testLoginHostWithPaths
+{
+    MSClient *client = [[MSClient alloc] initWithApplicationURL:[NSURL URLWithString:@"http://someURL.com/mypath/junk"]];
+    XCTAssertEqualObjects(client.loginHost.absoluteString, @"https://someURL.com");
+    
+    @try {
+        client.loginHost = [NSURL URLWithString:@"https://anotherURL.com/mypath/junk"];
+        XCTAssert(@"Error should have been thrown");
+    }
+    @catch (NSException *exception) {
+        XCTAssertEqualObjects(exception.name, @"InvalidLoginHost");
+    }
+    
+    XCTAssertEqualObjects(client.loginHost.absoluteString, @"https://someURL.com");
+}
+
+-(void) testLoginPrefixSuccess
+{
+    MSClient *client = [[MSClient alloc] initWithApplicationURL:[NSURL URLWithString:@"http://someURL.com/mypath/junk"]];
+    XCTAssertEqualObjects(client.loginPrefix, @".auth/login");
+    
+    client.loginPrefix = @"login";
+    XCTAssertEqualObjects(client.loginPrefix, @"login");
+
+    client.loginPrefix = @".auth/login";
+    XCTAssertEqualObjects(client.loginPrefix, @".auth/login");
+    
+    client.loginPrefix = @".auth/ space/!@#";
+    XCTAssertEqualObjects(client.loginPrefix, @".auth/%20space/!@%23");
+}
 
 #pragma mark * Table Method Tests
 
@@ -202,7 +189,7 @@
     // Use the filter to capture the request being sent
     MSTestFilter *testFilter = [[MSTestFilter alloc] init];
     testFilter.ignoreNextFilter = YES;
-    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:nil
+    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:[NSURL URLWithString:@"http://test.com"]
                                                            statusCode:200
                                                           HTTPVersion:nil
                                                          headerFields:nil];
@@ -255,7 +242,7 @@
     // Use the filter to capture the request being sent
     MSTestFilter *testFilter = [[MSTestFilter alloc] init];
     testFilter.ignoreNextFilter = YES;
-    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:nil
+    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:[NSURL URLWithString:@"http://test.com"]
                                                            statusCode:200
                                                           HTTPVersion:nil
                                                          headerFields:nil];
@@ -310,7 +297,7 @@
     // Use the filter to capture the request being sent
     MSTestFilter *testFilter = [[MSTestFilter alloc] init];
     testFilter.ignoreNextFilter = YES;
-    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:nil
+    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:[NSURL URLWithString:@"http://test.com"]
                                                            statusCode:200
                                                           HTTPVersion:nil
                                                          headerFields:nil];
@@ -364,7 +351,7 @@
     // Use the filter to capture the request being sent
     MSTestFilter *testFilter = [[MSTestFilter alloc] init];
     testFilter.ignoreNextFilter = YES;
-    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:nil
+    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:[NSURL URLWithString:@"http://test.com"]
                                                            statusCode:200
                                                           HTTPVersion:nil
                                                          headerFields:nil];
@@ -416,7 +403,7 @@
     // Use the filter to capture the request being sent
     MSTestFilter *testFilter = [[MSTestFilter alloc] init];
     testFilter.ignoreNextFilter = YES;
-    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:nil
+    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:[NSURL URLWithString:@"http://test.com"]
                                                            statusCode:200
                                                           HTTPVersion:nil
                                                          headerFields:nil];
@@ -459,7 +446,7 @@
     // Use the filter to capture the request being sent
     MSTestFilter *testFilter = [[MSTestFilter alloc] init];
     testFilter.ignoreNextFilter = YES;
-    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:nil
+    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:[NSURL URLWithString:@"http://test.com"]
                                                            statusCode:200
                                                           HTTPVersion:nil
                                                          headerFields:nil];
@@ -500,7 +487,7 @@
     // Use the filter to capture the request being sent
     MSTestFilter *testFilter = [[MSTestFilter alloc] init];
     testFilter.ignoreNextFilter = YES;
-    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:nil
+    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:[NSURL URLWithString:@"http://test.com"]
                                                            statusCode:200
                                                           HTTPVersion:nil
                                                          headerFields:nil];
@@ -543,7 +530,7 @@
     // Use the filter to capture the request being sent
     MSTestFilter *testFilter = [[MSTestFilter alloc] init];
     testFilter.ignoreNextFilter = YES;
-    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:nil
+    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:[NSURL URLWithString:@"http://test.com"]
                                                            statusCode:500
                                                           HTTPVersion:nil
                                                          headerFields:nil];
@@ -584,7 +571,7 @@
     // Use the filter to capture the request being sent
     MSTestFilter *testFilter = [[MSTestFilter alloc] init];
     testFilter.ignoreNextFilter = YES;
-    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:nil
+    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:[NSURL URLWithString:@"http://test.com"]
                                                            statusCode:200
                                                           HTTPVersion:nil
                                                          headerFields:nil];

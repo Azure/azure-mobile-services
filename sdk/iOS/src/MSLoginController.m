@@ -155,19 +155,13 @@
     if (!loginView) {
         
         // Ensure we are using HTTPS
-        NSURL *baseUrl = self.client.gatewayURL;
-        if ([[baseUrl.scheme lowercaseString] isEqualToString:@("http")])
-        {
-            NSString *baseUrlString = baseUrl.absoluteURL.absoluteString;
-            NSString *substring = [baseUrlString substringFromIndex:4];
-            baseUrl = [NSURL URLWithString:
-                          [NSString stringWithFormat:@"https%@",substring]];
-        }
-
+        NSURL *baseUrl = self.client.loginHost;
+        
         CGRect frame = [[UIScreen mainScreen] bounds];
         NSURL *start = [baseUrl URLByAppendingPathComponent:
-                        [NSString stringWithFormat:@"login/%@", self.provider]];
-        NSURL *end = [baseUrl URLByAppendingPathComponent:@"login/done"];
+                        [NSString stringWithFormat:@"%@/%@", self.client.loginPrefix, self.provider]];
+        NSURL *end = [baseUrl URLByAppendingPathComponent:
+                        [NSString stringWithFormat:@"%@/done", self.client.loginPrefix]];
         
         MSLoginViewBlock viewCompletion = nil;
         

@@ -142,10 +142,9 @@ NSString *const MSLoginViewErrorResponseData = @"com.Microsoft.WindowsAzureMobil
     }
     else {
         
-        // Check if this request is to the Microsoft Azure Mobile Service and
-        // if so, make the request with the MSClientConnection so that we
-        // can inspect the response
-        NSString *appURLString = self.client.gatewayURL.absoluteString;
+        // Check if this request is to the Authentication URL path, and if so, make the request with
+        // the MSClientConnection so that we can inspect the response
+        NSString *appURLString = self.client.loginHost.absoluteString;
         if ([self.currentURL isEqual:requestURL] ||
             [requestURLString rangeOfString:appURLString].location != 0)
         {

@@ -67,61 +67,22 @@
 
 +(MSClient *) clientWithApplicationURLString:(NSString *)urlString
 {
-    return [MSClient clientWithApplicationURLString:urlString
-                                   gatewayURLString:nil
-                                     applicationKey:nil];
-}
-
-+(MSClient *) clientWithApplicationURLString:(NSString *)urlString
-                           applicationKey:(NSString *)key
-{
-    return [MSClient clientWithApplicationURLString:urlString
-                                   gatewayURLString:nil
-                                     applicationKey:key];
-}
-
-
-+(MSClient *) clientWithApplicationURLString:(NSString *)applicationUrlString
-                            gatewayURLString:(NSString *)gatewayUrlString
-                              applicationKey:(NSString *)key
-{
     // NSURL will be nil for non-percent escaped url strings so we have to percent escape here
     NSMutableCharacterSet *set = [[NSCharacterSet URLPathAllowedCharacterSet] mutableCopy];
     [set formUnionWithCharacterSet:[NSCharacterSet URLHostAllowedCharacterSet]];
     [set formUnionWithCharacterSet:[NSCharacterSet URLQueryAllowedCharacterSet]];
     
-    NSString *appUrlStringEncoded = [applicationUrlString stringByAddingPercentEncodingWithAllowedCharacters:set];
-    NSString *gatewayUrlStringEncoded = [gatewayUrlString stringByAddingPercentEncodingWithAllowedCharacters:set];
+    NSString *appUrlStringEncoded = [urlString stringByAddingPercentEncodingWithAllowedCharacters:set];
     
     NSURL *url = [NSURL URLWithString:appUrlStringEncoded];
-    NSURL *gatewayUrl = [NSURL URLWithString:gatewayUrlStringEncoded];
     
-    return [MSClient clientWithApplicationURL:url gatewayURL:gatewayUrl applicationKey:key];
+    return [MSClient clientWithApplicationURL:url];
     
 }
 
 +(MSClient *) clientWithApplicationURL:(NSURL *)url
 {
-    return [[MSClient alloc] initWithApplicationURL:url
-                                         gatewayURL:nil
-                                     applicationKey:nil];
-}
-
-+(MSClient *) clientWithApplicationURL:(NSURL *)url
-                    applicationKey:(NSString *)key
-{
-    return [[MSClient alloc] initWithApplicationURL:url
-                                         gatewayURL:nil
-                                     applicationKey:key];
-}
-
-+(MSClient *) clientWithApplicationURL:(NSURL *)applicationUrl
-                            gatewayURL:(NSURL *)gatewayUrl
-                        applicationKey:(NSString *)key
-{
-    return [[MSClient alloc] initWithApplicationURL:applicationUrl
-                                         gatewayURL:gatewayUrl
-                                     applicationKey:key];
+    return [[MSClient alloc] initWithApplicationURL:url];
 }
 
 #pragma mark * Public Initializer Methods
@@ -129,28 +90,59 @@
 
 -(id) initWithApplicationURL:(NSURL *)url
 {
-    return [self initWithApplicationURL:url gatewayURL:nil applicationKey:nil];
-}
-
--(id) initWithApplicationURL:(NSURL *)url applicationKey:(NSString *)key
-{
-    return [self initWithApplicationURL:url gatewayURL:nil applicationKey:key];
-}
-
--(id)initWithApplicationURL:(NSURL *)applicationUrl
-                 gatewayURL:(NSURL *)gatewayUrl
-             applicationKey:(NSString *)key
-{
     self = [super init];
     if(self)
     {
-        _applicationURL = applicationUrl;
-        _gatewayURL = gatewayUrl;
-        _applicationKey = [key copy];
+        _applicationURL = url;
         _login = [[MSLogin alloc] initWithClient:self];
         _push = [[MSPush alloc] initWithClient:self];
     }
     return self;
+}
+
+@synthesize loginHost = _loginHost;
+-(void) setLoginHost:(NSURL *)loginHost
+{
+    if (loginHost.path.length > 0) {
+        @throw [NSException exceptionWithName:@"InvalidLoginHost"
+                                       reason:[NSString stringWithFormat:@"Login host should not include a path portion"]
+                                     userInfo:nil];
+    }
+
+    if (![loginHost.scheme isEqualToString:@"https"]) {
+        @throw [NSException exceptionWithName:@"InvalidLoginHost"
+                                       reason:[NSString stringWithFormat:@"Login host must use the https scheme"]
+                                     userInfo:nil];
+    }
+    
+    _loginHost = loginHost;
+}
+
+-(NSURL *)loginHost
+{
+    if (_loginHost == nil) {
+        NSString *host = [self.applicationURL.host stringByAddingPercentEncodingWithAllowedCharacters:
+                                [NSCharacterSet URLHostAllowedCharacterSet]];
+        
+        return [NSURL URLWithString:[NSString stringWithFormat:@"https://%@", host]];
+        return [self.applicationURL baseURL];
+    }
+    
+    return _loginHost;
+}
+
+@synthesize loginPrefix = _loginPrefix;
+- (void) setLoginPrefix:(NSString *)loginPrefix
+{
+    _loginPrefix = [loginPrefix stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLPathAllowedCharacterSet]];
+}
+
+-(NSString *) loginPrefix
+{
+    if (!_loginPrefix) {
+        _loginPrefix = @".auth/login";
+    }
+    return _loginPrefix;
 }
 
 #pragma mark * Public Filter Methods
@@ -183,6 +175,7 @@
 
 
 #pragma mark * Public Authentication Methods
+
 
 #if TARGET_OS_IPHONE
 -(void) loginWithProvider:(NSString *)provider
@@ -295,11 +288,8 @@
 
 -(id) copyWithZone:(NSZone *)zone
 {
-    MSClient *client = [[MSClient allocWithZone:zone]
-                            initWithApplicationURL:self.applicationURL
-                                        gatewayURL:self.gatewayURL
-                                    applicationKey:self.applicationKey];
-                                                                            
+    MSClient *client = [[MSClient allocWithZone:zone] initWithApplicationURL:self.applicationURL];
+    
     client.currentUser = [self.currentUser copyWithZone:zone];
     client.filters = [self.filters copyWithZone:zone];
 
