@@ -140,6 +140,7 @@
 		A2ADF7E91914481B0078BB16 /* MSTableOperationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A2ADF7E81914481B0078BB16 /* MSTableOperationTests.m */; };
 		A2C14C6A19105D9F00A58609 /* MSSyncContextReadResult.h in Headers */ = {isa = PBXBuildFile; fileRef = A2C14C6819105D9F00A58609 /* MSSyncContextReadResult.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A2C14C6B19105D9F00A58609 /* MSSyncContextReadResult.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C14C6919105D9F00A58609 /* MSSyncContextReadResult.m */; };
+		A319A02A1BD9BA69004D2A49 /* MSTestWaiter.m in Sources */ = {isa = PBXBuildFile; fileRef = CF4D498B1A3253E2006AEB70 /* MSTestWaiter.m */; };
 		A3514E3D1BCC62380032B74C /* MSClientConnectionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A3514E3C1BCC62380032B74C /* MSClientConnectionTests.m */; };
 		A3514E3E1BCC64AB0032B74C /* MSClientConnectionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A3514E3C1BCC62380032B74C /* MSClientConnectionTests.m */; };
 		A3FD2DB01BB1C3F300624DA0 /* MSQueryInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 8790D2BF199EA5950000DC4E /* MSQueryInternal.h */; };
@@ -928,7 +929,6 @@
 				5A4FACA01B05E5740027011D /* MSSyncTable.h in Headers */,
 				5A4FACB81B05E65E0027011D /* MSTableRequest.h in Headers */,
 				5A4FAC941B05E53F0027011D /* MSPush.h in Headers */,
-				A38A856F1BC35C8F005D63DF /* MSPullSettingsInternal.h in Headers */,
 				5A4FAC821B05E4BA0027011D /* MSClientInternal.h in Headers */,
 				5A4FACA21B05E57D0027011D /* MSSyncContext.h in Headers */,
 				5A4FACB41B05E6510027011D /* MSTableConnection.h in Headers */,
@@ -1267,7 +1267,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EB446B6D1BAB801A002F4A27 /* MSPullSettings.m in Sources */,
 				5A4FACB71B05E65B0027011D /* MSAPIConnection.m in Sources */,
 				5A4FAC8E1B05E5220027011D /* MSTable.m in Sources */,
 				5A4FAC881B05E4FA0027011D /* MSDateOffset.m in Sources */,
@@ -1357,6 +1356,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A24701CB196897C100385DA2 /* MSMultiRequestTestFilter.m in Sources */,
+				A319A02A1BD9BA69004D2A49 /* MSTestWaiter.m in Sources */,
 				E8F33B3C16166945002DD7C6 /* WindowsAzureMobileServicesFunctionalTests.m in Sources */,
 				A214410C182631A500C2E762 /* MSTableFuncTests.m in Sources */,
 				A232CCA21AC8FDE800E15D3A /* MSTableOperationErrorTests.m in Sources */,
@@ -1381,7 +1381,6 @@
 				A295B2B3192AB2040067562E /* MSCoreDataStoreTests.m in Sources */,
 				A29F44A31953CBF30063C0C1 /* MSCoreDataStore+TestHelper.m in Sources */,
 				E84CA4D6162373E2009B2588 /* MSUserAgentBuilderTests.m in Sources */,
-				A38A85711BC35CE5005D63DF /* MSTestWaiter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
