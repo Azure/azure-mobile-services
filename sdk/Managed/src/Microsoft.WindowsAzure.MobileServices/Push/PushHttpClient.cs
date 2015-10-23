@@ -3,10 +3,9 @@
 //------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices
@@ -25,11 +24,9 @@ namespace Microsoft.WindowsAzure.MobileServices
             return this.client.MobileAppHttpClient.RequestAsync(HttpMethod.Delete, string.Format("push/installations/{0}", Uri.EscapeUriString(this.client.InstallationId)), this.client.CurrentUser, ensureResponseContent: false);
         }
 
-        public Task CreateOrUpdateInstallationAsync(JObject installation)
+        public Task CreateOrUpdateInstallationAsync(JObject installation, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return this.client.MobileAppHttpClient.RequestAsync(HttpMethod.Put, string.Format("push/installations/{0}", Uri.EscapeUriString(this.client.InstallationId)), this.client.CurrentUser, installation.ToString(), ensureResponseContent: false);
+            return this.client.MobileAppHttpClient.RequestAsync(HttpMethod.Put, string.Format("push/installations/{0}", Uri.EscapeUriString(this.client.InstallationId)), this.client.CurrentUser, installation.ToString(), ensureResponseContent: false, cancellationToken: cancellationToken);
         }
-            await this.client.HttpClient.RequestAsync(HttpMethod.Put, string.Format("/push/registrations/{0}", Uri.EscapeUriString(regId)), this.client.CurrentUser, content, ensureResponseContent: false, cancellationToken: cancellationToken);
-
     }
 }
