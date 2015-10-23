@@ -179,6 +179,10 @@ public class Util {
     }
 
     public static boolean compareJson(JsonElement e1, JsonElement e2) {
+        return compareJson(e1, e2, false);
+    }
+
+    public static boolean compareJson(JsonElement e1, JsonElement e2, boolean ignoreSystemProperties) {
         // NOTE: if every property defined in e1 is in e2, the objects are
         // considered equal.
 
@@ -234,6 +238,12 @@ public class Util {
             Set<Entry<String, JsonElement>> entrySet1 = o1.entrySet();
 
             for (Entry<String, JsonElement> entry : entrySet1) {
+
+                if (ignoreSystemProperties && entry.getKey().startsWith("__"))
+                {
+                    continue;
+                }
+
                 if (entry.getKey().toLowerCase(Locale.getDefault()).equals("id")) {
                     continue;
                 }
@@ -241,6 +251,12 @@ public class Util {
                 String propertyName1 = entry.getKey();
                 String propertyName2 = null;
                 for (Entry<String, JsonElement> entry2 : o2.entrySet()) {
+
+                    if (ignoreSystemProperties && entry2.getKey().startsWith("__"))
+                    {
+                        continue;
+                    }
+
                     if (propertyName1.toLowerCase(Locale.getDefault()).equals(entry2.getKey().toLowerCase(Locale.getDefault()))) {
                         propertyName2 = entry2.getKey();
                     }

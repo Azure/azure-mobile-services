@@ -692,7 +692,6 @@ public class EnhancedPushTests extends TestGroup {
         final SettableFuture<JsonElement> resultFuture = SettableFuture.create();
 
         ArrayList<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
-                    MobileServiceClient client2 = new MobileServiceClient(client);
 
         parameters.add(new Pair<>("channelUri", registrationId));
 
