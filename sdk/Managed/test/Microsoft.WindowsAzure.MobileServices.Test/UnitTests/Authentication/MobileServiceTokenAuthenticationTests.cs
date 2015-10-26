@@ -21,7 +21,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
 
         string loginAsyncUriFragment = ".auth/login";
         string legacyLoginAsyncUriFragment = "login";
-        string validAlternateLoginUrl = "http://www.testalternatelogin.com/?n=John&n=Susan";
+        string validAlternateLoginUrl = "http://www.testalternatelogin.com/";
         string validAlternateLoginUrlWithoutTrailingSlash = "http://www.testalternatelogin.com";
 
 
