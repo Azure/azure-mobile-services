@@ -32,7 +32,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Determines the login endpoints. 
         /// </summary>
-        Boolean UseLegacyAuth { get; set; }
+        string LoginUriPrefix { get; set; }
 
         /// <summary>
         /// Alternate URI for login

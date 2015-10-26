@@ -21,9 +21,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
 
         string loginAsyncUriFragment = ".auth/login";
         string legacyLoginAsyncUriFragment = "login";
-        string loginAsyncDoneUriFragment = ".auth/login/done";
-        string legacyLoginAsyncDoneUriFragment = "login/done";
-        string validAlternateLoginUrl = "http://www.testalternatelogin.com/";
+        string validAlternateLoginUrl = "http://www.testalternatelogin.com/?n=John&n=Susan";
         string validAlternateLoginUrlWithoutTrailingSlash = "http://www.testalternatelogin.com";
 
 
@@ -31,7 +29,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
         {
             if (string.IsNullOrEmpty(appUrl))
             {
-                appUrl = MobileAppUriValidator.DummyMobileApp;
+                appUrl = MobileAppUriValidator.DummyMobileApp + "?n=John&n=Susan";
             }
             this.hijack = new TestHttpHandler();
             this.hijack.SetResponseContent(String.Empty);
@@ -41,7 +39,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
             this.client = new MobileServiceClient(appUrl, hijack);
             if (legacyAuth)
             {
-                this.client.UseLegacyAuth = true;
+                this.client.LoginUriPrefix = legacyLoginAsyncUriFragment;
             }
             if (!string.IsNullOrEmpty(alternateLoginUri))
             {
@@ -176,6 +174,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
         public void StartUri_InvalidAlternateLoginUri_IncludesParameters()
         {
             var client = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
+            client.AlternateLoginUri = MobileAppUriValidator.DummyMobileApp + "?n=John&n=Susan";
             AssertEx.Throws<ArgumentException>(() => client.AlternateLoginUri = MobileAppUriValidator.DummyMobileAppUriWithFolder);
             AssertEx.Throws<ArgumentException>(() => client.AlternateLoginUri = MobileAppUriValidator.DummyMobileAppUriWithFolderWithoutTralingSlash);
         }

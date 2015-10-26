@@ -1,4 +1,4 @@
-// ----------------------------------------------------------------------------
+﻿// ----------------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -50,10 +49,21 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         public MobileServiceUser CurrentUser { get; set; }
 
+        private string loginUriPrefix;
         /// <summary>
-        /// Determines the login endpoints. 
+        /// Prefix for the login endpoints. If not set defaults to /.auth/login
         /// </summary>
-        public bool UseLegacyAuth { get; set; }
+        public string LoginUriPrefix
+        {
+            get
+            {
+                return loginUriPrefix;
+            }
+            set
+            {
+                loginUriPrefix = MobileServiceUrlBuilder.AddLeadingSlash(value); 
+            }
+        }
 
         private string alternateLoginUri;
 
