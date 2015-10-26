@@ -30,9 +30,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         MobileServiceUser CurrentUser { get; set; }
 
         /// <summary>
-        /// Determines the login endpoints. 
+        /// Prefix for login endpoints. If not set defaults to /.auth/login
         /// </summary>
-        string LoginUriPrefix { get; set; }
+        String LoginUriPrefix { get; set; }
 
         /// <summary>
         /// Alternate URI for login
