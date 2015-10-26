@@ -29,7 +29,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
         {
             if (string.IsNullOrEmpty(appUrl))
             {
-                appUrl = MobileAppUriValidator.DummyMobileApp + "?n=John&n=Susan";
+                appUrl = MobileAppUriValidator.DummyMobileApp;
             }
             this.hijack = new TestHttpHandler();
             this.hijack.SetResponseContent(String.Empty);
