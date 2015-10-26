@@ -249,6 +249,21 @@ static NSString *const TableName = @"TodoItem";
     XCTAssertTrue(msKeys.count == 0, @"ms_ column keys were exposed");
 }
 
+-(void)testUpsertRelationships
+{
+    NSError *error;
+    NSDictionary *originalItem = @{@"id":@"A", @"name": @"test1", @"child":@"123"};
+    
+    [self.store upsertItems:@[originalItem] table:@"Parent" orError:&error];
+    XCTAssertNil(error, @"upsert failed: %@", error.description);
+    
+    NSDictionary *item = [self.store readTable:@"Parent" withItemId:@"A" orError:&error];
+    XCTAssertNil(error, @"readTable:withItemId: failed: %@", error.description);
+
+    XCTAssertEqual(item.count, 2);
+    XCTAssertNil(item[@"child"]);
+}
+
 -(void)testUpsertNoTableError
 {
     NSError *error;
@@ -272,6 +287,47 @@ static NSString *const TableName = @"TodoItem";
     XCTAssertNil(error, @"readTable:withItemId: failed: %@", error.description);
     
     XCTAssertEqual(item[@"text"], [NSNull null], @"Incorrect text value. Should have been null");
+}
+
+-(void)testReadTable_RecordWithRelationships
+{
+    NSError *error;
+    NSManagedObject *parent = [NSEntityDescription insertNewObjectForEntityForName:@"Parent"
+                                                            inManagedObjectContext:self.context];
+    NSManagedObject *child = [NSEntityDescription insertNewObjectForEntityForName:@"Child"
+                                                            inManagedObjectContext:self.context];
+    
+    [parent setValue:@"A" forKey:@"id"];
+    [parent setValue:@"TheParent" forKey:@"name"];
+    [child setValue:@"A-1" forKey:@"id"];
+    [child setValue:@12 forKey:@"value"];
+    [parent setValue:child forKey:@"child"];
+    
+    if (![self.context save:&error]) {
+        XCTFail(@"Failed to setup relationship data: %@", error.description);
+    }
+    
+    NSDictionary *item = [self.store readTable:@"Parent" withItemId:@"A" orError:&error];
+    XCTAssertNil(error, @"readTable:withItemId: failed: %@", error.description);
+    
+    XCTAssertEqualObjects(item[@"name"], @"TheParent");
+    XCTAssertNil(item[@"child"]);
+    
+    item = [self.store readTable:@"Child" withItemId:@"A-1" orError:&error];
+    XCTAssertNil(error, @"readTable:withItemId: failed: %@", error.description);
+    
+    XCTAssertEqualObjects(item[@"value"], @12);
+    XCTAssertNil(item[@"parent"]);
+    
+    MSSyncTable *parentTable = [[MSSyncTable alloc] initWithName:@"Parent" client:self.client];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:parentTable predicate:nil];
+    
+    MSSyncContextReadResult *result = [self.store readWithQuery:query orError:&error];
+    
+    XCTAssertNil(error, @"readWithQuery:orError failed: %@", error.description);
+    item = result.items[0];
+    XCTAssertEqualObjects(item[@"name"], @"TheParent");
+    XCTAssertNil(item[@"child"]);
 }
 
 -(void)testReadWithQuery_RecordWithNullPropertyValue
