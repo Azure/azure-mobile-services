@@ -205,7 +205,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             bool haveCloned = false;
             foreach (JProperty property in instance.Properties())
             {
-                if (systemProperties.Contains(property.Name))
+                if (systemProperties.Contains(property.Name.ToLowerInvariant()))
                 {
                     // We don't want to alter the original jtoken passed in by the caller
                     // so if we find a system property to remove, we have to clone first

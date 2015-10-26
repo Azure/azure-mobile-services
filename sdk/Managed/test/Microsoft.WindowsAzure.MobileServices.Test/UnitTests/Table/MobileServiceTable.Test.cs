@@ -1881,7 +1881,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 };
                 var table = service.GetTable<ToDoWithSystemPropertiesType>();
 
-                JObject itemToInsert = JToken.Parse("{\"id\":\"an id\",\"String\":\"what?\",\"" + testSystemProperty + "\":\"a value\"}") as JObject;
+                JObject itemToInsert = new JObject();
+                if (testSystemProperty.Contains("deleted")) { 
+                    itemToInsert = JToken.Parse("{\"id\":\"an id\",\"String\":\"what?\",\"" + testSystemProperty + "\":\"false\"}") as JObject;
+                }
+                else
+                {
+                    itemToInsert = JToken.Parse("{\"id\":\"an id\",\"String\":\"what?\",\"" + testSystemProperty + "\":\"2015-09-26\"}") as JObject;
+                }
                 var typedItemToInsert = itemToInsert.ToObject<ToDoWithSystemPropertiesType>();
                 await table.InsertAsync(typedItemToInsert);
             }
@@ -2060,35 +2067,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 };
 
                 JObject itemToUpdate = JToken.Parse("{\"id\":\"an id\",\"String\":\"what?\",\"" + testSystemProperty + "\":\"a value\"}") as JObject;
-                await table.UpdateAsync(itemToUpdate);
-            }
-        }
-
-        [AsyncTestMethod]
-        public async Task UpdateAsyncIntegerIdNoPropertiesRemovedFromRequest()
-        {
-            string[] testSystemProperties = SystemPropertiesTestData.NonSystemProperties.Concat(
-                                            SystemPropertiesTestData.ValidSystemProperties).ToArray();
-
-            foreach (string testSystemProperty in testSystemProperties)
-            {
-                TestHttpHandler hijack = new TestHttpHandler();
-                hijack.SetResponseContent("{\"id\":5,\"String\":\"Hey\",\"" + testSystemProperty + "\":\"a value\"}");
-                IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
-
-                IMobileServiceTable table = service.GetTable("someTable");
-
-                hijack.OnSendingRequest = async (request) =>
-                {
-                    string content = await request.Content.ReadAsStringAsync();
-                    JObject obj = JToken.Parse(content) as JObject;
-                    Assert.IsTrue(obj.Properties().Where(p => p.Name == "id").Any());
-                    Assert.IsTrue(obj.Properties().Where(p => p.Name == "String").Any());
-                    Assert.IsTrue(obj.Properties().Where(p => p.Name == testSystemProperty).Any());
-                    return request;
-                };
-
-                JObject itemToUpdate = JToken.Parse("{\"id\":5,\"String\":\"what?\",\"" + testSystemProperty + "\":\"a value\"}") as JObject;
                 await table.UpdateAsync(itemToUpdate);
             }
         }

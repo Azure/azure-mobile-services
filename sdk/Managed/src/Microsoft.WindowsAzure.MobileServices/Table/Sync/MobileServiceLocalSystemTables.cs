@@ -11,7 +11,6 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
-    //TODO: Fix for removal of prefix
     /// <summary>
     /// Names of tables in local store that are reserved by sync framework
     /// </summary>

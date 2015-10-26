@@ -2940,7 +2940,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 return request;
             };
 
-            await createdAtTable.InsertAsync(new NotSystemPropertyCreatedAtType() { CreatedAt = new DateTime(2012, 1, 8), Id = "an id" });
+            await createdAtTable.InsertAsync(new NotSystemPropertyCreatedAtType() { __CreatedAt = new DateTime(2012, 1, 8), Id = "an id" });
 
             hijack.SetResponseContent("{\"id\":\"an id\"}");
 
@@ -2970,84 +2970,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 return request;
             };
 
-            await versionTable.InsertAsync(new NotSystemPropertyVersionType() { version = "a version", Id = "an id" });
-        }
-
-        [TestMethod]
-        public void IntegerIdTypesCanNotHaveSystemPropertyAttributes()
-        {
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...");
-            Exception exception = null;
-
-            try
-            {
-                IMobileServiceTable<IntegerIdWithSystemPropertiesType> stringIdTable = service.GetTable<IntegerIdWithSystemPropertiesType>();
-            }
-            catch (Exception e)
-            {
-                exception = e;
-            }
-
-            Assert.IsNotNull(exception);
-            Assert.IsTrue(exception.Message.Contains("has an integer id member and therefore can not have any members with the system property attribute"));
-            exception = null;
-
-            try
-            {
-                IMobileServiceTable<LongIdWithSystemPropertiesType> stringIdTable = service.GetTable<LongIdWithSystemPropertiesType>();
-            }
-            catch (Exception e)
-            {
-                exception = e;
-            }
-
-            Assert.IsNotNull(exception);
-            Assert.IsTrue(exception.Message.Contains("has an integer id member and therefore can not have any members with the system property attribute"));
-
-        }
-
-        [TestMethod]
-        public void TypesCanNotHaveMultiplePropertiesWithTheSameSystemAttribute()
-        {
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...");
-            Exception exception = null;
-
-            try
-            {
-                IMobileServiceTable<MultipleSystemPropertiesType> stringIdTable = service.GetTable<MultipleSystemPropertiesType>();
-            }
-            catch (Exception e)
-            {
-                exception = e;
-            }
-
-            Assert.IsNotNull(exception);
-            Assert.IsTrue(exception.Message.Contains("Only one member may have the property name"));
-            exception = null;
-
-            try
-            {
-                IMobileServiceTable<NamedAndAttributedSystemPropertiesType> stringIdTable = service.GetTable<NamedAndAttributedSystemPropertiesType>();
-            }
-            catch (Exception e)
-            {
-                exception = e;
-            }
-
-            Assert.IsNotNull(exception);
-            Assert.IsTrue(exception.Message.Contains("Only one member may have the property name"));
-
-            try
-            {
-                IMobileServiceTable<DoubleJsonPropertyNamedSystemPropertiesType> stringIdTable = service.GetTable<DoubleJsonPropertyNamedSystemPropertiesType>();
-            }
-            catch (Exception e)
-            {
-                exception = e;
-            }
-
-            Assert.IsNotNull(exception);
-            Assert.IsTrue(exception.Message.Contains("Only one member may have the property name"));
+            await versionTable.InsertAsync(new NotSystemPropertyVersionType() { _version = "a version", Id = "an id" });
         }
 
         [AsyncTestMethod]

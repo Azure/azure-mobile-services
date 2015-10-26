@@ -259,8 +259,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(store.TableMap["stringId_test_table"]["abc"].Value<string>("String"), "Hey");
             Assert.AreEqual(store.TableMap["stringId_test_table"]["def"].Value<string>("String"), "How");
 
-            AssertEx.MatchUris(hijack.Requests, mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true"),
-                                                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(updatedAt ge datetimeoffset'2001-02-04T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true"));
+            AssertEx.MatchUris(hijack.Requests, mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=updatedAt&$skip=0&$top=50&__includeDeleted=true"),
+                                                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(updatedAt ge datetimeoffset'2001-02-04T00:00:00.0000000%2B00:00')&$orderby=updatedAt&$skip=0&$top=50&__includeDeleted=true"));
 
             Assert.Equals(store.TableMap[MobileServiceLocalSystemTables.Config]["deltaToken|stringId_test_table|items"]["value"], "2001-02-04T00:00:00.0000000+00:00");
         }
@@ -792,8 +792,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             await table.PullAsync("items", table.CreateQuery(), pullOptions: pullOptions);
             AssertEx.MatchUris(hijack.Requests,
-                string.Format("http://www.test.com/tables/stringId_test_table?$filter=(updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top={0}&__includeDeleted=true", pullOptions.MaxPageSize),
-                string.Format("http://www.test.com/tables/stringId_test_table?$filter=(updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=1&$top={0}&__includeDeleted=true", pullOptions.MaxPageSize));
+                string.Format("http://www.test.com/tables/stringId_test_table?$filter=(updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=updatedAt&$skip=0&$top={0}&__includeDeleted=true", pullOptions.MaxPageSize),
+                string.Format("http://www.test.com/tables/stringId_test_table?$filter=(updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=updatedAt&$skip=1&$top={0}&__includeDeleted=true", pullOptions.MaxPageSize));
         }
 
         private static async Task TestPullAsyncIncrementalWithOptions(MobileServiceRemoteTableOptions options, params string[] uris)

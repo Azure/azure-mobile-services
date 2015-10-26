@@ -19,7 +19,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     {
         public string Id { get; set; }
 
-        public DateTime CreatedAt { get; set; }
+        public DateTime __CreatedAt { get; set; }
     }
 
     public class IntegerIdNotSystemPropertyCreatedAtType
@@ -56,7 +56,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     {
         public string Id { get; set; }
 
-        public string version { get; set; }
+        public string _version { get; set; }
     }
 
     public class AllBaseTypesWithAllSystemPropertiesType : IEquatable<AllBaseTypesWithAllSystemPropertiesType>
