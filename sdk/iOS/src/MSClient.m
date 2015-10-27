@@ -85,10 +85,13 @@
                             gatewayURLString:(NSString *)gatewayUrlString
                               applicationKey:(NSString *)key
 {
-    // NSURL will be nil for non-percent escaped url strings so we have to
-    // percent escape here
-    NSString *appUrlStringEncoded = [applicationUrlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    NSString *gatewayUrlStringEncoded = [gatewayUrlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    // NSURL will be nil for non-percent escaped url strings so we have to percent escape here
+    NSMutableCharacterSet *set = [[NSCharacterSet URLPathAllowedCharacterSet] mutableCopy];
+    [set formUnionWithCharacterSet:[NSCharacterSet URLHostAllowedCharacterSet]];
+    [set formUnionWithCharacterSet:[NSCharacterSet URLQueryAllowedCharacterSet]];
+    
+    NSString *appUrlStringEncoded = [applicationUrlString stringByAddingPercentEncodingWithAllowedCharacters:set];
+    NSString *gatewayUrlStringEncoded = [gatewayUrlString stringByAddingPercentEncodingWithAllowedCharacters:set];
     
     NSURL *url = [NSURL URLWithString:appUrlStringEncoded];
     NSURL *gatewayUrl = [NSURL URLWithString:gatewayUrlStringEncoded];

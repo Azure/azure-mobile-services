@@ -1,4 +1,4 @@
-﻿// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
@@ -325,6 +325,30 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                     await trackedStore.UpsertAsync(error.TableName, item, fromServer: true);
                 }
             });
+        }
+
+        public Task UpdateOperationAsync(MobileServiceTableOperationError error, JObject item)
+        {
+            string itemId = error.Item.Value<string>(MobileServiceSystemColumns.Id);
+            return this.ExecuteOperationSafeAsync(itemId, error.TableName, async () =>
+            {
+                await this.TryUpdateOperation(error, item);
+                if (error.OperationKind != MobileServiceTableOperationKind.Delete)
+                {
+                    await this.Store.UpsertAsync(error.TableName, item, fromServer: true);
+                }
+            });
+        }
+
+        private async Task TryUpdateOperation(MobileServiceTableOperationError error, JObject item)
+        {
+            if (!await this.opQueue.UpdateAsync(error.Id, error.OperationVersion, item))
+            {
+                throw new InvalidOperationException("The operation has been updated and cannot be updated again");
+            }
+
+            // delete errors for updated operation
+            await this.Store.DeleteAsync(MobileServiceLocalSystemTables.SyncErrors, error.Id);
         }
 
         public Task CancelAndDiscardItemAsync(MobileServiceTableOperationError error)

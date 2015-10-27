@@ -252,6 +252,7 @@ $testGroup('MobileServiceClient.js',
         client = client.withFilter(function (req, next, callback) {
             $assert.areEqual(req.type, 'POST');
             $assert.areEqual(req.url, 'http://www.test.com/api/checkins/post');
+            $assert.areEqual(req.headers['ZUMO-API-VERSION'], "2.0.0");
             callback(null, { status: 200, responseText: '{"result":3 }', getResponseHeader: function () { return 'application/json'; } });
         });
         client.invokeApi("checkins/post").done(function (response) {
@@ -400,6 +401,7 @@ $testGroup('MobileServiceClient.js',
             $assert.areEqual(req.url, 'http://www.test.com/api/scenarios/verifyRequestAccess');
             $assert.areEqual(req.headers['x-zumo-testing'], 'test');
             $assert.areEqual(req.data, '{\"data\":\"one\"}');
+            $assert.areEqual(req.headers['ZUMO-API-VERSION'], "2.0.0");
             callback(null, { status: 200, getResponseHeader: function () { return 'application/xml'; }, responseText: '' });
         });
         var headers = { 'x-zumo-testing': 'test' };

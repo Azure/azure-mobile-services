@@ -27,6 +27,8 @@ var _zumoFeatures = {
     TableReadQuery: "TQ",            // Table reads where the caller uses a function / query OM to determine the items to be returned
 };
 var _zumoFeaturesHeaderName = "X-ZUMO-FEATURES";
+var _zumoApiVersionHeaderName = "ZUMO-API-VERSION";
+var _zumoApiVersion = "2.0.0";
 
 function MobileServiceClient(applicationUrl) {
     /// <summary>
@@ -380,6 +382,11 @@ MobileServiceClient.prototype.invokeApi = Platform.async(
             headers.accept = 'application/json';
         }
 
+        // Add version header on API requests
+        if (_.isNull(headers[_zumoApiVersionHeaderName])) {
+            headers[_zumoApiVersionHeaderName] = _zumoApiVersion;
+        }
+
         // Construct the URL
         var urlFragment = _.url.combinePathSegments("api", apiName);
         if (!_.isNull(parameters)) {
@@ -489,3 +496,13 @@ MobileServiceClient._userAgent = Platform.getUserAgent();
 /// The features that are sent to the server for telemetry.
 /// </summary>
 MobileServiceClient._zumoFeatures = _zumoFeatures;
+
+/// <summary>
+/// The header / querystring to use to specify the API Version
+/// </summary>
+MobileServiceClient._zumoApiVersionHeaderName = _zumoApiVersionHeaderName;
+
+/// <summary>
+/// The current Zumo API Version
+/// </summary>
+MobileServiceClient._zumoApiVersion = _zumoApiVersion;

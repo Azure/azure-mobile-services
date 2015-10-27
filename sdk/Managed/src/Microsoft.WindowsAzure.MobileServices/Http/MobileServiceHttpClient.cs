@@ -12,6 +12,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
@@ -44,6 +45,16 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// in.
         /// </summary>
         private const string RequestAuthenticationHeader = "X-ZUMO-AUTH";
+
+        ///<summary>
+        /// Name of the zumo api version header
+        /// </summary>
+        private const string ZumoApiVersionHeader = "ZUMO-API-VERSION";
+
+        ///<summary>
+        /// Current Zumo api version sent with each request
+        /// </summary>
+        private const string ZumoApiVersion = "2.0.0";
 
         /// <summary>
         /// Name of the user-agent header.
@@ -141,6 +152,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             // https://bugzilla.xamarin.com/show_bug.cgi?id=15128
             this.httpClient.DefaultRequestHeaders.TryAddWithoutValidation(UserAgentHeader, userAgentHeaderValue);
             this.httpClient.DefaultRequestHeaders.Add(ZumoVersionHeader, userAgentHeaderValue);
+            this.httpClient.DefaultRequestHeaders.Add(ZumoApiVersionHeader, ZumoApiVersion);
             this.httpClientSansHandlers.DefaultRequestHeaders.TryAddWithoutValidation(UserAgentHeader, userAgentHeaderValue);
             this.httpClientSansHandlers.DefaultRequestHeaders.Add(ZumoVersionHeader, userAgentHeaderValue);
         }
@@ -197,7 +209,8 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="features">
         /// Value indicating which features of the SDK are being used in this call. Useful for telemetry.
         /// </param>
-        /// <returns>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
+        /// <returns> 
         /// The response.
         /// </returns>
         public Task<MobileServiceHttpResponse> RequestAsync(HttpMethod method,
@@ -206,10 +219,11 @@ namespace Microsoft.WindowsAzure.MobileServices
                                                              string content = null,
                                                              bool ensureResponseContent = true,
                                                              IDictionary<string, string> requestHeaders = null,
-                                                             MobileServiceFeatures features = MobileServiceFeatures.None)
+                                                             MobileServiceFeatures features = MobileServiceFeatures.None,
+                                                             CancellationToken cancellationToken = default(CancellationToken))
         {
             requestHeaders = FeaturesHelper.AddFeaturesHeader(requestHeaders, features);
-            return this.RequestAsync(true, method, uriPathAndQuery, user, content, ensureResponseContent, requestHeaders);
+            return this.RequestAsync(true, method, uriPathAndQuery, user, content, ensureResponseContent, requestHeaders, cancellationToken);
         }
 
         /// <summary>
@@ -237,6 +251,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="requestHeaders">
         /// Additional request headers to include with the request.
         /// </param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
         /// <returns>
         /// The content of the response as a string.
         /// </returns>
@@ -246,7 +261,8 @@ namespace Microsoft.WindowsAzure.MobileServices
                                                         MobileServiceUser user,
                                                         string content = null,
                                                         bool ensureResponseContent = true,
-                                                        IDictionary<string, string> requestHeaders = null)
+                                                        IDictionary<string, string> requestHeaders = null,
+                                                        CancellationToken cancellationToken = default(CancellationToken))
         {
             Debug.Assert(method != null);
             Debug.Assert(!string.IsNullOrEmpty(uriPathAndQuery));
@@ -266,7 +282,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 client = this.httpClientSansHandlers;
             }
-            HttpResponseMessage response = await this.SendRequestAsync(client, request, ensureResponseContent);
+            HttpResponseMessage response = await this.SendRequestAsync(client, request, ensureResponseContent, cancellationToken);
             string responseContent = await GetResponseContent(response);
             string etag = null;
             if (response.Headers.ETag != null)
@@ -310,10 +326,17 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="features">
         /// Value indicating which features of the SDK are being used in this call. Useful for telemetry.
         /// </param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
         /// <returns>
         /// An <see cref="HttpResponseMessage"/>.
         /// </returns>
-        public async Task<HttpResponseMessage> RequestAsync(HttpMethod method, string uriPathAndQuery, MobileServiceUser user, HttpContent content, IDictionary<string, string> requestHeaders, MobileServiceFeatures features = MobileServiceFeatures.None)
+        public async Task<HttpResponseMessage> RequestAsync(HttpMethod method,
+                                                            string uriPathAndQuery, 
+                                                            MobileServiceUser user, 
+                                                            HttpContent content, 
+                                                            IDictionary<string, string> requestHeaders, 
+                                                            MobileServiceFeatures features = MobileServiceFeatures.None,
+                                                            CancellationToken cancellationToken = default(CancellationToken))
         {
             Debug.Assert(method != null);
             Debug.Assert(!string.IsNullOrEmpty(uriPathAndQuery));
@@ -323,7 +346,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             HttpRequestMessage request = this.CreateHttpRequestMessage(method, uriPathAndQuery, requestHeaders, content, user);
 
             // Get the response
-            HttpResponseMessage response = await this.SendRequestAsync(httpClient, request, ensureResponseContent: false);
+            HttpResponseMessage response = await this.SendRequestAsync(httpClient, request, ensureResponseContent: false, cancellationToken: cancellationToken);
 
             return response;
         }
@@ -577,16 +600,20 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="ensureResponseContent">
         /// Optional parameter to indicate if the response should include content.
         /// </param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
         /// <returns>
         /// An <see cref="HttpResponseMessage"/>.
         /// </returns>
-        private async Task<HttpResponseMessage> SendRequestAsync(HttpClient client, HttpRequestMessage request, bool ensureResponseContent)
+        private async Task<HttpResponseMessage> SendRequestAsync(HttpClient client,
+                                                                 HttpRequestMessage request,
+                                                                 bool ensureResponseContent,
+                                                                 CancellationToken cancellationToken)
         {
             Debug.Assert(client != null);
             Debug.Assert(request != null);
 
             // Send the request and get the response back as string
-            HttpResponseMessage response = await client.SendAsync(request);
+            HttpResponseMessage response = await client.SendAsync(request, cancellationToken);
 
             // Throw errors for any failing responses
             if (!response.IsSuccessStatusCode)

@@ -16,7 +16,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     public class MobileServiceTableOperationError
     {
         /// <summary>
-        /// A unique identifier for the error.
+        /// A unique identifier for the error. The Value matches value of MobileServiceTableOperation Id property.
         /// </summary>
         internal string Id { get; private set; }
 
@@ -110,6 +110,23 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
 
             await this.Context.CancelAndUpdateItemAsync(this, item);
+            this.Handled = true;
+        }
+
+        /// <summary>
+        /// Updates the table operation and updates the local instance of the item with the given item. 
+        /// Clears the error and sets the operation state to pending.
+        /// </summary>
+        /// <param name="item">The item to update in local store.</param>
+        /// <returns>Task that completes when operation is updated.</returns>
+        public async Task UpdateOperationAsync(JObject item)
+        {
+            if (item == null)
+            {
+                throw new ArgumentNullException("item");
+            }
+
+            await this.Context.UpdateOperationAsync(this, item);
             this.Handled = true;
         }
 
