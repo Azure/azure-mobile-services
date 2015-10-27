@@ -187,7 +187,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var hijack = new TestHttpHandler();
             hijack.SetResponseContent(@"[{
                                         ""id"": ""2014-01-29T23:01:33.444Z"",
-                                        ""__createdAt"": ""2014-01-29T23:01:33.444Z""
+                                        ""createdAt"": ""2014-01-29T23:01:33.444Z""
                                         }]");
 
             IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
@@ -206,7 +206,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var hijack = new TestHttpHandler();
             hijack.SetResponseContent(@"[{
                                         ""id"": ""2014-01-29T23:01:33.444Z"",
-                                        ""__createdAt"": ""2014-01-29T23:01:33.444Z""
+                                        ""createdAt"": ""2014-01-29T23:01:33.444Z""
                                         }]");
 
             IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
@@ -2901,11 +2901,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 string content = await request.Content.ReadAsStringAsync();
                 JObject obj = JToken.Parse(content) as JObject;
                 Assert.IsTrue(obj.Properties().Where(p => p.Name == "id").Any());
-                Assert.IsFalse(obj.Properties().Where(p => p.Name.Contains("__createdAt")).Any());
+                Assert.IsFalse(obj.Properties().Where(p => p.Name.Contains("createdAt")).Any());
                 return request;
             };
 
-            await namedCreatedAtTable.InsertAsync(new NamedSystemPropertiesType() { __createdAt = new DateTime(2012, 1, 8), Id = "an id" });
+            await namedCreatedAtTable.InsertAsync(new NamedSystemPropertiesType() { createdAt = new DateTime(2012, 1, 8), Id = "an id" });
 
             hijack.SetResponseContent("{\"id\":\"an id\"}");
 
@@ -2979,7 +2979,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 return request;
             };
 
-            await createdAtTable.InsertAsync(new NotSystemPropertyCreatedAtType() { CreatedAt = new DateTime(2012, 1, 8), Id = "an id" });
+            await createdAtTable.InsertAsync(new NotSystemPropertyCreatedAtType() { __CreatedAt = new DateTime(2012, 1, 8), Id = "an id" });
 
             hijack.SetResponseContent("{\"id\":\"an id\"}");
 
@@ -3009,84 +3009,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 return request;
             };
 
-            await versionTable.InsertAsync(new NotSystemPropertyVersionType() { version = "a version", Id = "an id" });
-        }
-
-        [TestMethod]
-        public void IntegerIdTypesCanNotHaveSystemPropertyAttributes()
-        {
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
-            Exception exception = null;
-
-            try
-            {
-                IMobileServiceTable<IntegerIdWithSystemPropertiesType> stringIdTable = service.GetTable<IntegerIdWithSystemPropertiesType>();
-            }
-            catch (Exception e)
-            {
-                exception = e;
-            }
-
-            Assert.IsNotNull(exception);
-            Assert.IsTrue(exception.Message.Contains("has an integer id member and therefore can not have any members with the system property attribute"));
-            exception = null;
-
-            try
-            {
-                IMobileServiceTable<LongIdWithSystemPropertiesType> stringIdTable = service.GetTable<LongIdWithSystemPropertiesType>();
-            }
-            catch (Exception e)
-            {
-                exception = e;
-            }
-
-            Assert.IsNotNull(exception);
-            Assert.IsTrue(exception.Message.Contains("has an integer id member and therefore can not have any members with the system property attribute"));
-
-        }
-
-        [TestMethod]
-        public void TypesCanNotHaveMultiplePropertiesWithTheSameSystemAttribute()
-        {
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
-            Exception exception = null;
-
-            try
-            {
-                IMobileServiceTable<MultipleSystemPropertiesType> stringIdTable = service.GetTable<MultipleSystemPropertiesType>();
-            }
-            catch (Exception e)
-            {
-                exception = e;
-            }
-
-            Assert.IsNotNull(exception);
-            Assert.IsTrue(exception.Message.Contains("Only one member may have the property name"));
-            exception = null;
-
-            try
-            {
-                IMobileServiceTable<NamedAndAttributedSystemPropertiesType> stringIdTable = service.GetTable<NamedAndAttributedSystemPropertiesType>();
-            }
-            catch (Exception e)
-            {
-                exception = e;
-            }
-
-            Assert.IsNotNull(exception);
-            Assert.IsTrue(exception.Message.Contains("Only one member may have the property name"));
-
-            try
-            {
-                IMobileServiceTable<DoubleJsonPropertyNamedSystemPropertiesType> stringIdTable = service.GetTable<DoubleJsonPropertyNamedSystemPropertiesType>();
-            }
-            catch (Exception e)
-            {
-                exception = e;
-            }
-
-            Assert.IsNotNull(exception);
-            Assert.IsTrue(exception.Message.Contains("Only one member may have the property name"));
+            await versionTable.InsertAsync(new NotSystemPropertyVersionType() { _version = "a version", Id = "an id" });
         }
 
         [AsyncTestMethod]
@@ -3094,7 +3017,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             TestHttpHandler hijack = new TestHttpHandler();
 
-            hijack.SetResponseContent("[{\"id\":\"an id\",\"__createdAt\":\"1999-12-31T23:59:59.000Z\"}]");
+            hijack.SetResponseContent("[{\"id\":\"an id\",\"createdAt\":\"1999-12-31T23:59:59.000Z\"}]");
             IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
 
             IMobileServiceTable<CreatedAtType> table = service.GetTable<CreatedAtType>();
@@ -3106,7 +3029,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual("an id", items[0].Id);
             Assert.AreEqual(new DateTime(1999, 12, 31, 23, 59, 59, DateTimeKind.Utc).ToLocalTime(), items[0].CreatedAt);
 
-            hijack.SetResponseContent("[{\"id\":\"an id\",\"__createdAt\":\"1999-12-31T23:59:59.000Z\"}]");
+            hijack.SetResponseContent("[{\"id\":\"an id\",\"createdAt\":\"1999-12-31T23:59:59.000Z\"}]");
             IMobileServiceTable<StringCreatedAtType> stringTable = service.GetTable<StringCreatedAtType>();
 
             IEnumerable<StringCreatedAtType> stringResults = await stringTable.ReadAsync();
@@ -3124,7 +3047,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             TestHttpHandler hijack = new TestHttpHandler();
 
-            hijack.SetResponseContent("[{\"id\":\"an id\",\"__updatedAt\":\"1999-12-31T23:59:59.000Z\"}]");
+            hijack.SetResponseContent("[{\"id\":\"an id\",\"updatedAt\":\"1999-12-31T23:59:59.000Z\"}]");
             IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
 
             IMobileServiceTable<UpdatedAtType> table = service.GetTable<UpdatedAtType>();
@@ -3136,7 +3059,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual("an id", items[0].Id);
             Assert.AreEqual(new DateTime(1999, 12, 31, 23, 59, 59, DateTimeKind.Utc).ToLocalTime(), items[0].UpdatedAt);
 
-            hijack.SetResponseContent("[{\"id\":\"an id\",\"__updatedAt\":\"1999-12-31T23:59:59.000Z\"}]");
+            hijack.SetResponseContent("[{\"id\":\"an id\",\"updatedAt\":\"1999-12-31T23:59:59.000Z\"}]");
             IMobileServiceTable<StringUpdatedAtType> stringTable = service.GetTable<StringUpdatedAtType>();
 
             IEnumerable<StringUpdatedAtType> stringResults = await stringTable.ReadAsync();
@@ -3154,7 +3077,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             TestHttpHandler hijack = new TestHttpHandler();
 
-            hijack.SetResponseContent("[{\"id\":\"an id\",\"__version\":\"AAAAAAAAH2o=\"}]");
+            hijack.SetResponseContent("[{\"id\":\"an id\",\"version\":\"AAAAAAAAH2o=\"}]");
             IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
 
             IMobileServiceTable<VersionType> table = service.GetTable<VersionType>();
@@ -3199,7 +3122,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             {
                 TestHttpHandler hijack = new TestHttpHandler();
 
-                hijack.SetResponseContent("{\"id\":\"an id\",\"__version\":\"AAAAAAAAH2o=\"}");
+                hijack.SetResponseContent("{\"id\":\"an id\",\"version\":\"AAAAAAAAH2o=\"}");
 
                 IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
 

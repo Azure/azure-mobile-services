@@ -15,11 +15,10 @@ static NSString *const xApplicationHeader = @"X-ZUMO-APPLICATION";
 static NSString *const contentTypeHeader = @"Content-Type";
 static NSString *const userAgentHeader = @"User-Agent";
 static NSString *const zumoVersionHeader = @"X-ZUMO-VERSION";
-static NSString *const zumoAPIVersionHeader = @"ZUMO-API-VERSION";
+static NSString *const zumoApiVersionHeader = @"ZUMO-API-VERSION";
 static NSString *const jsonContentType = @"application/json";
 static NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 static NSString *const xZumoInstallId = @"X-ZUMO-INSTALLATION-ID";
-
 
 #pragma mark * MSConnectionDelegate Private Interface
 
@@ -237,8 +236,11 @@ static NSOperationQueue *delegateQueue;
         [mutableRequest setValue:userAgentValue
               forHTTPHeaderField:zumoVersionHeader];
         
-        // Set the Zumo API Version Header
-        [mutableRequest setValue:@"2.0.0" forHTTPHeaderField:zumoAPIVersionHeader];
+        // Set the Zumo API Version Header for table, api, push, etc requests only
+        // Exemptions will need added if later on we use a wrapping MSLoginRequest object
+        if (![request isMemberOfClass:[NSURLRequest class]]) {
+            [mutableRequest setValue:@"2.0.0" forHTTPHeaderField:zumoApiVersionHeader];
+        }
         
         // Set the special Application key header
         NSString *appKey = client.applicationKey;
@@ -260,8 +262,6 @@ static NSOperationQueue *delegateQueue;
     
     return mutableRequest;
 }
-
-
 
 
 @end

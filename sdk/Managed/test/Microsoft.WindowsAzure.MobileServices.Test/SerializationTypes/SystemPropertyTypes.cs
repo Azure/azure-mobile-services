@@ -19,7 +19,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     {
         public string Id { get; set; }
 
-        public DateTime CreatedAt { get; set; }
+        public DateTime __CreatedAt { get; set; }
     }
 
     public class IntegerIdNotSystemPropertyCreatedAtType
@@ -56,7 +56,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     {
         public string Id { get; set; }
 
-        public string version { get; set; }
+        public string _version { get; set; }
     }
 
     public class AllBaseTypesWithAllSystemPropertiesType : IEquatable<AllBaseTypesWithAllSystemPropertiesType>
@@ -181,21 +181,21 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     {
         public string Id { get; set; }
 
-        public DateTime __createdAt { get; set; }
+        public DateTime createdAt { get; set; }
     }
 
     public class NamedDifferentCasingSystemPropertiesType
     {
         public string Id { get; set; }
 
-        public DateTime __CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 
     public class NamedAndAttributedSystemPropertiesType
     {
         public string Id { get; set; }
 
-        public DateTime __createdAt { get; set; }
+        public DateTime createdAt { get; set; }
 
         [CreatedAt]
         public DateTime CreatedAt { get; set; }
@@ -205,7 +205,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     {
         public string Id { get; set; }
 
-        public DateTime __createdAt { get; set; }
+        public DateTime createdAt { get; set; }
 
         public DateTime CreatedAt { get; set; }
     }
@@ -241,14 +241,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     {
         public int Id { get; set; }
 
-        public DateTime __createdAt { get; set; }
+        public DateTime createdAt { get; set; }
     }
 
     public class LongIdWithNamedSystemPropertiesType
     {
         public long Id { get; set; }
 
-        public DateTime __createdAt { get; set; }
+        public DateTime createdAt { get; set; }
     }
 
     public class StringCreatedAtType

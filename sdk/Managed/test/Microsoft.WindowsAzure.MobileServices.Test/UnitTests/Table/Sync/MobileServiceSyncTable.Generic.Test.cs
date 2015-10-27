@@ -240,8 +240,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public async Task PullAsync_UpdatesDeltaToken_AfterEachResult_IfOrderByIsSupported()
         {
             var hijack = new TestHttpHandler();
-            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""__updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""},
-                                         {""id"":""def"",""String"":""How"", ""__updatedAt"": ""2001-02-04T00:00:00.0000000+00:00""}]"); // first page
+            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""},
+                                         {""id"":""def"",""String"":""How"", ""updatedAt"": ""2001-02-04T00:00:00.0000000+00:00""}]"); // first page
             hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.InternalServerError)); // throw on second page
 
             var store = new MobileServiceLocalStoreMock();
@@ -259,8 +259,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(store.TableMap["stringId_test_table"]["abc"].Value<string>("String"), "Hey");
             Assert.AreEqual(store.TableMap["stringId_test_table"]["def"].Value<string>("String"), "How");
 
-            AssertEx.MatchUris(hijack.Requests, mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true"),
-                                                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(__updatedAt ge datetimeoffset'2001-02-04T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true"));
+            AssertEx.MatchUris(hijack.Requests, mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=updatedAt&$skip=0&$top=50&__includeDeleted=true"),
+                                                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(updatedAt ge datetimeoffset'2001-02-04T00:00:00.0000000%2B00:00')&$orderby=updatedAt&$skip=0&$top=50&__includeDeleted=true"));
 
             Assert.Equals(store.TableMap[MobileServiceLocalSystemTables.Config]["deltaToken|stringId_test_table|items"]["value"], "2001-02-04T00:00:00.0000000+00:00");
         }
@@ -269,8 +269,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public async Task PullAsync_DoesNotUpdateDeltaToken_AfterEachResult_IfOrderByIsNotSupported()
         {
             var hijack = new TestHttpHandler();
-            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""__updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""},
-                                         {""id"":""def"",""String"":""How"", ""__updatedAt"": ""2001-02-04T00:00:00.0000000+00:00""}]"); // first page
+            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""},
+                                         {""id"":""def"",""String"":""How"", ""updatedAt"": ""2001-02-04T00:00:00.0000000+00:00""}]"); // first page
             hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.InternalServerError)); // throw on second page
 
             var store = new MobileServiceLocalStoreMock();
@@ -289,8 +289,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(store.TableMap["stringId_test_table"]["abc"].Value<string>("String"), "Hey");
             Assert.AreEqual(store.TableMap["stringId_test_table"]["def"].Value<string>("String"), "How");
 
-            AssertEx.MatchUris(hijack.Requests, mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$skip=0&$top=50&__includeDeleted=true"),
-                                                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$skip=2&$top=50&__includeDeleted=true"));
+            AssertEx.MatchUris(hijack.Requests, mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$skip=0&$top=50&__includeDeleted=true"),
+                                                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$skip=2&$top=50&__includeDeleted=true"));
 
             Assert.IsFalse(store.TableMap[MobileServiceLocalSystemTables.Config].ContainsKey("deltaToken|stringId_test_table|items"));
         }
@@ -706,8 +706,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public async Task PullAsync_Incremental_AllOptions_MovesByUpdatedAt()
         {
             await TestPullAsyncIncrementalWithOptions(MobileServiceRemoteTableOptions.All,
-                    "stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$orderby=__updatedAt&$skip=0&$top=50&param1=val1&__includeDeleted=true",
-                    "stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00'))&$orderby=__updatedAt&$skip=0&$top=50&param1=val1&__includeDeleted=true");
+                    "stringId_test_table?$filter=((String eq 'world') and (updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$orderby=updatedAt&$skip=0&$top=50&param1=val1&__includeDeleted=true",
+                    "stringId_test_table?$filter=((String eq 'world') and (updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00'))&$orderby=updatedAt&$skip=0&$top=50&param1=val1&__includeDeleted=true");
         }
 
         [AsyncTestMethod]
@@ -718,7 +718,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             {
                 return Task.FromResult(req);
             };
-            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""__updatedAt"": null}]");
+            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""updatedAt"": null}]");
             hijack.AddResponseContent("[]"); // last page
 
             var store = new MobileServiceLocalStoreMock();
@@ -730,8 +730,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             await table.PullAsync("items", table.CreateQuery());
             AssertEx.MatchUris(hijack.Requests,
-                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true"),
-                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=1&$top=50&__includeDeleted=true"));
+                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=updatedAt&$skip=0&$top=50&__includeDeleted=true"),
+                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=updatedAt&$skip=1&$top=50&__includeDeleted=true"));
         }
 
         [AsyncTestMethod]
@@ -742,8 +742,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             {
                 return Task.FromResult(req);
             };
-            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""__updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""}]");
-            hijack.AddResponseContent(@"[{""id"":""def"",""String"":""World"", ""__updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""}]");
+            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""}]");
+            hijack.AddResponseContent(@"[{""id"":""def"",""String"":""World"", ""updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""}]");
             hijack.AddResponseContent("[]"); // last page
 
             var store = new MobileServiceLocalStoreMock();
@@ -755,40 +755,40 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             await table.PullAsync("items", table.CreateQuery());
             AssertEx.MatchUris(hijack.Requests,
-                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true"),
-                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(__updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true"),
-                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(__updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=1&$top=50&__includeDeleted=true"));
+                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=updatedAt&$skip=0&$top=50&__includeDeleted=true"),
+                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00')&$orderby=updatedAt&$skip=0&$top=50&__includeDeleted=true"),
+                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00')&$orderby=updatedAt&$skip=1&$top=50&__includeDeleted=true"));
         }
 
         [AsyncTestMethod]
         public async Task PullAsync_Incremental_WithoutOrderBy_MovesBySkipAndTop()
         {
             await TestPullAsyncIncrementalWithOptions(MobileServiceRemoteTableOptions.Skip | MobileServiceRemoteTableOptions.Top,
-                "stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$skip=0&$top=50&param1=val1&__includeDeleted=true",
-                "stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$skip=2&$top=50&param1=val1&__includeDeleted=true");
+                "stringId_test_table?$filter=((String eq 'world') and (updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$skip=0&$top=50&param1=val1&__includeDeleted=true",
+                "stringId_test_table?$filter=((String eq 'world') and (updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$skip=2&$top=50&param1=val1&__includeDeleted=true");
         }
 
         [AsyncTestMethod]
         public async Task PullAsync_Incremental_WithoutSkipAndOrderBy_CanNotMoveForward()
         {
             await TestPullAsyncIncrementalWithOptions(MobileServiceRemoteTableOptions.Top,
-                "stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$top=50&param1=val1&__includeDeleted=true");
+                "stringId_test_table?$filter=((String eq 'world') and (updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$top=50&param1=val1&__includeDeleted=true");
         }
 
         [AsyncTestMethod]
         public async Task PullAsync_Incremental_WithoutTopAndOrderBy_MovesBySkip()
         {
             await TestPullAsyncIncrementalWithOptions(MobileServiceRemoteTableOptions.Skip,
-                "stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&param1=val1&__includeDeleted=true",
-                "stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$skip=2&param1=val1&__includeDeleted=true");
+                "stringId_test_table?$filter=((String eq 'world') and (updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&param1=val1&__includeDeleted=true",
+                "stringId_test_table?$filter=((String eq 'world') and (updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$skip=2&param1=val1&__includeDeleted=true");
         }
 
         [AsyncTestMethod]
         public async Task PullAsync_Incremental_WithoutSkipAndTop_MovesByUpdatedAt()
         {
             await TestPullAsyncIncrementalWithOptions(MobileServiceRemoteTableOptions.OrderBy,
-                "stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$orderby=__updatedAt&param1=val1&__includeDeleted=true",
-                "stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00'))&$orderby=__updatedAt&param1=val1&__includeDeleted=true");
+                "stringId_test_table?$filter=((String eq 'world') and (updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$orderby=updatedAt&param1=val1&__includeDeleted=true",
+                "stringId_test_table?$filter=((String eq 'world') and (updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00'))&$orderby=updatedAt&param1=val1&__includeDeleted=true");
         }
 
         [AsyncTestMethod]
@@ -814,8 +814,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             await table.PullAsync("items", table.CreateQuery(), pullOptions: pullOptions);
             AssertEx.MatchUris(hijack.Requests,
-                string.Format("http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top={0}&__includeDeleted=true", pullOptions.MaxPageSize),
-                string.Format("http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=1&$top={0}&__includeDeleted=true", pullOptions.MaxPageSize));
+                string.Format("http://www.test.com/tables/stringId_test_table?$filter=(updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=updatedAt&$skip=0&$top={0}&__includeDeleted=true", pullOptions.MaxPageSize),
+                string.Format("http://www.test.com/tables/stringId_test_table?$filter=(updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=updatedAt&$skip=1&$top={0}&__includeDeleted=true", pullOptions.MaxPageSize));
         }
 
         private static async Task TestPullAsyncIncrementalWithOptions(MobileServiceRemoteTableOptions options, params string[] uris)
@@ -832,15 +832,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var store = new MobileServiceLocalStoreMock();
             store.TableMap[MobileServiceLocalSystemTables.Config] = new Dictionary<string, JObject>();
             await TestIncrementalPull(store, MobileServiceRemoteTableOptions.All,
-                "stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00'))&$orderby=__updatedAt&$skip=0&$top=50&param1=val1&__includeDeleted=true",
-                "stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00'))&$orderby=__updatedAt&$skip=0&$top=50&param1=val1&__includeDeleted=true");
+                "stringId_test_table?$filter=((String eq 'world') and (updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00'))&$orderby=updatedAt&$skip=0&$top=50&param1=val1&__includeDeleted=true",
+                "stringId_test_table?$filter=((String eq 'world') and (updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00'))&$orderby=updatedAt&$skip=0&$top=50&param1=val1&__includeDeleted=true");
         }
 
         private static async Task TestIncrementalPull(MobileServiceLocalStoreMock store, MobileServiceRemoteTableOptions options, params string[] expectedTableUriComponents)
         {
             var hijack = new TestHttpHandler();
-            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""__updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""},
-                                        {""id"":""def"",""String"":""World"", ""__updatedAt"": ""2001-02-03T00:03:00.0000000+07:00""}]"); // for pull
+            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""},
+                                        {""id"":""def"",""String"":""World"", ""updatedAt"": ""2001-02-03T00:03:00.0000000+07:00""}]"); // for pull
             hijack.AddResponseContent(@"[]");
 
             IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
@@ -935,8 +935,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public async Task PurgeAsync_ResetsDeltaToken_WhenQueryIdIsSpecified()
         {
             var hijack = new TestHttpHandler();
-            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""__updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""},
-                                         {""id"":""def"",""String"":""How"", ""__updatedAt"": ""2001-02-04T00:00:00.0000000+00:00""}]"); // first page
+            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""},
+                                         {""id"":""def"",""String"":""How"", ""updatedAt"": ""2001-02-04T00:00:00.0000000+00:00""}]"); // first page
             hijack.AddResponseContent("[]"); // last page of first pull
             hijack.AddResponseContent("[]"); // second pull
 
@@ -973,9 +973,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             await table.PullAsync("items", table.CreateQuery());
 
             // verify request urls
-            AssertEx.MatchUris(hijack.Requests, mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true"),
-                                                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(__updatedAt ge datetimeoffset'2001-02-04T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true"),
-                                                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true"));
+            AssertEx.MatchUris(hijack.Requests, mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=updatedAt&$skip=0&$top=50&__includeDeleted=true"),
+                                                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(updatedAt ge datetimeoffset'2001-02-04T00:00:00.0000000%2B00:00')&$orderby=updatedAt&$skip=0&$top=50&__includeDeleted=true"),
+                                                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=updatedAt&$skip=0&$top=50&__includeDeleted=true"));
         }
 
         [AsyncTestMethod]
