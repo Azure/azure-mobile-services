@@ -58,9 +58,9 @@ namespace Microsoft.WindowsAzure.MobileServices
             string path = MobileServiceUrlBuilder.CombinePaths(LoginAsyncUriFragment, ProviderName);
             if (!string.IsNullOrEmpty(client.LoginUriPrefix))
             {
-                path = MobileServiceUrlBuilder.CombinePaths(client.LoginUriPrefix, this.ProviderName);
+                path = MobileServiceUrlBuilder.CombinePaths(client.LoginUriPrefix, ProviderName);
             }
-            string queryString = MobileServiceUrlBuilder.GetQueryString(this.Parameters);
+            string queryString = MobileServiceUrlBuilder.GetQueryString(Parameters);
             string pathAndQuery = MobileServiceUrlBuilder.CombinePathAndQuery(path, queryString);
             if (client.AlternateLoginHost != null)
             {
