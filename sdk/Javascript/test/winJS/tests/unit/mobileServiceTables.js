@@ -20,6 +20,7 @@ $testGroup('MobileServiceTables.js',
         client = client.withFilter(function (req, next, callback) {
             $assert.areEqual(req.type, 'GET');
             $assert.areEqual(req.url, 'http://www.test.com/tables/books?$filter=price eq 100');
+            $assert.areEqual(req.headers['ZUMO-API-VERSION'], "2.0.0");
             callback(null, { status: 200, responseText: '{"title":"test"}' });
         });
 
@@ -421,6 +422,7 @@ $testGroup('MobileServiceTables.js',
             $assert.areEqual(req.type, 'POST');
             $assert.areEqual(req.url, 'http://www.test.com/tables/books?state=CA');
             $assert.areEqual(req.data, '{"price":100}');
+            $assert.areEqual(req.headers['ZUMO-API-VERSION'], "2.0.0");
             callback(null, { status: 200, responseText: '{"title":"test"}' });
         });
 
@@ -627,6 +629,7 @@ $testGroup('MobileServiceTables.js',
             $assert.areEqual(req.type, 'PATCH');
             $assert.areEqual(req.url, 'http://www.test.com/tables/books/2?state=AL');
             $assert.areEqual(req.data, '{"id":2,"price":100}');
+            $assert.areEqual(req.headers['ZUMO-API-VERSION'], "2.0.0");
             callback(null, { status: 200, responseText: '{"title":"test"}' });
         });
 
@@ -991,6 +994,7 @@ $testGroup('MobileServiceTables.js',
             $assert.areEqual(req.type, 'DELETE');
             $assert.areEqual(req.url, 'http://www.test.com/tables/books/2?state=WY');
             $assert.isNull(req.data);
+            $assert.areEqual(req.headers['ZUMO-API-VERSION'], "2.0.0");
             callback(null, { status: 200, responseText: null });
         });
 
