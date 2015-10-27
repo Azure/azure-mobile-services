@@ -21,8 +21,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
 
         string loginAsyncUriFragment = ".auth/login";
         string legacyLoginAsyncUriFragment = "login";
-        string validAlternateLoginUrl = "http://www.testalternatelogin.com/";
-        string validAlternateLoginUrlWithoutTrailingSlash = "http://www.testalternatelogin.com";
+        string validAlternateLoginUrl = "https://www.testalternatelogin.com/";
+        string validAlternateLoginUrlWithoutTrailingSlash = "https://www.testalternatelogin.com";
 
 
         private void TestInitialize(string appUrl = null, bool legacyAuth = false, string alternateLoginUri = null)
@@ -31,19 +31,19 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
             {
                 appUrl = MobileAppUriValidator.DummyMobileApp;
             }
-            this.hijack = new TestHttpHandler();
-            this.hijack.SetResponseContent(String.Empty);
+            hijack = new TestHttpHandler();
+            hijack.SetResponseContent(String.Empty);
 
             var originalFactory = MobileServiceHttpClient.DefaultHandlerFactory;
-            MobileServiceHttpClient.DefaultHandlerFactory = () => this.hijack;
-            this.client = new MobileServiceClient(appUrl, hijack);
+            MobileServiceHttpClient.DefaultHandlerFactory = () => hijack;
+            client = new MobileServiceClient(appUrl, hijack);
             if (legacyAuth)
             {
-                this.client.LoginUriPrefix = legacyLoginAsyncUriFragment;
+                client.LoginUriPrefix = legacyLoginAsyncUriFragment;
             }
             if (!string.IsNullOrEmpty(alternateLoginUri))
             {
-                this.client.AlternateLoginUri = alternateLoginUri;
+                client.AlternateLoginHost = new Uri(alternateLoginUri);
             }
             MobileServiceHttpClient.DefaultHandlerFactory = originalFactory;
         }
@@ -171,18 +171,18 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
 
 
         [TestMethod]
-        public void StartUri_InvalidAlternateLoginUri_IncludesParameters()
+        public void StartUri_ThrowsInvalidAlternateLoginHost()
         {
             var client = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
-            client.AlternateLoginUri = MobileAppUriValidator.DummyMobileApp + "?n=John&n=Susan";
-            AssertEx.Throws<ArgumentException>(() => client.AlternateLoginUri = MobileAppUriValidator.DummyMobileAppUriWithFolder);
-            AssertEx.Throws<ArgumentException>(() => client.AlternateLoginUri = MobileAppUriValidator.DummyMobileAppUriWithFolderWithoutTralingSlash);
+            AssertEx.Throws<ArgumentException>(() => client.AlternateLoginHost = new Uri(MobileAppUriValidator.DummyMobileAppUriWithFolder));
+            AssertEx.Throws<ArgumentException>(() => client.AlternateLoginHost = new Uri(MobileAppUriValidator.DummyMobileAppUriWithFolderWithoutTralingSlash));
+            AssertEx.Throws<ArgumentException>(() => client.AlternateLoginHost = new Uri("http://www.testalternatelogin.com/"));
         }
 
         private void TestStartUriForParameters(Dictionary<string, string> parameters, string uri, bool legacyAuth = false, string alternateLoginUri = null, string appUrl = null)
         {
             TestInitialize(appUrl, legacyAuth, alternateLoginUri);
-            var auth = new MobileServiceTokenAuthentication(this.client, "MicrosoftAccount", new JObject(), parameters);
+            var auth = new MobileServiceTokenAuthentication(client, "MicrosoftAccount", new JObject(), parameters);
             Assert.AreEqual(auth.StartUri.OriginalString, uri);
         }
 
@@ -273,13 +273,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
             return TestLoginAsyncForParameters(new Dictionary<string, string>(), validAlternateLoginUrl + legacyLoginAsyncUriFragment + "/microsoftaccount", true, validAlternateLoginUrl);
         }
 
-
         private async Task TestLoginAsyncForParameters(Dictionary<string, string> parameters, string uri, bool legacyAuth = false, string alternateLoginUrl = null, string appUrl = null)
         {
             TestInitialize(appUrl, legacyAuth, alternateLoginUrl);
-            var auth = new MobileServiceTokenAuthentication(this.client, "MicrosoftAccount", new JObject(), parameters);
+            var auth = new MobileServiceTokenAuthentication(client, "MicrosoftAccount", new JObject(), parameters);
             await auth.LoginAsync();
-            Assert.AreEqual(this.hijack.Request.RequestUri.OriginalString, uri);
+            Assert.AreEqual(hijack.Request.RequestUri.OriginalString, uri);
         }
     }
 }

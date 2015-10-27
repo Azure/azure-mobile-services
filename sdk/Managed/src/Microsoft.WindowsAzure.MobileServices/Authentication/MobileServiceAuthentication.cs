@@ -79,11 +79,10 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.StartUri = new Uri(this.Client.MobileAppUri, pathAndQuery);
             this.EndUri = new Uri(this.Client.MobileAppUri, loginAsyncDoneUriFragment);
 
-            Uri alternateLoginUri;
-            if (Uri.TryCreate(this.Client.AlternateLoginUri, UriKind.Absolute, out alternateLoginUri))
+            if (this.Client.AlternateLoginHost != null)
             {
-                this.StartUri = new Uri(alternateLoginUri, pathAndQuery);
-                this.EndUri = new Uri(alternateLoginUri, loginAsyncDoneUriFragment);
+                this.StartUri = new Uri(this.Client.AlternateLoginHost, pathAndQuery);
+                this.EndUri = new Uri(this.Client.AlternateLoginHost, loginAsyncDoneUriFragment);
             }
         }
 

@@ -55,16 +55,16 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         protected override Task<string> LoginAsyncOverride()
         {
-            string path = MobileServiceUrlBuilder.CombinePaths(MobileServiceAuthentication.LoginAsyncUriFragment, this.ProviderName);
+            string path = MobileServiceUrlBuilder.CombinePaths(LoginAsyncUriFragment, ProviderName);
             if (!string.IsNullOrEmpty(client.LoginUriPrefix))
             {
                 path = MobileServiceUrlBuilder.CombinePaths(client.LoginUriPrefix, this.ProviderName);
             }
             string queryString = MobileServiceUrlBuilder.GetQueryString(this.Parameters);
             string pathAndQuery = MobileServiceUrlBuilder.CombinePathAndQuery(path, queryString);
-            if (!string.IsNullOrEmpty(client.AlternateLoginUri))
+            if (client.AlternateLoginHost != null)
             {
-                return client.AlternateAuthHttpClient.RequestWithoutHandlersAsync(HttpMethod.Post, pathAndQuery, this.client.CurrentUser, token.ToString());
+                return client.AlternateAuthHttpClient.RequestWithoutHandlersAsync(HttpMethod.Post, pathAndQuery, client.CurrentUser, token.ToString());
             }
             return client.HttpClient.RequestWithoutHandlersAsync(HttpMethod.Post, pathAndQuery, client.CurrentUser, token.ToString());
         }

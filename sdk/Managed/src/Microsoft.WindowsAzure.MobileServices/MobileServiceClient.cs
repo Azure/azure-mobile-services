@@ -65,31 +65,31 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
         }
 
-        private string alternateLoginUri;
+        private Uri alternateLoginHost;
 
         /// <summary>
         /// Alternate URI for login
         /// </summary>
-        public string AlternateLoginUri
+        public Uri AlternateLoginHost
         {
             get
             {
-                return alternateLoginUri;
+                return alternateLoginHost;
             }
             set
             {
-                Uri loginUri = new Uri(value);
-                if (loginUri.IsAbsoluteUri && loginUri.Segments.Length == 1)
+                if (value.IsAbsoluteUri && value.Segments.Length == 1 && value.Scheme == "https")
                 {
-                    alternateLoginUri = MobileServiceUrlBuilder.AddTrailingSlash(value);
+                    alternateLoginHost = value;
                 }
                 else
                 {
                     throw new ArgumentException(
-                        string.Format(CultureInfo.InvariantCulture, Resources.MobileServiceClient_InvalidAlternateLoginURI, value),
-                        "alternateLoginUri");
+                        string.Format(CultureInfo.InvariantCulture, Resources.MobileServiceClient_InvalidAlternateLoginHost, value),
+                        "alternateLoginHost");
                 }
-                this.AlternateAuthHttpClient = new MobileServiceHttpClient(EmptyHttpMessageHandlers, new Uri(alternateLoginUri, UriKind.Absolute), this.InstallationId);
+                
+                this.AlternateAuthHttpClient = new MobileServiceHttpClient(EmptyHttpMessageHandlers, alternateLoginHost, this.InstallationId);
             }
         }
 

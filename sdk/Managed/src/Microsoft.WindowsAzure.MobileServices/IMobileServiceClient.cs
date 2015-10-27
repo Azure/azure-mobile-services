@@ -35,9 +35,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         String LoginUriPrefix { get; set; }
 
         /// <summary>
-        /// Alternate URI for login
+        /// Alternate Host URI for login
         /// </summary>
-        String AlternateLoginUri { get; set; }
+        Uri AlternateLoginHost { get; set; }
 
         /// <summary>
         /// Returns a <see cref="IMobileServiceSyncContext"/> instance.
