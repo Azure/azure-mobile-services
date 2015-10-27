@@ -25,7 +25,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
         string validAlternateLoginUrlWithoutTrailingSlash = "https://www.testalternatelogin.com";
 
 
-        private void TestInitialize(string appUrl = null, bool legacyAuth = false, string alternateLoginUri = null)
+        private void TestInitialize(string appUrl = null, string loginPrefix = null, string alternateLoginUri = null)
         {
             if (string.IsNullOrEmpty(appUrl))
             {
@@ -37,10 +37,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
             var originalFactory = MobileServiceHttpClient.DefaultHandlerFactory;
             MobileServiceHttpClient.DefaultHandlerFactory = () => hijack;
             client = new MobileServiceClient(appUrl, hijack);
-            if (legacyAuth)
-            {
-                client.LoginUriPrefix = legacyLoginAsyncUriFragment;
-            }
+            client.LoginUriPrefix = loginPrefix;
             if (!string.IsNullOrEmpty(alternateLoginUri))
             {
                 client.AlternateLoginHost = new Uri(alternateLoginUri);
@@ -65,7 +62,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
             {
                 { "display", "popup" },
                 { "scope", "email,birthday" }
-            }, MobileAppUriValidator.DummyMobileApp + legacyLoginAsyncUriFragment + "/microsoftaccount?display=popup&scope=email%2Cbirthday", true);
+            }, MobileAppUriValidator.DummyMobileApp + legacyLoginAsyncUriFragment + "/microsoftaccount?display=popup&scope=email%2Cbirthday", "login");
         }
 
 
@@ -76,7 +73,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
             {
                 { "display", "popup" },
                 { "scope", "email,birthday" }
-            }, validAlternateLoginUrl + loginAsyncUriFragment + "/microsoftaccount?display=popup&scope=email%2Cbirthday", false, validAlternateLoginUrl);
+            }, validAlternateLoginUrl + loginAsyncUriFragment + "/microsoftaccount?display=popup&scope=email%2Cbirthday", null, validAlternateLoginUrl);
         }
 
         [TestMethod]
@@ -86,7 +83,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
             {
                 { "display", "popup" },
                 { "scope", "email,birthday" }
-            }, validAlternateLoginUrl + legacyLoginAsyncUriFragment + "/microsoftaccount?display=popup&scope=email%2Cbirthday", true, validAlternateLoginUrl);
+            }, validAlternateLoginUrl + legacyLoginAsyncUriFragment + "/microsoftaccount?display=popup&scope=email%2Cbirthday", "/login", validAlternateLoginUrl);
         }
 
         [TestMethod]
@@ -96,7 +93,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
             {
                 { "display", "popup" },
                 { "scope", "email,birthday" }
-            }, MobileAppUriValidator.DummyMobileApp + loginAsyncUriFragment + "/microsoftaccount?display=popup&scope=email%2Cbirthday", false, null, MobileAppUriValidator.DummyMobileAppUriWithFolder);
+            }, MobileAppUriValidator.DummyMobileApp + loginAsyncUriFragment + "/microsoftaccount?display=popup&scope=email%2Cbirthday", null, null, MobileAppUriValidator.DummyMobileAppUriWithFolder);
         }
 
         [TestMethod]
@@ -106,7 +103,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
             {
                 { "display", "popup" },
                 { "scope", "email,birthday" }
-            }, MobileAppUriValidator.DummyMobileApp + legacyLoginAsyncUriFragment + "/microsoftaccount?display=popup&scope=email%2Cbirthday", true);
+            }, MobileAppUriValidator.DummyMobileApp + legacyLoginAsyncUriFragment + "/microsoftaccount?display=popup&scope=email%2Cbirthday", "login");
         }
 
         [TestMethod]
@@ -118,25 +115,25 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
         [TestMethod]
         public void StartUri_Legacy_WithNullParameters()
         {
-            TestStartUriForParameters(null, MobileAppUriValidator.DummyMobileApp + legacyLoginAsyncUriFragment + "/microsoftaccount", true);
+            TestStartUriForParameters(null, MobileAppUriValidator.DummyMobileApp + legacyLoginAsyncUriFragment + "/microsoftaccount", "/login");
         }
 
         [TestMethod]
         public void StartUri_MobileAppUriWihtoutTrailingSlash_WithNullParameters()
         {
-            TestStartUriForParameters(null, MobileAppUriValidator.DummyMobileAppWithoutTralingSlash + "/" + legacyLoginAsyncUriFragment + "/microsoftaccount", true, null, MobileAppUriValidator.DummyMobileAppWithoutTralingSlash);
+            TestStartUriForParameters(null, MobileAppUriValidator.DummyMobileAppWithoutTralingSlash + "/" + legacyLoginAsyncUriFragment + "/microsoftaccount", "login", null, MobileAppUriValidator.DummyMobileAppWithoutTralingSlash);
         }
 
         [TestMethod]
         public void StartUri_AlternateLoginUri_WithNullParameters()
         {
-            TestStartUriForParameters(null, validAlternateLoginUrl + loginAsyncUriFragment + "/microsoftaccount", false, validAlternateLoginUrl);
+            TestStartUriForParameters(null, validAlternateLoginUrl + loginAsyncUriFragment + "/microsoftaccount", null, validAlternateLoginUrl);
         }
 
         [TestMethod]
         public void StartUri_Legacy_AlternateLoginUri_WithNullParameters()
         {
-            TestStartUriForParameters(null, validAlternateLoginUrl + legacyLoginAsyncUriFragment + "/microsoftaccount", true, validAlternateLoginUrl);
+            TestStartUriForParameters(null, validAlternateLoginUrl + legacyLoginAsyncUriFragment + "/microsoftaccount", "login", validAlternateLoginUrl);
         }
 
         [TestMethod]
@@ -148,27 +145,26 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
         [TestMethod]
         public void StartUri_Legacy_WithEmptyParameters()
         {
-            TestStartUriForParameters(new Dictionary<string, string>(), MobileAppUriValidator.DummyMobileApp + legacyLoginAsyncUriFragment + "/microsoftaccount", true);
+            TestStartUriForParameters(new Dictionary<string, string>(), MobileAppUriValidator.DummyMobileApp + legacyLoginAsyncUriFragment + "/microsoftaccount", "login");
         }
 
         [TestMethod]
         public void StartUri_AlternateLoginUrl_WithEmptyParameters()
         {
-            TestStartUriForParameters(new Dictionary<string, string>(), validAlternateLoginUrlWithoutTrailingSlash + "/" + loginAsyncUriFragment + "/microsoftaccount", false, validAlternateLoginUrlWithoutTrailingSlash);
+            TestStartUriForParameters(new Dictionary<string, string>(), validAlternateLoginUrlWithoutTrailingSlash + "/" + loginAsyncUriFragment + "/microsoftaccount", null, validAlternateLoginUrlWithoutTrailingSlash);
         }
 
         [TestMethod]
         public void StartUri_Legacy_AlternateLoginUrl_WithEmptyParameters()
         {
-            TestStartUriForParameters(new Dictionary<string, string>(), validAlternateLoginUrl + legacyLoginAsyncUriFragment + "/microsoftaccount", true, validAlternateLoginUrl);
+            TestStartUriForParameters(new Dictionary<string, string>(), validAlternateLoginUrl + legacyLoginAsyncUriFragment + "/microsoftaccount", "/login", validAlternateLoginUrl);
         }
 
         [TestMethod]
         public void StartUri_Legacy_MobileAppUriWithFolder_WithEmptyParameters()
         {
-            TestStartUriForParameters(new Dictionary<string, string>(), MobileAppUriValidator.DummyMobileApp + legacyLoginAsyncUriFragment + "/microsoftaccount", true, null, MobileAppUriValidator.DummyMobileAppUriWithFolder);
+            TestStartUriForParameters(new Dictionary<string, string>(), MobileAppUriValidator.DummyMobileApp + legacyLoginAsyncUriFragment + "/microsoftaccount", "login", null, MobileAppUriValidator.DummyMobileAppUriWithFolder);
         }
-
 
         [TestMethod]
         public void StartUri_ThrowsInvalidAlternateLoginHost()
@@ -179,9 +175,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
             AssertEx.Throws<ArgumentException>(() => client.AlternateLoginHost = new Uri("http://www.testalternatelogin.com/"));
         }
 
-        private void TestStartUriForParameters(Dictionary<string, string> parameters, string uri, bool legacyAuth = false, string alternateLoginUri = null, string appUrl = null)
+        private void TestStartUriForParameters(Dictionary<string, string> parameters, string uri, string loginPrefix = null, string alternateLoginUri = null, string appUrl = null)
         {
-            TestInitialize(appUrl, legacyAuth, alternateLoginUri);
+            TestInitialize(appUrl, loginPrefix, alternateLoginUri);
             var auth = new MobileServiceTokenAuthentication(client, "MicrosoftAccount", new JObject(), parameters);
             Assert.AreEqual(auth.StartUri.OriginalString, uri);
         }
@@ -203,7 +199,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
             {
                 { "display", "popup" },
                 { "scope", "email,birthday" }
-            }, MobileAppUriValidator.DummyMobileApp + legacyLoginAsyncUriFragment + "/microsoftaccount?display=popup&scope=email%2Cbirthday", true);
+            }, MobileAppUriValidator.DummyMobileApp + legacyLoginAsyncUriFragment + "/microsoftaccount?display=popup&scope=email%2Cbirthday", "login");
         }
 
         [AsyncTestMethod]
@@ -213,7 +209,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
             {
                 { "display", "popup" },
                 { "scope", "email,birthday" }
-            }, validAlternateLoginUrl + loginAsyncUriFragment + "/microsoftaccount?display=popup&scope=email%2Cbirthday", false, validAlternateLoginUrl);
+            }, validAlternateLoginUrl + loginAsyncUriFragment + "/microsoftaccount?display=popup&scope=email%2Cbirthday", null, validAlternateLoginUrl);
         }
 
         [AsyncTestMethod]
@@ -223,7 +219,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
             {
                 { "display", "popup" },
                 { "scope", "email,birthday" }
-            }, validAlternateLoginUrl + legacyLoginAsyncUriFragment + "/microsoftaccount?display=popup&scope=email%2Cbirthday", true, validAlternateLoginUrl);
+            }, validAlternateLoginUrl + legacyLoginAsyncUriFragment + "/microsoftaccount?display=popup&scope=email%2Cbirthday", "/login", validAlternateLoginUrl);
         }
 
         [AsyncTestMethod]
@@ -233,7 +229,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
             {
                 { "display", "popup" },
                 { "scope", "email,birthday" }
-            }, MobileAppUriValidator.DummyMobileApp + loginAsyncUriFragment + "/microsoftaccount?display=popup&scope=email%2Cbirthday", false, null, MobileAppUriValidator.DummyMobileAppUriWithFolder);
+            }, MobileAppUriValidator.DummyMobileApp + loginAsyncUriFragment + "/microsoftaccount?display=popup&scope=email%2Cbirthday", null, null, MobileAppUriValidator.DummyMobileAppUriWithFolder);
         }
 
         [AsyncTestMethod]
@@ -251,31 +247,31 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
         [AsyncTestMethod]
         public Task LoginAsync_MobileAppUriWithoutTrailingSlash_WithEmptyParameters()
         {
-            return TestLoginAsyncForParameters(new Dictionary<string, string>(), MobileAppUriValidator.DummyMobileApp + loginAsyncUriFragment + "/microsoftaccount", false, null, MobileAppUriValidator.DummyMobileAppWithoutTralingSlash);
+            return TestLoginAsyncForParameters(new Dictionary<string, string>(), MobileAppUriValidator.DummyMobileApp + loginAsyncUriFragment + "/microsoftaccount", null, null, MobileAppUriValidator.DummyMobileAppWithoutTralingSlash);
         }
 
         [AsyncTestMethod]
         public Task LoginAsync_Legacy_WithEmptyParameters()
         {
             return TestLoginAsyncForParameters(new Dictionary<string, string>(),
-                MobileAppUriValidator.DummyMobileApp + legacyLoginAsyncUriFragment + "/microsoftaccount", true);
+                MobileAppUriValidator.DummyMobileApp + legacyLoginAsyncUriFragment + "/microsoftaccount", "login");
         }
 
         [AsyncTestMethod]
         public Task LoginAsync_AlternateLoginUri_WithEmptyParameters()
         {
-            return TestLoginAsyncForParameters(new Dictionary<string, string>(), validAlternateLoginUrl + loginAsyncUriFragment + "/microsoftaccount", false, validAlternateLoginUrl);
+            return TestLoginAsyncForParameters(new Dictionary<string, string>(), validAlternateLoginUrl + loginAsyncUriFragment + "/microsoftaccount", null, validAlternateLoginUrl);
         }
 
         [AsyncTestMethod]
         public Task LoginAsync_Legacy_AlternateLoginUri_WithEmptyParameters()
         {
-            return TestLoginAsyncForParameters(new Dictionary<string, string>(), validAlternateLoginUrl + legacyLoginAsyncUriFragment + "/microsoftaccount", true, validAlternateLoginUrl);
+            return TestLoginAsyncForParameters(new Dictionary<string, string>(), validAlternateLoginUrl + legacyLoginAsyncUriFragment + "/microsoftaccount", "login", validAlternateLoginUrl);
         }
 
-        private async Task TestLoginAsyncForParameters(Dictionary<string, string> parameters, string uri, bool legacyAuth = false, string alternateLoginUrl = null, string appUrl = null)
+        private async Task TestLoginAsyncForParameters(Dictionary<string, string> parameters, string uri, string loginPrefix = null, string alternateLoginUrl = null, string appUrl = null)
         {
-            TestInitialize(appUrl, legacyAuth, alternateLoginUrl);
+            TestInitialize(appUrl, loginPrefix, alternateLoginUrl);
             var auth = new MobileServiceTokenAuthentication(client, "MicrosoftAccount", new JObject(), parameters);
             await auth.LoginAsync();
             Assert.AreEqual(hijack.Request.RequestUri.OriginalString, uri);

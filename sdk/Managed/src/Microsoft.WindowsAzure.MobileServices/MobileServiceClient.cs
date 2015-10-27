@@ -50,6 +50,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         public MobileServiceUser CurrentUser { get; set; }
 
         private string loginUriPrefix;
+
         /// <summary>
         /// Prefix for the login endpoints. If not set defaults to /.auth/login
         /// </summary>
@@ -61,7 +62,11 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
             set
             {
-                loginUriPrefix = MobileServiceUrlBuilder.AddLeadingSlash(value); 
+                loginUriPrefix = value;
+                if (!string.IsNullOrEmpty(value))
+                {
+                    loginUriPrefix = MobileServiceUrlBuilder.AddLeadingSlash(value);    
+                }
             }
         }
 
