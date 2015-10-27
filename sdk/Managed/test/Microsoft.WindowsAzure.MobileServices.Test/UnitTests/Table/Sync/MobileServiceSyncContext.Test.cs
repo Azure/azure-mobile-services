@@ -154,7 +154,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             IMobileServiceSyncTable table = service.GetSyncTable("someTable");
 
-            await table.DeleteAsync(new JObject() { { "id", "abc" }, { "__version", "Wow" } });
+            await table.DeleteAsync(new JObject() { { "id", "abc" }, { "version", "Wow" } });
 
             await service.SyncContext.PushAsync();
         }
@@ -163,7 +163,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public async Task PushAsync_DoesNotRunHandler_WhenTableTypeIsNotTable()
         {
             var hijack = new TestHttpHandler();
-            hijack.AddResponseContent("{\"id\":\"abc\",\"__version\":\"Hey\"}");
+            hijack.AddResponseContent("{\"id\":\"abc\",\"version\":\"Hey\"}");
 
             bool invoked = false;
             var handler = new MobileServiceSyncHandlerMock();
@@ -178,7 +178,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             IMobileServiceSyncTable table = service.GetSyncTable("someTable");
 
-            await table.InsertAsync(new JObject() { { "id", "abc" }, { "__version", "Wow" } });
+            await table.InsertAsync(new JObject() { { "id", "abc" }, { "version", "Wow" } });
 
             await (service.SyncContext as MobileServiceSyncContext).PushAsync(CancellationToken.None, (MobileServiceTableKind)1);
 
@@ -196,7 +196,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             handler.TableOperationAction = op =>
             {
                 invoked = true;
-                return Task.FromResult(JObject.Parse("{\"id\":\"abc\",\"__version\":\"Hey\"}"));
+                return Task.FromResult(JObject.Parse("{\"id\":\"abc\",\"version\":\"Hey\"}"));
             };
 
             IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
@@ -204,7 +204,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             IMobileServiceSyncTable table = service.GetSyncTable("someTable");
 
-            await table.InsertAsync(new JObject() { { "id", "abc" }, { "__version", "Wow" } });
+            await table.InsertAsync(new JObject() { { "id", "abc" }, { "version", "Wow" } });
 
             await (service.SyncContext as MobileServiceSyncContext).PushAsync(CancellationToken.None, MobileServiceTableKind.Table);
 
@@ -263,7 +263,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var hijack = new TestHttpHandler();
             hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.PreconditionFailed)
             {
-                Content = new StringContent("{\"id\":\"abc\",\"__version\":\"Hey\"}")
+                Content = new StringContent("{\"id\":\"abc\",\"version\":\"Hey\"}")
             });
             hijack.AddResponseContent(@"{""id"": ""abc""}");
 
@@ -288,7 +288,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             IMobileServiceSyncTable table = service.GetSyncTable("someTable");
 
-            await table.UpdateAsync(new JObject() { { "id", "abc" }, { "__version", "Wow" } });
+            await table.UpdateAsync(new JObject() { { "id", "abc" }, { "version", "Wow" } });
 
             await service.SyncContext.PushAsync();
         }
@@ -371,7 +371,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             // Add the initial operation and perform a push
             IMobileServiceSyncTable table = service.GetSyncTable("someTable");
 
-            string responseContent = @"{ ""id"": ""abc"", ""value"": ""0"", ""__version"": ""v0"" }"; // Whatever is fine, since we won't use it or look at it
+            string responseContent = @"{ ""id"": ""abc"", ""value"": ""0"", ""version"": ""v0"" }"; // Whatever is fine, since we won't use it or look at it
 
             // Do this Insert/Push/Update+Update/Push cycle several times fast to try to hit any race conditions that would cause an error
             for (int id = 0; id < 10; id++)

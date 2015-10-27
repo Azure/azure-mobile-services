@@ -8,7 +8,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 {
     /// <summary>
     /// Attribute applied to a member of a type to specify that it represents
-    /// the __deleted system property.
+    /// the deleted system property.
     /// </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
     public class DeletedAttribute :  Attribute, ISystemPropertyAttribute

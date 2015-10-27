@@ -3629,10 +3629,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             {
                 new Tuple<CreatedAtType, string>(
                     new CreatedAtType { CreatedAt = new DateTime(2012, 1, 5, 12, 0, 0, DateTimeKind.Utc) },
-                    "{\"__createdAt\":\"2012-01-05T12:00:00.000Z\"}"),
+                    "{\"createdAt\":\"2012-01-05T12:00:00.000Z\"}"),
                 new Tuple<CreatedAtType, string>(
                     new CreatedAtType { CreatedAt = default(DateTime) },
-                    "{\"__createdAt\":" + MinDateTimeSerializedToJson + "}"),
+                    "{\"createdAt\":" + MinDateTimeSerializedToJson + "}"),
             };
 
             DefaultSerializer.SerializerSettings.ContractResolver.ResolveTableName(typeof(CreatedAtType));
@@ -3652,8 +3652,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public void CreatedAtTypeDeserialization()
         {
             List<Tuple<CreatedAtType, string>> testCases = new List<Tuple<CreatedAtType, string>>() {
-                new Tuple<CreatedAtType, string>(new CreatedAtType { CreatedAt = default(DateTime) }, "{\"__createdAt\":" + MinDateTimeSerializedToJson + "}"),
-                new Tuple<CreatedAtType, string>(new CreatedAtType { CreatedAt = new DateTime(2012, 1, 5, 12, 0, 0, DateTimeKind.Utc) }, "{\"__createdAt\":\"2012-01-05T12:00:00.000Z\"}"),
+                new Tuple<CreatedAtType, string>(new CreatedAtType { CreatedAt = default(DateTime) }, "{\"createdAt\":" + MinDateTimeSerializedToJson + "}"),
+                new Tuple<CreatedAtType, string>(new CreatedAtType { CreatedAt = new DateTime(2012, 1, 5, 12, 0, 0, DateTimeKind.Utc) }, "{\"createdAt\":\"2012-01-05T12:00:00.000Z\"}"),
             };
 
             // Need to ensure that the type is registered as a table to force the id property check
@@ -3678,10 +3678,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             {
                 new Tuple<UpdatedAtType, string>(
                     new UpdatedAtType { UpdatedAt = new DateTime(2012, 1, 5, 12, 0, 0, DateTimeKind.Utc) },
-                    "{\"__updatedAt\":\"2012-01-05T12:00:00.000Z\"}"),
+                    "{\"updatedAt\":\"2012-01-05T12:00:00.000Z\"}"),
                 new Tuple<UpdatedAtType, string>(
                     new UpdatedAtType { UpdatedAt = default(DateTime) },
-                    "{\"__updatedAt\":" + MinDateTimeSerializedToJson + "}"),
+                    "{\"updatedAt\":" + MinDateTimeSerializedToJson + "}"),
             };
 
             DefaultSerializer.SerializerSettings.ContractResolver.ResolveTableName(typeof(UpdatedAtType));
@@ -3701,8 +3701,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public void UpdatedAtTypeDeserialization()
         {
             List<Tuple<UpdatedAtType, string>> testCases = new List<Tuple<UpdatedAtType, string>>() {
-                new Tuple<UpdatedAtType, string>(new UpdatedAtType { UpdatedAt = default(DateTime) }, "{\"__updatedAt\":" + MinDateTimeSerializedToJson + "}"),
-                new Tuple<UpdatedAtType, string>(new UpdatedAtType { UpdatedAt = new DateTime(2012, 1, 5, 12, 0, 0, DateTimeKind.Utc) }, "{\"__updatedAt\":\"2012-01-05T12:00:00.000Z\"}"),
+                new Tuple<UpdatedAtType, string>(new UpdatedAtType { UpdatedAt = default(DateTime) }, "{\"updatedAt\":" + MinDateTimeSerializedToJson + "}"),
+                new Tuple<UpdatedAtType, string>(new UpdatedAtType { UpdatedAt = new DateTime(2012, 1, 5, 12, 0, 0, DateTimeKind.Utc) }, "{\"updatedAt\":\"2012-01-05T12:00:00.000Z\"}"),
             };
 
             // Need to ensure that the type is registered as a table to force the id property check
@@ -3753,8 +3753,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             List<Tuple<VersionType, string>> testCases = new List<Tuple<VersionType, string>>
             {
-                new Tuple<VersionType, string>(new VersionType { Version = "0x0004F" }, "{\"__version\":\"0x0004F\"}"),
-                new Tuple<VersionType, string>(new VersionType { Version = null }, "{\"__version\":null}"),
+                new Tuple<VersionType, string>(new VersionType { Version = "0x0004F" }, "{\"version\":\"0x0004F\"}"),
+                new Tuple<VersionType, string>(new VersionType { Version = null }, "{\"version\":null}"),
             };
 
             DefaultSerializer.SerializerSettings.ContractResolver.ResolveTableName(typeof(VersionType));
@@ -3774,8 +3774,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public void VersionTypeDeserialization()
         {
             List<Tuple<VersionType, string>> testCases = new List<Tuple<VersionType, string>>() {
-                new Tuple<VersionType, string>(new VersionType { Version = "0x0004F" }, "{\"__version\":\"0x0004F\"}"),
-                new Tuple<VersionType, string>(new VersionType { Version = null }, "{\"__version\":null}"),
+                new Tuple<VersionType, string>(new VersionType { Version = "0x0004F" }, "{\"version\":\"0x0004F\"}"),
+                new Tuple<VersionType, string>(new VersionType { Version = null }, "{\"version\":null}"),
             };
 
             // Need to ensure that the type is registered as a table to force the id property check
@@ -3801,10 +3801,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 new Tuple<AllSystemPropertiesType, string>(new AllSystemPropertiesType { UpdatedAt = new DateTime(2012, 1, 5, 12, 0, 0, DateTimeKind.Utc),
                                                                                          CreatedAt = new DateTime(2012, 1, 5, 12, 0, 0, DateTimeKind.Utc), 
                                                                                          Version = "0x0004F" }, 
-                                                                                         "{\"__createdAt\":\"2012-01-05T12:00:00.000Z\",\"__updatedAt\":\"2012-01-05T12:00:00.000Z\",\"__version\":\"0x0004F\"}"),
+                                                                                         "{\"createdAt\":\"2012-01-05T12:00:00.000Z\",\"updatedAt\":\"2012-01-05T12:00:00.000Z\",\"version\":\"0x0004F\"}"),
                 new Tuple<AllSystemPropertiesType, string>(
                     new AllSystemPropertiesType { Version = null }, 
-                    "{\"__createdAt\":MIN_DATE,\"__updatedAt\":MIN_DATE,\"__version\":null}".Replace("MIN_DATE", MinDateTimeSerializedToJson)
+                    "{\"createdAt\":MIN_DATE,\"updatedAt\":MIN_DATE,\"version\":null}".Replace("MIN_DATE", MinDateTimeSerializedToJson)
                 ),
             };
 
@@ -3829,10 +3829,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 new Tuple<AllSystemPropertiesType, string>(new AllSystemPropertiesType { UpdatedAt = new DateTime(2012, 1, 5, 12, 0, 0, DateTimeKind.Utc),
                                                                                          CreatedAt = new DateTime(2012, 1, 5, 12, 0, 0, DateTimeKind.Utc), 
                                                                                          Version = "0x0004F" }, 
-                                                                                         "{\"__createdAt\":\"2012-01-05T12:00:00.000Z\",\"__updatedAt\":\"2012-01-05T12:00:00.000Z\",\"__version\":\"0x0004F\"}"),
+                                                                                         "{\"createdAt\":\"2012-01-05T12:00:00.000Z\",\"updatedAt\":\"2012-01-05T12:00:00.000Z\",\"version\":\"0x0004F\"}"),
                 new Tuple<AllSystemPropertiesType, string>(
                     new AllSystemPropertiesType { Version = null }, 
-                    "{\"__createdAt\":MIN_DATE,\"__updatedAt\":MIN_DATE,\"__version\":null}".Replace("MIN_DATE", MinDateTimeSerializedToJson)),
+                    "{\"createdAt\":MIN_DATE,\"updatedAt\":MIN_DATE,\"version\":null}".Replace("MIN_DATE", MinDateTimeSerializedToJson)),
             };
 
             // Need to ensure that the type is registered as a table to force the id property check

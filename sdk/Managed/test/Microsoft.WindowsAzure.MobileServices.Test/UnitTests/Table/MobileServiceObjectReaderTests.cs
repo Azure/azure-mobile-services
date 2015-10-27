@@ -13,7 +13,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests.Table
         {
             DateTimeOffset value = DateTimeOffset.Parse("2001-02-03T00:00:00.0000000+00:00");
 
-            DateTimeOffset? actualValue = new MobileServiceObjectReader().GetUpdatedAt(new JObject() { { "__updatedAt", new JValue(value) } });
+            DateTimeOffset? actualValue = new MobileServiceObjectReader().GetUpdatedAt(new JObject() { { "updatedAt", new JValue(value) } });
 
             Assert.AreEqual(value, actualValue);
         }
@@ -40,7 +40,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests.Table
         {
             DateTimeOffset value = DateTimeOffset.Parse("2001-02-03T00:00:00.0000000+00:00");
 
-            DateTimeOffset? actualValue = new MobileServiceObjectReader().GetCreatedAt(new JObject() { { "__createdAt", new JValue(value) } });
+            DateTimeOffset? actualValue = new MobileServiceObjectReader().GetCreatedAt(new JObject() { { "createdAt", new JValue(value) } });
 
             Assert.AreEqual(value, actualValue);
         }
@@ -94,7 +94,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests.Table
         {
             string value = "abc";
 
-            string actualValue = new MobileServiceObjectReader().GetVersion(new JObject() { { "__version", new JValue(value) } });
+            string actualValue = new MobileServiceObjectReader().GetVersion(new JObject() { { "version", new JValue(value) } });
 
             Assert.AreEqual(value, actualValue);
         }
@@ -121,7 +121,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests.Table
         {
             bool value = true;
 
-            bool actualValue = new MobileServiceObjectReader().IsDeleted(new JObject() { { "__deleted", new JValue(value) } });
+            bool actualValue = new MobileServiceObjectReader().IsDeleted(new JObject() { { "deleted", new JValue(value) } });
 
             Assert.AreEqual(value, actualValue);
         }

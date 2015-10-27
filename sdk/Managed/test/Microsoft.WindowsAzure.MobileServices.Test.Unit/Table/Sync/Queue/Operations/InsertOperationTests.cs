@@ -32,7 +32,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
             this.operation.Table = table.Object;
 
             var item = JObject.Parse("{\"id\":\"abc\",\"Text\":\"Example\"}");
-            var itemWithProperties = JObject.Parse("{\"id\":\"abc\",\"Text\":\"Example\",\"__version\":\"1\",\"__system\":12}");
+            var itemWithProperties = JObject.Parse("{\"id\":\"abc\",\"Text\":\"Example\",\"version\":\"1\",\"__system\":12}");
             this.operation.Item = itemWithProperties;
 
             table.Setup(t => t.InsertAsync(item)).Returns(Task.FromResult<JToken>(item));

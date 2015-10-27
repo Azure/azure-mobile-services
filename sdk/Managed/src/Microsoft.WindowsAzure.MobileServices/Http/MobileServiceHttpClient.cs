@@ -46,6 +46,16 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         private const string RequestAuthenticationHeader = "X-ZUMO-AUTH";
 
+        ///<summary>
+        /// Name of the zumo api version header
+        /// </summary>
+        private const string ZumoApiVersionHeader = "ZUMO-API-VERSION";
+
+        ///<summary>
+        /// Current Zumo api version sent with each request
+        /// </summary>
+        private const string ZumoApiVersion = "2.0.0";
+
         /// <summary>
         /// Name of the user-agent header.
         /// </summary>
@@ -142,6 +152,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             // https://bugzilla.xamarin.com/show_bug.cgi?id=15128
             this.httpClient.DefaultRequestHeaders.TryAddWithoutValidation(UserAgentHeader, userAgentHeaderValue);
             this.httpClient.DefaultRequestHeaders.Add(ZumoVersionHeader, userAgentHeaderValue);
+            this.httpClient.DefaultRequestHeaders.Add(ZumoApiVersionHeader, ZumoApiVersion);
             this.httpClientSansHandlers.DefaultRequestHeaders.TryAddWithoutValidation(UserAgentHeader, userAgentHeaderValue);
             this.httpClientSansHandlers.DefaultRequestHeaders.Add(ZumoVersionHeader, userAgentHeaderValue);
         }
