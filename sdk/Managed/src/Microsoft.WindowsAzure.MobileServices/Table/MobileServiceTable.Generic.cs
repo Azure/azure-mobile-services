@@ -25,7 +25,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     internal class MobileServiceTable<T> : MobileServiceTable, IMobileServiceTable<T>
     {
         private MobileServiceTableQueryProvider queryProvider;
-        //private bool hasIntegerId;
+
 
         /// <summary>
         /// Initializes a new instance of the MobileServiceTables class.
