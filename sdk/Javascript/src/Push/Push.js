@@ -71,12 +71,15 @@ function executeRequest(client, method, pushChannel, content, installationId, ca
     Validate.isString(pushChannel, 'pushChannel');
     Validate.notNullOrEmpty(pushChannel, 'pushChannel');
 
+    var headers = { 'If-Modified-Since': 'Mon, 27 Mar 1972 00:00:00 GMT' };
+    headers[WindowsAzure.MobileServiceClient._zumoApiVersionHeaderName] = WindowsAzure.MobileServiceClient._zumoApiVersion;
+
     client._request(
         method,
         'push/installations/' + encodeURIComponent(installationId),
         content,
         null,
-        { 'If-Modified-Since': 'Mon, 27 Mar 1972 00:00:00 GMT' },
+        headers,
         callback
     );
 }

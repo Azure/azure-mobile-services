@@ -495,7 +495,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             var item = new JObject() { { "id", id }, { "String", "a value" } };
             var inserted = await table.InsertAsync(item);
-            item["__version"] = "random";
+            item["version"] = "random";
 
             MobileServicePreconditionFailedException expectedException = null;
             try
@@ -507,7 +507,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 expectedException = ex;
             }
             Assert.IsNotNull(expectedException);
-            Assert.AreEqual(expectedException.Value["__version"], inserted["__version"]);
+            Assert.AreEqual(expectedException.Value["version"], inserted["version"]);
             Assert.AreEqual(expectedException.Value["String"], inserted["String"]);
         }
 
@@ -547,7 +547,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             string responseContent = await expectedException.Response.Content.ReadAsStringAsync();
             JToken jtoken = responseContent.ParseToJToken(table.MobileServiceClient.SerializerSettings);
-            string serverVersion = (string)jtoken["__version"];
+            string serverVersion = (string)jtoken["version"];
             string stringValue = (string)jtoken["String"];
 
             Assert.AreEqual(version, serverVersion);
@@ -1117,7 +1117,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             var item = new JObject() { { "id", id }, { "String", "a value" } };
             var inserted = await table.InsertAsync(item);
-            item["__version"] = "random";
+            item["version"] = "random";
 
             MobileServicePreconditionFailedException expectedException = null;
             try
@@ -1129,7 +1129,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 expectedException = ex;
             }
             Assert.IsNotNull(expectedException);
-            Assert.AreEqual(expectedException.Value["__version"], inserted["__version"]);
+            Assert.AreEqual(expectedException.Value["version"], inserted["version"]);
             Assert.AreEqual(expectedException.Value["String"], inserted["String"]);
         }
 
@@ -1176,7 +1176,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             string responseContent = await expectedException.Response.Content.ReadAsStringAsync();
             JToken jtoken = responseContent.ParseToJToken(table.MobileServiceClient.SerializerSettings);
-            string serverVersion = (string)jtoken["__version"];
+            string serverVersion = (string)jtoken["version"];
             string stringValue = (string)jtoken["String"];
 
             Assert.AreEqual(newVersion, serverVersion);

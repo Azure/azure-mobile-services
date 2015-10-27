@@ -23,21 +23,21 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// The version column on a Mobile Service table.
         /// </summary>
-        public static readonly string Version = "__version";
+        public static readonly string Version = "version";
 
         /// <summary>
         /// The createdAt column on a Mobile Service table.
         /// </summary>
-        public static readonly string CreatedAt = "__createdAt";
+        public static readonly string CreatedAt = "createdAt";
 
         /// <summary>
         /// The updatedAt column on a Mobile Service table.
         /// </summary>
-        public static readonly string UpdatedAt = "__updatedAt";
+        public static readonly string UpdatedAt = "updatedAt";
 
         /// <summary>
         /// The deleted colum on a Mobile Service table.
         /// </summary>
-        public static readonly string Deleted = "__deleted";
+        public static readonly string Deleted = "deleted";
     }
 }

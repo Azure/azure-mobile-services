@@ -20,17 +20,12 @@ namespace Microsoft.WindowsAzure.MobileServices
     public class MobileServiceContractResolver : DefaultContractResolver
     {
         /// <summary>
-        /// The string prefix used to indicate system properties
-        /// </summary>
-        internal const string SystemPropertyPrefix = "__";
-
-        /// <summary>
         /// The property names that are all aliased to be the id of an instance.
         /// </summary>
         private static readonly string[] idPropertyNames = { "id", "Id", "ID" };
 
         /// <summary>
-        /// The system property names with the correct prefix mapped to the enum values
+        /// The system property names mapped to the enum values
         /// </summary>
         private static readonly Dictionary<string, MobileServiceSystemProperties> systemPropertyNameToEnum =
             new Dictionary<string, MobileServiceSystemProperties>(StringComparer.OrdinalIgnoreCase) { 
@@ -367,7 +362,6 @@ namespace Microsoft.WindowsAzure.MobileServices
 
                 // Find the id property
                 JsonProperty idProperty = DetermineIdProperty(type, properties);
-                bool isIntegerIdType = MobileServiceSerializer.IsIntegerId(idProperty);
 
                 // Create a reverse cache of property to memberInfo to be used locally for validating the type
                 Dictionary<JsonProperty, MemberInfo> memberInfoCache = new Dictionary<JsonProperty, MemberInfo>();
@@ -383,15 +377,12 @@ namespace Microsoft.WindowsAzure.MobileServices
                 foreach (JsonProperty property in properties)
                 {
                     SetMemberConverters(property);
-                    ApplySystemPropertyAttributes(property, memberInfoCache[property], isIntegerIdType);
+                    ApplySystemPropertyAttributes(property, memberInfoCache[property]);
                 }
 
                 // Determine the system properties from the property names
                 // and add the system properties to the cache
-                if (!isIntegerIdType)
-                {
-                    AddSystemPropertyCacheEntry(type, properties);
-                }
+                AddSystemPropertyCacheEntry(type, properties);
             }
 
             return properties;
@@ -485,15 +476,15 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         /// <summary>
         /// Given a <see cref="MobileServiceSystemProperties"/> enum value, returns the string value with the 
-        /// correct casing and system property prefix.
+        /// correct casing.
         /// </summary>
         /// <param name="systemProperty">The system property.</param>
-        /// <returns>A string of the system property with the correct casing and system property prefix.</returns>
+        /// <returns>A string of the system property with the correct casing.</returns>
         private static string GetSystemPropertyString(MobileServiceSystemProperties systemProperty)
         {
             string enumAsString = systemProperty.ToString();
             char firstLetterAsLower = char.ToLowerInvariant(enumAsString[0]);
-            return string.Format("{0}{1}{2}", MobileServiceSerializer.SystemPropertyPrefix, firstLetterAsLower, enumAsString.Substring(1));
+            return string.Format("{0}{1}", firstLetterAsLower, enumAsString.Substring(1));
         }
 
         /// <summary>
@@ -502,8 +493,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         /// <param name="property">The property.</param>
         /// <param name="member">The <see cref="MemberInfo"/> that corresponds to the property.</param>
-        /// <param name="isIntegerIdType">Indicates if the type that the property is on, has an integer id type or not.</param>
-        private static void ApplySystemPropertyAttributes(JsonProperty property, MemberInfo member, bool isIntegerIdType)
+        private static void ApplySystemPropertyAttributes(JsonProperty property, MemberInfo member)
         {
             // Check for system property attributes
             MobileServiceSystemProperties systemProperties = MobileServiceSystemProperties.None;
@@ -513,15 +503,6 @@ namespace Microsoft.WindowsAzure.MobileServices
                 ISystemPropertyAttribute systemProperty = attribute as ISystemPropertyAttribute;
                 if (systemProperty != null)
                 {
-                    if (isIntegerIdType)
-                    {
-                        throw new InvalidOperationException(
-                            string.Format(CultureInfo.InvariantCulture,
-                            "The type '{0}' has an integer id member and therefore can not have any members with the system property attribute '{1}'.",
-                            member.DeclaringType.FullName,
-                            systemProperty.SystemProperty));
-                    }
-
                     if (systemProperties != MobileServiceSystemProperties.None)
                     {
                         throw new InvalidOperationException(
