@@ -26,7 +26,6 @@ namespace Microsoft.WindowsAzure.MobileServices
     {
         private MobileServiceTableQueryProvider queryProvider;
 
-
         /// <summary>
         /// Initializes a new instance of the MobileServiceTables class.
         /// </summary>
