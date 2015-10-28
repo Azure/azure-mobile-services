@@ -104,7 +104,7 @@ MobileServiceLogin.prototype.loginWithOptions = function (provider, options, cal
         } else {
             Validate.notNull(null, 'callback');
         }
-    }    
+    }
 
     // loginWithOptions('a.b.c')
     if (!options && this._isAuthToken(provider)) {
@@ -218,7 +218,7 @@ MobileServiceLogin.prototype.loginWithMobileServiceToken = function(authenticati
         loginUrl,
         { authenticationToken: authenticationToken },
         self.ignoreFilters,
-        function(error, response) { 
+        function(error, response) {
             onLoginResponse(error, response, client, callback);
         });
 };
@@ -262,7 +262,7 @@ MobileServiceLogin.prototype.loginWithProvider = function(provider, token, useSi
     }
 
     provider = provider.toLowerCase();
-    
+
     // Either login with the token or the platform specific login control.
     if (!_.isNull(token)) {
         loginWithProviderAndToken(this, provider, token, parameters, callback);
@@ -421,7 +421,7 @@ function loginWithLoginControl(login, provider, useSingleSignOn, parameters, cal
 
     var client = login.getMobileServiceClient();
     var startUri = _.url.combinePathSegments(
-        client.gatewayUrl || client.applicationUrl,
+        client.applicationUrl,
         loginUrl,
         provider);
     var endUri = null;
@@ -434,11 +434,11 @@ function loginWithLoginControl(login, provider, useSingleSignOn, parameters, cal
     // If not single sign-on, then we need to construct a non-null end uri.
     if (!useSingleSignOn) {
         endUri = _.url.combinePathSegments(
-            client.gatewayUrl || client.applicationUrl,
+            client.applicationUrl,
             loginUrl,
             loginDone);
     }
-    
+
     login._loginState = { inProcess: true, cancelCallback: null }; // cancelCallback gets set below
 
     // Call the platform to launch the login control, capturing any
@@ -450,7 +450,7 @@ function loginWithLoginControl(login, provider, useSingleSignOn, parameters, cal
             login._loginState = { inProcess: false, cancelCallback: null };
             onLoginComplete(error, mobileServiceToken, client, callback);
         });
-    
+
     if (login._loginState.inProcess && platformResult && platformResult.cancelCallback) {
         login._loginState.cancelCallback = platformResult.cancelCallback;
     }
