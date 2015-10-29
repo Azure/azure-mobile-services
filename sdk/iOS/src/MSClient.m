@@ -145,6 +145,12 @@
     return _loginPrefix;
 }
 
+- (NSURL *) loginURL
+{
+    return [self.loginHost URLByAppendingPathComponent:self.loginPrefix];
+}
+
+
 #pragma mark * Public Filter Methods
 
 
@@ -206,9 +212,14 @@
                              completion:completion];
 }
 
--(void) logout
+-(void)logoutWithCompletion:(nullable MSClientLogoutBlock)completion;
 {
     self.currentUser = nil;
+    
+    // TODO: Rewrite to actually call the server and invalidate the token
+    if (completion) {
+        completion(nil);
+    }
 }
 
 

@@ -7,6 +7,7 @@
 #import "MSLoginSerializer.h"
 #import "MSJSONSerializer.h"
 #import "MSClient.h"
+#import "MSClientInternal.h"
 
 #pragma mark * MSLoginController Private Interface
 
@@ -155,13 +156,9 @@
     if (!loginView) {
         
         // Ensure we are using HTTPS
-        NSURL *baseUrl = self.client.loginHost;
-        
         CGRect frame = [[UIScreen mainScreen] bounds];
-        NSURL *start = [baseUrl URLByAppendingPathComponent:
-                        [NSString stringWithFormat:@"%@/%@", self.client.loginPrefix, self.provider]];
-        NSURL *end = [baseUrl URLByAppendingPathComponent:
-                        [NSString stringWithFormat:@"%@/done", self.client.loginPrefix]];
+        NSURL *start = [self.client.loginURL URLByAppendingPathComponent:self.provider];
+        NSURL *end = [self.client.loginURL URLByAppendingPathComponent: @"done"];
         
         MSLoginViewBlock viewCompletion = nil;
         

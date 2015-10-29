@@ -128,7 +128,7 @@
               completion:(nullable MSClientLoginBlock)completion;
 
 /// Logs out the current end user.
--(void)logout;
+-(void)logoutWithCompletion:(nullable MSClientLogoutBlock)completion;
 
 /// @}
 

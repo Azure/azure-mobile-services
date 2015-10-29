@@ -7,6 +7,7 @@
 #import "MSJSONSerializer.h"
 #import "MSClientConnection.h"
 #import "MSClient.h"
+#import "MSClientInternal.h"
 
 #if TARGET_OS_IPHONE
 #import "MSLoginController.h"
@@ -206,8 +207,7 @@
     NSData *requestBody = [[MSLoginSerializer loginSerializer] dataFromToken:token
                                                                      orError:error];
     if (requestBody) {
-        NSURL *URL = [self.client.loginHost URLByAppendingPathComponent:self.client.loginPrefix];
-        URL = [URL URLByAppendingPathComponent:provider];
+        NSURL *URL = [self.client.loginURL URLByAppendingPathComponent:provider];
 
         request = [NSMutableURLRequest requestWithURL:URL];
         request.HTTPMethod = @"POST";

@@ -6,6 +6,7 @@
 #import "MSClient.h"
 #import "MSSDKFeatures.h"
 #import "MSTestFilter.h"
+#import "MSClientInternal.h"
 
 @interface MSClientTests : XCTestCase {
     BOOL done;
@@ -93,8 +94,13 @@
 }
 
 -(void) testInitWithApplicationURLAllowsNilURL
-{    
+{
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wnonnull"
+
     MSClient *client = [[MSClient alloc] initWithApplicationURL:nil];
+    
+    #pragma clang diagnostic pop
     
     XCTAssertNotNil(client, @"client should not be nil.");
     XCTAssertNil(client.applicationURL, @"client.applicationURL should be nil.");
@@ -153,6 +159,22 @@
     XCTAssertEqualObjects(client.loginPrefix, @".auth/%20space/!@%23");
 }
 
+-(void) testLoginURL
+{
+    MSClient *client = [[MSClient alloc] initWithApplicationURL:[NSURL URLWithString:@"http://someURL.com/mypath/junk"]];
+    XCTAssertEqualObjects(client.loginURL.absoluteString, @"https://someURL.com/.auth/login");
+    
+    client.loginPrefix = @"login";
+    XCTAssertEqualObjects(client.loginURL.absoluteString, @"https://someURL.com/login");
+
+    client.loginPrefix = @"/login";
+    XCTAssertEqualObjects(client.loginURL.absoluteString, @"https://someURL.com/login");
+
+    client.loginHost = [NSURL URLWithString:@"https://anotherURL.com"];
+    XCTAssertEqualObjects(client.loginURL.absoluteString, @"https://anotherURL.com/login");
+}
+
+
 #pragma mark * Table Method Tests
 
 
@@ -171,7 +193,12 @@
     MSClient *client =
     [MSClient clientWithApplicationURLString:@"http://someURL.com"];
     
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wnonnull"
+    
     MSTable *table = [client tableWithName:nil];
+    
+    #pragma clang diagnostic pop
     
     XCTAssertNotNil(table, @"table should not be nil.");
 }
@@ -416,6 +443,9 @@
     MSClient *filterClient = [client clientWithFilter:testFilter];
     
     // Invoke the API
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wnonnull"
+
     [filterClient invokeAPI:nil
                        body:nil
                  HTTPMethod:@"Get"
@@ -433,6 +463,8 @@
          
          done = YES;
      }];
+
+    #pragma clang diagnostic pop
     
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
