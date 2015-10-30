@@ -181,9 +181,6 @@ static NSOperationQueue *pushQueue_;
                     
                 case MSTableOperationDelete:
                     [self.dataSource deleteItemsWithIds:@[itemId] table:table orError:&error];
-                    
-                    // Capture the deleted item in case the user wants to cancel it or a conflict occur
-                    operation.item = item;
                     break;
                     
                 default:
@@ -200,8 +197,13 @@ static NSOperationQueue *pushQueue_;
             }
             return;
         }
-        
+
         // Update the operation queue now
+        if (action == MSTableOperationDelete) {
+            // Capture the deleted item in case the user wants to cancel it or a conflict occurs
+            operation.item = item;
+        }
+        
         if (condenseAction == MSCondenseAddNew) {
             [self.operationQueue addOperation:operation orError:&error];
         }

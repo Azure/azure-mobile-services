@@ -30,6 +30,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     MSClient *client;
     BOOL done;
     MSOfflinePassthroughHelper *offline;
+    NSManagedObjectContext *context;
 }
 @end
 
@@ -45,7 +46,8 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     config.timeoutIntervalForRequest = 11;
     
     client = [MSClient clientWithApplicationURLString:@"https://someUrl/"];
-    offline = [[MSOfflinePassthroughHelper alloc] initWithManagedObjectContext:[MSCoreDataStore inMemoryManagedObjectContext]];
+    context = [MSCoreDataStore inMemoryManagedObjectContext];
+    offline = [[MSOfflinePassthroughHelper alloc] initWithManagedObjectContext:context];
     
     // Enable offline mode
     client.syncContext = [[MSSyncContext alloc] initWithDelegate:offline dataSource:offline callback:nil];
@@ -205,6 +207,64 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
+// Verify a sync table insert call puts an item in the table and adds a line to the operation queue
+-(void) testInsertSuccess
+{
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Insert"];
+    
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:500];
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
+
+    // Insert the item
+    [todoTable insert:@{ @"id": @"test1", @"name":@"test name" }
+           completion:^(NSDictionary *item, NSError *error) {
+        XCTAssertNil(error, @"error should have been nil.");
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
+    
+    // Expect 1 upsert for item, 1 for operation
+    XCTAssertEqual(offline.upsertCalls, 2);
+    
+    NSError *error = nil;
+    NSDictionary *savedItem = [offline readTable:TodoTableNoVersion
+                                      withItemId:@"test1"
+                                         orError:&error];
+    XCTAssertNotNil(savedItem, @"Unable to find expected item in store");
+}
+
+-(void) testInsertWithIgnoreSuccess
+{
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Insert"];
+    
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:500];
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    offline.handlesSyncTableOperations = NO;
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
+    
+    // Insert the item
+    [todoTable insert:@{ @"id" : @"test1", @"name" : @"test name" }
+           completion:^(NSDictionary *item, NSError *error) {
+        XCTAssertNil(error, @"error should have been nil.");
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
+    
+    // Expect 1 for operation, 0 for item
+    XCTAssertEqual(offline.upsertCalls, 1);
+    
+    // Now verify item was not inserted as well
+    NSError *error = nil;
+    NSDictionary *savedItem = [offline readTable:TodoTableNoVersion
+                                      withItemId:@"test1"
+                                         orError:&error];
+    
+    XCTAssertNil(savedItem, @"Find unexpected item in store");
+}
+
 -(void) testInsertItemWithValidId
 {
     XCTestExpectation *expectation = [self expectationWithDescription:self.name];
@@ -213,6 +273,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:stringData];
     
     BOOL __block insertRanToServer = NO;
+        
     testFilter.onInspectRequest =  ^(NSURLRequest *request) {
         XCTAssertEqualObjects(request.HTTPMethod, @"POST", @"Incorrect operation (%@) sent to server", request.HTTPMethod);
         insertRanToServer = YES;
@@ -223,7 +284,7 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTableNoVersion];
     
     // Create the item
-    NSDictionary *item = @{ @"id": @"test1", @"name":@"test name" };
+    NSDictionary *item = @{ @"id" : @"test1", @"name" : @"test name" };
     
     // Insert the item
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {

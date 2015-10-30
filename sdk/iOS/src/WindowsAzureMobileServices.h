@@ -22,6 +22,7 @@
 #import "MSTableOperation.h"
 #import "MSTableOperationError.h"
 #import "MSUser.h"
+#import "MSManagedObjectObserver.h"
 
 #define WindowsAzureMobileServicesSdkMajorVersion 2
 #define WindowsAzureMobileServicesSdkMinorVersion 2

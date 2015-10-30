@@ -140,7 +140,7 @@
     
     // Filter clients should inherit the same sync context
     newClient.syncContext = self.syncContext;
-    
+
     // Either copy or create a new filters array
     NSMutableArray *filters = [self.filters mutableCopy];
     if (!filters) {
@@ -277,7 +277,7 @@
                                                                             
     client.currentUser = [self.currentUser copyWithZone:zone];
     client.filters = [self.filters copyWithZone:zone];
-
+	
     return client;
 }
 
