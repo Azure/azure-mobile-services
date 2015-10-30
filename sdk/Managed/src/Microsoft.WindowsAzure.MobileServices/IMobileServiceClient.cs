@@ -166,7 +166,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Log a user out.
         /// </summary>
-        void Logout();
+        Task LogoutAsync();
 
         /// <summary>
         /// Invokes a user-defined custom API of a Microsoft Azure Mobile Service using an HTTP POST.

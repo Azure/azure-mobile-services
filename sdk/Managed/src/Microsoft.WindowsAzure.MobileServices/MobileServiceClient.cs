@@ -372,8 +372,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Log a user out.
         /// </summary>
-        [SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Logout", Justification = "Logout is preferred by design")]
-        public void Logout()
+        public async Task LogoutAsync()
         {
             this.CurrentUser = null;
         }

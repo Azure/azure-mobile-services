@@ -126,14 +126,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(firstAfterMessage, storedMessages[3]);
         }
 
-        [TestMethod]
-        public void Logout()
+        [AsyncTestMethod]
+        public async Task Logout()
         {
             MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
             service.CurrentUser = new MobileServiceUser("123456");
             Assert.IsNotNull(service.CurrentUser);
 
-            service.Logout();
+            await service.LogoutAsync();
             Assert.IsNull(service.CurrentUser);
         }
 
