@@ -14,18 +14,18 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     [Tag("table")]
     [Tag("offline")]
     public class MobileServiceSyncTableTests : TestBase
-    {        
+    {
         [AsyncTestMethod]
         public async Task InsertAsync_GeneratesId_WhenNull()
         {
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...");
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
 
             var item = new JObject();
             JObject inserted = await service.GetSyncTable("someTable").InsertAsync(item);
             Assert.IsNotNull(inserted.Value<string>("id"), "Expected id member not found.");
 
-            item = new JObject(){{"id", null}};
+            item = new JObject() { { "id", null } };
             inserted = await service.GetSyncTable("someTable").InsertAsync(item);
             Assert.IsNotNull(inserted.Value<string>("id"), "Expected id member not found.");
         }

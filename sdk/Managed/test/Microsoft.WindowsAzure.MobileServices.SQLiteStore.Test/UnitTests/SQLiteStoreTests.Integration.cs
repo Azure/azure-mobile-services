@@ -999,7 +999,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
         private static async Task<IMobileServiceClient> CreateClient(TestHttpHandler hijack, MobileServiceSQLiteStore store)
         {
-            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", hijack);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
             return service;
         }

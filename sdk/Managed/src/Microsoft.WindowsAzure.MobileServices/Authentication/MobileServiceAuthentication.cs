@@ -24,12 +24,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Relative URI fragment of the login endpoint.
         /// </summary>
-        protected const string LoginAsyncUriFragment = "login";
+        protected const string LoginAsyncUriFragment = "/.auth/login";
 
         /// <summary>
         /// Relative URI fragment of the login/done endpoint.
         /// </summary>
-        protected const string LoginAsyncDoneUriFragment = "login/done";
+        protected const string LoginAsyncDoneUriFragment = "/.auth/login/done";
 
         /// <summary>
         /// Name of the authentication provider as expected by the service REST API.
@@ -63,21 +63,27 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("providerName");
             }
 
-            if (client.GatewayUri == null)
-            {
-                throw new ArgumentException(Resources.MobileServicesAuthentication_MobileServiceClientDefinesNoGateway, "client");
-            }
-
             this.Client = client;
             this.Parameters = parameters;
             this.ProviderName = providerName;
-
             string path = MobileServiceUrlBuilder.CombinePaths(LoginAsyncUriFragment, this.ProviderName);
+            string loginAsyncDoneUriFragment = MobileServiceAuthentication.LoginAsyncDoneUriFragment;
+            if (!string.IsNullOrEmpty(this.Client.LoginUriPrefix))
+            {
+                path = MobileServiceUrlBuilder.CombinePaths(this.Client.LoginUriPrefix, this.ProviderName);
+                loginAsyncDoneUriFragment = MobileServiceUrlBuilder.CombinePaths(this.Client.LoginUriPrefix, "done");
+            }
             string queryString = MobileServiceUrlBuilder.GetQueryString(parameters, useTableAPIRules: false);
             string pathAndQuery = MobileServiceUrlBuilder.CombinePathAndQuery(path, queryString);
 
-            this.StartUri = new Uri(this.Client.GatewayUri, pathAndQuery);
-            this.EndUri = new Uri(this.Client.GatewayUri, MobileServiceAuthentication.LoginAsyncDoneUriFragment);
+            this.StartUri = new Uri(this.Client.MobileAppUri, pathAndQuery);
+            this.EndUri = new Uri(this.Client.MobileAppUri, loginAsyncDoneUriFragment);
+
+            if (this.Client.AlternateLoginHost != null)
+            {
+                this.StartUri = new Uri(this.Client.AlternateLoginHost, pathAndQuery);
+                this.EndUri = new Uri(this.Client.AlternateLoginHost, loginAsyncDoneUriFragment);
+            }
         }
 
         /// <summary>

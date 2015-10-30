@@ -1,4 +1,4 @@
-// ----------------------------------------------------------------------------
+﻿// ----------------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -45,21 +44,59 @@ namespace Microsoft.WindowsAzure.MobileServices
         public Uri MobileAppUri { get; private set; }
 
         /// <summary>
-        /// Absolute URI of the Azure App Service Gateway.
-        /// </summary>
-        public Uri GatewayUri { get; private set; }
-
-        /// <summary>
-        /// Gets the Mobile Services application's name that is provided by the
-        /// call to MobileServiceClient(...).
-        /// </summary>
-        public string ApplicationKey { get; private set; }
-
-        /// <summary>
         /// The current authenticated user provided after a successful call to
         /// MobileServiceClient.Login().
         /// </summary>
         public MobileServiceUser CurrentUser { get; set; }
+
+        private string loginUriPrefix;
+
+        /// <summary>
+        /// Prefix for the login endpoints. If not set defaults to /.auth/login
+        /// </summary>
+        public string LoginUriPrefix
+        {
+            get
+            {
+                return loginUriPrefix;
+            }
+            set
+            {
+                loginUriPrefix = value;
+                if (!string.IsNullOrEmpty(value))
+                {
+                    loginUriPrefix = MobileServiceUrlBuilder.AddLeadingSlash(value);    
+                }
+            }
+        }
+
+        private Uri alternateLoginHost;
+
+        /// <summary>
+        /// Alternate URI for login
+        /// </summary>
+        public Uri AlternateLoginHost
+        {
+            get
+            {
+                return alternateLoginHost;
+            }
+            set
+            {
+                if (value.IsAbsoluteUri && value.Segments.Length == 1 && value.Scheme == "https")
+                {
+                    alternateLoginHost = value;
+                }
+                else
+                {
+                    throw new ArgumentException(
+                        string.Format(CultureInfo.InvariantCulture, Resources.MobileServiceClient_InvalidAlternateLoginHost, value),
+                        "alternateLoginHost");
+                }
+                
+                this.AlternateAuthHttpClient = new MobileServiceHttpClient(EmptyHttpMessageHandlers, alternateLoginHost, this.InstallationId);
+            }
+        }
 
         /// <summary>
         /// The id used to identify this installation of the application to 
@@ -111,12 +148,13 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Gets the <see cref="MobileServiceHttpClient"/> associated with the Azure Mobile App.
         /// </summary>
-        internal MobileServiceHttpClient MobileAppHttpClient { get; private set; }
+        internal MobileServiceHttpClient HttpClient { get; private set; }
 
         /// <summary>
-        /// Gets the <see cref="MobileServiceHttpClient"/> associated with the Authentication endpoint.
+        /// Gets the <see cref="MobileServiceHttpClient"/> associated with the Alternate login
+        /// Azure Mobile App.
         /// </summary>
-        internal MobileServiceHttpClient AuthenticationHttpClient { get; private set; }
+        internal MobileServiceHttpClient AlternateAuthHttpClient { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the MobileServiceClient class.
@@ -128,50 +166,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Chain of <see cref="HttpMessageHandler" /> instances. 
         /// All but the last should be <see cref="DelegatingHandler"/>s. 
         /// </param>
-        public MobileServiceClient(string mobileAppUri, params HttpMessageHandler[] handlers)
-            : this(mobileAppUri: mobileAppUri, gatewayUri: null, applicationKey: null, handlers: handlers)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the MobileServiceClient class.
-        /// </summary>
-        /// <param name="mobileAppUri">
-        /// Absolute URI of the Microsoft Azure Mobile App.
-        /// </param>
-        /// <param name="applicationKey">
-        /// The application key for the Microsoft Azure Mobile App.
-        /// </param> 
-        /// <param name="handlers">
-        /// Chain of <see cref="HttpMessageHandler" /> instances. 
-        /// All but the last should be <see cref="DelegatingHandler"/>s. 
-        /// </param>
-        public MobileServiceClient(string mobileAppUri, string applicationKey, params HttpMessageHandler[] handlers)
-            : this(mobileAppUri: mobileAppUri, gatewayUri: null, applicationKey: applicationKey, handlers: handlers)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the MobileServiceClient class.
-        /// </summary>
-        /// <param name="mobileAppUri">
-        /// Absolute URI of the Microsoft Azure Mobile App.
-        /// </param>
-        /// <param name="gatewayUri">
-        /// Absolute URI of the gateway of the Microsoft Azure Mobile App.
-        /// </param>
-        /// <param name="applicationKey">
-        /// The application key for the Microsoft Azure Mobile App.
-        /// </param> 
-        /// <param name="handlers">
-        /// Chain of <see cref="HttpMessageHandler" /> instances. 
-        /// All but the last should be <see cref="DelegatingHandler"/>s. 
-        /// </param>
-        public MobileServiceClient(string mobileAppUri, string gatewayUri, string applicationKey,
+        public MobileServiceClient(string mobileAppUri,
             params HttpMessageHandler[] handlers)
-            : this(
-                new Uri(mobileAppUri, UriKind.Absolute),
-                string.IsNullOrEmpty(gatewayUri) ? null : new Uri(gatewayUri, UriKind.Absolute), applicationKey, handlers)
+            : this(new Uri(mobileAppUri, UriKind.Absolute), handlers)
         {
         }
 
@@ -185,46 +182,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Chain of <see cref="HttpMessageHandler" /> instances. 
         /// All but the last should be <see cref="DelegatingHandler"/>s. 
         /// </param>
-        public MobileServiceClient(Uri mobileAppUri, params HttpMessageHandler[] handlers)
-            : this(mobileAppUri: mobileAppUri, gatewayUri: null, applicationKey: null, handlers: handlers)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the MobileServiceClient class.
-        /// </summary>
-        /// <param name="mobileAppUri">
-        /// Absolute URI of the Microsoft Azure Mobile App.
-        /// </param>
-        /// <param name="applicationKey">
-        /// The application key for the Microsoft Azure Mobile App.
-        /// </param> 
-        /// <param name="handlers">
-        /// Chain of <see cref="HttpMessageHandler" /> instances. 
-        /// All but the last should be <see cref="DelegatingHandler"/>s. 
-        /// </param>
-        public MobileServiceClient(Uri mobileAppUri, string applicationKey, params HttpMessageHandler[] handlers)
-            : this(mobileAppUri: mobileAppUri, gatewayUri: null, applicationKey: applicationKey, handlers: handlers)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the MobileServiceClient class.
-        /// </summary>
-        /// <param name="mobileAppUri">
-        /// Absolute URI of the Microsoft Azure Mobile App.
-        /// </param>
-        /// <param name="gatewayUri">
-        /// Absolute URI of the gateway of the Microsoft Azure Mobile App.
-        /// </param>
-        /// <param name="applicationKey">
-        /// The application key for the Microsoft Azure Mobile App.
-        /// </param> 
-        /// <param name="handlers">
-        /// Chain of <see cref="HttpMessageHandler" /> instances. 
-        /// All but the last should be <see cref="DelegatingHandler"/>s. 
-        /// </param>
-        public MobileServiceClient(Uri mobileAppUri, Uri gatewayUri, string applicationKey,
+        public MobileServiceClient(Uri mobileAppUri,
             params HttpMessageHandler[] handlers)
         {
             if (mobileAppUri == null)
@@ -244,33 +202,10 @@ namespace Microsoft.WindowsAzure.MobileServices
                     "mobileAppUri");
             }
 
-            if (gatewayUri != null)
-            {
-                if (gatewayUri.IsAbsoluteUri)
-                {
-                    // Trailing slash in the GatewayUri is important. Fix it right here before we pass it on further.
-                    this.GatewayUri = new Uri(MobileServiceUrlBuilder.AddTrailingSlash(gatewayUri.AbsoluteUri),
-                        UriKind.Absolute);
-                }
-                else
-                {
-                    throw new ArgumentException(
-                        string.Format(CultureInfo.InvariantCulture, Resources.MobileServiceClient_NotAnAbsoluteURI, gatewayUri),
-                        "gatewayUri");
-                }
-            }
-
-            this.ApplicationKey = applicationKey;
             this.InstallationId = GetApplicationInstallationId();
-            
+
             handlers = handlers ?? EmptyHttpMessageHandlers;
-            this.MobileAppHttpClient = new MobileServiceHttpClient(handlers, this.MobileAppUri, this.InstallationId, this.ApplicationKey);
-
-            if (this.GatewayUri != null)
-            {
-                this.AuthenticationHttpClient = new MobileServiceHttpClient(handlers, this.GatewayUri, this.InstallationId, this.ApplicationKey);
-            }
-
+            this.HttpClient = new MobileServiceHttpClient(handlers, this.MobileAppUri, this.InstallationId);
             this.Serializer = new MobileServiceSerializer();
             this.EventManager = new MobileServiceEventManager();
             this.SyncContext = new MobileServiceSyncContext(this);
@@ -429,7 +364,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 throw new ArgumentNullException("token");
             }
-            
+
             MobileServiceTokenAuthentication auth = new MobileServiceTokenAuthentication(this, provider, token, parameters: null);
             return auth.LoginAsync();
         }
@@ -437,8 +372,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Log a user out.
         /// </summary>
-        [SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Logout", Justification = "Logout is preferred by design")]
-        public void Logout()
+        public async Task LogoutAsync()
         {
             this.CurrentUser = null;
         }
@@ -621,7 +555,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         public async Task<HttpResponseMessage> InvokeApiAsync(string apiName, HttpContent content, HttpMethod method, IDictionary<string, string> requestHeaders, IDictionary<string, string> parameters, CancellationToken cancellationToken = default(CancellationToken))
         {
             method = method ?? defaultHttpMethod;
-            HttpResponseMessage response = await this.MobileAppHttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), this.CurrentUser, content, requestHeaders: requestHeaders, features: MobileServiceFeatures.GenericApiCall, cancellationToken: cancellationToken);
+            HttpResponseMessage response = await this.HttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), this.CurrentUser, content, requestHeaders: requestHeaders, features: MobileServiceFeatures.GenericApiCall, cancellationToken: cancellationToken);
             return response;
         }
 
@@ -647,7 +581,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 features |= MobileServiceFeatures.AdditionalQueryParameters;
             }
 
-            MobileServiceHttpResponse response = await this.MobileAppHttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), this.CurrentUser, content, false, features: features, cancellationToken: cancellationToken);
+            MobileServiceHttpResponse response = await this.HttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), this.CurrentUser, content, false, features: features, cancellationToken: cancellationToken);
             return response.Content;
         }
 
@@ -682,7 +616,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         public async Task<HttpResponseMessage> InvokeApiAsync(string apiName, HttpContent content, HttpMethod method, IDictionary<string, string> requestHeaders, IDictionary<string, string> parameters)
         {
             method = method ?? defaultHttpMethod;
-            HttpResponseMessage response = await this.MobileAppHttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), this.CurrentUser, content, requestHeaders: requestHeaders, features: MobileServiceFeatures.GenericApiCall);
+            HttpResponseMessage response = await this.HttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), this.CurrentUser, content, requestHeaders: requestHeaders, features: MobileServiceFeatures.GenericApiCall);
             return response;
         }
 
@@ -709,7 +643,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 ((MobileServiceSyncContext)this.SyncContext).Dispose();
                 // free managed resources
-                this.MobileAppHttpClient.Dispose();
+                this.HttpClient.Dispose();
             }
         }
 

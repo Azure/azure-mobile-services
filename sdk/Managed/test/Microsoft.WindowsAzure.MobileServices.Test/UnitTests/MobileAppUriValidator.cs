@@ -14,12 +14,22 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
         /// <summary>
         /// URI for a dummy mobile app.
         /// </summary>
-        public const string DummyMobileApp = "http://www.testgateway.com/testmobileapp/";
+        public const string DummyMobileApp = "http://www.test.com/";
 
         /// <summary>
-        /// URI for a dummy mobile app.
+        /// URI for a dummy mobile app with a folder
         /// </summary>
-        public const string DummyGateway = "http://www.testgateway.com/";
+        public const string DummyMobileAppUriWithFolder = "http://www.test.com/testmobileapp/";
+
+        /// <summary>
+        /// URI for a dummy mobile app without trailing slash
+        /// </summary>
+        public const string DummyMobileAppWithoutTralingSlash = "http://www.test.com";
+
+        /// <summary>
+        /// URI for a dummy mobile app with a folder without trailing slash
+        /// </summary>
+        public const string DummyMobileAppUriWithFolderWithoutTralingSlash = "http://www.test.com/testmobileapp";
 
         /// <summary>
         /// Table component in a valid table URI.

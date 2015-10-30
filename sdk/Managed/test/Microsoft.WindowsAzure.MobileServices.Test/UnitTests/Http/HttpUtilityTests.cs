@@ -1,4 +1,8 @@
-﻿using System;
+﻿// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
+
+using System;
 using Microsoft.WindowsAzure.MobileServices.Test.UnitTests;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 
@@ -19,14 +23,28 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                     ServiceUri = MobileAppUriValidator.DummyMobileApp, 
                     Query = "/about?$filter=a eq b&$orderby=c", 
                     Absolute = false,
-                    Result = "http://www.testgateway.com/about?$filter=a eq b&$orderby=c"
+                    Result = MobileAppUriValidator.DummyMobileApp + "about?$filter=a eq b&$orderby=c"
                 },
                 new 
                 {
-                    ServiceUri = MobileAppUriValidator.DummyMobileApp, 
-                    Query = "http://www.testgateway.com/about?$filter=a eq b&$orderby=c", 
+                    ServiceUri = MobileAppUriValidator.DummyMobileAppWithoutTralingSlash, 
+                    Query = MobileAppUriValidator.DummyMobileAppWithoutTralingSlash + "/about?$filter=a eq b&$orderby=c", 
                     Absolute = true,
-                    Result = "http://www.testgateway.com/about?$filter=a eq b&$orderby=c"
+                    Result = MobileAppUriValidator.DummyMobileAppWithoutTralingSlash + "/about?$filter=a eq b&$orderby=c"
+                },
+                new 
+                {
+                    ServiceUri = MobileAppUriValidator.DummyMobileAppUriWithFolder,
+                    Query = MobileAppUriValidator.DummyMobileAppUriWithFolder + "about?$filter=a eq b&$orderby=c", 
+                    Absolute = true,
+                    Result = MobileAppUriValidator.DummyMobileAppUriWithFolder + "about?$filter=a eq b&$orderby=c"
+                },
+                new 
+                {
+                    ServiceUri = MobileAppUriValidator.DummyMobileAppUriWithFolderWithoutTralingSlash,
+                    Query = MobileAppUriValidator.DummyMobileAppUriWithFolderWithoutTralingSlash + "/about?$filter=a eq b&$orderby=c", 
+                    Absolute = true,
+                    Result = MobileAppUriValidator.DummyMobileAppUriWithFolderWithoutTralingSlash + "/about?$filter=a eq b&$orderby=c"
                 }
             };
 
@@ -49,13 +67,25 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 {
                     ServiceUri = MobileAppUriValidator.DummyMobileApp, 
                     Query = "about?$filter=a eq b&$orderby=c", 
-                    Result = "http://www.testgateway.com/about?$filter=a eq b&$orderby=c"
+                    Result = MobileAppUriValidator.DummyMobileApp + "about?$filter=a eq b&$orderby=c"
                 },
                 new 
                 {
-                    ServiceUri = MobileAppUriValidator.DummyMobileApp, 
+                    ServiceUri = MobileAppUriValidator.DummyMobileAppWithoutTralingSlash, 
                     Query = "$filter=a eq b&$orderby=c", 
-                    Result = "http://www.testgateway.com/about?$filter=a eq b&$orderby=c"
+                    Result = MobileAppUriValidator.DummyMobileAppWithoutTralingSlash + "/about?$filter=a eq b&$orderby=c"
+                },
+                new 
+                {
+                    ServiceUri = MobileAppUriValidator.DummyMobileAppUriWithFolder, 
+                    Query = "$filter=a eq b&$orderby=c", 
+                    Result = MobileAppUriValidator.DummyMobileAppUriWithFolder + "about?$filter=a eq b&$orderby=c"
+                },
+                new 
+                {
+                    ServiceUri = MobileAppUriValidator.DummyMobileAppUriWithFolderWithoutTralingSlash, 
+                    Query = "$filter=a eq b&$orderby=c", 
+                    Result = MobileAppUriValidator.DummyMobileAppUriWithFolderWithoutTralingSlash + "/about?$filter=a eq b&$orderby=c"
                 }
             };
 

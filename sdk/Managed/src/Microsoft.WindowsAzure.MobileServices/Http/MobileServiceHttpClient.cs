@@ -31,11 +31,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         private const string RequestInstallationIdHeader = "X-ZUMO-INSTALLATION-ID";
 
         /// <summary>
-        /// Name of the application key header included when there's a key.
-        /// </summary>
-        private const string RequestApplicationKeyHeader = "X-ZUMO-APPLICATION";
-
-        /// <summary>
         /// Name of the zumo version header.
         /// </summary>
         private const string ZumoVersionHeader = "X-ZUMO-VERSION";
@@ -75,11 +70,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// The installation id of the application.
         /// </summary>
         private readonly string installationId;
-
-        /// <summary>
-        /// The application key for the Microsoft Azure Mobile Service.
-        /// </summary>
-        private readonly string applicationKey;
 
         /// <summary>
         /// The user-agent header value to use with all requests.
@@ -130,17 +120,13 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="installationId">
         /// The installation id of the application.
         /// </param>
-        /// <param name="applicationKey">
-        /// The application key for the Microsoft Azure Mobile Service.
-        /// </param>
-        public MobileServiceHttpClient(IEnumerable<HttpMessageHandler> handlers, Uri applicationUri, string installationId, string applicationKey)
+        public MobileServiceHttpClient(IEnumerable<HttpMessageHandler> handlers, Uri applicationUri, string installationId)
         {
             Debug.Assert(handlers != null);
             Debug.Assert(applicationUri != null);
 
             this.applicationUri = applicationUri;
             this.installationId = installationId;
-            this.applicationKey = applicationKey;
 
             this.httpHandler = CreatePipeline(handlers);
             this.httpClient = new HttpClient(httpHandler);
@@ -569,11 +555,6 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             // Set Mobile Services authentication, application, and telemetry headers
             request.Headers.Add(RequestInstallationIdHeader, this.installationId);
-            if (!string.IsNullOrEmpty(this.applicationKey))
-            {
-                request.Headers.Add(RequestApplicationKeyHeader, this.applicationKey);
-            }
-
             if (user != null && !string.IsNullOrEmpty(user.MobileServiceAuthenticationToken))
             {
                 request.Headers.Add(RequestAuthenticationHeader, user.MobileServiceAuthenticationToken);

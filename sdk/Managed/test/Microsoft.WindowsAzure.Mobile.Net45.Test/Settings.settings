@@ -5,9 +5,6 @@
     <Setting Name="MobileServiceRuntimeUrl" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="MobileServiceRuntimeKey" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
     <Setting Name="MobileServiceTags" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
