@@ -93,14 +93,14 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             IMobileServiceSyncTable<NotSystemPropertyCreatedAtType> table = service.GetSyncTable<NotSystemPropertyCreatedAtType>();
 
             DateTime theDate = new DateTime(2014, 3, 10, 0, 0, 0, DateTimeKind.Utc);
-            var inserted = new NotSystemPropertyCreatedAtType() { __CreatedAt = theDate };
+            var inserted = new NotSystemPropertyCreatedAtType() { CreatedAt = theDate };
             await table.InsertAsync(inserted);
 
-            Assert.AreEqual(inserted.__CreatedAt.ToUniversalTime(), theDate);
+            Assert.AreEqual(inserted.CreatedAt.ToUniversalTime(), theDate);
 
             NotSystemPropertyCreatedAtType rehydrated = await table.LookupAsync(inserted.Id);
 
-            Assert.AreEqual(rehydrated.__CreatedAt.ToUniversalTime(), theDate);
+            Assert.AreEqual(rehydrated.CreatedAt.ToUniversalTime(), theDate);
         }
 
         [AsyncTestMethod]
