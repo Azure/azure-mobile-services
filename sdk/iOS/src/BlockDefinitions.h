@@ -26,6 +26,9 @@ typedef void (^MSSyncPushCompletionBlock)(void);
 /// cancelled, *error* will be non-nil.
 typedef void (^MSClientLoginBlock)(MSUser *__nullable user, NSError *__nullable error);
 
+/// Callback logging out an end user. If there was an error *error* will be non-nil.
+typedef void (^MSClientLogoutBlock)(NSError *__nullable error);
+
 #pragma mark * MSClient
 /// Callback for method with no return other than error.
 typedef void (^MSCompletionBlock)(NSError *__nullable error);

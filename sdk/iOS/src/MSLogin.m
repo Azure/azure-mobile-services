@@ -7,6 +7,7 @@
 #import "MSJSONSerializer.h"
 #import "MSClientConnection.h"
 #import "MSClient.h"
+#import "MSClientInternal.h"
 
 #if TARGET_OS_IPHONE
 #import "MSLoginController.h"
@@ -58,16 +59,6 @@
     __block NSError *localError = nil;
     __block int allDoneCount = 0;
   
-    // Verify we have a gateway URL
-    
-    if (![self verifyGatewayURL:self.client.gatewayURL error:&localError]) {
-        if (completion) {
-            completion(nil, localError);
-        }
-        return;
-    }
-
-    
     void (^callCompletionIfAllDone)() = ^{
         allDoneCount++;
         if (allDoneCount == 2) {
@@ -117,8 +108,6 @@
 -(MSLoginController *) loginViewControllerWithProvider:(NSString *)provider
                                             completion:(MSClientLoginBlock)completion
 {
-    NSAssert(self.client.gatewayURL != nil, @"The gateway URL is required for login");
-    
     provider = [self normalizeProvider:provider];
     return [[MSLoginController alloc] initWithClient:self.client
                                             provider:provider
@@ -198,17 +187,6 @@
 
 #pragma mark * Private Methods
 
-- (BOOL) verifyGatewayURL:(NSURL *)url error:(NSError **)error
-{
-    if (!url) {
-        *error = [NSError errorWithDomain:MSErrorDomain
-                                     code:MSLoginInvalidURL
-                                 userInfo:@{ NSLocalizedDescriptionKey :@"The gateway URL is required for login" }];
-        return NO;
-    }
-    
-    return YES;
-}
 
 -(NSString *) normalizeProvider:(NSString *)provider {
     // Microsoft Azure Active Directory can be specified either in
@@ -226,17 +204,11 @@
                              orError:(NSError **)error
 {
     NSMutableURLRequest *request = nil;
-    
-    if (![self verifyGatewayURL:self.client.gatewayURL error:error]) {
-        return nil;
-    }
-
     NSData *requestBody = [[MSLoginSerializer loginSerializer] dataFromToken:token
                                                                      orError:error];
     if (requestBody) {
-    
-        NSURL *URL = [self.client.gatewayURL URLByAppendingPathComponent:
-                             [NSString stringWithFormat:@"login/%@", provider]];
+        NSURL *URL = [self.client.loginURL URLByAppendingPathComponent:provider];
+
         request = [NSMutableURLRequest requestWithURL:URL];
         request.HTTPMethod = @"POST";
         request.HTTPBody = requestBody;

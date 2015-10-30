@@ -36,8 +36,13 @@
 /// The URL of the Microsoft Azure Mobile App
 @property (nonatomic, strong, readonly, nonnull) NSURL *applicationURL;
 
-/// The URL of the gateway associated with the mobile app
-@property (nonatomic, strong, readonly, nullable) NSURL *gatewayURL;
+/// If set, overrides the host used during all login operations, primarily intended
+/// for use when running your server locally
+@property (nonatomic, strong, nonnull) NSURL *loginHost;
+
+/// If set, overrides the path used during a login request, defaults to '.auth/login'
+/// For legacy usage, this can be set to 'login'
+@property (nonatomic, strong, nonnull) NSString *loginPrefix;
 
 /// The application key for the Microsoft Azure Mobile Service associated with
 /// the client if one was provided in the creation of the client and nil
@@ -55,7 +60,7 @@
 
 /// A sync context that defines how offline data is synced and allows for manually
 /// syncing data on demand
-@property (nonatomic, strong, nullable)     MSSyncContext *syncContext;
+@property (nonatomic, strong, nullable) MSSyncContext *syncContext;
 
 /// @name Registering and unregistering for push notifications
 
@@ -82,48 +87,13 @@
 /// Creates a client with the given URL for the Microsoft Azure Mobile Service.
 +(nonnull MSClient *)clientWithApplicationURLString:(nonnull NSString *)urlString;
 
-/// Creates a client with the given URL and application key for the Microsoft Azure
-/// Mobile Service.
-+(nonnull MSClient *)clientWithApplicationURLString:(nonnull NSString *)urlString
-                         applicationKey:(nullable NSString *)key;
-
-/// Creates a client with the given URL and application key for the Microsoft Azure
-/// Mobile Service.
-+(nonnull MSClient *)clientWithApplicationURLString:(nonnull NSString *)applicationUrlString
-                           gatewayURLString:(nullable NSString *)gatewayUrlString
-                             applicationKey:(nullable NSString *)key;
-
-
 /// Creates a client with the given URL for the Microsoft Azure Mobile Service.
 +(nonnull MSClient *)clientWithApplicationURL:(nonnull NSURL *)url;
-
-/// Creates a client with the given URL and application key for the Microsoft Azure
-/// Mobile Service.
-+(nonnull MSClient *)clientWithApplicationURL:(nonnull NSURL *)url
-                       applicationKey:(nullable NSString *)key;
-
-/// Creates a client with the given URL and application key for the Microsoft Azure
-/// Mobile Service.
-+(nonnull MSClient *)clientWithApplicationURL:(nonnull NSURL *)applicationUrl
-                           gatewayURL:(nullable NSURL *)gatewayUrl
-                       applicationKey:(nullable NSString *)key;
-
 
 #pragma  mark * Public Initializer Methods
 
 /// Initializes a client with the given URL for the Microsoft Azure Mobile Service.
 -(nonnull instancetype)initWithApplicationURL:(nonnull NSURL *)url;
-
-/// Initializes a client with the given URL and application key for the Windows
-/// Azure Mobile Service.
--(nonnull instancetype)initWithApplicationURL:(nonnull NSURL *)url applicationKey:(nullable NSString *)key;
-
-/// Initializes a client with the given URL and application key for the Windows
-/// Azure Mobile Service.
--(nonnull instancetype)initWithApplicationURL:(nonnull NSURL *)applicationUrl
-                 gatewayURL:(nullable NSURL *)gatewayUrl
-             applicationKey:(nullable NSString *)key;
-
 
 #pragma mark * Public Filter Methods
 
@@ -158,7 +128,7 @@
               completion:(nullable MSClientLoginBlock)completion;
 
 /// Logs out the current end user.
--(void)logout;
+-(void)logoutWithCompletion:(nullable MSClientLogoutBlock)completion;
 
 /// @}
 
