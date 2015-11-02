@@ -24,7 +24,9 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.util.Pair;
 
 import com.google.android.gcm.GCMRegistrar;
 import com.google.gson.JsonElement;
@@ -48,6 +50,7 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestSt
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.push.GCMMessageHelper;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.push.GCMMessageManager;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -91,7 +94,7 @@ public class EnhancedPushTests extends TestGroup {
         String template = "{'data':{'user':'$(fullName)'}}".replace('\'', '\"');
         String expectedPayload = "{'user':'John Doe'}".replace('\'', '\"');
 
-        this.addTest(createTemplatePushTest("Template Notification Roundtrip - Tag", "tag4", templateNotification, "templateTag", template, expectedPayload));
+        this.addTest(createTemplatePushTest("Template Notification Roundtrip - Tag", "World", templateNotification, "templateForToastGcm", template, expectedPayload));
 
         this.addTest(createTemplatePushTest("Template Notification Roundtrip - No Tag", null, templateNotification, "templateNoTag", template, expectedPayload));
 
@@ -202,6 +205,8 @@ public class EnhancedPushTests extends TestGroup {
         test.log("Unregister Native");
 
         hub.unregisterAll(gcmId).get();
+
+        hub.deleteRegistrationsForChannel(gcmId).get();
     }
 
     private void addUnexistingNativeRegistration(String registrationId) {
@@ -625,17 +630,18 @@ public class EnhancedPushTests extends TestGroup {
 
                     register(this, MobileServicePush, registrationId, tags);
 
-                    GCMMessageManager.instance.clearPushMessages();
-                    MobileServiceJsonTable table = client.getTable(tableName);
                     JsonObject item = new JsonObject();
                     item.addProperty("method", "send");
                     item.addProperty("tag", tag);
+                    item.addProperty("token", "dummy");
+                    item.addProperty("type", "gcm");
+
                     JsonObject sentPayload = new JsonObject();
                     sentPayload.add("data", payload);
                     item.add("payload", sentPayload);
                     item.addProperty("usingNH", true);
 
-                    JsonObject jsonObject = table.insert(item).get();
+                    JsonElement jsonObject = client.invokeApi("Push", item).get();
 
                     this.log("OnCompleted: " + jsonObject.toString());
                     TestExecutionCallback nativeUnregisterTestExecutionCallback = getNativeUnregisterTestExecutionCallback(client, tag, payload, callback);
@@ -673,17 +679,14 @@ public class EnhancedPushTests extends TestGroup {
 
                     JsonElement templateNotificationJsonElement = new JsonParser().parse(templateNotification);
 
-                    GCMMessageManager.instance.clearPushMessages();
-                    MobileServiceJsonTable table = client.getTable(tableName);
                     JsonObject item = new JsonObject();
                     item.addProperty("method", "send");
                     item.addProperty("tag", tag);
-                    item.addProperty("payload", "not used");
-                    item.addProperty("templatePush", true);
-                    item.add("templateNotification", templateNotificationJsonElement);
-                    item.addProperty("usingNH", true);
+                    item.addProperty("token", "dummy");
+                    item.addProperty("type", "template");
+                    item.add("payload", templateNotificationJsonElement);
 
-                    JsonObject jsonObject = table.insert(item).get();
+                    JsonElement jsonObject = client.invokeApi("Push", item).get();
 
                     log("OnCompleted: " + jsonObject.toString());
                     TestExecutionCallback nativeUnregisterTestExecutionCallback = getTemplateUnregisterTestExecutionCallback(client, tag, templateName,
@@ -792,23 +795,29 @@ public class EnhancedPushTests extends TestGroup {
             protected Void doInBackground(Void... arg0) {
 
                 try {
-                    unregister(test, client.getPush());
+
+                    unregisterAll(test, client.getPush(), registrationId);
+
+                    //SystemClock.sleep(60000);
+
+                    JsonElement unregisterResult = client.invokeApi("verifyUnregisterInstallationResult", "GET", new ArrayList<Pair<String, String>>()).get();
 
                     GCMMessageManager.instance.clearPushMessages();
-                    MobileServiceJsonTable table = client.getTable(tableName);
+
                     JsonObject item = new JsonObject();
                     item.addProperty("method", "send");
                     item.addProperty("tag", tag);
+                    item.addProperty("token", "dummy");
+                    item.addProperty("type", "gcm");
 
                     JsonObject sentPayload = new JsonObject();
                     sentPayload.add("data", payload);
                     item.add("payload", sentPayload);
-
                     item.addProperty("usingNH", true);
 
-                    JsonObject jsonObject = table.insert(item).get();
+                    JsonElement pushResult = client.invokeApi("Push", item).get();
 
-                    test.log("OnCompleted: " + jsonObject.toString());
+                    test.log("OnCompleted: " + pushResult.toString());
                     GCMMessageManager.instance.waitForPushMessage(20000, GCMMessageHelper.getNegativePushCallback(test, callback));
                 } catch (Exception exception) {
                     callback.onTestComplete(test, test.createResultFromException(exception));
@@ -863,16 +872,15 @@ public class EnhancedPushTests extends TestGroup {
                     JsonElement templateNotificationJsonElement = new JsonParser().parse(templateNotification);
 
                     GCMMessageManager.instance.clearPushMessages();
-                    MobileServiceJsonTable table = client.getTable(tableName);
                     JsonObject item = new JsonObject();
                     item.addProperty("method", "send");
                     item.addProperty("tag", tag);
-                    item.addProperty("payload", "not used");
-                    item.addProperty("templatePush", true);
-                    item.add("templateNotification", templateNotificationJsonElement);
-                    item.addProperty("usingNH", true);
+                    item.addProperty("token", "dummy");
+                    item.addProperty("type", "template");
+                    item.add("payload", templateNotificationJsonElement);
 
-                    JsonObject jsonObject = table.insert(item).get();
+                    JsonElement jsonObject = client.invokeApi("Push", item).get();
+
                     test.log("OnCompleted: " + jsonObject.toString());
                     GCMMessageManager.instance.waitForPushMessage(10000, GCMMessageHelper.getNegativePushCallback(test, callback));
                 } catch (Exception exception) {
@@ -1201,7 +1209,7 @@ public class EnhancedPushTests extends TestGroup {
 
                     unregisterAll(this, mobileServicePush, registrationId);
 
-                    removeStorageVersion();
+                    JsonElement unregisterResult = client.invokeApi("verifyUnregisterInstallationResult", "GET", new ArrayList<Pair<String, String>>()).get();
 
                     MobileServiceClient client2 = new MobileServiceClient(client);
 
@@ -1210,18 +1218,22 @@ public class EnhancedPushTests extends TestGroup {
                     register(this, mobileServicePush2, registrationId, tags);
 
                     GCMMessageManager.instance.clearPushMessages();
-                    MobileServiceJsonTable table = client.getTable(tableName);
+
                     JsonObject item = new JsonObject();
                     item.addProperty("method", "send");
                     item.addProperty("tag", tag);
+                    item.addProperty("token", "dummy");
+                    item.addProperty("type", "gcm");
+
                     JsonObject sentPayload = new JsonObject();
                     sentPayload.add("data", payload);
                     item.add("payload", sentPayload);
                     item.addProperty("usingNH", true);
 
-                    JsonObject jsonObject = table.insert(item).get();
+                    JsonElement jsonObject = client.invokeApi("Push", item).get();
 
                     this.log("OnCompleted: " + jsonObject.toString());
+
                     TestExecutionCallback nativeUnregisterTestExecutionCallback = getNativeUnregisterTestExecutionCallback(client, tag, payload, callback);
                     GCMMessageManager.instance.waitForPushMessage(20000, GCMMessageHelper.getPushCallback(this, payload, nativeUnregisterTestExecutionCallback));
 
@@ -1262,8 +1274,6 @@ public class EnhancedPushTests extends TestGroup {
 
                     unregisterAll(this, mobileServicePush, registrationId);
 
-                    removeStorageVersion();
-
                     MobileServiceClient client2 = new MobileServiceClient(client);
 
                     final MobileServicePush mobileServicePush2 = client2.getPush();
@@ -1296,15 +1306,5 @@ public class EnhancedPushTests extends TestGroup {
         result.setName(testName);
 
         return result;
-    }
-
-    private void removeStorageVersion() {
-
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.getInstance());
-
-        Editor editor = sharedPreferences.edit();
-        editor.remove("__NH_STORAGE_VERSION");
-
-        editor.commit();
     }
 }

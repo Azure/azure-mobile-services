@@ -26,6 +26,7 @@ package com.microsoft.windowsazure.mobileservices.notifications;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.util.Pair;
 
@@ -39,6 +40,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import com.microsoft.windowsazure.mobileservices.MobileServiceApplication;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
@@ -58,6 +60,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
 
 /**
  * The notification hub client
@@ -214,7 +217,7 @@ public class MobileServicePush {
      * @param tags         The tags to use in the registration
      * @return Future with TemplateRegistration Information
      */
-    public ListenableFuture<TemplateRegistration> registerTemplate(String pnsHandle, String templateName, String template, String[] tags) {
+    public ListenableFuture<TemplateRegistration> registerTemplate(String pnsHandle, String templateName, String body, String[] tags) {
 
         final SettableFuture<TemplateRegistration> resultFuture = SettableFuture.create();
 
@@ -228,18 +231,28 @@ public class MobileServicePush {
             return resultFuture;
         }
 
-        if (isNullOrWhiteSpace(template)) {
-            resultFuture.setException(new IllegalArgumentException("template"));
+        if (isNullOrWhiteSpace(body)) {
+            resultFuture.setException(new IllegalArgumentException("body"));
             return resultFuture;
         }
+
+        JsonObject templateDetailObject = new JsonObject();
+        templateDetailObject.addProperty("body", body);
+
+        if (tags != null) {
+            templateDetailObject.add("tags", new Gson().toJsonTree(tags));
+        }
+
+        JsonObject templateObject = new JsonObject();
+        templateObject.add(templateName, templateDetailObject);
 
         final TemplateRegistration registration = mPnsSpecificRegistrationFactory.createTemplateRegistration();
         registration.setPNSHandle(pnsHandle);
         registration.setName(templateName);
-        registration.setTemplateBody(template);
+        registration.setTemplateBody(body);
         registration.addTags(tags);
 
-        ListenableFuture<Void> registerInternalFuture = createOrUpdateInstallation(pnsHandle, template);
+        ListenableFuture<Void> registerInternalFuture = createOrUpdateInstallation(pnsHandle, tags, templateObject);
 
         Futures.addCallback(registerInternalFuture, new FutureCallback<Void>() {
             @Override
@@ -391,13 +404,39 @@ public class MobileServicePush {
             }
         });
     }
+
+    public ListenableFuture<JsonElement> deleteRegistrationsForChannel(String registrationId) {
+
+        final SettableFuture<JsonElement> resultFuture = SettableFuture.create();
+
+        ArrayList<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+
+        parameters.add(new Pair<String, String>("channelUri", registrationId));
+
+        ListenableFuture<JsonElement> serviceFilterFuture = mHttpClient.getClient().invokeApi("deleteRegistrationsForChannel", "DELETE", parameters);
+
+        Futures.addCallback(serviceFilterFuture, new FutureCallback<JsonElement>() {
+            @Override
+            public void onFailure(Throwable exception) {
+                resultFuture.setException(exception);
+            }
+
+            @Override
+            public void onSuccess(JsonElement response) {
+                resultFuture.set(null);
+            }
+        });
+
+        return resultFuture;
+    }
+
     private ListenableFuture<Void> deleteInstallation()
     {
         final SettableFuture<Void> resultFuture = SettableFuture.create();
 
         String installationId = MobileServiceApplication.getInstallationId(mHttpClient.getClient().getContext());
 
-        String path = PNS_API_URL + "/installations/" + installationId;
+        String path = PNS_API_URL + "/installations/" + Uri.encode(installationId);
 
         ListenableFuture<ServiceFilterResponse> serviceFilterFuture = mHttpClient.request(path, null, "DELETE", null, null);
 
@@ -409,6 +448,7 @@ public class MobileServicePush {
 
             @Override
             public void onSuccess(ServiceFilterResponse response) {
+
                 resultFuture.set(null);
             }
         });
@@ -417,24 +457,32 @@ public class MobileServicePush {
     }
 
     public ListenableFuture<Void> createOrUpdateInstallation(String registrationId) {
-        return createOrUpdateInstallation(registrationId, null);
+        return createOrUpdateInstallation(registrationId, null, null);
     }
 
-    private ListenableFuture<Void> createOrUpdateInstallation(String registrationId, String template)
+    public ListenableFuture<Void> createOrUpdateInstallation(String registrationId, String[] tags) {
+        return createOrUpdateInstallation(registrationId, tags, null);
+    }
+
+    private ListenableFuture<Void> createOrUpdateInstallation(String registrationId, String[] tags, JsonElement templates)
     {
         JsonObject installation = new JsonObject();
         installation.addProperty("pushChannel", registrationId);
         installation.addProperty("platform", "gcm");
 
-        if (template != null) {
-            installation.addProperty("templates", template);
+        if (tags != null){
+            installation.add("tags", new Gson().toJsonTree(tags));
+        }
+
+        if (templates != null) {
+            installation.add("templates", templates);
         }
 
         final SettableFuture<Void> resultFuture = SettableFuture.create();
 
         String installationId = MobileServiceApplication.getInstallationId(mHttpClient.getClient().getContext());
 
-        String path = PNS_API_URL+ "/installations/" + installationId;
+        String path = PNS_API_URL+ "/installations/" + Uri.encode(installationId);
 
         List<Pair<String, String>> headers = new ArrayList<Pair<String, String>>();
 
