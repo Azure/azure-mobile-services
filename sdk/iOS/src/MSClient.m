@@ -218,6 +218,12 @@
     
     // TODO: Rewrite to actually call the server and invalidate the token
     if (completion) {
+        NSHTTPCookieStorage *cookieStorage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+        NSArray<NSHTTPCookie *> *cookies = [cookieStorage cookiesForURL:self.loginHost];
+        
+        NSHTTPCookie *authCookie = [[cookies filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"name = 'AppServiceAuthSession'"]] firstObject];
+        [cookieStorage deleteCookie:authCookie];
+        
         completion(nil);
     }
 }
