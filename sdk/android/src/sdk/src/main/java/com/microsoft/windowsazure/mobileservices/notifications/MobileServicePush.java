@@ -68,36 +68,6 @@ import java.util.concurrent.ExecutionException;
 public class MobileServicePush {
 
     /**
-     * Prefix for Storage keys
-     */
-    private static final String STORAGE_PREFIX = "__NH_";
-
-    /**
-     * Prefix for registration information keys in local storage
-     */
-    private static final String REGISTRATION_NAME_STORAGE_KEY = "REG_NAME_";
-
-    /**
-     * Storage Version key
-     */
-    private static final String STORAGE_VERSION_KEY = "STORAGE_VERSION";
-
-    /**
-     * Storage Version
-     */
-    private static final String STORAGE_VERSION = "1.0.0";
-
-    /**
-     * PNS Handle Key
-     */
-    private static final String PNS_HANDLE_KEY = "PNS_HANDLE";
-
-    /**
-     * New registration location header name
-     */
-    private static final String NEW_REGISTRATION_LOCATION_HEADER = "Location";
-
-    /**
      * Push registration path
      */
     private static final String PNS_API_URL = "push";
@@ -108,23 +78,6 @@ public class MobileServicePush {
     private MobileServiceHttpClient mHttpClient;
 
     /**
-     * SharedPreferences reference used to access local storage
-     */
-    private SharedPreferences mSharedPreferences;
-
-    /**
-     * Factory which creates Registr
-     *
-     * ations according the PNS supported on device
-     */
-    private PnsSpecificRegistrationFactory mPnsSpecificRegistrationFactory;
-
-    /**
-     * Flag to signal the need of refreshing local storage
-     */
-    private boolean mIsRefreshNeeded = false;
-
-    /**
      * Creates a new NotificationHub client
      *
      * @param notificationHubPath Notification Hub path
@@ -132,7 +85,6 @@ public class MobileServicePush {
      * @param context             Android context used to access SharedPreferences
      */
     public MobileServicePush(MobileServiceClient client, Context context) {
-        mPnsSpecificRegistrationFactory = new PnsSpecificRegistrationFactory();
 
         mHttpClient = new MobileServiceHttpClient(client);
 
@@ -152,20 +104,16 @@ public class MobileServicePush {
      * @param tags      Tags to use in the registration
      * @return Future with Registration Information
      */
-    public ListenableFuture<Registration> register(String pnsHandle, String[] tags) {
+    public ListenableFuture<Void> register(String pnsHandle, String[] tags) {
 
-        final SettableFuture<Registration> resultFuture = SettableFuture.create();
+        final SettableFuture<Void> resultFuture = SettableFuture.create();
 
         if (isNullOrWhiteSpace(pnsHandle)) {
             resultFuture.setException(new IllegalArgumentException("pnsHandle"));
             return resultFuture;
         }
 
-        final Registration registration = mPnsSpecificRegistrationFactory.createNativeRegistration();
-        registration.setPNSHandle(pnsHandle);
-        registration.addTags(tags);
-
-        ListenableFuture<Void> registerInternalFuture = createOrUpdateInstallation(pnsHandle);
+        ListenableFuture<Void> registerInternalFuture = createOrUpdateInstallation(pnsHandle, tags);
 
         Futures.addCallback(registerInternalFuture, new FutureCallback<Void>() {
             @Override
@@ -175,7 +123,7 @@ public class MobileServicePush {
 
             @Override
             public void onSuccess(Void v) {
-                resultFuture.set(registration);
+                resultFuture.set(v);
             }
         });
 
@@ -191,19 +139,19 @@ public class MobileServicePush {
      * @deprecated use {@link register(String pnsHandle, String[] tags)} instead
      */
     public void register(String pnsHandle, String[] tags, final RegistrationCallback callback) {
-        ListenableFuture<Registration> registerFuture = register(pnsHandle, tags);
+        ListenableFuture<Void> registerFuture = register(pnsHandle, tags);
 
-        Futures.addCallback(registerFuture, new FutureCallback<Registration>() {
+        Futures.addCallback(registerFuture, new FutureCallback<Void>() {
             @Override
             public void onFailure(Throwable exception) {
                 if (exception instanceof Exception) {
-                    callback.onRegister(null, (Exception) exception);
+                    callback.onRegister((Exception) exception);
                 }
             }
 
             @Override
-            public void onSuccess(Registration registration) {
-                callback.onRegister(registration, null);
+            public void onSuccess(Void v) {
+                callback.onRegister(null);
             }
         });
     }
@@ -213,13 +161,13 @@ public class MobileServicePush {
      *
      * @param pnsHandle    PNS specific identifier
      * @param templateName The template name
-     * @param template     The template body
+     * @param templateBody     The template body
      * @param tags         The tags to use in the registration
      * @return Future with TemplateRegistration Information
      */
-    public ListenableFuture<TemplateRegistration> registerTemplate(String pnsHandle, String templateName, String body, String[] tags) {
+    public ListenableFuture<Void> registerTemplate(String pnsHandle, String templateName, String templateBody, String[] tags) {
 
-        final SettableFuture<TemplateRegistration> resultFuture = SettableFuture.create();
+        final SettableFuture<Void> resultFuture = SettableFuture.create();
 
         if (isNullOrWhiteSpace(pnsHandle)) {
             resultFuture.setException(new IllegalArgumentException("pnsHandle"));
@@ -231,26 +179,12 @@ public class MobileServicePush {
             return resultFuture;
         }
 
-        if (isNullOrWhiteSpace(body)) {
+        if (isNullOrWhiteSpace(templateBody)) {
             resultFuture.setException(new IllegalArgumentException("body"));
             return resultFuture;
         }
 
-        JsonObject templateDetailObject = new JsonObject();
-        templateDetailObject.addProperty("body", body);
-
-        if (tags != null) {
-            templateDetailObject.add("tags", new Gson().toJsonTree(tags));
-        }
-
-        JsonObject templateObject = new JsonObject();
-        templateObject.add(templateName, templateDetailObject);
-
-        final TemplateRegistration registration = mPnsSpecificRegistrationFactory.createTemplateRegistration();
-        registration.setPNSHandle(pnsHandle);
-        registration.setName(templateName);
-        registration.setTemplateBody(body);
-        registration.addTags(tags);
+        JsonObject templateObject = GetTemplateObject(templateName, templateBody,  tags);
 
         ListenableFuture<Void> registerInternalFuture = createOrUpdateInstallation(pnsHandle, tags, templateObject);
 
@@ -262,13 +196,26 @@ public class MobileServicePush {
 
             @Override
             public void onSuccess(Void v) {
-                resultFuture.set(registration);
+                resultFuture.set(v);
             }
         });
 
         return resultFuture;
     }
 
+    private JsonObject GetTemplateObject(String templateName, String templateBody, String[] tags) {
+        JsonObject templateDetailObject = new JsonObject();
+        templateDetailObject.addProperty("body", templateBody);
+
+        JsonObject templateObject = new JsonObject();
+        templateObject.add(templateName, templateDetailObject);
+
+        if (tags != null){
+            templateDetailObject.add("tags", new Gson().toJsonTree(tags));
+        }
+
+        return templateObject;
+    }
     /**
      * Registers the client for template notifications with the specified tags
      *
@@ -280,20 +227,20 @@ public class MobileServicePush {
      * @deprecated use {@link registerTemplate(String pnsHandle, String
      * templateName, String template, String[] tags)} instead
      */
-    public void registerTemplate(String pnsHandle, String templateName, String template, String[] tags, final TemplateRegistrationCallback callback) {
-        ListenableFuture<TemplateRegistration> registerFuture = registerTemplate(pnsHandle, templateName, template, tags);
+    public void registerTemplate(String pnsHandle, String templateName, String template, String[] tags, final RegistrationCallback callback) {
+        ListenableFuture<Void> registerFuture = registerTemplate(pnsHandle, templateName, template, tags);
 
-        Futures.addCallback(registerFuture, new FutureCallback<TemplateRegistration>() {
+        Futures.addCallback(registerFuture, new FutureCallback<Void>() {
             @Override
             public void onFailure(Throwable exception) {
                 if (exception instanceof Exception) {
-                    callback.onRegister(null, (Exception) exception);
+                    callback.onRegister((Exception) exception);
                 }
             }
 
             @Override
-            public void onSuccess(TemplateRegistration registration) {
-                callback.onRegister(registration, null);
+            public void onSuccess(Void v) {
+                callback.onRegister(null);
             }
         });
     }
@@ -331,83 +278,9 @@ public class MobileServicePush {
         });
     }
 
-    /**
-     * Unregisters the client for template notifications of a specific template
-     *
-     * @param templateName The template name
-     * @return Future with TemplateRegistration Information
-     */
-    public ListenableFuture<Void> unregisterTemplate(String templateName) {
-        if (isNullOrWhiteSpace(templateName)) {
-            throw new IllegalArgumentException("templateName");
-        }
+    public ListenableFuture<Void> deleteRegistrationsForChannel(String registrationId) {
 
-        return deleteInstallation();
-    }
-
-    /**
-     * Unregisters the client for template notifications of a specific template
-     *
-     * @param templateName The template name
-     * @param callback     The operation callback
-     * @deprecated use {@link unregisterTemplate(String templateName)} instead
-     */
-    public void unregisterTemplate(String templateName, final UnregisterCallback callback) {
-        ListenableFuture<Void> deleteInstallationFuture = deleteInstallation();
-
-        Futures.addCallback(deleteInstallationFuture, new FutureCallback<Void>() {
-            @Override
-            public void onFailure(Throwable exception) {
-                if (exception instanceof Exception) {
-                    callback.onUnregister((Exception) exception);
-                }
-            }
-
-            @Override
-            public void onSuccess(Void v) {
-                callback.onUnregister(null);
-            }
-        });
-    }
-
-    /**
-     * Unregisters the client for all notifications
-     *
-     * @param pnsHandle PNS specific identifier
-     * @return Future with TemplateRegistration Information
-     */
-    public ListenableFuture<Void> unregisterAll(String pnsHandle) {
-        return deleteInstallation();
-    }
-
-    /**
-     * Unregisters the client for all notifications
-     *
-     * @param pnsHandle PNS specific identifier
-     * @param callback  The operation callback
-     * @deprecated use {@link unregisterAll(String pnsHandle)} instead
-     */
-    public void unregisterAll(String pnsHandle, final UnregisterCallback callback) {
-        ListenableFuture<Void> unregisterAllFuture = unregisterAll(pnsHandle);
-
-        Futures.addCallback(unregisterAllFuture, new FutureCallback<Void>() {
-            @Override
-            public void onFailure(Throwable exception) {
-                if (exception instanceof Exception) {
-                    callback.onUnregister((Exception) exception);
-                }
-            }
-
-            @Override
-            public void onSuccess(Void v) {
-                callback.onUnregister(null);
-            }
-        });
-    }
-
-    public ListenableFuture<JsonElement> deleteRegistrationsForChannel(String registrationId) {
-
-        final SettableFuture<JsonElement> resultFuture = SettableFuture.create();
+        final SettableFuture<Void> resultFuture = SettableFuture.create();
 
         ArrayList<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
 
@@ -424,6 +297,60 @@ public class MobileServicePush {
             @Override
             public void onSuccess(JsonElement response) {
                 resultFuture.set(null);
+            }
+        });
+
+        return resultFuture;
+    }
+
+    public ListenableFuture<JsonElement> verifyUnregisterInstallationResult() {
+
+        final SettableFuture<JsonElement> resultFuture = SettableFuture.create();
+
+        ListenableFuture<JsonElement> serviceFilterFuture = mHttpClient.getClient().invokeApi("verifyUnregisterInstallationResult", "GET", new ArrayList<Pair<String, String>>());
+
+        Futures.addCallback(serviceFilterFuture, new FutureCallback<JsonElement>() {
+            @Override
+            public void onFailure(Throwable exception) {
+                resultFuture.setException(exception);
+            }
+
+            @Override
+            public void onSuccess(JsonElement response) {
+                resultFuture.set(response);
+            }
+        });
+
+        return resultFuture;
+    }
+
+    public ListenableFuture<JsonElement> verifyRegisterInstallationResult(String registrationId) {
+        return verifyRegisterInstallationResult(registrationId, null, null);
+    }
+    public ListenableFuture<JsonElement> verifyRegisterInstallationResult(String registrationId, String templateName, String templateBody) {
+
+        final SettableFuture<JsonElement> resultFuture = SettableFuture.create();
+
+        ArrayList<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+
+        parameters.add(new Pair<>("channelUri", registrationId));
+
+        if (templateName != null && templateBody != null) {
+            JsonObject templateObject = GetTemplateObject(templateName, templateBody, null);
+            parameters.add(new Pair<>("templates", templateObject.toString()));
+        }
+
+        ListenableFuture<JsonElement> serviceFilterFuture = mHttpClient.getClient().invokeApi("verifyRegisterInstallationResult", "GET", parameters);
+
+        Futures.addCallback(serviceFilterFuture, new FutureCallback<JsonElement>() {
+            @Override
+            public void onFailure(Throwable exception) {
+                resultFuture.setException(exception);
+            }
+
+            @Override
+            public void onSuccess(JsonElement response) {
+                resultFuture.set(response);
             }
         });
 
@@ -456,18 +383,18 @@ public class MobileServicePush {
         return resultFuture;
     }
 
-    public ListenableFuture<Void> createOrUpdateInstallation(String registrationId) {
-        return createOrUpdateInstallation(registrationId, null, null);
+    public ListenableFuture<Void> createOrUpdateInstallation(String pnsHandle) {
+        return createOrUpdateInstallation(pnsHandle, null, null);
     }
 
-    public ListenableFuture<Void> createOrUpdateInstallation(String registrationId, String[] tags) {
-        return createOrUpdateInstallation(registrationId, tags, null);
+    public ListenableFuture<Void> createOrUpdateInstallation(String pnsHandle, String[] tags) {
+        return createOrUpdateInstallation(pnsHandle, tags, null);
     }
 
-    private ListenableFuture<Void> createOrUpdateInstallation(String registrationId, String[] tags, JsonElement templates)
+    private ListenableFuture<Void> createOrUpdateInstallation(String pnsHandle, String[] tags, JsonElement templates)
     {
         JsonObject installation = new JsonObject();
-        installation.addProperty("pushChannel", registrationId);
+        installation.addProperty("pushChannel", pnsHandle);
         installation.addProperty("platform", "gcm");
 
         if (tags != null){
