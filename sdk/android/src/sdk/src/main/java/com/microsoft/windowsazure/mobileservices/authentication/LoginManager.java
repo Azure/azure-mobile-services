@@ -71,11 +71,11 @@ public class LoginManager {
     /**
      * Login process initial URL
      */
-    private static final String START_URL = "login/";
+    private static final String START_URL = "/.auth/login/";
     /**
      * Login process final URL
      */
-    private static final String END_URL = "login/done";
+    private static final String END_URL = "/.auth/login/done";
     /**
      * The name for the Azure Active Directory authentication provider as used
      * by the service REST API.

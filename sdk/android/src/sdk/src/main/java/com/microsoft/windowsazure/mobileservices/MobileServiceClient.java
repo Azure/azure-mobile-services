@@ -146,6 +146,19 @@ public class MobileServiceClient {
      */
     private MobileServiceSyncContext mSyncContext;
 
+
+    /**
+     * Constructor for the MobileServiceClient
+     *
+     * @param appUrl  Mobile Service URL
+     * @param context The Context where the MobileServiceClient is created
+     * @throws java.net.MalformedURLException
+     */
+    public MobileServiceClient(String appUrl, Context context) throws MalformedURLException {
+        this(new URL(appUrl), null, context);
+    }
+
+
     /**
      * Constructor for the MobileServiceClient
      *
