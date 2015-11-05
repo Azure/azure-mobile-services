@@ -137,7 +137,7 @@ NSString *const MSLoginViewErrorResponseData = @"com.Microsoft.WindowsAzureMobil
     NSString *requestURLString = request.URL.absoluteString;
     
     // Now check if we've reached the end URL and we're done
-    if ([requestURLString rangeOfString:self.endURLString].location == 0) {
+    if ([requestURLString rangeOfString:self.endURLString options:NSCaseInsensitiveSearch].location == 0) {
         [self callCompletion:requestURL orError:nil];
     }
     else {
