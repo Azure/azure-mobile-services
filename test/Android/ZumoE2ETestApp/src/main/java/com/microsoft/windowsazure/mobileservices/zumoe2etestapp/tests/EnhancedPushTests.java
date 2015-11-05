@@ -81,7 +81,7 @@ public class EnhancedPushTests extends TestGroup {
 
         String templateNotification = "{'fullName':'John Doe'}".replace('\'', '\"');
         String template = "{'data':{'user':'$(fullName)'}}".replace('\'', '\"');
-        String expectedPayload = "{'data':{'user':'John Doe'}}".replace('\'', '\"');
+        String expectedPayload = "{'user':'John Doe'}".replace('\'', '\"');
 
         this.addTest(createTemplatePushTest("Template Notification Roundtrip", templateNotification, "templateGCM", template, expectedPayload));
 
@@ -204,7 +204,7 @@ public class EnhancedPushTests extends TestGroup {
 
                     this.log("OnCompleted: " + jsonObject.toString());
                     TestExecutionCallback nativeUnregisterTestExecutionCallback = getNativeUnregisterTestExecutionCallback(client, payload, callback);
-                    GCMMessageManager.instance.waitForPushMessage(20000, GCMMessageHelper.getPushCallback(this, payload, nativeUnregisterTestExecutionCallback));
+                    GCMMessageManager.instance.waitForPushMessage(60000, GCMMessageHelper.getPushCallback(this, payload, nativeUnregisterTestExecutionCallback));
 
                 } catch (Exception e) {
                     callback.onTestComplete(this, createResultFromException(e));
@@ -377,7 +377,7 @@ public class EnhancedPushTests extends TestGroup {
                     JsonElement pushResult = client.invokeApi("Push", item).get();
 
                     test.log("OnCompleted: " + pushResult.toString());
-                    GCMMessageManager.instance.waitForPushMessage(20000, GCMMessageHelper.getNegativePushCallback(test, callback));
+                    GCMMessageManager.instance.waitForPushMessage(60000, GCMMessageHelper.getNegativePushCallback(test, callback));
                 } catch (Exception exception) {
                     callback.onTestComplete(test, test.createResultFromException(exception));
                     // return;
@@ -738,7 +738,7 @@ public class EnhancedPushTests extends TestGroup {
                     this.log("OnCompleted: " + jsonObject.toString());
 
                     TestExecutionCallback nativeUnregisterTestExecutionCallback = getNativeUnregisterTestExecutionCallback(client, payload, callback);
-                    GCMMessageManager.instance.waitForPushMessage(20000, GCMMessageHelper.getPushCallback(this, payload, nativeUnregisterTestExecutionCallback));
+                    GCMMessageManager.instance.waitForPushMessage(60000, GCMMessageHelper.getPushCallback(this, payload, nativeUnregisterTestExecutionCallback));
 
                 } catch (Exception e) {
                     callback.onTestComplete(this, createResultFromException(e));
