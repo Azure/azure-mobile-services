@@ -98,13 +98,12 @@ public class MobileServicePush {
     }
 
     /**
-     * Registers the client for native notifications with the specified tags
+     * Registers the client for native notifications
      *
      * @param pnsHandle PNS specific identifier
-     * @param tags      Tags to use in the registration
      * @return Future with Registration Information
      */
-    public ListenableFuture<Void> register(String pnsHandle, String[] tags) {
+    public ListenableFuture<Void> register(String pnsHandle) {
 
         final SettableFuture<Void> resultFuture = SettableFuture.create();
 
@@ -113,7 +112,7 @@ public class MobileServicePush {
             return resultFuture;
         }
 
-        ListenableFuture<Void> registerInternalFuture = createOrUpdateInstallation(pnsHandle, tags);
+        ListenableFuture<Void> registerInternalFuture = createOrUpdateInstallation(pnsHandle);
 
         Futures.addCallback(registerInternalFuture, new FutureCallback<Void>() {
             @Override
@@ -131,15 +130,14 @@ public class MobileServicePush {
     }
 
     /**
-     * Registers the client for native notifications with the specified tags
+     * Registers the client for native notifications
      *
      * @param pnsHandle PNS specific identifier
-     * @param callback  The callback to invoke after the Push execution
-     * @param tags      Tags to use in the registration
-     * @deprecated use {@link register(String pnsHandle, String[] tags)} instead
+     * @param callback  The callback to invoke after the Push
+     * @deprecated use {@link register(String pnsHandle)} instead
      */
-    public void register(String pnsHandle, String[] tags, final RegistrationCallback callback) {
-        ListenableFuture<Void> registerFuture = register(pnsHandle, tags);
+    public void register(String pnsHandle, final RegistrationCallback callback) {
+        ListenableFuture<Void> registerFuture = register(pnsHandle);
 
         Futures.addCallback(registerFuture, new FutureCallback<Void>() {
             @Override
@@ -157,15 +155,14 @@ public class MobileServicePush {
     }
 
     /**
-     * Registers the client for template notifications with the specified tags
+     * Registers the client for template notifications
      *
      * @param pnsHandle    PNS specific identifier
      * @param templateName The template name
      * @param templateBody     The template body
-     * @param tags         The tags to use in the registration
      * @return Future with TemplateRegistration Information
      */
-    public ListenableFuture<Void> registerTemplate(String pnsHandle, String templateName, String templateBody, String[] tags) {
+    public ListenableFuture<Void> registerTemplate(String pnsHandle, String templateName, String templateBody) {
 
         final SettableFuture<Void> resultFuture = SettableFuture.create();
 
@@ -184,9 +181,9 @@ public class MobileServicePush {
             return resultFuture;
         }
 
-        JsonObject templateObject = GetTemplateObject(templateName, templateBody,  tags);
+        JsonObject templateObject = GetTemplateObject(templateName, templateBody);
 
-        ListenableFuture<Void> registerInternalFuture = createOrUpdateInstallation(pnsHandle, tags, templateObject);
+        ListenableFuture<Void> registerInternalFuture = createOrUpdateInstallation(pnsHandle, templateObject);
 
         Futures.addCallback(registerInternalFuture, new FutureCallback<Void>() {
             @Override
@@ -203,32 +200,27 @@ public class MobileServicePush {
         return resultFuture;
     }
 
-    private JsonObject GetTemplateObject(String templateName, String templateBody, String[] tags) {
+    private JsonObject GetTemplateObject(String templateName, String templateBody) {
         JsonObject templateDetailObject = new JsonObject();
         templateDetailObject.addProperty("body", templateBody);
 
         JsonObject templateObject = new JsonObject();
         templateObject.add(templateName, templateDetailObject);
 
-        if (tags != null){
-            templateDetailObject.add("tags", new Gson().toJsonTree(tags));
-        }
-
         return templateObject;
     }
     /**
-     * Registers the client for template notifications with the specified tags
+     * Registers the client for template notifications
      *
      * @param pnsHandle    PNS specific identifier
      * @param templateName The template name
      * @param template     The template body
-     * @param tags         The tags to use in the registration
      * @param callback     The operation callback
      * @deprecated use {@link registerTemplate(String pnsHandle, String
-     * templateName, String template, String[] tags)} instead
+     * templateName, String template)} instead
      */
-    public void registerTemplate(String pnsHandle, String templateName, String template, String[] tags, final RegistrationCallback callback) {
-        ListenableFuture<Void> registerFuture = registerTemplate(pnsHandle, templateName, template, tags);
+    public void registerTemplate(String pnsHandle, String templateName, String template, final RegistrationCallback callback) {
+        ListenableFuture<Void> registerFuture = registerTemplate(pnsHandle, templateName, template);
 
         Futures.addCallback(registerFuture, new FutureCallback<Void>() {
             @Override
@@ -278,85 +270,6 @@ public class MobileServicePush {
         });
     }
 
-    public ListenableFuture<Void> deleteRegistrationsForChannel(String registrationId) {
-
-        final SettableFuture<Void> resultFuture = SettableFuture.create();
-
-        ArrayList<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
-
-        parameters.add(new Pair<String, String>("channelUri", registrationId));
-
-        ListenableFuture<JsonElement> serviceFilterFuture = mHttpClient.getClient().invokeApi("deleteRegistrationsForChannel", "DELETE", parameters);
-
-        Futures.addCallback(serviceFilterFuture, new FutureCallback<JsonElement>() {
-            @Override
-            public void onFailure(Throwable exception) {
-                resultFuture.setException(exception);
-            }
-
-            @Override
-            public void onSuccess(JsonElement response) {
-                resultFuture.set(null);
-            }
-        });
-
-        return resultFuture;
-    }
-
-    public ListenableFuture<JsonElement> verifyUnregisterInstallationResult() {
-
-        final SettableFuture<JsonElement> resultFuture = SettableFuture.create();
-
-        ListenableFuture<JsonElement> serviceFilterFuture = mHttpClient.getClient().invokeApi("verifyUnregisterInstallationResult", "GET", new ArrayList<Pair<String, String>>());
-
-        Futures.addCallback(serviceFilterFuture, new FutureCallback<JsonElement>() {
-            @Override
-            public void onFailure(Throwable exception) {
-                resultFuture.setException(exception);
-            }
-
-            @Override
-            public void onSuccess(JsonElement response) {
-                resultFuture.set(response);
-            }
-        });
-
-        return resultFuture;
-    }
-
-    public ListenableFuture<JsonElement> verifyRegisterInstallationResult(String registrationId) {
-        return verifyRegisterInstallationResult(registrationId, null, null);
-    }
-    public ListenableFuture<JsonElement> verifyRegisterInstallationResult(String registrationId, String templateName, String templateBody) {
-
-        final SettableFuture<JsonElement> resultFuture = SettableFuture.create();
-
-        ArrayList<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
-
-        parameters.add(new Pair<>("channelUri", registrationId));
-
-        if (templateName != null && templateBody != null) {
-            JsonObject templateObject = GetTemplateObject(templateName, templateBody, null);
-            parameters.add(new Pair<>("templates", templateObject.toString()));
-        }
-
-        ListenableFuture<JsonElement> serviceFilterFuture = mHttpClient.getClient().invokeApi("verifyRegisterInstallationResult", "GET", parameters);
-
-        Futures.addCallback(serviceFilterFuture, new FutureCallback<JsonElement>() {
-            @Override
-            public void onFailure(Throwable exception) {
-                resultFuture.setException(exception);
-            }
-
-            @Override
-            public void onSuccess(JsonElement response) {
-                resultFuture.set(response);
-            }
-        });
-
-        return resultFuture;
-    }
-
     private ListenableFuture<Void> deleteInstallation()
     {
         final SettableFuture<Void> resultFuture = SettableFuture.create();
@@ -383,23 +296,15 @@ public class MobileServicePush {
         return resultFuture;
     }
 
-    public ListenableFuture<Void> createOrUpdateInstallation(String pnsHandle) {
-        return createOrUpdateInstallation(pnsHandle, null, null);
+    private ListenableFuture<Void> createOrUpdateInstallation(String pnsHandle) {
+        return createOrUpdateInstallation(pnsHandle, null);
     }
 
-    public ListenableFuture<Void> createOrUpdateInstallation(String pnsHandle, String[] tags) {
-        return createOrUpdateInstallation(pnsHandle, tags, null);
-    }
-
-    private ListenableFuture<Void> createOrUpdateInstallation(String pnsHandle, String[] tags, JsonElement templates)
+    private ListenableFuture<Void> createOrUpdateInstallation(String pnsHandle, JsonElement templates)
     {
         JsonObject installation = new JsonObject();
         installation.addProperty("pushChannel", pnsHandle);
         installation.addProperty("platform", "gcm");
-
-        if (tags != null){
-            installation.add("tags", new Gson().toJsonTree(tags));
-        }
 
         if (templates != null) {
             installation.add("templates", templates);
@@ -409,7 +314,7 @@ public class MobileServicePush {
 
         String installationId = MobileServiceApplication.getInstallationId(mHttpClient.getClient().getContext());
 
-        String path = PNS_API_URL+ "/installations/" + Uri.encode(installationId);
+        String path = PNS_API_URL + "/installations/" + Uri.encode(installationId);
 
         List<Pair<String, String>> headers = new ArrayList<Pair<String, String>>();
 

@@ -102,7 +102,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
         String installationId = MobileServiceApplication.getInstallationId(getInstrumentation().getTargetContext());
 
         final String expectedUrl = appUrl + pnsApiUrl + "/installations/" + Uri.encode(installationId);
-        final String expectedContent = "{\"pushChannel\":\"handle\",\"platform\":\"gcm\",\"tags\":[\"tag1\"]}";
+        final String expectedContent = "{\"pushChannel\":\"handle\",\"platform\":\"gcm\"}";
         try {
             client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
@@ -125,7 +125,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
             });
 
             final MobileServicePush push = client.getPush();
-            push.register(handle, new String[]{"tag1"}).get();
+            push.register(handle).get();
 
         } catch (Exception exception) {
             if (exception instanceof ExecutionException) {
@@ -154,7 +154,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 
         final String expectedUrl = appUrl + pnsApiUrl + "/installations/" + Uri.encode(installationId);
         final String expectedContent =
-                "{\"pushChannel\":\"handle\",\"platform\":\"gcm\",\"tags\":[\"tag1\"],\"templates\":{\"template1\":{\"body\":\"{\\\"data\\\":\\\"abc\\\"}\",\"tags\":[\"tag1\"]}}}";
+                "{\"pushChannel\":\"handle\",\"platform\":\"gcm\",\"templates\":{\"template1\":{\"body\":\"{\\\"data\\\":\\\"abc\\\"}\",\"tags\":[\"tag1\"]}}}";
         try {
             client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
@@ -177,7 +177,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
             });
 
             final MobileServicePush push = client.getPush();
-            push.registerTemplate(handle, "template1", "{\"data\":\"abc\"}", new String[]{"tag1"}).get();
+            push.registerTemplate(handle, "template1", "{\"data\":\"abc\"}").get();
 
         } catch (Exception exception) {
             if (exception instanceof ExecutionException) {

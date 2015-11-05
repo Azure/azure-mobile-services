@@ -25,6 +25,11 @@ import android.os.Build;
 import android.util.Pair;
 
 import com.google.android.gcm.GCMRegistrar;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -66,22 +71,19 @@ public class EnhancedPushTests extends TestGroup {
 
         String json = "'Notification Hub test notification'".replace('\'', '\"');
 
-        this.addTest(createNativePushTestWithRefresh("Native Notification Roundtrip - Simple payload - With Refresh", "tag1", json));
+        this.addTest(createNativePushTestWithRefresh("Native Notification Roundtrip - Simple payload - With Refresh", json));
 
         json = "'Notification Hub test notification'".replace('\'', '\"');
-        this.addTest(createNativePushTest("Native Notification Roundtrip - Simple payload", "tag1", json));
+        this.addTest(createNativePushTest("Native Notification Roundtrip - Simple payload", json));
 
         json = "{'name':'John Doe','age':'33'}".replace('\'', '\"');
-        this.addTest(createNativePushTest("Native Notification Roundtrip - Complex payload", "tag2", json));
-
-        this.addTest(createNativePushTest("Native Notification Roundtrip - No Tag", null, json));
+        this.addTest(createNativePushTest("Native Notification Roundtrip - Complex payload", json));
 
         String templateNotification = "{'fullName':'John Doe'}".replace('\'', '\"');
         String template = "{'data':{'user':'$(fullName)'}}".replace('\'', '\"');
         String expectedPayload = "{'data':{'user':'John Doe'}}".replace('\'', '\"');
 
-        this.addTest(createTemplatePushTest("Template Notification Roundtrip - Tag", "tag2", templateNotification, "templateForToastGcm", template, expectedPayload));
-        this.addTest(createTemplatePushTest("Template Notification Roundtrip - No Tag", null, templateNotification, "templateNoTag", template, expectedPayload));
+        this.addTest(createTemplatePushTest("Template Notification Roundtrip", templateNotification, "templateGCM", template, expectedPayload));
 
         this.addTest(createUnregisterTestCase("Unregister"));
 
@@ -93,15 +95,10 @@ public class EnhancedPushTests extends TestGroup {
         this.addTest(createGCMUnregisterTest());
     }
 
-    private Void register(TestCase test, MobileServicePush hub, String gcmId, String[] tags) throws InterruptedException, ExecutionException {
+    private Void register(TestCase test, MobileServicePush hub, String gcmId) throws InterruptedException, ExecutionException {
         test.log("Register Native with GCMID = " + gcmId);
-        if (tags != null && tags.length > 0) {
-            for (String tag : tags) {
-                test.log("Using tag: " + tag);
-            }
-        }
 
-        return hub.register(gcmId, tags).get();
+        return hub.register(gcmId).get();
     }
 
     private void unregister(TestCase test, MobileServicePush hub) throws InterruptedException, ExecutionException {
@@ -110,34 +107,28 @@ public class EnhancedPushTests extends TestGroup {
         hub.unregister().get();
     }
 
-    private Void registerTemplate(TestCase test, MobileServicePush hub, String gcmId, String templateName, String[] tags)
+    private Void registerTemplate(TestCase test, MobileServicePush hub, String gcmId, String templateName)
             throws InterruptedException, ExecutionException {
         String template = "{\"time_to_live\": 108, \"delay_while_idle\": true, \"data\": { \"message\": \"$(msg)\" } }";
 
-        return registerTemplate(test, hub, gcmId, templateName, template, tags);
+        return registerTemplate(test, hub, gcmId, templateName, template);
     }
 
-    private Void registerTemplate(TestCase test, MobileServicePush hub, String gcmId, String templateName, String template, String[] tags)
+    private Void registerTemplate(TestCase test, MobileServicePush hub, String gcmId, String templateName, String template)
             throws InterruptedException, ExecutionException {
 
         test.log("Register with GCMID = " + gcmId);
         test.log("Register with templateName = " + templateName);
 
-        if (tags != null && tags.length > 0) {
-            for (String tag : tags) {
-                test.log("Using tag: " + tag);
-            }
-        }
-
-        return hub.registerTemplate(gcmId, templateName, template, tags).get();
+        return hub.registerTemplate(gcmId, templateName, template).get();
     }
 
-    private void unregisterAll(TestCase test, MobileServicePush hub, String registrationId) throws InterruptedException, ExecutionException {
+    private void unregisterAll(TestCase test, MobileServicePush hub, MobileServiceClient client, String registrationId) throws InterruptedException, ExecutionException {
         test.log("Unregister Native");
 
         hub.unregister().get();
 
-        hub.deleteRegistrationsForChannel(registrationId).get();
+        deleteRegistrationsForChannel(client, registrationId).get();
     }
 
     private TestCase createUnregisterTestCase(String name) {
@@ -171,7 +162,7 @@ public class EnhancedPushTests extends TestGroup {
 
     // Notification Roundtrip Tests
 
-    private TestCase createNativePushTest(String testName, final String tag, String jsonPayload) {
+    private TestCase createNativePushTest(String testName, String jsonPayload) {
         final JsonElement orginalPayload = new JsonParser().parse(jsonPayload);
 
         JsonObject newPayload;
@@ -192,17 +183,15 @@ public class EnhancedPushTests extends TestGroup {
                 try {
 
                     final MobileServicePush MobileServicePush = client.getPush();
-                    String[] tags = tag != null ? new String[]{tag} : null;
 
-                    unregisterAll(this, MobileServicePush, registrationId);
+                    unregisterAll(this, MobileServicePush, client, registrationId);
 
-                    register(this, MobileServicePush, registrationId, tags);
+                    register(this, MobileServicePush, registrationId);
 
-                    JsonElement result = client.getPush().verifyRegisterInstallationResult(registrationId).get();
+                    JsonElement result = verifyRegisterInstallationResult(client, registrationId).get();
 
                     JsonObject item = new JsonObject();
                     item.addProperty("method", "send");
-                    item.addProperty("tag", tag);
                     item.addProperty("token", "dummy");
                     item.addProperty("type", "gcm");
 
@@ -214,7 +203,7 @@ public class EnhancedPushTests extends TestGroup {
                     JsonElement jsonObject = client.invokeApi("Push", item).get();
 
                     this.log("OnCompleted: " + jsonObject.toString());
-                    TestExecutionCallback nativeUnregisterTestExecutionCallback = getNativeUnregisterTestExecutionCallback(client, tag, payload, callback);
+                    TestExecutionCallback nativeUnregisterTestExecutionCallback = getNativeUnregisterTestExecutionCallback(client, payload, callback);
                     GCMMessageManager.instance.waitForPushMessage(20000, GCMMessageHelper.getPushCallback(this, payload, nativeUnregisterTestExecutionCallback));
 
                 } catch (Exception e) {
@@ -229,7 +218,7 @@ public class EnhancedPushTests extends TestGroup {
         return result;
     }
 
-    private TestCase createTemplatePushTest(String testName, final String tag, final String templateNotification, final String templateName,
+    private TestCase createTemplatePushTest(String testName, final String templateNotification, final String templateName,
                                             final String template, final String expectedPayload) {
 
         TestCase result = new TestCase(testName) {
@@ -239,15 +228,13 @@ public class EnhancedPushTests extends TestGroup {
 
                 try {
 
-                    String[] tags = tag != null ? new String[]{tag} : null;
-
                     final MobileServicePush MobileServicePush = client.getPush();
 
-                    unregisterAll(this, MobileServicePush, registrationId);
+                    unregisterAll(this, MobileServicePush, client, registrationId);
 
-                    registerTemplate(this, MobileServicePush, registrationId, templateName, template, tags);
+                    registerTemplate(this, MobileServicePush, registrationId, templateName, template);
 
-                    JsonElement result = client.getPush().verifyRegisterInstallationResult(registrationId, templateName, template).get();
+                    JsonElement result = verifyRegisterInstallationResult(client, registrationId, templateName, template).get();
 
                     GCMMessageManager.instance.clearPushMessages();
 
@@ -255,15 +242,14 @@ public class EnhancedPushTests extends TestGroup {
 
                     JsonObject item = new JsonObject();
                     item.addProperty("method", "send");
-                    item.addProperty("tag", tag);
                     item.addProperty("token", "dummy");
                     item.addProperty("type", "template");
                     item.add("payload", templateNotificationJsonElement);
 
-                    //JsonElement jsonObject = client.invokeApi("Push", item).get();
+                    JsonElement jsonObject = client.invokeApi("Push", item).get();
 
                     //log("OnCompleted: " + jsonObject.toString());
-                    TestExecutionCallback nativeUnregisterTestExecutionCallback = getTemplateUnregisterTestExecutionCallback(client, tag, templateName,
+                    TestExecutionCallback nativeUnregisterTestExecutionCallback = getTemplateUnregisterTestExecutionCallback(client, templateName,
                             template, templateNotification, callback);
                     GCMMessageManager.instance.waitForPushMessage(60000,
                             GCMMessageHelper.getPushCallback(this, expectedPayload, nativeUnregisterTestExecutionCallback));
@@ -335,7 +321,7 @@ public class EnhancedPushTests extends TestGroup {
         return testCase;
     }
 
-    private TestExecutionCallback getNativeUnregisterTestExecutionCallback(final MobileServiceClient client, final String tag, final JsonObject payload,
+    private TestExecutionCallback getNativeUnregisterTestExecutionCallback(final MobileServiceClient client, final JsonObject payload,
                                                                            final TestExecutionCallback callback) {
         return new TestExecutionCallback() {
 
@@ -354,14 +340,14 @@ public class EnhancedPushTests extends TestGroup {
                 if (result.getStatus() == TestStatus.Failed) {
                     callback.onTestComplete(test, result);
                 } else {
-                    nativeUnregisterTestExecution(client, test, tag, payload, callback);
+                    nativeUnregisterTestExecution(client, test, payload, callback);
                 }
             }
         };
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private void nativeUnregisterTestExecution(final MobileServiceClient client, final TestCase test, final String tag, final JsonObject payload,
+    private void nativeUnregisterTestExecution(final MobileServiceClient client, final TestCase test, final JsonObject payload,
                                                final TestExecutionCallback callback) {
 
         new AsyncTask<Void, Void, Void>() {
@@ -370,17 +356,16 @@ public class EnhancedPushTests extends TestGroup {
 
                 try {
 
-                    unregisterAll(test, client.getPush(), registrationId);
+                    unregisterAll(test, client.getPush(), client, registrationId);
 
                     //SystemClock.sleep(60000);
 
-                    JsonElement unregisterResult = client.getPush().verifyUnregisterInstallationResult().get();
+                    JsonElement unregisterResult = verifyUnregisterInstallationResult(client).get();
 
                     GCMMessageManager.instance.clearPushMessages();
 
                     JsonObject item = new JsonObject();
                     item.addProperty("method", "send");
-                    item.addProperty("tag", tag);
                     item.addProperty("token", "dummy");
                     item.addProperty("type", "gcm");
 
@@ -403,7 +388,7 @@ public class EnhancedPushTests extends TestGroup {
 
     }
 
-    private TestExecutionCallback getTemplateUnregisterTestExecutionCallback(final MobileServiceClient client, final String tag, final String templateName,
+    private TestExecutionCallback getTemplateUnregisterTestExecutionCallback(final MobileServiceClient client, final String templateName,
                                                                              final String template, final String templateNotification, final TestExecutionCallback callback) {
         return new TestExecutionCallback() {
 
@@ -422,14 +407,14 @@ public class EnhancedPushTests extends TestGroup {
                 if (result.getStatus() == TestStatus.Failed) {
                     callback.onTestComplete(test, result);
                 } else {
-                    templateUnregisterTestExecution(client, test, tag, templateName, template, templateNotification, callback);
+                    templateUnregisterTestExecution(client, test, templateName, template, templateNotification, callback);
                 }
             }
         };
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private void templateUnregisterTestExecution(final MobileServiceClient client, final TestCase test, final String tag, final String templateName,
+    private void templateUnregisterTestExecution(final MobileServiceClient client, final TestCase test,  final String templateName,
                                                  final String template, final String templateNotification, final TestExecutionCallback callback) {
 
         new AsyncTask<Void, Void, Void>() {
@@ -437,9 +422,7 @@ public class EnhancedPushTests extends TestGroup {
             protected Void doInBackground(Void... arg0) {
                 try {
 
-                    String[] tags = tag != null ? new String[]{tag} : null;
-
-                    registerTemplate(test, client.getPush(), templateName, template, tags);
+                    registerTemplate(test, client.getPush(), templateName, template);
 
                     unregister(test, client.getPush());
 
@@ -448,7 +431,6 @@ public class EnhancedPushTests extends TestGroup {
                     GCMMessageManager.instance.clearPushMessages();
                     JsonObject item = new JsonObject();
                     item.addProperty("method", "send");
-                    item.addProperty("tag", tag);
                     item.addProperty("token", "dummy");
                     item.addProperty("type", "template");
                     item.add("payload", templateNotificationJsonElement);
@@ -456,7 +438,7 @@ public class EnhancedPushTests extends TestGroup {
                     JsonElement jsonObject = client.invokeApi("Push", item).get();
 
                     test.log("OnCompleted: " + jsonObject.toString());
-                    GCMMessageManager.instance.waitForPushMessage(10000, GCMMessageHelper.getNegativePushCallback(test, callback));
+                    GCMMessageManager.instance.waitForPushMessage(60000, GCMMessageHelper.getNegativePushCallback(test, callback));
                 } catch (Exception exception) {
                     callback.onTestComplete(test, test.createResultFromException(exception));
                     // return;
@@ -468,36 +450,25 @@ public class EnhancedPushTests extends TestGroup {
 
     // Test Callbacks
     @SuppressWarnings("deprecation")
-    private void register(TestCase test, MobileServicePush hub, String gcmId, String[] tags, final RegistrationCallback callback) {
+    private void register(TestCase test, MobileServicePush hub, String gcmId, final RegistrationCallback callback) {
         test.log("Register Native with GCMID = " + gcmId);
-        if (tags != null && tags.length > 0) {
-            for (String tag : tags) {
-                test.log("Using tag: " + tag);
-            }
-        }
 
-        hub.register(gcmId, tags, callback);
+        hub.register(gcmId, callback);
     }
 
-    private void registerTemplate(TestCase test, MobileServicePush hub, String gcmId, String templateName, String[] tags, RegistrationCallback callback) {
+    private void registerTemplate(TestCase test, MobileServicePush hub, String gcmId, String templateName, RegistrationCallback callback) {
         String template = "{\"time_to_live\": 108, \"delay_while_idle\": true, \"data\": { \"message\": \"$(msg)\" } }";
-        registerTemplate(test, hub, gcmId, templateName, template, tags, callback);
+        registerTemplate(test, hub, gcmId, templateName, template, callback);
     }
 
     @SuppressWarnings("deprecation")
-    private void registerTemplate(TestCase test, MobileServicePush hub, String gcmId, String templateName, String template, String[] tags,
+    private void registerTemplate(TestCase test, MobileServicePush hub, String gcmId, String templateName, String template,
                                   RegistrationCallback callback) {
 
         test.log("Register with GCMID = " + gcmId);
         test.log("Register with templateName = " + templateName);
 
-        if (tags != null && tags.length > 0) {
-            for (String tag : tags) {
-                test.log("Using tag: " + tag);
-            }
-        }
-
-        hub.registerTemplate(gcmId, templateName, template, tags, callback);
+        hub.registerTemplate(gcmId, templateName, template, callback);
     }
 
     @SuppressWarnings("deprecation")
@@ -521,7 +492,7 @@ public class EnhancedPushTests extends TestGroup {
 
                     final String gcmId = UUID.randomUUID().toString();
 
-                    register(this, MobileServicePush, gcmId, (String[]) null, new RegistrationCallback() {
+                    register(this, MobileServicePush, gcmId, new RegistrationCallback() {
 
                         @Override
                         public void onRegister(Exception exception) {
@@ -563,7 +534,7 @@ public class EnhancedPushTests extends TestGroup {
 
                     final String gcmId = UUID.randomUUID().toString();
 
-                    registerTemplate(this, MobileServicePush, gcmId, templateName, (String[]) null, new RegistrationCallback() {
+                    registerTemplate(this, MobileServicePush, gcmId, templateName, new RegistrationCallback() {
 
                         @Override
                         public void onRegister(Exception exception) {
@@ -626,7 +597,97 @@ public class EnhancedPushTests extends TestGroup {
         return register;
     }
 
-    private TestCase createNativePushTestWithRefresh(String testName, final String tag, String jsonPayload) {
+    public ListenableFuture<Void> deleteRegistrationsForChannel(final MobileServiceClient client,String registrationId) {
+
+        final SettableFuture<Void> resultFuture = SettableFuture.create();
+
+        ArrayList<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+
+        parameters.add(new Pair<String, String>("channelUri", registrationId));
+
+        ListenableFuture<JsonElement> serviceFilterFuture = client.invokeApi("deleteRegistrationsForChannel", "DELETE", parameters);
+
+        Futures.addCallback(serviceFilterFuture, new FutureCallback<JsonElement>() {
+            @Override
+            public void onFailure(Throwable exception) {
+                resultFuture.setException(exception);
+            }
+
+            @Override
+            public void onSuccess(JsonElement response) {
+                resultFuture.set(null);
+            }
+        });
+
+        return resultFuture;
+    }
+
+    public ListenableFuture<JsonElement> verifyUnregisterInstallationResult(final MobileServiceClient client) {
+
+        final SettableFuture<JsonElement> resultFuture = SettableFuture.create();
+
+        ListenableFuture<JsonElement> serviceFilterFuture = client.invokeApi("verifyUnregisterInstallationResult", "GET", new ArrayList<Pair<String, String>>());
+
+        Futures.addCallback(serviceFilterFuture, new FutureCallback<JsonElement>() {
+            @Override
+            public void onFailure(Throwable exception) {
+                resultFuture.setException(exception);
+            }
+
+            @Override
+            public void onSuccess(JsonElement response) {
+                resultFuture.set(response);
+            }
+        });
+
+        return resultFuture;
+    }
+
+    public ListenableFuture<JsonElement> verifyRegisterInstallationResult(MobileServiceClient client, String registrationId) {
+        return verifyRegisterInstallationResult(client, registrationId, null, null);
+    }
+
+    public ListenableFuture<JsonElement> verifyRegisterInstallationResult(MobileServiceClient client, String registrationId, String templateName, String templateBody) {
+
+        final SettableFuture<JsonElement> resultFuture = SettableFuture.create();
+
+        ArrayList<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+
+        parameters.add(new Pair<>("channelUri", registrationId));
+
+        if (templateName != null && templateBody != null) {
+            JsonObject templateObject = GetTemplateObject(templateName, templateBody);
+            parameters.add(new Pair<>("templates", templateObject.toString()));
+        }
+
+        ListenableFuture<JsonElement> serviceFilterFuture = client.invokeApi("verifyRegisterInstallationResult", "GET", parameters);
+
+        Futures.addCallback(serviceFilterFuture, new FutureCallback<JsonElement>() {
+            @Override
+            public void onFailure(Throwable exception) {
+                resultFuture.setException(exception);
+            }
+
+            @Override
+            public void onSuccess(JsonElement response) {
+                resultFuture.set(response);
+            }
+        });
+
+        return resultFuture;
+    }
+
+    private JsonObject GetTemplateObject(String templateName, String templateBody) {
+        JsonObject templateDetailObject = new JsonObject();
+        templateDetailObject.addProperty("body", templateBody);
+
+        JsonObject templateObject = new JsonObject();
+        templateObject.add(templateName, templateDetailObject);
+
+        return templateObject;
+    }
+
+    private TestCase createNativePushTestWithRefresh(String testName, String jsonPayload) {
         final JsonElement orginalPayload = new JsonParser().parse(jsonPayload);
 
         JsonObject newPayload;
@@ -647,25 +708,23 @@ public class EnhancedPushTests extends TestGroup {
                 try {
 
                     final MobileServicePush mobileServicePush = client.getPush();
-                    String[] tags = tag != null ? new String[]{tag} : null;
 
-                    unregisterAll(this, mobileServicePush, registrationId);
+                    unregisterAll(this, mobileServicePush, client, registrationId);
 
-                    JsonElement unregisterResult = client.getPush().verifyUnregisterInstallationResult().get();
+                    JsonElement unregisterResult = verifyUnregisterInstallationResult(client).get();
 
                     MobileServiceClient client2 = new MobileServiceClient(client);
 
                     final MobileServicePush mobileServicePush2 = client2.getPush();
 
-                    register(this, mobileServicePush2, registrationId, tags);
+                    register(this, mobileServicePush2, registrationId);
 
-                    JsonElement registerResult = client.getPush().verifyRegisterInstallationResult(registrationId).get();
+                    JsonElement registerResult = verifyRegisterInstallationResult(client, registrationId).get();
 
                     GCMMessageManager.instance.clearPushMessages();
 
                     JsonObject item = new JsonObject();
                     item.addProperty("method", "send");
-                    item.addProperty("tag", tag);
                     item.addProperty("token", "dummy");
                     item.addProperty("type", "gcm");
 
@@ -678,7 +737,7 @@ public class EnhancedPushTests extends TestGroup {
 
                     this.log("OnCompleted: " + jsonObject.toString());
 
-                    TestExecutionCallback nativeUnregisterTestExecutionCallback = getNativeUnregisterTestExecutionCallback(client, tag, payload, callback);
+                    TestExecutionCallback nativeUnregisterTestExecutionCallback = getNativeUnregisterTestExecutionCallback(client, payload, callback);
                     GCMMessageManager.instance.waitForPushMessage(20000, GCMMessageHelper.getPushCallback(this, payload, nativeUnregisterTestExecutionCallback));
 
                 } catch (Exception e) {
