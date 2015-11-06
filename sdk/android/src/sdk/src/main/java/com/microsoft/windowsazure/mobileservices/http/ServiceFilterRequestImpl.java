@@ -75,16 +75,12 @@ public class ServiceFilterRequestImpl implements ServiceFilterRequest {
     public ServiceFilterResponse execute() throws Exception {
         // Execute request
         OkApacheClient client = mAndroidHttpClientFactory.createAndroidHttpClient();
-     
-        try {
-            final HttpResponse response = client.execute(mRequest);
-            ServiceFilterResponse serviceFilterResponse = new ServiceFilterResponseImpl(response);
-            return serviceFilterResponse;
-        } finally {
-            client = null;
-        }
-    }
 
+        final HttpResponse response = client.execute(mRequest);
+        ServiceFilterResponse serviceFilterResponse = new ServiceFilterResponseImpl(response);
+        return serviceFilterResponse;
+    }
+    
     @Override
     public Header[] getHeaders() {
         return mRequest.getAllHeaders();
