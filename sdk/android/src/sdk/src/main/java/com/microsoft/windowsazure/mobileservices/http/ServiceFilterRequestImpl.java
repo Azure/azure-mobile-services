@@ -81,8 +81,7 @@ public class ServiceFilterRequestImpl implements ServiceFilterRequest {
             ServiceFilterResponse serviceFilterResponse = new ServiceFilterResponseImpl(response);
             return serviceFilterResponse;
         } finally {
-            //client.getConnectionManager().shutdown();
-            //client.close();
+            client = null;
         }
     }
 
