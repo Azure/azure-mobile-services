@@ -98,7 +98,7 @@ public class GCMMessageHelper {
 
                 for (Entry<String, JsonElement> entry : payloadEntries) {
                     String key = entry.getKey();
-                    String value = entry.getValue().toString();
+                    String value = entry.getValue().getAsString();
                     String intentExtra = intent.getStringExtra(key);
 
                     if (value.equals(intentExtra)) {
