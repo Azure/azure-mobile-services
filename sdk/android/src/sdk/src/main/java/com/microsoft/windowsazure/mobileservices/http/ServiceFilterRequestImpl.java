@@ -75,8 +75,7 @@ public class ServiceFilterRequestImpl implements ServiceFilterRequest {
     public ServiceFilterResponse execute() throws Exception {
         // Execute request
         OkApacheClient client = mAndroidHttpClientFactory.createAndroidHttpClient();
-        //client.getParams().setParameter(HTTP.USER_AGENT, MobileServiceConnection.getUserAgent());
-
+     
         try {
             final HttpResponse response = client.execute(mRequest);
             ServiceFilterResponse serviceFilterResponse = new ServiceFilterResponseImpl(response);

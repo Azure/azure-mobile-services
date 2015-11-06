@@ -40,15 +40,11 @@ public class AndroidHttpClientFactoryImpl implements AndroidHttpClientFactory {
 
         OkHttpClient okClient = new OkHttpClient();
         okClient.networkInterceptors().add(new UserAgentInterceptor(MobileServiceConnection.getUserAgent()));
-        //okClient.interceptors().add(new UserAgentInterceptor(MobileServiceConnection.getUserAgent()));
 
         OkApacheClient apacheClient = new OkApacheClient(okClient);
 
         return apacheClient;
 
-        //client.getConnectionManager().u
-        //rOkApacheClienteturn new ();
-        //return AndroidHttpClient.newInstance(MobileServiceConnection.getUserAgent());
     }
 
     private class UserAgentInterceptor implements Interceptor {
