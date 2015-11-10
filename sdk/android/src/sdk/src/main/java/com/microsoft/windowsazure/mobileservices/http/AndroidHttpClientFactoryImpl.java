@@ -23,7 +23,12 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.http;
 
-import android.net.http.AndroidHttpClient;
+import com.squareup.okhttp.Interceptor;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
+import com.squareup.okhttp.apache.OkApacheClient;
+import java.io.IOException;
 
 /**
  * Default implementation for AndroidHttpClientFactory
@@ -31,7 +36,33 @@ import android.net.http.AndroidHttpClient;
 public class AndroidHttpClientFactoryImpl implements AndroidHttpClientFactory {
 
     @Override
-    public AndroidHttpClient createAndroidHttpClient() {
-        return AndroidHttpClient.newInstance(MobileServiceConnection.getUserAgent());
+    public OkApacheClient createAndroidHttpClient() {
+
+        OkHttpClient okClient = new OkHttpClient();
+        okClient.networkInterceptors().add(new UserAgentInterceptor(MobileServiceConnection.getUserAgent()));
+
+        OkApacheClient apacheClient = new OkApacheClient(okClient);
+
+        return apacheClient;
+
+    }
+
+    private class UserAgentInterceptor implements Interceptor {
+
+        private final String userAgent;
+
+        public UserAgentInterceptor(String userAgent) {
+            this.userAgent = userAgent;
+        }
+
+        @Override
+        public Response intercept(Chain chain) throws IOException {
+            Request originalRequest = chain.request();
+            Request requestWithUserAgent = originalRequest.newBuilder()
+                    .removeHeader("User-Agent")
+                    .addHeader("User-Agent", userAgent)
+                    .build();
+            return chain.proceed(requestWithUserAgent);
+        }
     }
 }

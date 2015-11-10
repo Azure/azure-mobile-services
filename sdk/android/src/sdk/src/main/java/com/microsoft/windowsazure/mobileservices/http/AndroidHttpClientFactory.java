@@ -23,7 +23,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.http;
 
-import android.net.http.AndroidHttpClient;
+import com.squareup.okhttp.apache.OkApacheClient;
 
 /**
  * Factory for AndroidHttpClient instances
@@ -35,5 +35,5 @@ public interface AndroidHttpClientFactory {
      *
      * @return A new AndroidHttpClient
      */
-    public AndroidHttpClient createAndroidHttpClient();
+    public OkApacheClient createAndroidHttpClient();
 }

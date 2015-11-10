@@ -23,8 +23,6 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.http;
 
-import android.net.http.AndroidHttpClient;
-
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 
 import org.apache.http.Header;
@@ -36,6 +34,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.zip.GZIPInputStream;
 
 /**
  * ServiceFilterResponse implementation
@@ -65,7 +64,7 @@ public class ServiceFilterResponseImpl implements ServiceFilterResponse {
         // Get the response's content
         HttpEntity entity = mResponse.getEntity();
         if (entity != null) {
-            InputStream instream = AndroidHttpClient.getUngzippedContent(entity);
+            InputStream instream = getUngzippedContent(entity);
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             byte[] buffer = new byte[1024];
@@ -110,5 +109,28 @@ public class ServiceFilterResponseImpl implements ServiceFilterResponse {
     @Override
     public StatusLine getStatus() {
         return mResponse.getStatusLine();
+    }
+
+    public static InputStream getUngzippedContent(HttpEntity entity)  throws IOException {
+
+        InputStream responseStream = entity.getContent();
+
+        if (responseStream == null)
+            return responseStream;
+
+        Header header = entity.getContentEncoding();
+
+        if (header == null)
+            return responseStream;
+
+        String contentEncoding = header.getValue();
+
+        if (contentEncoding == null)
+            return responseStream;
+
+        if (contentEncoding.contains("gzip")) responseStream
+                = new GZIPInputStream(responseStream);
+
+        return responseStream;
     }
 }
