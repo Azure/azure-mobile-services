@@ -80,7 +80,7 @@ public class GCMMessageHelper {
             @Override
             public void timeoutElapsed() {
 
-                test.log("Did not receive push message on time, test failed");
+//                test.log("Did not receive push message on time, test failed");
                 TestResult testResult = new TestResult();
                 testResult.setTestCase(test);
                 testResult.setStatus(TestStatus.Failed);
