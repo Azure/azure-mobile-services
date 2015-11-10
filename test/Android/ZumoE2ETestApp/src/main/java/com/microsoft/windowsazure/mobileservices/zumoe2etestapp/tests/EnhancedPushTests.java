@@ -1202,7 +1202,7 @@ public class EnhancedPushTests extends TestGroup {
 
                     removeStorageVersion();
 
-                    MobileServiceClient client2 = new MobileServiceClient(client);
+                    MobileServiceClient client2 = new MobileServiceClient(client.getAppUrl(), client.getContext());
 
                     final MobileServicePush mobileServicePush2 = client2.getPush();
 

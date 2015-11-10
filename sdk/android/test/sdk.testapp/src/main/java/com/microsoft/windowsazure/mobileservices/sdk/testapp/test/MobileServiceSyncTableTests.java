@@ -68,14 +68,12 @@ import java.util.concurrent.ExecutionException;
 
 public class MobileServiceSyncTableTests extends InstrumentationTestCase {
     String appUrl = "";
-    String appKey = "";
     GsonBuilder gsonBuilder;
     String OperationQueue = "__operations";
     String SyncErrors = "__errors";
 
     protected void setUp() throws Exception {
         appUrl = "http://myapp.com/";
-        appKey = "qwerty";
         gsonBuilder = new GsonBuilder();
         super.setUp();
     }
@@ -88,7 +86,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
         ServiceFilterContainer serviceFilterContainer1 = new ServiceFilterContainer();
 
-        MobileServiceClient client1 = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client1 = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         client1 = client1.withFilter(getTestFilter(serviceFilterContainer1, ""));
 
@@ -110,7 +108,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         // create a new service to test that operations are loaded from store
         ServiceFilterContainer serviceFilterContainer2 = new ServiceFilterContainer();
 
-        MobileServiceClient client2 = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client2 = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         client2 = client2.withFilter(getTestFilter(serviceFilterContainer2, "{\"id\":\"abc\",\"String\":\"Hey\"}", "{\"id\":\"def\",\"String\":\"What\"}"));
 
@@ -130,7 +128,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         // create yet another service to make sure the old items were purged
         // from queue
         ServiceFilterContainer serviceFilterContainer3 = new ServiceFilterContainer();
-        MobileServiceClient client3 = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client3 = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         client3 = client3.withFilter(getTestFilter(serviceFilterContainer3, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
 
@@ -145,7 +143,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
         ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
 
         client = client.withFilter(getTestFilter(serviceFilterContainer, 401, "")); // for
@@ -186,7 +184,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
         ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         client = client.withFilter(getTestFilter(serviceFilterContainer, false, "{\"id\":\"abc\",\"String\":\"Hey\"}", "[{\"id\":\"def\",\"String\":\"World\"}]"));
 
@@ -221,7 +219,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         store.ReadResponses.add("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for
         // pull
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         client = client.withFilter(getTestFilter(serviceFilterContainer, false, "{\"id\":\"abc\",\"String\":\"Hey\"}",
                 "[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"));
@@ -280,7 +278,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         store.ReadResponses.add("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for
         // pull
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         client = client.withFilter(getTestFilter(serviceFilterContainer, false, "{\"id\":\"abc\",\"String\":\"Hey\"}", // for
                 // insert
@@ -321,7 +319,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
     //
     // MobileServiceClient client = null;
     //
-    // client = new MobileServiceClient(appUrl, appKey, getInstrumentation()
+    // client = new MobileServiceClient(appUrl, getInstrumentation()
     // .getTargetContext());
     //
     // client = client.withFilter(getTestFilter(404)); // for push
@@ -362,7 +360,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
         ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -395,7 +393,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
         ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -428,7 +426,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
         ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -462,7 +460,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
         String queryKey = "QueryKey";
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -506,7 +504,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         String queryKey = "QueryKey";
         String incrementalPullStrategyTable = "__incrementalPullData";
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -546,7 +544,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         String queryKey = "QueryKey";
         String incrementalPullStrategyTable = "__incrementalPullData";
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -592,7 +590,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
         ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         client = client.withFilter(getTestFilter(serviceFilterContainer, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
 
@@ -649,7 +647,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
         ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         client = client.withFilter(getTestFilter(serviceFilterContainer, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
 
@@ -684,7 +682,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
         ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         client = client.withFilter(getTestFilter(serviceFilterContainer, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
 
@@ -710,7 +708,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         MobileServiceClient client = null;
 
-        client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         client = client.withFilter(getTestFilter(serviceFilterContainer, "{\"id\":\"abc\",\"String\":\"Hey\"}", // for
                 // insert
@@ -754,7 +752,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         MobileServiceClient client = null;
 
-        client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         client = client.withFilter(getTestFilter(serviceFilterContainer, "[{\"id\":\"abc\",\"String\":\"Hey\"}]"));
 
@@ -800,7 +798,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
             public Void apply(ServiceFilterRequest request) {
@@ -863,7 +861,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         final JsonObject serverItem = new JsonObject();
         serverItem.addProperty("id", "abc");
@@ -932,7 +930,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         final MobileServiceException innerException = new MobileServiceException(new IOException());
 
@@ -995,7 +993,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
         response.setStatus(new StatusLineMock(401));
@@ -1061,7 +1059,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
             public Void apply(ServiceFilterRequest request) {
@@ -1124,7 +1122,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         final MobileServiceException innerException = new MobileServiceException(new IOException());
 
@@ -1182,7 +1180,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
         response.setStatus(new StatusLineMock(401));
@@ -1243,7 +1241,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
             public Void apply(ServiceFilterRequest request) {
@@ -1300,7 +1298,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         final MobileServiceException innerException = new MobileServiceException(new IOException());
 
@@ -1363,7 +1361,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
         response.setStatus(new StatusLineMock(401));
@@ -1429,7 +1427,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
             public Void apply(ServiceFilterRequest request) {
@@ -1490,7 +1488,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         final MobileServiceException innerException = new MobileServiceException(new IOException());
 
@@ -1557,7 +1555,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
         response.setStatus(new StatusLineMock(401));
@@ -1627,7 +1625,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         final MobileServiceException innerException = new MobileServiceException(new IOException());
 
@@ -1694,7 +1692,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         final MobileServiceException innerException = new MobileServiceException(new IOException());
 
@@ -1761,7 +1759,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
         response.setStatus(new StatusLineMock(401));
@@ -1831,7 +1829,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
             public Void apply(ServiceFilterRequest request) {
@@ -1895,7 +1893,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         final MobileServiceException innerException = new MobileServiceException(new IOException());
 
@@ -1955,7 +1953,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
         response.setStatus(new StatusLineMock(401));
@@ -2018,7 +2016,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
             public Void apply(ServiceFilterRequest request) {
@@ -2076,7 +2074,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         final MobileServiceException innerException = new MobileServiceException(new IOException());
 
@@ -2134,7 +2132,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
         response.setStatus(new StatusLineMock(401));
@@ -2195,7 +2193,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
             public Void apply(ServiceFilterRequest request) {
@@ -2251,7 +2249,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         final MobileServiceException innerException = new MobileServiceException(new IOException());
 
@@ -2309,7 +2307,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
         response.setStatus(new StatusLineMock(401));
@@ -2370,7 +2368,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
             public Void apply(ServiceFilterRequest request) {
@@ -2426,7 +2424,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         final MobileServiceException innerException = new MobileServiceException(new IOException());
 
@@ -2484,7 +2482,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
         response.setStatus(new StatusLineMock(401));
@@ -2545,7 +2543,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
             public Void apply(ServiceFilterRequest request) {
@@ -2601,7 +2599,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         final MobileServiceException innerException = new MobileServiceException(new IOException());
 
@@ -2659,7 +2657,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
         response.setStatus(new StatusLineMock(401));
@@ -2720,7 +2718,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         thrownExceptionFlag.Thrown = true;
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
             public Void apply(ServiceFilterRequest request) {
@@ -3155,7 +3153,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
         final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
             public Void apply(ServiceFilterRequest request) {
@@ -3206,7 +3204,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
                                    CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> secondOperation) throws Throwable {
         MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         client = client.withFilter(getTestFilter());
 
@@ -3244,7 +3242,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
         final ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         Function<ServiceFilterRequest, Void> onHandleRequest = new Function<ServiceFilterRequest, Void>() {
             public Void apply(ServiceFilterRequest request) {

@@ -71,12 +71,10 @@ import java.util.concurrent.ExecutionException;
 
 public class MobileServiceTableTests extends InstrumentationTestCase {
     String appUrl = "";
-    String appKey = "";
     GsonBuilder gsonBuilder;
 
     protected void setUp() throws Exception {
         appUrl = "http://myapp.com/";
-        appKey = "qwerty";
         gsonBuilder = new GsonBuilder();
         super.setUp();
     }
@@ -87,7 +85,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
     public void testNewMobileServiceTableShouldReturnMobileServiceTable() throws MalformedURLException {
         String tableName = "MyTableName";
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         MobileServiceTable<Object> msTable = new MobileServiceTable<Object>(tableName, client, Object.class);
 
         assertEquals(tableName, msTable.getTableName());
@@ -96,7 +94,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
     public void testNewMobileServiceTableWithNameFromClassShouldReturnMobileServiceTable() throws MalformedURLException {
         String tableName = "PersonTestObject";
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         MobileServiceTable<PersonTestObject> msTable = client.getTable(PersonTestObject.class);
 
         assertEquals(tableName.toLowerCase(Locale.getDefault()), msTable.getTableName().toLowerCase(Locale.getDefault()));
@@ -106,7 +104,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
     public void testNewMobileServiceTableWithNullNameShouldThrowException() {
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e1) {
             fail("This should not happen");
         }
@@ -121,7 +119,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
     public void testNewMobileServiceTableWithEmptyNameShouldThrowException() {
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e1) {
             fail("This should not happen");
         }
@@ -136,7 +134,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
     public void testNewMobileServiceTableWithWhiteSpacedNameShouldThrowException() {
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e1) {
             fail("This should not happen");
         }
@@ -161,7 +159,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
         MobileServiceTable<Object> msTable = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
             String tableName = "MyTableName";
             msTable = new MobileServiceTable<Object>(tableName, client, Object.class);
         } catch (MalformedURLException e1) {
@@ -181,7 +179,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -208,7 +206,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -242,7 +240,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -294,7 +292,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -350,7 +348,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -399,7 +397,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -445,7 +443,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -489,7 +487,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -534,7 +532,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -582,7 +580,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -630,7 +628,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -686,7 +684,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -745,7 +743,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -788,7 +786,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -860,7 +858,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -938,7 +936,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -991,7 +989,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -1048,7 +1046,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -1094,7 +1092,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -1143,7 +1141,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -1200,7 +1198,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -1257,7 +1255,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -1303,7 +1301,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -1350,7 +1348,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -1407,7 +1405,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -1461,7 +1459,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -1517,7 +1515,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -1575,7 +1573,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -1629,7 +1627,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -1689,7 +1687,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -1745,7 +1743,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -1803,7 +1801,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -1847,7 +1845,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -1904,7 +1902,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -1974,7 +1972,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -2023,7 +2021,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -2069,7 +2067,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -2108,7 +2106,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -2146,7 +2144,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -2200,7 +2198,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -2250,7 +2248,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -2313,7 +2311,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -2363,7 +2361,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -2416,7 +2414,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -2462,7 +2460,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -2506,7 +2504,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -2557,7 +2555,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -2605,7 +2603,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -2652,7 +2650,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -2700,7 +2698,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -2748,7 +2746,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -2799,7 +2797,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -2867,7 +2865,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
 
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
