@@ -147,7 +147,7 @@ public class MobileServiceClient {
      *
      * @param client An existing MobileServiceClient
      */
-    public MobileServiceClient(MobileServiceClient client) {
+    private MobileServiceClient(MobileServiceClient client) {
         initialize(client.getAppUrl(), client.getCurrentUser(), client.getGsonBuilder(), client.getContext(),
                 client.getAndroidHttpClientFactory());
     }

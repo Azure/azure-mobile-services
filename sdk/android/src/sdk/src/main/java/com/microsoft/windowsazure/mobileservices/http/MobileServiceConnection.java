@@ -47,10 +47,6 @@ public class MobileServiceConnection {
      * Header value to represent JSON content-type
      */
     public static final String JSON_CONTENTTYPE = "application/json";
-    /**
-     * Request header to indicate the Mobile Service application key
-     */
-    private static final String X_ZUMO_APPLICATION_HEADER = "X-ZUMO-APPLICATION";
 
     /**
      * Request header to indicate the Mobile Service Installation ID

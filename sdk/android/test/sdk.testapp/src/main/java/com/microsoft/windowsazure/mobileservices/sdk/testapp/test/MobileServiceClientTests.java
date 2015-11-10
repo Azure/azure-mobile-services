@@ -346,14 +346,12 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
                 final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
                 int zumoInstallationHeaderIndex = -1;
-                int zumoAppHeaderIndex = -1;
                 int zumoVersionHeader = -1;
                 int userAgentHeaderIndex = -1;
                 int acceptHeaderIndex = -1;
                 int acceptEncodingHeaderIndex = -1;
 
                 String installationHeader = "X-ZUMO-INSTALLATION-ID";
-                String appHeader = "X-ZUMO-APPLICATION";
                 String versionHeader = "X-ZUMO-VERSION";
                 String userAgentHeader = HTTP.USER_AGENT;
                 String acceptHeader = "Accept";
@@ -364,8 +362,6 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
                 for (int i = 0; i < headers.length; i++) {
                     if (headers[i].getName() == installationHeader) {
                         zumoInstallationHeaderIndex = i;
-                    } else if (headers[i].getName() == appHeader) {
-                        zumoAppHeaderIndex = i;
                     } else if (headers[i].getName() == versionHeader) {
                         zumoVersionHeader = i;
                     } else if (headers[i].getName() == userAgentHeader) {
@@ -379,10 +375,6 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 
                 if (zumoInstallationHeaderIndex == -1) {
                     resultFuture.setException(new Exception("zumoInstallationHeaderIndex == -1"));
-                    return resultFuture;
-                }
-                if (zumoAppHeaderIndex == -1) {
-                    resultFuture.setException(new Exception("zumoAppHeaderIndex == -1"));
                     return resultFuture;
                 }
                 if (zumoVersionHeader == -1) {
