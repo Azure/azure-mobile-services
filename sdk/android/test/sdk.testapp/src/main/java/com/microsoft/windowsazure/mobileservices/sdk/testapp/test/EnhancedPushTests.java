@@ -72,7 +72,6 @@ public class EnhancedPushTests extends InstrumentationTestCase {
     private static final String NEW_REGISTRATION_LOCATION_HEADER = "Location";
 
     String appUrl = "";
-    String appKey = "";
 
     private static void forceRefreshSync(MobileServicePush push, String handle) throws InterruptedException, ExecutionException {
         push.unregisterAll(handle).get();
@@ -199,7 +198,6 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 
     protected void setUp() throws Exception {
         appUrl = "http://myapp.com/";
-        appKey = "qwerty";
         super.setUp();
     }
 
@@ -216,7 +214,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 
         String registrationId = "registrationId";
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+        MobileServiceClient client = new MobileServiceClient(appUrl, context);
 
         client = client.withFilter(getUpsertTestFilter(registrationId));
 
@@ -264,7 +262,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 
         String registrationId = "registrationId";
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+        MobileServiceClient client = new MobileServiceClient(appUrl, context);
 
         client = client.withFilter(getUpsertTestFilter(registrationId));
 
@@ -329,7 +327,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 
         String registrationId = "registrationId";
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+        MobileServiceClient client = new MobileServiceClient(appUrl, context);
 
         client = client.withFilter(getUpsertTestFilter(registrationId));
 
@@ -377,7 +375,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 
         String registrationId = "registrationId";
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+        MobileServiceClient client = new MobileServiceClient(appUrl, context);
 
         client = client.withFilter(getUpsertTestFilter(registrationId));
 
@@ -439,7 +437,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 
         String registrationId = "registrationId";
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+        MobileServiceClient client = new MobileServiceClient(appUrl, context);
 
         client = client.withFilter(getUpsertFailTestFilter(registrationId));
 
@@ -477,7 +475,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 
         String registrationId = "registrationId";
 
-        MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+        MobileServiceClient client = new MobileServiceClient(appUrl, context);
 
         client = client.withFilter(getUpsertFailTestFilter(registrationId));
 
@@ -519,7 +517,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
             String[] tags1 = new String[]{"tag1"};
             final String[] tags2 = new String[]{"tag2"};
 
-            MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+            MobileServiceClient client = new MobileServiceClient(appUrl, context);
 
             MobileServiceClient registrationclient = client.withFilter(getUpsertTestFilter(registrationId1));
             MobileServiceClient reRegistrationclient = client.withFilter(getUpsertTestFilter(registrationId2));
@@ -575,7 +573,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
             String templateBody1 = "\"data\"={\"text\"=\"$message1\"}";
             final String templateBody2 = "\"data\"={\"text\"=\"$message2\"}";
 
-            MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+            MobileServiceClient client = new MobileServiceClient(appUrl, context);
 
             MobileServiceClient registrationclient = client.withFilter(getUpsertTestFilter(registrationId1));
             MobileServiceClient reRegistrationclient = client.withFilter(getUpsertTestFilter(registrationId2));
@@ -625,7 +623,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
             String registrationId1 = "registrationId1";
             String registrationId2 = "registrationId2";
 
-            MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+            MobileServiceClient client = new MobileServiceClient(appUrl, context);
 
             MobileServiceClient registrationclient = client.withFilter(getUpsertTestFilter(registrationId1));
             MobileServiceClient reRegistrationclient = client.withFilter(getUpsertFailTestFilter(registrationId2));
@@ -681,7 +679,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
             String registrationId1 = "registrationId1";
             String registrationId2 = "registrationId2";
 
-            MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+            MobileServiceClient client = new MobileServiceClient(appUrl, context);
 
             MobileServiceClient registrationclient = client.withFilter(getUpsertTestFilter(registrationId1));
             MobileServiceClient reRegistrationclient = client.withFilter(getUpsertFailTestFilter(registrationId2));
@@ -730,7 +728,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 
             Context context = getInstrumentation().getTargetContext();
 
-            MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+            MobileServiceClient client = new MobileServiceClient(appUrl, context);
 
             try {
                 client.getPush().register("", new String[]{"tag1"}).get();
@@ -759,7 +757,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 
             Context context = getInstrumentation().getTargetContext();
 
-            MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+            MobileServiceClient client = new MobileServiceClient(appUrl, context);
 
             try {
                 client.getPush().registerTemplate("", "template1", "{\"data\"={\"text\"=\"$message\"}}", new String[]{"tag1"}).get();
@@ -791,7 +789,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 
             Context context = getInstrumentation().getTargetContext();
 
-            MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+            MobileServiceClient client = new MobileServiceClient(appUrl, context);
 
             try {
                 client.getPush().registerTemplate(UUID.randomUUID().toString(), "", "{\"data\"={\"text\"=\"$message\"}}", new String[]{"tag1"}).get();
@@ -821,7 +819,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 
             Context context = getInstrumentation().getTargetContext();
 
-            MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+            MobileServiceClient client = new MobileServiceClient(appUrl, context);
 
             try {
                 client.getPush().registerTemplate(UUID.randomUUID().toString(), "template1", "", new String[]{"tag1"}).get();
