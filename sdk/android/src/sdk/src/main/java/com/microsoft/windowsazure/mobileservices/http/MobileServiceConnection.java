@@ -35,9 +35,6 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
 import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceUser;
 
-import org.apache.http.Header;
-import org.apache.http.protocol.HTTP;
-
 /**
  * Class for handling communication with Microsoft Azure Mobile Services REST APIs
  */
@@ -122,7 +119,7 @@ public class MobileServiceConnection {
 
                 try {
                     response = request.execute();
-                    int statusCode = response.getStatus().getStatusCode();
+                    int statusCode = response.getStatus();
 
                     // If the response has error throw exception
                     if (statusCode < 200 || statusCode >= 300) {

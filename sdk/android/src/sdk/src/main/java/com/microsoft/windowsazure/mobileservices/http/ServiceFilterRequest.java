@@ -23,7 +23,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.http;
 
-import org.apache.http.Header;
+import com.squareup.okhttp.Headers;
 
 import java.net.URISyntaxException;
 
@@ -34,7 +34,7 @@ public interface ServiceFilterRequest {
     /**
      * Returns request's Headers
      */
-    public Header[] getHeaders();
+    public Headers getHeaders();
 
     /**
      * Adds a new Header to the request

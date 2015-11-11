@@ -44,9 +44,6 @@ import com.microsoft.windowsazure.mobileservices.http.MobileServiceConnection;
 import com.microsoft.windowsazure.mobileservices.http.MobileServiceHttpClient;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
-import org.apache.http.Header;
-import org.apache.http.protocol.HTTP;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -561,7 +558,7 @@ public class MobileServicePush {
         List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
         parameters.add(new Pair<String, String>("platform", mPnsSpecificRegistrationFactory.getPlatform()));
         parameters.add(new Pair<String, String>("deviceId", pnsHandle));
-        requestHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE));
+        requestHeaders.add(new Pair<String, String>("Content-Type", MobileServiceConnection.JSON_CONTENTTYPE));
 
         ListenableFuture<ServiceFilterResponse> serviceFilterFuture = mHttpClient.request(path, null, "GET", requestHeaders, parameters);
 
@@ -744,7 +741,7 @@ public class MobileServicePush {
 
                 ServiceFilterResponse response = mobileServiceException.getResponse();
 
-                if (response != null && response.getStatus().getStatusCode() == 410) {
+                if (response != null && response.getStatus() == 410) {
 
                     // if we get an RegistrationGoneException (410) from
                     // service, we will recreate registration id and will try to
@@ -783,7 +780,7 @@ public class MobileServicePush {
 
                                     ServiceFilterResponse response = mobileServiceException.getResponse();
 
-                                    if (response != null && response.getStatus().getStatusCode() == 410) {
+                                    if (response != null && response.getStatus() == 410) {
 
                                         RegistrationGoneException registrationGoneException = new RegistrationGoneException(mobileServiceException);
                                         resultFuture.setException(registrationGoneException);
@@ -910,7 +907,7 @@ public class MobileServicePush {
 
         List<Pair<String, String>> requestHeaders = new ArrayList<Pair<String, String>>();
 
-        requestHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE));
+        requestHeaders.add(new Pair<String, String>("Content-Type", MobileServiceConnection.JSON_CONTENTTYPE));
 
         ListenableFuture<ServiceFilterResponse> serviceFilterFuture = mHttpClient.request(path, content, "PUT", requestHeaders, null);
 
