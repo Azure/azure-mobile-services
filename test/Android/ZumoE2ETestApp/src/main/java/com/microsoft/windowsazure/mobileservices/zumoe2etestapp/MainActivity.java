@@ -69,8 +69,12 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.RoundTripT
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.SystemPropertiesTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.UpdateDeleteTests;
 
+import org.apache.http.Header;
+import org.apache.http.HeaderElement;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.ParseException;
 import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -87,13 +91,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-//import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.EnhancedPushTests;
-//import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.LoginTests;
-//import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.MiscTests;
-//import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.PushTests;
-//import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.OfflineTests;
-//import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.SystemPropertiesTests;
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 @SuppressWarnings("deprecation")
@@ -636,7 +633,12 @@ public class MainActivity extends Activity {
         try {
 
             HttpClient httpclient = new DefaultHttpClient();
-            HttpResponse response = httpclient.execute(new HttpGet(getMobileServiceURL() + "api/runtimeinfo"));
+
+            HttpGet request = new HttpGet(getMobileServiceURL() + "api/runtimeinfo");
+            request.addHeader("ZUMO-API-VERSION","2.0.0");
+
+            HttpResponse response = httpclient.execute(request);
+
             String runtimeType;
 
             StatusLine statusLine = response.getStatusLine();
