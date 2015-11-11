@@ -43,13 +43,13 @@ public class StringIdRoundTripTableElement {
     // Complex type
     public ComplexType complex;
 
-    @SerializedName("__createdAt")
+    @SerializedName("createdAt")
     public Date CreatedAt;
 
-    @SerializedName("__updatedAt")
+    @SerializedName("updatedAt")
     public Date UpdatedAt;
 
-    @SerializedName("__version")
+    @SerializedName("version")
     public String Version;
 
     public StringIdRoundTripTableElement() {

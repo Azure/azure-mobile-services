@@ -407,10 +407,12 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
                 int userAgentHeaderIndex = -1;
                 int acceptHeaderIndex = -1;
                 int acceptEncodingHeaderIndex = -1;
+                int apiVersionHeaderIndex = -1;
 
                 String installationHeader = "X-ZUMO-INSTALLATION-ID";
                 String appHeader = "X-ZUMO-APPLICATION";
                 String versionHeader = "X-ZUMO-VERSION";
+                String apiVersionHeader = "ZUMO-API-VERSION";
                 String userAgentHeader = HTTP.USER_AGENT;
                 String acceptHeader = "Accept";
                 String acceptEncodingHeader = "Accept-Encoding";
@@ -430,6 +432,8 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
                         acceptHeaderIndex = i;
                     } else if (headers[i].getName() == acceptEncodingHeader) {
                         acceptEncodingHeaderIndex = i;
+                    }else if (headers[i].getName() == apiVersionHeader) {
+                        apiVersionHeaderIndex = i;
                     }
                 }
 
@@ -455,6 +459,10 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
                 }
                 if (acceptEncodingHeaderIndex == -1) {
                     resultFuture.setException(new Exception("acceptEncodingHeaderIndex == -1"));
+                    return resultFuture;
+                }
+                if (apiVersionHeaderIndex == -1) {
+                    resultFuture.setException(new Exception("apiVersionHeaderIndex == -1"));
                     return resultFuture;
                 }
 

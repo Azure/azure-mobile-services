@@ -18,7 +18,6 @@ Apache 2.0 License
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
-
 import android.content.Context;
 import android.test.InstrumentationTestCase;
 
@@ -65,7 +64,7 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
 
         Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
         tableDefinition.put("id", ColumnDataType.String);
-        tableDefinition.put("__createdAt", ColumnDataType.DateTimeOffset);
+        tableDefinition.put("createdAt", ColumnDataType.DateTimeOffset);
 
         store.defineTable(TestTable, tableDefinition);
 
@@ -98,7 +97,7 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
         long date = (long) (testDate.getTime() - epoch.getTime());
 
         // insert a row and make sure it is inserted
-        SQLiteStoreTestsUtilities.executeNonQuery(this.getContext(), TestDbName, "INSERT INTO todo (id, __createdat) VALUES ('abc', " + date + ")");
+        SQLiteStoreTestsUtilities.executeNonQuery(this.getContext(), TestDbName, "INSERT INTO todo (id, createdAt) VALUES ('abc', " + date + ")");
 
         long count = SQLiteStoreTestsUtilities.countRows(this.getContext(), TestDbName, TestTable);
 
@@ -112,7 +111,7 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
         JsonObject item = store.lookup(TestTable, "abc");
         assertNotNull(item);
         assertEquals(item.get("id").getAsString(), "abc");
-        assertEquals(item.get("__createdat").getAsLong(), date);
+        assertEquals(item.get("createdAt").getAsLong(), date);
     }
 
     public void testReadThrowsWhenStoreIsNotInitialized() {
@@ -135,7 +134,7 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
 
         // insert a row and make sure it is inserted
         SQLiteStoreTestsUtilities
-                .executeNonQuery(this.getContext(), TestDbName, "INSERT INTO todo (id, __createdAt) VALUES ('abc', 1), ('def', 2), ('ghi', 3)");
+                .executeNonQuery(this.getContext(), TestDbName, "INSERT INTO todo (id, createdAt) VALUES ('abc', 1), ('def', 2), ('ghi', 3)");
 
         long count = SQLiteStoreTestsUtilities.countRows(this.getContext(), TestDbName, TestTable);
 
@@ -146,7 +145,7 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
         defineTestTable(store);
         store.initialize();
 
-        Query query = QueryOperations.tableName("todo").field("__createdAt").gt(1).includeInlineCount();
+        Query query = QueryOperations.tableName("todo").field("createdAt").gt(1).includeInlineCount();
 
         JsonObject queryResults = store.read(query).getAsJsonObject();
 
@@ -192,7 +191,7 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
 
         // insert a row and make sure it is inserted
         SQLiteStoreTestsUtilities
-                .executeNonQuery(this.getContext(), TestDbName, "INSERT INTO todo (id, __createdAt) VALUES ('abc', 1), ('def', 2), ('ghi', 3)");
+                .executeNonQuery(this.getContext(), TestDbName, "INSERT INTO todo (id, createdAt) VALUES ('abc', 1), ('def', 2), ('ghi', 3)");
 
         long count = SQLiteStoreTestsUtilities.countRows(this.getContext(), TestDbName, TestTable);
 
@@ -204,7 +203,7 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
         defineTestTable(store);
         store.initialize();
 
-        Query query = QueryOperations.tableName("todo").field("__createdAt").gt(1).includeInlineCount();
+        Query query = QueryOperations.tableName("todo").field("createdAt").gt(1).includeInlineCount();
 
         store.delete(query);
         count = SQLiteStoreTestsUtilities.countRows(this.getContext(), TestDbName, TestTable);
@@ -216,7 +215,7 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
         prepareTodoTable();
 
         // insert a row and make sure it is inserted
-        SQLiteStoreTestsUtilities.executeNonQuery(this.getContext(), TestDbName, "INSERT INTO todo (id, __createdAt) VALUES ('abc', 123)");
+        SQLiteStoreTestsUtilities.executeNonQuery(this.getContext(), TestDbName, "INSERT INTO todo (id, createdAt) VALUES ('abc', 123)");
 
         long count = SQLiteStoreTestsUtilities.countRows(this.getContext(), TestDbName, TestTable);
 
@@ -398,7 +397,7 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
         tableDefinition.put("code", ColumnDataType.String);
         tableDefinition.put("options", ColumnDataType.String);
         tableDefinition.put("friends", ColumnDataType.String);
-        tableDefinition.put("__version", ColumnDataType.String);
+        tableDefinition.put("version", ColumnDataType.String);
 
         store.defineTable(TestTable, tableDefinition);
         store.initialize();
@@ -411,7 +410,7 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
         inserted.addProperty("code", (String) null);
         inserted.addProperty("options", (String) null);
         inserted.addProperty("friends", (String) null);
-        inserted.addProperty("__version", (String) null);
+        inserted.addProperty("version", (String) null);
 
         store.upsert(TestTable, inserted, false);
 
@@ -432,7 +431,7 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
 
         JsonObject inserted = new JsonObject();
         inserted.addProperty("id", "abc");
-        inserted.addProperty("__createdAt", new Date().toString());
+        inserted.addProperty("createdAt", new Date().toString());
 
         // insert a row and make sure it is inserted
         store.upsert(TestTable, inserted, false);
@@ -452,14 +451,14 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
 
         JsonObject inserted = new JsonObject();
         inserted.addProperty("id", "abc");
-        inserted.addProperty("__createdAt", new Date().toString());
+        inserted.addProperty("createdAt", new Date().toString());
 
         // insert a row and make sure it is inserted
         store.upsert(TestTable, inserted, false);
 
         JsonObject updated = new JsonObject();
         updated.addProperty("id", "abc");
-        updated.addProperty("__createdAt", new Date().toString());
+        updated.addProperty("createdAt", new Date().toString());
 
         store.upsert(TestTable, updated, false);
 
@@ -485,7 +484,7 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
             try {
                 JsonObject inserted = new JsonObject();
                 inserted.addProperty("id", mObjectId);
-                inserted.addProperty("__createdAt", new Date().toString());
+                inserted.addProperty("createdAt", new Date().toString());
             
                 mBlocker.await();
                 mStore.upsert(TestTable, inserted, false);
@@ -620,7 +619,7 @@ public class SQLiteStoreTests extends InstrumentationTestCase {
     public void defineTestTable(SQLiteLocalStore store) throws MobileServiceLocalStoreException {
         Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
         tableDefinition.put("id", ColumnDataType.String);
-        tableDefinition.put("__createdat", ColumnDataType.DateTimeOffset);
+        tableDefinition.put("createdAt", ColumnDataType.DateTimeOffset);
 
         store.defineTable(TestTable, tableDefinition);
     }

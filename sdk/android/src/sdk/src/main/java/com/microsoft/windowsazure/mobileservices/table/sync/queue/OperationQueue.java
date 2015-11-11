@@ -26,6 +26,7 @@ package com.microsoft.windowsazure.mobileservices.table.sync.queue;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemColumns;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
 import com.microsoft.windowsazure.mobileservices.table.serialization.DateSerializer;
@@ -94,7 +95,7 @@ public class OperationQueue {
         columns.put("kind", ColumnDataType.Real);
         columns.put("tablename", ColumnDataType.String);
         columns.put("itemid", ColumnDataType.String);
-        columns.put("__createdat", ColumnDataType.Date);
+        columns.put(MobileServiceSystemColumns.CreatedAt, ColumnDataType.Date);
         columns.put("__queueloadedat", ColumnDataType.Date);
         columns.put("sequence", ColumnDataType.Real);
         columns.put("state", ColumnDataType.Real);
@@ -153,7 +154,7 @@ public class OperationQueue {
         element.addProperty("kind", opQueueItem.getKind().getValue());
         element.addProperty("tablename", opQueueItem.getTableName());
         element.addProperty("itemid", opQueueItem.getItemId());
-        element.addProperty("__createdat", DateSerializer.serialize(opQueueItem.getCreatedAt()));
+        element.addProperty(MobileServiceSystemColumns.CreatedAt, DateSerializer.serialize(opQueueItem.getCreatedAt()));
         element.addProperty("__queueloadedat", DateSerializer.serialize(opQueueItem.getQueueLoadedAt()));
         element.addProperty("sequence", opQueueItem.getSequence());
         element.addProperty("state", opQueueItem.getOperationState().getValue());
@@ -166,7 +167,7 @@ public class OperationQueue {
         int kind = element.get("kind").getAsInt();
         String tableName = element.get("tablename").getAsString();
         String itemId = element.get("itemid").getAsString();
-        Date createdAt = DateSerializer.deserialize(element.get("__createdat").getAsString());
+        Date createdAt = DateSerializer.deserialize(element.get(MobileServiceSystemColumns.CreatedAt).getAsString());
         Date queueLoadedAt = DateSerializer.deserialize(element.get("__queueloadedat").getAsString());
         long sequence = element.get("sequence").getAsLong();
         int state = element.get("state").getAsInt();

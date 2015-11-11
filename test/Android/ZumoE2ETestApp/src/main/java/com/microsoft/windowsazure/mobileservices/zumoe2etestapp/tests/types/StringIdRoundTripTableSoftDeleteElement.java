@@ -40,16 +40,16 @@ public class StringIdRoundTripTableSoftDeleteElement {
 
     public Date date1;
 
-    @SerializedName("__createdAt")
+    @SerializedName("createdAt")
     public Date CreatedAt;
 
-    @SerializedName("__updatedAt")
+    @SerializedName("updatedAt")
     public Date UpdatedAt;
 
-    @SerializedName("__version")
+    @SerializedName("version")
     public String Version;
 
-    @SerializedName("__deleted")
+    @SerializedName("deleted")
     public Boolean Deleted;
 
     public StringIdRoundTripTableSoftDeleteElement() {

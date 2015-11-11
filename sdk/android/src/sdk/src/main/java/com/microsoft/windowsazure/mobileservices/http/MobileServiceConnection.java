@@ -53,6 +53,11 @@ public class MobileServiceConnection {
     private static final String X_ZUMO_APPLICATION_HEADER = "X-ZUMO-APPLICATION";
 
     /**
+     * Request header to indicate the API Version
+     */
+    private static final String ZUMO_API_VERSION_HEADER = "ZUMO-API-VERSION";
+
+    /**
      * Request header to indicate the Mobile Service Installation ID
      */
     private static final String X_ZUMO_INSTALLATION_ID_HEADER = "X-ZUMO-INSTALLATION-ID";
@@ -195,6 +200,9 @@ public class MobileServiceConnection {
         if (appKey != null && appKey.trim().length() > 0) {
             request.addHeader(X_ZUMO_APPLICATION_HEADER, mClient.getAppKey());
         }
+
+        // Set the Mobile Service SDK Version
+        request.addHeader(ZUMO_API_VERSION_HEADER,"2.0.0");
 
         // Set the special Installation ID header
         request.addHeader(X_ZUMO_INSTALLATION_ID_HEADER, MobileServiceApplication.getInstallationId(mClient.getContext()));

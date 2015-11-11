@@ -64,11 +64,6 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
     public static final String TABLES_URL = "tables/";
 
     /**
-     * The string prefix used to indicate system properties
-     */
-    protected static final String SystemPropertyPrefix = "__";
-
-    /**
      * The name of the _system query string parameter
      */
     protected static final String SystemPropertiesQueryParameterName = "__systemproperties";
@@ -141,16 +136,14 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
     }
 
     /**
-     * Removes all system properties (name start with '__') from the instance if
+     * Removes all system properties from the instance if
      * the instance is determined to have a string id and therefore be for table
      * that supports system properties.
      *
      * @param instance The instance to remove the system properties from.
-     * @param version  Set to the value of the version system property before it is
-     *                 removed.
      * @return The instance with the system properties removed.
      */
-    protected static JsonObject removeSystemProperties(JsonObject instance) {
+    public static JsonObject removeSystemProperties(JsonObject instance) {
         boolean haveCloned = false;
 
         for (Entry<String, JsonElement> property : instance.entrySet()) {
@@ -273,7 +266,7 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
     private static String getSystemPropertyString(MobileServiceSystemProperty systemProperty) {
         String property = systemProperty.toString().trim();
         char firstLetterAsLower = property.toLowerCase(Locale.getDefault()).charAt(0);
-        return SystemPropertyPrefix + firstLetterAsLower + property.substring(1);
+        return  firstLetterAsLower + property.substring(1);
     }
 
     /**
@@ -282,7 +275,7 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
      * @param clazz Target entity class
      * @return List of entities
      */
-    protected static <F> EnumSet<MobileServiceSystemProperty> getSystemProperties(Class<F> clazz) {
+    public static <F> EnumSet<MobileServiceSystemProperty> getSystemProperties(Class<F> clazz) {
         EnumSet<MobileServiceSystemProperty> result = EnumSet.noneOf(MobileServiceSystemProperty.class);
 
         Class<?> idClazz = getIdPropertyClass(clazz);
@@ -306,6 +299,39 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
 
         // Otherwise, return empty
         return result;
+    }
+
+    /**
+     * Returns the system properties on an JsonObject
+     *
+     * @param instance Target JsonObject
+     * @return List of entities
+     */
+    public static EnumSet<MobileServiceSystemProperty> getSystemProperties(JsonObject instance) {
+        EnumSet<MobileServiceSystemProperty> systemProperties = EnumSet.noneOf(MobileServiceSystemProperty.class);
+
+        for (Entry<String, JsonElement> property : instance.entrySet()) {
+            String propertyName = property.getKey().trim().toLowerCase(Locale.getDefault());
+
+            switch (propertyName) {
+                case MobileServiceSystemColumns.CreatedAt:
+                    systemProperties.add(MobileServiceSystemProperty.CreatedAt);
+                    break;
+                case MobileServiceSystemColumns.UpdatedAt:
+                    systemProperties.add(MobileServiceSystemProperty.UpdatedAt);
+                    break;
+                case MobileServiceSystemColumns.Version:
+                    systemProperties.add(MobileServiceSystemProperty.Version);
+                    break;
+                case MobileServiceSystemColumns.Deleted:
+                    systemProperties.add(MobileServiceSystemProperty.Deleted);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return systemProperties;
     }
 
     /**

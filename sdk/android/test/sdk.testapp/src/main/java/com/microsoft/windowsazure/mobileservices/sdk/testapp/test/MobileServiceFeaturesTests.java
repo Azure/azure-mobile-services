@@ -808,7 +808,7 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
                 MobileServiceJsonTable jsonTable = client.getTable("Person");
                 jsonTable.setSystemProperties(EnumSet.of(MobileServiceSystemProperty.Version));
                 JsonObject jo = createJsonObject();
-                jo.addProperty("__version", "abc");
+                jo.addProperty("version", "abc");
                 List<Pair<String, String>> queryParams = new ArrayList<Pair<String, String>>();
                 queryParams.add(new Pair<String, String>("a", "b"));
                 jsonTable.update(jo, queryParams).get();

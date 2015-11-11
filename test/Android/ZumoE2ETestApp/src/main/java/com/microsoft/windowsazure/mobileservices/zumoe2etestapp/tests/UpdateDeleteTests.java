@@ -484,10 +484,10 @@ public class UpdateDeleteTests extends TestGroup {
                     tableDefinition.put("number", ColumnDataType.Real);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
                     tableDefinition.put("date1", ColumnDataType.Date);
-                    tableDefinition.put("__createdAt", ColumnDataType.DateTimeOffset);
-                    tableDefinition.put("__updatedAt", ColumnDataType.DateTimeOffset);
-                    tableDefinition.put("__version", ColumnDataType.String);
-                    tableDefinition.put("__deleted", ColumnDataType.Boolean);
+                    tableDefinition.put("createdAt", ColumnDataType.DateTimeOffset);
+                    tableDefinition.put("updatedAt", ColumnDataType.DateTimeOffset);
+                    tableDefinition.put("version", ColumnDataType.String);
+                    tableDefinition.put("deleted", ColumnDataType.Boolean);
 
                     log("Initialized the store and sync context");
 

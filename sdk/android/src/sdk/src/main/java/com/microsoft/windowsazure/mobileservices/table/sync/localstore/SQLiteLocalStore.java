@@ -37,6 +37,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemColumns;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QuerySQLWriter;
 
@@ -423,26 +424,26 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 
         invColumnName = invColumnName.trim().toLowerCase(Locale.getDefault());
 
-        return invColumnName.equals("__version") || invColumnName.equals("__createdat") || invColumnName.equals("__updatedat")
-                || invColumnName.equals("__queueloadedat") || invColumnName.equals("__deleted");
+        return invColumnName.equals(MobileServiceSystemColumns.Version) || invColumnName.equals(MobileServiceSystemColumns.CreatedAt) || invColumnName.equals(MobileServiceSystemColumns.UpdatedAt)
+                || invColumnName.equals("__queueloadedat") || invColumnName.equals(MobileServiceSystemColumns.Deleted);
     }
 
     private void validateReservedProperties(ColumnDataType colDataType, String invColumnName) throws IllegalArgumentException {
 
         invColumnName = invColumnName.trim().toLowerCase(Locale.getDefault());
 
-        if (invColumnName.equals("id") && colDataType != ColumnDataType.String) {
+        if (invColumnName.equals(MobileServiceSystemColumns.Id) && colDataType != ColumnDataType.String) {
             throw new IllegalArgumentException("System column \"id\" must be ColumnDataType.String.");
-        } else if (invColumnName.equals("__version") && colDataType != ColumnDataType.String) {
-            throw new IllegalArgumentException("System column \"__version\" must be ColumnDataType.String.");
-        } else if (invColumnName.equals("__createdat") && (colDataType != ColumnDataType.DateTimeOffset && colDataType != ColumnDataType.Date)) {
-            throw new IllegalArgumentException("System column \"__createdat\" must be ColumnDataType.DateTimeOffset or ColumnDataType.Date.");
-        } else if (invColumnName.equals("__updatedat") && (colDataType != ColumnDataType.DateTimeOffset && colDataType != ColumnDataType.Date)) {
-            throw new IllegalArgumentException("System column \"__updatedat\" must be ColumnDataType.DateTimeOffset or ColumnDataType.Date.");
+        } else if (invColumnName.equals(MobileServiceSystemColumns.Version) && colDataType != ColumnDataType.String) {
+            throw new IllegalArgumentException("System column \"version\" must be ColumnDataType.String.");
+        } else if (invColumnName.equals(MobileServiceSystemColumns.CreatedAt) && (colDataType != ColumnDataType.DateTimeOffset && colDataType != ColumnDataType.Date)) {
+            throw new IllegalArgumentException("System column \"createdat\" must be ColumnDataType.DateTimeOffset or ColumnDataType.Date.");
+        } else if (invColumnName.equals(MobileServiceSystemColumns.UpdatedAt) && (colDataType != ColumnDataType.DateTimeOffset && colDataType != ColumnDataType.Date)) {
+            throw new IllegalArgumentException("System column \"updatedat\" must be ColumnDataType.DateTimeOffset or ColumnDataType.Date.");
         } else if (invColumnName.equals("__queueloadedat") && (colDataType != ColumnDataType.DateTimeOffset && colDataType != ColumnDataType.Date)) {
             throw new IllegalArgumentException("System column \"__queueloadedat\" must be ColumnDataType.DateTimeOffset or ColumnDataType.Date.");
-        } else if (invColumnName.equals("__deleted") && colDataType != ColumnDataType.Boolean) {
-            throw new IllegalArgumentException("System column \"__deleted\" must be ColumnDataType.Boolean.");
+        } else if (invColumnName.equals(MobileServiceSystemColumns.Deleted) && colDataType != ColumnDataType.Boolean) {
+            throw new IllegalArgumentException("System column \"deleted\" must be ColumnDataType.Boolean.");
         }
     }
 

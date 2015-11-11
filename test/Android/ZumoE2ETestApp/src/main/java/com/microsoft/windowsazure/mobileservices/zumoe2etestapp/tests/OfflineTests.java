@@ -153,7 +153,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
-                    tableDefinition.put("__version", ColumnDataType.String);
+                    tableDefinition.put("version", ColumnDataType.String);
 
                     log("Initialized the store and sync context");
 
@@ -216,9 +216,9 @@ public class OfflineTests extends TestGroup {
                     item.setFlag(!item.getFlag());
                     // item.addProperty("date", DateSerializer.serialize(new
                     // Date()));
-                    // item.addProperty("__updatedAt",
+                    // item.addProperty("updatedAt",
                     // DateSerializer.serialize(new Date()));
-                    // item.addProperty("__version", "1");
+                    // item.addProperty("version", "1");
 
                     // item.Flag = !item.Flag;
                     // item.Age++;
@@ -344,7 +344,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
-                    tableDefinition.put("__version", ColumnDataType.String);
+                    tableDefinition.put("version", ColumnDataType.String);
 
                     log("Initialized the store and sync context");
 
@@ -756,7 +756,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
-                    tableDefinition.put("__version", ColumnDataType.String);
+                    tableDefinition.put("version", ColumnDataType.String);
 
                     log("Initialized the store and sync context");
 
@@ -878,7 +878,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
-                    tableDefinition.put("__version", ColumnDataType.String);
+                    tableDefinition.put("version", ColumnDataType.String);
 
                     log("Initialized the store and sync context");
 
@@ -970,7 +970,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
-                    tableDefinition.put("__version", ColumnDataType.String);
+                    tableDefinition.put("version", ColumnDataType.String);
 
                     log("Initialized the store and sync context");
 
@@ -1117,7 +1117,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
-                    tableDefinition.put("__version", ColumnDataType.String);
+                    tableDefinition.put("version", ColumnDataType.String);
 
                     log("Initialized the store and sync context");
 
@@ -1260,7 +1260,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
-                    tableDefinition.put("__version", ColumnDataType.String);
+                    tableDefinition.put("version", ColumnDataType.String);
 
                     log("Initialized the store and sync context");
 
@@ -1445,7 +1445,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
-                    tableDefinition.put("__version", ColumnDataType.String);
+                    tableDefinition.put("version", ColumnDataType.String);
 
                     log("Initialized the store and sync context");
 
@@ -1550,7 +1550,7 @@ public class OfflineTests extends TestGroup {
 
         final String tableName = "offlineReadyAuthenticated";
 
-        // If a table does not have a __version column, then offline will still
+        // If a table does not have a version column, then offline will still
         // work, but there will be no conflicts
         final TestCase test = new TestCase() {
 
@@ -1873,9 +1873,9 @@ class ConflictResolvingSyncHandler implements MobileServiceSyncHandler {
                 JsonParser jsonParser = new JsonParser();
                 JsonObject mergedItem = (JsonObject) jsonParser.parse(mergedItemJson);
 
-                String serverVersion = serverItem.get("__version").getAsString();
+                String serverVersion = serverItem.get("version").getAsString();
 
-                mergedItem.addProperty("__version", serverVersion);
+                mergedItem.addProperty("version", serverVersion);
 
                 test.log("Merged the items, will try to resubmit the operation");
 
@@ -1931,9 +1931,9 @@ class InstaItem {
     private String mInspectionId;
     @SerializedName("levelsInInspectionId")
     private String mLevelsInInspectionId;
-    @SerializedName("__version")
+    @SerializedName("version")
     private String mVersion;
-    @SerializedName("__deleted")
+    @SerializedName("deleted")
     private boolean mDeleted;
 
     public InstaItem() {
@@ -2182,7 +2182,7 @@ class OfflineReadyItem {
     private Date mDate;
     @SerializedName("bool")
     private boolean mFlag;
-    @SerializedName("__version")
+    @SerializedName("version")
     private String mVersion;
 
     public OfflineReadyItem() {
