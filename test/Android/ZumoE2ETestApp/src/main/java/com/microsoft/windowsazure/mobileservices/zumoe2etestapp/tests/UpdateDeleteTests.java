@@ -249,7 +249,7 @@ public class UpdateDeleteTests extends TestGroup {
                     JsonObject lookedUpItem = (JsonObject) table.lookUp(updatedItem.get("id").getAsInt()).get();
 
                     log("verify items are equal");
-                    if (Util.compareJson(updatedItem, lookedUpItem)) { // check
+                    if (Util.compareJson(updatedItem, lookedUpItem, true)) { // check
                         // the
                         // items
                         // are

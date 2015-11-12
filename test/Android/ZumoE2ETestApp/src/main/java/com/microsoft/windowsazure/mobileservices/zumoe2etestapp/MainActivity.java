@@ -261,7 +261,7 @@ public class MainActivity extends Activity {
                 return true;
 
             case R.id.menu_run_tests:
-                if (getMobileServiceKey().trim() == "" || getMobileServiceURL().trim() == "") {
+                if (getMobileServiceURL().trim() == "") {
                     startActivity(new Intent(this, ZumoPreferenceActivity.class));
                 } else {
                     runTests();
@@ -536,10 +536,6 @@ public class MainActivity extends Activity {
         return this.getPreference(Constants.PREFERENCE_MOBILE_SERVICE_URL);
     }
 
-    private String getMobileServiceKey() {
-        return this.getPreference(Constants.PREFERENCE_MOBILE_SERVICE_KEY);
-    }
-
     private String getDaylightURL() {
         return this.getPreference(Constants.PREFERENCE_DAYLIGHT_URL);
     }
@@ -597,9 +593,8 @@ public class MainActivity extends Activity {
 
     private MobileServiceClient createMobileServiceClient() throws MalformedURLException {
         String url = getMobileServiceURL();
-        String key = getMobileServiceKey();
 
-        MobileServiceClient client = new MobileServiceClient(url, key, this);
+        MobileServiceClient client = new MobileServiceClient(url, this);
 
         return client;
     }

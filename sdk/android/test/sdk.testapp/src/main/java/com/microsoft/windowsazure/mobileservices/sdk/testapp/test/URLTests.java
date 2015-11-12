@@ -47,12 +47,10 @@ import java.util.Locale;
 public class URLTests extends InstrumentationTestCase {
 
     String appUrl = "";
-    String appKey = "";
 
     @Override
     protected void setUp() throws Exception {
         appUrl = "http://myapp.com/";
-        appKey = "qwerty";
         super.setUp();
     }
 
@@ -80,7 +78,7 @@ public class URLTests extends InstrumentationTestCase {
         // Create client
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
         }
 
@@ -135,7 +133,7 @@ public class URLTests extends InstrumentationTestCase {
         // Create client
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
         }
 
@@ -178,7 +176,7 @@ public class URLTests extends InstrumentationTestCase {
         // Create client
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
         }
 
@@ -218,7 +216,7 @@ public class URLTests extends InstrumentationTestCase {
 
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
         }
 
@@ -260,7 +258,7 @@ public class URLTests extends InstrumentationTestCase {
         // Create client
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
         }
 
@@ -300,7 +298,7 @@ public class URLTests extends InstrumentationTestCase {
         // Create client
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
         }
 
@@ -342,7 +340,7 @@ public class URLTests extends InstrumentationTestCase {
         // Create client
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
         }
 
@@ -382,7 +380,7 @@ public class URLTests extends InstrumentationTestCase {
 
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
         }
 
@@ -423,7 +421,7 @@ public class URLTests extends InstrumentationTestCase {
 
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
         }
 
@@ -462,7 +460,7 @@ public class URLTests extends InstrumentationTestCase {
         // Create client
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
         }
 
