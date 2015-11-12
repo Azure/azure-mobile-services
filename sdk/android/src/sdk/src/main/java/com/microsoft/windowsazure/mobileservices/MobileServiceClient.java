@@ -46,11 +46,11 @@ import com.google.gson.annotations.SerializedName;
 import com.microsoft.windowsazure.mobileservices.authentication.LoginManager;
 import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceAuthenticationProvider;
 import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceUser;
+import com.microsoft.windowsazure.mobileservices.http.OkHttpClientFactory;
+import com.microsoft.windowsazure.mobileservices.http.OkHttpClientFactoryImpl;
 import com.microsoft.windowsazure.mobileservices.http.MobileServiceConnection;
 import com.microsoft.windowsazure.mobileservices.http.MobileServiceHttpClient;
 import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
-import com.microsoft.windowsazure.mobileservices.http.OkHttpClientFactory;
-import com.microsoft.windowsazure.mobileservices.http.OkHttpClientFactoryImpl;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
@@ -63,6 +63,7 @@ import com.microsoft.windowsazure.mobileservices.table.serialization.LongSeriali
 import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceJsonSyncTable;
 import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncContext;
 import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncTable;
+
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
@@ -130,7 +131,7 @@ public class MobileServiceClient {
      */
     private Context mContext;
     /**
-     * AndroidHttpClientFactory used for request execution
+     * OkHttpClientFactory used for request execution
      */
     private OkHttpClientFactory mOkHttpClientFactory;
     /**
@@ -142,6 +143,19 @@ public class MobileServiceClient {
      * remote databases.
      */
     private MobileServiceSyncContext mSyncContext;
+
+
+    /**
+     * Constructor for the MobileServiceClient
+     *
+     * @param appUrl  Mobile Service URL
+     * @param context The Context where the MobileServiceClient is created
+     * @throws java.net.MalformedURLException
+     */
+    public MobileServiceClient(String appUrl, Context context) throws MalformedURLException {
+        this(new URL(appUrl), null, context);
+    }
+
 
     /**
      * Constructor for the MobileServiceClient
@@ -1198,7 +1212,7 @@ public class MobileServiceClient {
         Futures.addCallback(internalFuture, new FutureCallback<ServiceFilterResponse>() {
             @Override
             public void onFailure(Throwable e) {
-               future.setException(e);
+                future.setException(e);
             }
 
             @Override
@@ -1438,7 +1452,7 @@ public class MobileServiceClient {
      * @param context     The Context where the MobileServiceClient is created
      */
     private void initialize(URL appUrl, String appKey, MobileServiceUser currentUser, GsonBuilder gsonBuiler, Context context,
-                            OkHttpClientFactory okHttpClientFactory) {
+                            OkHttpClientFactory OkHttpClientFactory) {
         if (appUrl == null || appUrl.toString().trim().length() == 0) {
             throw new IllegalArgumentException("Invalid Application URL");
         }
@@ -1466,7 +1480,7 @@ public class MobileServiceClient {
         mCurrentUser = currentUser;
         mContext = context;
         mGsonBuilder = gsonBuiler;
-        mOkHttpClientFactory = okHttpClientFactory;
+        mOkHttpClientFactory = OkHttpClientFactory;
         mPush = new MobileServicePush(this, context);
         mSyncContext = new MobileServiceSyncContext(this);
     }
@@ -1522,7 +1536,7 @@ public class MobileServiceClient {
     }
 
     /**
-     * Gets the AndroidHttpClientFactory
+     * Gets the OkHttpClientFactory
      *
      * @return
      */
@@ -1531,10 +1545,10 @@ public class MobileServiceClient {
     }
 
     /**
-     * Sets the AndroidHttpClientFactory
+     * Sets the OkHttpClientFactory
      */
-    public void setAndroidHttpClientFactory(OkHttpClientFactory okHttpClientFactory) {
-        this.mOkHttpClientFactory = okHttpClientFactory;
+    public void setAndroidHttpClientFactory(OkHttpClientFactory mOkHttpClientFactory) {
+        this.mOkHttpClientFactory = mOkHttpClientFactory;
     }
 
     /**
@@ -1544,3 +1558,4 @@ public class MobileServiceClient {
         return mPush;
     }
 }
+
