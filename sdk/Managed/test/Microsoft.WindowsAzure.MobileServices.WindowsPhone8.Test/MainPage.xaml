@@ -28,8 +28,6 @@
             <StackPanel x:Name="testSettings">
                 <TextBlock VerticalAlignment="Center" Style="{StaticResource PhoneTextNormalStyle}" Text="Mobile Service Uri:" />
                 <TextBox x:Name="txtRuntimeUri" BorderThickness="0" Padding="0" FontSize="20"/>
-                <TextBlock VerticalAlignment="Center" Style="{StaticResource PhoneTextNormalStyle}" Text="Mobile Service Key:" />
-                <TextBox x:Name="txtRuntimeKey" BorderThickness="0" Padding="0" FontSize="20"/>
                 <TextBlock VerticalAlignment="Center" Style="{StaticResource PhoneTextNormalStyle}" Text="Tags:"/>
                 <TextBox x:Name="txtTags" FontSize="20"  BorderThickness="0" Padding="0" />
                 <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">

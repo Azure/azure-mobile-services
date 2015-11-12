@@ -21,7 +21,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>True if it was relative or absolute uri, False otherwise</returns>
         public static bool TryParseQueryUri(Uri applicationUri, string query, out Uri uri, out bool absolute)
         {
-            if (query.StartsWith("/") && Uri.TryCreate(applicationUri, query, out uri))
+            if (query.StartsWith("/") && Uri.TryCreate(applicationUri, query.TrimStart('/'), out uri))
             {
                 absolute = false;
                 return true;

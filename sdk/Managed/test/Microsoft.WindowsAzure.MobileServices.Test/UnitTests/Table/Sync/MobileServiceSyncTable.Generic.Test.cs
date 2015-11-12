@@ -24,7 +24,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task RefreshAsync_Succeeds_WhenIdIsNull()
         {
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...");
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable<StringIdType> table = service.GetSyncTable<StringIdType>();
@@ -36,7 +36,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task RefreshAsync_ThrowsInvalidOperationException_WhenIdItemDoesNotExist()
         {
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...");
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable<StringIdType> table = service.GetSyncTable<StringIdType>();
@@ -49,7 +49,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task RefreshAsync_UpdatesItem_WhenItExistsInStore()
         {
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...");
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable<StringIdType> table = service.GetSyncTable<StringIdType>();
@@ -79,7 +79,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var handler = new MobileServiceSyncHandlerMock();
             handler.TableOperationAction = op => Task.Delay(TimeSpan.MaxValue).ContinueWith<JObject>(t => null); // long slow operation
 
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...");
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
             await service.SyncContext.InitializeAsync(store, handler);
 
             IMobileServiceSyncTable table = service.GetSyncTable("someTable");
@@ -107,7 +107,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             var store = new MobileServiceLocalStoreMock();
 
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable table = service.GetSyncTable("someTable");
@@ -132,7 +132,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var store = new MobileServiceLocalStoreMock();
             store.ReadResponses.Enqueue("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for pull
 
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
             // insert item in pull table
@@ -167,7 +167,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var store = new MobileServiceLocalStoreMock();
             store.ReadResponses.Enqueue("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for pull
 
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
             // insert an item but don't push
@@ -190,7 +190,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for pull
             hijack.AddResponseContent("[]"); // last page
 
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
 
             // insert an item but don't push
@@ -215,7 +215,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.AddResponseContent("[]"); // end of the list
 
             var store = new MobileServiceLocalStoreMock();
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             MobileAppUriValidator mobileAppUriValidator = new MobileAppUriValidator(service);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
@@ -240,12 +240,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public async Task PullAsync_UpdatesDeltaToken_AfterEachResult_IfOrderByIsSupported()
         {
             var hijack = new TestHttpHandler();
-            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""__updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""},
-                                         {""id"":""def"",""String"":""How"", ""__updatedAt"": ""2001-02-04T00:00:00.0000000+00:00""}]"); // first page
+            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""},
+                                         {""id"":""def"",""String"":""How"", ""updatedAt"": ""2001-02-04T00:00:00.0000000+00:00""}]"); // first page
             hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.InternalServerError)); // throw on second page
 
             var store = new MobileServiceLocalStoreMock();
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             MobileAppUriValidator mobileAppUriValidator = new MobileAppUriValidator(service);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
@@ -259,8 +259,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(store.TableMap["stringId_test_table"]["abc"].Value<string>("String"), "Hey");
             Assert.AreEqual(store.TableMap["stringId_test_table"]["def"].Value<string>("String"), "How");
 
-            AssertEx.MatchUris(hijack.Requests, mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true"),
-                                                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(__updatedAt ge datetimeoffset'2001-02-04T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true"));
+            AssertEx.MatchUris(hijack.Requests, mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=updatedAt&$skip=0&$top=50&__includeDeleted=true"),
+                                                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(updatedAt ge datetimeoffset'2001-02-04T00:00:00.0000000%2B00:00')&$orderby=updatedAt&$skip=0&$top=50&__includeDeleted=true"));
 
             Assert.Equals(store.TableMap[MobileServiceLocalSystemTables.Config]["deltaToken|stringId_test_table|items"]["value"], "2001-02-04T00:00:00.0000000+00:00");
         }
@@ -269,12 +269,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public async Task PullAsync_DoesNotUpdateDeltaToken_AfterEachResult_IfOrderByIsNotSupported()
         {
             var hijack = new TestHttpHandler();
-            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""__updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""},
-                                         {""id"":""def"",""String"":""How"", ""__updatedAt"": ""2001-02-04T00:00:00.0000000+00:00""}]"); // first page
+            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""},
+                                         {""id"":""def"",""String"":""How"", ""updatedAt"": ""2001-02-04T00:00:00.0000000+00:00""}]"); // first page
             hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.InternalServerError)); // throw on second page
 
             var store = new MobileServiceLocalStoreMock();
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             MobileAppUriValidator mobileAppUriValidator = new MobileAppUriValidator(service);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
@@ -289,8 +289,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(store.TableMap["stringId_test_table"]["abc"].Value<string>("String"), "Hey");
             Assert.AreEqual(store.TableMap["stringId_test_table"]["def"].Value<string>("String"), "How");
 
-            AssertEx.MatchUris(hijack.Requests, mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$skip=0&$top=50&__includeDeleted=true"),
-                                                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$skip=2&$top=50&__includeDeleted=true"));
+            AssertEx.MatchUris(hijack.Requests, mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$skip=0&$top=50&__includeDeleted=true"),
+                                                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$skip=2&$top=50&__includeDeleted=true"));
 
             Assert.IsFalse(store.TableMap[MobileServiceLocalSystemTables.Config].ContainsKey("deltaToken|stringId_test_table|items"));
         }
@@ -310,7 +310,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.AddResponseContent("[]");
 
             var store = new MobileServiceLocalStoreMock();
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             MobileAppUriValidator mobileAppUriValidator = new MobileAppUriValidator(service);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
@@ -337,20 +337,42 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task PullAsync_Supports_AbsoluteAndRelativeUri()
         {
-            var data = new string[] 
+            var data = new[]
             {
-                "http://www.testgateway.com/api/todoitem",
-                "/api/todoitem"
+                new 
+                {
+                    ServiceUri = MobileAppUriValidator.DummyMobileApp, 
+                    QueryUri = MobileAppUriValidator.DummyMobileApp + "api/todoitem", 
+                    Result = MobileAppUriValidator.DummyMobileApp + "api/todoitem"
+                },
+                new 
+                {
+                    ServiceUri = MobileAppUriValidator.DummyMobileAppWithoutTralingSlash, 
+                    QueryUri = "/api/todoitem", 
+                    Result = MobileAppUriValidator.DummyMobileAppWithoutTralingSlash + "/api/todoitem"
+                },
+                new 
+                {
+                    ServiceUri = MobileAppUriValidator.DummyMobileAppUriWithFolder,
+                    QueryUri = MobileAppUriValidator.DummyMobileAppUriWithFolder + "api/todoitem", 
+                    Result = MobileAppUriValidator.DummyMobileAppUriWithFolder + "api/todoitem"
+                },
+                new 
+                {
+                    ServiceUri = MobileAppUriValidator.DummyMobileAppUriWithFolderWithoutTralingSlash, 
+                    QueryUri = "/api/todoitem", 
+                    Result = MobileAppUriValidator.DummyMobileAppUriWithFolderWithoutTralingSlash + "/api/todoitem"
+                }
             };
 
-            foreach (string uri in data)
+            foreach (var item in data)
             {
                 var hijack = new TestHttpHandler();
                 hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"How\"}]"); // first page
                 hijack.AddResponseContent("[]");
 
                 var store = new MobileServiceLocalStoreMock();
-                IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+                IMobileServiceClient service = new MobileServiceClient(item.ServiceUri, hijack);
                 MobileAppUriValidator mobileAppUriValidator = new MobileAppUriValidator(service);
                 await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
@@ -358,12 +380,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
                 Assert.IsFalse(store.TableMap.ContainsKey("stringId_test_table"));
 
-                await table.PullAsync(null, uri);
+                await table.PullAsync(null, item.QueryUri);
 
                 Assert.AreEqual(store.TableMap["stringId_test_table"].Count, 2);
 
-                AssertEx.MatchUris(hijack.Requests, "http://www.testgateway.com/api/todoitem?$skip=0&$top=50&__includeDeleted=true",
-                                                    "http://www.testgateway.com/api/todoitem?$skip=2&$top=50&__includeDeleted=true");
+                AssertEx.MatchUris(hijack.Requests, item.Result + "?$skip=0&$top=50&__includeDeleted=true",
+                                                    item.Result + "?$skip=2&$top=50&__includeDeleted=true");
 
                 Assert.AreEqual("QS,OL", hijack.Requests[0].Headers.GetValues("X-ZUMO-FEATURES").First());
                 Assert.AreEqual("QS,OL", hijack.Requests[1].Headers.GetValues("X-ZUMO-FEATURES").First());
@@ -372,7 +394,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
         public async Task PullASync_Throws_IfAbsoluteUriHostNameDoesNotMatch()
         {
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", new TestHttpHandler());
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, new TestHttpHandler());
             IMobileServiceSyncTable<ToDo> table = service.GetSyncTable<ToDo>();
 
             var ex = await AssertEx.Throws<ArgumentException>(async () => await table.PullAsync(null, "http://www.contoso.com/about?$filter=a eq b&$orderby=c"));
@@ -390,7 +412,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.AddResponseContent("[]"); // end of the list
 
             var store = new MobileServiceLocalStoreMock();
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             MobileAppUriValidator mobileAppUriValidator = new MobileAppUriValidator(service);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
@@ -417,7 +439,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.AddResponseContent("[]"); // end of the list
 
             var store = new MobileServiceLocalStoreMock();
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             MobileAppUriValidator mobileAppUriValidator = new MobileAppUriValidator(service);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
@@ -432,7 +454,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             AssertEx.MatchUris(hijack.Requests, mobileAppUriValidator.GetTableUri("stringId_test_table?$top=50&__includeDeleted=true"));
         }
-        
+
         [AsyncTestMethod]
         public async Task PullAsync_UsesTopInQuery_IfLessThanMaxPageSize()
         {
@@ -441,7 +463,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.AddResponseContent("[]"); // end of the list
 
             var store = new MobileServiceLocalStoreMock();
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             MobileAppUriValidator mobileAppUriValidator = new MobileAppUriValidator(service);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
@@ -473,7 +495,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.AddResponseContent("[]"); // end of the list
 
             var store = new MobileServiceLocalStoreMock();
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             MobileAppUriValidator mobileAppUriValidator = new MobileAppUriValidator(service);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
@@ -492,7 +514,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             AssertEx.MatchUris(hijack.Requests, mobileAppUriValidator.GetTableUri("stringId_test_table?$skip=0&$top=50&__includeDeleted=true"),
                                         mobileAppUriValidator.GetTableUri("stringId_test_table?$skip=2&$top=49&__includeDeleted=true"));
         }
-        
+
         [AsyncTestMethod]
         public async Task PullAsync_DoesNotFollowLink_IfMaxRecordsAreRetrieved()
         {
@@ -502,7 +524,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.AddResponseContent("[{\"id\":\"ghi\",\"String\":\"Are\"},{\"id\":\"jkl\",\"String\":\"You\"}]"); // second page
 
             var store = new MobileServiceLocalStoreMock();
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
@@ -523,7 +545,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.AddResponseContent("[{\"id\":\"ghi\",\"String\":\"Are\"},{\"id\":\"jkl\",\"String\":\"You\"}]"); // second page
 
             var store = new MobileServiceLocalStoreMock();
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
@@ -543,7 +565,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             var store = new MobileServiceLocalStoreMock();
 
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
             // insert an item but don't push
@@ -561,7 +583,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task PullAsync_Throws_WhenSelectClauseIsSpecified()
         {
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...");
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
@@ -575,7 +597,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task PullAsync_Throws_WhenOrderByClauseIsSpecifiedWithQueryId()
         {
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...");
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
@@ -589,7 +611,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task PullAsync_Throws_WhenOrderByClauseIsSpecifiedAndOptionIsNotSet()
         {
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...");
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
@@ -604,7 +626,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task PullAsync_Throws_WhenTopClauseIsSpecifiedAndOptionIsNotSet()
         {
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...");
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
@@ -619,7 +641,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task PullAsync_Throws_WhenSkipClauseIsSpecifiedAndOptionIsNotSet()
         {
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...");
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
@@ -634,7 +656,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task PullAsync_Throws_WhenTopOrSkipIsSpecifiedWithQueryId()
         {
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...");
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
@@ -663,7 +685,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.AddResponseContent("[]"); // last page
 
             var store = new MobileServiceLocalStoreMock();
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
@@ -684,8 +706,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public async Task PullAsync_Incremental_AllOptions_MovesByUpdatedAt()
         {
             await TestPullAsyncIncrementalWithOptions(MobileServiceRemoteTableOptions.All,
-                    "stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$orderby=__updatedAt&$skip=0&$top=50&param1=val1&__includeDeleted=true",
-                    "stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00'))&$orderby=__updatedAt&$skip=0&$top=50&param1=val1&__includeDeleted=true");
+                    "stringId_test_table?$filter=((String eq 'world') and (updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$orderby=updatedAt&$skip=0&$top=50&param1=val1&__includeDeleted=true",
+                    "stringId_test_table?$filter=((String eq 'world') and (updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00'))&$orderby=updatedAt&$skip=0&$top=50&param1=val1&__includeDeleted=true");
         }
 
         [AsyncTestMethod]
@@ -696,11 +718,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             {
                 return Task.FromResult(req);
             };
-            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""__updatedAt"": null}]");
+            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""updatedAt"": null}]");
             hijack.AddResponseContent("[]"); // last page
 
             var store = new MobileServiceLocalStoreMock();
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             MobileAppUriValidator mobileAppUriValidator = new MobileAppUriValidator(service);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
@@ -708,8 +730,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             await table.PullAsync("items", table.CreateQuery());
             AssertEx.MatchUris(hijack.Requests,
-                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true"),
-                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=1&$top=50&__includeDeleted=true"));
+                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=updatedAt&$skip=0&$top=50&__includeDeleted=true"),
+                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=updatedAt&$skip=1&$top=50&__includeDeleted=true"));
         }
 
         [AsyncTestMethod]
@@ -720,12 +742,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             {
                 return Task.FromResult(req);
             };
-            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""__updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""}]");
-            hijack.AddResponseContent(@"[{""id"":""def"",""String"":""World"", ""__updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""}]");
+            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""}]");
+            hijack.AddResponseContent(@"[{""id"":""def"",""String"":""World"", ""updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""}]");
             hijack.AddResponseContent("[]"); // last page
 
             var store = new MobileServiceLocalStoreMock();
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             MobileAppUriValidator mobileAppUriValidator = new MobileAppUriValidator(service);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
@@ -733,40 +755,40 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             await table.PullAsync("items", table.CreateQuery());
             AssertEx.MatchUris(hijack.Requests,
-                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true"),
-                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(__updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true"),
-                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(__updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=1&$top=50&__includeDeleted=true"));
+                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=updatedAt&$skip=0&$top=50&__includeDeleted=true"),
+                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00')&$orderby=updatedAt&$skip=0&$top=50&__includeDeleted=true"),
+                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00')&$orderby=updatedAt&$skip=1&$top=50&__includeDeleted=true"));
         }
 
         [AsyncTestMethod]
         public async Task PullAsync_Incremental_WithoutOrderBy_MovesBySkipAndTop()
         {
             await TestPullAsyncIncrementalWithOptions(MobileServiceRemoteTableOptions.Skip | MobileServiceRemoteTableOptions.Top,
-                "stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$skip=0&$top=50&param1=val1&__includeDeleted=true",
-                "stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$skip=2&$top=50&param1=val1&__includeDeleted=true");
+                "stringId_test_table?$filter=((String eq 'world') and (updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$skip=0&$top=50&param1=val1&__includeDeleted=true",
+                "stringId_test_table?$filter=((String eq 'world') and (updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$skip=2&$top=50&param1=val1&__includeDeleted=true");
         }
 
         [AsyncTestMethod]
         public async Task PullAsync_Incremental_WithoutSkipAndOrderBy_CanNotMoveForward()
         {
             await TestPullAsyncIncrementalWithOptions(MobileServiceRemoteTableOptions.Top,
-                "stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$top=50&param1=val1&__includeDeleted=true");
+                "stringId_test_table?$filter=((String eq 'world') and (updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$top=50&param1=val1&__includeDeleted=true");
         }
 
         [AsyncTestMethod]
         public async Task PullAsync_Incremental_WithoutTopAndOrderBy_MovesBySkip()
         {
             await TestPullAsyncIncrementalWithOptions(MobileServiceRemoteTableOptions.Skip,
-                "stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&param1=val1&__includeDeleted=true",
-                "stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$skip=2&param1=val1&__includeDeleted=true");
+                "stringId_test_table?$filter=((String eq 'world') and (updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&param1=val1&__includeDeleted=true",
+                "stringId_test_table?$filter=((String eq 'world') and (updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$skip=2&param1=val1&__includeDeleted=true");
         }
 
         [AsyncTestMethod]
         public async Task PullAsync_Incremental_WithoutSkipAndTop_MovesByUpdatedAt()
         {
             await TestPullAsyncIncrementalWithOptions(MobileServiceRemoteTableOptions.OrderBy,
-                "stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$orderby=__updatedAt&param1=val1&__includeDeleted=true",
-                "stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00'))&$orderby=__updatedAt&param1=val1&__includeDeleted=true");
+                "stringId_test_table?$filter=((String eq 'world') and (updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$orderby=updatedAt&param1=val1&__includeDeleted=true",
+                "stringId_test_table?$filter=((String eq 'world') and (updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00'))&$orderby=updatedAt&param1=val1&__includeDeleted=true");
         }
 
         [AsyncTestMethod]
@@ -781,7 +803,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.AddResponseContent("[]"); // last page
 
             var store = new MobileServiceLocalStoreMock();
-            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", hijack);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
@@ -792,8 +814,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             await table.PullAsync("items", table.CreateQuery(), pullOptions: pullOptions);
             AssertEx.MatchUris(hijack.Requests,
-                string.Format("http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top={0}&__includeDeleted=true", pullOptions.MaxPageSize),
-                string.Format("http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=1&$top={0}&__includeDeleted=true", pullOptions.MaxPageSize));
+                string.Format("http://www.test.com/tables/stringId_test_table?$filter=(updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=updatedAt&$skip=0&$top={0}&__includeDeleted=true", pullOptions.MaxPageSize),
+                string.Format("http://www.test.com/tables/stringId_test_table?$filter=(updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=updatedAt&$skip=1&$top={0}&__includeDeleted=true", pullOptions.MaxPageSize));
         }
 
         private static async Task TestPullAsyncIncrementalWithOptions(MobileServiceRemoteTableOptions options, params string[] uris)
@@ -810,18 +832,18 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var store = new MobileServiceLocalStoreMock();
             store.TableMap[MobileServiceLocalSystemTables.Config] = new Dictionary<string, JObject>();
             await TestIncrementalPull(store, MobileServiceRemoteTableOptions.All,
-                "stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00'))&$orderby=__updatedAt&$skip=0&$top=50&param1=val1&__includeDeleted=true",
-                "stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00'))&$orderby=__updatedAt&$skip=0&$top=50&param1=val1&__includeDeleted=true");
+                "stringId_test_table?$filter=((String eq 'world') and (updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00'))&$orderby=updatedAt&$skip=0&$top=50&param1=val1&__includeDeleted=true",
+                "stringId_test_table?$filter=((String eq 'world') and (updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00'))&$orderby=updatedAt&$skip=0&$top=50&param1=val1&__includeDeleted=true");
         }
 
         private static async Task TestIncrementalPull(MobileServiceLocalStoreMock store, MobileServiceRemoteTableOptions options, params string[] expectedTableUriComponents)
         {
             var hijack = new TestHttpHandler();
-            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""__updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""},
-                                        {""id"":""def"",""String"":""World"", ""__updatedAt"": ""2001-02-03T00:03:00.0000000+07:00""}]"); // for pull
+            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""},
+                                        {""id"":""def"",""String"":""World"", ""updatedAt"": ""2001-02-03T00:03:00.0000000+07:00""}]"); // for pull
             hijack.AddResponseContent(@"[]");
 
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             MobileAppUriValidator mobileAppUriValidator = new MobileAppUriValidator(service);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
@@ -855,7 +877,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task PullAsync_Throws_WhenQueryIdIsInvalid()
         {
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", new TestHttpHandler());
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, new TestHttpHandler());
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
@@ -866,7 +888,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         private async Task TestPullQueryOverrideThrows(IDictionary<string, string> parameters, string errorMessage)
         {
             var store = new MobileServiceLocalStoreMock();
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...");
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
@@ -883,7 +905,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var hijack = new TestHttpHandler();
             hijack.SetResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
             var store = new MobileServiceLocalStoreMock();
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
             // insert item in purge table
@@ -913,13 +935,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public async Task PurgeAsync_ResetsDeltaToken_WhenQueryIdIsSpecified()
         {
             var hijack = new TestHttpHandler();
-            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""__updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""},
-                                         {""id"":""def"",""String"":""How"", ""__updatedAt"": ""2001-02-04T00:00:00.0000000+00:00""}]"); // first page
+            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""},
+                                         {""id"":""def"",""String"":""How"", ""updatedAt"": ""2001-02-04T00:00:00.0000000+00:00""}]"); // first page
             hijack.AddResponseContent("[]"); // last page of first pull
             hijack.AddResponseContent("[]"); // second pull
 
             var store = new MobileServiceLocalStoreMock();
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             MobileAppUriValidator mobileAppUriValidator = new MobileAppUriValidator(service);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
@@ -951,15 +973,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             await table.PullAsync("items", table.CreateQuery());
 
             // verify request urls
-            AssertEx.MatchUris(hijack.Requests, mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true"),
-                                                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(__updatedAt ge datetimeoffset'2001-02-04T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true"),
-                                                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true"));
+            AssertEx.MatchUris(hijack.Requests, mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=updatedAt&$skip=0&$top=50&__includeDeleted=true"),
+                                                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(updatedAt ge datetimeoffset'2001-02-04T00:00:00.0000000%2B00:00')&$orderby=updatedAt&$skip=0&$top=50&__includeDeleted=true"),
+                                                mobileAppUriValidator.GetTableUri("stringId_test_table?$filter=(updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=updatedAt&$skip=0&$top=50&__includeDeleted=true"));
         }
 
         [AsyncTestMethod]
         public async Task PurgeAsync_Throws_WhenQueryIdIsInvalid()
         {
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", new TestHttpHandler());
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, new TestHttpHandler());
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
@@ -973,7 +995,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var hijack = new TestHttpHandler();
             hijack.SetResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
             var store = new MobileServiceLocalStoreMock();
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
             // insert an item but don't push
@@ -994,7 +1016,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var hijack = new TestHttpHandler();
             hijack.SetResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
             var store = new MobileServiceLocalStoreMock();
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
             // insert an item but don't push
@@ -1015,7 +1037,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var hijack = new TestHttpHandler();
             hijack.SetResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
             var store = new MobileServiceLocalStoreMock();
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
             // put a dummy delta token
@@ -1044,7 +1066,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var store = new MobileServiceLocalStoreMock();
             hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
             hijack.AddResponseContent("{\"id\":\"def\",\"String\":\"Hey\"}");
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable<StringIdType> table = service.GetSyncTable<StringIdType>();
@@ -1066,7 +1088,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var hijack = new TestHttpHandler();
             var store = new MobileServiceLocalStoreMock();
             hijack.SetResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable<StringIdType> table = service.GetSyncTable<StringIdType>();
@@ -1100,7 +1122,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var hijack = new TestHttpHandler();
             hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}"); // for insert
             hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}"); // for delete
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
 
             await service.SyncContext.InitializeAsync(storeMock, new MobileServiceSyncHandler());
 
@@ -1132,7 +1154,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             var hijack = new TestHttpHandler();
             hijack.Response = new HttpResponseMessage(HttpStatusCode.RequestTimeout); // insert response
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
             IMobileServiceSyncTable<StringIdType> table = service.GetSyncTable<StringIdType>();
 
@@ -1168,7 +1190,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 Assert.Fail("No request should be made.");
                 return Task.FromResult(req);
             };
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
             IMobileServiceSyncTable<StringIdType> table = service.GetSyncTable<StringIdType>();
 
@@ -1265,7 +1287,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             var store = new MobileServiceLocalStoreMock();
             var hijack = new TestHttpHandler();
-            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
 
             var item = new StringIdType() { Id = "item1", String = "what?" };
 
@@ -1291,7 +1313,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             var store = new MobileServiceLocalStoreMock();
             var hijack = new TestHttpHandler();
-            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
 
             var item = new StringIdType() { Id = "item1", String = "what?" };
 
@@ -1344,7 +1366,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var store = new MobileServiceLocalStoreMock();
             store.ReadResponses.Enqueue("{count: 1, results: [{\"id\":\"abc\",\"String\":\"Hey\"}]}");
 
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...");
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable<StringIdType> table = service.GetSyncTable<StringIdType>();
@@ -1374,7 +1396,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var store = new MobileServiceLocalStoreMock();
             store.ReadResponses.Enqueue("{count: 1, results: [{\"id\":\"abc\",\"String\":\"Hey\"}]}");
 
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...");
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable<StringIdType> table = service.GetSyncTable<StringIdType>();
@@ -1407,7 +1429,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             var store = new MobileServiceLocalStoreMock();
             var hijack = new TestHttpHandler();
-            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            MobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
 
             var item1 = new StringIdType() { Id = "item1", String = "what?" };
             var item2 = new StringIdType() { Id = "item2", String = "this" };
@@ -1449,7 +1471,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         /// <returns></returns>
         private async Task TestCollapseThrow(Func<IMobileServiceSyncTable<StringIdType>, StringIdType, Task> firstOperation, Func<IMobileServiceSyncTable<StringIdType>, StringIdType, Task> secondOperation)
         {
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...");
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
             IMobileServiceSyncTable<StringIdType> table = service.GetSyncTable<StringIdType>();
 
@@ -1485,7 +1507,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var operationHandler = new MobileServiceSyncHandlerMock();
 
             hijack.SetResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, hijack);
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), operationHandler);
 
             IMobileServiceSyncTable<StringIdType> table = service.GetSyncTable<StringIdType>();

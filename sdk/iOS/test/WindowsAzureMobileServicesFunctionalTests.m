@@ -35,9 +35,7 @@
     NSString *path = [[NSBundle  bundleForClass:[self class]] pathForResource:@"settings" ofType:@"plist"];
     NSDictionary *settings = [[NSDictionary alloc] initWithContentsOfFile:path];
     
-    client = [MSClient
-              clientWithApplicationURLString:[settings objectForKey:@"TestAppUrl"]
-              applicationKey:[settings objectForKey:@"TestAppApplicationKey"]];
+    client = [MSClient clientWithApplicationURLString:[settings objectForKey:@"TestAppUrl"]];
 
     XCTAssertTrue([client.applicationURL.description hasPrefix:@"https://"], @"The functional tests are currently disabled.");
 

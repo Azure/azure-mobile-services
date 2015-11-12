@@ -40,7 +40,7 @@ import com.microsoft.windowsazure.mobileservices.table.query.ExecutableJsonQuery
 import com.microsoft.windowsazure.mobileservices.table.query.ExecutableQuery;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.ExpectedValueException;
-import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.FroyoAndroidHttpClientFactory;
+//import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.FroyoAndroidHttpClientFactory;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestCase;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestExecutionCallback;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestGroup;
@@ -50,9 +50,6 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.Util;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.IntIdRoundTripTableElement;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.ParamsTestTableItem;
 import com.squareup.okhttp.Headers;
-
-import org.apache.http.Header;
-import org.apache.http.client.methods.HttpGet;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -182,7 +179,7 @@ public class MiscTests extends TestGroup {
 
         this.addTest(createHttpContentApiTest());
 
-        this.addTest(createFroyoFixedRequestTest());
+        //this.addTest(createFroyoFixedRequestTest());
 
         this.addTest(new TestCase("User-Agent validation") {
 
@@ -263,6 +260,7 @@ public class MiscTests extends TestGroup {
         });
     }
 
+    /*
     private TestCase createFroyoFixedRequestTest() {
         final TestCase test = new TestCase() {
 
@@ -274,7 +272,7 @@ public class MiscTests extends TestGroup {
                 final TestCase testCase = this;
 
                 // duplicate the client
-                MobileServiceClient froyoClient = new MobileServiceClient(client);
+                MobileServiceClient froyoClient = new MobileServiceClient(client.getAppUrl(), client.getContext());
 
                 log("add custom AndroidHttpClientFactory with Froyo support");
                 froyoClient.setAndroidHttpClientFactory(new FroyoAndroidHttpClientFactory());
@@ -297,6 +295,7 @@ public class MiscTests extends TestGroup {
         test.setName("Simple request on Froyo");
         return test;
     }
+    */
 
     private TestCase createParameterPassingTest(final boolean typed) {
         TestCase test = new TestCase() {
@@ -606,7 +605,7 @@ public class MiscTests extends TestGroup {
             }
 
             private void createHttpContentTestInput() {
-                mHttpMethod = HttpGet.METHOD_NAME;
+                mHttpMethod = "GET";
                 log("Method = " + mHttpMethod);
 
                 mExpectedResult = new JsonObject();

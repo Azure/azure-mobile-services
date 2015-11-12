@@ -1,11 +1,9 @@
-package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework;
+/*package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework;
 
 import com.microsoft.windowsazure.mobileservices.http.OkHttpClientFactoryImpl;
 import com.squareup.okhttp.OkHttpClient;
 
-/**
- * AndroidHttpClientFactory with Froyo support
- */
+
 public class FroyoAndroidHttpClientFactory extends OkHttpClientFactoryImpl {
 
     @Override
@@ -17,3 +15,4 @@ public class FroyoAndroidHttpClientFactory extends OkHttpClientFactoryImpl {
         return client;
     }
 }
+*/

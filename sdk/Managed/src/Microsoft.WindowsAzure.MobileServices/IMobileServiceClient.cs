@@ -19,27 +19,26 @@ namespace Microsoft.WindowsAzure.MobileServices
     public interface IMobileServiceClient
     {
         /// <summary>
-        /// Gets the Mobile Services application's name that is provided by the
-        /// call to MobileServiceClient(...).
-        /// </summary>
-        string ApplicationKey { get; }
-
-        /// <summary>
         /// Absolute URI of the Microsoft Azure Mobile App.
         /// </summary>
         Uri MobileAppUri { get; }
-
-        /// <summary>
-        /// Absolute URI of the Azure App Service Gateway.
-        /// </summary>
-        Uri GatewayUri { get; }
 
         /// <summary>
         /// The current authenticated user provided after a successful call to
         /// MobileServiceClient.Login().
         /// </summary>
         MobileServiceUser CurrentUser { get; set; }
-        
+
+        /// <summary>
+        /// Prefix for login endpoints. If not set defaults to /.auth/login
+        /// </summary>
+        String LoginUriPrefix { get; set; }
+
+        /// <summary>
+        /// Alternate Host URI for login
+        /// </summary>
+        Uri AlternateLoginHost { get; set; }
+
         /// <summary>
         /// Returns a <see cref="IMobileServiceSyncContext"/> instance.
         /// </summary>
@@ -167,7 +166,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Log a user out.
         /// </summary>
-        void Logout();
+        Task LogoutAsync();
 
         /// <summary>
         /// Invokes a user-defined custom API of a Microsoft Azure Mobile Service using an HTTP POST.

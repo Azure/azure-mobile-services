@@ -20,7 +20,7 @@
 {
     [super setUp];
     self.url = [[NSURL alloc] initWithString:@"https://aurl.azure-mobilefake.net"];
-    self.client = [[MSClient alloc] initWithApplicationURL:self.url applicationKey:@"QdffoEwYCblcmkvbInMEkEoSemgJHm31"];
+    self.client = [[MSClient alloc] initWithApplicationURL:self.url];
 
     self.done = NO;
 }

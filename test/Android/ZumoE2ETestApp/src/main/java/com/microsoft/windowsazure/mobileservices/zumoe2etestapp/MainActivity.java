@@ -56,7 +56,7 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestGr
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestResult;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestStatus;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.Util;
-import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.log.DaylightLogger;
+//import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.log.DaylightLogger;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.ClientSDKLoginTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.CustomApiTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.EnhancedPushTests;
@@ -68,6 +68,10 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.QueryTests
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.RoundTripTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.SystemPropertiesTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.UpdateDeleteTests;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
+import com.squareup.okhttp.internal.http.StatusLine;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
@@ -257,7 +261,7 @@ public class MainActivity extends Activity {
                 return true;
 
             case R.id.menu_run_tests:
-                if (getMobileServiceKey().trim() == "" || getMobileServiceURL().trim() == "") {
+                if (getMobileServiceURL().trim() == "") {
                     startActivity(new Intent(this, ZumoPreferenceActivity.class));
                 } else {
                     runTests();
@@ -392,14 +396,14 @@ public class MainActivity extends Activity {
                                 tests.add(result.getTestCase());
                             }
 
-                            DaylightLogger logger = new DaylightLogger(getDaylightURL(), getDaylightProject(), getDaylightClientId(),
+                            /*DaylightLogger logger = new DaylightLogger(getDaylightURL(), getDaylightProject(), getDaylightClientId(),
                                     getDaylightClientSecret(), getDaylightRuntime(), getDaylightRunId());
                             try {
                                 logger.reportResultsToDaylight(group.getFailedTestCount(), group.getStartTime(), group.getEndTime(), tests,
                                         group.getSourceMap());
                             } catch (Throwable e) {
                                 log(e.getMessage());
-                            }
+                            }*/
                         }
 
                         if (shouldRunUnattended()) {
@@ -532,10 +536,6 @@ public class MainActivity extends Activity {
         return this.getPreference(Constants.PREFERENCE_MOBILE_SERVICE_URL);
     }
 
-    private String getMobileServiceKey() {
-        return this.getPreference(Constants.PREFERENCE_MOBILE_SERVICE_KEY);
-    }
-
     private String getDaylightURL() {
         return this.getPreference(Constants.PREFERENCE_DAYLIGHT_URL);
     }
@@ -593,9 +593,8 @@ public class MainActivity extends Activity {
 
     private MobileServiceClient createMobileServiceClient() throws MalformedURLException {
         String url = getMobileServiceURL();
-        String key = getMobileServiceKey();
 
-        MobileServiceClient client = new MobileServiceClient(url, key, this);
+        MobileServiceClient client = new MobileServiceClient(url, this);
 
         return client;
     }
@@ -628,15 +627,20 @@ public class MainActivity extends Activity {
 
         try {
 
-            HttpClient httpclient = new DefaultHttpClient();
-            HttpResponse response = httpclient.execute(new HttpGet(getMobileServiceURL() + "api/runtimeinfo"));
+            OkHttpClient httpclient = new OkHttpClient();
+
+            Request request = new Request.Builder()
+                    .url(getMobileServiceURL() + "api/runtimeinfo")
+                    .addHeader("ZUMO-API-VERSION", "2.0.0")
+                    .build();
+
+            Response response = httpclient.newCall(request).execute();
+
             String runtimeType;
 
-            StatusLine statusLine = response.getStatusLine();
-            if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
+            if (response.code() == 200) {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
-                response.getEntity().writeTo(out);
-                String responseString = out.toString();
+                String responseString = response.body().string();
 
                 JsonObject jsonResult = new JsonParser().parse(responseString).getAsJsonObject();
 
@@ -644,8 +648,8 @@ public class MainActivity extends Activity {
 
                 out.close();
             } else {
-                response.getEntity().getContent().close();
-                throw new IOException(statusLine.getReasonPhrase());
+                response.body().close();
+                throw new IOException(String.valueOf(response.code()));
             }
 
             if (runtimeType.equals(".NET")) {

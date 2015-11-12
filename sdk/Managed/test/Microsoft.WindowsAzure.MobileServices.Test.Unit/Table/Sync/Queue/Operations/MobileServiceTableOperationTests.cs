@@ -85,7 +85,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         [TestMethod]
         public void Deserialize_Succeeds()
         {
-            var serializedOperation = JObject.Parse("{\"id\":\"70cf6cc2-5981-4a32-ae6c-249572917a46\",\"kind\": 0,\"tableName\":\"test\",\"itemId\":\"abc\",\"item\":null,\"__createdAt\":\"2014-03-11T20:37:10.3366689Z\",\"sequence\":0}");
+            var serializedOperation = JObject.Parse("{\"id\":\"70cf6cc2-5981-4a32-ae6c-249572917a46\",\"kind\": 0,\"tableName\":\"test\",\"itemId\":\"abc\",\"item\":null,\"createdAt\":\"2014-03-11T20:37:10.3366689Z\",\"sequence\":0}");
 
             var operation = MobileServiceTableOperation.Deserialize(serializedOperation);
 
@@ -109,7 +109,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
             ""sequence"":null,
             ""state"":null,
             ""item"":""{\""id\"":\""abc\"",\""text\"":\""example\""}"",
-            ""__createdAt"":""2014-03-11T20:37:10.3366689Z"",
+            ""createdAt"":""2014-03-11T20:37:10.3366689Z"",
             ""sequence"":0
             }");
             var operation = MobileServiceTableOperation.Deserialize(serializedOperation);
@@ -136,7 +136,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
             ""sequence"":null,
             ""state"":null,
             ""item"":""{\""id\"":\""abc\"",\""text\"":\""example\""}"",
-            ""__createdAt"":""2014-03-11T20:37:10.3366689Z"",
+            ""createdAt"":""2014-03-11T20:37:10.3366689Z"",
             ""sequence"":0
             }");
             var operation = MobileServiceTableOperation.Deserialize(serializedOperation);

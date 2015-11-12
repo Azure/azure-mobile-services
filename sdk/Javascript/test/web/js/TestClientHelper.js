@@ -11,7 +11,7 @@
     // that tests don't inadvertently start depending on it
 
     global.$getClient = function () {
-        return new global.WindowsAzure.MobileServiceClient(clientUriElem.value, "dummy-app-key");
+        return new global.WindowsAzure.MobileServiceClient(clientUriElem.value);
     };
 
     var configureButtonElem = document.getElementById("edit-test-config"),

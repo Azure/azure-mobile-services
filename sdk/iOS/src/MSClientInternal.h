@@ -11,4 +11,7 @@
 @property (nonatomic, strong, readonly)         id<MSSerializer> serializer;
 // The installation id used to track unique users of the sdk
 @property (nonatomic, strong, readonly)         NSString* installId;
+
+- (NSURL *) loginURL;
+
 @end

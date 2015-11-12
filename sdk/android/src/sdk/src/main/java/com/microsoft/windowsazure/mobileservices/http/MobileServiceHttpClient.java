@@ -53,6 +53,13 @@ public class MobileServiceHttpClient {
     MobileServiceClient mClient;
 
     /**
+     * Get client associated with this HTTP caller.
+     * @return MobileServiceClient
+     */
+    public MobileServiceClient getClient(){
+        return mClient;
+    }
+    /**
      * Constructor
      *
      * @param client The client associated with this HTTP caller.
@@ -156,7 +163,6 @@ public class MobileServiceHttpClient {
             future.setException(new IllegalArgumentException("httpMethod not supported"));
             return future;
         }
-
 
         String featuresHeader = MobileServiceFeatures.featuresToString(features);
         if (featuresHeader != null) {

@@ -61,8 +61,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests.Table.Sync.Eventi
 
             EnqueueSimpleObjectResponse(store, "123", "XXX", "789");
 
-            await changeTracker.UpsertAsync("test", new JObject() { { "id", "123" }, { "__version", "2" } }, true); // Update
-            await changeTracker.UpsertAsync("test", new JObject() { { "id", "456" }, { "__version", "2" } }, true); // Insert
+            await changeTracker.UpsertAsync("test", new JObject() { { "id", "123" }, { "version", "2" } }, true); // Update
+            await changeTracker.UpsertAsync("test", new JObject() { { "id", "456" }, { "version", "2" } }, true); // Insert
             await changeTracker.DeleteAsync("test", "789"); // Delete
 
             StoreOperationsBatchCompletedEvent batchEvent = null;
@@ -185,7 +185,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests.Table.Sync.Eventi
             var results = new List<JObject>();
             foreach (var id in ids)
             {
-                var item = new JObject() { { "id", id }, { "__version", "1" } };
+                var item = new JObject() { { "id", id }, { "version", "1" } };
                 store.ReadResponses.Enqueue(string.Format("[{0}]", item.ToString()));
 
                 results.Add(item);

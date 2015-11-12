@@ -48,12 +48,8 @@ import javax.net.ssl.X509TrustManager;
 /**
  * Method for Froyo Support for MobileServices
  */
-public class FroyoSupport {
-    /**
-     * Fixes an AndroidHttpClient instance to accept MobileServices SSL certificate
-     *
-     * @param client AndroidHttpClient to fix
-     */
+/*public class FroyoSupport {
+
     public static void fixAndroidHttpClientForCertificateValidation(OkHttpClient client) {
 
         final SchemeRegistry schemeRegistry = new SchemeRegistry();
@@ -65,7 +61,7 @@ public class FroyoSupport {
 
         client.getConnectionManager().getSchemeRegistry().register(new Scheme("https",
                 createAdditionalCertsSSLSocketFactory(), 443));
-                */
+
     }
 
     private static SSLSocketFactory createAdditionalCertsSSLSocketFactory() {
@@ -176,3 +172,4 @@ public class FroyoSupport {
         }
     }
 }
+*/

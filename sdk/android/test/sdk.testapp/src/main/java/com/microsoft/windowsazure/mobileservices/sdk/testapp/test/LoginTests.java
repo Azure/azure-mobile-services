@@ -46,12 +46,10 @@ import java.util.concurrent.CountDownLatch;
 public class LoginTests extends InstrumentationTestCase {
 
     String appUrl = "";
-    String appKey = "";
 
     @Override
     protected void setUp() throws Exception {
         appUrl = "http://myapp.com/";
-        appKey = "qwerty";
         super.setUp();
     }
 
@@ -73,7 +71,7 @@ public class LoginTests extends InstrumentationTestCase {
         // Create client
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
         }
 
@@ -137,7 +135,7 @@ public class LoginTests extends InstrumentationTestCase {
         // Create client
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
         }
 
@@ -207,7 +205,7 @@ public class LoginTests extends InstrumentationTestCase {
         // Create client
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
         }
 
@@ -274,7 +272,7 @@ public class LoginTests extends InstrumentationTestCase {
         // Create client
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
         }
 
@@ -315,7 +313,7 @@ public class LoginTests extends InstrumentationTestCase {
         // Create client
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
             client.setCurrentUser(user);
         } catch (MalformedURLException e) {
         }
@@ -359,7 +357,7 @@ public class LoginTests extends InstrumentationTestCase {
         // Create client
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
         }
 
@@ -384,7 +382,7 @@ public class LoginTests extends InstrumentationTestCase {
         // Create client
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
         }
 
@@ -409,7 +407,7 @@ public class LoginTests extends InstrumentationTestCase {
         // Create client
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
         }
 

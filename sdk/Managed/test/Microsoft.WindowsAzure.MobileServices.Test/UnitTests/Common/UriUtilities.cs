@@ -2,8 +2,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-using System;
-
 namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests.Common
 {
     /// <summary>

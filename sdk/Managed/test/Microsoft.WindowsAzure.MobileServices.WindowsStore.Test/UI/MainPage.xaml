@@ -65,17 +65,6 @@
                       Style="{StaticResource InputStyle}" />
 
                     <TextBlock
-                      Grid.Row="1"
-                      Grid.Column="0"
-                      Style="{StaticResource LabelStyle}"
-                      Text="Mobile Service Key:" />
-                    <TextBox
-                      x:Name="txtRuntimeKey"
-                      Grid.Row="1"
-                      Grid.Column="1"
-                      Style="{StaticResource InputStyle}" />
-
-                    <TextBlock
                       Grid.Row="2"
                       Grid.Column="0"
                       Style="{StaticResource LabelStyle}"

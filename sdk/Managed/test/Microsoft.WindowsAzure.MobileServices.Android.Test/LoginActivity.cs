@@ -13,7 +13,6 @@ namespace Microsoft.WindowsAzure.Mobile.Android.Test
     public class LoginActivity : Activity
     {
         private const string MobileServiceUriKey = "MobileServiceUri";
-        private const string MobileServiceKeyKey = "MobileServiceKey";
         private const string TagsKey = "Tags";
 
         private EditText uriText, keyText, tagsText;
@@ -28,9 +27,6 @@ namespace Microsoft.WindowsAzure.Mobile.Android.Test
             this.uriText = FindViewById<EditText> (Resource.Id.ServiceUri);
             this.uriText.Text = prefs.GetString (MobileServiceUriKey, null);
 
-            this.keyText = FindViewById<EditText> (Resource.Id.ServiceKey);
-            this.keyText.Text = prefs.GetString (MobileServiceKeyKey, null);
-
             this.tagsText = FindViewById<EditText> (Resource.Id.ServiceTags);
             this.tagsText.Text = prefs.GetString (TagsKey, null);
 
@@ -43,14 +39,12 @@ namespace Microsoft.WindowsAzure.Mobile.Android.Test
             using (ISharedPreferences prefs = PreferenceManager.GetDefaultSharedPreferences (this))
             using (ISharedPreferencesEditor editor = prefs.Edit()) {
                 editor.PutString (MobileServiceUriKey, this.uriText.Text);
-                editor.PutString (MobileServiceKeyKey, this.keyText.Text);
                 editor.PutString (TagsKey, this.tagsText.Text);
 
                 editor.Commit();
             }
 
             App.Harness.Settings.Custom["MobileServiceRuntimeUrl"] = this.uriText.Text;
-            App.Harness.Settings.Custom["MobileServiceRuntimeKey"] = this.keyText.Text;
             App.Harness.Settings.TagExpression = this.tagsText.Text;
 
             if (!string.IsNullOrEmpty(App.Harness.Settings.TagExpression))
@@ -70,7 +64,7 @@ namespace Microsoft.WindowsAzure.Mobile.Android.Test
 
         private async void OnClickLogin(object sender, EventArgs eventArgs)
         {
-            var client = new MobileServiceClient(this.uriText.Text, this.keyText.Text);
+            var client = new MobileServiceClient(this.uriText.Text);
             var user = await client.LoginAsync(this, MobileServiceAuthenticationProvider.MicrosoftAccount);
             System.Diagnostics.Debug.WriteLine(user.UserId);
         }

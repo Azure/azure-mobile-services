@@ -179,13 +179,16 @@ MobileServiceTable.prototype._read = function (query, parameters, callback) {
         }
     }
 
+    var headers = { };
+    headers[WindowsAzure.MobileServiceClient._zumoApiVersionHeaderName] = WindowsAzure.MobileServiceClient._zumoApiVersion;
+
     // Make the request
     this.getMobileServiceClient()._request(
         'GET',
         urlFragment,
         null,
         false,
-        null,
+        headers,
         features,
         function (error, response) {
             var values = null;
@@ -296,13 +299,16 @@ MobileServiceTable.prototype.insert = Platform.async(
             urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
         }
 
+        var headers = { };
+        headers[WindowsAzure.MobileServiceClient._zumoApiVersionHeaderName] = WindowsAzure.MobileServiceClient._zumoApiVersion;
+
         // Make the request
         this.getMobileServiceClient()._request(
             'POST',
             urlFragment,
             instance,
             false,
-            null,
+            headers,
             features,
             function (error, response) {
                 if (!_.isNull(error)) {
@@ -355,6 +361,8 @@ MobileServiceTable.prototype.update = Platform.async(
             headers['If-Match'] = getEtagFromVersion(version);
             features.push(WindowsAzure.MobileServiceClient._zumoFeatures.OptimisticConcurrency);
         }
+
+        headers[WindowsAzure.MobileServiceClient._zumoApiVersionHeaderName] = WindowsAzure.MobileServiceClient._zumoApiVersion;
 
         features = addQueryParametersFeaturesIfApplicable(features, parameters);
 
@@ -447,13 +455,16 @@ MobileServiceTable.prototype.refresh = Platform.async(
         var features = [WindowsAzure.MobileServiceClient._zumoFeatures.TableRefreshCall];
         features = addQueryParametersFeaturesIfApplicable(features, parameters);
 
+        var headers = { };
+        headers[WindowsAzure.MobileServiceClient._zumoApiVersionHeaderName] = WindowsAzure.MobileServiceClient._zumoApiVersion;
+
         // Make the request
         this.getMobileServiceClient()._request(
             'GET',
             urlFragment,
             instance,
             false,
-            null,
+            headers,
             features,
             function (error, response) {
                 if (!_.isNull(error)) {
@@ -518,13 +529,16 @@ MobileServiceTable.prototype.lookup = Platform.async(
             urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
         }
 
+        var headers = { };
+        headers[WindowsAzure.MobileServiceClient._zumoApiVersionHeaderName] = WindowsAzure.MobileServiceClient._zumoApiVersion;
+
         // Make the request
         this.getMobileServiceClient()._request(
             'GET',
             urlFragment,
             null,
             false,
-            null,
+            headers,
             features,
             function (error, response) {
                 if (!_.isNull(error)) {
@@ -570,6 +584,7 @@ MobileServiceTable.prototype.del = Platform.async(
                 features.push(WindowsAzure.MobileServiceClient._zumoFeatures.OptimisticConcurrency);
             }
         }
+        headers[WindowsAzure.MobileServiceClient._zumoApiVersionHeaderName] = WindowsAzure.MobileServiceClient._zumoApiVersion;
 
         features = addQueryParametersFeaturesIfApplicable(features, parameters);
 

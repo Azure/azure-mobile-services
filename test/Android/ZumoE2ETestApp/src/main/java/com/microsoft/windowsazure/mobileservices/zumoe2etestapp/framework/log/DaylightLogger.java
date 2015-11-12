@@ -17,7 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/*
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.log;
+
 
 import android.annotation.SuppressLint;
 import android.os.AsyncTask;
@@ -538,3 +541,5 @@ public class DaylightLogger {
         return result;
     }
 }
+
+ */

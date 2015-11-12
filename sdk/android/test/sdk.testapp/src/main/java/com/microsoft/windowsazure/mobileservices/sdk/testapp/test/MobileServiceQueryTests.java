@@ -41,7 +41,6 @@ import static com.microsoft.windowsazure.mobileservices.table.query.QueryOperati
 public class MobileServiceQueryTests extends InstrumentationTestCase {
 
     String appUrl = "";
-    String appKey = "";
     GsonBuilder gsonBuilder;
     MobileServiceClient client;
     MobileServiceJsonTable table;
@@ -57,9 +56,8 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
 
     protected void setUp() throws Exception {
         appUrl = "http://myapp.com/";
-        appKey = "qwerty";
         gsonBuilder = new GsonBuilder();
-        client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+        client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         table = client.getTable("TableName");
         super.setUp();
     }

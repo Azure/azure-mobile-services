@@ -197,6 +197,15 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} is invalid.AlternateLoginHost must be a valid https URI with hostname only.
+        /// </summary>
+        internal static string MobileServiceClient_InvalidAlternateLoginHost {
+            get {
+                return ResourceManager.GetString("MobileServiceClient_InvalidAlternateLoginHost", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The server did not provide a response with the expected content..
         /// </summary>
         internal static string MobileServiceClient_NoResponseContent {
@@ -319,15 +328,6 @@ namespace Microsoft.WindowsAzure.MobileServices {
         internal static string MobileServicesAuthentication_LoginAlreadyInProgress {
             get {
                 return ResourceManager.GetString("MobileServicesAuthentication_LoginAlreadyInProgress", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Cannot work with a MobileServiceClient that does not specify a gateway URI..
-        /// </summary>
-        internal static string MobileServicesAuthentication_MobileServiceClientDefinesNoGateway {
-            get {
-                return ResourceManager.GetString("MobileServicesAuthentication_MobileServiceClientDefinesNoGateway", resourceCulture);
             }
         }
         

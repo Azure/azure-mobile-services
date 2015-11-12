@@ -30,7 +30,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             store.DefineTable(TestTable, new JObject()
             {
                 {"id", String.Empty },
-                {"__createdAt", DateTime.UtcNow}
+                {"createdAt", DateTime.UtcNow}
             });
             await store.InitializeAsync();
         }
@@ -69,7 +69,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             long date = (long)(testDate - epoch).TotalSeconds;
 
             // insert a row and make sure it is inserted
-            TestUtilities.ExecuteNonQuery(TestDbName, "INSERT INTO todo (id, __createdAt) VALUES ('abc', " + date + ")");
+            TestUtilities.ExecuteNonQuery(TestDbName, "INSERT INTO todo (id, createdAt) VALUES ('abc', " + date + ")");
             long count = TestUtilities.CountRows(TestDbName, TestTable);
             Assert.AreEqual(count, 1L);
 
@@ -81,7 +81,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
                 JObject item = await store.LookupAsync(TestTable, "abc");
                 Assert.IsNotNull(item);
                 Assert.AreEqual(item.Value<string>("id"), "abc");
-                Assert.AreEqual(item.Value<DateTime>("__createdAt"), testDate);
+                Assert.AreEqual(item.Value<DateTime>("createdAt"), testDate);
             }
         }
 
@@ -135,7 +135,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             await PrepareTodoTable();
 
             // insert rows and make sure they are inserted
-            TestUtilities.ExecuteNonQuery(TestDbName, "INSERT INTO todo (id, __createdAt) VALUES ('abc', 1), ('def', 2), ('ghi', 3)");
+            TestUtilities.ExecuteNonQuery(TestDbName, "INSERT INTO todo (id, createdAt) VALUES ('abc', 1), ('def', 2), ('ghi', 3)");
             long count = TestUtilities.CountRows(TestDbName, TestTable);
             Assert.AreEqual(count, 3L);
 
@@ -144,7 +144,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
                 DefineTestTable(store);
                 await store.InitializeAsync();
 
-                var query = MobileServiceTableQueryDescription.Parse(TestTable, "$filter=__createdAt gt 1&$inlinecount=allpages");
+                var query = MobileServiceTableQueryDescription.Parse(TestTable, "$filter=createdAt gt 1&$inlinecount=allpages");
                 JToken item = await store.ReadAsync(query);
                 Assert.IsNotNull(item);
                 var results = item["results"].Value<JArray>();
@@ -173,7 +173,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             await PrepareTodoTable();
 
             // insert rows and make sure they are inserted
-            TestUtilities.ExecuteNonQuery(TestDbName, "INSERT INTO todo (id, __createdAt) VALUES ('abc', 1), ('def', 2), ('ghi', 3)");
+            TestUtilities.ExecuteNonQuery(TestDbName, "INSERT INTO todo (id, createdAt) VALUES ('abc', 1), ('def', 2), ('ghi', 3)");
             long count = TestUtilities.CountRows(TestDbName, TestTable);
             Assert.AreEqual(count, 3L);
 
@@ -182,7 +182,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             {
                 DefineTestTable(store);
                 await store.InitializeAsync();
-                var query = MobileServiceTableQueryDescription.Parse(TestTable, "$filter=__createdAt gt 1");
+                var query = MobileServiceTableQueryDescription.Parse(TestTable, "$filter=createdAt gt 1");
                 await store.DeleteAsync(query);
             }
 
@@ -197,7 +197,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             await PrepareTodoTable();
 
             // insert a row and make sure it is inserted
-            TestUtilities.ExecuteNonQuery(TestDbName, "INSERT INTO todo (id, __createdAt) VALUES ('abc', 123)");
+            TestUtilities.ExecuteNonQuery(TestDbName, "INSERT INTO todo (id, createdAt) VALUES ('abc', 123)");
             long count = TestUtilities.CountRows(TestDbName, TestTable);
             Assert.AreEqual(count, 1L);
 
@@ -302,7 +302,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
                     { "code", Guid.NewGuid() },   
                     { "options", new JObject(){} },  
                     { "friends", new JArray(){} },  
-                    { "__version", String.Empty }
+                    { "version", String.Empty }
                 });
 
                 await store.InitializeAsync();
@@ -316,7 +316,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
                     { "code", null }, 
                     { "options", null },  
                     { "friends", null },  
-                    { "__version", null }
+                    { "version", null }
                 };
                 await store.UpsertAsync(TestTable, new[] { inserted }, ignoreMissingColumns: false);
 
@@ -339,7 +339,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
                 await store.UpsertAsync(TestTable, new[]{new JObject() 
                 { 
                     { "id", "abc" }, 
-                    { "__createdAt", DateTime.Now } 
+                    { "createdAt", DateTime.Now } 
                 }}, ignoreMissingColumns: false);
             }
             long count = TestUtilities.CountRows(TestDbName, TestTable);
@@ -361,20 +361,20 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
                 { 
                     { "id", "abc" }, 
                     { "text", "xyz" },
-                    { "__createdAt", DateTime.Now } 
+                    { "createdAt", DateTime.Now } 
                 }}, ignoreMissingColumns: false);
 
                 await store.UpsertAsync(TestTable, new[]{new JObject() 
                 { 
                     { "id", "abc" }, 
-                    { "__createdAt", new DateTime(200,1,1) } 
+                    { "createdAt", new DateTime(200,1,1) } 
                 }}, ignoreMissingColumns: false);
 
                 JObject result = await store.LookupAsync(TestTable, "abc");
 
                 Assert.AreEqual(result.Value<string>("id"), "abc");
                 Assert.AreEqual(result.Value<string>("text"), "xyz");
-                Assert.AreEqual(result.Value<string>("__createdAt"), "01/01/0200 00:00:00");
+                Assert.AreEqual(result.Value<string>("createdAt"), "01/01/0200 00:00:00");
             }
             long count = TestUtilities.CountRows(TestDbName, TestTable);
             Assert.AreEqual(count, 1L);
@@ -554,7 +554,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             {
                 { "id", String.Empty },
                 { "text", String.Empty },
-                { "__createdAt", DateTime.Now }
+                { "createdAt", DateTime.Now }
             });
         }
     }

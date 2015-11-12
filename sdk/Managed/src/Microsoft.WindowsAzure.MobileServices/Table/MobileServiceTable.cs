@@ -179,7 +179,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         private async Task<QueryResult> ReadAsync(string uriString, MobileServiceFeatures features)
         {
-            MobileServiceHttpResponse response = await this.MobileServiceClient.MobileAppHttpClient.RequestAsync(HttpMethod.Get, uriString, this.MobileServiceClient.CurrentUser, null, true, features: this.Features | features);
+            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, this.MobileServiceClient.CurrentUser, null, true, features: this.Features | features);
 
             return QueryResult.Parse(response, this.MobileServiceClient.SerializerSettings, validate: false);
         }
@@ -257,7 +257,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             return await this.TransformHttpException(async () =>
             {
-                MobileServiceHttpResponse response = await this.MobileServiceClient.MobileAppHttpClient.RequestAsync(HttpMethod.Post, uriString, this.MobileServiceClient.CurrentUser, instance.ToString(Formatting.None), true, features: this.Features | features);
+                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Post, uriString, this.MobileServiceClient.CurrentUser, instance.ToString(Formatting.None), true, features: this.Features | features);
                 return GetJTokenFromResponse(response);
             });
         }
@@ -326,7 +326,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             return await this.TransformHttpException(async () =>
             {
-                MobileServiceHttpResponse response = await this.MobileServiceClient.MobileAppHttpClient.RequestAsync(patchHttpMethod, uriString, this.MobileServiceClient.CurrentUser, content, true, headers, this.Features | features);
+                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(patchHttpMethod, uriString, this.MobileServiceClient.CurrentUser, content, true, headers, this.Features | features);
                 return GetJTokenFromResponse(response);
             });
         }
@@ -371,7 +371,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             return await this.TransformHttpException(async () =>
             {
-                MobileServiceHttpResponse response = await this.MobileServiceClient.MobileAppHttpClient.RequestAsync(HttpMethod.Post, uriString, this.MobileServiceClient.CurrentUser, null, true, headers, this.Features | features);
+                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Post, uriString, this.MobileServiceClient.CurrentUser, null, true, headers, this.Features | features);
                 return GetJTokenFromResponse(response);
             });
         }
@@ -438,7 +438,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             return await TransformHttpException(async () =>
             {
-                MobileServiceHttpResponse response = await this.MobileServiceClient.MobileAppHttpClient.RequestAsync(HttpMethod.Delete, uriString, this.MobileServiceClient.CurrentUser, null, false, headers, this.Features | features);
+                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Delete, uriString, this.MobileServiceClient.CurrentUser, null, false, headers, this.Features | features);
                 return GetJTokenFromResponse(response);
             });
         }
@@ -498,7 +498,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             features = this.AddRequestFeatures(features, parameters);
 
             string uriString = GetUri(this.TableName, id, parameters);
-            MobileServiceHttpResponse response = await this.MobileServiceClient.MobileAppHttpClient.RequestAsync(HttpMethod.Get, uriString, this.MobileServiceClient.CurrentUser, null, true, features: this.Features | features);
+            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, this.MobileServiceClient.CurrentUser, null, true, features: this.Features | features);
             return GetJTokenFromResponse(response);
         }
 
@@ -540,37 +540,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             return parameters;
-        }
-
-        /// <summary>
-        /// Gets the system properties header value from the <see cref="MobileServiceSystemProperties"/>.
-        /// </summary>
-        /// <param name="properties">The system properties to set in the system properties header.</param>
-        /// <returns>
-        /// The system properties header value. Returns null if the systemProperty value is None.
-        /// </returns>
-        private static string GetSystemPropertiesString(MobileServiceSystemProperties properties)
-        {
-            if (properties == MobileServiceSystemProperties.None)
-            {
-                return null;
-            }
-            if (properties == MobileServiceSystemProperties.All)
-            {
-                return "*";
-            }
-
-            string[] systemProperties = properties.ToString().Split(',');
-
-            for (int i = 0; i < systemProperties.Length; i++)
-            {
-                string property = systemProperties[i].Trim();
-                char firstLetterAsLower = char.ToLowerInvariant(property[0]);
-                systemProperties[i] = MobileServiceSerializer.SystemPropertyPrefix + firstLetterAsLower + property.Substring(1);
-            }
-
-            string systemPropertiesString = string.Join(",", systemProperties);
-            return systemPropertiesString;
         }
 
         /// <summary>
@@ -714,10 +683,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         private Dictionary<string, string> StripSystemPropertiesAndAddVersionHeader(ref JObject instance, ref IDictionary<string, string> parameters, object id)
         {
             string version = null;
-            if (!MobileServiceSerializer.IsIntegerId(id))
-            {
-                instance = MobileServiceSerializer.RemoveSystemProperties(instance, out version);
-            }
+            instance = MobileServiceSerializer.RemoveSystemProperties(instance, out version);
 
             Dictionary<string, string> headers = AddIfMatchHeader(version);
             return headers;

@@ -207,6 +207,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             {
                 query = uri.Query.Length > 0 ? uri.Query.Substring(1) : String.Empty;
                 uriPath = uri.AbsolutePath;
+                if (applicationUri.Segments.Length > 1)
+                {
+                    uriPath = MobileServiceUrlBuilder.AddLeadingSlash(uri.AbsolutePath.Replace(applicationUri.AbsolutePath, ""));
+                }
             }
 
             return Parse(tableName, query, uriPath);

@@ -59,25 +59,31 @@ public class ServiceFilterResponseImpl implements ServiceFilterResponse {
         mResponse = response;
         mResponseContent = null;
 
-        // Get the response's content
-        ResponseBody entity = mResponse.body();
+        try {
+            // Get the response's content
+            ResponseBody entity = mResponse.body();
 
-        if (entity != null) {
-            InputStream instream = getUngzippedContent(response);
+            if (entity != null) {
+                InputStream instream = getUngzippedContent(response);
 
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            int length;
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                byte[] buffer = new byte[1024];
+                int length;
 
-            while ((length = instream.read(buffer)) != -1) {
-                out.write(buffer, 0, length);
+                while ((length = instream.read(buffer)) != -1) {
+                    out.write(buffer, 0, length);
+                }
+
+                instream.close();
+
+                mResponseContent = out.toByteArray();
+            } else {
+                mResponseContent = null;
             }
-
-            instream.close();
-
-            mResponseContent = out.toByteArray();
-        } else {
-            mResponseContent = null;
+        }finally {
+            if (response != null && response.body() != null) {
+                response.body().close();
+            }
         }
     }
 

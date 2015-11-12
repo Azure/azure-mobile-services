@@ -93,14 +93,14 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             IMobileServiceSyncTable<NotSystemPropertyCreatedAtType> table = service.GetSyncTable<NotSystemPropertyCreatedAtType>();
 
             DateTime theDate = new DateTime(2014, 3, 10, 0, 0, 0, DateTimeKind.Utc);
-            var inserted = new NotSystemPropertyCreatedAtType() { CreatedAt = theDate };
+            var inserted = new NotSystemPropertyCreatedAtType() { __CreatedAt = theDate };
             await table.InsertAsync(inserted);
 
-            Assert.AreEqual(inserted.CreatedAt.ToUniversalTime(), theDate);
+            Assert.AreEqual(inserted.__CreatedAt.ToUniversalTime(), theDate);
 
             NotSystemPropertyCreatedAtType rehydrated = await table.LookupAsync(inserted.Id);
 
-            Assert.AreEqual(rehydrated.CreatedAt.ToUniversalTime(), theDate);
+            Assert.AreEqual(rehydrated.__CreatedAt.ToUniversalTime(), theDate);
         }
 
         [AsyncTestMethod]
@@ -169,7 +169,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             store.DefineTable<ToDoWithSystemPropertiesType>();
 
             var hijack = new TestHttpHandler();
-            hijack.AddResponseContent(@"{""id"": ""123"", ""__version"": ""xyz""}");
+            hijack.AddResponseContent(@"{""id"": ""123"", ""version"": ""xyz""}");
             IMobileServiceClient service = await CreateClient(hijack, store);
             var table = service.GetSyncTable<ToDoWithSystemPropertiesType>();
 
@@ -286,15 +286,15 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             var hijack = new TestHttpHandler();
             IMobileServiceSyncTable<ToDoWithStringId> table = await GetSynctable<ToDoWithStringId>(hijack);
 
-            string pullResult = "[{\"id\":\"b\",\"String\":\"Wow\",\"__version\":\"def\", \"__updatedAt\":\"2014-01-30T23:01:33.444Z\"}]";
+            string pullResult = "[{\"id\":\"b\",\"String\":\"Wow\",\"version\":\"def\", \"updatedAt\":\"2014-01-30T23:01:33.444Z\"}]";
             hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(pullResult) }); // pull
             hijack.AddResponseContent("[]");
 
             await table.PullAsync(queryId: "todoItems", query: table.CreateQuery());
-            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.0000000%2B00%3A00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true");
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.Query, "?$filter=(updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.0000000%2B00%3A00')&$orderby=updatedAt&$skip=0&$top=50&__includeDeleted=true");
 
 
-            pullResult = "[{\"id\":\"b\",\"String\":\"Updated\",\"__version\":\"def\", \"__updatedAt\":\"2014-02-27T23:01:33.444Z\"}]";
+            pullResult = "[{\"id\":\"b\",\"String\":\"Updated\",\"version\":\"def\", \"updatedAt\":\"2014-02-27T23:01:33.444Z\"}]";
             hijack.AddResponseContent(pullResult); // pull
             hijack.AddResponseContent("[]");
 
@@ -302,7 +302,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
             var item = await table.LookupAsync("b");
             Assert.AreEqual(item.String, "Updated");
-            AssertEx.QueryEquals(hijack.Requests[2].RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetimeoffset'2014-01-30T23%3A01%3A33.4440000%2B00%3A00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true");
+            AssertEx.QueryEquals(hijack.Requests[2].RequestUri.Query, "?$filter=(updatedAt%20ge%20datetimeoffset'2014-01-30T23%3A01%3A33.4440000%2B00%3A00')&$orderby=updatedAt&$skip=0&$top=50&__includeDeleted=true");
         }
 
         [AsyncTestMethod]
@@ -313,17 +313,17 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             var hijack = new TestHttpHandler();
             IMobileServiceSyncTable<ToDoWithStringId> table = await GetSynctable<ToDoWithStringId>(hijack);
 
-            string pullResult = "[{\"id\":\"b\",\"String\":\"Wow\",\"__version\":\"def\", \"__updatedAt\":\"2014-01-30T23:01:33.444Z\"}]";
+            string pullResult = "[{\"id\":\"b\",\"String\":\"Wow\",\"version\":\"def\", \"updatedAt\":\"2014-01-30T23:01:33.444Z\"}]";
             hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(pullResult) }); // pull
             hijack.AddResponseContent("[]");
 
             await table.PullAsync(queryId: "todoItems", query: table.CreateQuery());
-            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.0000000%2B00%3A00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true");
+            AssertEx.QueryEquals(hijack.Requests[0].RequestUri.Query, "?$filter=(updatedAt%20ge%20datetimeoffset'1970-01-01T00%3A00%3A00.0000000%2B00%3A00')&$orderby=updatedAt&$skip=0&$top=50&__includeDeleted=true");
 
             table = await GetSynctable<ToDoWithStringId>(hijack);
 
 
-            pullResult = "[{\"id\":\"b\",\"String\":\"Updated\",\"__version\":\"def\", \"__updatedAt\":\"2014-02-27T23:01:33.444Z\"}]";
+            pullResult = "[{\"id\":\"b\",\"String\":\"Updated\",\"version\":\"def\", \"updatedAt\":\"2014-02-27T23:01:33.444Z\"}]";
             hijack.AddResponseContent(pullResult); // pull
             hijack.AddResponseContent("[]");
 
@@ -331,7 +331,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
             var item = await table.LookupAsync("b");
             Assert.AreEqual(item.String, "Updated");
-            AssertEx.QueryEquals(hijack.Requests[2].RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetimeoffset'2014-01-30T23%3A01%3A33.4440000%2B00%3A00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true");
+            AssertEx.QueryEquals(hijack.Requests[2].RequestUri.Query, "?$filter=(updatedAt%20ge%20datetimeoffset'2014-01-30T23%3A01%3A33.4440000%2B00%3A00')&$orderby=updatedAt&$skip=0&$top=50&__includeDeleted=true");
         }
 
         [AsyncTestMethod]
@@ -342,7 +342,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             var hijack = new TestHttpHandler();
             IMobileServiceSyncTable<ToDoWithSystemPropertiesType> table = await GetSynctable<ToDoWithSystemPropertiesType>(hijack);
 
-            string pullResult = "[{\"id\":\"b\",\"String\":\"Wow\",\"__version\":\"def\",\"__createdAt\":\"2014-01-29T23:01:33.444Z\", \"__updatedAt\":\"2014-01-30T23:01:33.444Z\"}]";
+            string pullResult = "[{\"id\":\"b\",\"String\":\"Wow\",\"version\":\"def\",\"createdAt\":\"2014-01-29T23:01:33.444Z\", \"updatedAt\":\"2014-01-30T23:01:33.444Z\"}]";
             hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(pullResult) }); // pull
             hijack.AddResponseContent("[]");
 
@@ -613,7 +613,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
                 Assert.AreEqual(content, @"{""id"":""b"",""String"":""Hey""}"); // the system properties are not sent to server
                 return req;
             };
-            string updateResult = "{\"id\":\"b\",\"String\":\"Wow\",\"__version\":\"def\",\"__createdAt\":\"2014-01-29T23:01:33.444Z\", \"__updatedAt\":\"2014-01-30T23:01:33.444Z\"}";
+            string updateResult = "{\"id\":\"b\",\"String\":\"Wow\",\"version\":\"def\",\"createdAt\":\"2014-01-29T23:01:33.444Z\", \"updatedAt\":\"2014-01-30T23:01:33.444Z\"}";
             hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(updateResult) }); // push
             await service.SyncContext.PushAsync();
 
@@ -638,8 +638,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             store.DefineTable<ToDoWithSystemPropertiesType>();
 
             var hijack = new TestHttpHandler();
-            hijack.AddResponseContent(@"{""id"": ""123"", ""__version"": ""xyz""}");
-            hijack.AddResponseContent(@"{""id"": ""134"", ""__version"": ""ghi""}");
+            hijack.AddResponseContent(@"{""id"": ""123"", ""version"": ""xyz""}");
+            hijack.AddResponseContent(@"{""id"": ""134"", ""version"": ""ghi""}");
 
             IMobileServiceClient service = await CreateClient(hijack, store);
             var table = service.GetSyncTable<ToDoWithSystemPropertiesType>();
@@ -681,9 +681,9 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             ResetDatabase(TestTable);
 
             var hijack = new TestHttpHandler();
-            string conflictResult = "{\"id\":\"b\",\"String\":\"Hey\",\"__version\":\"def\"}";
+            string conflictResult = "{\"id\":\"b\",\"String\":\"Hey\",\"version\":\"def\"}";
             hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.PreconditionFailed) { Content = new StringContent(conflictResult) }); // first push
-            string successResult = "{\"id\":\"b\",\"String\":\"Wow\",\"__version\":\"def\"}";
+            string successResult = "{\"id\":\"b\",\"String\":\"Wow\",\"version\":\"def\"}";
             hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(successResult) }); // second push
 
             var store = new MobileServiceSQLiteStore(TestDbName);
@@ -737,7 +737,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             ResetDatabase(TestTable);
 
             var hijack = new TestHttpHandler();
-            string conflictResult = "{\"id\":\"b\",\"String\":\"Wow\",\"__version\":\"def\"}";
+            string conflictResult = "{\"id\":\"b\",\"String\":\"Wow\",\"version\":\"def\"}";
             hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.PreconditionFailed) { Content = new StringContent(conflictResult) }); // first push
 
             var store = new MobileServiceSQLiteStore(TestDbName);
@@ -774,7 +774,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             ResetDatabase(TestTable);
 
             var hijack = new TestHttpHandler();
-            string conflictResult = "{\"id\":\"b\",\"String\":\"Wow\",\"__version\":\"def\"}";
+            string conflictResult = "{\"id\":\"b\",\"String\":\"Wow\",\"version\":\"def\"}";
             hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.PreconditionFailed) { Content = new StringContent(conflictResult) }); // first push
 
             var store = new MobileServiceSQLiteStore(TestDbName);
@@ -885,7 +885,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 ""enum4"":""Enum4Value2"",
 ""enum5"":""Enum5Value2"",
 ""enum6"":""Enum6Value2"",
-""__version"":""XYZ""}");
+""version"":""XYZ""}");
             await service.SyncContext.PushAsync();
             AllBaseTypesWithAllSystemPropertiesType lookedUp = await table.LookupAsync("abc");
             inserted.Version = "XYZ";
@@ -999,7 +999,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
         private static async Task<IMobileServiceClient> CreateClient(TestHttpHandler hijack, MobileServiceSQLiteStore store)
         {
-            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", hijack);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
             return service;
         }
