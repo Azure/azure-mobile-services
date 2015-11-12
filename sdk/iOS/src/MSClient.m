@@ -14,17 +14,15 @@
 #import "MSSyncTable.h"
 #import "MSPush.h"
 
-
 #pragma mark * MSClient Private Interface
-
 
 @interface MSClient ()
 
 // Public readonly, private readwrite properties
-@property (nonatomic, strong, readwrite) NSArray<id<MSFilter>> *filters;
+@property (nonatomic, strong, readwrite)         NSArray *filters;
 
 // Private properties
-@property (nonatomic, strong, readonly) MSLogin *login;
+@property (nonatomic, strong, readonly)         MSLogin *login;
 
 @end
 
@@ -34,11 +32,17 @@
 
 @implementation MSClient
 
+@synthesize applicationURL = applicationURL_;
+@synthesize applicationKey = applicationKey_;
+@synthesize currentUser = currentUser_;
+@synthesize login = login_;
+@synthesize serializer = serializer_;
+@synthesize syncContext = syncContext_;
 - (void) setSyncContext:(MSSyncContext *)syncContext
 {
-    _syncContext = syncContext;
+    syncContext_ = syncContext;
     if (syncContext) {
-        _syncContext.client = self;
+        syncContext_.client = self;    
     }
 }
 
@@ -68,87 +72,63 @@
 +(MSClient *) clientWithApplicationURLString:(NSString *)urlString
 {
     return [MSClient clientWithApplicationURLString:urlString
-                                   gatewayURLString:nil
-                                     applicationKey:nil];
+                                 applicationKey:nil];
 }
 
 +(MSClient *) clientWithApplicationURLString:(NSString *)urlString
                            applicationKey:(NSString *)key
 {
-    return [MSClient clientWithApplicationURLString:urlString
-                                   gatewayURLString:nil
-                                     applicationKey:key];
+    // NSURL will be nil for non-percent escaped url strings so we have to percent escape here
+    NSMutableCharacterSet *set = [[NSCharacterSet URLPathAllowedCharacterSet] mutableCopy];
+    [set formUnionWithCharacterSet:[NSCharacterSet URLHostAllowedCharacterSet]];
+    [set formUnionWithCharacterSet:[NSCharacterSet URLQueryAllowedCharacterSet]];
+    
+    NSString *urlStringEncoded = [urlString stringByAddingPercentEncodingWithAllowedCharacters:set];
+    
+    NSURL *url = [NSURL URLWithString:urlStringEncoded];
+    return [MSClient clientWithApplicationURL:url applicationKey:key];
 }
 
-
-+(MSClient *) clientWithApplicationURLString:(NSString *)applicationUrlString
-                            gatewayURLString:(NSString *)gatewayUrlString
-                              applicationKey:(NSString *)key
++(MSClient *) clientWithApplicationURLString:(NSString *)urlString
+                          withApplicationKey:(NSString *)key
 {
-    // NSURL will be nil for non-percent escaped url strings so we have to
-    // percent escape here
-    NSString *appUrlStringEncoded = [applicationUrlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    NSString *gatewayUrlStringEncoded = [gatewayUrlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    
-    NSURL *url = [NSURL URLWithString:appUrlStringEncoded];
-    NSURL *gatewayUrl = [NSURL URLWithString:gatewayUrlStringEncoded];
-    
-    return [MSClient clientWithApplicationURL:url gatewayURL:gatewayUrl applicationKey:key];
-    
+    return [MSClient clientWithApplicationURLString:urlString
+                                     applicationKey:key];
 }
 
 +(MSClient *) clientWithApplicationURL:(NSURL *)url
 {
-    return [[MSClient alloc] initWithApplicationURL:url
-                                         gatewayURL:nil
-                                     applicationKey:nil];
+    return [MSClient clientWithApplicationURL:url applicationKey:nil];
 }
 
 +(MSClient *) clientWithApplicationURL:(NSURL *)url
                     applicationKey:(NSString *)key
 {
-    return [[MSClient alloc] initWithApplicationURL:url
-                                         gatewayURL:nil
-                                     applicationKey:key];
+    return [[MSClient alloc] initWithApplicationURL:url applicationKey:key];    
 }
 
-+(MSClient *) clientWithApplicationURL:(NSURL *)applicationUrl
-                            gatewayURL:(NSURL *)gatewayUrl
-                        applicationKey:(NSString *)key
-{
-    return [[MSClient alloc] initWithApplicationURL:applicationUrl
-                                         gatewayURL:gatewayUrl
-                                     applicationKey:key];
-}
 
 #pragma mark * Public Initializer Methods
 
 
 -(id) initWithApplicationURL:(NSURL *)url
 {
-    return [self initWithApplicationURL:url gatewayURL:nil applicationKey:nil];
+    return [self initWithApplicationURL:url applicationKey:nil];
 }
 
 -(id) initWithApplicationURL:(NSURL *)url applicationKey:(NSString *)key
 {
-    return [self initWithApplicationURL:url gatewayURL:nil applicationKey:key];
-}
-
--(id)initWithApplicationURL:(NSURL *)applicationUrl
-                 gatewayURL:(NSURL *)gatewayUrl
-             applicationKey:(NSString *)key
-{
     self = [super init];
     if(self)
     {
-        _applicationURL = applicationUrl;
-        _gatewayURL = gatewayUrl;
-        _applicationKey = [key copy];
-        _login = [[MSLogin alloc] initWithClient:self];
+        applicationURL_ = url;
+        applicationKey_ = [key copy];
+        login_ = [[MSLogin alloc] initWithClient:self];
         _push = [[MSPush alloc] initWithClient:self];
     }
     return self;
 }
+
 
 #pragma mark * Public Filter Methods
 
@@ -181,7 +161,7 @@
 
 #pragma mark * Public Authentication Methods
 
-#if TARGET_OS_IPHONE
+
 -(void) loginWithProvider:(NSString *)provider
              controller:(UIViewController *)controller
                  animated:(BOOL)animated
@@ -199,7 +179,6 @@
     return [self.login loginViewControllerWithProvider:provider
                                             completion:completion];
 }
-#endif
 
 -(void) loginWithProvider:(NSString *)provider
                 token:(NSDictionary *)token
@@ -294,8 +273,7 @@
 {
     MSClient *client = [[MSClient allocWithZone:zone]
                             initWithApplicationURL:self.applicationURL
-                                        gatewayURL:self.gatewayURL
-                                    applicationKey:self.applicationKey];
+                                applicationKey:self.applicationKey];
                                                                             
     client.currentUser = [self.currentUser copyWithZone:zone];
     client.filters = [self.filters copyWithZone:zone];

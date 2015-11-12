@@ -6,8 +6,6 @@
 #import "MSSerializer.h"
 #import "MSQueryResult.h"
 #import "MSClientInternal.h"
-#import "MSTableRequest.h"
-#import "MSTable.h"
 
 // next link is the format "http://contoso.com; rel=next"
 static NSString *const nextLinkPattern = @"^(.*?);\\s*rel\\s*=\\s*(\\w+)\\s*"; // $1; rel = $2
@@ -65,6 +63,9 @@ static NSString *const nextLinkPattern = @"^(.*?);\\s*rel\\s*=\\s*(\\w+)\\s*"; /
                         }
                         [item setValue:[version stringByReplacingOccurrencesOfString:@"\\\"" withString:@"\""] forKey:MSSystemColumnVersion];
                     }
+                    
+                    // Remove unasked for system columns
+                    [MSTableConnection removeSystemColumnsFromItem:item ifNotInQuery:response.URL.query];
                 }
             }
             
@@ -254,6 +255,40 @@ static NSString *const nextLinkPattern = @"^(.*?);\\s*rel\\s*=\\s*(\\w+)\\s*"; /
     }
     
     return totalCount;
+}
+
++(void) removeSystemColumnsFromItem:(NSMutableDictionary *)item ifNotInQuery:(NSString *)query
+{
+    // Do nothing for non-string Ids
+    if(![item[@"id"] isKindOfClass:[NSString class]]) {
+        return;
+    }
+    
+    NSString *requestedSystemProperties = nil;
+    NSRange range = [query rangeOfString:@"__systemProperties=" options:NSCaseInsensitiveSearch];
+    
+    if(query && range.location != NSNotFound)
+    {
+        requestedSystemProperties = [query substringFromIndex:range.location + range.length];
+        NSRange endOfSystemProperties = [query rangeOfString:@"&" options:NSCaseInsensitiveSearch];
+        if (endOfSystemProperties.location != NSNotFound) {
+            requestedSystemProperties = [query substringToIndex:endOfSystemProperties.location];
+        }
+    }
+    
+    requestedSystemProperties = [requestedSystemProperties stringByRemovingPercentEncoding];
+    
+    if (requestedSystemProperties && [requestedSystemProperties rangeOfString:@"*"].location != NSNotFound) {
+        return;
+    }
+    
+    NSSet *systemProperties = [item keysOfEntriesPassingTest:^BOOL(NSString *key, id obj, BOOL *stop) {
+        return [key hasPrefix:@"__"];
+    }];
+    
+    for (NSString *systemProperty in systemProperties) {
+        [MSTableConnection removeSystemColumn:systemProperty fromItem:item ifNotInQuery:requestedSystemProperties];
+    }
 }
 
 +(void) removeSystemColumn:(NSString *)systemColumnName fromItem:(NSMutableDictionary *)item ifNotInQuery:(NSString *)query

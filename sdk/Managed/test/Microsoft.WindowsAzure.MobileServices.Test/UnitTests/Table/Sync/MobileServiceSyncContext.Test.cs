@@ -10,7 +10,6 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Sync;
-using Microsoft.WindowsAzure.MobileServices.Test.UnitTests;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -26,14 +25,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task InitializeAsync_Throws_WhenStoreIsNull()
         {
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...");
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...");
             await AssertEx.Throws<ArgumentException>(() => service.SyncContext.InitializeAsync(null));
         }
 
         [AsyncTestMethod]
         public async Task InitializeAsync_DoesNotThrow_WhenSyncHandlerIsNull()
         {
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...");
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...");
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), null);
         }
 
@@ -41,7 +40,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public async Task PushAsync_ExecutesThePendingOperations_InOrder()
         {
             var hijack = new TestHttpHandler();
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             var store = new MobileServiceLocalStoreMock();
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
@@ -59,7 +58,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
             hijack.AddResponseContent("{\"id\":\"def\",\"String\":\"What\"}");
 
-            service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
             Assert.AreEqual(hijack.Requests.Count, 0);
@@ -74,7 +73,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             // create yet another service to make sure the old items were purged from queue
             hijack = new TestHttpHandler();
             hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
-            service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
             Assert.AreEqual(hijack.Requests.Count, 0);
             await service.SyncContext.PushAsync();
@@ -87,7 +86,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var hijack = new TestHttpHandler();
             hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
 
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             var store = new MobileServiceLocalStoreMock();
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
@@ -103,7 +102,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public async Task PushAsync_FeatureHeaderPresentWhenRehydrated()
         {
             var hijack = new TestHttpHandler();
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             var store = new MobileServiceLocalStoreMock();
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
@@ -115,7 +114,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack = new TestHttpHandler();
             hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
 
-            service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
             await service.SyncContext.PushAsync();
 
@@ -137,7 +136,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             await store.UpsertAsync(MobileServiceLocalSystemTables.SyncErrors, error.Serialize(), fromServer: false);
 
             var hijack = new TestHttpHandler();
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
             var ex = await ThrowsAsync<MobileServicePushFailedException>(service.SyncContext.PushAsync);
@@ -149,7 +148,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var hijack = new TestHttpHandler();
             hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.NotFound));
 
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandlerMock());
 
             IMobileServiceSyncTable table = service.GetSyncTable("someTable");
@@ -173,7 +172,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 throw new InvalidOperationException();
             };
 
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), handler);
 
             IMobileServiceSyncTable table = service.GetSyncTable("someTable");
@@ -199,7 +198,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 return Task.FromResult(JObject.Parse("{\"id\":\"abc\",\"__version\":\"Hey\"}"));
             };
 
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), handler);
 
             IMobileServiceSyncTable table = service.GetSyncTable("someTable");
@@ -209,6 +208,52 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             await (service.SyncContext as MobileServiceSyncContext).PushAsync(CancellationToken.None, MobileServiceTableKind.Table);
 
             Assert.IsTrue(invoked);
+        }
+        
+        [AsyncTestMethod]
+        public async Task UpdateOperationAsync_UpsertsTheItemInLocalStore_AndDeletesTheError_FromSyncHandler()
+        {
+            // Arrange
+            string itemId = "abc";
+            var hijack = new TestHttpHandler();
+            hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+
+            var handler = new MobileServiceSyncHandlerMock();
+            handler.PushCompleteAction = async pushCompletionResult =>
+            {
+                foreach (var error in pushCompletionResult.Errors)
+                {
+                    await error.UpdateOperationAsync(JObject.Parse("{\"id\":\"abc\",\"__version\":\"Hey\"}"));
+                }
+            };
+            var store = new MobileServiceLocalStoreMock();
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            await service.SyncContext.InitializeAsync(store, handler);
+
+            IMobileServiceSyncTable table = service.GetSyncTable("someTable");
+
+            await table.InsertAsync(new JObject() { { "id", "abc" }, { "__version", "Wow" } });
+
+            // Act
+            await (service.SyncContext as MobileServiceSyncContext).PushAsync(CancellationToken.None, MobileServiceTableKind.Table);
+
+
+            // Assert
+            var syncError = store.TableMap[MobileServiceLocalSystemTables.SyncErrors].Values;
+            var operation = store.TableMap[MobileServiceLocalSystemTables.OperationQueue].Values.FirstOrDefault();
+            var item = JObject.Parse("{\"id\":\"abc\",\"__version\":\"Hey\"}");
+            JObject upserted = await store.LookupAsync("someTable", itemId);
+            // item is upserted
+            Assert.IsNotNull(upserted);
+
+            // verify if the record was updated
+            Assert.AreEqual(item.ToString(), upserted.ToString());
+
+            // verify if the errors were cleared
+            Assert.AreEqual(0, syncError.Count);
+
+            // Verify operation is still present
+            Assert.AreEqual(operation.Value<string>("itemId"),itemId);
         }
 
         [AsyncTestMethod]
@@ -237,7 +282,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 }
                 return null;
             };
-            IMobileServiceClient service = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp, "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), handler);
 
             IMobileServiceSyncTable table = service.GetSyncTable("someTable");
@@ -380,7 +425,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task CancelAndUpdateItemAsync_UpsertsTheItemInLocalStore_AndDeletesTheOperationAndError()
         {
-            var client = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
+            var client = new MobileServiceClient("http://www.test.com");
             var store = new MobileServiceLocalStoreMock();
             var context = new MobileServiceSyncContext(client);
             await context.InitializeAsync(store);
@@ -422,9 +467,110 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
+        public async Task UpdateOperationAsync_UpsertsTheItemInLocalStore_AndDeletesTheError_AndUpdatesTheOperation()
+        {
+            var client = new MobileServiceClient("http://www.test.com");
+            var store = new MobileServiceLocalStoreMock();
+            var context = new MobileServiceSyncContext(client);
+            await context.InitializeAsync(store);
+
+            string operationId = "abc";
+            string itemId = "def";
+            string tableName = "test";
+
+
+            store.TableMap[MobileServiceLocalSystemTables.SyncErrors] = new Dictionary<string, JObject>() { { operationId, new JObject() { { "id", operationId }, { "version", 1 } } } };
+            store.TableMap[MobileServiceLocalSystemTables.OperationQueue].Add(operationId, new JObject() { { "id", operationId }, { "version", 1 } });
+            store.TableMap.Add(tableName, new Dictionary<string, JObject>() { { itemId, new JObject() } });
+
+            // operation exists before cancel
+            Assert.IsNotNull(await store.LookupAsync(MobileServiceLocalSystemTables.OperationQueue, operationId));
+            // item exists before upsert
+            Assert.IsNotNull(await store.LookupAsync(tableName, itemId));
+
+            var error = new MobileServiceTableOperationError(operationId,
+                                                             1,
+                                                             MobileServiceTableOperationKind.Update,
+                                                             HttpStatusCode.Conflict,
+                                                             tableName,
+                                                             item: new JObject() { { "id", itemId } },
+                                                             rawResult: "{}",
+                                                             result: new JObject());
+
+            var item = new JObject() { { "id", itemId }, { "name", "unknown" } };
+            await context.UpdateOperationAsync(error, item);
+
+            // operation is updated
+            Assert.IsNotNull(await store.LookupAsync(MobileServiceLocalSystemTables.OperationQueue, operationId));
+            // error is deleted
+            Assert.IsNull(await store.LookupAsync(MobileServiceLocalSystemTables.SyncErrors, operationId));
+
+            JObject upserted = await store.LookupAsync(tableName, itemId);
+            // item is upserted
+            Assert.IsNotNull(upserted);
+            Assert.AreEqual(item, upserted);
+        }
+
+        [AsyncTestMethod]
+        public async Task UpdateOperationAsync_UpsertTheItemInOperation_AndDeletesTheError()
+        {
+            var client = new MobileServiceClient("http://www.test.com");
+            var store = new MobileServiceLocalStoreMock();
+            var context = new MobileServiceSyncContext(client);
+            await context.InitializeAsync(store);
+
+            string operationId = "abc";
+            string itemId = "def";
+            string tableName = "test";
+
+            var item = new JObject() { { "id", itemId }, { "name", "unknown" } };
+
+            store.TableMap[MobileServiceLocalSystemTables.SyncErrors] = new Dictionary<string, JObject>() { { operationId, new JObject() { { "id", operationId }, { "version", 1 } } } };
+            store.TableMap[MobileServiceLocalSystemTables.OperationQueue].Add(operationId, new JObject() { { "id", operationId }, { "version", 1 }, { "item", item.ToString() }, { "kind", (int)MobileServiceTableOperationKind.Delete } });
+
+            // operation exists before cancel
+            Assert.IsNotNull(await store.LookupAsync(MobileServiceLocalSystemTables.OperationQueue, operationId));
+            // item does not exist
+            Assert.IsNull(await store.LookupAsync(tableName, itemId));
+
+            var error = new MobileServiceTableOperationError(operationId,
+                                                             1,
+                                                             MobileServiceTableOperationKind.Delete,
+                                                             HttpStatusCode.PreconditionFailed,
+                                                             tableName,
+                                                             item: new JObject() { { "id", itemId } },
+                                                             rawResult: "{}",
+                                                             result: new JObject());
+            var item2 = new JObject() { { "id", itemId }, { "name", "unknown" }, { "version", 2 } };
+            await context.UpdateOperationAsync(error, item2);
+
+            var operation = await store.LookupAsync(MobileServiceLocalSystemTables.OperationQueue, operationId);
+            // operation is updated
+            Assert.IsNotNull(operation);
+            // error is deleted
+            Assert.IsNull(await store.LookupAsync(MobileServiceLocalSystemTables.SyncErrors, operationId));
+
+            Assert.AreEqual(operation.GetValue("item").ToString(), item2.ToString(Formatting.None));
+        }
+        
+        [AsyncTestMethod]
+        public async Task UpdateOperationAsync_Throws_IfOperationIsModified()
+        {
+            string errorMessage = "The operation has been updated and cannot be updated again";
+            await TestOperationModifiedException(true, (error, context) => context.UpdateOperationAsync(error, new JObject()), errorMessage);
+        }
+
+        [AsyncTestMethod]
+        public async Task UpdateOperationAsync_Throws_IfOperationDoesNotExist()
+        {
+            string errorMessage = "The operation has been updated and cannot be updated again";
+            await TestOperationModifiedException(false, (error, context) => context.UpdateOperationAsync(error, new JObject()), errorMessage);
+        }
+
+        [AsyncTestMethod]
         public async Task CancelAndDiscardItemAsync_DeletesTheItemInLocalStore_AndDeletesTheOperationAndError()
         {
-            var client = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
+            var client = new MobileServiceClient("http://www.test.com");
             var store = new MobileServiceLocalStoreMock();
             var context = new MobileServiceSyncContext(client);
             await context.InitializeAsync(store);
@@ -465,31 +611,35 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task CancelAndUpdateItemAsync_Throws_IfOperationDoesNotExist()
         {
-            await TestOperationModifiedException(false, (error, context) => context.CancelAndUpdateItemAsync(error, new JObject()));
+            string errorMessage = "The operation has been updated and cannot be cancelled.";
+            await TestOperationModifiedException(false, (error, context) => context.CancelAndUpdateItemAsync(error, new JObject()), errorMessage);
         }
 
         [AsyncTestMethod]
         public async Task CancelAndDiscardItemAsync_Throws_IfOperationDoesNotExist()
         {
-            await TestOperationModifiedException(false, (error, context) => context.CancelAndDiscardItemAsync(error));
+            string errorMessage = "The operation has been updated and cannot be cancelled.";
+            await TestOperationModifiedException(false, (error, context) => context.CancelAndDiscardItemAsync(error), errorMessage);
         }
 
 
         [AsyncTestMethod]
         public async Task CancelAndUpdateItemAsync_Throws_IfOperationIsModified()
         {
-            await TestOperationModifiedException(true, (error, context) => context.CancelAndUpdateItemAsync(error, new JObject()));
+            string errorMessage = "The operation has been updated and cannot be cancelled.";
+            await TestOperationModifiedException(true, (error, context) => context.CancelAndUpdateItemAsync(error, new JObject()), errorMessage);
         }
 
         [AsyncTestMethod]
         public async Task CancelAndDiscardItemAsync_Throws_IfOperationIsModified()
         {
-            await TestOperationModifiedException(true, (error, context) => context.CancelAndDiscardItemAsync(error));
+            string errorMessage = "The operation has been updated and cannot be cancelled.";
+            await TestOperationModifiedException(true, (error, context) => context.CancelAndDiscardItemAsync(error), errorMessage);
         }
-        
-        private async Task TestOperationModifiedException(bool operationExists, Func<MobileServiceTableOperationError, MobileServiceSyncContext, Task> action)
+
+        private async Task TestOperationModifiedException(bool operationExists, Func<MobileServiceTableOperationError, MobileServiceSyncContext, Task> action, String errorMessage)
         {
-            var client = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
+            var client = new MobileServiceClient("http://www.test.com");
             var store = new MobileServiceLocalStoreMock();
             var context = new MobileServiceSyncContext(client);
             await context.InitializeAsync(store);
@@ -519,63 +669,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             var ex = await ThrowsAsync<InvalidOperationException>(() => action(error, context));
 
-            Assert.AreEqual(ex.Message, "The operation has been updated and cannot be cancelled.");
-        }
-
-        [AsyncTestMethod]
-        public async Task CancelAndDiscardItemAsync_WithNotificationsEnabled_UsesTheCorrectStoreOperationSource()
-        {
-            await ConflictOperation_WithNotificationsEnabled_UsesTheCorrectStoreOperationSource(
-                async (context, error) => await context.CancelAndDiscardItemAsync(error));
-        }
-
-        [AsyncTestMethod]
-        public async Task CancelAndUpdateItemAsync_WithNotificationsEnabled_UsesTheCorrectStoreOperationSource()
-        {
-            await ConflictOperation_WithNotificationsEnabled_UsesTheCorrectStoreOperationSource(
-                async (context, error) => await context.CancelAndUpdateItemAsync(error, new JObject() { { "id", string.Empty } }));
-        }
-
-        private async Task ConflictOperation_WithNotificationsEnabled_UsesTheCorrectStoreOperationSource(Func<MobileServiceSyncContext, MobileServiceTableOperationError, Task> handler)
-        {
-            var client = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
-            var store = new MobileServiceLocalStoreMock();
-            var context = new MobileServiceSyncContext(client);
-            var manualResetEvent = new ManualResetEventSlim();
-
-            await context.InitializeAsync(store, StoreTrackingOptions.NotifyLocalConflictResolutionOperations);
-
-            string operationId = "abc";
-            string itemId = string.Empty;
-            string tableName = "test";
-
-            store.TableMap[MobileServiceLocalSystemTables.OperationQueue].Add(operationId, new JObject() { { "version", 1 } });
-
-
-            var error = new MobileServiceTableOperationError(operationId,
-                                                             1,
-                                                             MobileServiceTableOperationKind.Update,
-                                                             HttpStatusCode.Conflict,
-                                                             tableName,
-                                                             item: new JObject() { { "id", itemId } },
-                                                             rawResult: "{}",
-                                                             result: new JObject());
-
-
-            bool sourceIsLocalConflict = false;
-            IDisposable subscription = client.EventManager.Subscribe<StoreOperationCompletedEvent>(o =>
-            {
-                sourceIsLocalConflict = o.Operation.Source == StoreOperationSource.LocalConflictResolution;
-                manualResetEvent.Set();
-            });
-
-            await handler(context, error);
-
-            bool resetEventSignaled = manualResetEvent.Wait(1000);
-            subscription.Dispose();
-
-            Assert.IsTrue(resetEventSignaled);
-            Assert.IsTrue(sourceIsLocalConflict);
+            Assert.AreEqual(ex.Message, errorMessage);
         }
     }
 }

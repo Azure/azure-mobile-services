@@ -6,10 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.WindowsAzure.MobileServices.Eventing;
 using Microsoft.WindowsAzure.MobileServices.Sync;
 using Newtonsoft.Json.Linq;
 
@@ -20,6 +19,8 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// </summary>
     public class MobileServiceClient : IMobileServiceClient, IDisposable
     {
+        private static HttpMethod defaultHttpMethod = HttpMethod.Post;
+
         /// <summary>
         /// Name of the config setting that stores the installation ID.
         /// </summary>
@@ -31,22 +32,22 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         private const string ConfigureAsyncApplicationIdKey = "applicationInstallationId";
 
-        private static HttpMethod defaultHttpMethod = HttpMethod.Post;
-
         /// <summary>
         /// Default empty array of HttpMessageHandlers.
         /// </summary>
         private static readonly HttpMessageHandler[] EmptyHttpMessageHandlers = new HttpMessageHandler[0];
 
         /// <summary>
-        /// Absolute URI of the Microsoft Azure Mobile App.
+        /// The id used to identify this installation of the application to 
+        /// provide telemetry data.
         /// </summary>
-        public Uri MobileAppUri { get; private set; }
+        internal string applicationInstallationId;
 
         /// <summary>
-        /// Absolute URI of the Azure App Service Gateway.
+        /// Gets the Uri to the Mobile Services application that is provided by
+        /// the call to MobileServiceClient(...).
         /// </summary>
-        public Uri GatewayUri { get; private set; }
+        public Uri ApplicationUri { get; private set; }
 
         /// <summary>
         /// Gets the Mobile Services application's name that is provided by the
@@ -59,18 +60,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// MobileServiceClient.Login().
         /// </summary>
         public MobileServiceUser CurrentUser { get; set; }
-
-        /// <summary>
-        /// The id used to identify this installation of the application to 
-        /// provide telemetry data.
-        /// </summary>
-        public string InstallationId { get; private set; }
-
-        /// <summary>
-        /// The event manager that exposes and manages the event stream used by the mobile services types to 
-        /// publish and consume events.
-        /// </summary>
-        public IMobileServiceEventManager EventManager { get; private set; }
 
         /// <summary>
         /// Gets or sets the settings used for serialization.
@@ -108,170 +97,108 @@ namespace Microsoft.WindowsAzure.MobileServices
         internal MobileServiceSerializer Serializer { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="MobileServiceHttpClient"/> associated with the Azure Mobile App.
+        /// Gets the <see cref="MobileServiceHttpClient"/> associated with this client.
         /// </summary>
-        internal MobileServiceHttpClient MobileAppHttpClient { get; private set; }
-
-        /// <summary>
-        /// Gets the <see cref="MobileServiceHttpClient"/> associated with the Authentication endpoint.
-        /// </summary>
-        internal MobileServiceHttpClient AuthenticationHttpClient { get; private set; }
+        internal MobileServiceHttpClient HttpClient { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the MobileServiceClient class.
         /// </summary>
-        /// <param name="mobileAppUri">
-        /// Absolute URI of the Microsoft Azure Mobile App.
+        /// <param name="applicationUrl">
+        /// The URI for the Microsoft Azure Mobile Service.
         /// </param>
-        /// <param name="handlers">
-        /// Chain of <see cref="HttpMessageHandler" /> instances. 
-        /// All but the last should be <see cref="DelegatingHandler"/>s. 
-        /// </param>
-        public MobileServiceClient(string mobileAppUri, params HttpMessageHandler[] handlers)
-            : this(mobileAppUri: mobileAppUri, gatewayUri: null, applicationKey: null, handlers: handlers)
+        [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "0#", Justification = "Enables easier copy/paste getting started workflow")]
+        public MobileServiceClient(string applicationUrl)
+            : this(new Uri(applicationUrl))
         {
         }
 
         /// <summary>
         /// Initializes a new instance of the MobileServiceClient class.
         /// </summary>
-        /// <param name="mobileAppUri">
-        /// Absolute URI of the Microsoft Azure Mobile App.
+        /// <param name="applicationUri">
+        /// The URI for the Microsoft Azure Mobile Service.
+        /// </param>
+        public MobileServiceClient(Uri applicationUri)
+            : this(applicationUri, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the MobileServiceClient class.
+        /// </summary>
+        /// <param name="applicationUrl">
+        /// The URI for the Microsoft Azure Mobile Service.
         /// </param>
         /// <param name="applicationKey">
-        /// The application key for the Microsoft Azure Mobile App.
+        /// The application key for the Microsoft Azure Mobile Service.
+        /// </param>
+        [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "0#", Justification = "Enables easier copy/paste getting started workflow")]
+        public MobileServiceClient(string applicationUrl, string applicationKey)
+            : this(new Uri(applicationUrl), applicationKey)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the MobileServiceClient class.
+        /// </summary>
+        /// <param name="applicationUri">
+        /// The URI for the Microsoft Azure Mobile Service.
+        /// </param>
+        /// <param name="applicationKey">
+        /// The application key for the Microsoft Azure Mobile Service.
+        /// </param> 
+        public MobileServiceClient(Uri applicationUri, string applicationKey)
+            : this(applicationUri, applicationKey, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the MobileServiceClient class.
+        /// </summary>
+        /// <param name="applicationUrl">
+        /// The URI for the Microsoft Azure Mobile Service.
+        /// </param>
+        /// <param name="applicationKey">
+        /// The application key for the Microsoft Azure Mobile Service.
+        /// </param>
+        /// <param name="handlers">
+        /// Chain of <see cref="HttpMessageHandler" /> instances. 
+        /// All but the last should be <see cref="DelegatingHandler"/>s. 
+        /// </param>
+        [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "0#", Justification = "Enables easier copy/paste getting started workflow")]
+        public MobileServiceClient(string applicationUrl, string applicationKey, params HttpMessageHandler[] handlers)
+            : this(new Uri(applicationUrl), applicationKey, handlers)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the MobileServiceClient class.
+        /// </summary>
+        /// <param name="applicationUri">
+        /// The URI for the Microsoft Azure Mobile Service.
+        /// </param>
+        /// <param name="applicationKey">
+        /// The application key for the Microsoft Azure Mobile Service.
         /// </param> 
         /// <param name="handlers">
         /// Chain of <see cref="HttpMessageHandler" /> instances. 
         /// All but the last should be <see cref="DelegatingHandler"/>s. 
         /// </param>
-        public MobileServiceClient(string mobileAppUri, string applicationKey, params HttpMessageHandler[] handlers)
-            : this(mobileAppUri: mobileAppUri, gatewayUri: null, applicationKey: applicationKey, handlers: handlers)
+        public MobileServiceClient(Uri applicationUri, string applicationKey, params HttpMessageHandler[] handlers)
         {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the MobileServiceClient class.
-        /// </summary>
-        /// <param name="mobileAppUri">
-        /// Absolute URI of the Microsoft Azure Mobile App.
-        /// </param>
-        /// <param name="gatewayUri">
-        /// Absolute URI of the gateway of the Microsoft Azure Mobile App.
-        /// </param>
-        /// <param name="applicationKey">
-        /// The application key for the Microsoft Azure Mobile App.
-        /// </param> 
-        /// <param name="handlers">
-        /// Chain of <see cref="HttpMessageHandler" /> instances. 
-        /// All but the last should be <see cref="DelegatingHandler"/>s. 
-        /// </param>
-        public MobileServiceClient(string mobileAppUri, string gatewayUri, string applicationKey,
-            params HttpMessageHandler[] handlers)
-            : this(
-                new Uri(mobileAppUri, UriKind.Absolute),
-                string.IsNullOrEmpty(gatewayUri) ? null : new Uri(gatewayUri, UriKind.Absolute), applicationKey, handlers)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the MobileServiceClient class.
-        /// </summary>
-        /// <param name="mobileAppUri">
-        /// Absolute URI of the Microsoft Azure Mobile App.
-        /// </param>
-        /// <param name="handlers">
-        /// Chain of <see cref="HttpMessageHandler" /> instances. 
-        /// All but the last should be <see cref="DelegatingHandler"/>s. 
-        /// </param>
-        public MobileServiceClient(Uri mobileAppUri, params HttpMessageHandler[] handlers)
-            : this(mobileAppUri: mobileAppUri, gatewayUri: null, applicationKey: null, handlers: handlers)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the MobileServiceClient class.
-        /// </summary>
-        /// <param name="mobileAppUri">
-        /// Absolute URI of the Microsoft Azure Mobile App.
-        /// </param>
-        /// <param name="applicationKey">
-        /// The application key for the Microsoft Azure Mobile App.
-        /// </param> 
-        /// <param name="handlers">
-        /// Chain of <see cref="HttpMessageHandler" /> instances. 
-        /// All but the last should be <see cref="DelegatingHandler"/>s. 
-        /// </param>
-        public MobileServiceClient(Uri mobileAppUri, string applicationKey, params HttpMessageHandler[] handlers)
-            : this(mobileAppUri: mobileAppUri, gatewayUri: null, applicationKey: applicationKey, handlers: handlers)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the MobileServiceClient class.
-        /// </summary>
-        /// <param name="mobileAppUri">
-        /// Absolute URI of the Microsoft Azure Mobile App.
-        /// </param>
-        /// <param name="gatewayUri">
-        /// Absolute URI of the gateway of the Microsoft Azure Mobile App.
-        /// </param>
-        /// <param name="applicationKey">
-        /// The application key for the Microsoft Azure Mobile App.
-        /// </param> 
-        /// <param name="handlers">
-        /// Chain of <see cref="HttpMessageHandler" /> instances. 
-        /// All but the last should be <see cref="DelegatingHandler"/>s. 
-        /// </param>
-        public MobileServiceClient(Uri mobileAppUri, Uri gatewayUri, string applicationKey,
-            params HttpMessageHandler[] handlers)
-        {
-            if (mobileAppUri == null)
+            if (applicationUri == null)
             {
-                throw new ArgumentNullException("mobileAppUri");
+                throw new ArgumentNullException("applicationUri");
             }
 
-            if (mobileAppUri.IsAbsoluteUri)
-            {
-                // Trailing slash in the MobileAppUri is important. Fix it right here before we pass it on further.
-                this.MobileAppUri = new Uri(MobileServiceUrlBuilder.AddTrailingSlash(mobileAppUri.AbsoluteUri), UriKind.Absolute);
-            }
-            else
-            {
-                throw new ArgumentException(
-                    string.Format(CultureInfo.InvariantCulture, Resources.MobileServiceClient_NotAnAbsoluteURI, mobileAppUri),
-                    "mobileAppUri");
-            }
-
-            if (gatewayUri != null)
-            {
-                if (gatewayUri.IsAbsoluteUri)
-                {
-                    // Trailing slash in the GatewayUri is important. Fix it right here before we pass it on further.
-                    this.GatewayUri = new Uri(MobileServiceUrlBuilder.AddTrailingSlash(gatewayUri.AbsoluteUri),
-                        UriKind.Absolute);
-                }
-                else
-                {
-                    throw new ArgumentException(
-                        string.Format(CultureInfo.InvariantCulture, Resources.MobileServiceClient_NotAnAbsoluteURI, gatewayUri),
-                        "gatewayUri");
-                }
-            }
-
+            this.ApplicationUri = applicationUri;
             this.ApplicationKey = applicationKey;
-            this.InstallationId = GetApplicationInstallationId();
-            
+            this.applicationInstallationId = GetApplicationInstallationId();
+
             handlers = handlers ?? EmptyHttpMessageHandlers;
-            this.MobileAppHttpClient = new MobileServiceHttpClient(handlers, this.MobileAppUri, this.InstallationId, this.ApplicationKey);
-
-            if (this.GatewayUri != null)
-            {
-                this.AuthenticationHttpClient = new MobileServiceHttpClient(handlers, this.GatewayUri, this.InstallationId, this.ApplicationKey);
-            }
-
+            this.HttpClient = new MobileServiceHttpClient(handlers, this.ApplicationUri, this.applicationInstallationId, this.ApplicationKey);
             this.Serializer = new MobileServiceSerializer();
-            this.EventManager = new MobileServiceEventManager();
             this.SyncContext = new MobileServiceSyncContext(this);
         }
 
@@ -280,6 +207,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         protected MobileServiceClient()
         {
+
         }
 
         /// <summary>
@@ -428,7 +356,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 throw new ArgumentNullException("token");
             }
-            
+
             MobileServiceTokenAuthentication auth = new MobileServiceTokenAuthentication(this, provider, token, parameters: null);
             return auth.LoginAsync();
         }
@@ -447,10 +375,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         /// <typeparam name="T">The type of instance returned from the Microsoft Azure Mobile Service.</typeparam>    
         /// <param name="apiName">The name of the custom API.</param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
         /// <returns>The response content from the custom api invocation.</returns>
-        public Task<T> InvokeApiAsync<T>(string apiName)
+        public Task<T> InvokeApiAsync<T>(string apiName, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return this.InvokeApiAsync<string, T>(apiName, null, null, null);
+            return this.InvokeApiAsync<string, T>(apiName, null, null, null, cancellationToken);
         }
 
         /// <summary>
@@ -461,10 +390,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <typeparam name="U">The type of instance returned from the Microsoft Azure Mobile Service.</typeparam>    
         /// <param name="apiName">The name of the custom API.</param>
         /// <param name="body">The value to be sent as the HTTP body.</param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
         /// <returns>The response content from the custom api invocation.</returns>
-        public Task<U> InvokeApiAsync<T, U>(string apiName, T body)
+        public Task<U> InvokeApiAsync<T, U>(string apiName, T body, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return this.InvokeApiAsync<T, U>(apiName, body, null, null);
+            return this.InvokeApiAsync<T, U>(apiName, body, null, null, cancellationToken);
         }
 
         /// <summary>
@@ -477,10 +407,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="parameters">
         /// A dictionary of user-defined parameters and values to include in the request URI query string.
         /// </param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
         /// <returns>The response content from the custom api invocation.</returns>
-        public Task<T> InvokeApiAsync<T>(string apiName, HttpMethod method, IDictionary<string, string> parameters)
+        public Task<T> InvokeApiAsync<T>(string apiName, HttpMethod method, IDictionary<string, string> parameters, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return this.InvokeApiAsync<string, T>(apiName, null, method, parameters);
+            return this.InvokeApiAsync<string, T>(apiName, null, method, parameters, cancellationToken);
         }
 
         /// <summary>
@@ -495,8 +426,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="parameters">
         /// A dictionary of user-defined parameters and values to include in the request URI query string.
         /// </param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
         /// <returns>The response content from the custom api invocation.</returns>
-        public async Task<U> InvokeApiAsync<T, U>(string apiName, T body, HttpMethod method, IDictionary<string, string> parameters)
+        public async Task<U> InvokeApiAsync<T, U>(string apiName, T body, HttpMethod method, IDictionary<string, string> parameters, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (string.IsNullOrWhiteSpace(apiName))
             {
@@ -510,7 +442,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 content = serializer.Serialize(body).ToString();
             }
 
-            string response = await this.InternalInvokeApiAsync(apiName, content, method, parameters, MobileServiceFeatures.TypedApiCall);
+            string response = await this.InternalInvokeApiAsync(apiName, content, method, parameters, MobileServiceFeatures.TypedApiCall, cancellationToken);
             if (string.IsNullOrEmpty(response))
             {
                 return default(U);
@@ -522,10 +454,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Invokes a user-defined custom API of a Microsoft Azure Mobile Service using an HTTP POST.
         /// </summary>
         /// <param name="apiName">The name of the custom API.</param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
         /// <returns></returns>
-        public Task<JToken> InvokeApiAsync(string apiName)
+        public Task<JToken> InvokeApiAsync(string apiName, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return this.InvokeApiAsync(apiName, null, null, null);
+            return this.InvokeApiAsync(apiName, null, null, null, cancellationToken);
         }
 
         /// <summary>
@@ -534,10 +467,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         /// <param name="apiName">The name of the custom API.</param>
         /// <param name="body">The value to be sent as the HTTP body.</param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
         /// <returns>The response content from the custom api invocation.</returns>
-        public Task<JToken> InvokeApiAsync(string apiName, JToken body)
+        public Task<JToken> InvokeApiAsync(string apiName, JToken body, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return this.InvokeApiAsync(apiName, body, defaultHttpMethod, null);
+            return this.InvokeApiAsync(apiName, body, defaultHttpMethod, null, cancellationToken);
         }
 
         /// <summary>
@@ -549,10 +483,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="parameters">
         /// A dictionary of user-defined parameters and values to include in the request URI query string.
         /// </param>        
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
         /// <returns>The response content from the custom api invocation.</returns>
-        public Task<JToken> InvokeApiAsync(string apiName, HttpMethod method, IDictionary<string, string> parameters)
+        public Task<JToken> InvokeApiAsync(string apiName, HttpMethod method, IDictionary<string, string> parameters, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return this.InvokeApiAsync(apiName, null, method, parameters);
+            return this.InvokeApiAsync(apiName, null, method, parameters, cancellationToken);
         }
 
         /// <summary>
@@ -565,8 +500,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="parameters">
         /// A dictionary of user-defined parameters and values to include in the request URI query string.
         /// </param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
         /// <returns>The response content from the custom api invocation.</returns>
-        public async Task<JToken> InvokeApiAsync(string apiName, JToken body, HttpMethod method, IDictionary<string, string> parameters)
+        public async Task<JToken> InvokeApiAsync(string apiName, JToken body, HttpMethod method, IDictionary<string, string> parameters, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (string.IsNullOrWhiteSpace(apiName))
             {
@@ -590,47 +526,8 @@ namespace Microsoft.WindowsAzure.MobileServices
                 }
             }
 
-            string response = await this.InternalInvokeApiAsync(apiName, content, method, parameters, MobileServiceFeatures.JsonApiCall);
+            string response = await this.InternalInvokeApiAsync(apiName, content, method, parameters, MobileServiceFeatures.JsonApiCall, cancellationToken);
             return response.ParseToJToken(this.SerializerSettings);
-        }
-
-        /// <summary>
-        /// Invokes a user-defined custom API of a Microsoft Azure Mobile Service.
-        /// </summary>
-        /// <param name="apiName">The name of the custom API.</param>
-        /// <param name="content">The HTTP content, as a string, in json format.</param>
-        /// <param name="method">The HTTP method.</param>
-        /// <param name="parameters">
-        /// A dictionary of user-defined parameters and values to include in the request URI query string.
-        /// </param>
-        /// <param name="features">
-        /// Value indicating which features of the SDK are being used in this call. Useful for telemetry.
-        /// </param>
-        /// <returns>The response content from the custom api invocation.</returns>
-        private async Task<string> InternalInvokeApiAsync(string apiName, string content, HttpMethod method, IDictionary<string, string> parameters, MobileServiceFeatures features)
-        {
-            method = method ?? defaultHttpMethod;
-            if (parameters != null && parameters.Count > 0)
-            {
-                features |= MobileServiceFeatures.AdditionalQueryParameters;
-            }
-
-            MobileServiceHttpResponse response = await this.MobileAppHttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), this.CurrentUser, content, false, features: features);
-            return response.Content;
-        }
-
-        /// <summary>
-        /// Helper function to assemble the Uri for a given custom api.
-        /// </summary>
-        /// <param name="apiName"></param>
-        /// <param name="parameters"></param>
-        /// <returns></returns>
-        private string CreateAPIUriString(string apiName, IDictionary<string, string> parameters = null)
-        {
-            string uriFragment = apiName.StartsWith("/") ? apiName : string.Format(CultureInfo.InvariantCulture, "api/{0}", apiName);
-            string queryString = MobileServiceUrlBuilder.GetQueryString(parameters, useTableAPIRules: false);
-
-            return MobileServiceUrlBuilder.CombinePathAndQuery(uriFragment, queryString);
         }
 
         /// <summary>
@@ -646,12 +543,53 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="parameters">
         /// A dictionary of user-defined parameters and values to include in the request URI query string.
         /// </param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
         /// <returns>The HTTP Response from the custom api invocation.</returns>
-        public async Task<HttpResponseMessage> InvokeApiAsync(string apiName, HttpContent content, HttpMethod method, IDictionary<string, string> requestHeaders, IDictionary<string, string> parameters)
+        public async Task<HttpResponseMessage> InvokeApiAsync(string apiName, HttpContent content, HttpMethod method, IDictionary<string, string> requestHeaders, IDictionary<string, string> parameters, CancellationToken cancellationToken = default(CancellationToken))
         {
             method = method ?? defaultHttpMethod;
-            HttpResponseMessage response = await this.MobileAppHttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), this.CurrentUser, content, requestHeaders: requestHeaders, features: MobileServiceFeatures.GenericApiCall);
+            HttpResponseMessage response = await this.HttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), this.CurrentUser, content, requestHeaders: requestHeaders, features: MobileServiceFeatures.GenericApiCall, cancellationToken: cancellationToken);
             return response;
+        }
+
+        /// <summary>
+        /// Invokes a user-defined custom API of a Microsoft Azure Mobile Service.
+        /// </summary>
+        /// <param name="apiName">The name of the custom API.</param>
+        /// <param name="content">The HTTP content, as a string, in json format.</param>
+        /// <param name="method">The HTTP method.</param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in the request URI query string.
+        /// </param>
+        /// <param name="features">
+        /// Value indicating which features of the SDK are being used in this call. Useful for telemetry.
+        /// </param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe</param>
+        /// <returns>The response content from the custom api invocation.</returns>
+        private async Task<string> InternalInvokeApiAsync(string apiName, string content, HttpMethod method, IDictionary<string, string> parameters, MobileServiceFeatures features, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            method = method ?? defaultHttpMethod;
+            if (parameters != null && parameters.Count > 0)
+            {
+                features |= MobileServiceFeatures.AdditionalQueryParameters;
+            }
+
+            MobileServiceHttpResponse response = await this.HttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), this.CurrentUser, content, false, features: features, cancellationToken: cancellationToken);
+            return response.Content;
+        }
+
+        /// <summary>
+        /// Helper function to assemble the Uri for a given custom api.
+        /// </summary>
+        /// <param name="apiName"></param>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
+        private string CreateAPIUriString(string apiName, IDictionary<string, string> parameters = null)
+        {
+            string uriFragment = apiName.StartsWith("/") ? apiName : string.Format(CultureInfo.InvariantCulture, "api/{0}", apiName);
+            string queryString = MobileServiceUrlBuilder.GetQueryString(parameters, useTableAPIRules: false);
+
+            return MobileServiceUrlBuilder.CombinePathAndQuery(uriFragment, queryString);
         }
 
         /// <summary>
@@ -677,7 +615,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 ((MobileServiceSyncContext)this.SyncContext).Dispose();
                 // free managed resources
-                this.MobileAppHttpClient.Dispose();
+                this.HttpClient.Dispose();
             }
         }
 
@@ -739,5 +677,6 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             return installationId;
         }
+
     }
 }
