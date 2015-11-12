@@ -851,23 +851,23 @@ public class MobileServicePush {
 
             @Override
             public void onSuccess(ServiceFilterResponse response) {
-                for (Header header : response.getHeaders()) {
-                    if (header.getName().equalsIgnoreCase(NEW_REGISTRATION_LOCATION_HEADER)) {
 
-                        URI regIdUri = null;
-                        try {
-                            regIdUri = new URI(header.getValue());
-                        } catch (URISyntaxException e) {
-                            resultFuture.setException(e);
+                try {
+                    String regId = response.getHeaders().get(NEW_REGISTRATION_LOCATION_HEADER);
 
-                            return;
-                        }
+                    URI regIdUri = new URI(regId);
 
-                        String[] pathFragments = regIdUri.getPath().split("/");
-                        String result = pathFragments[pathFragments.length - 1];
+                    String[] pathFragments = regIdUri.getPath().split("/");
+                    String result = pathFragments[pathFragments.length - 1];
 
-                        resultFuture.set(result);
-                    }
+                    resultFuture.set(result);
+
+                    return;
+
+                } catch (URISyntaxException e) {
+                    resultFuture.setException(e);
+
+                    return;
                 }
             }
         });

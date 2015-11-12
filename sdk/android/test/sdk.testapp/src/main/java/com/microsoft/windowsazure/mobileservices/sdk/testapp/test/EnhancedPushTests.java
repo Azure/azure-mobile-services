@@ -21,6 +21,7 @@ package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.test.InstrumentationTestCase;
 
@@ -39,13 +40,9 @@ import com.microsoft.windowsazure.mobileservices.notifications.TemplateRegistrat
 import com.microsoft.windowsazure.mobileservices.notifications.UnregisterCallback;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterRequestMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterResponseMock;
-import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.StatusLineMock;
+import com.squareup.okhttp.Headers;
 
 import junit.framework.Assert;
-
-import org.apache.http.Header;
-import org.apache.http.HeaderElement;
-import org.apache.http.ParseException;
 
 import java.util.List;
 import java.util.UUID;
@@ -100,43 +97,30 @@ public class EnhancedPushTests extends InstrumentationTestCase {
             @Override
             public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
                 ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-                response.setStatus(new StatusLineMock(400));
+                response.setStatus(400);
 
                 final String url = request.getUrl();
                 String method = request.getMethod();
 
                 if (method == "POST" && url.contains("registrationids/")) {
                     response = new ServiceFilterResponseMock();
-                    response.setStatus(new StatusLineMock(201));
-                    response.setHeaders(new Header[]{new Header() {
+                    response.setStatus(201);
+                    Headers headers = new Headers.Builder().add(NEW_REGISTRATION_LOCATION_HEADER,  url + registrationId).build();
 
-                        @Override
-                        public String getValue() {
-                            return url + registrationId;
-                        }
+                    response.setHeaders(headers);
 
-                        @Override
-                        public String getName() {
-                            return NEW_REGISTRATION_LOCATION_HEADER;
-                        }
-
-                        @Override
-                        public HeaderElement[] getElements() throws ParseException {
-                            return null;
-                        }
-                    }});
                 } else if (method == "PUT" && url.contains("registrations/" + registrationId)) {
                     response = new ServiceFilterResponseMock();
-                    response.setStatus(new StatusLineMock(204));
+                    response.setStatus((204));
                 } else if (method == "PUT" && url.contains("registrations/")) {
                     response = new ServiceFilterResponseMock();
-                    response.setStatus(new StatusLineMock(204));
+                    response.setStatus((204));
                 } else if (method == "DELETE" && url.contains("registrations/")) {
                     response = new ServiceFilterResponseMock();
-                    response.setStatus(new StatusLineMock(204));
+                    response.setStatus((204));
                 } else if (method == "GET" && url.contains("registrations/")) {
                     response = new ServiceFilterResponseMock();
-                    response.setStatus(new StatusLineMock(200));
+                    response.setStatus((200));
                     response.setContent("[ ]");
                 }
 
@@ -153,40 +137,27 @@ public class EnhancedPushTests extends InstrumentationTestCase {
             @Override
             public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
                 ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-                response.setStatus(new StatusLineMock(400));
+                response.setStatus((400));
 
                 final String url = request.getUrl();
                 String method = request.getMethod();
 
                 if (method == "POST" && url.contains("registrationids/")) {
                     response = new ServiceFilterResponseMock();
-                    response.setStatus(new StatusLineMock(201));
-                    response.setHeaders(new Header[]{new Header() {
+                    response.setStatus((201));
 
-                        @Override
-                        public String getValue() {
-                            return url + registrationId;
-                        }
+                    Headers headers = new Headers.Builder().add(NEW_REGISTRATION_LOCATION_HEADER,  url + registrationId).build();
 
-                        @Override
-                        public String getName() {
-                            return NEW_REGISTRATION_LOCATION_HEADER;
-                        }
-
-                        @Override
-                        public HeaderElement[] getElements() throws ParseException {
-                            return null;
-                        }
-                    }});
+                    response.setHeaders(headers);
                 } else if (method == "PUT" && url.contains("registrations/")) {
                     response = new ServiceFilterResponseMock();
-                    response.setStatus(new StatusLineMock(410));
+                    response.setStatus((410));
                 } else if (method == "DELETE" && url.contains("registrations/")) {
                     response = new ServiceFilterResponseMock();
-                    response.setStatus(new StatusLineMock(204));
+                    response.setStatus((204));
                 } else if (method == "GET" && url.contains("registrations/")) {
                     response = new ServiceFilterResponseMock();
-                    response.setStatus(new StatusLineMock(200));
+                    response.setStatus((200));
                     response.setContent("[ ]");
                 }
 

@@ -141,20 +141,22 @@ public class MobileServiceHttpClient {
         ServiceFilterRequestImpl request;
         String url = uriBuilder.build().toString();
 
-        if (httpMethod.equalsIgnoreCase(HttpGet.METHOD_NAME)) {
-            request = new ServiceFilterRequestImpl(new HttpGet(url), mClient.getAndroidHttpClientFactory());
-        } else if (httpMethod.equalsIgnoreCase(HttpPost.METHOD_NAME)) {
-            request = new ServiceFilterRequestImpl(new HttpPost(url), mClient.getAndroidHttpClientFactory());
-        } else if (httpMethod.equalsIgnoreCase(HttpPut.METHOD_NAME)) {
-            request = new ServiceFilterRequestImpl(new HttpPut(url), mClient.getAndroidHttpClientFactory());
-        } else if (httpMethod.equalsIgnoreCase(HttpPatch.METHOD_NAME)) {
-            request = new ServiceFilterRequestImpl(new HttpPatch(url), mClient.getAndroidHttpClientFactory());
-        } else if (httpMethod.equalsIgnoreCase(HttpDelete.METHOD_NAME)) {
-            request = new ServiceFilterRequestImpl(new HttpDelete(url), mClient.getAndroidHttpClientFactory());
+
+        if (httpMethod.equalsIgnoreCase("GET")) {
+            request = ServiceFilterRequestImpl.get(mClient.getAndroidHttpClientFactory(), url);
+        } else if (httpMethod.equalsIgnoreCase("POST")) {
+            request = ServiceFilterRequestImpl.post(mClient.getAndroidHttpClientFactory(), url, content);
+        } else if (httpMethod.equalsIgnoreCase("PUT")) {
+            request = ServiceFilterRequestImpl.put(mClient.getAndroidHttpClientFactory(), url, content);
+        } else if (httpMethod.equalsIgnoreCase("PATCH")) {
+            request = ServiceFilterRequestImpl.patch(mClient.getAndroidHttpClientFactory(), url, content);
+        } else if (httpMethod.equalsIgnoreCase("DELETE")) {
+            request = ServiceFilterRequestImpl.delete(mClient.getAndroidHttpClientFactory(), url, content);
         } else {
             future.setException(new IllegalArgumentException("httpMethod not supported"));
             return future;
         }
+
 
         String featuresHeader = MobileServiceFeatures.featuresToString(features);
         if (featuresHeader != null) {
@@ -180,15 +182,6 @@ public class MobileServiceHttpClient {
         if (requestHeaders != null && requestHeaders.size() > 0) {
             for (Pair<String, String> header : requestHeaders) {
                 request.addHeader(header.first, header.second);
-            }
-        }
-
-        if (content != null) {
-            try {
-                request.setContent(content);
-            } catch (Exception e) {
-                future.setException(e);
-                return future;
             }
         }
 

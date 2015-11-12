@@ -23,6 +23,8 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.http;
 
+import android.util.Pair;
+
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 
 import com.squareup.okhttp.Headers;
@@ -33,8 +35,8 @@ import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 /**
  * ServiceFilterRequest implementation
@@ -68,62 +70,130 @@ public class ServiceFilterRequestImpl implements ServiceFilterRequest {
      * @param factory The AndroidHttpClientFactory instance used to create
      *                AndroidHttpClient objects
      */
-    public ServiceFilterRequestImpl(Request request, OkHttpClientFactory factory) {
+    private ServiceFilterRequestImpl(Request request, OkHttpClientFactory factory) {
         mRequest = request;
         mOkHttpClientFactory = factory;
     }
 
-    public static ServiceFilterRequestImpl post(OkHttpClientFactory factory, String url, String content ) {
+    private ServiceFilterRequestImpl(Request request, OkHttpClientFactory factory, byte[] content) {
+        mRequest = request;
+        mOkHttpClientFactory = factory;
+        mContent = content;
+    }
+
+    /*
+    public static ServiceFilterRequestImpl post(OkHttpClientFactory factory, String url, List<Pair<String, String>> requestHeaders, String content) {
 
         RequestBody requestBody = RequestBody.create(JSON, content);
 
-        Request request = new Request.Builder()
-                .url(url)
-                .addHeader("Content-Type", MobileServiceConnection.JSON_CONTENTTYPE)
+        Request request = getBaseRequestBuilder(url, requestHeaders)
                 .post(requestBody).build();
 
         return new ServiceFilterRequestImpl(request, factory);
     }
+    */
 
-    public static ServiceFilterRequestImpl patch(OkHttpClientFactory factory, String url, String content ) {
+    public static ServiceFilterRequestImpl post(OkHttpClientFactory factory, String url, byte[] content) {
 
+        if (content == null) {
+            content = "".getBytes();
+        }
 
-        Request request = new Request.Builder()
         RequestBody requestBody = RequestBody.create(JSON, content);
-        .url(url)
-                .addHeader("Content-Type", MobileServiceConnection.JSON_CONTENTTYPE)
+
+        Request request = getBaseRequestBuilder(url)
+                .post(requestBody).build();
+
+        return new ServiceFilterRequestImpl(request, factory, content);
+    }
+
+    public static ServiceFilterRequestImpl put(OkHttpClientFactory factory, String url, byte[] content) {
+
+        if (content == null) {
+            content = "".getBytes();
+        }
+
+        RequestBody requestBody = RequestBody.create(JSON, content);
+
+        Request request = getBaseRequestBuilder(url)
+                .put(requestBody).build();
+
+        return new ServiceFilterRequestImpl(request, factory, content);
+    }
+
+    /*
+    public static ServiceFilterRequestImpl patch(OkHttpClientFactory factory, String url, String content) {
+
+        RequestBody requestBody = RequestBody.create(JSON, content);
+
+        Request request = getBaseRequestBuilder(url)
                 .patch(requestBody).build();
 
         return new ServiceFilterRequestImpl(request, factory);
     }
+*/
+    public static ServiceFilterRequestImpl patch(OkHttpClientFactory factory, String url, byte[] content) {
+
+        if (content == null) {
+            content = "".getBytes();
+        }
+
+        RequestBody requestBody = RequestBody.create(JSON, content);
+
+        Request request = getBaseRequestBuilder(url)
+                .patch(requestBody).build();
+
+        return new ServiceFilterRequestImpl(request, factory, content);
+    }
 
     public static ServiceFilterRequestImpl get(OkHttpClientFactory factory, String url) {
 
-        Request request = new Request.Builder()
-                .url(url)
-                .addHeader("Content-Type", MobileServiceConnection.JSON_CONTENTTYPE)
-                .get().build();
+        Request request = getBaseRequestBuilder(url).get().build();
 
         return new ServiceFilterRequestImpl(request, factory);
     }
 
     public static ServiceFilterRequestImpl delete(OkHttpClientFactory factory, String url) {
-        return delete(factory, url, null)
+        return delete(factory, url, (byte[]) null);
     }
 
+    /*
     public static ServiceFilterRequestImpl delete(OkHttpClientFactory factory, String url, String content) {
 
-        Request.Builder requestBuilder = new Request.Builder()
-                .url(url)
-                .addHeader("Content-Type", MobileServiceConnection.JSON_CONTENTTYPE);
+        Request.Builder requestBuilder = getBaseRequestBuilder(url);
 
         if (content != null) {
             RequestBody requestBody = RequestBody.create(JSON, content);
-
             requestBuilder = requestBuilder.delete(requestBody);
+        } else {
+            requestBuilder = requestBuilder.delete();
         }
 
         return new ServiceFilterRequestImpl(requestBuilder.build(), factory);
+    }
+*/
+
+    public static ServiceFilterRequestImpl delete(OkHttpClientFactory factory, String url, byte[] content) {
+
+        Request.Builder requestBuilder = getBaseRequestBuilder(url);
+
+        if (content != null) {
+            RequestBody requestBody = RequestBody.create(JSON, content);
+            requestBuilder = requestBuilder.delete(requestBody);
+        } else {
+            requestBuilder = requestBuilder.delete();
+        }
+
+        return new ServiceFilterRequestImpl(requestBuilder.build(), factory, content);
+    }
+
+    private static Request.Builder getBaseRequestBuilder(String url) {
+
+        Request.Builder builder = new Request.Builder()
+                .url(url);
+                //.addHeader("Content-Type", MobileServiceConnection.JSON_CONTENTTYPE);
+
+        return builder;
     }
 
     @Override
@@ -152,11 +222,6 @@ public class ServiceFilterRequestImpl implements ServiceFilterRequest {
         mRequest = mRequest.newBuilder().removeHeader(name).build();
     }
 
-    @Override
-    public void setContent(byte[] content) throws Exception {
-        ((HttpEntityEnclosingRequestBase) mRequest).setEntity(new ByteArrayEntity(content));
-        mContent = content;
-    }
 
     @Override
     public String getContent() {
@@ -170,12 +235,6 @@ public class ServiceFilterRequestImpl implements ServiceFilterRequest {
         } else {
             return null;
         }
-    }
-
-    @Override
-    public void setContent(String content) throws UnsupportedEncodingException {
-        ((HttpEntityEnclosingRequestBase) mRequest).setEntity(new StringEntity(content, MobileServiceClient.UTF8_ENCODING));
-        mContent = content.getBytes(MobileServiceClient.UTF8_ENCODING);
     }
 
     @Override

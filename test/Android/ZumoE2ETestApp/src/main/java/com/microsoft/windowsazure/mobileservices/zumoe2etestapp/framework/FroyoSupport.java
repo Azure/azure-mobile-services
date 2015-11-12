@@ -20,14 +20,11 @@ See the Apache Version 2.0 License for specific language governing permissions a
 
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework;
 
-import android.net.http.AndroidHttpClient;
 
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.MainActivity;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.R;
-import com.squareup.okhttp.apache.OkApacheClient;
+import com.squareup.okhttp.OkHttpClient;
 
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 
 import java.io.IOException;
@@ -57,15 +54,18 @@ public class FroyoSupport {
      *
      * @param client AndroidHttpClient to fix
      */
-    public static void fixAndroidHttpClientForCertificateValidation(OkApacheClient client) {
+    public static void fixAndroidHttpClientForCertificateValidation(OkHttpClient client) {
 
         final SchemeRegistry schemeRegistry = new SchemeRegistry();
         schemeRegistry.register(new Scheme("https",
                 createAdditionalCertsSSLSocketFactory(), 443));
+
+        /*client
         client.getConnectionManager().getSchemeRegistry().unregister("https");
 
         client.getConnectionManager().getSchemeRegistry().register(new Scheme("https",
                 createAdditionalCertsSSLSocketFactory(), 443));
+                */
     }
 
     private static SSLSocketFactory createAdditionalCertsSSLSocketFactory() {

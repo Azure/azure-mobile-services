@@ -34,7 +34,6 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterRequestMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterResponseMock;
-import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.StatusLineMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.mocks.MobileServiceLocalStoreMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.mocks.MobileServiceSyncHandlerMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.helpers.EncodingUtilities;
@@ -52,8 +51,6 @@ import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePu
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushStatus;
 import com.microsoft.windowsazure.mobileservices.table.sync.queue.OperationErrorList;
 import com.microsoft.windowsazure.mobileservices.table.sync.synchandler.SimpleSyncHandler;
-
-import org.apache.http.Header;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -998,7 +995,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-        response.setStatus(new StatusLineMock(401));
+        response.setStatus((401));
 
         final MobileServiceException innerException = new MobileServiceException("", response);
 
@@ -1185,7 +1182,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-        response.setStatus(new StatusLineMock(401));
+        response.setStatus((401));
 
         final MobileServiceException innerException = new MobileServiceException("", response);
 
@@ -1366,7 +1363,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-        response.setStatus(new StatusLineMock(401));
+        response.setStatus((401));
 
         final MobileServiceException innerException = new MobileServiceException("", response);
 
@@ -1560,7 +1557,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-        response.setStatus(new StatusLineMock(401));
+        response.setStatus((401));
 
         final MobileServiceException innerException = new MobileServiceException("", response);
 
@@ -1762,9 +1759,9 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         thrownExceptionFlag.Thrown = true;
 
         MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-
+        
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-        response.setStatus(new StatusLineMock(401));
+        response.setStatus((401));
 
         final MobileServiceException innerException = new MobileServiceException("", response);
 
@@ -1958,7 +1955,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-        response.setStatus(new StatusLineMock(401));
+        response.setStatus((401));
 
         final MobileServiceException innerException = new MobileServiceException("", response);
 
@@ -2137,7 +2134,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-        response.setStatus(new StatusLineMock(401));
+        response.setStatus((401));
 
         final MobileServiceException innerException = new MobileServiceException("", response);
 
@@ -2312,7 +2309,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-        response.setStatus(new StatusLineMock(401));
+        response.setStatus((401));
 
         final MobileServiceException innerException = new MobileServiceException("", response);
 
@@ -2487,7 +2484,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-        response.setStatus(new StatusLineMock(401));
+        response.setStatus((401));
 
         final MobileServiceException innerException = new MobileServiceException("", response);
 
@@ -2662,7 +2659,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-        response.setStatus(new StatusLineMock(401));
+        response.setStatus((401));
 
         final MobileServiceException innerException = new MobileServiceException("", response);
 
@@ -3141,7 +3138,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
     public void testPushIsAbortedOnAuthenticationError() throws Throwable {
         // Create a mock response simulating an error
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-        response.setStatus(new StatusLineMock(401));
+        response.setStatus((401));
 
         MobileServiceException authError = new MobileServiceException("", response);
         TestPushAbort(authError, MobileServicePushStatus.CancelledByAuthenticationError);
@@ -3341,7 +3338,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
                 // Create a mock response simulating an error
                 ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-                response.setStatus(new StatusLineMock(statusCode));
+                response.setStatus((statusCode));
 
                 String content = "";
 
@@ -3401,7 +3398,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
     }
 
     public class ServiceFilterRequestData {
-        public Header[] Headers;
+        public com.squareup.okhttp.Headers Headers;
 
         public String Content;
 
@@ -3413,13 +3410,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         public String getHeaderValue(String headerName) {
 
-            for (Header header : Headers) {
-                if (header.getName().equals(headerName)) {
-                    return header.getValue();
-                }
-            }
-
-            return null;
+            return this.Headers.get(headerName);
         }
     }
 }

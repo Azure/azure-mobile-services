@@ -551,7 +551,7 @@ public class LoginManager {
 
         // Create a request
         final ServiceFilterRequest request =
-                ServiceFilterRequestImpl.Post(mClient.getAndroidHttpClientFactory(), url, token);
+                ServiceFilterRequestImpl.post(mClient.getAndroidHttpClientFactory(), url, token.getBytes());
 
         final MobileServiceConnection connection = mClient.createConnection();
 

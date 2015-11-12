@@ -38,7 +38,7 @@ public class OkHttpClientFactoryImpl implements OkHttpClientFactory {
     public OkHttpClient createOkHttpClient() {
 
         OkHttpClient okClient = new OkHttpClient();
-        okClient.networkInterceptors().add(new UserAgentInterceptor(MobileServiceConnection.getUserAgent()));
+        //okClient.networkInterceptors().add(new UserAgentInterceptor(MobileServiceConnection.getUserAgent()));
 
         return okClient;
     }

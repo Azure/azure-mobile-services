@@ -533,7 +533,8 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
 
         final SettableFuture<Void> future = SettableFuture.create();
 
-        delete = new ServiceFilterRequestImpl(new HttpDelete(uriBuilder.build().toString()), mClient.getAndroidHttpClientFactory());
+        delete = ServiceFilterRequestImpl.delete(mClient.getAndroidHttpClientFactory(), uriBuilder.build().toString());
+
         if (!features.isEmpty()) {
             delete.addHeader(MobileServiceHttpClient.X_ZUMO_FEATURES, MobileServiceFeatures.featuresToString(features));
         }

@@ -185,7 +185,7 @@ public class MobileServiceConnection {
             request.addHeader(X_ZUMO_VERSION_HEADER, SDK_VERSION);
         }
         // Set the User Agent header
-        request.addHeader(HTTP.USER_AGENT, getUserAgent());
+        request.addHeader("User-Agent", getUserAgent());
 
         // Set the special Application key header, if present
         String appKey = mClient.getAppKey();
@@ -213,12 +213,9 @@ public class MobileServiceConnection {
      * @return True if the header is present, false otherwise
      */
     private boolean requestContainsHeader(ServiceFilterRequest request, String headerName) {
-        for (Header header : request.getHeaders()) {
-            if (header.getName().equals(headerName)) {
-                return true;
-            }
-        }
 
-        return false;
+        String value = request.getHeaders().get(headerName);
+
+        return (value != null);
     }
 }

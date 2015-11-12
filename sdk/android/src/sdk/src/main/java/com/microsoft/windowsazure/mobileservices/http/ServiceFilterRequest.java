@@ -52,25 +52,9 @@ public interface ServiceFilterRequest {
     public void removeHeader(String name);
 
     /**
-     * Sets request content
-     *
-     * @param content string that will be used in the setEntity method
-     * @throws Exception
-     */
-    public void setContent(String content) throws Exception;
-
-    /**
      * Gets the request's content
      */
     public String getContent();
-
-    /**
-     * Sets request content
-     *
-     * @param content byte array that will be used in the setEntity method
-     * @throws Exception
-     */
-    public void setContent(byte[] content) throws Exception;
 
     /**
      * Gets the request's content

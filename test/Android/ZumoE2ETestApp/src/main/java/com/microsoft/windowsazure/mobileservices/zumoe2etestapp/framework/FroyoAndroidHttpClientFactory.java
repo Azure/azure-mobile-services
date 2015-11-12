@@ -1,20 +1,16 @@
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework;
 
-import android.net.http.AndroidHttpClient;
-
-import com.microsoft.windowsazure.mobileservices.http.AndroidHttpClientFactoryImpl;
-import com.squareup.okhttp.apache.OkApacheClient;
-
-import org.apache.http.client.HttpClient;
+import com.microsoft.windowsazure.mobileservices.http.OkHttpClientFactoryImpl;
+import com.squareup.okhttp.OkHttpClient;
 
 /**
  * AndroidHttpClientFactory with Froyo support
  */
-public class FroyoAndroidHttpClientFactory extends AndroidHttpClientFactoryImpl {
+public class FroyoAndroidHttpClientFactory extends OkHttpClientFactoryImpl {
 
     @Override
-    public OkApacheClient createAndroidHttpClient() {
-        OkApacheClient client = super.createAndroidHttpClient();
+    public OkHttpClient createOkHttpClient() {
+        OkHttpClient client = super.createOkHttpClient();
 
         FroyoSupport.fixAndroidHttpClientForCertificateValidation(client);
 

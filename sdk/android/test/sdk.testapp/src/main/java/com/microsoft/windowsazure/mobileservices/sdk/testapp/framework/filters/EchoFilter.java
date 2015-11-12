@@ -31,7 +31,7 @@ public class EchoFilter implements ServiceFilter {
     public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
         response.setContent(request.getRawContent());
-        response.setStatus(new StatusLineMock(200));
+        response.setStatus(200);
 
         ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
         return nextServiceFilterCallback.onNext(requestMock);

@@ -49,6 +49,7 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestSt
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.Util;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.IntIdRoundTripTableElement;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.ParamsTestTableItem;
+import com.squareup.okhttp.Headers;
 
 import org.apache.http.Header;
 import org.apache.http.client.methods.HttpGet;
@@ -198,21 +199,21 @@ public class MiscTests extends TestGroup {
 
                         final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-                        Header[] headers = request.getHeaders();
-                        for (Header reqHeader : headers) {
-                            if (reqHeader.getName() == "User-Agent") {
-                                String userAgent = reqHeader.getValue();
-                                log("User-Agent: " + userAgent);
-                                testResult.setStatus(TestStatus.Passed);
-                                String clientVersion = userAgent;
-                                if (clientVersion.endsWith(")")) {
-                                    clientVersion = clientVersion.substring(0, clientVersion.length() - 1);
-                                }
-                                int indexOfEquals = clientVersion.lastIndexOf('=');
-                                if (indexOfEquals >= 0) {
-                                    clientVersion = clientVersion.substring(indexOfEquals + 1);
-                                    Util.getGlobalTestParameters().put(ClientVersionKey, clientVersion);
-                                }
+                        Headers headers = request.getHeaders();
+
+                        String userAgent = headers.get("User-Agent");
+
+                        if (userAgent != null) {
+                            log("User-Agent: " + userAgent);
+                            testResult.setStatus(TestStatus.Passed);
+                            String clientVersion = userAgent;
+                            if (clientVersion.endsWith(")")) {
+                                clientVersion = clientVersion.substring(0, clientVersion.length() - 1);
+                            }
+                            int indexOfEquals = clientVersion.lastIndexOf('=');
+                            if (indexOfEquals >= 0) {
+                                clientVersion = clientVersion.substring(indexOfEquals + 1);
+                                Util.getGlobalTestParameters().put(ClientVersionKey, clientVersion);
                             }
                         }
 
@@ -227,12 +228,13 @@ public class MiscTests extends TestGroup {
                             @Override
                             public void onSuccess(ServiceFilterResponse response) {
                                 if (response != null) {
-                                    Header[] respHeaders = response.getHeaders();
-                                    for (Header header : respHeaders) {
-                                        if (header.getName().equalsIgnoreCase("x-zumo-version")) {
-                                            String runtimeVersion = header.getValue();
-                                            Util.getGlobalTestParameters().put(ServerVersionKey, runtimeVersion);
-                                        }
+
+                                    Headers headers = response.getHeaders();
+
+                                    String runtimeVersion = headers.get("x-zumo-version");
+
+                                    if (runtimeVersion != null) {
+                                        Util.getGlobalTestParameters().put(ServerVersionKey, runtimeVersion);
                                     }
                                 }
 
@@ -591,13 +593,13 @@ public class MiscTests extends TestGroup {
             ;
 
             private Exception validateResponse(ServiceFilterResponse response) {
-                if (mExpectedStatusCode != response.getStatus().getStatusCode()) {
+                if (mExpectedStatusCode != response.getStatus()) {
                     mResult.getTestCase().log("Invalid status code");
                     String content = response.getContent();
                     if (content != null) {
                         mResult.getTestCase().log("Response: " + content);
                     }
-                    return new ExpectedValueException(mExpectedStatusCode, response.getStatus().getStatusCode());
+                    return new ExpectedValueException(mExpectedStatusCode, response.getStatus());
                 } else {
                     return null;
                 }

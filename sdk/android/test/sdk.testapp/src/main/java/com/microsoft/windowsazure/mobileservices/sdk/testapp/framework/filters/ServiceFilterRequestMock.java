@@ -22,11 +22,8 @@ package com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.squareup.okhttp.Headers;
 
-import org.apache.http.Header;
-import org.apache.http.message.BasicHeader;
-
-import java.io.InvalidClassException;
 import java.net.URISyntaxException;
 
 public class ServiceFilterRequestMock implements ServiceFilterRequest {
@@ -40,22 +37,18 @@ public class ServiceFilterRequestMock implements ServiceFilterRequest {
     }
 
     @Override
-    public Header[] getHeaders() {
+    public Headers getHeaders() {
         return null;
     }
 
     @Override
     public void addHeader(String name, String val) {
-        Header[] currentHeaders = this.responseToUse.getHeaders();
-        int oldSize = currentHeaders == null ? 0 : currentHeaders.length;
-        Header[] newHeaders = new Header[oldSize + 1];
-        if (oldSize > 0) {
-            System.arraycopy(currentHeaders, 0, newHeaders, 0, oldSize);
-        }
+        Headers currentHeaders = this.responseToUse.getHeaders();
 
-        newHeaders[oldSize] = new BasicHeader(name, val);
+        Headers addedHeaders = currentHeaders.newBuilder()
+                .add(name, val).build();
 
-        ((ServiceFilterResponseMock) this.responseToUse).setHeaders(newHeaders);
+        ((ServiceFilterResponseMock) this.responseToUse).setHeaders(addedHeaders);
     }
 
     @Override
@@ -63,16 +56,8 @@ public class ServiceFilterRequestMock implements ServiceFilterRequest {
     }
 
     @Override
-    public void setContent(String content) throws InvalidClassException {
-    }
-
-    @Override
     public String getContent() {
         return null;
-    }
-
-    @Override
-    public void setContent(byte[] content) throws Exception {
     }
 
     @Override

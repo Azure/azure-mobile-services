@@ -220,13 +220,13 @@ public class CustomApiTests extends TestGroup {
             }
 
             private Exception validateResponseHeaders(ServiceFilterResponse response) {
-                if (mExpectedStatusCode != response.getStatus().getStatusCode()) {
+                if (mExpectedStatusCode != response.getStatus()) {
                     mResult.getTestCase().log("Invalid status code");
                     String content = response.getContent();
                     if (content != null) {
                         mResult.getTestCase().log("Response: " + content);
                     }
-                    return new ExpectedValueException(mExpectedStatusCode, response.getStatus().getStatusCode());
+                    return new ExpectedValueException(mExpectedStatusCode, response.getStatus());
                 } else {
 
                     for (Pair<String, String> header : mHeaders) {
@@ -650,7 +650,7 @@ public class CustomApiTests extends TestGroup {
                         ServiceFilterResponse response = cause.getResponse();
 
                         if (mExpected401) {
-                            if (response == null || response.getStatus().getStatusCode() != 401) {
+                            if (response == null || response.getStatus() != 401) {
                                 mResult.setStatus(TestStatus.Failed);
                                 mResult.setException(exception);
                                 mResult.getTestCase().log("Expected 401");
@@ -682,7 +682,7 @@ public class CustomApiTests extends TestGroup {
 
                             ServiceFilterResponse response = cause.getResponse();
 
-                            if (response == null || response.getStatus().getStatusCode() != 401) {
+                            if (response == null || response.getStatus() != 401) {
                                 mResult.setStatus(TestStatus.Failed);
                                 mResult.setException(exception);
                                 mResult.getTestCase().log("Expected 401");
@@ -715,7 +715,7 @@ public class CustomApiTests extends TestGroup {
 
                             ServiceFilterResponse response = cause.getResponse();
 
-                            if (response == null || response.getStatus().getStatusCode() != 401) {
+                            if (response == null || response.getStatus() != 401) {
                                 mResult.setStatus(TestStatus.Failed);
                                 mResult.setException(exception);
                                 mResult.getTestCase().log("Expected 401");
@@ -748,7 +748,7 @@ public class CustomApiTests extends TestGroup {
 
                             ServiceFilterResponse response = cause.getResponse();
 
-                            if (response == null || response.getStatus().getStatusCode() != 401) {
+                            if (response == null || response.getStatus() != 401) {
                                 mResult.setStatus(TestStatus.Failed);
                                 mResult.setException(exception);
                                 mResult.getTestCase().log("Expected 401");
