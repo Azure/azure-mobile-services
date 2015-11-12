@@ -175,6 +175,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.UnitTests
             AssertEx.Throws<ArgumentException>(() => client.AlternateLoginHost = new Uri("http://www.testalternatelogin.com/"));
         }
 
+        [TestMethod]
+        public void AlternateLoginUri_Null()
+        {
+            var client = new MobileServiceClient(MobileAppUriValidator.DummyMobileApp);
+            client.AlternateLoginHost = null;
+            Assert.AreEqual(client.AlternateLoginHost, client.MobileAppUri);
+        }
+
         private void TestStartUriForParameters(Dictionary<string, string> parameters, string uri, string loginPrefix = null, string alternateLoginUri = null, string appUrl = null)
         {
             TestInitialize(appUrl, loginPrefix, alternateLoginUri);
