@@ -24,6 +24,7 @@ import android.net.http.AndroidHttpClient;
 
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.MainActivity;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.R;
+import com.squareup.okhttp.apache.OkApacheClient;
 
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
@@ -56,7 +57,7 @@ public class FroyoSupport {
      *
      * @param client AndroidHttpClient to fix
      */
-    public static void fixAndroidHttpClientForCertificateValidation(AndroidHttpClient client) {
+    public static void fixAndroidHttpClientForCertificateValidation(OkApacheClient client) {
 
         final SchemeRegistry schemeRegistry = new SchemeRegistry();
         schemeRegistry.register(new Scheme("https",

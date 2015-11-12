@@ -20,25 +20,23 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests;
 
 import android.annotation.TargetApi;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.preference.PreferenceManager;
+import android.util.Pair;
 
 import com.google.android.gcm.GCMRegistrar;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
-import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.notifications.MobileServicePush;
-import com.microsoft.windowsazure.mobileservices.notifications.Registration;
 import com.microsoft.windowsazure.mobileservices.notifications.RegistrationCallback;
-import com.microsoft.windowsazure.mobileservices.notifications.TemplateRegistration;
-import com.microsoft.windowsazure.mobileservices.notifications.TemplateRegistrationCallback;
 import com.microsoft.windowsazure.mobileservices.notifications.UnregisterCallback;
-import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.MainActivity;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestCase;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestExecutionCallback;
@@ -48,16 +46,13 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestSt
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.push.GCMMessageHelper;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.push.GCMMessageManager;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 public class EnhancedPushTests extends TestGroup {
 
-    private static final String tableName = "droidPushTest";
-    private static final String DEFAULT_REGISTRATION_NAME = "$Default";
-    private static final String REGISTRATION_NAME_STORAGE_KEY = "__NH_REG_NAME_";
     private boolean isNetBackend = true;
 
     /*
@@ -72,95 +67,36 @@ public class EnhancedPushTests extends TestGroup {
         this.isNetBackend = isNetBackend;
 
         // Notification Roundtrip Tests
-
         this.addTest(createGCMRegisterTest());
 
         String json = "'Notification Hub test notification'".replace('\'', '\"');
-        this.addTest(createNativePushTestWithRefresh("Native Notification Roundtrip - Simple payload - With Refresh", "tag1", json));
 
         json = "'Notification Hub test notification'".replace('\'', '\"');
-        this.addTest(createNativePushTest("Native Notification Roundtrip - Simple payload", "tag1", json));
+        this.addTest(createNativePushTest("Native Notification Roundtrip - Simple payload", json));
 
         json = "{'name':'John Doe','age':'33'}".replace('\'', '\"');
-        this.addTest(createNativePushTest("Native Notification Roundtrip - Complex payload", "tag2", json));
-
-        this.addTest(createNativePushTest("Native Notification Roundtrip - No Tag", null, json));
+        this.addTest(createNativePushTest("Native Notification Roundtrip - Complex payload", json));
 
         String templateNotification = "{'fullName':'John Doe'}".replace('\'', '\"');
         String template = "{'data':{'user':'$(fullName)'}}".replace('\'', '\"');
         String expectedPayload = "{'user':'John Doe'}".replace('\'', '\"');
 
-        this.addTest(createTemplatePushTest("Template Notification Roundtrip - Tag", "tag4", templateNotification, "templateTag", template, expectedPayload));
+        this.addTest(createTemplatePushTest("Template Notification Roundtrip", templateNotification, "templateGCM", template, expectedPayload));
 
-        this.addTest(createTemplatePushTest("Template Notification Roundtrip - No Tag", null, templateNotification, "templateNoTag", template, expectedPayload));
-
-        this.addTest(createReRegisterNativeTestCase("Register native - Register / Unregister / Register / Unregister"));
-
-        this.addTest(createReRegisterTemplateTestCase("Register template - Register / Unregister / Register / Unregister", UUID.randomUUID().toString()));
-
-        this.addTest(createUnregisterNativeNonExistingTestCase("Unregister native - Non existing"));
-        this.addTest(createUnregisterNativeUnexistingRegistrationTestCase("Unregister native - Unexisting registration"));
-
-        this.addTest(createUnregisterTemplateNonExistingTestCase("Unregister template - Non existing", UUID.randomUUID().toString()));
-        this.addTest(createUnregisterTemplateUnexistingRegistrationTestCase("Unregister template - Unexisting registration", UUID.randomUUID().toString()));
-
-        this.addTest(createUnregisterAllUnregisterNativeTestCase(
-                "Unregister all - Register native / Register template / Unregister all / Unregister native - Unexisting registration", UUID.randomUUID()
-                        .toString()));
-        this.addTest(createUnregisterAllUnregisterTemplateTestCase(
-                "Unregister all - Register native / Register template / Unregister all / Unregister template - Unexisting registration", UUID.randomUUID()
-                        .toString()));
-
-        this.addTest(createCheckIsRefreshNeeded("Retrieve existing registrations on first connection"));
+        this.addTest(createUnregisterTestCase("Unregister"));
 
         // With Callbacks
         this.addTest(RegisterNativeWithCallbackTestCase("Register Native With Callback"));
         this.addTest(RegisterTemplateWithCallbackTestCase("Register Template With Callback", "template1"));
-        this.addTest(UnRegisterNativeWithCallbackTestCase("UnRegister Native With Callback"));
-        this.addTest(UnRegisterTemplateWithCallbackTestCase("UnRegister Template With Callback", "template1"));
-        this.addTest(UnRegisterAllNativeWithCallbackTestCase("UnRegister All Native With Callback"));
-        this.addTest(UnRegisterAllTemplateWithCallbackTestCase("UnRegister All Template With Callback", "template1"));
+        this.addTest(UnRegisterWithCallbackTestCase("UnRegister With Callback"));
 
         this.addTest(createGCMUnregisterTest());
     }
 
-    public static void clearNotificationHubStorageData() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.getInstance());
-        Editor editor = sharedPreferences.edit();
-        Set<String> keys = sharedPreferences.getAll().keySet();
-
-        for (String key : keys) {
-            if (key.startsWith("__NH_")) {
-                editor.remove(key);
-            }
-        }
-
-        editor.commit();
-    }
-
-    public static void clearRegistrationsStorageData() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.getInstance());
-        Editor editor = sharedPreferences.edit();
-        Set<String> keys = sharedPreferences.getAll().keySet();
-
-        for (String key : keys) {
-            if (key.startsWith("REGISTRATION_NAME_STORAGE_KEY")) {
-                editor.remove(key);
-            }
-        }
-
-        editor.commit();
-    }
-
-    private Registration register(TestCase test, MobileServicePush hub, String gcmId, String[] tags) throws InterruptedException, ExecutionException {
+    private Void register(TestCase test, MobileServicePush hub, String gcmId) throws InterruptedException, ExecutionException {
         test.log("Register Native with GCMID = " + gcmId);
-        if (tags != null && tags.length > 0) {
-            for (String tag : tags) {
-                test.log("Using tag: " + tag);
-            }
-        }
 
-        return hub.register(gcmId, tags).get();
+        return hub.register(gcmId).get();
     }
 
     private void unregister(TestCase test, MobileServicePush hub) throws InterruptedException, ExecutionException {
@@ -169,154 +105,31 @@ public class EnhancedPushTests extends TestGroup {
         hub.unregister().get();
     }
 
-    private TemplateRegistration registerTemplate(TestCase test, MobileServicePush hub, String gcmId, String templateName, String[] tags)
+    private Void registerTemplate(TestCase test, MobileServicePush hub, String gcmId, String templateName)
             throws InterruptedException, ExecutionException {
         String template = "{\"time_to_live\": 108, \"delay_while_idle\": true, \"data\": { \"message\": \"$(msg)\" } }";
 
-        return registerTemplate(test, hub, gcmId, templateName, template, tags);
+        return registerTemplate(test, hub, gcmId, templateName, template);
     }
 
-    private TemplateRegistration registerTemplate(TestCase test, MobileServicePush hub, String gcmId, String templateName, String template, String[] tags)
+    private Void registerTemplate(TestCase test, MobileServicePush hub, String gcmId, String templateName, String template)
             throws InterruptedException, ExecutionException {
 
         test.log("Register with GCMID = " + gcmId);
         test.log("Register with templateName = " + templateName);
 
-        if (tags != null && tags.length > 0) {
-            for (String tag : tags) {
-                test.log("Using tag: " + tag);
-            }
-        }
-
-        return hub.registerTemplate(gcmId, templateName, template, tags).get();
+        return hub.registerTemplate(gcmId, templateName, template).get();
     }
 
-    private void unregisterTemplate(TestCase test, MobileServicePush hub, String templateName) throws InterruptedException, ExecutionException {
-        test.log("UnregisterTemplate with templateName = " + templateName);
-
-        hub.unregisterTemplate(templateName).get();
-    }
-
-    private void unregisterAll(TestCase test, MobileServicePush hub, String gcmId) throws InterruptedException, ExecutionException {
+    private void unregisterAll(TestCase test, MobileServicePush hub, MobileServiceClient client, String registrationId) throws InterruptedException, ExecutionException {
         test.log("Unregister Native");
 
-        hub.unregisterAll(gcmId).get();
+        hub.unregister().get();
+
+        deleteRegistrationsForChannel(client, registrationId).get();
     }
 
-    private void addUnexistingNativeRegistration(String registrationId) {
-        addUnexistingTemplateRegistration(DEFAULT_REGISTRATION_NAME, registrationId);
-    }
-
-    private void addUnexistingTemplateRegistration(String templateName, String registrationId) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.getInstance());
-
-        Editor editor = sharedPreferences.edit();
-        editor.putString(REGISTRATION_NAME_STORAGE_KEY + templateName, registrationId);
-        editor.commit();
-    }
-
-    // Register Native Tests
-
-    private int getRegistrationCountInLocalStorage() {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.getInstance());
-        int regCount = 0;
-
-        for (String key : preferences.getAll().keySet()) {
-            if (key.startsWith("__NH_REG_NAME_")) {
-                regCount++;
-            }
-        }
-
-        return regCount;
-    }
-
-    // Register Template Tests
-
-    private TestCase createReRegisterNativeTestCase(String name) {
-        TestCase register = new TestCase() {
-
-            @Override
-            protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
-
-                try {
-
-                    final MobileServicePush MobileServicePush = client.getPush();
-                    final TestResult result = new TestResult();
-                    result.setStatus(TestStatus.Passed);
-                    result.setTestCase(this);
-
-                    final String gcmId = UUID.randomUUID().toString();
-
-                    Registration reg1 = register(this, MobileServicePush, gcmId, (String[]) null);
-
-                    unregister(this, MobileServicePush);
-
-                    Registration reg2 = register(this, MobileServicePush, gcmId, (String[]) null);
-
-                    if (reg2.getRegistrationId().equals(reg1.getRegistrationId())) {
-                        result.setStatus(TestStatus.Failed);
-                    }
-
-                    unregister(this, MobileServicePush);
-
-                    callback.onTestComplete(this, result);
-
-                } catch (Exception e) {
-                    callback.onTestComplete(this, createResultFromException(e));
-                    return;
-                }
-            }
-        };
-
-        register.setName(name);
-
-        return register;
-    }
-
-    // Unregister Native Tests
-
-    private TestCase createReRegisterTemplateTestCase(String name, final String templateName) {
-        TestCase register = new TestCase() {
-
-            @Override
-            protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
-
-                try {
-                    final MobileServicePush MobileServicePush = client.getPush();
-                    final TestResult result = new TestResult();
-                    result.setStatus(TestStatus.Passed);
-                    result.setTestCase(this);
-
-                    final String gcmId = UUID.randomUUID().toString();
-
-                    TemplateRegistration reg1 = registerTemplate(this, MobileServicePush, gcmId, templateName, (String[]) null);
-
-                    unregisterTemplate(this, MobileServicePush, templateName);
-
-                    TemplateRegistration reg2 = registerTemplate(this, MobileServicePush, gcmId, templateName + "1", (String[]) null);
-
-                    if (reg2.getRegistrationId().equals(reg1.getRegistrationId())) {
-                        result.setStatus(TestStatus.Failed);
-                    }
-
-                    unregisterTemplate(this, MobileServicePush, templateName);
-
-                    callback.onTestComplete(this, result);
-                    return;
-
-                } catch (Exception e) {
-                    callback.onTestComplete(this, createResultFromException(e));
-                    return;
-                }
-            }
-        };
-
-        register.setName(name);
-
-        return register;
-    }
-
-    private TestCase createUnregisterNativeNonExistingTestCase(String name) {
+    private TestCase createUnregisterTestCase(String name) {
         TestCase register = new TestCase() {
 
             @Override
@@ -341,263 +154,13 @@ public class EnhancedPushTests extends TestGroup {
         };
 
         register.setName(name);
-
-        return register;
-    }
-
-    // Unregister Template Tests
-
-    private TestCase createUnregisterNativeUnexistingRegistrationTestCase(String name) {
-        TestCase register = new TestCase() {
-
-            @Override
-            protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
-
-                try {
-                    final MobileServicePush MobileServicePush = client.getPush();
-                    final TestResult result = new TestResult();
-                    result.setStatus(TestStatus.Passed);
-                    result.setTestCase(this);
-
-                    String gcmId = UUID.randomUUID().toString();
-
-                    Registration registration = register(this, MobileServicePush, gcmId, (String[]) null);
-
-                    final String registrationId = registration.getRegistrationId();
-
-                    unregister(this, MobileServicePush);
-
-                    addUnexistingNativeRegistration(registrationId);
-
-                    unregister(this, MobileServicePush);
-
-                    callback.onTestComplete(this, result);
-                    return;
-
-                } catch (Exception e) {
-                    callback.onTestComplete(this, createResultFromException(e));
-                    return;
-                }
-            }
-        };
-
-        register.setName(name);
-
-        if (!isNetBackend) {
-            register.setExpectedExceptionClass(MobileServiceException.class);
-        }
-
-        return register;
-    }
-
-    private TestCase createUnregisterTemplateNonExistingTestCase(String name, final String templateName) {
-        TestCase register = new TestCase() {
-
-            @Override
-            protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
-                try {
-                    final MobileServicePush MobileServicePush = client.getPush();
-                    final TestResult result = new TestResult();
-                    result.setStatus(TestStatus.Passed);
-                    result.setTestCase(this);
-
-                    unregisterTemplate(this, MobileServicePush, templateName);
-
-                    callback.onTestComplete(this, result);
-                    return;
-
-                } catch (Exception e) {
-                    callback.onTestComplete(this, createResultFromException(e));
-                    return;
-                }
-            }
-        };
-
-        register.setName(name);
-
-        return register;
-    }
-
-    // Unregister All Tests
-
-    private TestCase createUnregisterTemplateUnexistingRegistrationTestCase(String name, final String templateName) {
-        TestCase register = new TestCase() {
-
-            @Override
-            protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
-                final TestCase that = this;
-
-                try {
-                    final MobileServicePush MobileServicePush = client.getPush();
-                    final TestResult result = new TestResult();
-                    result.setStatus(TestStatus.Passed);
-                    result.setTestCase(this);
-
-                    TemplateRegistration templateRegistration = registerTemplate(this, MobileServicePush, UUID.randomUUID().toString(), templateName,
-                            (String[]) null);
-
-                    final String registrationId = templateRegistration.getRegistrationId();
-
-                    unregisterTemplate(that, MobileServicePush, templateName);
-
-                    addUnexistingTemplateRegistration(templateName, registrationId);
-
-                    unregisterTemplate(that, MobileServicePush, templateName);
-
-                    callback.onTestComplete(this, result);
-                    return;
-
-                } catch (Exception e) {
-                    callback.onTestComplete(this, createResultFromException(e));
-                    return;
-                }
-            }
-        };
-
-        register.setName(name);
-
-        if (!isNetBackend) {
-            register.setExpectedExceptionClass(MobileServiceException.class);
-        }
-
-        return register;
-    }
-
-    private TestCase createUnregisterAllUnregisterNativeTestCase(String name, final String templateName) {
-        TestCase register = new TestCase() {
-
-            @Override
-            protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
-
-                try {
-                    final MobileServicePush MobileServicePush = client.getPush();
-                    final TestResult result = new TestResult();
-                    result.setStatus(TestStatus.Passed);
-                    result.setTestCase(this);
-
-                    final String gcmId = UUID.randomUUID().toString();
-
-                    unregisterAll(this, MobileServicePush, gcmId);
-
-                    Registration nativeRegistration = register(this, MobileServicePush, gcmId, (String[]) null);
-
-                    final String registrationId = nativeRegistration.getRegistrationId();
-
-                    registerTemplate(this, MobileServicePush, gcmId, templateName, (String[]) null);
-
-                    unregisterAll(this, MobileServicePush, gcmId);
-
-                    addUnexistingNativeRegistration(registrationId);
-
-                    unregister(this, MobileServicePush);
-
-                    callback.onTestComplete(this, result);
-                    return;
-
-                } catch (Exception e) {
-                    callback.onTestComplete(this, createResultFromException(e));
-                    return;
-                }
-            }
-        };
-
-        register.setName(name);
-
-        if (!isNetBackend) {
-            register.setExpectedExceptionClass(MobileServiceException.class);
-        }
-
-        return register;
-    }
-
-    private TestCase createUnregisterAllUnregisterTemplateTestCase(String name, final String templateName) {
-        TestCase register = new TestCase() {
-
-            @Override
-            protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
-
-                try {
-                    final MobileServicePush MobileServicePush = client.getPush();
-                    final TestResult result = new TestResult();
-                    result.setStatus(TestStatus.Passed);
-                    result.setTestCase(this);
-
-                    final String gcmId = UUID.randomUUID().toString();
-
-                    unregisterAll(this, MobileServicePush, gcmId);
-
-                    register(this, MobileServicePush, gcmId, (String[]) null);
-
-                    TemplateRegistration templateRegistration = registerTemplate(this, MobileServicePush, gcmId, templateName, (String[]) null);
-
-                    final String registrationId = templateRegistration.getRegistrationId();
-
-                    unregisterAll(this, MobileServicePush, gcmId);
-
-                    addUnexistingTemplateRegistration(templateName, registrationId);
-
-                    unregisterTemplate(this, MobileServicePush, templateName);
-
-                    callback.onTestComplete(this, result);
-                    return;
-
-                } catch (Exception e) {
-                    callback.onTestComplete(this, createResultFromException(e));
-                    return;
-                }
-            }
-        };
-
-        register.setName(name);
-        if (!isNetBackend) {
-            register.setExpectedExceptionClass(MobileServiceException.class);
-        }
 
         return register;
     }
 
     // Notification Roundtrip Tests
 
-    private TestCase createCheckIsRefreshNeeded(String name) {
-        TestCase register = new TestCase() {
-
-            @Override
-            protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
-
-                try {
-                    final MobileServicePush MobileServicePush = client.getPush();
-                    final TestResult result = new TestResult();
-                    result.setStatus(TestStatus.Passed);
-                    result.setTestCase(this);
-
-                    final String gcmId = UUID.randomUUID().toString();
-
-                    unregisterAll(this, MobileServicePush, gcmId);
-
-                    register(this, MobileServicePush, gcmId, (String[]) null);
-
-                    registerTemplate(this, MobileServicePush, gcmId, UUID.randomUUID().toString(), (String[]) null);
-
-                    if (getRegistrationCountInLocalStorage() != 2) {
-                        result.setStatus(TestStatus.Failed);
-                    }
-
-                    callback.onTestComplete(this, result);
-                    return;
-
-                } catch (Exception e) {
-                    callback.onTestComplete(this, createResultFromException(e));
-                    return;
-                }
-            }
-        };
-
-        register.setName(name);
-
-        return register;
-    }
-
-    private TestCase createNativePushTest(String testName, final String tag, String jsonPayload) {
+    private TestCase createNativePushTest(String testName, String jsonPayload) {
         final JsonElement orginalPayload = new JsonParser().parse(jsonPayload);
 
         JsonObject newPayload;
@@ -610,35 +173,57 @@ public class EnhancedPushTests extends TestGroup {
 
         final JsonObject payload = newPayload;
 
-        TestCase result = new TestCase(testName) {
+        TestCase test = new TestCase(testName) {
 
             @Override
             protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
 
                 try {
 
+                    final TestResult result = new TestResult();
+                    result.setStatus(TestStatus.Passed);
+                    result.setTestCase(this);
+
                     final MobileServicePush MobileServicePush = client.getPush();
-                    String[] tags = tag != null ? new String[]{tag} : null;
 
-                    unregisterAll(this, MobileServicePush, registrationId);
+                    unregisterAll(this, MobileServicePush, client, registrationId);
 
-                    register(this, MobileServicePush, registrationId, tags);
+                    JsonElement unregisterResult = verifyUnregisterInstallationResult(client).get();
 
-                    GCMMessageManager.instance.clearPushMessages();
-                    MobileServiceJsonTable table = client.getTable(tableName);
+                    if (!unregisterResult.getAsBoolean()) {
+                        this.log("Unregister failed");
+                        result.setStatus(TestStatus.Failed);
+
+                        callback.onTestComplete(this, result);
+                        return;
+                    }
+
+                    register(this, MobileServicePush, registrationId);
+
+                    JsonElement registerResult = verifyRegisterInstallationResult(client, registrationId).get();
+
+                    if (!registerResult.getAsBoolean()) {
+                        this.log("Register failed");
+                        result.setStatus(TestStatus.Failed);
+
+                        callback.onTestComplete(this, result);
+                        return;
+                    }
+
                     JsonObject item = new JsonObject();
                     item.addProperty("method", "send");
-                    item.addProperty("tag", tag);
+                    item.addProperty("token", "dummy");
+                    item.addProperty("type", "gcm");
+
                     JsonObject sentPayload = new JsonObject();
                     sentPayload.add("data", payload);
                     item.add("payload", sentPayload);
-                    item.addProperty("usingNH", true);
 
-                    JsonObject jsonObject = table.insert(item).get();
+                    JsonElement jsonObject = client.invokeApi("Push", item).get();
 
                     this.log("OnCompleted: " + jsonObject.toString());
-                    TestExecutionCallback nativeUnregisterTestExecutionCallback = getNativeUnregisterTestExecutionCallback(client, tag, payload, callback);
-                    GCMMessageManager.instance.waitForPushMessage(20000, GCMMessageHelper.getPushCallback(this, payload, nativeUnregisterTestExecutionCallback));
+                    TestExecutionCallback nativeUnregisterTestExecutionCallback = getNativeUnregisterTestExecutionCallback(client, payload, callback);
+                    GCMMessageManager.instance.waitForPushMessage(60000, GCMMessageHelper.getPushCallback(this, payload, nativeUnregisterTestExecutionCallback));
 
                 } catch (Exception e) {
                     callback.onTestComplete(this, createResultFromException(e));
@@ -647,47 +232,67 @@ public class EnhancedPushTests extends TestGroup {
             }
         };
 
-        result.setName(testName);
+        test.setName(testName);
 
-        return result;
+        return test;
     }
 
-    private TestCase createTemplatePushTest(String testName, final String tag, final String templateNotification, final String templateName,
+    private TestCase createTemplatePushTest(String testName, final String templateNotification, final String templateName,
                                             final String template, final String expectedPayload) {
 
-        TestCase result = new TestCase(testName) {
+        TestCase test = new TestCase(testName) {
 
             @Override
             protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
 
                 try {
 
-                    String[] tags = tag != null ? new String[]{tag} : null;
+                    final TestResult result = new TestResult();
+                    result.setStatus(TestStatus.Passed);
+                    result.setTestCase(this);
 
                     final MobileServicePush MobileServicePush = client.getPush();
 
-                    unregisterAll(this, MobileServicePush, registrationId);
+                    unregisterAll(this, MobileServicePush, client, registrationId);
 
-                    registerTemplate(this, MobileServicePush, registrationId, templateName, template, tags);
+                    JsonElement unregisterResult = verifyUnregisterInstallationResult(client).get();
+
+                    if (!unregisterResult.getAsBoolean()) {
+                        this.log("Unregister failed");
+                        result.setStatus(TestStatus.Failed);
+
+                        callback.onTestComplete(this, result);
+                        return;
+                    }
+
+                    registerTemplate(this, MobileServicePush, registrationId, templateName, template);
+
+                    JsonElement registerResult = verifyRegisterInstallationResult(client, registrationId, templateName, template).get();
+
+                    if (!registerResult.getAsBoolean()) {
+                        this.log("Register failed");
+                        result.setStatus(TestStatus.Failed);
+
+                        callback.onTestComplete(this, result);
+                        return;
+                    }
+
+                    GCMMessageManager.instance.clearPushMessages();
 
                     JsonElement templateNotificationJsonElement = new JsonParser().parse(templateNotification);
 
-                    GCMMessageManager.instance.clearPushMessages();
-                    MobileServiceJsonTable table = client.getTable(tableName);
                     JsonObject item = new JsonObject();
                     item.addProperty("method", "send");
-                    item.addProperty("tag", tag);
-                    item.addProperty("payload", "not used");
-                    item.addProperty("templatePush", true);
-                    item.add("templateNotification", templateNotificationJsonElement);
-                    item.addProperty("usingNH", true);
+                    item.addProperty("token", "dummy");
+                    item.addProperty("type", "template");
+                    item.add("payload", templateNotificationJsonElement);
 
-                    JsonObject jsonObject = table.insert(item).get();
+                    JsonElement jsonObject = client.invokeApi("Push", item).get();
 
                     log("OnCompleted: " + jsonObject.toString());
-                    TestExecutionCallback nativeUnregisterTestExecutionCallback = getTemplateUnregisterTestExecutionCallback(client, tag, templateName,
+                    TestExecutionCallback nativeUnregisterTestExecutionCallback = getTemplateUnregisterTestExecutionCallback(client, templateName,
                             template, templateNotification, callback);
-                    GCMMessageManager.instance.waitForPushMessage(20000,
+                    GCMMessageManager.instance.waitForPushMessage(60000,
                             GCMMessageHelper.getPushCallback(this, expectedPayload, nativeUnregisterTestExecutionCallback));
 
                 } catch (Exception e) {
@@ -697,9 +302,9 @@ public class EnhancedPushTests extends TestGroup {
             }
         };
 
-        result.setName(testName);
+        test.setName(testName);
 
-        return result;
+        return test;
     }
 
     private TestCase createGCMUnregisterTest() {
@@ -757,7 +362,7 @@ public class EnhancedPushTests extends TestGroup {
         return testCase;
     }
 
-    private TestExecutionCallback getNativeUnregisterTestExecutionCallback(final MobileServiceClient client, final String tag, final JsonObject payload,
+    private TestExecutionCallback getNativeUnregisterTestExecutionCallback(final MobileServiceClient client, final JsonObject payload,
                                                                            final TestExecutionCallback callback) {
         return new TestExecutionCallback() {
 
@@ -776,14 +381,13 @@ public class EnhancedPushTests extends TestGroup {
                 if (result.getStatus() == TestStatus.Failed) {
                     callback.onTestComplete(test, result);
                 } else {
-                    nativeUnregisterTestExecution(client, test, tag, payload, callback);
+                    nativeUnregisterTestExecution(client, test, payload, callback);
                 }
             }
         };
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private void nativeUnregisterTestExecution(final MobileServiceClient client, final TestCase test, final String tag, final JsonObject payload,
+    private void nativeUnregisterTestExecution(final MobileServiceClient client, final TestCase test, final JsonObject payload,
                                                final TestExecutionCallback callback) {
 
         new AsyncTask<Void, Void, Void>() {
@@ -791,24 +395,29 @@ public class EnhancedPushTests extends TestGroup {
             protected Void doInBackground(Void... arg0) {
 
                 try {
-                    unregister(test, client.getPush());
+
+                    unregisterAll(test, client.getPush(), client, registrationId);
+
+                    //SystemClock.sleep(60000);
+
+                    JsonElement unregisterResult = verifyUnregisterInstallationResult(client).get();
 
                     GCMMessageManager.instance.clearPushMessages();
-                    MobileServiceJsonTable table = client.getTable(tableName);
+
                     JsonObject item = new JsonObject();
                     item.addProperty("method", "send");
-                    item.addProperty("tag", tag);
+                    item.addProperty("token", "dummy");
+                    item.addProperty("type", "gcm");
 
                     JsonObject sentPayload = new JsonObject();
                     sentPayload.add("data", payload);
                     item.add("payload", sentPayload);
-
                     item.addProperty("usingNH", true);
 
-                    JsonObject jsonObject = table.insert(item).get();
+                    JsonElement pushResult = client.invokeApi("Push", item).get();
 
-                    test.log("OnCompleted: " + jsonObject.toString());
-                    GCMMessageManager.instance.waitForPushMessage(20000, GCMMessageHelper.getNegativePushCallback(test, callback));
+                    test.log("OnCompleted: " + pushResult.toString());
+                    GCMMessageManager.instance.waitForPushMessage(60000, GCMMessageHelper.getNegativePushCallback(test, callback));
                 } catch (Exception exception) {
                     callback.onTestComplete(test, test.createResultFromException(exception));
                     // return;
@@ -819,7 +428,7 @@ public class EnhancedPushTests extends TestGroup {
 
     }
 
-    private TestExecutionCallback getTemplateUnregisterTestExecutionCallback(final MobileServiceClient client, final String tag, final String templateName,
+    private TestExecutionCallback getTemplateUnregisterTestExecutionCallback(final MobileServiceClient client, final String templateName,
                                                                              final String template, final String templateNotification, final TestExecutionCallback callback) {
         return new TestExecutionCallback() {
 
@@ -838,14 +447,14 @@ public class EnhancedPushTests extends TestGroup {
                 if (result.getStatus() == TestStatus.Failed) {
                     callback.onTestComplete(test, result);
                 } else {
-                    templateUnregisterTestExecution(client, test, tag, templateName, template, templateNotification, callback);
+                    templateUnregisterTestExecution(client, test, templateName, template, templateNotification, callback);
                 }
             }
         };
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private void templateUnregisterTestExecution(final MobileServiceClient client, final TestCase test, final String tag, final String templateName,
+    private void templateUnregisterTestExecution(final MobileServiceClient client, final TestCase test, final String templateName,
                                                  final String template, final String templateNotification, final TestExecutionCallback callback) {
 
         new AsyncTask<Void, Void, Void>() {
@@ -853,27 +462,23 @@ public class EnhancedPushTests extends TestGroup {
             protected Void doInBackground(Void... arg0) {
                 try {
 
-                    String[] tags = tag != null ? new String[]{tag} : null;
+                    registerTemplate(test, client.getPush(), templateName, template);
 
-                    registerTemplate(test, client.getPush(), templateName, template, tags);
-
-                    unregisterTemplate(test, client.getPush(), templateName);
+                    unregister(test, client.getPush());
 
                     JsonElement templateNotificationJsonElement = new JsonParser().parse(templateNotification);
 
                     GCMMessageManager.instance.clearPushMessages();
-                    MobileServiceJsonTable table = client.getTable(tableName);
                     JsonObject item = new JsonObject();
                     item.addProperty("method", "send");
-                    item.addProperty("tag", tag);
-                    item.addProperty("payload", "not used");
-                    item.addProperty("templatePush", true);
-                    item.add("templateNotification", templateNotificationJsonElement);
-                    item.addProperty("usingNH", true);
+                    item.addProperty("token", "dummy");
+                    item.addProperty("type", "template");
+                    item.add("payload", templateNotificationJsonElement);
 
-                    JsonObject jsonObject = table.insert(item).get();
+                    JsonElement jsonObject = client.invokeApi("Push", item).get();
+
                     test.log("OnCompleted: " + jsonObject.toString());
-                    GCMMessageManager.instance.waitForPushMessage(10000, GCMMessageHelper.getNegativePushCallback(test, callback));
+                    GCMMessageManager.instance.waitForPushMessage(60000, GCMMessageHelper.getNegativePushCallback(test, callback));
                 } catch (Exception exception) {
                     callback.onTestComplete(test, test.createResultFromException(exception));
                     // return;
@@ -885,55 +490,31 @@ public class EnhancedPushTests extends TestGroup {
 
     // Test Callbacks
     @SuppressWarnings("deprecation")
-    private void register(TestCase test, MobileServicePush hub, String gcmId, String[] tags, final RegistrationCallback callback) {
+    private void register(TestCase test, MobileServicePush hub, String gcmId, final RegistrationCallback callback) {
         test.log("Register Native with GCMID = " + gcmId);
-        if (tags != null && tags.length > 0) {
-            for (String tag : tags) {
-                test.log("Using tag: " + tag);
-            }
-        }
 
-        hub.register(gcmId, tags, callback);
+        hub.register(gcmId, callback);
     }
 
-    private void registerTemplate(TestCase test, MobileServicePush hub, String gcmId, String templateName, String[] tags, TemplateRegistrationCallback callback) {
+    private void registerTemplate(TestCase test, MobileServicePush hub, String gcmId, String templateName, RegistrationCallback callback) {
         String template = "{\"time_to_live\": 108, \"delay_while_idle\": true, \"data\": { \"message\": \"$(msg)\" } }";
-        registerTemplate(test, hub, gcmId, templateName, template, tags, callback);
+        registerTemplate(test, hub, gcmId, templateName, template, callback);
     }
 
     @SuppressWarnings("deprecation")
-    private void registerTemplate(TestCase test, MobileServicePush hub, String gcmId, String templateName, String template, String[] tags,
-                                  TemplateRegistrationCallback callback) {
+    private void registerTemplate(TestCase test, MobileServicePush hub, String gcmId, String templateName, String template,
+                                  RegistrationCallback callback) {
 
         test.log("Register with GCMID = " + gcmId);
         test.log("Register with templateName = " + templateName);
 
-        if (tags != null && tags.length > 0) {
-            for (String tag : tags) {
-                test.log("Using tag: " + tag);
-            }
-        }
-
-        hub.registerTemplate(gcmId, templateName, template, tags, callback);
+        hub.registerTemplate(gcmId, templateName, template, callback);
     }
 
     @SuppressWarnings("deprecation")
     private void unregister(TestCase test, MobileServicePush hub, UnregisterCallback callback) {
         test.log("Unregister Native");
         hub.unregister(callback);
-    }
-
-    @SuppressWarnings("deprecation")
-    private void unregisterTemplate(TestCase test, MobileServicePush hub, String templateName, final UnregisterCallback callback) {
-        test.log("UnregisterTemplate with templateName = " + templateName);
-
-        hub.unregisterTemplate(templateName, callback);
-    }
-
-    @SuppressWarnings("deprecation")
-    private void unregisterAll(TestCase test, MobileServicePush hub, String gcmId, final UnregisterCallback callback) {
-        test.log("Unregister Native");
-        hub.unregisterAll(gcmId, callback);
     }
 
     private TestCase RegisterNativeWithCallbackTestCase(String name) {
@@ -951,10 +532,10 @@ public class EnhancedPushTests extends TestGroup {
 
                     final String gcmId = UUID.randomUUID().toString();
 
-                    register(this, MobileServicePush, gcmId, (String[]) null, new RegistrationCallback() {
+                    register(this, MobileServicePush, gcmId, new RegistrationCallback() {
 
                         @Override
-                        public void onRegister(final Registration reg1, Exception exception) {
+                        public void onRegister(Exception exception) {
 
                             if (exception != null) {
                                 callback.onTestComplete(that, createResultFromException(exception));
@@ -993,10 +574,10 @@ public class EnhancedPushTests extends TestGroup {
 
                     final String gcmId = UUID.randomUUID().toString();
 
-                    registerTemplate(this, MobileServicePush, gcmId, templateName, (String[]) null, new TemplateRegistrationCallback() {
+                    registerTemplate(this, MobileServicePush, gcmId, templateName, new RegistrationCallback() {
 
                         @Override
-                        public void onRegister(final TemplateRegistration reg1, Exception exception) {
+                        public void onRegister(Exception exception) {
                             if (exception != null) {
                                 callback.onTestComplete(that, createResultFromException(exception));
                                 return;
@@ -1018,7 +599,7 @@ public class EnhancedPushTests extends TestGroup {
         return register;
     }
 
-    private TestCase UnRegisterNativeWithCallbackTestCase(String name) {
+    private TestCase UnRegisterWithCallbackTestCase(String name) {
         TestCase register = new TestCase() {
 
             @Override
@@ -1056,193 +637,93 @@ public class EnhancedPushTests extends TestGroup {
         return register;
     }
 
-    private TestCase UnRegisterTemplateWithCallbackTestCase(String name, final String templateName) {
-        TestCase register = new TestCase() {
+    public ListenableFuture<Void> deleteRegistrationsForChannel(final MobileServiceClient client, String registrationId) {
+
+        final SettableFuture<Void> resultFuture = SettableFuture.create();
+
+        ArrayList<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+
+        parameters.add(new Pair<String, String>("channelUri", registrationId));
+
+        ListenableFuture<JsonElement> serviceFilterFuture = client.invokeApi("deleteRegistrationsForChannel", "DELETE", parameters);
+
+        Futures.addCallback(serviceFilterFuture, new FutureCallback<JsonElement>() {
+            @Override
+            public void onFailure(Throwable exception) {
+                resultFuture.setException(exception);
+            }
 
             @Override
-            protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
-                final TestCase that = this;
-                try {
-                    final MobileServicePush MobileServicePush = client.getPush();
-                    final TestResult result = new TestResult();
-                    result.setStatus(TestStatus.Passed);
-                    result.setTestCase(this);
-
-                    unregisterTemplate(this, MobileServicePush, templateName, new UnregisterCallback() {
-
-                        @Override
-                        public void onUnregister(Exception exception) {
-                            if (exception != null) {
-                                callback.onTestComplete(that, createResultFromException(exception));
-                                return;
-                            }
-
-                            callback.onTestComplete(that, result);
-                            return;
-                        }
-                    });
-                } catch (Exception e) {
-                    callback.onTestComplete(this, createResultFromException(e));
-                    return;
-                }
+            public void onSuccess(JsonElement response) {
+                resultFuture.set(null);
             }
-        };
+        });
 
-        register.setName(name);
-
-        return register;
+        return resultFuture;
     }
 
-    private TestCase UnRegisterAllNativeWithCallbackTestCase(String name) {
-        TestCase register = new TestCase() {
+    public ListenableFuture<JsonElement> verifyUnregisterInstallationResult(final MobileServiceClient client) {
+
+        final SettableFuture<JsonElement> resultFuture = SettableFuture.create();
+
+        ListenableFuture<JsonElement> serviceFilterFuture = client.invokeApi("verifyUnregisterInstallationResult", "GET", new ArrayList<Pair<String, String>>());
+
+        Futures.addCallback(serviceFilterFuture, new FutureCallback<JsonElement>() {
+            @Override
+            public void onFailure(Throwable exception) {
+                resultFuture.setException(exception);
+            }
 
             @Override
-            protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
-                final TestCase that = this;
-
-                try {
-                    final MobileServicePush MobileServicePush = client.getPush();
-                    final TestResult result = new TestResult();
-                    result.setStatus(TestStatus.Passed);
-                    result.setTestCase(this);
-
-                    final String gcmId = UUID.randomUUID().toString();
-
-                    unregisterAll(that, MobileServicePush, gcmId, new UnregisterCallback() {
-
-                        @Override
-                        public void onUnregister(Exception exception) {
-                            if (exception != null) {
-                                callback.onTestComplete(that, createResultFromException(exception));
-                                return;
-                            }
-                            callback.onTestComplete(that, result);
-                            return;
-                        }
-                    });
-                } catch (Exception e) {
-                    callback.onTestComplete(this, createResultFromException(e));
-                    return;
-                }
+            public void onSuccess(JsonElement response) {
+                resultFuture.set(response);
             }
-        };
+        });
 
-        register.setName(name);
-        // register.setExpectedExceptionClass(MobileServiceException.class);
-
-        return register;
+        return resultFuture;
     }
 
-    private TestCase UnRegisterAllTemplateWithCallbackTestCase(String name, final String templateName) {
-        TestCase register = new TestCase() {
-
-            @Override
-            protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
-
-                final TestCase that = this;
-
-                try {
-                    final MobileServicePush MobileServicePush = client.getPush();
-                    final TestResult result = new TestResult();
-                    result.setStatus(TestStatus.Passed);
-                    result.setTestCase(this);
-
-                    final String gcmId = UUID.randomUUID().toString();
-
-                    unregisterAll(that, MobileServicePush, gcmId, new UnregisterCallback() {
-
-                        @Override
-                        public void onUnregister(Exception exception) {
-                            if (exception != null) {
-                                callback.onTestComplete(that, createResultFromException(exception));
-                                return;
-                            }
-
-                            callback.onTestComplete(that, result);
-                            return;
-                        }
-                    });
-                } catch (Exception e) {
-                    callback.onTestComplete(this, createResultFromException(e));
-                    return;
-                }
-            }
-        };
-
-        register.setName(name);
-        // register.setExpectedExceptionClass(MobileServiceException.class);
-
-        return register;
+    public ListenableFuture<JsonElement> verifyRegisterInstallationResult(MobileServiceClient client, String registrationId) {
+        return verifyRegisterInstallationResult(client, registrationId, null, null);
     }
 
-    private TestCase createNativePushTestWithRefresh(String testName, final String tag, String jsonPayload) {
-        final JsonElement orginalPayload = new JsonParser().parse(jsonPayload);
+    public ListenableFuture<JsonElement> verifyRegisterInstallationResult(MobileServiceClient client, String registrationId, String templateName, String templateBody) {
 
-        JsonObject newPayload;
-        if (orginalPayload.isJsonObject()) {
-            newPayload = orginalPayload.getAsJsonObject();
-        } else {
-            newPayload = new JsonObject();
-            newPayload.add("message", orginalPayload);
+        final SettableFuture<JsonElement> resultFuture = SettableFuture.create();
+
+        ArrayList<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+
+        parameters.add(new Pair<>("channelUri", registrationId));
+
+        if (templateName != null && templateBody != null) {
+            JsonObject templateObject = GetTemplateObject(templateName, templateBody);
+            parameters.add(new Pair<>("templates", templateObject.toString()));
         }
 
-        final JsonObject payload = newPayload;
+        ListenableFuture<JsonElement> serviceFilterFuture = client.invokeApi("verifyRegisterInstallationResult", "GET", parameters);
 
-        TestCase result = new TestCase(testName) {
+        Futures.addCallback(serviceFilterFuture, new FutureCallback<JsonElement>() {
+            @Override
+            public void onFailure(Throwable exception) {
+                resultFuture.setException(exception);
+            }
 
             @Override
-            protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
-
-                try {
-
-                    final MobileServicePush mobileServicePush = client.getPush();
-                    String[] tags = tag != null ? new String[]{tag} : null;
-
-                    unregisterAll(this, mobileServicePush, registrationId);
-
-                    removeStorageVersion();
-
-                    MobileServiceClient client2 = new MobileServiceClient(client);
-
-                    final MobileServicePush mobileServicePush2 = client2.getPush();
-
-                    register(this, mobileServicePush2, registrationId, tags);
-
-                    GCMMessageManager.instance.clearPushMessages();
-                    MobileServiceJsonTable table = client.getTable(tableName);
-                    JsonObject item = new JsonObject();
-                    item.addProperty("method", "send");
-                    item.addProperty("tag", tag);
-                    JsonObject sentPayload = new JsonObject();
-                    sentPayload.add("data", payload);
-                    item.add("payload", sentPayload);
-                    item.addProperty("usingNH", true);
-
-                    JsonObject jsonObject = table.insert(item).get();
-
-                    this.log("OnCompleted: " + jsonObject.toString());
-                    TestExecutionCallback nativeUnregisterTestExecutionCallback = getNativeUnregisterTestExecutionCallback(client, tag, payload, callback);
-                    GCMMessageManager.instance.waitForPushMessage(20000, GCMMessageHelper.getPushCallback(this, payload, nativeUnregisterTestExecutionCallback));
-
-                } catch (Exception e) {
-                    callback.onTestComplete(this, createResultFromException(e));
-                    return;
-                }
+            public void onSuccess(JsonElement response) {
+                resultFuture.set(response);
             }
-        };
+        });
 
-        result.setName(testName);
-
-        return result;
+        return resultFuture;
     }
 
-    private void removeStorageVersion() {
+    private JsonObject GetTemplateObject(String templateName, String templateBody) {
+        JsonObject templateDetailObject = new JsonObject();
+        templateDetailObject.addProperty("body", templateBody);
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.getInstance());
+        JsonObject templateObject = new JsonObject();
+        templateObject.add(templateName, templateDetailObject);
 
-        Editor editor = sharedPreferences.edit();
-        editor.remove("__NH_STORAGE_VERSION");
-
-        editor.commit();
+        return templateObject;
     }
 }

@@ -23,9 +23,8 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.http;
 
-import android.net.http.AndroidHttpClient;
-
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+import com.squareup.okhttp.apache.OkApacheClient;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -33,7 +32,6 @@ import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.protocol.HTTP;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -76,18 +74,13 @@ public class ServiceFilterRequestImpl implements ServiceFilterRequest {
     @Override
     public ServiceFilterResponse execute() throws Exception {
         // Execute request
-        AndroidHttpClient client = mAndroidHttpClientFactory.createAndroidHttpClient();
-        client.getParams().setParameter(HTTP.USER_AGENT, MobileServiceConnection.getUserAgent());
+        OkApacheClient client = mAndroidHttpClientFactory.createAndroidHttpClient();
 
-        try {
-            final HttpResponse response = client.execute(mRequest);
-            ServiceFilterResponse serviceFilterResponse = new ServiceFilterResponseImpl(response);
-            return serviceFilterResponse;
-        } finally {
-            client.close();
-        }
+        final HttpResponse response = client.execute(mRequest);
+        ServiceFilterResponse serviceFilterResponse = new ServiceFilterResponseImpl(response);
+        return serviceFilterResponse;
     }
-
+    
     @Override
     public Header[] getHeaders() {
         return mRequest.getAllHeaders();

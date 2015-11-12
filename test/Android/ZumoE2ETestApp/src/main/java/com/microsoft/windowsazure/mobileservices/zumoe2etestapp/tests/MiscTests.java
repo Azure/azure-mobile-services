@@ -272,7 +272,7 @@ public class MiscTests extends TestGroup {
                 final TestCase testCase = this;
 
                 // duplicate the client
-                MobileServiceClient froyoClient = new MobileServiceClient(client);
+                MobileServiceClient froyoClient = new MobileServiceClient(client.getAppUrl(), client.getContext());
 
                 log("add custom AndroidHttpClientFactory with Froyo support");
                 froyoClient.setAndroidHttpClientFactory(new FroyoAndroidHttpClientFactory());

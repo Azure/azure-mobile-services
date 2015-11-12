@@ -22,9 +22,9 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
             var columns = new[]
             {
                 new ColumnDefinition("id", JTokenType.String, SqlColumnType.Text),
-                new ColumnDefinition("__createdAt", JTokenType.Date, SqlColumnType.DateTime),
-                new ColumnDefinition("__updatedAt", JTokenType.Date, SqlColumnType.DateTime),
-                new ColumnDefinition("__version", JTokenType.String, SqlColumnType.Text),
+                new ColumnDefinition("createdAt", JTokenType.Date, SqlColumnType.DateTime),
+                new ColumnDefinition("updatedAt", JTokenType.Date, SqlColumnType.DateTime),
+                new ColumnDefinition("version", JTokenType.String, SqlColumnType.Text),
                 new ColumnDefinition("Bool", JTokenType.Boolean, SqlColumnType.Boolean),
                 new ColumnDefinition("Byte", JTokenType.Integer, SqlColumnType.Integer),
                 new ColumnDefinition("SByte", JTokenType.Integer, SqlColumnType.Integer),
@@ -97,10 +97,10 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
             {
                 new ColumnDefinition("id", JTokenType.String, SqlColumnType.Text),
                 new ColumnDefinition("String", JTokenType.String, SqlColumnType.Text),
-                new ColumnDefinition("__createdAt", JTokenType.Date, SqlColumnType.DateTime),
-                new ColumnDefinition("__updatedAt", JTokenType.Date, SqlColumnType.DateTime),
-                new ColumnDefinition("__version", JTokenType.String, SqlColumnType.Text),
-                new ColumnDefinition("__deleted", JTokenType.Boolean, SqlColumnType.Boolean)
+                new ColumnDefinition("createdAt", JTokenType.Date, SqlColumnType.DateTime),
+                new ColumnDefinition("updatedAt", JTokenType.Date, SqlColumnType.DateTime),
+                new ColumnDefinition("version", JTokenType.String, SqlColumnType.Text),
+                new ColumnDefinition("deleted", JTokenType.Boolean, SqlColumnType.Boolean)
             };
 
             await TestDefineTable<ToDoWithSystemPropertiesType>("stringId_test_table", columns);
