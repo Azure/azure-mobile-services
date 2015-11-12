@@ -153,7 +153,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 
         final String expectedUrl = appUrl + pnsApiUrl + "/installations/" + Uri.encode(installationId);
         final String expectedContent =
-                "{\"pushChannel\":\"handle\",\"platform\":\"gcm\",\"templates\":{\"template1\":{\"body\":\"{\\\"data\\\":\\\"abc\\\"}\",\"tags\":[\"tag1\"]}}}";
+                "{\"pushChannel\":\"handle\",\"platform\":\"gcm\",\"templates\":{\"template1\":{\"body\":\"{\\\"data\\\":\\\"abc\\\"}\"}}}";
         try {
             client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
