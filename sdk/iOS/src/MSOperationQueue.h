@@ -3,9 +3,10 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSTableOperation.h"
-#import "MSClient.h"
-#import "MSSyncContext.h"
+
+@class MSClient;
+@class MSTableOperation;
+@protocol MSSyncContextDataSource;
 
 /// A simple queue interface to abstract access from implementation. For now this may just
 /// be an NSArray but long term this is liable to change
@@ -25,7 +26,7 @@
 -(BOOL) condenseOperation:(MSTableOperation *)operation orError:(NSError **)error;
 
 /// Gets a list of all operations in the queue for a given table (and optionally item)
--(NSArray *) getOperationsForTable:(NSString *) table item:(NSString *)item;
+-(NSArray<MSTableOperation *> *) getOperationsForTable:(NSString *) table item:(NSString *)item;
 
 /// Returns the topmost operation
 -(id) peek;

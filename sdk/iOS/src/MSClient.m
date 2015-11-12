@@ -14,15 +14,17 @@
 #import "MSSyncTable.h"
 #import "MSPush.h"
 
+
 #pragma mark * MSClient Private Interface
+
 
 @interface MSClient ()
 
 // Public readonly, private readwrite properties
-@property (nonatomic, strong, readwrite)         NSArray *filters;
+@property (nonatomic, strong, readwrite) NSArray<id<MSFilter>> *filters;
 
 // Private properties
-@property (nonatomic, strong, readonly)         MSLogin *login;
+@property (nonatomic, strong, readonly) MSLogin *login;
 
 @end
 
@@ -32,17 +34,11 @@
 
 @implementation MSClient
 
-@synthesize applicationURL = applicationURL_;
-@synthesize applicationKey = applicationKey_;
-@synthesize currentUser = currentUser_;
-@synthesize login = login_;
-@synthesize serializer = serializer_;
-@synthesize syncContext = syncContext_;
 - (void) setSyncContext:(MSSyncContext *)syncContext
 {
-    syncContext_ = syncContext;
+    _syncContext = syncContext;
     if (syncContext) {
-        syncContext_.client = self;    
+        _syncContext.client = self;
     }
 }
 
@@ -71,62 +67,87 @@
 
 +(MSClient *) clientWithApplicationURLString:(NSString *)urlString
 {
-    return [MSClient clientWithApplicationURLString:urlString
-                                 applicationKey:nil];
-}
-
-+(MSClient *) clientWithApplicationURLString:(NSString *)urlString
-                           applicationKey:(NSString *)key
-{
     // NSURL will be nil for non-percent escaped url strings so we have to percent escape here
     NSMutableCharacterSet *set = [[NSCharacterSet URLPathAllowedCharacterSet] mutableCopy];
     [set formUnionWithCharacterSet:[NSCharacterSet URLHostAllowedCharacterSet]];
     [set formUnionWithCharacterSet:[NSCharacterSet URLQueryAllowedCharacterSet]];
     
-    NSString *urlStringEncoded = [urlString stringByAddingPercentEncodingWithAllowedCharacters:set];
+    NSString *appUrlStringEncoded = [urlString stringByAddingPercentEncodingWithAllowedCharacters:set];
     
-    NSURL *url = [NSURL URLWithString:urlStringEncoded];
-    return [MSClient clientWithApplicationURL:url applicationKey:key];
-}
-
-+(MSClient *) clientWithApplicationURLString:(NSString *)urlString
-                          withApplicationKey:(NSString *)key
-{
-    return [MSClient clientWithApplicationURLString:urlString
-                                     applicationKey:key];
+    NSURL *url = [NSURL URLWithString:appUrlStringEncoded];
+    
+    return [MSClient clientWithApplicationURL:url];
+    
 }
 
 +(MSClient *) clientWithApplicationURL:(NSURL *)url
 {
-    return [MSClient clientWithApplicationURL:url applicationKey:nil];
+    return [[MSClient alloc] initWithApplicationURL:url];
 }
-
-+(MSClient *) clientWithApplicationURL:(NSURL *)url
-                    applicationKey:(NSString *)key
-{
-    return [[MSClient alloc] initWithApplicationURL:url applicationKey:key];    
-}
-
 
 #pragma mark * Public Initializer Methods
 
 
 -(id) initWithApplicationURL:(NSURL *)url
 {
-    return [self initWithApplicationURL:url applicationKey:nil];
-}
-
--(id) initWithApplicationURL:(NSURL *)url applicationKey:(NSString *)key
-{
     self = [super init];
     if(self)
     {
-        applicationURL_ = url;
-        applicationKey_ = [key copy];
-        login_ = [[MSLogin alloc] initWithClient:self];
+        _applicationURL = url;
+        _login = [[MSLogin alloc] initWithClient:self];
         _push = [[MSPush alloc] initWithClient:self];
     }
     return self;
+}
+
+@synthesize loginHost = _loginHost;
+-(void) setLoginHost:(NSURL *)loginHost
+{
+    if (loginHost.path.length > 0) {
+        @throw [NSException exceptionWithName:@"InvalidLoginHost"
+                                       reason:[NSString stringWithFormat:@"Login host should not include a path portion"]
+                                     userInfo:nil];
+    }
+
+    if (![loginHost.scheme isEqualToString:@"https"]) {
+        @throw [NSException exceptionWithName:@"InvalidLoginHost"
+                                       reason:[NSString stringWithFormat:@"Login host must use the https scheme"]
+                                     userInfo:nil];
+    }
+    
+    _loginHost = loginHost;
+}
+
+-(NSURL *)loginHost
+{
+    if (_loginHost == nil) {
+        NSString *host = [self.applicationURL.host stringByAddingPercentEncodingWithAllowedCharacters:
+                                [NSCharacterSet URLHostAllowedCharacterSet]];
+        
+        return [NSURL URLWithString:[NSString stringWithFormat:@"https://%@", host]];
+        return [self.applicationURL baseURL];
+    }
+    
+    return _loginHost;
+}
+
+@synthesize loginPrefix = _loginPrefix;
+- (void) setLoginPrefix:(NSString *)loginPrefix
+{
+    _loginPrefix = [loginPrefix stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLPathAllowedCharacterSet]];
+}
+
+-(NSString *) loginPrefix
+{
+    if (!_loginPrefix) {
+        _loginPrefix = @".auth/login";
+    }
+    return _loginPrefix;
+}
+
+- (NSURL *) loginURL
+{
+    return [self.loginHost URLByAppendingPathComponent:self.loginPrefix];
 }
 
 
@@ -162,6 +183,7 @@
 #pragma mark * Public Authentication Methods
 
 
+#if TARGET_OS_IPHONE
 -(void) loginWithProvider:(NSString *)provider
              controller:(UIViewController *)controller
                  animated:(BOOL)animated
@@ -179,6 +201,7 @@
     return [self.login loginViewControllerWithProvider:provider
                                             completion:completion];
 }
+#endif
 
 -(void) loginWithProvider:(NSString *)provider
                 token:(NSDictionary *)token
@@ -189,9 +212,20 @@
                              completion:completion];
 }
 
--(void) logout
+-(void)logoutWithCompletion:(nullable MSClientLogoutBlock)completion;
 {
     self.currentUser = nil;
+    
+    // TODO: Rewrite to actually call the server and invalidate the token
+    if (completion) {
+        NSHTTPCookieStorage *cookieStorage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+        NSArray<NSHTTPCookie *> *cookies = [cookieStorage cookiesForURL:self.loginHost];
+        
+        NSHTTPCookie *authCookie = [[cookies filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"name = 'AppServiceAuthSession'"]] firstObject];
+        [cookieStorage deleteCookie:authCookie];
+        
+        completion(nil);
+    }
 }
 
 
@@ -271,10 +305,8 @@
 
 -(id) copyWithZone:(NSZone *)zone
 {
-    MSClient *client = [[MSClient allocWithZone:zone]
-                            initWithApplicationURL:self.applicationURL
-                                applicationKey:self.applicationKey];
-                                                                            
+    MSClient *client = [[MSClient allocWithZone:zone] initWithApplicationURL:self.applicationURL];
+    
     client.currentUser = [self.currentUser copyWithZone:zone];
     client.filters = [self.filters copyWithZone:zone];
 
