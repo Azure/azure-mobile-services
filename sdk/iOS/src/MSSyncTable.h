@@ -8,6 +8,7 @@
 @class MSClient;
 @class MSQuery;
 #import "MSPullSettings.h"
+#import "MSSyncContext.h"
 
 @class MSQueuePullOperation;
 @class MSQueuePurgeOperation;

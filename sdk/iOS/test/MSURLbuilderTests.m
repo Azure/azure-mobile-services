@@ -74,8 +74,7 @@
                                             orError:nil];
         
         XCTAssertNotNil(url, @"url should not be nil");
-        XCTAssertTrue([[url absoluteString] isEqualToString:expectedURL],
-                     @"the url was: %@", [url absoluteString]);
+        XCTAssertEqualObjects(url.absoluteString, expectedURL);
     }
 }
 
@@ -132,8 +131,7 @@
                                             orError:nil];
         
         XCTAssertNotNil(url, @"url should not be nil");
-        XCTAssertTrue([[url absoluteString] isEqualToString:expectedURL],
-                     @"the url was: %@", [url absoluteString]);
+        XCTAssertEqualObjects(url.absoluteString, expectedURL);
     }
 }
 
