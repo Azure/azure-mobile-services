@@ -29,6 +29,7 @@ import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.MobileServiceFeatures;
+import com.microsoft.windowsazure.mobileservices.http.HttpConstants;
 import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
@@ -47,8 +48,7 @@ import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceJsonSyn
 import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncTable;
 import com.microsoft.windowsazure.mobileservices.table.sync.localstore.ColumnDataType;
 import com.microsoft.windowsazure.mobileservices.table.sync.synchandler.SimpleSyncHandler;
-
-import org.apache.http.Header;
+import com.squareup.okhttp.Headers;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -376,11 +376,11 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
                 final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
                 String featuresHeaderName = "X-ZUMO-FEATURES";
 
-                Header[] headers = request.getHeaders();
+                Headers headers = request.getHeaders();
                 String features = null;
-                for (int i = 0; i < headers.length; i++) {
-                    if (headers[i].getName() == featuresHeaderName) {
-                        features = headers[i].getValue();
+                for (int i = 0; i < headers.size(); i++) {
+                    if (headers.name(i) == featuresHeaderName) {
+                        features = headers.value(i);
                     }
                 }
 
@@ -458,7 +458,7 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
             public void executeOperation(MobileServiceClient client) throws Exception {
                 List<Pair<String, String>> queryParams = new ArrayList<Pair<String, String>>();
                 queryParams.add(new Pair<String, String>("a", "b"));
-                client.invokeApi("apiName", "GET", queryParams, Address.class).get();
+                client.invokeApi("apiName", HttpConstants.GetMethod, queryParams, Address.class).get();
             }
 
         }, "AT,QS");
@@ -472,7 +472,7 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
                 List<Pair<String, String>> queryParams = new ArrayList<Pair<String, String>>();
                 queryParams.add(new Pair<String, String>("a", "b"));
                 List<Pair<String, String>> requestHeaders = new ArrayList<Pair<String, String>>();
-                requestHeaders.add(new Pair<String, String>("Content-Type", "text/plain"));
+                requestHeaders.add(new Pair<String, String>(HttpConstants.ContentType, "text/plain"));
                 byte[] content = "hello world".getBytes();
                 client.invokeApi("apiName", content, "POST", requestHeaders, queryParams).get();
             }
@@ -488,7 +488,7 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
                 List<Pair<String, String>> queryParams = new ArrayList<Pair<String, String>>();
                 queryParams.add(new Pair<String, String>("a", "b"));
                 List<Pair<String, String>> requestHeaders = new ArrayList<Pair<String, String>>();
-                requestHeaders.add(new Pair<String, String>("Content-Type", "text/plain"));
+                requestHeaders.add(new Pair<String, String>(HttpConstants.ContentType, "text/plain"));
                 requestHeaders.add(new Pair<String, String>("X-ZUMO-FEATURES", "something"));
                 byte[] content = "hello world".getBytes();
                 client.invokeApi("apiName", content, "POST", requestHeaders, queryParams).get();
@@ -514,11 +514,11 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
                 final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
                 String featuresHeaderName = "X-ZUMO-FEATURES";
 
-                Header[] headers = request.getHeaders();
+                Headers headers = request.getHeaders();
                 String features = null;
-                for (int i = 0; i < headers.length; i++) {
-                    if (headers[i].getName() == featuresHeaderName) {
-                        features = headers[i].getValue();
+                for (int i = 0; i < headers.size(); i++) {
+                    if (headers.name(i) == featuresHeaderName) {
+                        features = headers.value(i);
                     }
                 }
 
@@ -661,11 +661,11 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
                 final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
                 String featuresHeaderName = "X-ZUMO-FEATURES";
 
-                Header[] headers = request.getHeaders();
+                Headers headers = request.getHeaders();
                 String features = null;
-                for (int i = 0; i < headers.length; i++) {
-                    if (headers[i].getName() == featuresHeaderName) {
-                        features = headers[i].getValue();
+                for (int i = 0; i < headers.size(); i++) {
+                    if (headers.name(i) == featuresHeaderName) {
+                        features = headers.value(i);
                     }
                 }
 
@@ -682,7 +682,7 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
                     //if (fistPullPage) {
                         content = "{\"id\":\"the-id\",\"firstName\":\"John\",\"lastName\":\"Doe\",\"age\":33}";
 
-                        if (request.getMethod().equalsIgnoreCase("GET") && requestUri.getPathSegments().size() == 2) {
+                        if (request.getMethod().equalsIgnoreCase(HttpConstants.GetMethod) && requestUri.getPathSegments().size() == 2) {
                             // GET which should return an array of results
                             content = "[" + content + "]";
                         }
@@ -740,11 +740,11 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
                 final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
                 String featuresHeaderName = "X-ZUMO-FEATURES";
 
-                Header[] headers = request.getHeaders();
+                Headers headers = request.getHeaders();
                 String features = null;
-                for (int i = 0; i < headers.length; i++) {
-                    if (headers[i].getName() == featuresHeaderName) {
-                        features = headers[i].getValue();
+                for (int i = 0; i < headers.size(); i++) {
+                    if (headers.name(i) == featuresHeaderName) {
+                        features = headers.value(i);
                     }
                 }
 
@@ -761,7 +761,7 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
                     if (isFirstPage) {
                         content = "{\"id\":\"the-id\",\"firstName\":\"John\",\"lastName\":\"Doe\",\"age\":33}";
 
-                        if (request.getMethod().equalsIgnoreCase("GET") && requestUri.getPathSegments().size() == 2) {
+                        if (request.getMethod().equalsIgnoreCase(HttpConstants.GetMethod) && requestUri.getPathSegments().size() == 2) {
                             // GET which should return an array of results
                             content = "[" + content + "]";
                         }
@@ -861,11 +861,11 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
                 final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
                 String featuresHeaderName = "X-ZUMO-FEATURES";
 
-                Header[] headers = request.getHeaders();
+                Headers headers = request.getHeaders();
                 String features = null;
-                for (int i = 0; i < headers.length; i++) {
-                    if (headers[i].getName() == featuresHeaderName) {
-                        features = headers[i].getValue();
+                for (int i = 0; i < headers.size(); i++) {
+                    if (headers.name(i) == featuresHeaderName) {
+                        features = headers.value(i);
                     }
                 }
 
@@ -877,7 +877,7 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
                     ServiceFilterResponseMock response = new ServiceFilterResponseMock();
                     Uri requestUri = Uri.parse(request.getUrl());
                     String content = "{\"id\":\"the-id\",\"firstName\":\"John\",\"lastName\":\"Doe\",\"age\":33}";
-                    if (request.getMethod().equalsIgnoreCase("GET") && requestUri.getPathSegments().size() == 2) {
+                    if (request.getMethod().equalsIgnoreCase(HttpConstants.GetMethod) && requestUri.getPathSegments().size() == 2) {
                         // GET which should return an array of results
                         content = "[" + content + "]";
                     }

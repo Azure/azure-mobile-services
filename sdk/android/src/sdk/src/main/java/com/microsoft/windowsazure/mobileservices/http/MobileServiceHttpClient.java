@@ -31,11 +31,6 @@ import com.google.common.util.concurrent.SettableFuture;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceFeatures;
 
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -153,16 +148,17 @@ public class MobileServiceHttpClient {
         ServiceFilterRequestImpl request;
         String url = uriBuilder.build().toString();
 
-        if (httpMethod.equalsIgnoreCase(HttpGet.METHOD_NAME)) {
-            request = new ServiceFilterRequestImpl(new HttpGet(url), mClient.getAndroidHttpClientFactory());
-        } else if (httpMethod.equalsIgnoreCase(HttpPost.METHOD_NAME)) {
-            request = new ServiceFilterRequestImpl(new HttpPost(url), mClient.getAndroidHttpClientFactory());
-        } else if (httpMethod.equalsIgnoreCase(HttpPut.METHOD_NAME)) {
-            request = new ServiceFilterRequestImpl(new HttpPut(url), mClient.getAndroidHttpClientFactory());
-        } else if (httpMethod.equalsIgnoreCase(HttpPatch.METHOD_NAME)) {
-            request = new ServiceFilterRequestImpl(new HttpPatch(url), mClient.getAndroidHttpClientFactory());
-        } else if (httpMethod.equalsIgnoreCase(HttpDelete.METHOD_NAME)) {
-            request = new ServiceFilterRequestImpl(new HttpDelete(url), mClient.getAndroidHttpClientFactory());
+
+        if (httpMethod.equalsIgnoreCase(HttpConstants.GetMethod)) {
+            request = ServiceFilterRequestImpl.get(mClient.getOkHttpClientFactory(), url);
+        } else if (httpMethod.equalsIgnoreCase(HttpConstants.PostMethod)) {
+            request = ServiceFilterRequestImpl.post(mClient.getOkHttpClientFactory(), url, content);
+        } else if (httpMethod.equalsIgnoreCase(HttpConstants.PutMethod)) {
+            request = ServiceFilterRequestImpl.put(mClient.getOkHttpClientFactory(), url, content);
+        } else if (httpMethod.equalsIgnoreCase(HttpConstants.PatchMethod)) {
+            request = ServiceFilterRequestImpl.patch(mClient.getOkHttpClientFactory(), url, content);
+        } else if (httpMethod.equalsIgnoreCase(HttpConstants.DeleteMethod)) {
+            request = ServiceFilterRequestImpl.delete(mClient.getOkHttpClientFactory(), url, content);
         } else {
             future.setException(new IllegalArgumentException("httpMethod not supported"));
             return future;
@@ -192,15 +188,6 @@ public class MobileServiceHttpClient {
         if (requestHeaders != null && requestHeaders.size() > 0) {
             for (Pair<String, String> header : requestHeaders) {
                 request.addHeader(header.first, header.second);
-            }
-        }
-
-        if (content != null) {
-            try {
-                request.setContent(content);
-            } catch (Exception e) {
-                future.setException(e);
-                return future;
             }
         }
 

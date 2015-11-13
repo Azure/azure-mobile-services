@@ -21,30 +21,29 @@ package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests;
 
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
-
-import org.apache.http.Header;
-import org.apache.http.ProtocolVersion;
-import org.apache.http.StatusLine;
+import com.squareup.okhttp.Headers;
+import com.squareup.okhttp.Protocol;
+import com.squareup.okhttp.internal.http.StatusLine;
 
 import java.io.UnsupportedEncodingException;
 
 public class MockResponse implements ServiceFilterResponse {
 
-    private int mStatus;
+    private StatusLine mStatus;
     private byte[] mContent;
 
-    public MockResponse(String content, int status) {
-        mStatus = status;
+    public MockResponse(String content, int statusCode) {
+        mStatus = new StatusLine(Protocol.HTTP_2, statusCode, "");
         mContent = content.getBytes();
     }
 
-    public MockResponse(byte[] content, int status) {
-        mStatus = status;
+    public MockResponse(byte[] content, int statusCode) {
+        mStatus = new StatusLine(Protocol.HTTP_2, statusCode, "");
         mContent = content;
     }
 
     @Override
-    public Header[] getHeaders() {
+    public Headers getHeaders() {
         return null;
     }
 
@@ -64,23 +63,7 @@ public class MockResponse implements ServiceFilterResponse {
 
     @Override
     public StatusLine getStatus() {
-        return new StatusLine() {
-
-            @Override
-            public int getStatusCode() {
-                return mStatus;
-            }
-
-            @Override
-            public String getReasonPhrase() {
-                return null;
-            }
-
-            @Override
-            public ProtocolVersion getProtocolVersion() {
-                return new ProtocolVersion("HTTP", 1, 1);
-            }
-        };
+        return mStatus;
     }
 
     @Override

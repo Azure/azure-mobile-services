@@ -1009,7 +1009,7 @@ public class MobileServiceSyncContext {
             MobileServiceException msEx = (MobileServiceException) innerException;
             if (msEx.getCause() != null && msEx.getCause() instanceof IOException) {
                 reason = MobileServicePushStatus.CancelledByNetworkError;
-            } else if (msEx.getResponse() != null && msEx.getResponse().getStatus() != null && msEx.getResponse().getStatus().getStatusCode() == 401) {
+            } else if (msEx.getResponse() != null && msEx.getResponse().getStatus().code == 401) {
                 reason = MobileServicePushStatus.CancelledByAuthenticationError;
             }
         }
@@ -1041,9 +1041,7 @@ public class MobileServiceSyncContext {
             MobileServiceException msEx = (MobileServiceException) throwable;
             if (msEx.getResponse() != null) {
                 serverResponse = msEx.getResponse().getContent();
-                if (msEx.getResponse().getStatus() != null) {
-                    statusCode = msEx.getResponse().getStatus().getStatusCode();
-                }
+                statusCode = msEx.getResponse().getStatus().code;
             }
         }
 

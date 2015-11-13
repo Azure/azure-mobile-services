@@ -46,8 +46,6 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequestImpl;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
-import org.apache.http.client.methods.HttpDelete;
-
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -354,11 +352,10 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
             MobileServiceException msExcep = (MobileServiceException) exc;
 
             if (msExcep.getResponse() != null &&
-                    msExcep.getResponse().getStatus() != null &&
-                    (msExcep.getResponse().getStatus().getStatusCode() == 412 ||
-                            msExcep.getResponse().getStatus().getStatusCode() == 409)) {
+                    (msExcep.getResponse().getStatus().code == 412 ||
+                            msExcep.getResponse().getStatus().code == 409)) {
 
-                if (msExcep.getResponse().getStatus().getStatusCode() == 412) {
+                if (msExcep.getResponse().getStatus().code == 412) {
                     String content = msExcep.getResponse().getContent();
 
                     JsonObject serverEntity = null;
@@ -373,7 +370,7 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
                     return new MobileServicePreconditionFailedExceptionJson(msExcep, serverEntity);
                 }
 
-                if (msExcep.getResponse().getStatus().getStatusCode() == 409) {
+                if (msExcep.getResponse().getStatus().code == 409) {
                     return new MobileServiceConflictExceptionJson(msExcep, null);
                 }
             }
@@ -536,7 +533,8 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
 
         final SettableFuture<Void> future = SettableFuture.create();
 
-        delete = new ServiceFilterRequestImpl(new HttpDelete(uriBuilder.build().toString()), mClient.getAndroidHttpClientFactory());
+        delete = ServiceFilterRequestImpl.delete(mClient.getOkHttpClientFactory(), uriBuilder.build().toString());
+
         if (!features.isEmpty()) {
             delete.addHeader(MobileServiceHttpClient.X_ZUMO_FEATURES, MobileServiceFeatures.featuresToString(features));
         }

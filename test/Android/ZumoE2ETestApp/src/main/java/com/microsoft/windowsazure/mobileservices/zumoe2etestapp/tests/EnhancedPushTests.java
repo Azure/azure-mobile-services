@@ -34,6 +34,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+import com.microsoft.windowsazure.mobileservices.http.HttpConstants;
 import com.microsoft.windowsazure.mobileservices.notifications.MobileServicePush;
 import com.microsoft.windowsazure.mobileservices.notifications.RegistrationCallback;
 import com.microsoft.windowsazure.mobileservices.notifications.UnregisterCallback;
@@ -645,7 +646,7 @@ public class EnhancedPushTests extends TestGroup {
 
         parameters.add(new Pair<String, String>("channelUri", registrationId));
 
-        ListenableFuture<JsonElement> serviceFilterFuture = client.invokeApi("deleteRegistrationsForChannel", "DELETE", parameters);
+        ListenableFuture<JsonElement> serviceFilterFuture = client.invokeApi("deleteRegistrationsForChannel", HttpConstants.DeleteMethod, parameters);
 
         Futures.addCallback(serviceFilterFuture, new FutureCallback<JsonElement>() {
             @Override
@@ -666,7 +667,7 @@ public class EnhancedPushTests extends TestGroup {
 
         final SettableFuture<JsonElement> resultFuture = SettableFuture.create();
 
-        ListenableFuture<JsonElement> serviceFilterFuture = client.invokeApi("verifyUnregisterInstallationResult", "GET", new ArrayList<Pair<String, String>>());
+        ListenableFuture<JsonElement> serviceFilterFuture = client.invokeApi("verifyUnregisterInstallationResult", HttpConstants.GetMethod, new ArrayList<Pair<String, String>>());
 
         Futures.addCallback(serviceFilterFuture, new FutureCallback<JsonElement>() {
             @Override
@@ -700,7 +701,7 @@ public class EnhancedPushTests extends TestGroup {
             parameters.add(new Pair<>("templates", templateObject.toString()));
         }
 
-        ListenableFuture<JsonElement> serviceFilterFuture = client.invokeApi("verifyRegisterInstallationResult", "GET", parameters);
+        ListenableFuture<JsonElement> serviceFilterFuture = client.invokeApi("verifyRegisterInstallationResult", HttpConstants.GetMethod, parameters);
 
         Futures.addCallback(serviceFilterFuture, new FutureCallback<JsonElement>() {
             @Override

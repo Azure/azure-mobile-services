@@ -53,14 +53,17 @@ import com.microsoft.windowsazure.mobileservices.http.RequestAsyncTask;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequestImpl;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
 
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.protocol.HTTP;
-
+import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+
+import okio.BufferedSink;
 
 /**
  * Class for handling Login operations with Authentication Providers and Microsoft
@@ -547,15 +550,8 @@ public class LoginManager {
         }
 
         // Create a request
-        final ServiceFilterRequest request = new ServiceFilterRequestImpl(new HttpPost(url), mClient.getAndroidHttpClientFactory());
-        request.addHeader(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE);
-
-        try {
-            // Set request's content with the token
-            request.setContent(token);
-        } catch (Exception e) {
-            // this should never happen
-        }
+        final ServiceFilterRequest request =
+                ServiceFilterRequestImpl.post(mClient.getOkHttpClientFactory(), url, token.getBytes());
 
         final MobileServiceConnection connection = mClient.createConnection();
 

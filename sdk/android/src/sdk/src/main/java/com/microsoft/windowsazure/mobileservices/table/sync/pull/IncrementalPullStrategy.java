@@ -69,7 +69,7 @@ public class IncrementalPullStrategy extends PullStrategy {
             results = mStore.read(
                     QueryOperations.tableName(INCREMENTAL_PULL_STRATEGY_TABLE)
                             .field("id")
-                            .eq(query.getTableName() + "_" + queryId));
+                            .eq(table.getTableName() + "_" + queryId));
 
             if (results != null) {
 
@@ -133,7 +133,7 @@ public class IncrementalPullStrategy extends PullStrategy {
 
         JsonObject updatedElement = new JsonObject();
 
-        updatedElement.addProperty("id", query.getTableName() + "_" + queryId);
+        updatedElement.addProperty("id", table.getTableName() + "_" + queryId);
         updatedElement.addProperty("maxupdateddate", lastElementUpdatedAt);
 
         try {

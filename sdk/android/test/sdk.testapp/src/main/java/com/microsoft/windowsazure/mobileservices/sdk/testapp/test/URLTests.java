@@ -28,6 +28,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceAuthenticationProvider;
+import com.microsoft.windowsazure.mobileservices.http.HttpConstants;
 import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
@@ -309,7 +310,7 @@ public class URLTests extends InstrumentationTestCase {
             public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
                 result.setRequestUrl(request.getUrl());
-                assertEquals("GET", request.getMethod());
+                assertEquals(HttpConstants.GetMethod, request.getMethod());
 
                 ServiceFilterResponseMock response = new ServiceFilterResponseMock();
                 response.setContent("{}");
@@ -351,7 +352,7 @@ public class URLTests extends InstrumentationTestCase {
             public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
                 result.setRequestUrl(request.getUrl());
-                assertEquals("GET", request.getMethod());
+                assertEquals(HttpConstants.GetMethod, request.getMethod());
 
                 ServiceFilterResponseMock response = new ServiceFilterResponseMock();
                 response.setContent("{}");
@@ -471,7 +472,7 @@ public class URLTests extends InstrumentationTestCase {
             public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
                 result.setRequestUrl(request.getUrl());
-                assertEquals("GET", request.getMethod());
+                assertEquals(HttpConstants.GetMethod, request.getMethod());
 
                 ServiceFilterResponseMock response = new ServiceFilterResponseMock();
                 response.setContent("{}");

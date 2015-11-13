@@ -23,19 +23,20 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.http;
 
-import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
-import com.squareup.okhttp.apache.OkApacheClient;
+import android.util.Pair;
 
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.StringEntity;
+import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+
+import com.squareup.okhttp.Headers;
+import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.Response;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 /**
  * ServiceFilterRequest implementation
@@ -45,14 +46,17 @@ public class ServiceFilterRequestImpl implements ServiceFilterRequest {
     /**
      * The request to execute
      */
-    private HttpRequestBase mRequest;
+    private Request mRequest;
 
     /**
      * The request content
      */
     private byte[] mContent;
 
-    private AndroidHttpClientFactory mAndroidHttpClientFactory;
+    private OkHttpClientFactory mOkHttpClientFactory;
+
+    private static final MediaType JSON
+            = MediaType.parse(MobileServiceConnection.JSON_CONTENTTYPE);
 
     /**
      * @param request
@@ -66,41 +70,157 @@ public class ServiceFilterRequestImpl implements ServiceFilterRequest {
      * @param factory The AndroidHttpClientFactory instance used to create
      *                AndroidHttpClient objects
      */
-    public ServiceFilterRequestImpl(HttpRequestBase request, AndroidHttpClientFactory factory) {
+    private ServiceFilterRequestImpl(Request request, OkHttpClientFactory factory) {
         mRequest = request;
-        mAndroidHttpClientFactory = factory;
+        mOkHttpClientFactory = factory;
+    }
+
+    private ServiceFilterRequestImpl(Request request, OkHttpClientFactory factory, byte[] content) {
+        mRequest = request;
+        mOkHttpClientFactory = factory;
+        mContent = content;
+    }
+
+    /*
+    public static ServiceFilterRequestImpl post(OkHttpClientFactory factory, String url, List<Pair<String, String>> requestHeaders, String content) {
+
+        RequestBody requestBody = RequestBody.create(JSON, content);
+
+        Request request = getBaseRequestBuilder(url, requestHeaders)
+                .post(requestBody).build();
+
+        return new ServiceFilterRequestImpl(request, factory);
+    }
+    */
+
+    public static ServiceFilterRequestImpl post(OkHttpClientFactory factory, String url, byte[] content) {
+
+        if (content == null) {
+            content = "".getBytes();
+        }
+
+        RequestBody requestBody = RequestBody.create(JSON, content);
+
+        Request request = getBaseRequestBuilder(url)
+                .post(requestBody).build();
+
+        return new ServiceFilterRequestImpl(request, factory, content);
+    }
+
+    public static ServiceFilterRequestImpl put(OkHttpClientFactory factory, String url, byte[] content) {
+
+        if (content == null) {
+            content = "".getBytes();
+        }
+
+        RequestBody requestBody = RequestBody.create(JSON, content);
+
+        Request request = getBaseRequestBuilder(url)
+                .put(requestBody).build();
+
+        return new ServiceFilterRequestImpl(request, factory, content);
+    }
+
+    /*
+    public static ServiceFilterRequestImpl patch(OkHttpClientFactory factory, String url, String content) {
+
+        RequestBody requestBody = RequestBody.create(JSON, content);
+
+        Request request = getBaseRequestBuilder(url)
+                .patch(requestBody).build();
+
+        return new ServiceFilterRequestImpl(request, factory);
+    }
+*/
+    public static ServiceFilterRequestImpl patch(OkHttpClientFactory factory, String url, byte[] content) {
+
+        if (content == null) {
+            content = "".getBytes();
+        }
+
+        RequestBody requestBody = RequestBody.create(JSON, content);
+
+        Request request = getBaseRequestBuilder(url)
+                .patch(requestBody).build();
+
+        return new ServiceFilterRequestImpl(request, factory, content);
+    }
+
+    public static ServiceFilterRequestImpl get(OkHttpClientFactory factory, String url) {
+
+        Request request = getBaseRequestBuilder(url).get().build();
+
+        return new ServiceFilterRequestImpl(request, factory);
+    }
+
+    public static ServiceFilterRequestImpl delete(OkHttpClientFactory factory, String url) {
+        return delete(factory, url, (byte[]) null);
+    }
+
+    /*
+    public static ServiceFilterRequestImpl delete(OkHttpClientFactory factory, String url, String content) {
+
+        Request.Builder requestBuilder = getBaseRequestBuilder(url);
+
+        if (content != null) {
+            RequestBody requestBody = RequestBody.create(JSON, content);
+            requestBuilder = requestBuilder.delete(requestBody);
+        } else {
+            requestBuilder = requestBuilder.delete();
+        }
+
+        return new ServiceFilterRequestImpl(requestBuilder.build(), factory);
+    }
+*/
+
+    public static ServiceFilterRequestImpl delete(OkHttpClientFactory factory, String url, byte[] content) {
+
+        Request.Builder requestBuilder = getBaseRequestBuilder(url);
+
+        if (content != null) {
+            RequestBody requestBody = RequestBody.create(JSON, content);
+            requestBuilder = requestBuilder.delete(requestBody);
+        } else {
+            requestBuilder = requestBuilder.delete();
+        }
+
+        return new ServiceFilterRequestImpl(requestBuilder.build(), factory, content);
+    }
+
+    private static Request.Builder getBaseRequestBuilder(String url) {
+
+        Request.Builder builder = new Request.Builder()
+                .url(url);
+
+        return builder;
     }
 
     @Override
     public ServiceFilterResponse execute() throws Exception {
         // Execute request
-        OkApacheClient client = mAndroidHttpClientFactory.createAndroidHttpClient();
+        OkHttpClient client = mOkHttpClientFactory.createOkHttpClient();
 
-        final HttpResponse response = client.execute(mRequest);
+        final Response response = client.newCall(mRequest).execute();
+
         ServiceFilterResponse serviceFilterResponse = new ServiceFilterResponseImpl(response);
         return serviceFilterResponse;
     }
     
     @Override
-    public Header[] getHeaders() {
-        return mRequest.getAllHeaders();
+    public Headers getHeaders() {
+        return mRequest.headers();
     }
 
     @Override
     public void addHeader(String name, String val) {
-        mRequest.addHeader(name, val);
+        mRequest = mRequest.newBuilder().addHeader(name, val).build();
     }
 
     @Override
     public void removeHeader(String name) {
-        mRequest.removeHeaders(name);
+        mRequest = mRequest.newBuilder().removeHeader(name).build();
     }
 
-    @Override
-    public void setContent(byte[] content) throws Exception {
-        ((HttpEntityEnclosingRequestBase) mRequest).setEntity(new ByteArrayEntity(content));
-        mContent = content;
-    }
 
     @Override
     public String getContent() {
@@ -117,29 +237,23 @@ public class ServiceFilterRequestImpl implements ServiceFilterRequest {
     }
 
     @Override
-    public void setContent(String content) throws UnsupportedEncodingException {
-        ((HttpEntityEnclosingRequestBase) mRequest).setEntity(new StringEntity(content, MobileServiceClient.UTF8_ENCODING));
-        mContent = content.getBytes(MobileServiceClient.UTF8_ENCODING);
-    }
-
-    @Override
     public byte[] getRawContent() {
         return mContent;
     }
 
     @Override
     public String getUrl() {
-        return mRequest.getURI().toString();
+        return mRequest.httpUrl().toString();
     }
 
     @Override
     public void setUrl(String url) throws URISyntaxException {
-        mRequest.setURI(new URI(url));
+        mRequest = mRequest.newBuilder().url(url).build();
 
     }
 
     @Override
     public String getMethod() {
-        return mRequest.getMethod();
+        return mRequest.method();
     }
 }
