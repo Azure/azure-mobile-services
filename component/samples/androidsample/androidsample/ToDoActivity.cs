@@ -31,7 +31,6 @@ namespace androidsample
 		private ProgressBar progressBar;
 
         const string applicationURL = @"MOBILE SERVICE URL";
-		const string applicationKey = @"APPLICATION KEY";
 
 		protected override async void OnCreate (Bundle bundle)
 		{
@@ -59,7 +58,7 @@ namespace androidsample
 				// Mobile Service URL and key
 				client = new MobileServiceClient (
 					applicationURL,
-					applicationKey, progressHandler);
+					progressHandler);
 
 				// Get the Mobile Service Table instance to use
 				toDoTable = client.GetTable <ToDoItem> ();
