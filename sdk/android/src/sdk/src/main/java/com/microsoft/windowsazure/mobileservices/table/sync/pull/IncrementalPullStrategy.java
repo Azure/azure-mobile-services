@@ -1,5 +1,6 @@
 package com.microsoft.windowsazure.mobileservices.table.sync.pull;
 
+import com.google.common.base.Strings;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -153,7 +154,12 @@ public class IncrementalPullStrategy extends PullStrategy {
         }
 
         if (maxUpdatedAt != null) {
+
             Query filterQuery = QueryOperations.field(MobileServiceSystemColumns.UpdatedAt).ge(this.maxUpdatedAt);
+
+            if (!Strings.isNullOrEmpty(this.query.getTableName())) {
+                filterQuery.tableName(this.query.getTableName());
+            }
 
             if (this.query.getQueryNode() != null) {
                 this.query = this.query.and(filterQuery);

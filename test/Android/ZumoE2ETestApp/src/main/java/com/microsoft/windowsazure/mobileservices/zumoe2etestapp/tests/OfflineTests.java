@@ -153,7 +153,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
-                    tableDefinition.put("__version", ColumnDataType.String);
+                    tableDefinition.put("version", ColumnDataType.String);
 
                     log("Initialized the store and sync context");
 
@@ -216,9 +216,9 @@ public class OfflineTests extends TestGroup {
                     item.setFlag(!item.getFlag());
                     // item.addProperty("date", DateSerializer.serialize(new
                     // Date()));
-                    // item.addProperty("__updatedAt",
+                    // item.addProperty("updatedAt",
                     // DateSerializer.serialize(new Date()));
-                    // item.addProperty("__version", "1");
+                    // item.addProperty("version", "1");
 
                     // item.Flag = !item.Flag;
                     // item.Age++;
@@ -344,7 +344,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
-                    tableDefinition.put("__version", ColumnDataType.String);
+                    tableDefinition.put("version", ColumnDataType.String);
 
                     log("Initialized the store and sync context");
 
@@ -756,7 +756,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
-                    tableDefinition.put("__version", ColumnDataType.String);
+                    tableDefinition.put("version", ColumnDataType.String);
 
                     log("Initialized the store and sync context");
 
@@ -878,7 +878,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
-                    tableDefinition.put("__version", ColumnDataType.String);
+                    tableDefinition.put("version", ColumnDataType.String);
 
                     log("Initialized the store and sync context");
 
@@ -970,7 +970,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
-                    tableDefinition.put("__version", ColumnDataType.String);
+                    tableDefinition.put("version", ColumnDataType.String);
 
                     log("Initialized the store and sync context");
 
@@ -1117,7 +1117,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
-                    tableDefinition.put("__version", ColumnDataType.String);
+                    tableDefinition.put("version", ColumnDataType.String);
 
                     log("Initialized the store and sync context");
 
@@ -1260,7 +1260,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
-                    tableDefinition.put("__version", ColumnDataType.String);
+                    tableDefinition.put("version", ColumnDataType.String);
 
                     log("Initialized the store and sync context");
 
@@ -1445,7 +1445,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
-                    tableDefinition.put("__version", ColumnDataType.String);
+                    tableDefinition.put("version", ColumnDataType.String);
 
                     log("Initialized the store and sync context");
 
@@ -1550,7 +1550,7 @@ public class OfflineTests extends TestGroup {
 
         final String tableName = "offlineReadyAuthenticated";
 
-        // If a table does not have a __version column, then offline will still
+        // If a table does not have a version column, then offline will still
         // work, but there will be no conflicts
         final TestCase test = new TestCase() {
 
@@ -1873,9 +1873,9 @@ class ConflictResolvingSyncHandler implements MobileServiceSyncHandler {
                 JsonParser jsonParser = new JsonParser();
                 JsonObject mergedItem = (JsonObject) jsonParser.parse(mergedItemJson);
 
-                String serverVersion = serverItem.get("__version").getAsString();
+                String serverVersion = serverItem.get("version").getAsString();
 
-                mergedItem.addProperty("__version", serverVersion);
+                mergedItem.addProperty("version", serverVersion);
 
                 test.log("Merged the items, will try to resubmit the operation");
 
@@ -1931,9 +1931,9 @@ class InstaItem {
     private String mInspectionId;
     @SerializedName("levelsInInspectionId")
     private String mLevelsInInspectionId;
-    @SerializedName("__version")
+    @SerializedName("version")
     private String mVersion;
-    @SerializedName("__deleted")
+    @SerializedName("deleted")
     private boolean mDeleted;
 
     public InstaItem() {
@@ -2091,7 +2091,7 @@ class InstaItem {
 
     @Override
     public String toString() {
-        return String.format(Locale.getDefault(), "InstaItem[Id={0},Inventory={1},Wall={2},Floor={3},Ceiling={4},Inspected={5}, Rejected={6}, InspectionId={7}, LevelsIninspectionId={8}, Version={9}, Deleted={9}, InspectedDateTime={10}]",
+        return String.format(Locale.getDefault(), "InstaItem[Id=%s,Inventory=%s,Wall=%s,Floor=%s,Ceiling=%s,Inspected=%b, Rejected=%b, InspectionId=%s, LevelsIninspectionId=%s, Version=%s, Deleted=%b, InspectedDateTime={%s]",
                 id, mInventory, mWall, mFloor, mCeiling, mInspected, mRejected, mInspectionId, mLevelsInInspectionId, mVersion, mDeleted,
                 Util.dateToString(mInspectedDateTime));
     }
@@ -2163,7 +2163,7 @@ class PersonItem {
 
     @Override
     public String toString() {
-        return String.format(Locale.getDefault(), "PersonItem[Id={0},Name={1},Age={2}]",
+        return String.format(Locale.getDefault(), "PersonItem[Id=%s,Name=%s,Age=%d]",
                 id, mName, mAge);
     }
 }
@@ -2182,7 +2182,7 @@ class OfflineReadyItem {
     private Date mDate;
     @SerializedName("bool")
     private boolean mFlag;
-    @SerializedName("__version")
+    @SerializedName("version")
     private String mVersion;
 
     public OfflineReadyItem() {
@@ -2191,12 +2191,12 @@ class OfflineReadyItem {
 
     public OfflineReadyItem(Random rndGen) {
         this.id = java.util.UUID.randomUUID().toString();
-        this.mName = "";// rndGen.nextLong();
-        this.mAge = 20;//rndGen.nextInt();
-        this.mFloatingNumber = rndGen.nextInt() * rndGen.nextDouble();
-        this.mDate = new Date();
-        this.mFlag = rndGen.nextInt(2) == 0;
-    }
+    this.mName = "";// rndGen.nextLong();
+    this.mAge = 20;//rndGen.nextInt();
+    this.mFloatingNumber = rndGen.nextInt() * rndGen.nextDouble();
+    this.mDate = new Date();
+    this.mFlag = rndGen.nextInt(2) == 0;
+}
 
     public String getId() {
         return id;
@@ -2282,7 +2282,7 @@ class OfflineReadyItem {
 
     @Override
     public String toString() {
-        return String.format(Locale.getDefault(), "OfflineReadyItem[Id={0},Name={1},Age={2},FloatingNumber={3},Date={4},Flag={5},Version={6}]", id, mName,
+        return String.format(Locale.getDefault(), "OfflineReadyItem[Id=%s,Name=%s,Age=%d,FloatingNumber=%f,Date=%s,Flag=%b,Version=%s]", id, mName,
                 mAge, mFloatingNumber, Util.dateToString(mDate), mFlag, mVersion);
     }
 }
@@ -2391,7 +2391,7 @@ class OfflineReadyItemNoVersion {
 
     @Override
     public String toString() {
-        return String.format(Locale.getDefault(), "OfflineReadyItem[Id={0},Name={1},Age={2},FloatingNumber={3},Date={4},Flag={5}]", id, mName,
+        return String.format(Locale.getDefault(), "OfflineReadyItem[Id=%s,Name=%s,Age=%d,FloatingNumber=%f,Date=%s,Flag=%b]", id, mName,
                 mAge, mFloatingNumber, Util.dateToString(mDate), mFlag);
     }
 }

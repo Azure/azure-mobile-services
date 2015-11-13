@@ -369,7 +369,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         String updatedAt = sdf.format(new Date());
 
         client = client.withFilter(getTestFilter(serviceFilterContainer, false,
-                "{\"count\":\"2\",\"results\":[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt + "\"},{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt + "\"}]}"// remote
+                "{\"count\":\"2\",\"results\":[{\"id\":\"abc\",\"String\":\"Hey\",\"updatedAt\":\"" + updatedAt + "\"},{\"id\":\"def\",\"String\":\"World\",\"updatedAt\":\"" + updatedAt + "\"}]}"// remote
                 // item
         ));
 
@@ -386,7 +386,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
                 serviceFilterContainer.Requests.get(0).Url,
                 EncodingUtilities
                         .percentEncodeSpaces(
-                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27world%27)&$top=3&$skip=5&$orderby=Id%20desc&__includeDeleted=true&__systemproperties=__version,__deleted"));
+                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27world%27)&$top=3&$skip=5&$orderby=Id%20desc&__includeDeleted=true&__systemproperties=version,deleted"));
     }
 
     public void testPullNoSkipSucceds() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
@@ -402,7 +402,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         String updatedAt = sdf.format(new Date());
 
         client = client.withFilter(getTestFilter(serviceFilterContainer, false,
-                "{\"count\":\"2\",\"results\":[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt + "\"},{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt + "\"}]}"// remote
+                "{\"count\":\"2\",\"results\":[{\"id\":\"abc\",\"String\":\"Hey\",\"updatedAt\":\"" + updatedAt + "\"},{\"id\":\"def\",\"String\":\"World\",\"updatedAt\":\"" + updatedAt + "\"}]}"// remote
                 // item
         ));
 
@@ -419,7 +419,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
                 serviceFilterContainer.Requests.get(0).Url,
                 EncodingUtilities
                         .percentEncodeSpaces(
-                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27world%27)&$top=3&$skip=0&$orderby=Id%20desc&__includeDeleted=true&__systemproperties=__version,__deleted"));
+                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27world%27)&$top=3&$skip=0&$orderby=Id%20desc&__includeDeleted=true&__systemproperties=version,deleted"));
     }
 
     public void testPullSuccedsNoTopNoOrderBy() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
@@ -435,7 +435,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         String updatedAt = sdf.format(new Date());
 
         client = client.withFilter(getTestFilter(serviceFilterContainer, false,
-                "{\"count\":\"2\",\"results\":[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt + "\"},{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt + "\"}]}"// remote
+                "{\"count\":\"2\",\"results\":[{\"id\":\"abc\",\"String\":\"Hey\",\"updatedAt\":\"" + updatedAt + "\"},{\"id\":\"def\",\"String\":\"World\",\"updatedAt\":\"" + updatedAt + "\"}]}"// remote
                 // item
         ));
 
@@ -452,7 +452,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
                 serviceFilterContainer.Requests.get(0).Url,
                 EncodingUtilities
                         .percentEncodeSpaces(
-                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27world%27)&$top=50&$skip=0&$orderby=Id%20desc&__includeDeleted=true&__systemproperties=__version,__deleted"));
+                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27world%27)&$top=50&$skip=0&$orderby=Id%20desc&__includeDeleted=true&__systemproperties=version,deleted"));
     }
 
     public void testIncrementalPullSucceds() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
@@ -470,8 +470,8 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         String updatedAt2 = sdf.format(new Date());
 
         client = client.withFilter(getTestFilter(serviceFilterContainer, false,
-                "{\"count\":\"4\",\"results\":[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt1 + "\"},{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt1 + "\"}]}",
-                "[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt2 + "\"},{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt2 + "\"}]"
+                "{\"count\":\"4\",\"results\":[{\"id\":\"abc\",\"String\":\"Hey\",\"updatedAt\":\"" + updatedAt1 + "\"},{\"id\":\"def\",\"String\":\"World\",\"updatedAt\":\"" + updatedAt1 + "\"}]}",
+                "[{\"id\":\"abc\",\"String\":\"Hey\",\"updatedAt\":\"" + updatedAt2 + "\"},{\"id\":\"def\",\"String\":\"World\",\"updatedAt\":\"" + updatedAt2 + "\"}]"
                 // remote
                 // item
         ));
@@ -488,14 +488,14 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
                 serviceFilterContainer.Requests.get(0).Url,
                 EncodingUtilities
                         .percentEncodeSpaces(
-                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27noMatch%27)&$top=50&$orderby=__updatedAt%20asc&__includeDeleted=true&__systemproperties=__updatedAt,__version,__deleted"));
+                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27noMatch%27)&$top=50&$orderby=updatedAt%20asc&__includeDeleted=true&__systemproperties=updatedAt,version,deleted"));
 
         assertEquals(
                 serviceFilterContainer.Requests.get(1).Url,
                 EncodingUtilities
                         .percentEncodeSpaces(
                                 "http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27noMatch%27)%20and%20" +
-                                        "(__updatedAt%20ge%20(datetimeoffset%27"+updatedAt1 +"%27))&$top=50&$orderby=__updatedAt%20asc&__includeDeleted=true&__systemproperties=__updatedAt,__version,__deleted"));
+                                        "(updatedAt%20ge%20(datetimeoffset%27"+updatedAt1 +"%27))&$top=50&$orderby=updatedAt%20asc&__includeDeleted=true&__systemproperties=updatedAt,version,deleted"));
     }
 
     public void testIncrementalPullSaveLastUpdatedAtDate() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
@@ -514,8 +514,8 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         String updatedAt2 = sdf.format(new Date());
 
         client = client.withFilter(getTestFilter(serviceFilterContainer, false,
-                "{\"count\":\"4\",\"results\":[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt1 + "\"},{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt1 + "\"}]}",
-                "[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt2 + "\"},{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt2 + "\"}]"
+                "{\"count\":\"4\",\"results\":[{\"id\":\"abc\",\"String\":\"Hey\",\"updatedAt\":\"" + updatedAt1 + "\"},{\"id\":\"def\",\"String\":\"World\",\"updatedAt\":\"" + updatedAt1 + "\"}]}",
+                "[{\"id\":\"abc\",\"String\":\"Hey\",\"updatedAt\":\"" + updatedAt2 + "\"},{\"id\":\"def\",\"String\":\"World\",\"updatedAt\":\"" + updatedAt2 + "\"}]"
                 // remote
                 // item
         ));
@@ -556,12 +556,12 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         String updatedAt2 = sdf.format(d);
 
         client = client.withFilter(getTestFilter(serviceFilterContainer, false,
-                        "[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt1 + "\"}," +
-                        "{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt1 + "\"}]",
-                "[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt1 + "\"}," +
-                        "{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt1 + "\"}]",
-                "[{\"id\":\"abc\",\"String\":\"Hey\",\"__updatedAt\":\"" + updatedAt2 + "\"}," +
-                        "{\"id\":\"def\",\"String\":\"World\",\"__updatedAt\":\"" + updatedAt2 + "\"}]"
+                        "[{\"id\":\"abc\",\"String\":\"Hey\",\"updatedAt\":\"" + updatedAt1 + "\"}," +
+                        "{\"id\":\"def\",\"String\":\"World\",\"updatedAt\":\"" + updatedAt1 + "\"}]",
+                "[{\"id\":\"abc\",\"String\":\"Hey\",\"updatedAt\":\"" + updatedAt1 + "\"}," +
+                        "{\"id\":\"def\",\"String\":\"World\",\"updatedAt\":\"" + updatedAt1 + "\"}]",
+                "[{\"id\":\"abc\",\"String\":\"Hey\",\"updatedAt\":\"" + updatedAt2 + "\"}," +
+                        "{\"id\":\"def\",\"String\":\"World\",\"updatedAt\":\"" + updatedAt2 + "\"}]"
         ));
 
         client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
@@ -576,15 +576,15 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         assertEquals(
                 serviceFilterContainer.Requests.get(2).Url,
                 EncodingUtilities
-                        .percentEncodeSpaces("http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27Hey%27)%20and%20(__updatedAt%20ge%20(datetimeoffset%27"+updatedAt1+"%27))" +
+                        .percentEncodeSpaces("http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27Hey%27)%20and%20(updatedAt%20ge%20(datetimeoffset%27"+updatedAt1+"%27))" +
                                 "&$top=50&$skip=2&" +
-                                "$orderby=__updatedAt%20asc&__includeDeleted=true&__systemproperties=__updatedAt,__version,__deleted"));
+                                "$orderby=updatedAt%20asc&__includeDeleted=true&__systemproperties=updatedAt,version,deleted"));
         // Skip removed
         assertEquals(
                 serviceFilterContainer.Requests.get(3).Url,
                 EncodingUtilities
-                        .percentEncodeSpaces("http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27Hey%27)%20and%20(__updatedAt%20ge%20(datetimeoffset%27"+updatedAt2+"%27))" +
-                                "&$top=50&$orderby=__updatedAt%20asc&__includeDeleted=true&__systemproperties=__updatedAt,__version,__deleted"));
+                        .percentEncodeSpaces("http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27Hey%27)%20and%20(updatedAt%20ge%20(datetimeoffset%27"+updatedAt2+"%27))" +
+                                "&$top=50&$orderby=updatedAt%20asc&__includeDeleted=true&__systemproperties=updatedAt,version,deleted"));
     }
 
     public void testPurgeDoesNotThrowExceptionWhenThereIsNoOperationInTable() throws MalformedURLException, InterruptedException, ExecutionException {
@@ -1761,7 +1761,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         thrownExceptionFlag.Thrown = true;
 
         MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
-        
+
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
         response.setStatus(new StatusLine(Protocol.HTTP_2, 401, ""));
 

@@ -27,47 +27,47 @@ public class SystemPropertyTestClasses {
     public static class CreatedAtType {
         public String Id;
 
-        @SerializedName("__createdAt")
+        @SerializedName("createdAt")
         public Date CreatedAt;
     }
 
     public static class UpdatedAtType {
         public String Id;
 
-        @SerializedName("__updatedAt")
+        @SerializedName("updatedAt")
         public Date UpdatedAt;
     }
 
     public static class VersionType {
         public String Id;
 
-        @SerializedName("__version")
+        @SerializedName("version")
         public String Version;
     }
 
     public static class AllSystemPropertiesType {
         public String Id;
 
-        @SerializedName("__createdAt")
+        @SerializedName("createdAt")
         public Date CreatedAt;
 
-        @SerializedName("__updatedAt")
+        @SerializedName("updatedAt")
         public Date UpdatedAt;
 
-        @SerializedName("__version")
+        @SerializedName("version")
         public String Version;
     }
 
     public static class NamedSystemPropertiesType {
         public String Id;
 
-        public Date __createdAt;
+        public Date createdAt;
     }
 
     public static class NotSystemPropertyCreatedAtType {
         public String Id;
 
-        public Date CreatedAt;
+        public Date _CreatedAt;
     }
 
     public static class NotSystemPropertyUpdatedAtType {
@@ -79,7 +79,7 @@ public class SystemPropertyTestClasses {
     public static class NotSystemPropertyVersionType {
         public String Id;
 
-        public String version;
+        public String _Version;
     }
 
     public static class StringType {
@@ -90,25 +90,25 @@ public class SystemPropertyTestClasses {
     public static class IntegerIdNotSystemPropertyCreatedAtType {
         public int Id;
 
-        public Date __createdAt;
+        public Date createdAt;
     }
 
     public static class IntegerIdWithNamedSystemPropertiesType {
         public int Id;
 
-        public Date __createdAt;
+        public Date createdAt;
     }
 
     public static class LongIdWithNamedSystemPropertiesType {
         public long Id;
 
-        public Date __createdAt;
+        public Date createdAt;
     }
 
     public static class DoubleNamedSystemPropertiesType {
         public String Id;
 
-        public Date __createdAt;
+        public Date createdAt;
 
         public Date CreatedAt;
     }
@@ -116,20 +116,20 @@ public class SystemPropertyTestClasses {
     public static class NamedDifferentCasingSystemPropertiesType {
         public String Id;
 
-        public Date __CreatedAt;
+        public Date CreatedAt;
     }
 
     public static class StringCreatedAtType {
         public String Id;
 
-        @SerializedName("__createdAt")
+        @SerializedName("createdAt")
         public String CreatedAt;
     }
 
     public static class StringUpdatedAtType {
         public String Id;
 
-        @SerializedName("__updatedAt")
+        @SerializedName("updatedAt")
         public String UpdatedAt;
     }
 }
