@@ -47,10 +47,7 @@ import com.microsoft.windowsazure.mobileservices.table.query.ExecutableJsonQuery
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryODataWriter;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
-
-import org.apache.http.Header;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.protocol.HTTP;
+import com.squareup.okhttp.Headers;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -83,12 +80,11 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
      */
     private static void updateVersionFromETag(ServiceFilterResponse response, JsonObject json) {
         if (response != null && response.getHeaders() != null) {
-            for (Header header : response.getHeaders()) {
-                if (header.getName().equalsIgnoreCase("ETag")) {
-                    json.remove(VersionSystemPropertyName);
-                    json.addProperty(VersionSystemPropertyName, getValueFromEtag(header.getValue()));
-                    break;
-                }
+            String etag = response.getHeaders().get("ETag");
+
+            if (etag != null) {
+                json.remove(VersionSystemPropertyName);
+                json.addProperty(VersionSystemPropertyName, getValueFromEtag(etag));
             }
         }
     }
@@ -912,7 +908,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
         }
 
         if (content != null) {
-            requestHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE));
+            requestHeaders.add(new Pair<String, String>("Content-Type", MobileServiceConnection.JSON_CONTENTTYPE));
         }
 
         ListenableFuture<ServiceFilterResponse> internalFuture = httpClient.request(path, content, httpMethod, requestHeaders, parameters, features);
@@ -955,7 +951,8 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
     private ListenableFuture<Pair<JsonElement, ServiceFilterResponse>> executeGetRecords(final String url, EnumSet<MobileServiceFeatures> features) {
         final SettableFuture<Pair<JsonElement, ServiceFilterResponse>> future = SettableFuture.create();
 
-        ServiceFilterRequest request = new ServiceFilterRequestImpl(new HttpGet(url), mClient.getAndroidHttpClientFactory());
+        ServiceFilterRequest request = ServiceFilterRequestImpl.get(mClient.getAndroidHttpClientFactory(), url );
+
         String featuresHeader = MobileServiceFeatures.featuresToString(features);
         if (featuresHeader != null) {
             request.addHeader(MobileServiceHttpClient.X_ZUMO_FEATURES, featuresHeader);
@@ -989,20 +986,13 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
         return future;
     }
 
-    private String getHeaderValue(Header[] headers, String headerName){
+    private String getHeaderValue(Headers headers, String headerName) {
 
         if (headers == null) {
             return null;
         }
 
-        for(Header header : headers){
-
-            if (header.getName().equals(headerName)) {
-                return header.getValue();
-            }
-        }
-
-        return null;
+        return headers.get(headerName);
     }
 
     /**

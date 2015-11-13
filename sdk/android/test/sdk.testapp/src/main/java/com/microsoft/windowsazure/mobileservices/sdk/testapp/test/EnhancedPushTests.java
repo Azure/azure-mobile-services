@@ -32,7 +32,6 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.notifications.MobileServicePush;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterRequestMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterResponseMock;
-import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.StatusLineMock;
 
 import junit.framework.Assert;
 
@@ -65,7 +64,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
                     container.requestMethod = request.getMethod();
 
                     ServiceFilterResponseMock mockResponse = new ServiceFilterResponseMock();
-                    mockResponse.setStatus(new StatusLineMock(204));
+                    mockResponse.setStatus((204));
 
                     ServiceFilterRequestMock mockRequest = new ServiceFilterRequestMock(mockResponse);
 
@@ -115,7 +114,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
                     container.requestMethod = request.getMethod();
 
                     ServiceFilterResponseMock mockResponse = new ServiceFilterResponseMock();
-                    mockResponse.setStatus(new StatusLineMock(204));
+                    mockResponse.setStatus((204));
 
                     ServiceFilterRequestMock mockRequest = new ServiceFilterRequestMock(mockResponse);
 
@@ -153,7 +152,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 
         final String expectedUrl = appUrl + pnsApiUrl + "/installations/" + Uri.encode(installationId);
         final String expectedContent =
-                "{\"pushChannel\":\"handle\",\"platform\":\"gcm\",\"templates\":{\"template1\":{\"body\":\"{\\\"data\\\":\\\"abc\\\"}\",\"tags\":[\"tag1\"]}}}";
+                "{\"pushChannel\":\"handle\",\"platform\":\"gcm\",\"templates\":{\"template1\":{\"body\":\"{\\\"data\\\":\\\"abc\\\"}\"}}}";
         try {
             client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
@@ -167,7 +166,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
                     container.requestMethod = request.getMethod();
 
                     ServiceFilterResponseMock mockResponse = new ServiceFilterResponseMock();
-                    mockResponse.setStatus(new StatusLineMock(204));
+                    mockResponse.setStatus((204));
 
                     ServiceFilterRequestMock mockRequest = new ServiceFilterRequestMock(mockResponse);
 
@@ -202,3 +201,4 @@ public class EnhancedPushTests extends InstrumentationTestCase {
         public Exception exception;
     }
 }
+

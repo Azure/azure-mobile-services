@@ -17,31 +17,23 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-package com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters;
 
-import org.apache.http.ProtocolVersion;
-import org.apache.http.StatusLine;
+/**
+ * AndroidHttpClientFactory.java
+ */
+package com.microsoft.windowsazure.mobileservices.http;
 
-public class StatusLineMock implements StatusLine {
-    private int statusCode;
+import com.squareup.okhttp.OkHttpClient;
 
-    public StatusLineMock(int statusCode) {
-        this.statusCode = statusCode;
-    }
+/**
+ * Factory for AndroidHttpClient instances
+ */
+public interface OkHttpClientFactory {
 
-    @Override
-    public ProtocolVersion getProtocolVersion() {
-        return null;
-    }
-
-    @Override
-    public String getReasonPhrase() {
-        return null;
-    }
-
-    @Override
-    public int getStatusCode() {
-        return this.statusCode;
-    }
-
+    /**
+     * Creates a new AndroidHttpClient
+     *
+     * @return A new AndroidHttpClient
+     */
+    public OkHttpClient createOkHttpClient();
 }

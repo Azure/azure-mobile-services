@@ -47,12 +47,6 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.Movi
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.SimpleMovieFilter;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.StringIdMovie;
 
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.protocol.HTTP;
-
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -220,13 +214,13 @@ public class CustomApiTests extends TestGroup {
             }
 
             private Exception validateResponseHeaders(ServiceFilterResponse response) {
-                if (mExpectedStatusCode != response.getStatus().getStatusCode()) {
+                if (mExpectedStatusCode != response.getStatus()) {
                     mResult.getTestCase().log("Invalid status code");
                     String content = response.getContent();
                     if (content != null) {
                         mResult.getTestCase().log("Response: " + content);
                     }
-                    return new ExpectedValueException(mExpectedStatusCode, response.getStatus().getStatusCode());
+                    return new ExpectedValueException(mExpectedStatusCode, response.getStatus());
                 } else {
 
                     for (Pair<String, String> header : mHeaders) {
@@ -260,7 +254,7 @@ public class CustomApiTests extends TestGroup {
 
                 JsonElement body = null;
                 String textBody = null;
-                if (!mHttpMethod.equals(HttpGet.METHOD_NAME) && !mHttpMethod.equals(HttpDelete.METHOD_NAME)) {
+                if (!mHttpMethod.equals("GET") && !mHttpMethod.equals("DELETE")) {
                     body = createJson(rndGen, 0, true);
                     if (outputFormat == DataFormat.Xml || inputFormat == DataFormat.Xml) {
                         // to prevent non-XML names from interfering with checks
@@ -271,18 +265,18 @@ public class CustomApiTests extends TestGroup {
                         switch (inputFormat) {
                             case Json:
                                 mContent = body.toString().getBytes("utf-8");
-                                mHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, "application/json"));
+                                mHeaders.add(new Pair<String, String>("Content-Type", "application/json"));
                                 break;
 
                             case Xml:
                                 textBody = jsonToXml(body);
                                 mContent = textBody.getBytes("utf-8");
-                                mHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, "text/xml"));
+                                mHeaders.add(new Pair<String, String>("Content-Type", "text/xml"));
                                 break;
                             default:
                                 textBody = body.toString().replace('{', '<').replace('}', '>').replace("[", "__[__").replace("]", "__]__");
                                 mContent = textBody.getBytes("utf-8");
-                                mHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, "text/plain"));
+                                mHeaders.add(new Pair<String, String>("Content-Type", "text/plain"));
                                 break;
                         }
                     } catch (UnsupportedEncodingException e) {
@@ -439,7 +433,7 @@ public class CustomApiTests extends TestGroup {
                         mExpectedResult = new StringIdMovie[]{ramdomMovie};
 
                         try {
-                            AllStringIdMovies result = mClient.invokeApi(apiUrl, HttpGet.METHOD_NAME, null, AllStringIdMovies.class).get();
+                            AllStringIdMovies result = mClient.invokeApi(apiUrl, "GET", null, AllStringIdMovies.class).get();
 
                             if (!Util.compareArrays(mExpectedResult, result.getMovies())) {
                                 createResultFromException(mResult,
@@ -470,7 +464,7 @@ public class CustomApiTests extends TestGroup {
                         mExpectedResult = dateFilter.filter(QueryTestData.getAllStringIdMovies()).elements.toArray(new Movie[0]);
 
                         try {
-                            AllStringIdMovies result = mClient.invokeApi(apiUrl, HttpGet.METHOD_NAME, null, AllStringIdMovies.class).get();
+                            AllStringIdMovies result = mClient.invokeApi(apiUrl, "GET", null, AllStringIdMovies.class).get();
 
                             if (!Util.compareArrays(mExpectedResult, result.getMovies())) {
                                 createResultFromException(mResult,
@@ -544,7 +538,7 @@ public class CustomApiTests extends TestGroup {
                         if (mQuery == null) {
 
                             try {
-                                AllStringIdMovies result = mClient.invokeApi(apiUrl, ramdomMovie, HttpPost.METHOD_NAME, null, AllStringIdMovies.class).get();
+                                AllStringIdMovies result = mClient.invokeApi(apiUrl, ramdomMovie, "POST", null, AllStringIdMovies.class).get();
 
                                 if (!Util.compareArrays(mExpectedResult, result.getMovies())) {
                                     createResultFromException(mResult,
@@ -559,7 +553,7 @@ public class CustomApiTests extends TestGroup {
                         } else {
 
                             try {
-                                AllStringIdMovies result = mClient.invokeApi(apiUrl, ramdomMovie, HttpPost.METHOD_NAME, mQuery, AllStringIdMovies.class).get();
+                                AllStringIdMovies result = mClient.invokeApi(apiUrl, ramdomMovie, "POST", mQuery, AllStringIdMovies.class).get();
 
                                 if (!Util.compareArrays(mExpectedResult, result.getMovies())) {
                                     createResultFromException(mResult,
@@ -607,8 +601,8 @@ public class CustomApiTests extends TestGroup {
                 log("Method = " + method);
 
                 JsonElement body = null;
-                if (!method.equals(HttpGet.METHOD_NAME) && !method.equals(HttpDelete.METHOD_NAME)) {
-                    if (method.equals(PATCH_METHOD_NAME) || method.equals(HttpPut.METHOD_NAME)) {
+                if (!method.equals("GET") && !method.equals("DELETE")) {
+                    if (method.equals(PATCH_METHOD_NAME) || method.equals("PUT")) {
                         body = createJson(rndGen, 0, false);
                     } else {
                         body = createJson(rndGen, 0, true);
@@ -629,7 +623,7 @@ public class CustomApiTests extends TestGroup {
                 String api = apiNames.get(permission);
                 log("API: " + api);
 
-                if (body == null && method.equals(HttpPost.METHOD_NAME) && mQuery == null) {
+                if (body == null && method.equals("POST") && mQuery == null) {
 
                     try {
                         JsonElement jsonElement = client.invokeApi(api).get();
@@ -650,7 +644,7 @@ public class CustomApiTests extends TestGroup {
                         ServiceFilterResponse response = cause.getResponse();
 
                         if (mExpected401) {
-                            if (response == null || response.getStatus().getStatusCode() != 401) {
+                            if (response == null || response.getStatus() != 401) {
                                 mResult.setStatus(TestStatus.Failed);
                                 mResult.setException(exception);
                                 mResult.getTestCase().log("Expected 401");
@@ -662,7 +656,7 @@ public class CustomApiTests extends TestGroup {
                         }
                     }
 
-                } else if (body != null && method.equals(HttpPost.METHOD_NAME) && mQuery == null) {
+                } else if (body != null && method.equals("POST") && mQuery == null) {
                     try {
                         JsonElement jsonElement = client.invokeApi(api, body).get();
 
@@ -682,7 +676,7 @@ public class CustomApiTests extends TestGroup {
 
                             ServiceFilterResponse response = cause.getResponse();
 
-                            if (response == null || response.getStatus().getStatusCode() != 401) {
+                            if (response == null || response.getStatus() != 401) {
                                 mResult.setStatus(TestStatus.Failed);
                                 mResult.setException(exception);
                                 mResult.getTestCase().log("Expected 401");
@@ -715,7 +709,7 @@ public class CustomApiTests extends TestGroup {
 
                             ServiceFilterResponse response = cause.getResponse();
 
-                            if (response == null || response.getStatus().getStatusCode() != 401) {
+                            if (response == null || response.getStatus() != 401) {
                                 mResult.setStatus(TestStatus.Failed);
                                 mResult.setException(exception);
                                 mResult.getTestCase().log("Expected 401");
@@ -748,7 +742,7 @@ public class CustomApiTests extends TestGroup {
 
                             ServiceFilterResponse response = cause.getResponse();
 
-                            if (response == null || response.getStatus().getStatusCode() != 401) {
+                            if (response == null || response.getStatus() != 401) {
                                 mResult.setStatus(TestStatus.Failed);
                                 mResult.setException(exception);
                                 mResult.getTestCase().log("Expected 401");
@@ -1103,7 +1097,7 @@ public class CustomApiTests extends TestGroup {
                 List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
 
                 try {
-                    client.invokeApi(apiUrl, HttpGet.METHOD_NAME, parameters, AllStringIdMovies.class, typedTestCallback());
+                    client.invokeApi(apiUrl, "GET", parameters, AllStringIdMovies.class, typedTestCallback());
                 } catch (Exception exception) {
                     createResultFromException(mResult, exception);
                 }
@@ -1155,7 +1149,7 @@ public class CustomApiTests extends TestGroup {
                 List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
 
                 try {
-                    client.invokeApi(apiUrl, HttpGet.METHOD_NAME, parameters, AllStringIdMovies.class, typedTestCallback());
+                    client.invokeApi(apiUrl, "GET", parameters, AllStringIdMovies.class, typedTestCallback());
                 } catch (Exception exception) {
                     createResultFromException(mResult, exception);
                 }
@@ -1206,7 +1200,7 @@ public class CustomApiTests extends TestGroup {
                 List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
 
                 try {
-                    client.invokeApi(apiUrl, ramdomMovie, HttpPost.METHOD_NAME, parameters, AllStringIdMovies.class, typedTestCallback());
+                    client.invokeApi(apiUrl, ramdomMovie, "POST", parameters, AllStringIdMovies.class, typedTestCallback());
                 } catch (Exception exception) {
                     createResultFromException(mResult, exception);
                 }
@@ -1258,7 +1252,7 @@ public class CustomApiTests extends TestGroup {
                 List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
 
                 try {
-                    client.invokeApi(apiUrl, ramdomMovie, HttpPost.METHOD_NAME, parameters, AllStringIdMovies.class, typedTestCallback());
+                    client.invokeApi(apiUrl, ramdomMovie, "POST", parameters, AllStringIdMovies.class, typedTestCallback());
                 } catch (Exception exception) {
                     createResultFromException(mResult, exception);
                 }
@@ -1475,7 +1469,7 @@ public class CustomApiTests extends TestGroup {
                 List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
 
                 try {
-                    client.invokeApi(PUBLIC_API_NAME, HttpGet.METHOD_NAME, parameters, jsonTestCallback());
+                    client.invokeApi(PUBLIC_API_NAME, "GET", parameters, jsonTestCallback());
                 } catch (Exception exception) {
                     createResultFromException(mResult, exception);
                 }
@@ -1520,7 +1514,7 @@ public class CustomApiTests extends TestGroup {
                 List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
 
                 try {
-                    client.invokeApi(INEXISTENT_API_NAME, HttpGet.METHOD_NAME, parameters, jsonTestCallback());
+                    client.invokeApi(INEXISTENT_API_NAME, "GET", parameters, jsonTestCallback());
                 } catch (Exception exception) {
                     createResultFromException(mResult, exception);
                 }
@@ -1566,7 +1560,7 @@ public class CustomApiTests extends TestGroup {
                 JsonElement json = createJson(new Random(), 0, false);
 
                 try {
-                    client.invokeApi(PUBLIC_API_NAME, json, HttpPost.METHOD_NAME, parameters, jsonTestCallback());
+                    client.invokeApi(PUBLIC_API_NAME, json, "POST", parameters, jsonTestCallback());
                 } catch (Exception exception) {
                     createResultFromException(mResult, exception);
                 }
@@ -1613,7 +1607,7 @@ public class CustomApiTests extends TestGroup {
                 JsonElement json = createJson(new Random(), 0, false);
 
                 try {
-                    client.invokeApi(INEXISTENT_API_NAME, json, HttpPost.METHOD_NAME, parameters, jsonTestCallback());
+                    client.invokeApi(INEXISTENT_API_NAME, json, "POST", parameters, jsonTestCallback());
                 } catch (Exception exception) {
                     createResultFromException(mResult, exception);
                 }
@@ -1657,7 +1651,7 @@ public class CustomApiTests extends TestGroup {
 
                 try {
 
-                    client.invokeApi(apiUrl, new byte[0], HttpPost.METHOD_NAME, new ArrayList<Pair<String, String>>(), new ArrayList<Pair<String, String>>(),
+                    client.invokeApi(apiUrl, new byte[0], "POST", new ArrayList<Pair<String, String>>(), new ArrayList<Pair<String, String>>(),
                             serviceFilterResponseCallback());
                 } catch (Exception exception) {
                     createResultFromException(mResult, exception);
@@ -1702,7 +1696,7 @@ public class CustomApiTests extends TestGroup {
 
                 try {
 
-                    client.invokeApi(apiUrl, new byte[0], HttpPost.METHOD_NAME, new ArrayList<Pair<String, String>>(), new ArrayList<Pair<String, String>>(),
+                    client.invokeApi(apiUrl, new byte[0], "POST", new ArrayList<Pair<String, String>>(), new ArrayList<Pair<String, String>>(),
                             serviceFilterResponseCallback());
                 } catch (Exception exception) {
                     createResultFromException(mResult, exception);
@@ -1731,16 +1725,16 @@ public class CustomApiTests extends TestGroup {
             case 0:
             case 1:
             case 2:
-                return HttpPost.METHOD_NAME;
+                return "POST";
             case 3:
             case 4:
             case 5:
             case 6:
-                return HttpGet.METHOD_NAME;
+                return "GET";
             case 7:
-                return HttpPut.METHOD_NAME;
+                return "PUT";
             case 8:
-                return HttpDelete.METHOD_NAME;
+                return "DELETE";
             default:
                 return PATCH_METHOD_NAME;
         }

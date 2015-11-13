@@ -47,8 +47,7 @@ import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceJsonSyn
 import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncTable;
 import com.microsoft.windowsazure.mobileservices.table.sync.localstore.ColumnDataType;
 import com.microsoft.windowsazure.mobileservices.table.sync.synchandler.SimpleSyncHandler;
-
-import org.apache.http.Header;
+import com.squareup.okhttp.Headers;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -376,11 +375,11 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
                 final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
                 String featuresHeaderName = "X-ZUMO-FEATURES";
 
-                Header[] headers = request.getHeaders();
+                Headers headers = request.getHeaders();
                 String features = null;
-                for (int i = 0; i < headers.length; i++) {
-                    if (headers[i].getName() == featuresHeaderName) {
-                        features = headers[i].getValue();
+                for (int i = 0; i < headers.size(); i++) {
+                    if (headers.name(i) == featuresHeaderName) {
+                        features = headers.value(i);
                     }
                 }
 
@@ -514,11 +513,11 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
                 final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
                 String featuresHeaderName = "X-ZUMO-FEATURES";
 
-                Header[] headers = request.getHeaders();
+                Headers headers = request.getHeaders();
                 String features = null;
-                for (int i = 0; i < headers.length; i++) {
-                    if (headers[i].getName() == featuresHeaderName) {
-                        features = headers[i].getValue();
+                for (int i = 0; i < headers.size(); i++) {
+                    if (headers.name(i) == featuresHeaderName) {
+                        features = headers.value(i);
                     }
                 }
 
@@ -661,11 +660,11 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
                 final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
                 String featuresHeaderName = "X-ZUMO-FEATURES";
 
-                Header[] headers = request.getHeaders();
+                Headers headers = request.getHeaders();
                 String features = null;
-                for (int i = 0; i < headers.length; i++) {
-                    if (headers[i].getName() == featuresHeaderName) {
-                        features = headers[i].getValue();
+                for (int i = 0; i < headers.size(); i++) {
+                    if (headers.name(i) == featuresHeaderName) {
+                        features = headers.value(i);
                     }
                 }
 
@@ -740,11 +739,11 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
                 final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
                 String featuresHeaderName = "X-ZUMO-FEATURES";
 
-                Header[] headers = request.getHeaders();
+                Headers headers = request.getHeaders();
                 String features = null;
-                for (int i = 0; i < headers.length; i++) {
-                    if (headers[i].getName() == featuresHeaderName) {
-                        features = headers[i].getValue();
+                for (int i = 0; i < headers.size(); i++) {
+                    if (headers.name(i) == featuresHeaderName) {
+                        features = headers.value(i);
                     }
                 }
 
@@ -861,11 +860,11 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
                 final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
                 String featuresHeaderName = "X-ZUMO-FEATURES";
 
-                Header[] headers = request.getHeaders();
+                Headers headers = request.getHeaders();
                 String features = null;
-                for (int i = 0; i < headers.length; i++) {
-                    if (headers[i].getName() == featuresHeaderName) {
-                        features = headers[i].getValue();
+                for (int i = 0; i < headers.size(); i++) {
+                    if (headers.name(i) == featuresHeaderName) {
+                        features = headers.value(i);
                     }
                 }
 

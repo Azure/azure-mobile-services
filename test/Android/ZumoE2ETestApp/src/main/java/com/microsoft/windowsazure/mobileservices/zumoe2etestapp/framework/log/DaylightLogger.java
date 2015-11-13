@@ -17,7 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/*
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.log;
+
 
 import android.annotation.SuppressLint;
 import android.os.AsyncTask;
@@ -34,13 +37,6 @@ import com.google.gson.JsonPrimitive;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestCase;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestExecutionCallback;
-
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.StringEntity;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -545,3 +541,5 @@ public class DaylightLogger {
         return result;
     }
 }
+
+ */

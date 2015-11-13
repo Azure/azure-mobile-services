@@ -31,7 +31,6 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterRequestMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterResponseMock;
-import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.StatusLineMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.PersonTestObject;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.ResultsContainer;
 
@@ -210,7 +209,7 @@ public class ServiceFilterTests extends InstrumentationTestCase {
         // Create ServiceFilterResponseMock
         final ServiceFilterResponseMock response = new ServiceFilterResponseMock();
         response.setContent("Response Content");
-        response.setStatus(new StatusLineMock(200));
+        response.setStatus((200));
 
         // Create client and connection
         MobileServiceClient client = null;
@@ -264,7 +263,7 @@ public class ServiceFilterTests extends InstrumentationTestCase {
         // Create ServiceFilterResponseMock
         final ServiceFilterResponseMock response = new ServiceFilterResponseMock();
         response.setContent("Response Content");
-        response.setStatus(new StatusLineMock(200));
+        response.setStatus((200));
 
         // Create ServiceFilterRequestMock that returns the given
         // response
@@ -322,7 +321,7 @@ public class ServiceFilterTests extends InstrumentationTestCase {
         // Create ServiceFilterResponseMock
         final ServiceFilterResponseMock response = new ServiceFilterResponseMock();
         response.setContent("{'error': 'Unauthorized'}");
-        response.setStatus(new StatusLineMock(401));
+        response.setStatus((401));
 
         // Create ServiceFilterRequestMock that returns the given
         // response

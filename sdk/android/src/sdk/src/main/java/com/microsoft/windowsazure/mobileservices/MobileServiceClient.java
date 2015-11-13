@@ -46,8 +46,8 @@ import com.google.gson.annotations.SerializedName;
 import com.microsoft.windowsazure.mobileservices.authentication.LoginManager;
 import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceAuthenticationProvider;
 import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceUser;
-import com.microsoft.windowsazure.mobileservices.http.AndroidHttpClientFactory;
-import com.microsoft.windowsazure.mobileservices.http.AndroidHttpClientFactoryImpl;
+import com.microsoft.windowsazure.mobileservices.http.OkHttpClientFactory;
+import com.microsoft.windowsazure.mobileservices.http.OkHttpClientFactoryImpl;
 import com.microsoft.windowsazure.mobileservices.http.MobileServiceConnection;
 import com.microsoft.windowsazure.mobileservices.http.MobileServiceHttpClient;
 import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
@@ -64,8 +64,6 @@ import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceJsonSyn
 import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncContext;
 import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncTable;
 
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.protocol.HTTP;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
@@ -105,6 +103,10 @@ public class MobileServiceClient {
      */
     private LoginManager mLoginManager;
     /**
+     * Mobile Service application key
+     */
+    private String mAppKey;
+    /**
      * Mobile Service URL
      */
     private URL mAppUrl;
@@ -129,9 +131,9 @@ public class MobileServiceClient {
      */
     private Context mContext;
     /**
-     * AndroidHttpClientFactory used for request execution
+     * OkHttpClientFactory used for request execution
      */
-    private AndroidHttpClientFactory mAndroidHttpClientFactory;
+    private OkHttpClientFactory mOkHttpClientFactory;
     /**
      * MobileServicePush used for push notifications
      */
@@ -142,15 +144,6 @@ public class MobileServiceClient {
      */
     private MobileServiceSyncContext mSyncContext;
 
-    /**
-     * Constructor for the MobileServiceClient
-     *
-     * @param client An existing MobileServiceClient
-     */
-    private MobileServiceClient(MobileServiceClient client) {
-        initialize(client.getAppUrl(), client.getCurrentUser(), client.getGsonBuilder(), client.getContext(),
-                client.getAndroidHttpClientFactory());
-    }
 
     /**
      * Constructor for the MobileServiceClient
@@ -160,20 +153,44 @@ public class MobileServiceClient {
      * @throws java.net.MalformedURLException
      */
     public MobileServiceClient(String appUrl, Context context) throws MalformedURLException {
-        this(new URL(appUrl), context);
+        this(new URL(appUrl), null, context);
+    }
+
+
+    /**
+     * Constructor for the MobileServiceClient
+     *
+     * @param appUrl  Mobile Service URL
+     * @param appKey  Mobile Service application key
+     * @param context The Context where the MobileServiceClient is created
+     * @throws java.net.MalformedURLException
+     */
+    public MobileServiceClient(String appUrl, String appKey, Context context) throws MalformedURLException {
+        this(new URL(appUrl), appKey, context);
+    }
+
+    /**
+     * Constructor for the MobileServiceClient
+     *
+     * @param client An existing MobileServiceClient
+     */
+    public MobileServiceClient(MobileServiceClient client) {
+        initialize(client.getAppUrl(), client.getAppKey(), client.getCurrentUser(), client.getGsonBuilder(), client.getContext(),
+                client.getAndroidHttpClientFactory());
     }
 
     /**
      * Constructor for the MobileServiceClient
      *
      * @param appUrl  Mobile Service URL
+     * @param appKey  Mobile Service application key
      * @param context The Context where the MobileServiceClient is created
      */
-    public MobileServiceClient(URL appUrl, Context context) {
+    public MobileServiceClient(URL appUrl, String appKey, Context context) {
         GsonBuilder gsonBuilder = createMobileServiceGsonBuilder();
         gsonBuilder.serializeNulls(); // by default, add null serialization
 
-        initialize(appUrl, null, gsonBuilder, context, new AndroidHttpClientFactoryImpl());
+        initialize(appUrl, appKey, null, gsonBuilder, context, new OkHttpClientFactoryImpl());
     }
 
     /**
@@ -800,6 +817,13 @@ public class MobileServiceClient {
     }
 
     /**
+     * Returns the Mobile Service application key
+     */
+    public String getAppKey() {
+        return mAppKey;
+    }
+
+    /**
      * Returns The Mobile Service URL
      */
     public URL getAppUrl() {
@@ -912,7 +936,7 @@ public class MobileServiceClient {
      * @param clazz   The API result class
      */
     public <E> ListenableFuture<E> invokeApi(String apiName, Class<E> clazz) {
-        return invokeApi(apiName, null, HttpPost.METHOD_NAME, null, clazz);
+        return invokeApi(apiName, null, "POST", null, clazz);
     }
 
     /**
@@ -924,7 +948,7 @@ public class MobileServiceClient {
      * @deprecated use {@link invokeApi(String apiName, Class<E> clazz)} instead
      */
     public <E> void invokeApi(String apiName, Class<E> clazz, ApiOperationCallback<E> callback) {
-        invokeApi(apiName, null, HttpPost.METHOD_NAME, null, clazz, callback);
+        invokeApi(apiName, null, "POST", null, clazz, callback);
     }
 
     /**
@@ -935,7 +959,7 @@ public class MobileServiceClient {
      * @param clazz   The API result class
      */
     public <E> ListenableFuture<E> invokeApi(String apiName, Object body, Class<E> clazz) {
-        return invokeApi(apiName, body, HttpPost.METHOD_NAME, null, clazz);
+        return invokeApi(apiName, body, "POST", null, clazz);
     }
 
     /**
@@ -949,7 +973,7 @@ public class MobileServiceClient {
      * clazz)} instead
      */
     public <E> void invokeApi(String apiName, Object body, Class<E> clazz, ApiOperationCallback<E> callback) {
-        invokeApi(apiName, body, HttpPost.METHOD_NAME, null, clazz, callback);
+        invokeApi(apiName, body, "POST", null, clazz, callback);
     }
 
     /**
@@ -1100,7 +1124,7 @@ public class MobileServiceClient {
      * @param body    The json element to send as the request body
      */
     public ListenableFuture<JsonElement> invokeApi(String apiName, JsonElement body) {
-        return invokeApi(apiName, body, HttpPost.METHOD_NAME, null);
+        return invokeApi(apiName, body, "POST", null);
     }
 
     /**
@@ -1113,7 +1137,7 @@ public class MobileServiceClient {
      * instead
      */
     public void invokeApi(String apiName, JsonElement body, ApiJsonOperationCallback callback) {
-        invokeApi(apiName, body, HttpPost.METHOD_NAME, null, callback);
+        invokeApi(apiName, body, "POST", null, callback);
     }
 
     /**
@@ -1175,7 +1199,7 @@ public class MobileServiceClient {
 
         List<Pair<String, String>> requestHeaders = new ArrayList<Pair<String, String>>();
         if (body != null) {
-            requestHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE));
+            requestHeaders.add(new Pair<String, String>("Content-Type", MobileServiceConnection.JSON_CONTENTTYPE));
         }
 
         if (parameters != null && !parameters.isEmpty()) {
@@ -1188,7 +1212,7 @@ public class MobileServiceClient {
         Futures.addCallback(internalFuture, new FutureCallback<ServiceFilterResponse>() {
             @Override
             public void onFailure(Throwable e) {
-               future.setException(e);
+                future.setException(e);
             }
 
             @Override
@@ -1422,12 +1446,13 @@ public class MobileServiceClient {
      * Initializes the MobileServiceClient
      *
      * @param appUrl      Mobile Service URL
+     * @param appKey      Mobile Service application key
      * @param currentUser The Mobile Service user used to authenticate requests
      * @param gsonBuilder the GsonBuilder used to in JSON Serialization/Deserialization
      * @param context     The Context where the MobileServiceClient is created
      */
-    private void initialize(URL appUrl, MobileServiceUser currentUser, GsonBuilder gsonBuiler, Context context,
-                            AndroidHttpClientFactory androidHttpClientFactory) {
+    private void initialize(URL appUrl, String appKey, MobileServiceUser currentUser, GsonBuilder gsonBuiler, Context context,
+                            OkHttpClientFactory OkHttpClientFactory) {
         if (appUrl == null || appUrl.toString().trim().length() == 0) {
             throw new IllegalArgumentException("Invalid Application URL");
         }
@@ -1448,13 +1473,14 @@ public class MobileServiceClient {
         }
 
         mAppUrl = normalizedAppURL;
+        mAppKey = appKey;
         mLoginManager = new LoginManager(this);
         mServiceFilter = null;
         mLoginInProgress = false;
         mCurrentUser = currentUser;
         mContext = context;
         mGsonBuilder = gsonBuiler;
-        mAndroidHttpClientFactory = androidHttpClientFactory;
+        mOkHttpClientFactory = OkHttpClientFactory;
         mPush = new MobileServicePush(this, context);
         mSyncContext = new MobileServiceSyncContext(this);
     }
@@ -1510,19 +1536,19 @@ public class MobileServiceClient {
     }
 
     /**
-     * Gets the AndroidHttpClientFactory
+     * Gets the OkHttpClientFactory
      *
      * @return
      */
-    public AndroidHttpClientFactory getAndroidHttpClientFactory() {
-        return mAndroidHttpClientFactory;
+    public OkHttpClientFactory getAndroidHttpClientFactory() {
+        return mOkHttpClientFactory;
     }
 
     /**
-     * Sets the AndroidHttpClientFactory
+     * Sets the OkHttpClientFactory
      */
-    public void setAndroidHttpClientFactory(AndroidHttpClientFactory mAndroidHttpClientFactory) {
-        this.mAndroidHttpClientFactory = mAndroidHttpClientFactory;
+    public void setAndroidHttpClientFactory(OkHttpClientFactory mOkHttpClientFactory) {
+        this.mOkHttpClientFactory = mOkHttpClientFactory;
     }
 
     /**
@@ -1532,3 +1558,4 @@ public class MobileServiceClient {
         return mPush;
     }
 }
+

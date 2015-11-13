@@ -32,7 +32,7 @@ public class NullResponseContentFilter implements ServiceFilter {
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 
         response.setContent((String) null);
-        response.setStatus(new StatusLineMock(200));
+        response.setStatus(200);
 
         ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
         return nextServiceFilterCallback.onNext(requestMock);
