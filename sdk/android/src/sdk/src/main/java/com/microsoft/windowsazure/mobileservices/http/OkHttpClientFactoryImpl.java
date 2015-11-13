@@ -27,24 +27,20 @@ import com.squareup.okhttp.Interceptor;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
-import com.squareup.okhttp.apache.OkApacheClient;
 import java.io.IOException;
 
 /**
- * Default implementation for AndroidHttpClientFactory
+ * Default implementation for OkHttpClientFactory
  */
-public class AndroidHttpClientFactoryImpl implements AndroidHttpClientFactory {
+public class OkHttpClientFactoryImpl implements OkHttpClientFactory {
 
     @Override
-    public OkApacheClient createAndroidHttpClient() {
+    public OkHttpClient createOkHttpClient() {
 
         OkHttpClient okClient = new OkHttpClient();
-        okClient.networkInterceptors().add(new UserAgentInterceptor(MobileServiceConnection.getUserAgent()));
+        //okClient.networkInterceptors().add(new UserAgentInterceptor(MobileServiceConnection.getUserAgent()));
 
-        OkApacheClient apacheClient = new OkApacheClient(okClient);
-
-        return apacheClient;
-
+        return okClient;
     }
 
     private class UserAgentInterceptor implements Interceptor {

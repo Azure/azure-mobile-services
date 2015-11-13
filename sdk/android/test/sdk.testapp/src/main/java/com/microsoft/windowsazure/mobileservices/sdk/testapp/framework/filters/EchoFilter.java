@@ -24,6 +24,8 @@ import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.squareup.okhttp.Protocol;
+import com.squareup.okhttp.internal.http.StatusLine;
 
 public class EchoFilter implements ServiceFilter {
 
@@ -31,7 +33,7 @@ public class EchoFilter implements ServiceFilter {
     public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
         response.setContent(request.getRawContent());
-        response.setStatus(new StatusLineMock(200));
+        response.setStatus(new StatusLine(Protocol.HTTP_2, 200, ""));
 
         ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
         return nextServiceFilterCallback.onNext(requestMock);

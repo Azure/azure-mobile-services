@@ -154,7 +154,7 @@ public class RemoteTableOperationProcessor implements TableOperationVisitor<Json
             return false;
         }
 
-        int statusCode = mse.getResponse().getStatus().getStatusCode();
+        int statusCode = mse.getResponse().getStatus().code;
 
         if (statusCode != 404) {
             return false;

@@ -27,8 +27,9 @@ import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
-
-import org.apache.http.Header;
+import com.squareup.okhttp.Headers;
+import com.squareup.okhttp.Protocol;
+import com.squareup.okhttp.internal.http.StatusLine;
 
 public class HttpMetaEchoFilter implements ServiceFilter {
 
@@ -39,12 +40,12 @@ public class HttpMetaEchoFilter implements ServiceFilter {
 
         jResponse.addProperty("method", request.getMethod());
 
-        Header[] headers = request.getHeaders();
-        if (headers != null && headers.length > 0) {
+        Headers headers = request.getHeaders();
+        if (headers != null && headers.size() > 0) {
             JsonObject jHeaders = new JsonObject();
 
-            for (Header header : headers) {
-                jHeaders.addProperty(header.getName(), header.getValue());
+            for (int i = 0; i < headers.size(); i++) {
+                jHeaders.addProperty(headers.name(i), headers.value(i));
             }
 
             jResponse.add("headers", jHeaders);
@@ -64,7 +65,7 @@ public class HttpMetaEchoFilter implements ServiceFilter {
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
         response.setContent(jResponse.toString());
-        response.setStatus(new StatusLineMock(200));
+        response.setStatus(new StatusLine(Protocol.HTTP_2, 200, ""));
 
         ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
         return nextServiceFilterCallback.onNext(requestMock);

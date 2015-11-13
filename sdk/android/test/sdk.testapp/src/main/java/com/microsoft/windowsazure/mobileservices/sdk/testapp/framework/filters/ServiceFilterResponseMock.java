@@ -21,14 +21,14 @@ package com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters;
 
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
-
-import org.apache.http.Header;
-import org.apache.http.StatusLine;
+import com.squareup.okhttp.Headers;
+import com.squareup.okhttp.Protocol;
+import com.squareup.okhttp.internal.http.StatusLine;
 
 import java.io.UnsupportedEncodingException;
 
 public class ServiceFilterResponseMock implements ServiceFilterResponse {
-    private Header[] headers;
+    private Headers headers;
     private byte[] content;
     private StatusLine status;
 
@@ -41,11 +41,11 @@ public class ServiceFilterResponseMock implements ServiceFilterResponse {
     }
 
     @Override
-    public Header[] getHeaders() {
+    public Headers getHeaders() {
         return this.headers;
     }
 
-    public void setHeaders(Header[] headers) {
+    public void setHeaders(Headers headers) {
         this.headers = headers;
     }
 
@@ -63,10 +63,6 @@ public class ServiceFilterResponseMock implements ServiceFilterResponse {
         }
     }
 
-    public void setContent(byte[] content) {
-        this.content = content;
-    }
-
     @Override
     public StatusLine getStatus() {
         return this.status;
@@ -82,6 +78,10 @@ public class ServiceFilterResponseMock implements ServiceFilterResponse {
         } else {
             this.content = null;
         }
+    }
+
+    public void setContent(byte[] content) {
+        this.content = content;
     }
 
     @Override

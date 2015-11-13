@@ -36,7 +36,6 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterRequestMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterResponseMock;
-import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.StatusLineMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.helpers.EncodingUtilities;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.IdPropertyTestClasses.IdPropertyMultipleIdsTestObject;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.IdPropertyTestClasses.IdPropertyWithDifferentIdPropertyCasing;
@@ -55,13 +54,11 @@ import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
+import com.squareup.okhttp.Headers;
+import com.squareup.okhttp.Protocol;
+import com.squareup.okhttp.internal.http.StatusLine;
 
 import junit.framework.Assert;
-
-import org.apache.http.Header;
-import org.apache.http.ProtocolVersion;
-import org.apache.http.StatusLine;
-import org.apache.http.message.BasicHeader;
 
 import java.net.MalformedURLException;
 import java.util.List;
@@ -799,23 +796,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
             public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
                 ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-                response.setStatus(new StatusLine() {
-
-                    @Override
-                    public int getStatusCode() {
-                        return 500;
-                    }
-
-                    @Override
-                    public String getReasonPhrase() {
-                        return "Internal server error";
-                    }
-
-                    @Override
-                    public ProtocolVersion getProtocolVersion() {
-                        return null;
-                    }
-                });
+                response.setStatus(new StatusLine(Protocol.HTTP_2, 500, ""));
 
                 response.setContent("{'error': 'Internal server error'}");
                 // call onResponse with the mocked response
@@ -871,23 +852,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
             public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
                 ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-                response.setStatus(new StatusLine() {
-
-                    @Override
-                    public int getStatusCode() {
-                        return 500;
-                    }
-
-                    @Override
-                    public String getReasonPhrase() {
-                        return "Internal server error";
-                    }
-
-                    @Override
-                    public ProtocolVersion getProtocolVersion() {
-                        return null;
-                    }
-                });
+                response.setStatus(new StatusLine(Protocol.HTTP_2, 500, ""));
 
                 response.setContent((String) null);
                 // call onResponse with the mocked response
@@ -895,7 +860,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
                 final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
                 resultFuture.setException(new MobileServiceException("Error while processing request", new MobileServiceException(String.format("{'code': %d}",
-                        response.getStatus().getStatusCode()))));
+                        response.getStatus().code))));
 
                 return resultFuture;
 
@@ -2428,7 +2393,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
                 // Create a mock response simulating an error
                 ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-                response.setStatus(new StatusLineMock(404));
+                response.setStatus((new StatusLine(Protocol.HTTP_2, 404, "")));
                 response.setContent("{\"error\":404,\"message\":\"entity does not exist\"}");
 
                 container.setResponseValue(response.getContent());
@@ -2474,7 +2439,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
                 // Create a mock response simulating an error
                 ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-                response.setStatus(new StatusLineMock(404));
+                response.setStatus((new StatusLine(Protocol.HTTP_2, 404, "")));
                 response.setContent("{\"error\":404,\"message\":\"entity does not exist\"}");
 
                 container.setResponseValue(response.getContent());
@@ -2816,11 +2781,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
                 ServiceFilterResponseMock responseMock = new ServiceFilterResponseMock();
 
-                Header[] responseHeaders = new Header[1];
-
-                Header responseHeader =  new BasicHeader("Link", nextLink + nextLinkContinuation);
-
-                responseHeaders[0] = responseHeader;
+                Headers responseHeaders = new Headers.Builder().add("Link", nextLink + nextLinkContinuation).build();
 
                 responseMock.setHeaders(responseHeaders);
 
@@ -2884,11 +2845,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
                 ServiceFilterResponseMock responseMock = new ServiceFilterResponseMock();
 
-                Header[] responseHeaders = new Header[1];
-
-                Header responseHeader =  new BasicHeader("Link", nextLink + nextLinkContinuation);
-
-                responseHeaders[0] = responseHeader;
+                Headers responseHeaders = new Headers.Builder().add("Link",  nextLink + nextLinkContinuation).build();
 
                 responseMock.setHeaders(responseHeaders);
 

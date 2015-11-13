@@ -34,7 +34,6 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterRequestMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterResponseMock;
-import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.StatusLineMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.IdPropertyTestClasses.StringIdType;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.SystemPropertyTestClasses.AllSystemPropertiesType;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.SystemPropertyTestClasses.CreatedAtType;
@@ -56,10 +55,9 @@ import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.data.Sys
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProperty;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
-
-import org.apache.http.Header;
-import org.apache.http.HeaderElement;
-import org.apache.http.ParseException;
+import com.squareup.okhttp.Headers;
+import com.squareup.okhttp.Protocol;
+import com.squareup.okhttp.internal.http.StatusLine;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -2524,9 +2522,11 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
             public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
                 boolean hasHeaderIfMatch = false;
 
-                for (Header header : request.getHeaders()) {
-                    if (header.getName().equalsIgnoreCase("If-Match")) {
-                        assertTrue(header.getValue().equalsIgnoreCase(version.second));
+                Headers headers = request.getHeaders();
+
+                for (int i = 0; i < request.getHeaders().size(); i++) {
+                    if (headers.name(i).equalsIgnoreCase("If-Match")) {
+                        assertTrue(headers.value(i).equalsIgnoreCase(version.second));
 
                         hasHeaderIfMatch = true;
                     }
@@ -2585,26 +2585,9 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
             public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
                 // Create a mock response simulating an error
                 ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-                response.setStatus(new StatusLineMock(200));
+                response.setStatus((new StatusLine(Protocol.HTTP_2, 200, "")));
                 response.setContent(responseContent);
-                response.setHeaders(new Header[]{new Header() {
-
-                    @Override
-                    public String getValue() {
-                        return version.second;
-                    }
-
-                    @Override
-                    public String getName() {
-                        return "ETag";
-                    }
-
-                    @Override
-                    public HeaderElement[] getElements() throws ParseException {
-                        return null;
-                    }
-                }});
-
+                response.setHeaders(new Headers.Builder().add("ETag",version.second).build());
                 // create a mock request to replace the existing one
                 ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
                 return nextServiceFilterCallback.onNext(requestMock);
@@ -2648,7 +2631,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 
                 // Create a mock response simulating an error
                 ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-                response.setStatus(new StatusLineMock(statusCode));
+                response.setStatus((new StatusLine(Protocol.HTTP_2, statusCode, "")));
                 response.setContent(content);
 
                 // create a mock request to replace the existing one

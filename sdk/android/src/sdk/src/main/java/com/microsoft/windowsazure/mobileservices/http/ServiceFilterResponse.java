@@ -23,8 +23,8 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.http;
 
-import org.apache.http.Header;
-import org.apache.http.StatusLine;
+import com.squareup.okhttp.Headers;
+import com.squareup.okhttp.internal.http.StatusLine;
 
 /**
  * Represents an HTTP response that can be manipulated by ServiceFilters
@@ -35,7 +35,7 @@ public interface ServiceFilterResponse {
      *
      * @return The response's headers
      */
-    public Header[] getHeaders();
+    public Headers getHeaders();
 
     /**
      * Gets the response's content.

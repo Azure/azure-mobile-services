@@ -34,13 +34,14 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterRequestMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterResponseMock;
-import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.StatusLineMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.IdPropertyTestClasses.LongIdType;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.IdPropertyTestClasses.StringIdType;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.ResultsContainer;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.data.IdTestData;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
+import com.squareup.okhttp.Protocol;
+import com.squareup.okhttp.internal.http.StatusLine;
 
 import java.net.MalformedURLException;
 import java.util.List;
@@ -7931,7 +7932,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
                 // Create a mock response simulating an error
                 ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-                response.setStatus(new StatusLineMock(statusCode));
+                response.setStatus(new StatusLine(Protocol.HTTP_2, statusCode, ""));
                 response.setContent(content);
 
                 // create a mock request to replace the existing one

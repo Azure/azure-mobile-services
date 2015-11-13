@@ -28,13 +28,13 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
+import com.microsoft.windowsazure.mobileservices.http.HttpConstants;
 import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterRequestMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterResponseMock;
-import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.StatusLineMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.mocks.MobileServiceLocalStoreMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.mocks.MobileServiceSyncHandlerMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.helpers.EncodingUtilities;
@@ -52,8 +52,8 @@ import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePu
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushStatus;
 import com.microsoft.windowsazure.mobileservices.table.sync.queue.OperationErrorList;
 import com.microsoft.windowsazure.mobileservices.table.sync.synchandler.SimpleSyncHandler;
-
-import org.apache.http.Header;
+import com.squareup.okhttp.Protocol;
+import com.squareup.okhttp.internal.http.StatusLine;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -68,12 +68,14 @@ import java.util.concurrent.ExecutionException;
 
 public class MobileServiceSyncTableTests extends InstrumentationTestCase {
     String appUrl = "";
+    String appKey = "";
     GsonBuilder gsonBuilder;
     String OperationQueue = "__operations";
     String SyncErrors = "__errors";
 
     protected void setUp() throws Exception {
         appUrl = "http://myapp.com/";
+        appKey = "qwerty";
         gsonBuilder = new GsonBuilder();
         super.setUp();
     }
@@ -385,7 +387,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
                 serviceFilterContainer.Requests.get(0).Url,
                 EncodingUtilities
                         .percentEncodeSpaces(
-                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20('world')&$top=3&$skip=5&$orderby=Id%20desc&__includeDeleted=true&__systemproperties=__version,__deleted"));
+                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27world%27)&$top=3&$skip=5&$orderby=Id%20desc&__includeDeleted=true&__systemproperties=__version,__deleted"));
     }
 
     public void testPullNoSkipSucceds() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
@@ -418,7 +420,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
                 serviceFilterContainer.Requests.get(0).Url,
                 EncodingUtilities
                         .percentEncodeSpaces(
-                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20('world')&$top=3&$skip=0&$orderby=Id%20desc&__includeDeleted=true&__systemproperties=__version,__deleted"));
+                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27world%27)&$top=3&$skip=0&$orderby=Id%20desc&__includeDeleted=true&__systemproperties=__version,__deleted"));
     }
 
     public void testPullSuccedsNoTopNoOrderBy() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
@@ -451,7 +453,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
                 serviceFilterContainer.Requests.get(0).Url,
                 EncodingUtilities
                         .percentEncodeSpaces(
-                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20('world')&$top=50&$skip=0&$orderby=Id%20desc&__includeDeleted=true&__systemproperties=__version,__deleted"));
+                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27world%27)&$top=50&$skip=0&$orderby=Id%20desc&__includeDeleted=true&__systemproperties=__version,__deleted"));
     }
 
     public void testIncrementalPullSucceds() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
@@ -487,14 +489,14 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
                 serviceFilterContainer.Requests.get(0).Url,
                 EncodingUtilities
                         .percentEncodeSpaces(
-                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20('noMatch')&$top=50&$orderby=__updatedAt%20asc&__includeDeleted=true&__systemproperties=__updatedAt,__version,__deleted"));
+                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27noMatch%27)&$top=50&$orderby=__updatedAt%20asc&__includeDeleted=true&__systemproperties=__updatedAt,__version,__deleted"));
 
         assertEquals(
                 serviceFilterContainer.Requests.get(1).Url,
                 EncodingUtilities
                         .percentEncodeSpaces(
-                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20('noMatch')%20and%20" +
-                                        "(__updatedAt%20ge%20(datetimeoffset'"+updatedAt1 +"'))&$top=50&$orderby=__updatedAt%20asc&__includeDeleted=true&__systemproperties=__updatedAt,__version,__deleted"));
+                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27noMatch%27)%20and%20" +
+                                        "(__updatedAt%20ge%20(datetimeoffset%27"+updatedAt1 +"%27))&$top=50&$orderby=__updatedAt%20asc&__includeDeleted=true&__systemproperties=__updatedAt,__version,__deleted"));
     }
 
     public void testIncrementalPullSaveLastUpdatedAtDate() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
@@ -529,7 +531,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         LinkedHashMap<String, JsonObject> tableContent = store.Tables.get(incrementalPullStrategyTable);
 
-        JsonElement result = tableContent.get(table.getName() + "_" + queryKey);
+        JsonElement result = tableContent.get(table.getName().toLowerCase() + "_" + queryKey);
 
         String stringMaxUpdatedDate = result.getAsJsonObject()
                 .get("maxupdateddate").getAsString();
@@ -575,14 +577,14 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         assertEquals(
                 serviceFilterContainer.Requests.get(2).Url,
                 EncodingUtilities
-                        .percentEncodeSpaces("http://myapp.com/tables/stringidtype?$filter=String%20eq%20('Hey')%20and%20(__updatedAt%20ge%20(datetimeoffset'"+updatedAt1+"'))" +
+                        .percentEncodeSpaces("http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27Hey%27)%20and%20(__updatedAt%20ge%20(datetimeoffset%27"+updatedAt1+"%27))" +
                                 "&$top=50&$skip=2&" +
                                 "$orderby=__updatedAt%20asc&__includeDeleted=true&__systemproperties=__updatedAt,__version,__deleted"));
         // Skip removed
         assertEquals(
                 serviceFilterContainer.Requests.get(3).Url,
                 EncodingUtilities
-                        .percentEncodeSpaces("http://myapp.com/tables/stringidtype?$filter=String%20eq%20('Hey')%20and%20(__updatedAt%20ge%20(datetimeoffset'"+updatedAt2+"'))" +
+                        .percentEncodeSpaces("http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27Hey%27)%20and%20(__updatedAt%20ge%20(datetimeoffset%27"+updatedAt2+"%27))" +
                                 "&$top=50&$orderby=__updatedAt%20asc&__includeDeleted=true&__systemproperties=__updatedAt,__version,__deleted"));
     }
 
@@ -978,7 +980,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             client.getSyncContext().push().get();
 
             assertEquals(client.getSyncContext().getPendingOperations(), 0);
-            assertEquals(serviceFilterContainer.Requests.get(1).Method, "POST");
+            assertEquals(serviceFilterContainer.Requests.get(1).Method, HttpConstants.PostMethod);
 
             return;
         }
@@ -996,7 +998,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-        response.setStatus(new StatusLineMock(401));
+        response.setStatus(new StatusLine(Protocol.HTTP_2, 401, ""));
 
         final MobileServiceException innerException = new MobileServiceException("", response);
 
@@ -1044,7 +1046,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             client.getSyncContext().push().get();
 
             assertEquals(client.getSyncContext().getPendingOperations(), 0);
-            assertEquals(serviceFilterContainer.Requests.get(1).Method, "POST");
+            assertEquals(serviceFilterContainer.Requests.get(1).Method, HttpConstants.PostMethod);
 
             return;
         }
@@ -1104,7 +1106,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             client.getSyncContext().push().get();
 
             assertEquals(client.getSyncContext().getPendingOperations(), 0);
-            assertEquals(serviceFilterContainer.Requests.get(1).Method, "POST");
+            assertEquals(serviceFilterContainer.Requests.get(1).Method, HttpConstants.PostMethod);
 
             return;
         }
@@ -1163,7 +1165,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             }
             catch(Exception ex2) {
                 assertEquals(client.getSyncContext().getPendingOperations(), 1);
-                assertEquals(serviceFilterContainer.Requests.get(0).Method, "POST");
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, HttpConstants.PostMethod);
                 assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: An insert operation on the item is already in the queue.");
 
                 return;
@@ -1183,7 +1185,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-        response.setStatus(new StatusLineMock(401));
+        response.setStatus(new StatusLine(Protocol.HTTP_2, 401, ""));
 
         final MobileServiceException innerException = new MobileServiceException("", response);
 
@@ -1224,7 +1226,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             }
             catch(Exception ex2) {
                 assertEquals(client.getSyncContext().getPendingOperations(), 1);
-                assertEquals(serviceFilterContainer.Requests.get(0).Method, "POST");
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, HttpConstants.PostMethod);
                 assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: An insert operation on the item is already in the queue.");
 
                 return;
@@ -1280,7 +1282,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             }
             catch(Exception ex2) {
                 assertEquals(client.getSyncContext().getPendingOperations(), 1);
-                assertEquals(serviceFilterContainer.Requests.get(0).Method, "POST");
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, HttpConstants.PostMethod);
                 assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: An insert operation on the item is already in the queue.");
 
                 return;
@@ -1345,7 +1347,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             assertEquals(client.getSyncContext().getPendingOperations(), 0);
 
             assertEquals(serviceFilterContainer.Requests.get(1).Url, expectedUrl);
-            assertEquals(serviceFilterContainer.Requests.get(1).Method, "DELETE");
+            assertEquals(serviceFilterContainer.Requests.get(1).Method, HttpConstants.DeleteMethod);
 
             return;
         }
@@ -1364,7 +1366,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-        response.setStatus(new StatusLineMock(401));
+        response.setStatus(new StatusLine(Protocol.HTTP_2, 401, ""));
 
         final MobileServiceException innerException = new MobileServiceException("", response);
 
@@ -1411,7 +1413,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             assertEquals(client.getSyncContext().getPendingOperations(), 0);
 
             assertEquals(serviceFilterContainer.Requests.get(1).Url, expectedUrl);
-            assertEquals(serviceFilterContainer.Requests.get(1).Method, "DELETE");
+            assertEquals(serviceFilterContainer.Requests.get(1).Method, HttpConstants.DeleteMethod);
 
             return;
         }
@@ -1472,7 +1474,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             assertEquals(client.getSyncContext().getPendingOperations(), 0);
 
             assertEquals(serviceFilterContainer.Requests.get(1).Url, expectedUrl);
-            assertEquals(serviceFilterContainer.Requests.get(1).Method, "DELETE");
+            assertEquals(serviceFilterContainer.Requests.get(1).Method, HttpConstants.DeleteMethod);
 
             return;
         }
@@ -1537,8 +1539,8 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             client.getSyncContext().push().get();
 
             assertEquals(client.getSyncContext().getPendingOperations(), 0);
-            assertEquals(serviceFilterContainer.Requests.get(0).Method, "POST");
-            assertEquals(serviceFilterContainer.Requests.get(1).Method, "POST");
+            assertEquals(serviceFilterContainer.Requests.get(0).Method, HttpConstants.PostMethod);
+            assertEquals(serviceFilterContainer.Requests.get(1).Method, HttpConstants.PostMethod);
             assertEquals(serviceFilterContainer.Requests.get(1).Content, expectedUpdateContent);
 
             return;
@@ -1558,7 +1560,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-        response.setStatus(new StatusLineMock(401));
+        response.setStatus(new StatusLine(Protocol.HTTP_2, 401, ""));
 
         final MobileServiceException innerException = new MobileServiceException("", response);
 
@@ -1607,8 +1609,8 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             client.getSyncContext().push().get();
 
             assertEquals(client.getSyncContext().getPendingOperations(), 0);
-            assertEquals(serviceFilterContainer.Requests.get(0).Method, "POST");
-            assertEquals(serviceFilterContainer.Requests.get(1).Method, "POST");
+            assertEquals(serviceFilterContainer.Requests.get(0).Method, HttpConstants.PostMethod);
+            assertEquals(serviceFilterContainer.Requests.get(1).Method, HttpConstants.PostMethod);
             assertEquals(serviceFilterContainer.Requests.get(1).Content, expectedUpdateContent);
 
             return;
@@ -1674,8 +1676,8 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             client.getSyncContext().push().get();
 
             assertEquals(client.getSyncContext().getPendingOperations(), 0);
-            assertEquals(serviceFilterContainer.Requests.get(0).Method, "POST");
-            assertEquals(serviceFilterContainer.Requests.get(1).Method, "POST");
+            assertEquals(serviceFilterContainer.Requests.get(0).Method, HttpConstants.PostMethod);
+            assertEquals(serviceFilterContainer.Requests.get(1).Method, HttpConstants.PostMethod);
             assertEquals(serviceFilterContainer.Requests.get(1).Content, expectedUpdateContent);
 
             return;
@@ -1741,8 +1743,8 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             client.getSyncContext().push().get();
 
             assertEquals(client.getSyncContext().getPendingOperations(), 0);
-            assertEquals(serviceFilterContainer.Requests.get(0).Method, "PATCH");
-            assertEquals(serviceFilterContainer.Requests.get(1).Method, "PATCH");
+            assertEquals(serviceFilterContainer.Requests.get(0).Method, HttpConstants.PatchMethod);
+            assertEquals(serviceFilterContainer.Requests.get(1).Method, HttpConstants.PatchMethod);
             assertEquals(serviceFilterContainer.Requests.get(1).Content, expectedUpdateContent);
 
             return;
@@ -1760,9 +1762,9 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         thrownExceptionFlag.Thrown = true;
 
         MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
-
+        
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-        response.setStatus(new StatusLineMock(401));
+        response.setStatus(new StatusLine(Protocol.HTTP_2, 401, ""));
 
         final MobileServiceException innerException = new MobileServiceException("", response);
 
@@ -1811,8 +1813,8 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             client.getSyncContext().push().get();
 
             assertEquals(client.getSyncContext().getPendingOperations(), 0);
-            assertEquals(serviceFilterContainer.Requests.get(0).Method, "PATCH");
-            assertEquals(serviceFilterContainer.Requests.get(1).Method, "PATCH");
+            assertEquals(serviceFilterContainer.Requests.get(0).Method, HttpConstants.PatchMethod);
+            assertEquals(serviceFilterContainer.Requests.get(1).Method, HttpConstants.PatchMethod);
             assertEquals(serviceFilterContainer.Requests.get(1).Content, expectedUpdateContent);
 
             return;
@@ -1876,8 +1878,8 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             client.getSyncContext().push().get();
 
             assertEquals(client.getSyncContext().getPendingOperations(), 0);
-            assertEquals(serviceFilterContainer.Requests.get(0).Method, "PATCH");
-            assertEquals(serviceFilterContainer.Requests.get(1).Method, "PATCH");
+            assertEquals(serviceFilterContainer.Requests.get(0).Method, HttpConstants.PatchMethod);
+            assertEquals(serviceFilterContainer.Requests.get(1).Method, HttpConstants.PatchMethod);
             assertEquals(serviceFilterContainer.Requests.get(1).Content, expectedUpdateContent);
 
             return;
@@ -1937,8 +1939,8 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             client.getSyncContext().push().get();
 
             assertEquals(client.getSyncContext().getPendingOperations(), 0);
-            assertEquals(serviceFilterContainer.Requests.get(0).Method, "PATCH");
-            assertEquals(serviceFilterContainer.Requests.get(1).Method, "DELETE");
+            assertEquals(serviceFilterContainer.Requests.get(0).Method, HttpConstants.PatchMethod);
+            assertEquals(serviceFilterContainer.Requests.get(1).Method, HttpConstants.DeleteMethod);
 
             return;
         }
@@ -1956,7 +1958,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-        response.setStatus(new StatusLineMock(401));
+        response.setStatus((new StatusLine(Protocol.HTTP_2, 401, "")));
 
         final MobileServiceException innerException = new MobileServiceException("", response);
 
@@ -2000,8 +2002,8 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             client.getSyncContext().push().get();
 
             assertEquals(client.getSyncContext().getPendingOperations(), 0);
-            assertEquals(serviceFilterContainer.Requests.get(0).Method, "PATCH");
-            assertEquals(serviceFilterContainer.Requests.get(1).Method, "DELETE");
+            assertEquals(serviceFilterContainer.Requests.get(0).Method, HttpConstants.PatchMethod);
+            assertEquals(serviceFilterContainer.Requests.get(1).Method, HttpConstants.DeleteMethod);
 
             return;
         }
@@ -2058,8 +2060,8 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             client.getSyncContext().push().get();
 
             assertEquals(client.getSyncContext().getPendingOperations(), 0);
-            assertEquals(serviceFilterContainer.Requests.get(0).Method, "PATCH");
-            assertEquals(serviceFilterContainer.Requests.get(1).Method, "DELETE");
+            assertEquals(serviceFilterContainer.Requests.get(0).Method, HttpConstants.PatchMethod);
+            assertEquals(serviceFilterContainer.Requests.get(1).Method, HttpConstants.DeleteMethod);
 
             return;
         }
@@ -2115,7 +2117,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             }
             catch(Exception ex2) {
                 assertEquals(client.getSyncContext().getPendingOperations(), 1);
-                assertEquals(serviceFilterContainer.Requests.get(0).Method, "PATCH");
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, HttpConstants.PatchMethod);
                 assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: An update operation on the item is already in the queue.");
 
                 return;
@@ -2135,7 +2137,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-        response.setStatus(new StatusLineMock(401));
+        response.setStatus(new StatusLine(Protocol.HTTP_2, 401, ""));
 
         final MobileServiceException innerException = new MobileServiceException("", response);
 
@@ -2176,7 +2178,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             }
             catch(Exception ex2) {
                 assertEquals(client.getSyncContext().getPendingOperations(), 1);
-                assertEquals(serviceFilterContainer.Requests.get(0).Method, "PATCH");
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, HttpConstants.PatchMethod);
                 assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: An update operation on the item is already in the queue.");
 
                 return;
@@ -2232,7 +2234,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             }
             catch(Exception ex2) {
                 assertEquals(client.getSyncContext().getPendingOperations(), 1);
-                assertEquals(serviceFilterContainer.Requests.get(0).Method, "PATCH");
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, HttpConstants.PatchMethod);
                 assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: An update operation on the item is already in the queue.");
 
                 return;
@@ -2290,7 +2292,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             }
             catch(Exception ex2) {
                 assertEquals(client.getSyncContext().getPendingOperations(), 1);
-                assertEquals(serviceFilterContainer.Requests.get(0).Method, "DELETE");
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, HttpConstants.DeleteMethod);
                 assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: A delete operation on the item is already in the queue.");
 
                 return;
@@ -2310,7 +2312,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-        response.setStatus(new StatusLineMock(401));
+        response.setStatus(new StatusLine(Protocol.HTTP_2, 401, ""));
 
         final MobileServiceException innerException = new MobileServiceException("", response);
 
@@ -2351,7 +2353,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             }
             catch(Exception ex2) {
                 assertEquals(client.getSyncContext().getPendingOperations(), 1);
-                assertEquals(serviceFilterContainer.Requests.get(0).Method, "DELETE");
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, HttpConstants.DeleteMethod);
                 assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: A delete operation on the item is already in the queue.");
 
                 return;
@@ -2407,7 +2409,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             }
             catch(Exception ex2) {
                 assertEquals(client.getSyncContext().getPendingOperations(), 1);
-                assertEquals(serviceFilterContainer.Requests.get(0).Method, "DELETE");
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, HttpConstants.DeleteMethod);
                 assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: A delete operation on the item is already in the queue.");
 
                 return;
@@ -2465,7 +2467,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             }
             catch(Exception ex2) {
                 assertEquals(client.getSyncContext().getPendingOperations(), 1);
-                assertEquals(serviceFilterContainer.Requests.get(0).Method, "DELETE");
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, HttpConstants.DeleteMethod);
                 assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: A delete operation on the item is already in the queue.");
 
                 return;
@@ -2485,7 +2487,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-        response.setStatus(new StatusLineMock(401));
+        response.setStatus((new StatusLine(Protocol.HTTP_2, 401, "")));
 
         final MobileServiceException innerException = new MobileServiceException("", response);
 
@@ -2526,7 +2528,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             }
             catch(Exception ex2) {
                 assertEquals(client.getSyncContext().getPendingOperations(), 1);
-                assertEquals(serviceFilterContainer.Requests.get(0).Method, "DELETE");
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, HttpConstants.DeleteMethod);
                 assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: A delete operation on the item is already in the queue.");
 
                 return;
@@ -2582,7 +2584,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             }
             catch(Exception ex2) {
                 assertEquals(client.getSyncContext().getPendingOperations(), 1);
-                assertEquals(serviceFilterContainer.Requests.get(0).Method, "DELETE");
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, HttpConstants.DeleteMethod);
                 assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: A delete operation on the item is already in the queue.");
 
                 return;
@@ -2640,7 +2642,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             }
             catch(Exception ex2) {
                 assertEquals(client.getSyncContext().getPendingOperations(), 1);
-                assertEquals(serviceFilterContainer.Requests.get(0).Method, "DELETE");
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, HttpConstants.DeleteMethod);
                 assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: A delete operation on the item is already in the queue.");
 
                 return;
@@ -2660,7 +2662,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-        response.setStatus(new StatusLineMock(401));
+        response.setStatus((new StatusLine(Protocol.HTTP_2, 401, "")));
 
         final MobileServiceException innerException = new MobileServiceException("", response);
 
@@ -2701,7 +2703,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             }
             catch(Exception ex2) {
                 assertEquals(client.getSyncContext().getPendingOperations(), 1);
-                assertEquals(serviceFilterContainer.Requests.get(0).Method, "DELETE");
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, HttpConstants.DeleteMethod);
                 assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: A delete operation on the item is already in the queue.");
 
                 return;
@@ -2757,7 +2759,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
             }
             catch(Exception ex2) {
                 assertEquals(client.getSyncContext().getPendingOperations(), 1);
-                assertEquals(serviceFilterContainer.Requests.get(0).Method, "DELETE");
+                assertEquals(serviceFilterContainer.Requests.get(0).Method, HttpConstants.DeleteMethod);
                 assertEquals(ex2.getMessage(), "java.lang.IllegalStateException: A delete operation on the item is already in the queue.");
 
                 return;
@@ -2824,9 +2826,9 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
                 // and delete after that. This means first
                 // update was cancelled, not the second one.
                 {
-                    assertEquals(serviceFilterRequest.getMethod(), "POST");
+                    assertEquals(serviceFilterRequest.getMethod(), HttpConstants.PostMethod);
                 } else {
-                    assertEquals(serviceFilterRequest.getMethod(), "DELETE");
+                    assertEquals(serviceFilterRequest.getMethod(), HttpConstants.DeleteMethod);
                 }
 
                 return null;
@@ -2973,98 +2975,6 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
         this.TestCollapseThrow(firstOperation, secondOperation);
     }
 
-    // public void testUpdateCancelsSecondUpdateWhenUpdateIsInQueue()
-    // throws Throwable
-    // {
-    // CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>,
-    // StringIdType, Void>
-    // firstOperationOnItem1 = new
-    // CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>,
-    // StringIdType,
-    // Void>() {
-    //
-    // @Override
-    // public Void apply(MobileServiceSyncTable<StringIdType> table,
-    // StringIdType item) throws Exception {
-    // try {
-    // table.update(item).get();
-    // } catch (Exception e) {
-    // throw e;
-    // }
-    //
-    // return null;
-    // }
-    //
-    // };
-    //
-    // CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>,
-    // StringIdType, Void>
-    // operationOnItem2 = new
-    // CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>,
-    // StringIdType,
-    // Void>() {
-    //
-    // @Override
-    // public Void apply(MobileServiceSyncTable<StringIdType> table,
-    // StringIdType item) throws Exception {
-    // try {
-    // table.delete(item).get();
-    // } catch (Exception e) {
-    // throw e;
-    // }
-    //
-    // return null;
-    // }
-    //
-    // };
-    //
-    // CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>,
-    // StringIdType, Void>
-    // secondOperationOnItem1 = new
-    // CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>,
-    // StringIdType,
-    // Void>() {
-    //
-    // @Override
-    // public Void apply(MobileServiceSyncTable<StringIdType> table,
-    // StringIdType item) throws Exception {
-    // try {
-    // table.update(item).get();
-    // } catch (Exception e) {
-    // throw e;
-    // }
-    //
-    // return null;
-    // }
-    //
-    // };
-    //
-    // CustomFunctionTwoParameters<ServiceFilterRequest, Integer, Void>
-    // assertRequest = new
-    // CustomFunctionTwoParameters<ServiceFilterRequest, Integer, Void>() {
-    //
-    // @Override
-    // public Void apply(ServiceFilterRequest serviceFilterRequest, Integer
-    // executed) {
-    //
-    // // if (executed == 1) // order is maintained by doing insert first
-    // // // and delete after that. This means first
-    // // // update was cancelled, not the second one.
-    // // {
-    // // assertEquals(serviceFilterRequest.getMethod(), "PATCH");
-    // // } else {
-    // // assertEquals(serviceFilterRequest.getMethod(), "DELETE");
-    // // }
-    //
-    // return null;
-    // }
-    //
-    // };
-    //
-    // this.TestCollapseCancel(firstOperationOnItem1, operationOnItem2,
-    // secondOperationOnItem1, assertRequest);
-    // }
-
     public void testUpdateCancelsSecondUpdateWhenInsertIsInQueue() throws Throwable {
         CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void> firstOperationOnItem1 = new CustomFunctionTwoParameters<MobileServiceSyncTable<StringIdType>, StringIdType, Void>() {
 
@@ -3119,9 +3029,9 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
                 // and delete after that. This means first
                 // update was cancelled, not the second one.
                 {
-                    assertEquals(serviceFilterRequest.getMethod(), "POST");
+                    assertEquals(serviceFilterRequest.getMethod(), HttpConstants.PostMethod);
                 } else {
-                    assertEquals(serviceFilterRequest.getMethod(), "DELETE");
+                    assertEquals(serviceFilterRequest.getMethod(), HttpConstants.DeleteMethod);
                 }
 
                 return null;
@@ -3139,7 +3049,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
     public void testPushIsAbortedOnAuthenticationError() throws Throwable {
         // Create a mock response simulating an error
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-        response.setStatus(new StatusLineMock(401));
+        response.setStatus((new StatusLine(Protocol.HTTP_2, 401, "")));
 
         MobileServiceException authError = new MobileServiceException("", response);
         TestPushAbort(authError, MobileServicePushStatus.CancelledByAuthenticationError);
@@ -3339,7 +3249,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
                 // Create a mock response simulating an error
                 ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-                response.setStatus(new StatusLineMock(statusCode));
+                response.setStatus((new StatusLine(Protocol.HTTP_2, statusCode, "")));
 
                 String content = "";
 
@@ -3399,7 +3309,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
     }
 
     public class ServiceFilterRequestData {
-        public Header[] Headers;
+        public com.squareup.okhttp.Headers Headers;
 
         public String Content;
 
@@ -3411,13 +3321,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
         public String getHeaderValue(String headerName) {
 
-            for (Header header : Headers) {
-                if (header.getName().equals(headerName)) {
-                    return header.getValue();
-                }
-            }
-
-            return null;
+            return this.Headers.get(headerName);
         }
     }
 }

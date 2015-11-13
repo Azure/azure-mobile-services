@@ -41,12 +41,13 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterResponseMock;
-import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.StatusLineMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.Address;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.ComplexPersonTestObject;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.DateTestObject;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.ResultsContainer;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
+import com.squareup.okhttp.Protocol;
+import com.squareup.okhttp.internal.http.StatusLine;
 
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
@@ -362,7 +363,7 @@ public class SerializationTests extends InstrumentationTestCase {
 
                 // Create a mock response simulating an error
                 ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-                response.setStatus(new StatusLineMock(404));
+                response.setStatus((new StatusLine(Protocol.HTTP_2, 404, "")));
                 response.setContent("{\"date\":\"2013-01-22T14:30:40.000Z\"}");
 
                 final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
@@ -469,7 +470,7 @@ public class SerializationTests extends InstrumentationTestCase {
 
                 // Create a mock response simulating an error
                 ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-                response.setStatus(new StatusLineMock(404));
+                response.setStatus((new StatusLine(Protocol.HTTP_2, 404, "")));
                 response.setContent("{\"address\":{\"zipcode\":1313,\"country\":\"US\",\"streetaddress\":\"1345 Washington St\"},\"firstName\":\"John\",\"lastName\":\"Doe\"}");
 
                 final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();

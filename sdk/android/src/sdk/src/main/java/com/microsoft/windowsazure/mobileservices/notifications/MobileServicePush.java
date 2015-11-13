@@ -2,19 +2,19 @@
 Copyright (c) Microsoft Open Technologies, Inc.
 All Rights Reserved
 Apache 2.0 License
- 
+
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
- 
+
      http://www.apache.org/licenses/LICENSE-2.0
- 
+
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
- 
+
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
 
@@ -45,12 +45,10 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceApplication;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.MobileServiceFeatures;
+import com.microsoft.windowsazure.mobileservices.http.HttpConstants;
 import com.microsoft.windowsazure.mobileservices.http.MobileServiceConnection;
 import com.microsoft.windowsazure.mobileservices.http.MobileServiceHttpClient;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
-
-import org.apache.http.Header;
-import org.apache.http.protocol.HTTP;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -278,7 +276,7 @@ public class MobileServicePush {
 
         String path = PNS_API_URL + "/installations/" + Uri.encode(installationId);
 
-        ListenableFuture<ServiceFilterResponse> serviceFilterFuture = mHttpClient.request(path, null, "DELETE", null, null);
+        ListenableFuture<ServiceFilterResponse> serviceFilterFuture = mHttpClient.request(path, null, HttpConstants.DeleteMethod, null, null);
 
         Futures.addCallback(serviceFilterFuture, new FutureCallback<ServiceFilterResponse>() {
             @Override
@@ -316,13 +314,11 @@ public class MobileServicePush {
 
         String path = PNS_API_URL + "/installations/" + Uri.encode(installationId);
 
-        List<Pair<String, String>> headers = new ArrayList<Pair<String, String>>();
+        List<Pair<String, String>> requestHeaders = new ArrayList<Pair<String, String>>();
 
-        Pair<String, String> header = new Pair<String, String>("Content-Type", "application/json");
+        requestHeaders.add(new Pair<>(HttpConstants.ContentType, MobileServiceConnection.JSON_CONTENTTYPE));
 
-        headers.add(header);
-
-        ListenableFuture<ServiceFilterResponse> serviceFilterFuture = mHttpClient.request(path, installation.toString(), "PUT", headers, null, EnumSet.noneOf(MobileServiceFeatures.class));
+        ListenableFuture<ServiceFilterResponse> serviceFilterFuture = mHttpClient.request(path, installation.toString(), HttpConstants.PutMethod, requestHeaders, null, EnumSet.noneOf(MobileServiceFeatures.class));
 
         Futures.addCallback(serviceFilterFuture, new FutureCallback<ServiceFilterResponse>() {
             @Override
