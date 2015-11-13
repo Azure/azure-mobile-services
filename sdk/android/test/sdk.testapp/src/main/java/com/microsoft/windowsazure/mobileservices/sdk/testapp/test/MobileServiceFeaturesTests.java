@@ -434,7 +434,7 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
             public void executeOperation(MobileServiceClient client) throws Exception {
                 List<Pair<String, String>> queryParams = new ArrayList<Pair<String, String>>();
                 queryParams.add(new Pair<String, String>("a", "b"));
-                client.invokeApi("apiName", "DELETE", queryParams).get();
+                client.invokeApi("apiName", HttpConstants.DeleteMethod, queryParams).get();
             }
 
         }, "AJ,QS");
@@ -474,7 +474,7 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
                 List<Pair<String, String>> requestHeaders = new ArrayList<Pair<String, String>>();
                 requestHeaders.add(new Pair<String, String>(HttpConstants.ContentType, "text/plain"));
                 byte[] content = "hello world".getBytes();
-                client.invokeApi("apiName", content, "POST", requestHeaders, queryParams).get();
+                client.invokeApi("apiName", content, HttpConstants.PostMethod, requestHeaders, queryParams).get();
             }
 
         }, "AG");
@@ -491,7 +491,7 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
                 requestHeaders.add(new Pair<String, String>(HttpConstants.ContentType, "text/plain"));
                 requestHeaders.add(new Pair<String, String>("X-ZUMO-FEATURES", "something"));
                 byte[] content = "hello world".getBytes();
-                client.invokeApi("apiName", content, "POST", requestHeaders, queryParams).get();
+                client.invokeApi("apiName", content, HttpConstants.PostMethod, requestHeaders, queryParams).get();
             }
 
         }, "something");
