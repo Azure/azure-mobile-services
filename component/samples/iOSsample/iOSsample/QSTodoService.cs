@@ -9,7 +9,6 @@ namespace iOSsample
 	public class QSTodoService : DelegatingHandler
 	{		
         const string applicationURL = @"MOBILE SERVICE URL";
-		const string applicationKey = @"APPLICATION KEY";
 		MobileServiceClient client;
 		IMobileServiceTable<ToDoItem> todoTable;
 		int busyCount = 0;
@@ -21,7 +20,7 @@ namespace iOSsample
 			CurrentPlatform.Init ();
 
 			// Initialize the Mobile Service client with your URL and key
-			client = new MobileServiceClient (applicationURL, applicationKey, this);
+			client = new MobileServiceClient (applicationURL, this);
 
 			// Create an MSTable instance to allow us to work with the TodoItem table
 			todoTable = client.GetTable <ToDoItem> ();
