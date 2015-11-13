@@ -530,7 +530,7 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
         });
 
         try {
-            client.invokeApi("myApi", null, "POST", headers).get();
+            client.invokeApi("myApi", null, HttpConstants.PostMethod, headers).get();
         } catch (Exception exception) {
             if (exception instanceof ExecutionException) {
                 fail(exception.getCause().getMessage());
@@ -609,7 +609,7 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
         });
 
         try {
-            client.invokeApi("myApi", null, "POST", headers).get();
+            client.invokeApi("myApi", null, HttpConstants.PostMethod, headers).get();
         } catch (Exception exception) {
             if (exception instanceof ExecutionException) {
                 fail(exception.getCause().getMessage());
