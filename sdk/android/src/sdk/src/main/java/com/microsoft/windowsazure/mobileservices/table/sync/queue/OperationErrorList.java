@@ -26,6 +26,8 @@ package com.microsoft.windowsazure.mobileservices.table.sync.queue;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemColumns;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProperty;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
 import com.microsoft.windowsazure.mobileservices.table.serialization.DateSerializer;
 import com.microsoft.windowsazure.mobileservices.table.sync.localstore.ColumnDataType;
@@ -82,7 +84,7 @@ public class OperationErrorList {
         columns.put("serverresponse", ColumnDataType.String);
         columns.put("serveritem", ColumnDataType.Other);
         columns.put("operationkind", ColumnDataType.String);
-        columns.put("__createdat", ColumnDataType.Date);
+        columns.put(MobileServiceSystemColumns.CreatedAt, ColumnDataType.Date);
 
         store.defineTable(OPERATION_ERROR_TABLE, columns);
     }
@@ -141,7 +143,7 @@ public class OperationErrorList {
             element.add("serveritem", operationError.getServerItem());
         }
 
-        element.addProperty("__createdat", DateSerializer.serialize(operationError.getCreatedAt()));
+        element.addProperty(MobileServiceSystemColumns.CreatedAt, DateSerializer.serialize(operationError.getCreatedAt()));
 
         return element;
     }
@@ -155,7 +157,7 @@ public class OperationErrorList {
         String errorMessage = element.get("errormessage").getAsString();
         Integer statusCode = element.get("statuscode") != null ? element.get("statuscode").getAsInt() : null;
         String serverResponse = element.get("serverresponse") != null ? element.get("serverresponse").getAsString() : null;
-        Date createdAt = DateSerializer.deserialize(element.get("__createdat").getAsString());
+        Date createdAt = DateSerializer.deserialize(element.get(MobileServiceSystemColumns.CreatedAt).getAsString());
 
         JsonObject clientItem = null;
 

@@ -81,18 +81,6 @@ public class ServiceFilterRequestImpl implements ServiceFilterRequest {
         mContent = content;
     }
 
-    /*
-    public static ServiceFilterRequestImpl post(OkHttpClientFactory factory, String url, List<Pair<String, String>> requestHeaders, String content) {
-
-        RequestBody requestBody = RequestBody.create(JSON, content);
-
-        Request request = getBaseRequestBuilder(url, requestHeaders)
-                .post(requestBody).build();
-
-        return new ServiceFilterRequestImpl(request, factory);
-    }
-    */
-
     public static ServiceFilterRequestImpl post(OkHttpClientFactory factory, String url, byte[] content) {
 
         if (content == null) {
@@ -121,17 +109,6 @@ public class ServiceFilterRequestImpl implements ServiceFilterRequest {
         return new ServiceFilterRequestImpl(request, factory, content);
     }
 
-    /*
-    public static ServiceFilterRequestImpl patch(OkHttpClientFactory factory, String url, String content) {
-
-        RequestBody requestBody = RequestBody.create(JSON, content);
-
-        Request request = getBaseRequestBuilder(url)
-                .patch(requestBody).build();
-
-        return new ServiceFilterRequestImpl(request, factory);
-    }
-*/
     public static ServiceFilterRequestImpl patch(OkHttpClientFactory factory, String url, byte[] content) {
 
         if (content == null) {
@@ -156,22 +133,6 @@ public class ServiceFilterRequestImpl implements ServiceFilterRequest {
     public static ServiceFilterRequestImpl delete(OkHttpClientFactory factory, String url) {
         return delete(factory, url, (byte[]) null);
     }
-
-    /*
-    public static ServiceFilterRequestImpl delete(OkHttpClientFactory factory, String url, String content) {
-
-        Request.Builder requestBuilder = getBaseRequestBuilder(url);
-
-        if (content != null) {
-            RequestBody requestBody = RequestBody.create(JSON, content);
-            requestBuilder = requestBuilder.delete(requestBody);
-        } else {
-            requestBuilder = requestBuilder.delete();
-        }
-
-        return new ServiceFilterRequestImpl(requestBuilder.build(), factory);
-    }
-*/
 
     public static ServiceFilterRequestImpl delete(OkHttpClientFactory factory, String url, byte[] content) {
 

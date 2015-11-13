@@ -153,7 +153,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
-                    tableDefinition.put("__version", ColumnDataType.String);
+                    tableDefinition.put("version", ColumnDataType.String);
 
                     log("Initialized the store and sync context");
 
@@ -216,9 +216,9 @@ public class OfflineTests extends TestGroup {
                     item.setFlag(!item.getFlag());
                     // item.addProperty("date", DateSerializer.serialize(new
                     // Date()));
-                    // item.addProperty("__updatedAt",
+                    // item.addProperty("updatedAt",
                     // DateSerializer.serialize(new Date()));
-                    // item.addProperty("__version", "1");
+                    // item.addProperty("version", "1");
 
                     // item.Flag = !item.Flag;
                     // item.Age++;
@@ -344,7 +344,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
-                    tableDefinition.put("__version", ColumnDataType.String);
+                    tableDefinition.put("version", ColumnDataType.String);
 
                     log("Initialized the store and sync context");
 
@@ -438,286 +438,6 @@ public class OfflineTests extends TestGroup {
         return test;
     }
 
-
-    private TestCase issue536() {
-
-        final String tableName = "INSTA";
-
-        final TestCase test = new TestCase() {
-
-            @Override
-            protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
-
-                try {
-
-                    TestCase testCase = this;
-                    TestResult result = new TestResult();
-                    result.setStatus(TestStatus.Passed);
-                    result.setTestCase(testCase);
-
-                    ServiceFilterWithRequestCount serviceFilter = new ServiceFilterWithRequestCount();
-
-                    int requestsSentToServer = 0;
-
-                    client = client.withFilter(serviceFilter);
-
-                    SQLiteLocalStore localStore = new SQLiteLocalStore(client.getContext(), OFFLINE_TABLE_NAME, null, 1);
-
-                    SimpleSyncHandler handler = new SimpleSyncHandler();
-                    MobileServiceSyncContext syncContext = client.getSyncContext();
-
-                    syncContext.initialize(localStore, handler).get();
-
-                    log("Defined the table on the local store");
-
-                    Map<String, ColumnDataType> instaTableDefinition = new HashMap<String, ColumnDataType>();
-                    instaTableDefinition.put("id", ColumnDataType.String);
-                    instaTableDefinition.put("inspectedDateTime", ColumnDataType.Date);
-                    instaTableDefinition.put("inventory", ColumnDataType.String);
-                    instaTableDefinition.put("wall", ColumnDataType.String);
-                    instaTableDefinition.put("floor", ColumnDataType.String);
-                    instaTableDefinition.put("ceiling", ColumnDataType.String);
-                    instaTableDefinition.put("inspected", ColumnDataType.Boolean);
-                    instaTableDefinition.put("rejected", ColumnDataType.Boolean);
-                    instaTableDefinition.put("inspectionId", ColumnDataType.String);
-                    instaTableDefinition.put("levelsInInspectionId", ColumnDataType.String);
-
-                    log("Initialized the store and sync context");
-
-                    localStore.defineTable(tableName, instaTableDefinition);
-
-                    client.getSyncContext().initialize(localStore, new SimpleSyncHandler()).get();
-
-                    MobileServiceSyncTable<InstaItem> localTable = client.getSyncTable(tableName, InstaItem.class);
-
-                    MobileServiceTable<InstaItem> remoteTable = client.getTable(tableName, InstaItem.class);
-
-                    InstaItem item = new InstaItem(new Random());
-
-                    log("Inserted the item to the local store:" + item);
-
-                    item = localTable.insert(item).get();
-
-                    item = localTable.lookUp(item.getId()).get();
-
-                    log("Validating that the item is not in the server table");
-
-                    try {
-                        requestsSentToServer++;
-                        remoteTable.lookUp(item.getId()).get();
-                        log("Error, item is present in the server");
-                        // return false;
-                    } catch (ExecutionException ex) {
-                        log("Ok, item is not in the server:" + ex.getMessage());
-                    }
-
-                    if (!validateRequestCount(this, serviceFilter.requestCount, requestsSentToServer)) {
-                        result.setStatus(TestStatus.Failed);
-                        callback.onTestComplete(this, result);
-                    }
-
-                    log("Pushing changes to the server");
-                    client.getSyncContext().push().get();
-                    requestsSentToServer++;
-
-                    if (!validateRequestCount(this, serviceFilter.requestCount, requestsSentToServer)) {
-                        result.setStatus(TestStatus.Failed);
-                        callback.onTestComplete(this, result);
-                    }
-                    log("Push done; now verifying that item is in the server");
-
-                    InstaItem serverItem = remoteTable.lookUp(item.getId()).get();
-                    requestsSentToServer++;
-
-                    log("Retrieved item from server:" + serverItem);
-
-                    if (serverItem.equals(item)) {
-                        log("Items are the same");
-                    } else {
-                        log("Items are different. Local: " + item + "; remote: " + serverItem);
-                        result.setStatus(TestStatus.Failed);
-                        callback.onTestComplete(this, result);
-                        return;
-                    }
-
-                    log("Now updating the item locally");
-
-                    item.setInspected(!item.getInspected());
-
-                    localTable.update(item).get();
-
-                    log("Item has been updated");
-
-                    InstaItem newItem = new InstaItem(new Random());
-
-                    log("Adding a new item to the local table:" + newItem);
-                    newItem = localTable.insert(newItem).get();
-
-                    if (!validateRequestCount(this, serviceFilter.requestCount, requestsSentToServer)) {
-                        result.setStatus(TestStatus.Failed);
-                        callback.onTestComplete(this, result);
-                    }
-
-                    log("Pushing the new changes to the server");
-                    client.getSyncContext().push().get();
-                    requestsSentToServer += 2;
-
-                    if (!validateRequestCount(this, serviceFilter.requestCount, requestsSentToServer)) {
-                        result.setStatus(TestStatus.Failed);
-                        callback.onTestComplete(this, result);
-                    }
-
-                    log("Push done. Verifying changes on the server");
-                    serverItem = remoteTable.lookUp(item.getId()).get();
-                    requestsSentToServer++;
-
-                    if (serverItem.equals(item)) {
-                        log("Updated items are the same");
-                    } else {
-                        log("Items are different. Local: " + item + "; remote: " + serverItem);
-                        result.setStatus(TestStatus.Failed);
-                        callback.onTestComplete(this, result);
-                        return;
-                    }
-
-                    serverItem = remoteTable.lookUp(newItem.getId()).get();
-                    requestsSentToServer++;
-
-                    if (serverItem.equals(newItem)) {
-                        log("New inserted item is the same");
-                    } else {
-                        log("Items are different. Local: " + item + "; remote: " + serverItem);
-                        result.setStatus(TestStatus.Failed);
-                        callback.onTestComplete(this, result);
-                        return;
-                    }
-
-                    log("Cleaning up");
-                    localTable.delete(item).get();
-                    localTable.delete(newItem).get();
-                    log("Local table cleaned up. Now sync'ing once more");
-                    client.getSyncContext().push().get();
-
-                    requestsSentToServer += 2;
-                    if (!validateRequestCount(this, serviceFilter.requestCount, requestsSentToServer)) {
-                        result.setStatus(TestStatus.Failed);
-                        callback.onTestComplete(this, result);
-                        return;
-                    }
-
-                    log("Done");
-
-                    callback.onTestComplete(this, result);
-
-                } catch (Exception e) {
-                    callback.onTestComplete(this, createResultFromException(e));
-                    return;
-                }
-            }
-
-            ;
-        };
-
-        test.setName("issue536");
-
-        return test;
-    }
-
-    private TestCase issue417() {
-
-        final String tableName = "Person";
-
-        final TestCase test = new TestCase() {
-
-            @Override
-            protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
-
-                try {
-
-                    TestCase testCase = this;
-                    TestResult result = new TestResult();
-                    result.setStatus(TestStatus.Passed);
-                    result.setTestCase(testCase);
-
-                    ServiceFilterWithRequestCount serviceFilter = new ServiceFilterWithRequestCount();
-
-                    int requestsSentToServer = 0;
-
-                    client = client.withFilter(serviceFilter);
-
-                    SQLiteLocalStore localStore = new SQLiteLocalStore(client.getContext(), OFFLINE_TABLE_NAME, null, 1);
-
-                    SimpleSyncHandler handler = new SimpleSyncHandler();
-                    MobileServiceSyncContext syncContext = client.getSyncContext();
-
-                    syncContext.initialize(localStore, handler).get();
-
-                    log("Defined the table on the local store");
-
-                    Map<String, ColumnDataType> instaTableDefinition = new HashMap<String, ColumnDataType>();
-                    instaTableDefinition.put("id", ColumnDataType.String);
-                    instaTableDefinition.put("name", ColumnDataType.String);
-                    instaTableDefinition.put("age", ColumnDataType.Integer);
-
-                    log("Initialized the store and sync context");
-
-                    localStore.defineTable(tableName, instaTableDefinition);
-
-                    client.getSyncContext().initialize(localStore, new SimpleSyncHandler()).get();
-
-                    MobileServiceSyncTable<PersonItem> localTable = client.getSyncTable(tableName, PersonItem.class);
-
-                    MobileServiceTable<PersonItem> remoteTable = client.getTable(tableName, PersonItem.class);
-
-                    String testFilter = UUID.randomUUID().toString();
-
-                    /*for(int i = 0; i < 50; i++) {
-                        PersonItem item = new PersonItem(new Random(), "partition");
-
-                        log("Inserted the item to the local store:" + item);
-
-                        item.setName(testFilter);
-                        localTable.insert(item).get();
-
-                    }
-
-                    log("Pushing changes to the server");
-                    client.getSyncContext().push().get();
-                    log("Push done; now verifying that item is in the server");
-*/
-
-                    Query query =
-                            QueryOperations
-                                    .tableName(tableName)
-                                            //.field("name").eq(testFilter)
-                                    .top(5);
-
-
-                    MobileServiceList<PersonItem> personItems = remoteTable.execute(query).get();
-
-                    while (personItems.getNextLink() != null) {
-                        log("Querying " + personItems.getNextLink());
-                        personItems = remoteTable.execute(personItems.getNextLink()).get();
-                    }
-
-                    log("Done");
-
-                    callback.onTestComplete(this, result);
-
-                } catch (Exception e) {
-                    callback.onTestComplete(this, createResultFromException(e));
-                    return;
-                }
-            }
-
-            ;
-        };
-
-        test.setName("issue417");
-
-        return test;
-    }
-
     private TestCase createLocallyDeleteAlreadyDeletedElementTest() {
 
         final String tableName = "offlineReady";
@@ -756,7 +476,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
-                    tableDefinition.put("__version", ColumnDataType.String);
+                    tableDefinition.put("version", ColumnDataType.String);
 
                     log("Initialized the store and sync context");
 
@@ -878,7 +598,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
-                    tableDefinition.put("__version", ColumnDataType.String);
+                    tableDefinition.put("version", ColumnDataType.String);
 
                     log("Initialized the store and sync context");
 
@@ -970,7 +690,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
-                    tableDefinition.put("__version", ColumnDataType.String);
+                    tableDefinition.put("version", ColumnDataType.String);
 
                     log("Initialized the store and sync context");
 
@@ -1117,7 +837,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
-                    tableDefinition.put("__version", ColumnDataType.String);
+                    tableDefinition.put("version", ColumnDataType.String);
 
                     log("Initialized the store and sync context");
 
@@ -1260,7 +980,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
-                    tableDefinition.put("__version", ColumnDataType.String);
+                    tableDefinition.put("version", ColumnDataType.String);
 
                     log("Initialized the store and sync context");
 
@@ -1445,7 +1165,7 @@ public class OfflineTests extends TestGroup {
                     tableDefinition.put("float", ColumnDataType.Real);
                     tableDefinition.put("date", ColumnDataType.Date);
                     tableDefinition.put("bool", ColumnDataType.Boolean);
-                    tableDefinition.put("__version", ColumnDataType.String);
+                    tableDefinition.put("version", ColumnDataType.String);
 
                     log("Initialized the store and sync context");
 
@@ -1550,7 +1270,7 @@ public class OfflineTests extends TestGroup {
 
         final String tableName = "offlineReadyAuthenticated";
 
-        // If a table does not have a __version column, then offline will still
+        // If a table does not have a version column, then offline will still
         // work, but there will be no conflicts
         final TestCase test = new TestCase() {
 
@@ -1873,9 +1593,9 @@ class ConflictResolvingSyncHandler implements MobileServiceSyncHandler {
                 JsonParser jsonParser = new JsonParser();
                 JsonObject mergedItem = (JsonObject) jsonParser.parse(mergedItemJson);
 
-                String serverVersion = serverItem.get("__version").getAsString();
+                String serverVersion = serverItem.get("version").getAsString();
 
-                mergedItem.addProperty("__version", serverVersion);
+                mergedItem.addProperty("version", serverVersion);
 
                 test.log("Merged the items, will try to resubmit the operation");
 
@@ -1931,9 +1651,9 @@ class InstaItem {
     private String mInspectionId;
     @SerializedName("levelsInInspectionId")
     private String mLevelsInInspectionId;
-    @SerializedName("__version")
+    @SerializedName("version")
     private String mVersion;
-    @SerializedName("__deleted")
+    @SerializedName("deleted")
     private boolean mDeleted;
 
     public InstaItem() {
@@ -2091,7 +1811,7 @@ class InstaItem {
 
     @Override
     public String toString() {
-        return String.format(Locale.getDefault(), "InstaItem[Id={0},Inventory={1},Wall={2},Floor={3},Ceiling={4},Inspected={5}, Rejected={6}, InspectionId={7}, LevelsIninspectionId={8}, Version={9}, Deleted={9}, InspectedDateTime={10}]",
+        return String.format(Locale.getDefault(), "InstaItem[Id=%s,Inventory=%s,Wall=%s,Floor=%s,Ceiling=%s,Inspected=%b, Rejected=%b, InspectionId=%s, LevelsIninspectionId=%s, Version=%s, Deleted=%b, InspectedDateTime={%s]",
                 id, mInventory, mWall, mFloor, mCeiling, mInspected, mRejected, mInspectionId, mLevelsInInspectionId, mVersion, mDeleted,
                 Util.dateToString(mInspectedDateTime));
     }
@@ -2163,7 +1883,7 @@ class PersonItem {
 
     @Override
     public String toString() {
-        return String.format(Locale.getDefault(), "PersonItem[Id={0},Name={1},Age={2}]",
+        return String.format(Locale.getDefault(), "PersonItem[Id=%s,Name=%s,Age=%d]",
                 id, mName, mAge);
     }
 }
@@ -2182,7 +1902,7 @@ class OfflineReadyItem {
     private Date mDate;
     @SerializedName("bool")
     private boolean mFlag;
-    @SerializedName("__version")
+    @SerializedName("version")
     private String mVersion;
 
     public OfflineReadyItem() {
@@ -2191,12 +1911,12 @@ class OfflineReadyItem {
 
     public OfflineReadyItem(Random rndGen) {
         this.id = java.util.UUID.randomUUID().toString();
-        this.mName = "";// rndGen.nextLong();
-        this.mAge = 20;//rndGen.nextInt();
-        this.mFloatingNumber = rndGen.nextInt() * rndGen.nextDouble();
-        this.mDate = new Date();
-        this.mFlag = rndGen.nextInt(2) == 0;
-    }
+    this.mName = "";// rndGen.nextLong();
+    this.mAge = 20;//rndGen.nextInt();
+    this.mFloatingNumber = rndGen.nextInt() * rndGen.nextDouble();
+    this.mDate = new Date();
+    this.mFlag = rndGen.nextInt(2) == 0;
+}
 
     public String getId() {
         return id;
@@ -2282,7 +2002,7 @@ class OfflineReadyItem {
 
     @Override
     public String toString() {
-        return String.format(Locale.getDefault(), "OfflineReadyItem[Id={0},Name={1},Age={2},FloatingNumber={3},Date={4},Flag={5},Version={6}]", id, mName,
+        return String.format(Locale.getDefault(), "OfflineReadyItem[Id=%s,Name=%s,Age=%d,FloatingNumber=%f,Date=%s,Flag=%b,Version=%s]", id, mName,
                 mAge, mFloatingNumber, Util.dateToString(mDate), mFlag, mVersion);
     }
 }
@@ -2391,7 +2111,7 @@ class OfflineReadyItemNoVersion {
 
     @Override
     public String toString() {
-        return String.format(Locale.getDefault(), "OfflineReadyItem[Id={0},Name={1},Age={2},FloatingNumber={3},Date={4},Flag={5}]", id, mName,
+        return String.format(Locale.getDefault(), "OfflineReadyItem[Id=%s,Name=%s,Age=%d,FloatingNumber=%f,Date=%s,Flag=%b]", id, mName,
                 mAge, mFloatingNumber, Util.dateToString(mDate), mFlag);
     }
 }

@@ -377,7 +377,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
             @Override
             public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-                assertTrue(request.getUrl().contains("__systemproperties=__createdAt"));
+                assertTrue(request.getUrl().contains("__systemproperties=createdAt"));
 
                 return nextServiceFilterCallback.onNext(request);
             }
@@ -389,7 +389,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
         msTable.setSystemProperties(systemProperties);
 
         List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
-        parameters.add(new Pair<String, String>("__systemproperties", "__createdAt"));
+        parameters.add(new Pair<String, String>("__systemproperties", "createdAt"));
 
         try {
             // Call the insert method
@@ -436,7 +436,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
             @Override
             public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-                assertTrue(request.getUrl().contains("__systemproperties=__createdAt"));
+                assertTrue(request.getUrl().contains("__systemproperties=createdAt"));
 
                 return nextServiceFilterCallback.onNext(request);
             }
@@ -448,7 +448,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
         msTable.setSystemProperties(systemProperties);
 
         List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
-        parameters.add(new Pair<String, String>("__systemproperties", "__createdAt"));
+        parameters.add(new Pair<String, String>("__systemproperties", "createdAt"));
 
         try {
             // Call the insert method
@@ -1590,7 +1590,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
             @Override
             public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-                assertTrue(request.getUrl().contains("__systemproperties=__createdAt"));
+                assertTrue(request.getUrl().contains("__systemproperties=createdAt"));
 
                 return nextServiceFilterCallback.onNext(request);
             }
@@ -1603,7 +1603,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 
         try {
             // Call the execute method with projection
-            JsonElement result = msTable.select("Id", "String").parameter("__systemproperties", "__createdAt").execute().get();
+            JsonElement result = msTable.select("Id", "String").parameter("__systemproperties", "createdAt").execute().get();
 
             if (result == null) {
                 fail("Expected result");
@@ -1644,7 +1644,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
             @Override
             public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-                assertTrue(request.getUrl().contains("__systemproperties=__createdAt"));
+                assertTrue(request.getUrl().contains("__systemproperties=createdAt"));
 
                 return nextServiceFilterCallback.onNext(request);
             }
@@ -1657,7 +1657,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 
         try {
             // Call the execute method with filter
-            JsonElement result = msTable.where().field("id").eq().val("an id").parameter("__systemproperties", "__createdAt").execute().get();
+            JsonElement result = msTable.where().field("id").eq().val("an id").parameter("__systemproperties", "createdAt").execute().get();
 
             if (result == null) {
                 fail("Expected result");
@@ -1698,7 +1698,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
             @Override
             public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-                assertTrue(request.getUrl().contains("__systemproperties=__createdAt"));
+                assertTrue(request.getUrl().contains("__systemproperties=createdAt"));
 
                 return nextServiceFilterCallback.onNext(request);
             }
@@ -1711,7 +1711,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 
         try {
             // Call the execute method with projection
-            JsonElement result = msTable.select("id", "String").parameter("__systemproperties", "__createdAt").execute().get();
+            JsonElement result = msTable.select("id", "String").parameter("__systemproperties", "createdAt").execute().get();
 
             if (result == null) {
                 fail("Expected result");
@@ -1752,7 +1752,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
             @Override
             public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-                assertTrue(request.getUrl().contains("__systemproperties=__createdAt"));
+                assertTrue(request.getUrl().contains("__systemproperties=createdAt"));
 
                 return nextServiceFilterCallback.onNext(request);
             }
@@ -1765,7 +1765,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 
         try {
             // Call the execute method with filter
-            JsonElement result = msTable.where().field("id").eq().val(5).parameter("__systemproperties", "__createdAt").execute().get();
+            JsonElement result = msTable.where().field("id").eq().val(5).parameter("__systemproperties", "createdAt").execute().get();
 
             if (result == null) {
                 fail("Expected result");
@@ -1811,7 +1811,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
                 }
 
                 assertTrue(properties.containsKey("id"));
-                assertFalse(properties.containsKey("__createdAt"));
+                assertFalse(properties.containsKey("createdAt"));
 
                 return nextServiceFilterCallback.onNext(request);
             }
@@ -1866,7 +1866,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
                 }
 
                 assertTrue(properties.containsKey("id"));
-                assertFalse(properties.containsKey("__createdAt"));
+                assertFalse(properties.containsKey("createdAt"));
 
                 return nextServiceFilterCallback.onNext(request);
             }
@@ -1877,7 +1877,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 
         NamedSystemPropertiesType element = new NamedSystemPropertiesType();
         element.Id = "an id";
-        element.__createdAt = new GregorianCalendar(2012, 00, 18).getTime();
+        element.createdAt = new GregorianCalendar(2012, 00, 18).getTime();
 
         try {
             // Call the insert method
@@ -1921,7 +1921,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
                 }
 
                 assertTrue(properties.containsKey("id"));
-                assertFalse(properties.containsKey("__updatedAt"));
+                assertFalse(properties.containsKey("updatedAt"));
 
                 return nextServiceFilterCallback.onNext(request);
             }
@@ -1976,7 +1976,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
                 }
 
                 assertTrue(properties.containsKey("id"));
-                assertFalse(properties.containsKey("__version"));
+                assertFalse(properties.containsKey("version"));
 
                 return nextServiceFilterCallback.onNext(request);
             }
@@ -2030,9 +2030,9 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
                 }
 
                 assertTrue(properties.containsKey("id"));
-                assertFalse(properties.containsKey("__createdAt"));
-                assertFalse(properties.containsKey("__updatedAt"));
-                assertFalse(properties.containsKey("__version"));
+                assertFalse(properties.containsKey("createdAt"));
+                assertFalse(properties.containsKey("updatedAt"));
+                assertFalse(properties.containsKey("version"));
 
                 return nextServiceFilterCallback.onNext(request);
             }
@@ -2089,7 +2089,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
                 }
 
                 assertTrue(properties.containsKey("id"));
-                assertTrue(properties.containsKey("CreatedAt"));
+                assertTrue(properties.containsKey("_CreatedAt"));
 
                 return nextServiceFilterCallback.onNext(request);
             }
@@ -2100,7 +2100,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 
         NotSystemPropertyCreatedAtType element = new NotSystemPropertyCreatedAtType();
         element.Id = "an id";
-        element.CreatedAt = new GregorianCalendar(2012, 00, 18).getTime();
+        element._CreatedAt = new GregorianCalendar(2012, 00, 18).getTime();
 
         try {
             // Call the insert method
@@ -2199,7 +2199,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
                 }
 
                 assertTrue(properties.containsKey("id"));
-                assertTrue(properties.containsKey("version"));
+                assertTrue(properties.containsKey("_Version"));
 
                 return nextServiceFilterCallback.onNext(request);
             }
@@ -2210,7 +2210,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 
         NotSystemPropertyVersionType element = new NotSystemPropertyVersionType();
         element.Id = "an id";
-        element.version = "a version";
+        element._Version = "a version";
 
         try {
             // Call the insert method
@@ -2300,7 +2300,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 
     public void testLookupDeserializesCreateAtToDate() throws Throwable {
 
-        final String responseContent = "{\"id\":\"an id\",\"__createdAt\":\"2000-01-01T07:59:59.000Z\"}";
+        final String responseContent = "{\"id\":\"an id\",\"createdAt\":\"2000-01-01T07:59:59.000Z\"}";
 
         MobileServiceClient client = null;
 
@@ -2341,7 +2341,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 
     public void testLookupDeserializesCreateAtToString() throws Throwable {
 
-        final String responseContent = "{\"id\":\"an id\",\"__createdAt\":\"2000-01-01T07:59:59.000Z\"}";
+        final String responseContent = "{\"id\":\"an id\",\"createdAt\":\"2000-01-01T07:59:59.000Z\"}";
 
         MobileServiceClient client = null;
 
@@ -2379,7 +2379,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 
     public void testLookupDeserializesUpdateAtToDate() throws Throwable {
 
-        final String responseContent = "{\"id\":\"an id\",\"__updatedAt\":\"2000-01-01T07:59:59.000Z\"}";
+        final String responseContent = "{\"id\":\"an id\",\"updatedAt\":\"2000-01-01T07:59:59.000Z\"}";
 
         MobileServiceClient client = null;
 
@@ -2420,7 +2420,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 
     public void testLookupDeserializesUpdateAtToString() throws Throwable {
 
-        final String responseContent = "{\"id\":\"an id\",\"__updatedAt\":\"2000-01-01T07:59:59.000Z\"}";
+        final String responseContent = "{\"id\":\"an id\",\"updatedAt\":\"2000-01-01T07:59:59.000Z\"}";
 
         MobileServiceClient client = null;
 
@@ -2458,7 +2458,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 
     public void testLookupDeserializesVersionToString() throws Throwable {
 
-        final String responseContent = "{\"id\":\"an id\",\"__version\":\"AAAAAAAAH2o=\"}";
+        final String responseContent = "{\"id\":\"an id\",\"version\":\"AAAAAAAAH2o=\"}";
         MobileServiceClient client = null;
 
         try {
@@ -2503,7 +2503,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 
     private void updateSetsIfMatchWithVersion(final Pair<String, String> version) throws Throwable {
 
-        final String responseContent = "{\"id\":\"an id\",\"__version\":\"AAAAAAAAH2o=\"}";
+        final String responseContent = "{\"id\":\"an id\",\"version\":\"AAAAAAAAH2o=\"}";
 
         MobileServiceClient client = null;
 
@@ -2651,11 +2651,11 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
         if (EnumSet.complementOf(systemProperties).isEmpty()) {
             assertTrue(requestUri.contains("__systemproperties=*"));
         } else if (systemProperties.contains(MobileServiceSystemProperty.CreatedAt)) {
-            assertTrue(requestUri.contains("__createdAt"));
+            assertTrue(requestUri.contains("createdAt"));
         } else if (systemProperties.contains(MobileServiceSystemProperty.UpdatedAt)) {
-            assertTrue(requestUri.contains("__updatedAt"));
+            assertTrue(requestUri.contains("updatedAt"));
         } else if (systemProperties.contains(MobileServiceSystemProperty.Version)) {
-            assertTrue(requestUri.contains("__version"));
+            assertTrue(requestUri.contains("version"));
         }
     }
 

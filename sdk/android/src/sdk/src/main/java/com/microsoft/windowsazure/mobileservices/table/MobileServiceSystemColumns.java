@@ -13,20 +13,20 @@ public class MobileServiceSystemColumns {
     /*
     * The version column on a Mobile Service table.
     */
-    public static final String Version = "__version";
+    public static final String Version = "version";
 
     /*
     * The createdAt column on a Mobile Service table.
     */
-    public static final String CreatedAt = "__createdAt";
+    public static final String CreatedAt = "createdAt";
 
     /*
     * The updatedAt column on a Mobile Service table.
     */
-    public static final String UpdatedAt = "__updatedAt";
+    public static final String UpdatedAt = "updatedAt";
 
     /*
     * The deleted colum on a Mobile Service table.
     */
-    public static final String Deleted = "__deleted";
+    public static final String Deleted = "deleted";
 }
