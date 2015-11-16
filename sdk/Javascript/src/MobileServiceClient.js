@@ -29,6 +29,8 @@ var _zumoFeatures = {
 var _zumoFeaturesHeaderName = "X-ZUMO-FEATURES";
 var _zumoApiVersionHeaderName = "ZUMO-API-VERSION";
 var _zumoApiVersion = "2.0.0";
+var alternateLoginHost = null;
+var loginUriPrefix = null;
 
 function MobileServiceClient(applicationUrl) {
     /// <summary>

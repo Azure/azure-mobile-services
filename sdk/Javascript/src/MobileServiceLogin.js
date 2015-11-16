@@ -10,7 +10,7 @@ var _ = require('Extensions');
 var Validate = require('Validate');
 var Platform = require('Platform');
 
-var loginUrl = "login";
+var loginUrl = ".auth/login";
 var loginDone = "done";
 
 function MobileServiceLogin(client, ignoreFilters) {
@@ -196,7 +196,7 @@ MobileServiceLogin.prototype._isAuthToken = function (value) {
     return value && _.isString(value) && value.split('.').length === 3;
 };
 
-MobileServiceLogin.prototype.loginWithMobileServiceToken = function(authenticationToken, callback) {
+MobileServiceLogin.prototype.loginWithMobileServiceToken = function (authenticationToken, callback) {
     /// <summary>
     /// Log a user into a Mobile Services application given an Mobile Service authentication token.
     /// </summary>
@@ -218,12 +218,12 @@ MobileServiceLogin.prototype.loginWithMobileServiceToken = function(authenticati
         loginUrl,
         { authenticationToken: authenticationToken },
         self.ignoreFilters,
-        function(error, response) {
+        function (error, response) {
             onLoginResponse(error, response, client, callback);
         });
 };
 
-MobileServiceLogin.prototype.loginWithProvider = function(provider, token, useSingleSignOn, parameters, callback) {
+MobileServiceLogin.prototype.loginWithProvider = function (provider, token, useSingleSignOn, parameters, callback) {
     /// <summary>
     /// Log a user into a Mobile Services application given a provider name and optional token object.
     /// </summary>
@@ -421,8 +421,8 @@ function loginWithLoginControl(login, provider, useSingleSignOn, parameters, cal
 
     var client = login.getMobileServiceClient();
     var startUri = _.url.combinePathSegments(
-        client.applicationUrl,
-        loginUrl,
+        client.alternateLoginHost || client.applicationUrl,
+        client.loginUriPrefix || loginUrl,
         provider);
     var endUri = null;
 
@@ -434,8 +434,8 @@ function loginWithLoginControl(login, provider, useSingleSignOn, parameters, cal
     // If not single sign-on, then we need to construct a non-null end uri.
     if (!useSingleSignOn) {
         endUri = _.url.combinePathSegments(
-            client.applicationUrl,
-            loginUrl,
+            client.alternateLoginHost || client.applicationUrl,
+            client.loginUriPrefix || loginUrl,
             loginDone);
     }
 
