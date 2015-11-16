@@ -23,6 +23,8 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
+import com.microsoft.windowsazure.mobileservices.table.DateTimeOffset;
+
 import java.util.Date;
 
 /**
@@ -35,7 +37,9 @@ class ConstantNode implements QueryNode {
     public QueryNode deepClone() {
         ConstantNode clone = new ConstantNode();
 
-        if (this.mValue instanceof Date) {
+        if (this.mValue instanceof DateTimeOffset) {
+            clone.mValue = new DateTimeOffset(((Date) this.mValue));
+        } else if (this.mValue instanceof Date) {
             clone.mValue = new Date(((Date) this.mValue).getTime());
         } else {
             clone.mValue = this.mValue;
