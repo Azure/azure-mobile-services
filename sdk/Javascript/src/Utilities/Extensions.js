@@ -508,7 +508,20 @@ exports.url = {
 
         var start = url.substring(0, 7).toLowerCase();
         return (start  == "http://" || start == "https:/");
+    },
+
+    isHttps: function (url) {
+        /// <summary>
+        /// Simple check to verify if url begins with https:/
+        /// </summary>
+        if (_.isNullOrEmpty(url)) {
+            return false;
+        }
+
+        var start = url.substring(0, 7).toLowerCase();
+        return (start == "https:/");
     }
+
 };
 
 exports.tryParseIsoDateString = function (text) {
