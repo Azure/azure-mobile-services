@@ -29,6 +29,8 @@ import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
 import android.app.Activity;
 import android.content.Context;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Pair;
 
@@ -134,6 +136,89 @@ public class MobileServiceClient {
      * MobileServicePush used for push notifications
      */
     private MobileServicePush mPush;
+
+    /*
+    *  prefix for login endpoints. If not set defaults to /.auth/login
+    */
+    private String mLoginUriPrefix;
+
+    /*
+    *    Alternate Host URI for login
+    */
+    private URL mAlternateLoginHost;
+
+    /*
+     *  returns the Alternate Host URI for login
+     */
+    public URL getAlternateLoginHost() {
+        return mAlternateLoginHost;
+    }
+
+    private static URL normalizeUrl(URL appUrl) {
+        URL normalizedAppURL = appUrl;
+
+        if (normalizedAppURL.getPath() == "") {
+            try {
+                normalizedAppURL = new URL(appUrl.toString() + "/");
+            } catch (MalformedURLException e) {
+                // This exception won't happen, since it's just adding a
+                // trailing "/" to a valid URL
+            }
+        }
+        return normalizedAppURL;
+    }
+
+    /**
+     * Sets the Alternate Host URI for login
+     *
+     * @param alternateLoginHost Alternate Host URI for login
+     */
+    public void setAlternateLoginHost(URL alternateLoginHost) {
+        if (alternateLoginHost == null) {
+            mAlternateLoginHost = mAppUrl;
+        } else if (alternateLoginHost.getProtocol().toUpperCase().equals(HttpConstants.HttpsProtocol) && (alternateLoginHost.getPath().length() == 0 || alternateLoginHost.getPath().equals(Character.toString(Slash)))) {
+            mAlternateLoginHost = normalizeUrl(alternateLoginHost);
+        } else {
+            throw new IllegalArgumentException(String.format("%s is invalid.AlternateLoginHost must be a valid https URI with hostname only", alternateLoginHost.toString()));
+        }
+    }
+
+    /*
+     *  returns the prefix for login endpoints. If not set defaults to /.auth/login
+     */
+    public String getLoginUriPrefix() {
+        return mLoginUriPrefix;
+    }
+
+    /**
+     * Sets the prefix for login endpoints
+     *
+     * @param loginUriPrefix prefix for login endpoints
+     */
+    public void setLoginUriPrefix(String loginUriPrefix) {
+        if (mLoginUriPrefix == null) {
+            return;
+        }
+        mLoginUriPrefix = AddLeadingSlash(loginUriPrefix);
+    }
+
+    private static final char Slash = '/';
+
+    /*
+        Adds Leading slash to the string if not present
+    */
+    private static String AddLeadingSlash(String uri) {
+        if (uri == null) {
+            throw new IllegalArgumentException("uri");
+        }
+
+        if (!uri.startsWith(Character.toString(Slash))) {
+            uri = Slash + uri;
+        }
+
+        return uri;
+    }
+
     /**
      * MobileServiceSyncContext used for synchronization between local and
      * remote databases.
@@ -147,7 +232,7 @@ public class MobileServiceClient {
      */
     private MobileServiceClient(MobileServiceClient client) {
         initialize(client.getAppUrl(), client.getCurrentUser(), client.getGsonBuilder(), client.getContext(),
-                client.getOkHttpClientFactory());
+                client.getOkHttpClientFactory(), client.getLoginUriPrefix(), client.getAlternateLoginHost());
     }
 
     /**
@@ -171,7 +256,7 @@ public class MobileServiceClient {
         GsonBuilder gsonBuilder = createMobileServiceGsonBuilder();
         gsonBuilder.serializeNulls(); // by default, add null serialization
 
-        initialize(appUrl, null, gsonBuilder, context, new OkHttpClientFactoryImpl());
+        initialize(appUrl, null, gsonBuilder, context, new OkHttpClientFactoryImpl(), null, null);
     }
 
     /**
@@ -206,7 +291,7 @@ public class MobileServiceClient {
      * Invokes an interactive authentication process using the specified
      * Authentication Provider
      *
-     * @param provider The provider used for the authentication process
+     * @param provider   The provider used for the authentication process
      * @param parameters Aditional parameters for the authentication process
      */
     public ListenableFuture<MobileServiceUser> login(MobileServiceAuthenticationProvider provider, HashMap<String, String> parameters) {
@@ -231,9 +316,9 @@ public class MobileServiceClient {
      * Invokes an interactive authentication process using the specified
      * Authentication Provider
      *
-     * @param provider The provider used for the authentication process
+     * @param provider   The provider used for the authentication process
      * @param parameters Aditional parameters for the authentication process
-     * @param callback Callback to invoke when the authentication process finishes
+     * @param callback   Callback to invoke when the authentication process finishes
      * @deprecated use {@link login( com.microsoft.windowsazure.mobileservices.authentication.MobileServiceAuthenticationProvider
      * provider)} instead
      */
@@ -255,7 +340,7 @@ public class MobileServiceClient {
      * Invokes an interactive authentication process using the specified
      * Authentication Provider
      *
-     * @param provider The provider used for the authentication process
+     * @param provider   The provider used for the authentication process
      * @param parameters Aditional parameters for the authentication process
      */
     public ListenableFuture<MobileServiceUser> login(String provider, HashMap<String, String> parameters) {
@@ -301,9 +386,9 @@ public class MobileServiceClient {
      * Invokes an interactive authentication process using the specified
      * Authentication Provider
      *
-     * @param provider The provider used for the authentication process
+     * @param provider   The provider used for the authentication process
      * @param parameters Aditional parameters for the authentication process
-     * @param callback Callback to invoke when the authentication process finishes
+     * @param callback   Callback to invoke when the authentication process finishes
      * @deprecated use {@link login(String provider)} instead
      */
     public void login(String provider, HashMap<String, String> parameters, final UserAuthenticationCallback callback) {
@@ -793,8 +878,18 @@ public class MobileServiceClient {
     /**
      * Log the user out of the Mobile Service
      */
-    public void logout() {
-        mCurrentUser = null;
+    public ListenableFuture logout() {
+        final SettableFuture logoutFuture = SettableFuture.create();
+
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                mCurrentUser = null;
+                logoutFuture.set(null);
+                return null;
+            }
+        }.execute();
+        return logoutFuture;
     }
 
     /**
@@ -1186,7 +1281,7 @@ public class MobileServiceClient {
         Futures.addCallback(internalFuture, new FutureCallback<ServiceFilterResponse>() {
             @Override
             public void onFailure(Throwable e) {
-               future.setException(e);
+                future.setException(e);
             }
 
             @Override
@@ -1424,8 +1519,8 @@ public class MobileServiceClient {
      * @param gsonBuilder the GsonBuilder used to in JSON Serialization/Deserialization
      * @param context     The Context where the MobileServiceClient is created
      */
-    private void initialize(URL appUrl, MobileServiceUser currentUser, GsonBuilder gsonBuiler, Context context,
-                            OkHttpClientFactory okHttpClientFactory) {
+    private void initialize(URL appUrl, MobileServiceUser currentUser, GsonBuilder gsonBuilder, Context context,
+                            OkHttpClientFactory okHttpClientFactory, String loginUriPrefix, URL alternateLoginHost) {
         if (appUrl == null || appUrl.toString().trim().length() == 0) {
             throw new IllegalArgumentException("Invalid Application URL");
         }
@@ -1434,24 +1529,16 @@ public class MobileServiceClient {
             throw new IllegalArgumentException("Context cannot be null");
         }
 
-        URL normalizedAppURL = appUrl;
-
-        if (normalizedAppURL.getPath() == "") {
-            try {
-                normalizedAppURL = new URL(appUrl.toString() + "/");
-            } catch (MalformedURLException e) {
-                // This exception won't happen, since it's just adding a
-                // trailing "/" to a valid URL
-            }
-        }
-
+        URL normalizedAppURL = normalizeUrl(appUrl);
         mAppUrl = normalizedAppURL;
         mLoginManager = new LoginManager(this);
+        mLoginUriPrefix = loginUriPrefix;
+        mAlternateLoginHost = alternateLoginHost;
         mServiceFilter = null;
         mLoginInProgress = false;
         mCurrentUser = currentUser;
         mContext = context;
-        mGsonBuilder = gsonBuiler;
+        mGsonBuilder = gsonBuilder;
         mOkHttpClientFactory = okHttpClientFactory;
         mPush = new MobileServicePush(this, context);
         mSyncContext = new MobileServiceSyncContext(this);
@@ -1467,7 +1554,7 @@ public class MobileServiceClient {
     /**
      * Sets the GsonBuilder used to in JSON Serialization/Deserialization
      *
-     * @param mGsonBuilder The GsonBuilder to set
+     * @param gsonBuilder The GsonBuilder to set
      */
     public void setGsonBuilder(GsonBuilder gsonBuilder) {
         mGsonBuilder = gsonBuilder;

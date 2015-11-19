@@ -41,6 +41,7 @@ import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.ResultsC
 import junit.framework.Assert;
 
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -69,6 +70,107 @@ public class URLTests extends InstrumentationTestCase {
         testLoginURL("windowsAZUREactiveDIRECTORY");
         testLoginURL("AAD");
         testLoginURL("aad");
+    }
+
+    public void testLoginURLPrefixAndAlternateHost() throws Throwable {
+
+        // App Urls
+        String appUrlWithTrailingSlash = "https://myapp.com/";
+        String appUrlWithoutTrailingSlash = "https://myapp.com";
+        String appUrlWithPath = "https://myapp.com/abc/";
+
+        // Alternate appUrls
+        String altUrlWithTrailingSlash = "https://altapp.com/";
+        String altUrlWithoutTrailingSlash = "https://altapp.com";
+        String altUrlWithPath = "https://altapp.com/abc/";
+
+        // loginPrefix
+        String loginPrefix = ".auth/login/";
+
+        // loginPrefix
+        String altPrefix = ".auth/login/";
+        String altPrefixWithStartingSlash = "/.auth/login/";
+        String altPrefixWithoutTrailingSlash = "/.auth/login";
+
+        testLoginURLPrefixAndAlternateHost(appUrlWithTrailingSlash, null, null, appUrlWithTrailingSlash, loginPrefix, null);
+        testLoginURLPrefixAndAlternateHost(appUrlWithoutTrailingSlash, null, null, appUrlWithTrailingSlash, loginPrefix, null);
+        testLoginURLPrefixAndAlternateHost(appUrlWithPath, null, null, appUrlWithTrailingSlash, loginPrefix, null);
+        testLoginURLPrefixAndAlternateHost(appUrlWithTrailingSlash, altPrefix, null, appUrlWithTrailingSlash, altPrefix, null);
+        testLoginURLPrefixAndAlternateHost(appUrlWithTrailingSlash, altPrefixWithStartingSlash, null, appUrlWithTrailingSlash, altPrefix, null);
+        testLoginURLPrefixAndAlternateHost(appUrlWithTrailingSlash, altPrefixWithoutTrailingSlash, null, appUrlWithTrailingSlash, altPrefix, null);
+        testLoginURLPrefixAndAlternateHost(appUrlWithTrailingSlash, altPrefix, altUrlWithoutTrailingSlash, altUrlWithTrailingSlash, altPrefix, null);
+        testLoginURLPrefixAndAlternateHost(appUrlWithTrailingSlash, altPrefix, altUrlWithTrailingSlash, altUrlWithTrailingSlash, altPrefix, null);
+
+        boolean caughtException = false;
+        try {
+            testLoginURLPrefixAndAlternateHost(appUrlWithTrailingSlash, altPrefix, altUrlWithPath, altUrlWithTrailingSlash, altPrefix, null);
+        } catch (IllegalArgumentException e) {
+            caughtException = true;
+        }
+
+        if (!caughtException) {
+            Assert.fail("alternateHostURL validation failed, exception should have been caught");
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    private void testLoginURLPrefixAndAlternateHost(String appUrl, String altLoginPrefix, String alternateHostURL, String expectedAppUrl, String expectedPrefix, String expectedAlternateHostUrl) throws Throwable {
+        Object provider = MobileServiceAuthenticationProvider.Facebook;
+        final ResultsContainer result = new ResultsContainer();
+
+        // Create client
+        MobileServiceClient client = null;
+        try {
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
+            client.setLoginUriPrefix(altLoginPrefix);
+            if (alternateHostURL != null) {
+                client.setAlternateLoginHost(new URL(alternateHostURL));
+            }
+        } catch (MalformedURLException e) {
+        }
+
+        // Add a new filter to the client
+        client = client.withFilter(new ServiceFilter() {
+
+            @Override
+            public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+
+                result.setRequestUrl(request.getUrl());
+                assertEquals(HttpConstants.PostMethod, request.getMethod());
+
+                ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+                response.setContent("{authenticationToken:'123abc', user:{userId:'123456'}}");
+
+                final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+
+                resultFuture.set(response);
+
+                return resultFuture;
+            }
+        });
+
+        try {
+            if (provider.getClass().equals(MobileServiceAuthenticationProvider.class)) {
+                client.login((MobileServiceAuthenticationProvider) provider, "{\"myToken\":123}").get();
+            } else {
+                client.login((String) provider, "{\"myToken\":123}").get();
+            }
+        } catch (Exception exception) {
+            Assert.fail();
+        }
+
+        String normalizedProvider = provider.toString().toLowerCase(Locale.getDefault());
+        if (normalizedProvider.equals("windowsazureactivedirectory")) {
+            normalizedProvider = "aad";
+        }
+
+        // Assert
+        String expectedURL = expectedAppUrl + expectedPrefix + normalizedProvider;
+        if (expectedAlternateHostUrl != null) {
+            expectedURL = expectedAlternateHostUrl + expectedPrefix + normalizedProvider;
+        }
+        assertEquals(expectedURL, result.getRequestUrl());
+
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -119,7 +221,8 @@ public class URLTests extends InstrumentationTestCase {
         }
 
         // Assert
-        String expectedURL = appUrl + "login/" + normalizedProvider;
+        String urlPrefix = ".auth/login/";
+        String expectedURL = appUrl + urlPrefix + normalizedProvider;
         assertEquals(expectedURL, result.getRequestUrl());
 
     }

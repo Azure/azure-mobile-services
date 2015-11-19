@@ -249,7 +249,7 @@ public class SerializationTests extends InstrumentationTestCase {
 
         // Asserts
         assertEquals(
-                "{\"address\":{\"zipcode\":1313,\"country\":\"US\",\"streetaddress\":\"1345 Washington St\"},\"firstName\":\"John\",\"lastName\":\"Doe\",\"id\":0}",
+                "{\"address\":{\"zipcode\":1313,\"country\":\"US\",\"streetaddress\":\"1345 Washington St\"},\"firstName\":\"John\",\"id\":0,\"lastName\":\"Doe\"}",
                 serializedObject);
     }
 
@@ -290,7 +290,7 @@ public class SerializationTests extends InstrumentationTestCase {
         String serializedObject = gsonBuilder.create().toJson(group);
         // Asserts
         assertEquals(
-                "{\"people\":[{\"age\":23,\"id\":2,\"name\":\"John\"},{\"age\":18,\"id\":4,\"name\":\"Paul\"},{\"age\":25,\"id\":5,\"name\":\"Maria\"}],\"mName\":\"Group1\",\"mId\":1}",
+                "{\"mId\":1,\"mName\":\"Group1\",\"people\":[{\"age\":23,\"id\":2,\"name\":\"John\"},{\"age\":18,\"id\":4,\"name\":\"Paul\"},{\"age\":25,\"id\":5,\"name\":\"Maria\"}]}",
                 serializedObject);
     }
 

@@ -115,7 +115,8 @@ public class LoginTests extends InstrumentationTestCase {
         }
 
         // Assert
-        String expectedURL = appUrl + "login/" + provider.toString().toLowerCase(Locale.getDefault());
+        String urlPrefix = ".auth/login/";
+        String expectedURL = appUrl + urlPrefix + provider.toString().toLowerCase(Locale.getDefault());
         assertEquals(expectedURL, result.getRequestUrl());
     }
 
@@ -183,7 +184,8 @@ public class LoginTests extends InstrumentationTestCase {
         }
 
         // Assert
-        String expectedURL = appUrl + "login/" + provider.toString().toLowerCase(Locale.getDefault()) + parameterQueryString;
+        String urlPrefix = ".auth/login/";
+        String expectedURL = appUrl + urlPrefix + provider.toString().toLowerCase(Locale.getDefault()) + parameterQueryString;
         assertEquals(expectedURL, result.getRequestUrl());
     }
 
@@ -254,7 +256,8 @@ public class LoginTests extends InstrumentationTestCase {
         latch.await();
 
         // Assert
-        String expectedURL = appUrl + "login/" + provider.toString().toLowerCase(Locale.getDefault());
+        String urlPrefix = ".auth/login/";
+        String expectedURL = appUrl + urlPrefix + provider.toString().toLowerCase(Locale.getDefault());
         assertEquals(expectedURL, result.getRequestUrl());
     }
 
@@ -415,7 +418,11 @@ public class LoginTests extends InstrumentationTestCase {
 
         client.setCurrentUser(new MobileServiceUser("abc"));
 
-        client.logout();
+        try {
+            client.logout().get();
+        } catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
 
         assertNull(client.getCurrentUser());
     }
