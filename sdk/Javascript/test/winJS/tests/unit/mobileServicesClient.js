@@ -32,8 +32,8 @@ $testGroup('MobileServiceClient.js',
     .checkAsync(function () {
         var descend = '';
         var rise = '';
-        var createFilter = function(letter) {
-            return function(req, next, callback) {
+        var createFilter = function (letter) {
+            return function (req, next, callback) {
                 descend += letter;
                 next(req, function (err, resp) {
                     rise += letter;
@@ -70,13 +70,13 @@ $testGroup('MobileServiceClient.js',
         });
     }),
 
-    $test('login - Verify login mechanics')
+    $test('login_Verify_login_mechanics')
     .tag('login')
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com");
         client = client.withFilter(function (req, next, callback) {
             $assert.areEqual(req.type, 'POST');
-            $assert.contains(req.url, "login");
+            $assert.contains(req.url, ".auth/login");
             $assert.areEqual(req.data, '{"authenticationToken":"token.a.b"}');
             callback(null, { status: 200, responseText: '{"authenticationToken":"zumo","user":{"userId":"bob"}}' });
         });
@@ -95,7 +95,7 @@ $testGroup('MobileServiceClient.js',
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com");
         client = client.withFilter(function (req, next, callback) {
             $assert.areEqual(req.type, 'POST');
-            $assert.contains(req.url, "login");
+            $assert.contains(req.url, ".auth/login");
             $assert.areEqual(req.data, '{"authenticationToken":"token.a.b"}');
             callback(null, { status: 200, responseText: '{"authenticationToken":"zumo","user":{"userId":"bob"}}' });
         });
@@ -112,15 +112,15 @@ $testGroup('MobileServiceClient.js',
     .tag('login')
     .checkAsync(function () {
         return testLoginParameters(['facebook', { parameters: { display: 'popup' } }],
-                                  "http://www.test.com/login/facebook?display=popup",
-                                  "http://www.test.com/login/done");
+                                  "http://www.test.com/.auth/login/facebook?display=popup",
+                                  "http://www.test.com/.auth/login/done");
     }),
 
     $test('loginWithOptions_provider_singlesignon_parameters')
     .tag('login')
     .checkAsync(function () {
         return testLoginParameters(['facebook', { useSingleSignOn: true, parameters: { display: 'popup' } }],
-                                  "http://www.test.com/login/facebook?display=popup",
+                                  "http://www.test.com/.auth/login/facebook?display=popup",
                                   null);
     }),
 
@@ -128,7 +128,7 @@ $testGroup('MobileServiceClient.js',
     .tag('login')
     .checkAsync(function () {
         return testLoginParameters(['facebook', { useSingleSignOn: true }],
-                                  "http://www.test.com/login/facebook",
+                                  "http://www.test.com/.auth/login/facebook",
                                   null);
     }),
 
@@ -136,9 +136,128 @@ $testGroup('MobileServiceClient.js',
     .tag('login')
     .checkAsync(function () {
         return testLoginParameters(['facebook'],
-                                  "http://www.test.com/login/facebook",
-                                  "http://www.test.com/login/done");
+                                  "http://www.test.com/.auth/login/facebook",
+                                  "http://www.test.com/.auth/login/done");
     }),
+
+      $test('loginWithOptions_provider_parameters_alternateLoginHost')
+    .tag('login')
+    .checkAsync(function () {
+        return testLoginParameters(['facebook', { parameters: { display: 'popup' } }],
+                                  "https://www.testalternateloginhost.com/.auth/login/facebook?display=popup",
+                                  "https://www.testalternateloginhost.com/.auth/login/done", "https://www.testalternateloginhost.com/");
+    }),
+
+    $test('loginWithOptions_provider_singlesignon_parameters_alternateLoginHost')
+    .tag('login')
+    .checkAsync(function () {
+        return testLoginParameters(['facebook', { useSingleSignOn: true, parameters: { display: 'popup' } }],
+                                  "https://www.testalternateloginhost.com/.auth/login/facebook?display=popup",
+                                  null, "https://www.testalternateloginhost.com/");
+    }),
+
+    $test('loginWithOptions_provider_singlesignon_alternateLoginHost')
+    .tag('login')
+    .checkAsync(function () {
+        return testLoginParameters(['facebook', { useSingleSignOn: true }],
+                                  "https://www.testalternateloginhost.com/.auth/login/facebook",
+                                  null, "https://www.testalternateloginhost.com/");
+    }),
+
+    $test('loginWithOptions_provider_alternateLoginHost')
+    .tag('login')
+    .checkAsync(function () {
+        return testLoginParameters(['facebook'],
+                                  "https://www.testalternateloginhost.com/.auth/login/facebook",
+                                  "https://www.testalternateloginhost.com/.auth/login/done", "https://www.testalternateloginhost.com/");
+    }),
+
+
+     $test('loginWithOptions_provider_parameters_loginPrefix')
+    .tag('login')
+    .checkAsync(function () {
+        return testLoginParameters(['facebook', { parameters: { display: 'popup' } }],
+                                  "http://www.test.com/login/facebook?display=popup",
+                                  "http://www.test.com/login/done", null, "login");
+    }),
+
+    $test('loginWithOptions_provider_singlesignon_parameters_loginPrefix')
+    .tag('login')
+    .checkAsync(function () {
+        return testLoginParameters(['facebook', { useSingleSignOn: true, parameters: { display: 'popup' } }],
+                                  "http://www.test.com/login/facebook?display=popup",
+                                  null, null, "login");
+    }),
+
+    $test('loginWithOptions_provider_singlesignon_loginPrefix')
+    .tag('login')
+    .checkAsync(function () {
+        return testLoginParameters(['facebook', { useSingleSignOn: true }],
+                                  "http://www.test.com/login/facebook",
+                                  null, null, "login");
+    }),
+
+    $test('loginWithOptions_provider_loginPrefix')
+    .tag('login')
+    .checkAsync(function () {
+        return testLoginParameters(['facebook'],
+                                  "http://www.test.com/login/facebook",
+                                  "http://www.test.com/login/done", null, "login");
+    }),
+
+    $test('loginWithOptions_provider_parameters_alternateLoginHost_loginPrefix')
+    .tag('login')
+    .checkAsync(function () {
+        return testLoginParameters(['facebook', { parameters: { display: 'popup' } }],
+                                  "https://www.testalternateloginhost.com/login/facebook?display=popup",
+                                  "https://www.testalternateloginhost.com/login/done", "https://www.testalternateloginhost.com/", "login");
+    }),
+
+    $test('loginWithOptions_provider_singlesignon_parameters_alternateLoginHost_loginPrefix')
+    .tag('login')
+    .checkAsync(function () {
+        return testLoginParameters(['facebook', { useSingleSignOn: true, parameters: { display: 'popup' } }],
+                                  "https://www.testalternateloginhost.com/login/facebook?display=popup",
+                                  null, "https://www.testalternateloginhost.com/", "login");
+    }),
+
+    $test('loginWithOptions_provider_singlesignon_alternateLoginHost_loginPrefix')
+    .tag('login')
+    .checkAsync(function () {
+        return testLoginParameters(['facebook', { useSingleSignOn: true }],
+                                  "https://www.testalternateloginhost.com/login/facebook",
+                                  null, "https://www.testalternateloginhost.com/", "login");
+    }),
+
+    $test('loginWithOptions_provider_alternateLoginHost_loginPrefix')
+    .tag('login')
+    .checkAsync(function () {
+        return testLoginParameters(['facebook'],
+                                  "https://www.testalternateloginhost.com/login/facebook",
+                                  "https://www.testalternateloginhost.com/login/done", "https://www.testalternateloginhost.com/", "login");
+    }),
+
+     $test('invalid_alternateLoginHost')
+            .tag('login')
+            .check(function () {
+                $assertThrows(function () {
+                    var client = new WindowsAzure.MobileServiceClient("http://www.test.com");
+                    client.alternateLoginHost = "invalidUrl";
+                });
+                $assertThrows(function () {
+                    var client = new WindowsAzure.MobileServiceClient("http://www.test.com");
+                    client.alternateLoginHost = "http://www.alternateloginHostHttp.com";
+                });
+            }),
+
+     $test('default_loginendpoint_if_alternateloginhost_isnull')
+            .tag('login')
+            .checkAsync(function () {
+                return testLoginParameters(['facebook'],
+                                          "http://www.test.com/.auth/login/facebook",
+                                          "http://www.test.com/.auth/login/done", null, null);
+            }),
+    
 
     $test('logout')
     .description('Verify Authentication.logout undoes the effects of logging in')
@@ -610,10 +729,13 @@ $testGroup('MobileServiceClient.js',
     })
 );
 
-function testLoginParameters(args, expectedStartUri, expectedEndUri) {
+function testLoginParameters(args, expectedStartUri, expectedEndUri, alternateLoginHost, loginUriPrefix) {
     var client = new WindowsAzure.MobileServiceClient("http://www.test.com");
+    client.alternateLoginHost = alternateLoginHost;
+    client.loginUriPrefix = loginUriPrefix;
 
     var _login = Platform.login;
+
     Platform.login = function (startUri, endUri, callback) {
         Platform.login = _login;
 

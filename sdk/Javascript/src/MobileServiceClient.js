@@ -29,6 +29,39 @@ var _zumoFeatures = {
 var _zumoFeaturesHeaderName = "X-ZUMO-FEATURES";
 var _zumoApiVersionHeaderName = "ZUMO-API-VERSION";
 var _zumoApiVersion = "2.0.0";
+var _alternateLoginHost = null;
+Object.defineProperties(MobileServiceClient.prototype, {
+    alternateLoginHost: {
+        get: function () {
+            return this._alternateLoginHost;
+        },
+        set: function (value) {
+            if (_.isNullOrEmpty(value)) {
+                this._alternateLoginHost = this.applicationUrl;
+            }else if (_.url.isAbsoluteUrl(value) && _.url.isHttps(value)) {
+                this._alternateLoginHost = value;
+            } else {
+                throw _.format(Platform.getResourceString("AlternateLoginHost_Invalid"), value);
+            }
+        }
+    }
+});
+var _loginUriPrefix = null;
+Object.defineProperties(MobileServiceClient.prototype, {
+    loginUriPrefix: {
+        get: function () {
+            return this._loginUriPrefix;
+        },
+        set: function (value) {
+            if (_.isNullOrEmpty(value)) {
+                this._loginUriPrefix = ".auth/login";
+            } else {
+                _.isString(value);
+                this._loginUriPrefix = value;
+            }
+        }
+    }
+});
 
 function MobileServiceClient(applicationUrl) {
     /// <summary>
@@ -71,6 +104,8 @@ function MobileServiceClient(applicationUrl) {
         this.push = new Push(this, MobileServiceClient._applicationInstallationId);
     }
 }
+
+
 
 // Export the MobileServiceClient class
 exports.MobileServiceClient = MobileServiceClient;

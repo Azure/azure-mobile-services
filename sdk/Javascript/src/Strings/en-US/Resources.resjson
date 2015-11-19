@@ -18,5 +18,6 @@
     "Push_InvalidTemplateName"                              : "Template name can't contain ';' or ':'.",
     "Push_NotSupportedXMLFormatAsBodyTemplateWin8"          : "The bodyTemplate is not in accepted XML format. The first node of the bodyTemplate should be Badge\/Tile\/Toast, except for the wns\/raw template, which need to be a valid XML.",
     "Push_BodyTemplateMustBeXml"                            : "Valid XML is required for any template without a raw header.",
-    "Push_TagNoCommas"                                      : "Tags must not contain ','."
+    "Push_TagNoCommas"                                      : "Tags must not contain ','.",
+	 "AlternateLoginHost_Invalid"                            : "{0} is not valid. Expected Absolute Url with https scheme"
 }
