@@ -119,7 +119,7 @@ public class URLTests extends InstrumentationTestCase {
         }
 
         // Assert
-        String expectedURL = appUrl + "login/" + normalizedProvider;
+        String expectedURL = appUrl + ".auth/login/" + normalizedProvider;
         assertEquals(expectedURL, result.getRequestUrl());
 
     }

@@ -115,7 +115,7 @@ public class LoginTests extends InstrumentationTestCase {
         }
 
         // Assert
-        String expectedURL = appUrl + "login/" + provider.toString().toLowerCase(Locale.getDefault());
+        String expectedURL = appUrl + ".auth/login/" + provider.toString().toLowerCase(Locale.getDefault());
         assertEquals(expectedURL, result.getRequestUrl());
     }
 
@@ -183,7 +183,7 @@ public class LoginTests extends InstrumentationTestCase {
         }
 
         // Assert
-        String expectedURL = appUrl + "login/" + provider.toString().toLowerCase(Locale.getDefault()) + parameterQueryString;
+        String expectedURL = appUrl + ".auth/login/" + provider.toString().toLowerCase(Locale.getDefault()) + parameterQueryString;
         assertEquals(expectedURL, result.getRequestUrl());
     }
 
@@ -254,7 +254,7 @@ public class LoginTests extends InstrumentationTestCase {
         latch.await();
 
         // Assert
-        String expectedURL = appUrl + "login/" + provider.toString().toLowerCase(Locale.getDefault());
+        String expectedURL = appUrl + ".auth/login/" + provider.toString().toLowerCase(Locale.getDefault());
         assertEquals(expectedURL, result.getRequestUrl());
     }
 
