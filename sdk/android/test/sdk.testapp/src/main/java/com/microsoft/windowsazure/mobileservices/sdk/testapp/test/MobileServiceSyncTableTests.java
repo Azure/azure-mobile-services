@@ -387,7 +387,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
                 serviceFilterContainer.Requests.get(0).Url,
                 EncodingUtilities
                         .percentEncodeSpaces(
-                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27world%27)&$top=3&$skip=5&$orderby=Id%20desc&__includeDeleted=true&__systemproperties=version,deleted"));
+                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27world%27)&$top=3&$skip=5&$orderby=Id%20desc&__includeDeleted=true"));
     }
 
     public void testPullNoSkipSucceds() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
@@ -420,7 +420,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
                 serviceFilterContainer.Requests.get(0).Url,
                 EncodingUtilities
                         .percentEncodeSpaces(
-                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27world%27)&$top=3&$skip=0&$orderby=Id%20desc&__includeDeleted=true&__systemproperties=version,deleted"));
+                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27world%27)&$top=3&$skip=0&$orderby=Id%20desc&__includeDeleted=true"));
     }
 
     public void testPullSuccedsNoTopNoOrderBy() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
@@ -453,7 +453,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
                 serviceFilterContainer.Requests.get(0).Url,
                 EncodingUtilities
                         .percentEncodeSpaces(
-                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27world%27)&$top=50&$skip=0&$orderby=Id%20desc&__includeDeleted=true&__systemproperties=version,deleted"));
+                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27world%27)&$top=50&$skip=0&$orderby=Id%20desc&__includeDeleted=true"));
     }
 
     public void testIncrementalPullSucceds() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
@@ -489,14 +489,14 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
                 serviceFilterContainer.Requests.get(0).Url,
                 EncodingUtilities
                         .percentEncodeSpaces(
-                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27noMatch%27)&$top=50&$orderby=updatedAt%20asc&__includeDeleted=true&__systemproperties=updatedAt,version,deleted"));
+                                "http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27noMatch%27)&$top=50&$orderby=updatedAt%20asc&__includeDeleted=true"));
 
         assertEquals(
                 serviceFilterContainer.Requests.get(1).Url,
                 EncodingUtilities
                         .percentEncodeSpaces(
                                 "http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27noMatch%27)%20and%20" +
-                                        "(updatedAt%20ge%20(datetimeoffset%27"+updatedAt1 +"%27))&$top=50&$orderby=updatedAt%20asc&__includeDeleted=true&__systemproperties=updatedAt,version,deleted"));
+                                        "(updatedAt%20ge%20(datetimeoffset%27"+updatedAt1 +"%27))&$top=50&$orderby=updatedAt%20asc&__includeDeleted=true"));
     }
 
     public void testIncrementalPullSaveLastUpdatedAtDate() throws MalformedURLException, InterruptedException, ExecutionException, MobileServiceException {
@@ -579,13 +579,13 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
                 EncodingUtilities
                         .percentEncodeSpaces("http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27Hey%27)%20and%20(updatedAt%20ge%20(datetimeoffset%27"+updatedAt1+"%27))" +
                                 "&$top=50&$skip=2&" +
-                                "$orderby=updatedAt%20asc&__includeDeleted=true&__systemproperties=updatedAt,version,deleted"));
+                                "$orderby=updatedAt%20asc&__includeDeleted=true"));
         // Skip removed
         assertEquals(
                 serviceFilterContainer.Requests.get(3).Url,
                 EncodingUtilities
                         .percentEncodeSpaces("http://myapp.com/tables/stringidtype?$filter=String%20eq%20(%27Hey%27)%20and%20(updatedAt%20ge%20(datetimeoffset%27"+updatedAt2+"%27))" +
-                                "&$top=50&$orderby=updatedAt%20asc&__includeDeleted=true&__systemproperties=updatedAt,version,deleted"));
+                                "&$top=50&$orderby=updatedAt%20asc&__includeDeleted=true"));
     }
 
     public void testPurgeDoesNotThrowExceptionWhenThereIsNoOperationInTable() throws MalformedURLException, InterruptedException, ExecutionException {
