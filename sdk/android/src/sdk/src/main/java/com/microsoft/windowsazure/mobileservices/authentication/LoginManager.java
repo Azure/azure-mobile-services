@@ -152,14 +152,14 @@ public class LoginManager {
 
         URL appUrl = UriHelper.createHostOnlyUrl(mClient.getAppUrl());
 
-        String startUrl = appUrl.toString() + path + UriHelper.normalizeParameters(parameters);
-        String endUrl = appUrl.toString() + loginAsyncDoneUriFragment;
+        String startUrl = UriHelper.CombinePath(appUrl.toString(), path);
+        String endUrl = UriHelper.CombinePath(appUrl.toString(), loginAsyncDoneUriFragment);
 
         if (this.mClient.getAlternateLoginHost() != null) {
-            startUrl = mClient.getAlternateLoginHost().toString() + path + UriHelper.normalizeParameters(parameters);
-            endUrl = mClient.getAlternateLoginHost().toString() + loginAsyncDoneUriFragment;
+            startUrl = UriHelper.CombinePath(mClient.getAlternateLoginHost().toString(), path);
+            endUrl = UriHelper.CombinePath(mClient.getAlternateLoginHost().toString(), loginAsyncDoneUriFragment);
         }
-
+        startUrl = startUrl + UriHelper.normalizeParameters(parameters);
         // Shows an interactive view with the provider's login
         showLoginUI(startUrl, endUrl, context, new LoginUIOperationCallback() {
 
@@ -252,11 +252,12 @@ public class LoginManager {
         URL appUrl = UriHelper.createHostOnlyUrl(mClient.getAppUrl());
 
         // Create the login URL
-        String url = appUrl.toString() + path + UriHelper.normalizeParameters(parameters);
+        String url = UriHelper.CombinePath(appUrl.toString(), path);
 
         if (this.mClient.getAlternateLoginHost() != null) {
-            url = mClient.getAlternateLoginHost().toString() + path + UriHelper.normalizeParameters(parameters);
+            url = UriHelper.CombinePath(mClient.getAlternateLoginHost().toString(), path);
         }
+        url = url + UriHelper.normalizeParameters(parameters);
 
         return authenticateWithToken(oAuthToken, url);
     }

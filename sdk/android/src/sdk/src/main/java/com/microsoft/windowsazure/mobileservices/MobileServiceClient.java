@@ -196,7 +196,7 @@ public class MobileServiceClient {
      * @param loginUriPrefix prefix for login endpoints
      */
     public void setLoginUriPrefix(String loginUriPrefix) {
-        if (mLoginUriPrefix == null) {
+        if (loginUriPrefix == null) {
             return;
         }
         mLoginUriPrefix = AddLeadingSlash(loginUriPrefix);

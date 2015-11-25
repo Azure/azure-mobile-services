@@ -88,15 +88,15 @@ public class URLTests extends InstrumentationTestCase {
         String loginPrefix = ".auth/login/";
 
         // loginPrefix
-        String altPrefix = ".auth/login/";
-        String altPrefixWithStartingSlash = "/.auth/login/";
-        String altPrefixWithoutTrailingSlash = "/.auth/login";
+        String altPrefix = ".auth/";
+        String altPrefixWithStartingSlash = "/.auth/";
+        String altPrefixWithoutTrailingSlash = "/.auth";
 
+        testLoginURLPrefixAndAlternateHost(appUrlWithTrailingSlash, altPrefixWithStartingSlash, null, appUrlWithTrailingSlash, altPrefix, null);
         testLoginURLPrefixAndAlternateHost(appUrlWithTrailingSlash, null, null, appUrlWithTrailingSlash, loginPrefix, null);
         testLoginURLPrefixAndAlternateHost(appUrlWithoutTrailingSlash, null, null, appUrlWithTrailingSlash, loginPrefix, null);
         testLoginURLPrefixAndAlternateHost(appUrlWithPath, null, null, appUrlWithTrailingSlash, loginPrefix, null);
         testLoginURLPrefixAndAlternateHost(appUrlWithTrailingSlash, altPrefix, null, appUrlWithTrailingSlash, altPrefix, null);
-        testLoginURLPrefixAndAlternateHost(appUrlWithTrailingSlash, altPrefixWithStartingSlash, null, appUrlWithTrailingSlash, altPrefix, null);
         testLoginURLPrefixAndAlternateHost(appUrlWithTrailingSlash, altPrefixWithoutTrailingSlash, null, appUrlWithTrailingSlash, altPrefix, null);
         testLoginURLPrefixAndAlternateHost(appUrlWithTrailingSlash, altPrefix, altUrlWithoutTrailingSlash, altUrlWithTrailingSlash, altPrefix, null);
         testLoginURLPrefixAndAlternateHost(appUrlWithTrailingSlash, altPrefix, altUrlWithTrailingSlash, altUrlWithTrailingSlash, altPrefix, null);

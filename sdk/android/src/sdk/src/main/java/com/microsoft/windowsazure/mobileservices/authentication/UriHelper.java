@@ -24,6 +24,8 @@
  * UriHelper.java
  * <p/>
  * UriHelper.java
+ * <p/>
+ * UriHelper.java
  */
 
 /**
@@ -92,6 +94,12 @@ class UriHelper {
         if (path2.length() == 0) {
             return path1;
         }
+
+        //trim all the trailing slash
+        path1 = path1.replaceAll("[" + Slash + "]+$", "");
+
+        //trim all the starting slash
+        path2 = path2.replaceAll("^[" + Slash + "]+", "");
         return String.format("%s%c%s", path1, Slash, path2);
     }
 }
