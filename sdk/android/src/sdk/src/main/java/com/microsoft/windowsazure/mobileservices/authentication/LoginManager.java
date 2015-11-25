@@ -453,7 +453,7 @@ public class LoginManager {
                     return false;
                 }
 
-                return url.startsWith(endUrl);
+                return url.toLowerCase().startsWith(endUrl.toLowerCase());
             }
 
             // Checks if the given URL matches with the start URL's format
@@ -462,7 +462,7 @@ public class LoginManager {
                     return false;
                 }
 
-                return url.startsWith(startUrl);
+                return url.toLowerCase().startsWith(startUrl.toLowerCase());
             }
 
             @Override
