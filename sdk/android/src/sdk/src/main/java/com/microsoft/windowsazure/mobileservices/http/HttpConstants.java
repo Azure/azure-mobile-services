@@ -11,4 +11,6 @@ public class HttpConstants {
     public static String PatchMethod = "PATCH";
     public static String ContentType = "Content-Type";
     public static String PutMethod = "PUT";
+    public static String HttpsProtocol = "HTTPS";
+
 }

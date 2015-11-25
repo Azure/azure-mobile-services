@@ -72,7 +72,7 @@ public class MobileServiceConnection {
     /**
      * Current SDK version
      */
-    private static final String SDK_VERSION = "2.0.2";
+    private static final String SDK_VERSION = "3.0.0";
     /**
      * The MobileServiceClient used for communication with the Mobile Service
      */
@@ -190,7 +190,7 @@ public class MobileServiceConnection {
         request.addHeader("User-Agent", getUserAgent());
 
         // Set the Mobile Service SDK Version
-        request.addHeader(ZUMO_API_VERSION_HEADER,"2.0.0");
+        request.addHeader(ZUMO_API_VERSION_HEADER, "2.0.0");
 
         // Set the special Installation ID header
         request.addHeader(X_ZUMO_INSTALLATION_ID_HEADER, MobileServiceApplication.getInstallationId(mClient.getContext()));

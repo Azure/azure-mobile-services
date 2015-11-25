@@ -472,33 +472,33 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
         JsonArray result = new JsonArray();
 
         JsonObject item1 = new JsonObject();
-        item1.addProperty("col1", "the");
         item1.addProperty("col2", 5.0);
+        item1.addProperty("col1", "the");
         result.add(item1);
 
         JsonObject item2 = new JsonObject();
-        item2.addProperty("col1", "quick");
         item2.addProperty("col2", 3.0);
+        item2.addProperty("col1", "quick");
         result.add(item2);
 
         JsonObject item3 = new JsonObject();
-        item3.addProperty("col1", "brown");
         item3.addProperty("col2", 1.0);
+        item3.addProperty("col1", "brown");
         result.add(item3);
 
         JsonObject item4 = new JsonObject();
-        item4.addProperty("col1", "fox");
         item4.addProperty("col2", 6.0);
+        item4.addProperty("col1", "fox");
         result.add(item4);
 
         JsonObject item5 = new JsonObject();
-        item5.addProperty("col1", "jumped");
         item5.addProperty("col2", 9.0);
+        item5.addProperty("col1", "jumped");
         result.add(item5);
 
         JsonObject item6 = new JsonObject();
-        item6.addProperty("col1", " EndsWithBackslash\\");
         item6.addProperty("col2", 8.0);
+        item6.addProperty("col1", " EndsWithBackslash\\");
         result.add(item6);
 
         return result;
@@ -509,33 +509,33 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
         JsonArray result = new JsonArray();
 
         JsonObject item5 = new JsonObject();
-        item5.addProperty("col1", "jumped");
         item5.addProperty("col2", 9.0);
+        item5.addProperty("col1", "jumped");
         result.add(item5);
 
         JsonObject item6 = new JsonObject();
-        item6.addProperty("col1", " EndsWithBackslash\\");
         item6.addProperty("col2", 8.0);
+        item6.addProperty("col1", " EndsWithBackslash\\");
         result.add(item6);
 
         JsonObject item4 = new JsonObject();
-        item4.addProperty("col1", "fox");
         item4.addProperty("col2", 6.0);
+        item4.addProperty("col1", "fox");
         result.add(item4);
 
         JsonObject item1 = new JsonObject();
-        item1.addProperty("col1", "the");
         item1.addProperty("col2", 5.0);
+        item1.addProperty("col1", "the");
         result.add(item1);
 
         JsonObject item2 = new JsonObject();
-        item2.addProperty("col1", "quick");
         item2.addProperty("col2", 3.0);
+        item2.addProperty("col1", "quick");
         result.add(item2);
 
         JsonObject item3 = new JsonObject();
-        item3.addProperty("col1", "brown");
         item3.addProperty("col2", 1.0);
+        item3.addProperty("col1", "brown");
         result.add(item3);
 
         return result;

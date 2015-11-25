@@ -40,7 +40,6 @@ import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.Address;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.PersonTestObjectWithStringId;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.SystemPropertyTestClasses.VersionType;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
-import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProperty;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.table.query.ExecutableJsonQuery;
 import com.microsoft.windowsazure.mobileservices.table.query.ExecutableQuery;
@@ -804,7 +803,6 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
             @Override
             public void executeOperation(MobileServiceClient client) throws Exception {
                 MobileServiceJsonTable jsonTable = client.getTable("Person");
-                jsonTable.setSystemProperties(EnumSet.of(MobileServiceSystemProperty.Version));
                 JsonObject jo = createJsonObject();
                 jo.addProperty("version", "abc");
                 List<Pair<String, String>> queryParams = new ArrayList<Pair<String, String>>();

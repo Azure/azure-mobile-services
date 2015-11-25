@@ -38,6 +38,8 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestGr
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestResult;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestStatus;
 
+import junit.framework.Assert;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -221,8 +223,12 @@ public class LoginTests extends TestGroup {
 
             @Override
             protected void executeTest(MobileServiceClient client, TestExecutionCallback callback) {
+                try {
+                    client.logout().get();
+                } catch (Exception e) {
+                    Assert.fail(e.getMessage());
+                }
 
-                client.logout();
                 log("Logged out");
                 TestResult result = new TestResult();
                 result.setTestCase(this);
@@ -293,7 +299,11 @@ public class LoginTests extends TestGroup {
             @Override
             protected void executeTest(MobileServiceClient client, TestExecutionCallback callback) {
 
-                client.logout();
+                try {
+                    client.logout().get();
+                } catch (Exception e) {
+                    Assert.fail(e.getMessage());
+                }
                 log("Logged out");
                 TestResult result = new TestResult();
                 result.setTestCase(this);

@@ -72,7 +72,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         Query query = table.where();
 
         // Assert
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals("", QueryODataWriter.getRowFilter(query));
     }
 
@@ -84,7 +84,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedModifiers = "&$select=Id,Name";
         expectedModifiers = EncodingUtilities.percentEncodeSpaces(expectedModifiers);
-        assertEquals(expectedModifiers, QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals(expectedModifiers, QueryODataWriter.getRowSetModifiers(query));
         assertEquals("", QueryODataWriter.getRowFilter(query));
     }
 
@@ -96,7 +96,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedModifiers = "&firstname=john&lastname=null";
         expectedModifiers = EncodingUtilities.percentEncodeSpaces(expectedModifiers);
-        assertEquals(expectedModifiers, QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals(expectedModifiers, QueryODataWriter.getRowSetModifiers(query));
         assertEquals("", QueryODataWriter.getRowFilter(query));
     }
 
@@ -108,7 +108,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedModifiers = "&$orderby=Name asc";
         expectedModifiers = EncodingUtilities.percentEncodeSpaces(expectedModifiers);
-        assertEquals(expectedModifiers, QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals(expectedModifiers, QueryODataWriter.getRowSetModifiers(query));
         assertEquals("", QueryODataWriter.getRowFilter(query));
     }
 
@@ -120,7 +120,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedModifiers = "&__includeDeleted=true";
         expectedModifiers = EncodingUtilities.percentEncodeSpaces(expectedModifiers);
-        assertEquals(expectedModifiers, QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals(expectedModifiers, QueryODataWriter.getRowSetModifiers(query));
         assertEquals("", QueryODataWriter.getRowFilter(query));
     }
 
@@ -132,7 +132,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedModifiers = "&$orderby=Name desc";
         expectedModifiers = EncodingUtilities.percentEncodeSpaces(expectedModifiers);
-        assertEquals(expectedModifiers, QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals(expectedModifiers, QueryODataWriter.getRowSetModifiers(query));
         assertEquals("", QueryODataWriter.getRowFilter(query));
     }
 
@@ -144,7 +144,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedModifiers = "&$orderby=Name asc,Age desc";
         expectedModifiers = EncodingUtilities.percentEncodeSpaces(expectedModifiers);
-        assertEquals(expectedModifiers, QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals(expectedModifiers, QueryODataWriter.getRowSetModifiers(query));
         assertEquals("", QueryODataWriter.getRowFilter(query));
     }
 
@@ -156,7 +156,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedModifiers = "&$skip=10";
         expectedModifiers = EncodingUtilities.percentEncodeSpaces(expectedModifiers);
-        assertEquals(expectedModifiers, QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals(expectedModifiers, QueryODataWriter.getRowSetModifiers(query));
         assertEquals("", QueryODataWriter.getRowFilter(query));
     }
 
@@ -168,7 +168,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedModifiers = "&$top=5";
         expectedModifiers = EncodingUtilities.percentEncodeSpaces(expectedModifiers);
-        assertEquals(expectedModifiers, QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals(expectedModifiers, QueryODataWriter.getRowSetModifiers(query));
         assertEquals("", QueryODataWriter.getRowFilter(query));
     }
 
@@ -180,7 +180,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedModifiers = "&$top=3&$skip=10";
         expectedModifiers = EncodingUtilities.percentEncodeSpaces(expectedModifiers);
-        assertEquals(expectedModifiers, QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals(expectedModifiers, QueryODataWriter.getRowSetModifiers(query));
         assertEquals("", QueryODataWriter.getRowFilter(query));
     }
 
@@ -192,7 +192,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "age gt 3";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
 
         // Create query
@@ -201,7 +201,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         expectedFilters = "age gt (3)";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -213,7 +213,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "age ge 3";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
 
         // Create query
@@ -222,7 +222,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         expectedFilters = "age ge (3)";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
 
     }
@@ -235,7 +235,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "age le 3";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
 
         // Create query
@@ -244,7 +244,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         expectedFilters = "age le (3)";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
 
     }
@@ -257,7 +257,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "age le 3";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
 
         // Create query
@@ -266,7 +266,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         expectedFilters = "age le (3)";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
 
     }
@@ -279,7 +279,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "age eq 3";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
 
         // Create query
@@ -288,7 +288,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         expectedFilters = "age eq (3)";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -300,7 +300,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "age ne 3";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
 
         // Create query
@@ -309,7 +309,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         expectedFilters = "age ne (3)";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -322,7 +322,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "birthdate eq datetime'1986-06-30T00:00:00.000Z'";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
 
         // Create query
@@ -332,7 +332,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         expectedFilters = "birthdate eq (datetime'1986-06-30T00:00:00.000Z')";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -345,7 +345,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "birthdate eq datetimeoffset'1986-06-30T00:00:00.000Z'";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
 
         // Create query
@@ -355,7 +355,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         expectedFilters = "birthdate eq (datetimeoffset'1986-06-30T00:00:00.000Z')";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -369,7 +369,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "age eq 18 and name eq 'John'";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
 
         // Create query
@@ -378,7 +378,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         expectedFilters = "age eq 18 and (name eq 'John')";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
 
     }
@@ -391,7 +391,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "age eq 18 or name eq 'John'";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
 
         // Create query
@@ -400,7 +400,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         expectedFilters = "age eq 18 or (name eq 'John' and lastname eq 'Doe')";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -412,7 +412,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "not (age eq 15)";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
 
         // Create query
@@ -421,7 +421,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         expectedFilters = "not (age eq (15))";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
 
     }
@@ -434,7 +434,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "age add 2 eq 18";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
 
         // Create query
@@ -443,7 +443,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         expectedFilters = "age add (2) eq 18";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -455,7 +455,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "age sub 2 eq 16";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
 
         // Create query
@@ -464,7 +464,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         expectedFilters = "age sub (2) eq 16";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -476,7 +476,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "age mul 2 eq 16";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
 
         // Create query
@@ -485,7 +485,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         expectedFilters = "age mul (2) eq 16";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
 
     }
@@ -498,7 +498,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "age div 2 eq 8";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
 
         // Create query
@@ -507,7 +507,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         expectedFilters = "age div (2) eq 8";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
 
     }
@@ -520,7 +520,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "price mod 2 eq 1";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
 
         // Create query
@@ -529,7 +529,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         expectedFilters = "price mod (2) eq 1";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -541,7 +541,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "year(date) eq 2013";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -553,7 +553,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "month(date) eq 8";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -565,7 +565,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "day(date) eq 3";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -577,7 +577,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "hour(date) eq 10";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -589,7 +589,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "minute(date) eq 15";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -601,7 +601,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "second(date) eq 11";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -613,7 +613,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "floor(price) gt 10";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -625,7 +625,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "ceiling(price) gt 10";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -637,7 +637,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "round(price) gt 5";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -649,7 +649,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "startswith(Name,'Jo')";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -661,7 +661,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "endswith(Name,'in')";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -673,7 +673,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "substringof(FirstName,LastName)";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -685,7 +685,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "concat(FirstName,LastName) eq 'JohnDoe'";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -697,7 +697,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "indexof(Name,'do') ne -1";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -709,14 +709,14 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "substring(ProductCode,3) eq 'FOO'";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
 
         // Create query
         query = table.where().subString(field("ProductCode"), val(1), val(2)).eq().val("FC");
         expectedFilters = "substring(ProductCode,1,2) eq 'FC'";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -728,7 +728,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "replace(Description,' ','-') eq 'Code-1'";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -740,12 +740,12 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "tolower(Description) eq ('code-1')";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
 
         query = table.where().toLower("Description").eq("code-1");
 
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -757,12 +757,12 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "toupper(Description) eq ('code-1')";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
 
         query = table.where().toUpper("Description").eq("code-1");
 
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -774,12 +774,12 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "trim(Description) eq ('code-1')";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
 
         query = table.where().trim("Description").eq("code-1");
 
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -791,12 +791,12 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         // Assert
         String expectedFilters = "length(Description) eq (5)";
         expectedFilters = EncodingUtilities.percentEncodeSpaces(expectedFilters);
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
 
         query = table.where().length("Description").eq(5);
 
-        assertEquals("", QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals("", QueryODataWriter.getRowSetModifiers(query));
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
     }
 
@@ -811,7 +811,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
         String expectedModifiers = "&$top=3&$skip=5&$orderby=Name asc&$select=Id,Name";
         expectedModifiers = EncodingUtilities.percentEncodeSpaces(expectedModifiers);
-        assertEquals(expectedModifiers, QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals(expectedModifiers, QueryODataWriter.getRowSetModifiers(query));
 
         // Create query
         Query query2 = table.where(field("id").gt().val(1)).and(field("complete").eq().val(true));
@@ -840,7 +840,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
         assertEquals(expectedFilters, QueryODataWriter.getRowFilter(query));
         String expectedModifiers = "&$top=3&$skip=5&$orderby=Name asc&$select=Id,Name";
         expectedModifiers = EncodingUtilities.percentEncodeSpaces(expectedModifiers);
-        assertEquals(expectedModifiers, QueryODataWriter.getRowSetModifiers(query, table));
+        assertEquals(expectedModifiers, QueryODataWriter.getRowSetModifiers(query));
 
         // Create query
         Query query2 = table.where(field("id").gt().val("1")).and(field("complete").eq().val(true));

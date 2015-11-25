@@ -87,63 +87,6 @@ public class SystemPropertiesTestData {
     public static String[] NonSystemProperties = new String[]{"someProperty", "__createdAt", "__updatedAt", "__version", "_createdAt", "_updatedAt", "_version",
             "X__createdAt"};
 
-    public static String[] ValidSystemPropertyQueryStrings = new String[]{
-            // General
-            "__systemProperties=*", "__systemProperties=createdAt", "__systemProperties=createdAt,updatedAt", "__systemProperties=createdAt,version",
-            "__systemProperties=createdAt,updatedAt,version", "__systemProperties=createdAt,version,updatedAt",
-            "__systemProperties=updatedAt",
-            "__systemProperties=updatedAt,createdAt",
-            "__systemProperties=updatedAt,createdAt,version",
-            "__systemProperties=updatedAt,version",
-            "__systemProperties=updatedAt,version, createdAt",
-            "__systemProperties=version",
-            "__systemProperties=version,createdAt",
-            "__systemProperties=version,createdAt,updatedAt",
-            "__systemProperties=version,updatedAt",
-            "__systemProperties=version,updatedAt, createdAt",
-
-            // Trailing commas, extra commas
-            "__systemProperties=createdAt,", "__systemProperties=createdAt,updatedAt,",
-            "__systemProperties=createdAt,updatedAt,version,",
-            "__systemProperties=,createdAt",
-            "__systemProperties=createdAt,,updatedAt",
-            "__systemProperties=createdAt, ,updatedAt,version",
-            "__systemProperties=createdAt,,",
-            "__systemProperties=createdAt, ,",
-
-            // Trailing, leading whitespace
-            "__systemProperties= *", "__systemProperties=\t*\t", "__systemProperties= createdAt ", "__systemProperties=\tcreatedAt,\tupdatedAt\t",
-            "__systemProperties=\rcreatedAt,\rupdatedAt,\tversion\r",
-            "__systemProperties=\ncreatedAt\n",
-            "__systemProperties=createdAt,\nupdatedAt",
-            "__systemProperties=createdAt, updatedAt, version",
-
-            // Different casing
-            "__SystemProperties=*", "__SystemProperties=createdAt", "__SYSTEMPROPERTIES=createdAt,updatedAt",
-            "__systemproperties=createdAt,updatedAt,version", "__SystemProperties=createdAt", "__SYSTEMPROPERTIES=createdAt,updatedAt",
-            "__systemproperties=createdAt,updatedAt,version",
-
-            // Sans __ prefix
-            "__systemProperties=createdAt", "__systemProperties=updatedAt,createdAt", "__systemProperties=UPDATEDAT,createdat",
-            "__systemProperties=updatedAt,version,createdAt",
-
-            // Combinations of above
-            "__SYSTEMPROPERTIES=createdAt, updatedat", "__systemProperties=createdAt,,\tversion", "__systemProperties= updatedat ,,"};
-
-    public static String[] InvalidSystemPropertyQueryStrings = new String[]{
-            // Unknown system Properties
-            "__systemProperties=__created", "__systemProperties=updated At", "__systemProperties=notASystemProperty", "__systemProperties=_version",
-
-            // System properties not comma separated
-            "__systemProperties=createdAt updatedAt", "__systemProperties=createdAt\tversion", "__systemProperties=createdAt updatedAt version",
-            "__systemProperties=__createdAt__version",
-
-            // All and individual system properties requested
-            "__systemProperties=*,updatedAt",};
-
-    // Missing ‘__’ prefix to systemProperties query string parameter
-    public static String InvalidSystemParameterQueryString = "_systemProperties=createdAt,version";
-
     public static List<Pair<String, String>> VersionsSerialize;
 
     static {
