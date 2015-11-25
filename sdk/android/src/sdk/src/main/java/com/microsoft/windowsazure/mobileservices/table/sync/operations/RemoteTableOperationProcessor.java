@@ -24,20 +24,12 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices.table.sync.operations;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.MobileServiceFeatures;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
-import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemColumns;
-import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProperty;
 
-import java.util.EnumSet;
-import java.util.Locale;
-import java.util.Map.Entry;
-import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -61,7 +53,6 @@ public class RemoteTableOperationProcessor implements TableOperationVisitor<Json
     @Override
     public JsonObject visit(InsertOperation operation) throws Throwable {
         MobileServiceJsonTable table = this.getRemoteTable(operation.getTableName());
-        table.setSystemProperties(EnumSet.allOf(MobileServiceSystemProperty.class));
 
         JsonObject item = table.removeSystemProperties(this.mItem);
 
@@ -77,7 +68,6 @@ public class RemoteTableOperationProcessor implements TableOperationVisitor<Json
     @Override
     public JsonObject visit(UpdateOperation operation) throws Throwable {
         MobileServiceJsonTable table = this.getRemoteTable(operation.getTableName());
-        table.setSystemProperties(table.getSystemProperties(this.mItem));
 
         ListenableFuture<JsonObject> future = table.update(this.mItem);
 

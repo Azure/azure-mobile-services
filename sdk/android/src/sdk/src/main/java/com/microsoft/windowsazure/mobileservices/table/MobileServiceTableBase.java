@@ -54,17 +54,12 @@ import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-abstract class MobileServiceTableBase implements MobileServiceTableSystemPropertiesProvider {
+abstract class MobileServiceTableBase {
 
     /**
      * Tables URI part
      */
     public static final String TABLES_URL = "tables/";
-
-    /**
-     * The name of the _system query string parameter
-     */
-    protected static final String SystemPropertiesQueryParameterName = "__systemproperties";
 
     /**
      * The system property names with the correct prefix.
@@ -103,11 +98,6 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
      * The name of the represented table
      */
     protected String mTableName;
-
-    /**
-     * The Mobile Service system properties to be included with items
-     */
-    protected EnumSet<MobileServiceSystemProperty> mSystemProperties = EnumSet.noneOf(MobileServiceSystemProperty.class);
 
     /**
      * Features to be sent in telemetry headers for requests made by this table
@@ -264,7 +254,7 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
     private static String getSystemPropertyString(MobileServiceSystemProperty systemProperty) {
         String property = systemProperty.toString().trim();
         char firstLetterAsLower = property.toLowerCase(Locale.getDefault()).charAt(0);
-        return  firstLetterAsLower + property.substring(1);
+        return firstLetterAsLower + property.substring(1);
     }
 
     /**
@@ -389,8 +379,8 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
                     if (content != null) {
                         try {
                             serverEntity = new JsonParser().parse(content).getAsJsonObject();
+                        } catch (JsonSyntaxException ex) {
                         }
-                        catch(JsonSyntaxException ex) {}
                     }
 
                     return new MobileServicePreconditionFailedExceptionJson(msExcep, serverEntity);
@@ -423,20 +413,6 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
     }
 
     /**
-     * Returns the set of enabled System Properties
-     */
-    public EnumSet<MobileServiceSystemProperty> getSystemProperties() {
-        return mSystemProperties;
-    }
-
-    /**
-     * Sets the set of enabled System Properties
-     */
-    public void setSystemProperties(EnumSet<MobileServiceSystemProperty> systemProperties) {
-        this.mSystemProperties = systemProperties;
-    }
-
-    /**
      * Returns the client used for table operations
      */
     protected MobileServiceClient getClient() {
@@ -455,7 +431,7 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
     /**
      * Deletes an entity from a Mobile Service Table
      *
-     * @param id  The entity id to delete
+     * @param id       The entity id to delete
      * @param callback Callback to invoke when the operation is completed
      * @deprecated use {@link delete(Object elementOrId)} instead
      */
@@ -486,7 +462,7 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
     /**
      * Deletes an entity from a Mobile Service Table
      *
-     * @param id  The entity id to delete
+     * @param id       The entity id to delete
      * @param callback Callback to invoke when the operation is completed
      * @deprecated use {@link delete(Object elementOrId)} instead
      */
@@ -517,7 +493,7 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
     /**
      * Deletes an entity from a Mobile Service Table
      *
-     * @param id  The entity id to delete
+     * @param id       The entity id to delete
      * @param callback Callback to invoke when the operation is completed
      * @deprecated use {@link delete(Object elementOrId)} instead
      */
@@ -548,8 +524,6 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
         if (parameters != null && parameters.size() > 0) {
             features.add(MobileServiceFeatures.AdditionalQueryParameters);
         }
-
-        parameters = addSystemProperties(mSystemProperties, parameters);
 
         if (parameters != null && parameters.size() > 0) {
             for (Pair<String, String> parameter : parameters) {
@@ -999,37 +973,5 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
         return (id == 0);
     }
 
-    /**
-     * Adds the tables requested system properties to the parameters collection.
-     *
-     * @param systemProperties The system properties to add.
-     * @param parameters       The parameters collection.
-     * @return The parameters collection with any requested system properties
-     * included.
-     */
-    public List<Pair<String, String>> addSystemProperties(EnumSet<MobileServiceSystemProperty> systemProperties, List<Pair<String, String>> parameters) {
-        boolean containsSystemProperties = false;
 
-        List<Pair<String, String>> result = new ArrayList<Pair<String, String>>(parameters != null ? parameters.size() : 0);
-
-        // Make sure we have a case-insensitive parameters list
-        if (parameters != null) {
-            for (Pair<String, String> parameter : parameters) {
-                result.add(parameter);
-                containsSystemProperties = containsSystemProperties || parameter.first.equalsIgnoreCase(SystemPropertiesQueryParameterName);
-            }
-        }
-
-        // If there is already a user parameter for the system properties, just
-        // use it
-        if (!containsSystemProperties) {
-            String systemPropertiesString = getSystemPropertiesString(systemProperties);
-
-            if (systemPropertiesString != null) {
-                result.add(new Pair<String, String>(SystemPropertiesQueryParameterName, systemPropertiesString));
-            }
-        }
-
-        return result;
-    }
 }

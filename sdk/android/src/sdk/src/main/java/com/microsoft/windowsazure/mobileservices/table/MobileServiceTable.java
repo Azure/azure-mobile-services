@@ -69,17 +69,6 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
         mInternalTable.mFeatures = EnumSet.of(MobileServiceFeatures.TypedTable);
         mClazz = clazz;
 
-        mSystemProperties = getSystemProperties(clazz);
-        mInternalTable.setSystemProperties(mSystemProperties);
-    }
-
-    public EnumSet<MobileServiceSystemProperty> getSystemProperties() {
-        return mInternalTable.getSystemProperties();
-    }
-
-    public void setSystemProperties(EnumSet<MobileServiceSystemProperty> systemProperties) {
-        this.mSystemProperties = systemProperties;
-        this.mInternalTable.setSystemProperties(systemProperties);
     }
 
     /**
