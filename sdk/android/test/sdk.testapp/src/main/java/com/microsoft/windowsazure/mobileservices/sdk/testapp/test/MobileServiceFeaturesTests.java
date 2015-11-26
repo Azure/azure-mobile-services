@@ -61,11 +61,9 @@ import java.util.concurrent.ExecutionException;
 
 public class MobileServiceFeaturesTests extends InstrumentationTestCase {
     String appUrl;
-    String appKey;
 
     protected void setUp() throws Exception {
         appUrl = "http://myapp.com/";
-        appKey = "qwerty";
         super.setUp();
     }
 
@@ -364,7 +362,7 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
     private void testTableFeatureHeader(TableTestOperation operation, final boolean responseIsArray, final String expectedFeaturesHeader) {
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -502,7 +500,7 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
     private void testInvokeApiFeatureHeader(ClientTestOperation operation, final String expectedFeaturesHeader) {
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -646,7 +644,7 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
     private void testSyncTableOperationsFeatureHeader(OfflineTableTestOperation operation, final String expectedFeaturesHeader) {
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -725,7 +723,7 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
     private void testSyncTablePullOperationsFeatureHeader(OfflineTableTestOperation operation, final String expectedFeaturesHeader) {
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -848,7 +846,7 @@ public class MobileServiceFeaturesTests extends InstrumentationTestCase {
     private void testOpportunisticConcurrencyOperationsFeatureHeader(OpportunisticConcurrencyTestOperation operation, final String expectedFeaturesHeader) {
         MobileServiceClient client = null;
         try {
-            client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+            client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }

@@ -105,10 +105,6 @@ public class MobileServiceClient {
      */
     private LoginManager mLoginManager;
     /**
-     * Mobile Service application key
-     */
-    private String mAppKey;
-    /**
      * Mobile Service URL
      */
     private URL mAppUrl;
@@ -146,6 +142,15 @@ public class MobileServiceClient {
      */
     private MobileServiceSyncContext mSyncContext;
 
+    /**
+     * Constructor for the MobileServiceClient
+     *
+     * @param client An existing MobileServiceClient
+     */
+    private MobileServiceClient(MobileServiceClient client) {
+        initialize(client.getAppUrl(), client.getCurrentUser(), client.getGsonBuilder(), client.getContext(),
+                client.getAndroidHttpClientFactory());
+    }
 
     /**
      * Constructor for the MobileServiceClient
@@ -155,44 +160,20 @@ public class MobileServiceClient {
      * @throws java.net.MalformedURLException
      */
     public MobileServiceClient(String appUrl, Context context) throws MalformedURLException {
-        this(new URL(appUrl), null, context);
-    }
-
-
-    /**
-     * Constructor for the MobileServiceClient
-     *
-     * @param appUrl  Mobile Service URL
-     * @param appKey  Mobile Service application key
-     * @param context The Context where the MobileServiceClient is created
-     * @throws java.net.MalformedURLException
-     */
-    public MobileServiceClient(String appUrl, String appKey, Context context) throws MalformedURLException {
-        this(new URL(appUrl), appKey, context);
-    }
-
-    /**
-     * Constructor for the MobileServiceClient
-     *
-     * @param client An existing MobileServiceClient
-     */
-    public MobileServiceClient(MobileServiceClient client) {
-        initialize(client.getAppUrl(), client.getAppKey(), client.getCurrentUser(), client.getGsonBuilder(), client.getContext(),
-                client.getAndroidHttpClientFactory());
+        this(new URL(appUrl), context);
     }
 
     /**
      * Constructor for the MobileServiceClient
      *
      * @param appUrl  Mobile Service URL
-     * @param appKey  Mobile Service application key
      * @param context The Context where the MobileServiceClient is created
      */
-    public MobileServiceClient(URL appUrl, String appKey, Context context) {
+    public MobileServiceClient(URL appUrl, Context context) {
         GsonBuilder gsonBuilder = createMobileServiceGsonBuilder();
         gsonBuilder.serializeNulls(); // by default, add null serialization
 
-        initialize(appUrl, appKey, null, gsonBuilder, context, new AndroidHttpClientFactoryImpl());
+        initialize(appUrl, null, gsonBuilder, context, new AndroidHttpClientFactoryImpl());
     }
 
     /**
@@ -819,13 +800,6 @@ public class MobileServiceClient {
     }
 
     /**
-     * Returns the Mobile Service application key
-     */
-    public String getAppKey() {
-        return mAppKey;
-    }
-
-    /**
      * Returns The Mobile Service URL
      */
     public URL getAppUrl() {
@@ -1448,12 +1422,11 @@ public class MobileServiceClient {
      * Initializes the MobileServiceClient
      *
      * @param appUrl      Mobile Service URL
-     * @param appKey      Mobile Service application key
      * @param currentUser The Mobile Service user used to authenticate requests
      * @param gsonBuilder the GsonBuilder used to in JSON Serialization/Deserialization
      * @param context     The Context where the MobileServiceClient is created
      */
-    private void initialize(URL appUrl, String appKey, MobileServiceUser currentUser, GsonBuilder gsonBuiler, Context context,
+    private void initialize(URL appUrl, MobileServiceUser currentUser, GsonBuilder gsonBuiler, Context context,
                             AndroidHttpClientFactory androidHttpClientFactory) {
         if (appUrl == null || appUrl.toString().trim().length() == 0) {
             throw new IllegalArgumentException("Invalid Application URL");
@@ -1475,7 +1448,6 @@ public class MobileServiceClient {
         }
 
         mAppUrl = normalizedAppURL;
-        mAppKey = appKey;
         mLoginManager = new LoginManager(this);
         mServiceFilter = null;
         mLoginInProgress = false;

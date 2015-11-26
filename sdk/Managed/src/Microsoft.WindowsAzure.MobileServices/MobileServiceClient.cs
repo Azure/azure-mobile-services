@@ -65,7 +65,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 loginUriPrefix = value;
                 if (!string.IsNullOrEmpty(value))
                 {
-                    loginUriPrefix = MobileServiceUrlBuilder.AddLeadingSlash(value);    
+                    loginUriPrefix = MobileServiceUrlBuilder.AddLeadingSlash(value);
                 }
             }
         }
@@ -83,7 +83,11 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
             set
             {
-                if (value.IsAbsoluteUri && value.Segments.Length == 1 && value.Scheme == "https")
+                if (value == null)
+                {
+                    alternateLoginHost = MobileAppUri;
+                }
+                else if (value.IsAbsoluteUri && value.Segments.Length == 1 && value.Scheme == "https")
                 {
                     alternateLoginHost = value;
                 }
@@ -93,7 +97,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                         string.Format(CultureInfo.InvariantCulture, Resources.MobileServiceClient_InvalidAlternateLoginHost, value),
                         "alternateLoginHost");
                 }
-                
+
                 this.AlternateAuthHttpClient = new MobileServiceHttpClient(EmptyHttpMessageHandlers, alternateLoginHost, this.InstallationId);
             }
         }
