@@ -168,9 +168,9 @@ public class SystemPropertiesTests extends TestGroup {
 
                             if (isNetBackend) {
                                 byte[] versionFilterBytes = Base64.decode(versionFilter.getBytes(), Base64.DEFAULT);
-                                filteredVersionElements = read(table, field("__version").eq(versionFilterBytes));
+                                filteredVersionElements = read(table, field("version").eq(versionFilterBytes));
                             } else {
-                                filteredVersionElements = read(table, field("__version").eq().val(versionFilter));
+                                filteredVersionElements = read(table, field("version").eq().val(versionFilter));
                             }
 
                             log("Verify response size");
@@ -198,7 +198,7 @@ public class SystemPropertiesTests extends TestGroup {
                                     });
 
                             log("Filter table - CreatedAt");
-                            List<StringIdRoundTripTableElement> filteredCreatedAtElements = read(table, field("__createdAt").ge().val(createdAtFilter));
+                            List<StringIdRoundTripTableElement> filteredCreatedAtElements = read(table, field("createdAt").ge().val(createdAtFilter));
 
                             log("verify response size");
                             if (filteredCreatedAtElements == null || filteredCreatedAtElements.size() != filteredCreatedAtResponseElements.size()) {
@@ -225,7 +225,7 @@ public class SystemPropertiesTests extends TestGroup {
                                     });
 
                             log("Filter table - UpdatedAt");
-                            List<StringIdRoundTripTableElement> filteredUpdatedAtElements = read(table, field("__updatedAt").ge().val(updatedAtFilter));
+                            List<StringIdRoundTripTableElement> filteredUpdatedAtElements = read(table, field("updatedAt").ge().val(updatedAtFilter));
 
                             log("verify response size");
                             if (filteredUpdatedAtElements == null || filteredUpdatedAtElements.size() != filteredUpdatedAtResponseElements.size()) {
@@ -570,8 +570,8 @@ public class SystemPropertiesTests extends TestGroup {
 
                             JsonObject responseJsonElement1Copy = new JsonParser().parse(responseJsonElement1.toString()).getAsJsonObject();
 
-                            responseJsonElement1Copy.remove("__version");
-                            responseJsonElement1Copy.addProperty("__version", "BAAAAAAAdkw=");
+                            responseJsonElement1Copy.remove("version");
+                            responseJsonElement1Copy.addProperty("version", "BAAAAAAAdkw=");
 
                             log("Update response Json element 1 copy - " + responseJsonElement1Copy.toString());
                             update(jsonTable, responseJsonElement1Copy);
@@ -585,8 +585,8 @@ public class SystemPropertiesTests extends TestGroup {
                                 MobileServicePreconditionFailedExceptionJson preconditionFailed = (MobileServicePreconditionFailedExceptionJson) ex.getCause();
                                 JsonObject serverValue = preconditionFailed.getValue();
 
-                                String serverVersion = serverValue.get("__version").getAsString();
-                                String responseVersion = responseJsonElement1.get("__version").getAsString();
+                                String serverVersion = serverValue.get("version").getAsString();
+                                String responseVersion = responseJsonElement1.get("version").getAsString();
 
                                 if (!serverVersion.equals(responseVersion)) {
                                     ex = new ExpectedValueException(serverVersion, responseVersion);

@@ -1,5 +1,6 @@
 package com.microsoft.windowsazure.mobileservices.table.sync.pull;
 
+import com.google.common.base.Strings;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -69,7 +70,7 @@ public class IncrementalPullStrategy extends PullStrategy {
             results = mStore.read(
                     QueryOperations.tableName(INCREMENTAL_PULL_STRATEGY_TABLE)
                             .field("id")
-                            .eq(query.getTableName() + "_" + queryId));
+                            .eq(table.getTableName() + "_" + queryId));
 
             if (results != null) {
 
@@ -133,7 +134,7 @@ public class IncrementalPullStrategy extends PullStrategy {
 
         JsonObject updatedElement = new JsonObject();
 
-        updatedElement.addProperty("id", query.getTableName() + "_" + queryId);
+        updatedElement.addProperty("id", table.getTableName() + "_" + queryId);
         updatedElement.addProperty("maxupdateddate", lastElementUpdatedAt);
 
         try {
@@ -153,7 +154,12 @@ public class IncrementalPullStrategy extends PullStrategy {
         }
 
         if (maxUpdatedAt != null) {
+
             Query filterQuery = QueryOperations.field(MobileServiceSystemColumns.UpdatedAt).ge(this.maxUpdatedAt);
+
+            if (!Strings.isNullOrEmpty(this.query.getTableName())) {
+                filterQuery.tableName(this.query.getTableName());
+            }
 
             if (this.query.getQueryNode() != null) {
                 this.query = this.query.and(filterQuery);

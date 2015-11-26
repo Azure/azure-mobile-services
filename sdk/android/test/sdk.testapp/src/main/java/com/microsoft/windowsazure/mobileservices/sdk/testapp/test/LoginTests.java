@@ -34,12 +34,11 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterResponseMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.ResultsContainer;
+import com.squareup.okhttp.Headers;
+import com.squareup.okhttp.Protocol;
+import com.squareup.okhttp.internal.http.StatusLine;
 
 import junit.framework.Assert;
-
-import org.apache.http.Header;
-import org.apache.http.ProtocolVersion;
-import org.apache.http.StatusLine;
 
 import java.net.MalformedURLException;
 import java.util.HashMap;
@@ -289,23 +288,7 @@ public class LoginTests extends InstrumentationTestCase {
 
                 ServiceFilterResponseMock response = new ServiceFilterResponseMock();
                 response.setContent(errorJson);
-                response.setStatus(new StatusLine() {
-
-                    @Override
-                    public int getStatusCode() {
-                        return 400;
-                    }
-
-                    @Override
-                    public String getReasonPhrase() {
-                        return errorMessage;
-                    }
-
-                    @Override
-                    public ProtocolVersion getProtocolVersion() {
-                        return null;
-                    }
-                });
+                response.setStatus(new StatusLine(Protocol.HTTP_2, 400, ""));
 
                 final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
@@ -344,9 +327,10 @@ public class LoginTests extends InstrumentationTestCase {
             public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
                 int headerIndex = -1;
-                Header[] headers = request.getHeaders();
-                for (int i = 0; i < headers.length; i++) {
-                    if (headers[i].getName() == "X-ZUMO-AUTH") {
+
+                Headers headers = request.getHeaders();
+                for (int i = 0; i < headers.size(); i++) {
+                    if (headers.name(i) == "X-ZUMO-AUTH") {
                         headerIndex = i;
                     }
                 }
@@ -354,7 +338,7 @@ public class LoginTests extends InstrumentationTestCase {
                     Assert.fail();
                 }
 
-                assertEquals(user.getAuthenticationToken(), headers[headerIndex].getValue());
+                assertEquals(user.getAuthenticationToken(), headers.value(headerIndex));
 
                 ServiceFilterResponseMock response = new ServiceFilterResponseMock();
                 response.setContent("{}");

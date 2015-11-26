@@ -30,6 +30,7 @@ import com.microsoft.windowsazure.mobileservices.ApiJsonOperationCallback;
 import com.microsoft.windowsazure.mobileservices.ApiOperationCallback;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
+import com.microsoft.windowsazure.mobileservices.http.HttpConstants;
 import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
@@ -40,13 +41,10 @@ import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.N
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.HttpMetaEchoFilter;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterRequestMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterResponseMock;
-import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.StatusLineMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.PersonTestObject;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.test.types.ResultsContainer;
-
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpPost;
+import com.squareup.okhttp.Protocol;
+import com.squareup.okhttp.internal.http.StatusLine;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -82,7 +80,7 @@ public class CustomApiClientTests extends InstrumentationTestCase {
                 public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
                     ServiceFilterResponseMock mockResponse = new ServiceFilterResponseMock();
-                    mockResponse.setStatus(new StatusLineMock(418)); // I'm a
+                    mockResponse.setStatus(new StatusLine(Protocol.HTTP_2, 418, "")); // I'm a
                     // teapot
                     // status
                     // code
@@ -95,7 +93,7 @@ public class CustomApiClientTests extends InstrumentationTestCase {
             List<Pair<String, String>> mockHeaders = new ArrayList<Pair<String, String>>();
             List<Pair<String, String>> mockParameters = new ArrayList<Pair<String, String>>();
 
-            client.invokeApi("myApi", new byte[]{1, 2, 3, 4}, HttpPost.METHOD_NAME, mockHeaders, mockParameters).get();
+            client.invokeApi("myApi", new byte[]{1, 2, 3, 4}, HttpConstants.PostMethod, mockHeaders, mockParameters).get();
 
         } catch (Exception exception) {
             if (exception instanceof ExecutionException) {
@@ -160,7 +158,7 @@ public class CustomApiClientTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
         try {
             client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
-            client.invokeApi("myApi", new Object(), HttpHead.METHOD_NAME, null, null).get();
+            client.invokeApi("myApi", new Object(), "HEAD", null, null).get();
         } catch (Exception exception) {
             container.setException(exception);
         }
@@ -180,7 +178,7 @@ public class CustomApiClientTests extends InstrumentationTestCase {
         MobileServiceClient client = null;
         try {
             client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
-            client.invokeApi("myApi", new Object(), HttpPost.METHOD_NAME, null, null).get();
+            client.invokeApi("myApi", new Object(), HttpConstants.PostMethod, null, null).get();
 
         } catch (Exception exception) {
             container.setException(exception);
@@ -207,7 +205,7 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 
             client = client.withFilter(new EchoFilter());
 
-            PersonTestObject result = client.invokeApi("myApi", p, HttpPost.METHOD_NAME, null, PersonTestObject.class).get();
+            PersonTestObject result = client.invokeApi("myApi", p, HttpConstants.PostMethod, null, PersonTestObject.class).get();
 
             if (result == null) {
                 container.setException(new Exception("Expected one person result"));
@@ -248,7 +246,7 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 
         client = client.withFilter(new EchoFilter());
 
-        client.invokeApi("myApi", p, HttpPost.METHOD_NAME, null, PersonTestObject.class, new ApiOperationCallback<PersonTestObject>() {
+        client.invokeApi("myApi", p, HttpConstants.PostMethod, null, PersonTestObject.class, new ApiOperationCallback<PersonTestObject>() {
 
             @Override
             public void onCompleted(PersonTestObject result, Exception exception, ServiceFilterResponse response) {
@@ -293,7 +291,7 @@ public class CustomApiClientTests extends InstrumentationTestCase {
         client = client.withFilter(new EchoFilter());
 
         try {
-            PersonTestObject result = client.invokeApi("myApi", input, HttpPost.METHOD_NAME, null, PersonTestObject.class).get();
+            PersonTestObject result = client.invokeApi("myApi", input, HttpConstants.PostMethod, null, PersonTestObject.class).get();
             if (result == null) {
                 fail("Expected one person result");
             } else {
@@ -322,7 +320,7 @@ public class CustomApiClientTests extends InstrumentationTestCase {
         try {
             client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
             client = client.withFilter(new EchoFilter());
-            String result = client.invokeApi("myApi", s, HttpPost.METHOD_NAME, null, String.class).get();
+            String result = client.invokeApi("myApi", s, HttpConstants.PostMethod, null, String.class).get();
 
             if (result == null) {
                 container.setException(new Exception("Expected one string result"));
@@ -357,7 +355,7 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 
             client = client.withFilter(new EchoFilter());
 
-            Integer result = client.invokeApi("myApi", i, HttpPost.METHOD_NAME, null, Integer.class).get();
+            Integer result = client.invokeApi("myApi", i, HttpConstants.PostMethod, null, Integer.class).get();
 
             if (result == null) {
                 container.setException(new Exception("Expected one integer result"));
@@ -391,7 +389,7 @@ public class CustomApiClientTests extends InstrumentationTestCase {
             client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
             client = client.withFilter(new EchoFilter());
 
-            Float result = client.invokeApi("myApi", f, HttpPost.METHOD_NAME, null, Float.class).get();
+            Float result = client.invokeApi("myApi", f, HttpConstants.PostMethod, null, Float.class).get();
 
             if (result == null) {
                 container.setException(new Exception("Expected one float result"));
@@ -426,7 +424,7 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 
             client = client.withFilter(new EchoFilter());
 
-            Boolean result = client.invokeApi("myApi", b, HttpPost.METHOD_NAME, null, Boolean.class).get();
+            Boolean result = client.invokeApi("myApi", b, HttpConstants.PostMethod, null, Boolean.class).get();
 
             if (result == null) {
                 container.setException(new Exception("Expected one boolean result"));
@@ -465,7 +463,7 @@ public class CustomApiClientTests extends InstrumentationTestCase {
             people.add(p1);
             people.add(p2);
 
-            PersonTestObject[] entities = client.invokeApi("myApi", people, HttpPost.METHOD_NAME, null, PersonTestObject[].class).get();
+            PersonTestObject[] entities = client.invokeApi("myApi", people, HttpConstants.PostMethod, null, PersonTestObject[].class).get();
 
             if (entities == null || entities.length != 2) {
                 container.setException(new Exception("Expected two person result"));
@@ -505,7 +503,7 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 
             client = client.withFilter(new EchoFilter());
 
-            JsonElement result = client.invokeApi("myApi", json, HttpPost.METHOD_NAME, null).get();
+            JsonElement result = client.invokeApi("myApi", json, HttpConstants.PostMethod, null).get();
 
             if (result == null) {
                 container.setException(new Exception("Expected result"));
@@ -546,7 +544,7 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 
         client = client.withFilter(new EchoFilter());
 
-        client.invokeApi("myApi", json, HttpPost.METHOD_NAME, null, new ApiJsonOperationCallback() {
+        client.invokeApi("myApi", json, HttpConstants.PostMethod, null, new ApiJsonOperationCallback() {
 
             @Override
             public void onCompleted(JsonElement result, Exception exception, ServiceFilterResponse response) {
@@ -591,7 +589,7 @@ public class CustomApiClientTests extends InstrumentationTestCase {
             List<Pair<String, String>> mockHeaders = new ArrayList<Pair<String, String>>();
             List<Pair<String, String>> mockParameters = new ArrayList<Pair<String, String>>();
 
-            ServiceFilterResponse response = client.invokeApi("myApi", content, HttpPost.METHOD_NAME, mockHeaders, mockParameters).get();
+            ServiceFilterResponse response = client.invokeApi("myApi", content, HttpConstants.PostMethod, mockHeaders, mockParameters).get();
 
             if (response == null || response.getRawContent() == null) {
                 container.setException(new Exception("Expected response"));
@@ -627,7 +625,7 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 
             List<Pair<String, String>> headers = new ArrayList<Pair<String, String>>(expectedHeaders);
             List<Pair<String, String>> queryParameters = new ArrayList<Pair<String, String>>(expectedQueryParameters);
-            client.invokeApi("myApi", content, "POST", headers, queryParameters).get();
+            client.invokeApi("myApi", content, HttpConstants.PostMethod, headers, queryParameters).get();
 
             assertEquals(expectedHeaders.size(), headers.size());
             for (int i = 0; i < expectedHeaders.size(); i++) {
@@ -652,7 +650,7 @@ public class CustomApiClientTests extends InstrumentationTestCase {
             MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
             client = client.withFilter(new NullResponseFilter());
 
-            JsonElement response = client.invokeApi("myApi", content, "POST", null).get();
+            JsonElement response = client.invokeApi("myApi", content, HttpConstants.PostMethod, null).get();
 
         } catch (Exception exception) {
             if (!(exception.getCause() instanceof MobileServiceException)) {
@@ -673,7 +671,7 @@ public class CustomApiClientTests extends InstrumentationTestCase {
             MobileServiceClient client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
             client = client.withFilter(new NullResponseContentFilter());
 
-            JsonElement response = client.invokeApi("myApi", content, "POST", null).get();
+            JsonElement response = client.invokeApi("myApi", content, HttpConstants.PostMethod, null).get();
 
             if (response != null) {
                 fail("Expected Null Response");
@@ -701,7 +699,7 @@ public class CustomApiClientTests extends InstrumentationTestCase {
             List<Pair<String, String>> mockHeaders = new ArrayList<Pair<String, String>>();
             List<Pair<String, String>> mockParameters = new ArrayList<Pair<String, String>>();
 
-            ServiceFilterResponse response = client.invokeApi("myApi", null, HttpGet.METHOD_NAME, mockHeaders, mockParameters).get();
+            ServiceFilterResponse response = client.invokeApi("myApi", null, HttpConstants.GetMethod, mockHeaders, mockParameters).get();
 
             if (response == null || response.getContent() == null) {
                 container.setException(new Exception("Expected response"));
@@ -719,7 +717,7 @@ public class CustomApiClientTests extends InstrumentationTestCase {
             fail(exception.getMessage());
         } else {
             JsonObject jResponse = (new JsonParser()).parse(container.getResponseValue()).getAsJsonObject();
-            assertEquals(HttpGet.METHOD_NAME, jResponse.get("method").getAsString());
+            assertEquals(HttpConstants.GetMethod, jResponse.get("method").getAsString());
         }
     }
 
@@ -749,7 +747,7 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 
             List<Pair<String, String>> fakeParameters = new ArrayList<Pair<String, String>>();
 
-            ServiceFilterResponse response = client.invokeApi("myApi", null, HttpPost.METHOD_NAME, headers, fakeParameters).get();
+            ServiceFilterResponse response = client.invokeApi("myApi", null, HttpConstants.PostMethod, headers, fakeParameters).get();
 
             if (response == null || response.getContent() == null) {
                 container.setException(new Exception("Expected response"));
@@ -810,7 +808,7 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 
             client = client.withFilter(new HttpMetaEchoFilter());
 
-            ServiceFilterResponse response = client.invokeApi("myApi", null, HttpPost.METHOD_NAME, null, parameters).get();
+            ServiceFilterResponse response = client.invokeApi("myApi", null, HttpConstants.PostMethod, null, parameters).get();
 
             if (response == null || response.getContent() == null) {
                 container.setException(new Exception("Expected response"));

@@ -35,9 +35,6 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
 import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceUser;
 
-import org.apache.http.Header;
-import org.apache.http.protocol.HTTP;
-
 /**
  * Class for handling communication with Microsoft Azure Mobile Services REST APIs
  */
@@ -47,6 +44,11 @@ public class MobileServiceConnection {
      * Header value to represent JSON content-type
      */
     public static final String JSON_CONTENTTYPE = "application/json";
+
+    /**
+     * Request header to indicate the API Version
+     */
+    private static final String ZUMO_API_VERSION_HEADER = "ZUMO-API-VERSION";
 
     /**
      * Request header to indicate the Mobile Service Installation ID
@@ -118,7 +120,7 @@ public class MobileServiceConnection {
 
                 try {
                     response = request.execute();
-                    int statusCode = response.getStatus().getStatusCode();
+                    int statusCode = response.getStatus().code;
 
                     // If the response has error throw exception
                     if (statusCode < 200 || statusCode >= 300) {
@@ -183,8 +185,12 @@ public class MobileServiceConnection {
         if (SDK_VERSION != null) {
             request.addHeader(X_ZUMO_VERSION_HEADER, SDK_VERSION);
         }
+
         // Set the User Agent header
-        request.addHeader(HTTP.USER_AGENT, getUserAgent());
+        request.addHeader("User-Agent", getUserAgent());
+
+        // Set the Mobile Service SDK Version
+        request.addHeader(ZUMO_API_VERSION_HEADER,"2.0.0");
 
         // Set the special Installation ID header
         request.addHeader(X_ZUMO_INSTALLATION_ID_HEADER, MobileServiceApplication.getInstallationId(mClient.getContext()));
@@ -206,12 +212,9 @@ public class MobileServiceConnection {
      * @return True if the header is present, false otherwise
      */
     private boolean requestContainsHeader(ServiceFilterRequest request, String headerName) {
-        for (Header header : request.getHeaders()) {
-            if (header.getName().equals(headerName)) {
-                return true;
-            }
-        }
 
-        return false;
+        String value = request.getHeaders().get(headerName);
+
+        return (value != null);
     }
 }

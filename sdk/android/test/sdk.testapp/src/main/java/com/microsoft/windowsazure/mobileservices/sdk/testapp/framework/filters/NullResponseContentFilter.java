@@ -24,6 +24,8 @@ import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.squareup.okhttp.Protocol;
+import com.squareup.okhttp.internal.http.StatusLine;
 
 public class NullResponseContentFilter implements ServiceFilter {
 
@@ -32,7 +34,7 @@ public class NullResponseContentFilter implements ServiceFilter {
         ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 
         response.setContent((String) null);
-        response.setStatus(new StatusLineMock(200));
+        response.setStatus(new StatusLine(Protocol.HTTP_2, 200, ""));
 
         ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
         return nextServiceFilterCallback.onNext(requestMock);

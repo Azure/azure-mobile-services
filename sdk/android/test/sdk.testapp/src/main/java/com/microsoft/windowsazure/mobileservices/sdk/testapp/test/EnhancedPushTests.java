@@ -25,6 +25,7 @@ import android.test.InstrumentationTestCase;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.microsoft.windowsazure.mobileservices.MobileServiceApplication;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+import com.microsoft.windowsazure.mobileservices.http.HttpConstants;
 import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
@@ -32,7 +33,8 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.notifications.MobileServicePush;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterRequestMock;
 import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.ServiceFilterResponseMock;
-import com.microsoft.windowsazure.mobileservices.sdk.testapp.framework.filters.StatusLineMock;
+import com.squareup.okhttp.Protocol;
+import com.squareup.okhttp.internal.http.StatusLine;
 
 import junit.framework.Assert;
 
@@ -65,7 +67,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
                     container.requestMethod = request.getMethod();
 
                     ServiceFilterResponseMock mockResponse = new ServiceFilterResponseMock();
-                    mockResponse.setStatus(new StatusLineMock(204));
+                    mockResponse.setStatus(new StatusLine(Protocol.HTTP_2, 204, ""));
 
                     ServiceFilterRequestMock mockRequest = new ServiceFilterRequestMock(mockResponse);
 
@@ -88,7 +90,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 
         // Asserts
         Assert.assertEquals(expectedUrl, container.requestUrl);
-        Assert.assertEquals("DELETE", container.requestMethod);
+        Assert.assertEquals(HttpConstants.DeleteMethod, container.requestMethod);
     }
 
     public void testRegister() throws Throwable {
@@ -115,7 +117,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
                     container.requestMethod = request.getMethod();
 
                     ServiceFilterResponseMock mockResponse = new ServiceFilterResponseMock();
-                    mockResponse.setStatus(new StatusLineMock(204));
+                    mockResponse.setStatus(new StatusLine(Protocol.HTTP_2, 204, ""));
 
                     ServiceFilterRequestMock mockRequest = new ServiceFilterRequestMock(mockResponse);
 
@@ -139,7 +141,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
         // Asserts
         Assert.assertEquals(expectedUrl, container.requestUrl);
         Assert.assertEquals(expectedContent, container.requestContent);
-        Assert.assertEquals("PUT", container.requestMethod);
+        Assert.assertEquals(HttpConstants.PutMethod, container.requestMethod);
     }
 
     public void testRegisterTemplate() throws Throwable {
@@ -153,7 +155,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 
         final String expectedUrl = appUrl + pnsApiUrl + "/installations/" + Uri.encode(installationId);
         final String expectedContent =
-                "{\"pushChannel\":\"handle\",\"platform\":\"gcm\",\"templates\":{\"template1\":{\"body\":\"{\\\"data\\\":\\\"abc\\\"}\",\"tags\":[\"tag1\"]}}}";
+                "{\"pushChannel\":\"handle\",\"platform\":\"gcm\",\"templates\":{\"template1\":{\"body\":\"{\\\"data\\\":\\\"abc\\\"}\"}}}";
         try {
             client = new MobileServiceClient(appUrl, getInstrumentation().getTargetContext());
 
@@ -167,7 +169,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
                     container.requestMethod = request.getMethod();
 
                     ServiceFilterResponseMock mockResponse = new ServiceFilterResponseMock();
-                    mockResponse.setStatus(new StatusLineMock(204));
+                    mockResponse.setStatus(new StatusLine(Protocol.HTTP_2, 204, ""));
 
                     ServiceFilterRequestMock mockRequest = new ServiceFilterRequestMock(mockResponse);
 
@@ -191,7 +193,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
         // Asserts
         Assert.assertEquals(expectedUrl, container.requestUrl);
         Assert.assertEquals(expectedContent, container.requestContent);
-        Assert.assertEquals("PUT", container.requestMethod);
+        Assert.assertEquals(HttpConstants.PutMethod, container.requestMethod);
     }
     private class Container {
 
@@ -202,3 +204,4 @@ public class EnhancedPushTests extends InstrumentationTestCase {
         public Exception exception;
     }
 }
+

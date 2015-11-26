@@ -27,8 +27,6 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.table.serialization.DateSerializer;
 
-import org.apache.http.Header;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -300,23 +298,14 @@ public class Util {
     }
 
     public static boolean responseContainsHeader(ServiceFilterResponse response, String headerName) {
-        for (Header header : response.getHeaders()) {
-            if (header.getName().equals(headerName)) {
-                return true;
-            }
-        }
 
-        return false;
+        String headerValue = response.getHeaders().get(headerName);
+
+        return (headerValue != null);
     }
 
     public static String getHeaderValue(ServiceFilterResponse response, String headerName) {
-        for (Header header : response.getHeaders()) {
-            if (header.getName().equals(headerName)) {
-                return header.getValue();
-            }
-        }
-
-        return null;
+        return response.getHeaders().get(headerName);
     }
 
     public static <T> List<T> filter(List<T> list, IPredicate<T> predicate) {

@@ -24,11 +24,10 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices.http;
 
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
-
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
+import com.squareup.okhttp.Headers;
+import com.squareup.okhttp.Response;
+import com.squareup.okhttp.ResponseBody;
+import com.squareup.okhttp.internal.http.StatusLine;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -43,7 +42,7 @@ public class ServiceFilterResponseImpl implements ServiceFilterResponse {
     /**
      * The original response
      */
-    private HttpResponse mResponse;
+    private Response mResponse;
 
     /**
      * The response content
@@ -57,34 +56,41 @@ public class ServiceFilterResponseImpl implements ServiceFilterResponse {
      * @throws java.io.IOException
      * @throws IllegalStateException
      */
-    public ServiceFilterResponseImpl(HttpResponse response) throws IllegalStateException, IOException {
+    public ServiceFilterResponseImpl(Response response) throws IllegalStateException, IOException {
         mResponse = response;
         mResponseContent = null;
 
-        // Get the response's content
-        HttpEntity entity = mResponse.getEntity();
-        if (entity != null) {
-            InputStream instream = getUngzippedContent(entity);
+        try {
+            // Get the response's content
+            ResponseBody entity = mResponse.body();
 
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            int length;
+            if (entity != null) {
+                InputStream instream = getUngzippedContent(response);
 
-            while ((length = instream.read(buffer)) != -1) {
-                out.write(buffer, 0, length);
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                byte[] buffer = new byte[1024];
+                int length;
+
+                while ((length = instream.read(buffer)) != -1) {
+                    out.write(buffer, 0, length);
+                }
+
+                instream.close();
+
+                mResponseContent = out.toByteArray();
+            } else {
+                mResponseContent = null;
             }
-
-            instream.close();
-
-            mResponseContent = out.toByteArray();
-        } else {
-            mResponseContent = null;
+        }finally {
+            if (response != null && response.body() != null) {
+                response.body().close();
+            }
         }
     }
 
     @Override
-    public Header[] getHeaders() {
-        return mResponse.getAllHeaders();
+    public Headers getHeaders() {
+        return mResponse.headers();
     }
 
     @Override
@@ -108,25 +114,21 @@ public class ServiceFilterResponseImpl implements ServiceFilterResponse {
 
     @Override
     public StatusLine getStatus() {
-        return mResponse.getStatusLine();
+        return StatusLine.get(mResponse);
     }
 
-    public static InputStream getUngzippedContent(HttpEntity entity)  throws IOException {
+    public static InputStream getUngzippedContent(Response response)  throws IOException {
 
-        InputStream responseStream = entity.getContent();
+        InputStream responseStream = response.body().byteStream();
 
         if (responseStream == null)
             return responseStream;
 
-        Header header = entity.getContentEncoding();
+        String contentEncoding = response.headers().get("content-encoding");
 
-        if (header == null)
+        if (contentEncoding == null) {
             return responseStream;
-
-        String contentEncoding = header.getValue();
-
-        if (contentEncoding == null)
-            return responseStream;
+        }
 
         if (contentEncoding.contains("gzip")) responseStream
                 = new GZIPInputStream(responseStream);
