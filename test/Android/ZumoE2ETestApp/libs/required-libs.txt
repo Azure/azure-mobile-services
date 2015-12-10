@@ -1,2 +1,0 @@
-This directory should contain the following JARs:
-    - gcm.jar R3

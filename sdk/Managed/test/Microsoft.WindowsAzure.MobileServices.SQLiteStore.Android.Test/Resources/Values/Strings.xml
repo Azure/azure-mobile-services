@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-	<string name="Tags">Tags</string>
-	<string name="RunTests">Run Tests</string>
-	<string name="ApplicationName">Microsoft.WindowsAzure.Mobile.SQLiteStore.Android.Test</string>
-</resources>
