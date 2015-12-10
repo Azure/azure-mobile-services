@@ -1,8 +1,0 @@
-*.suo
-obj/
-bin/
-bld/
-build/
-debug/
-*.jsproj.user
-packages/
