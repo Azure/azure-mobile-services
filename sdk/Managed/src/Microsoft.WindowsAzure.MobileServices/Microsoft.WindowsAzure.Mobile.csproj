@@ -62,6 +62,7 @@
     <Compile Include="Extensions\MobileServiceSyncContextExtensions.cs" />
     <Compile Include="Extensions\MobileServiceSyncTableExtensions.cs" />
     <Compile Include="Extensions\MobileServiceTableExtensions.cs" />
+    <Compile Include="Extensions\PlatformInformationExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Http\HttpUtility.cs" />
@@ -80,6 +81,7 @@
     <Compile Include="Platform\IPlatformInformation.cs" />
     <Compile Include="Http\MobileServiceHttpClient.cs" />
     <Compile Include="Platform\Platform.cs" />
+    <Compile Include="Platform\PreserveAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Push\ILocalStorageManager.cs" />
     <Compile Include="Push\IRegistrationManager.cs" />

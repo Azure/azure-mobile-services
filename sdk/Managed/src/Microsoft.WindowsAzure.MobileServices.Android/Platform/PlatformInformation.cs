@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Reflection;
 using Android.OS;
 
 namespace Microsoft.WindowsAzure.MobileServices
@@ -31,6 +32,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         public bool IsEmulator
         {
             get { return Build.Brand.Equals ("generic", StringComparison.OrdinalIgnoreCase); }
+        }
+
+        public string Version
+        {
+            get
+            {
+                return this.GetVersionFromAssemblyFileVersion();
+            }
         }
     }
 }

@@ -692,14 +692,10 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         private string GetUserAgentHeader()
         {
-            AssemblyFileVersionAttribute fileVersionAttribute = typeof(MobileServiceClient).GetTypeInfo().Assembly
-                                                                        .GetCustomAttributes(typeof(AssemblyFileVersionAttribute))
-                                                                        .Cast<AssemblyFileVersionAttribute>()
-                                                                        .FirstOrDefault();
-            string fileVersion = fileVersionAttribute.Version;
-            string sdkVersion = string.Join(".", fileVersion.Split('.').Take(2)); // Get just the major and minor versions
-
             IPlatformInformation platformInformation = Platform.Instance.PlatformInformation;
+
+            string sdkVersion = string.Join(".", platformInformation.Version.Split('.').Take(2)); // Get just the major and minor versions
+
             return string.Format(
                 CultureInfo.InvariantCulture,
                 "ZUMO/{0} (lang={1}; os={2}; os_version={3}; arch={4}; version={5})",
@@ -708,7 +704,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 platformInformation.OperatingSystemName,
                 platformInformation.OperatingSystemVersion,
                 platformInformation.OperatingSystemArchitecture,
-                fileVersion);
+                platformInformation.Version);
         }
 
         /// <summary>
