@@ -35,5 +35,10 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Boolean indicating if the platform is running on an emulator.
         /// </summary>
         bool IsEmulator { get; }
+
+        /// <summary>
+        /// Gets the platform library version.
+        /// </summary>
+        string Version { get; }
     }
 }
