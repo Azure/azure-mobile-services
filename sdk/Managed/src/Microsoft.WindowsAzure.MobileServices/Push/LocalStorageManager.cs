@@ -95,11 +95,12 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         public void UpdateRegistrationByName(string registrationName, string registrationId, string registrationDeviceId)
         {
-            StoredRegistrationEntry cacheReg = new StoredRegistrationEntry(registrationName, registrationId);
             if (string.IsNullOrEmpty(registrationName))
             {
                 registrationName = Registration.NativeRegistrationName;
             }
+
+            StoredRegistrationEntry cacheReg = new StoredRegistrationEntry(registrationName, registrationId);
             lock (this.registrations)
             {
                 this.registrations[registrationName] = cacheReg;
