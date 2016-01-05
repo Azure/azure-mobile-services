@@ -46,6 +46,7 @@
     <Compile Include="SerializationTypes\TypeWithConstructor.cs" />
     <Compile Include="UnitTests\Http\HttpUtilityTests.cs" />
     <Compile Include="UnitTests\OData\ODataExpressionParser.Test.cs" />
+    <Compile Include="UnitTests\Push\LocalStorageMananger.Test.cs" />
     <Compile Include="UnitTests\Table\MobileServiceObjectReaderTests.cs" />
     <Compile Include="UnitTests\Table\Sync\MobileServiceSyncContext.Test.cs" />
   </ItemGroup>
@@ -101,7 +102,6 @@
     <Compile Include="UnitTests\MobileServiceFeatures.Test.cs" />
     <Compile Include="UnitTests\MobileServiceClient.Test.cs" />
     <Compile Include="UnitTests\Authentication\MobileServiceTokenAuthenticationTests.cs" />
-    <Compile Include="UnitTests\Push\Push.Test.cs" />
     <Compile Include="UnitTests\Push\PushHttpClient.Test.cs" />
     <Compile Include="UnitTests\Table\MobileServiceTable.Test.cs" />
     <Compile Include="UnitTests\MobileServiceUser.Test.cs" />
