@@ -68,20 +68,20 @@ Add a cloud backend to your iOS application in minutes with our iOS client SDK. 
 
 ### Prerequisites
 
-The SDK requires XCode 4.6.3 or greater.
+The SDK requires Xcode 4.6.3 or greater.
 
 ###Building and Referencing the SDK
 
-1. Open the ```sdk\iOS\WindowsAzureMobileServices.xcodeproj``` file in XCode.
+1. Open the ```sdk\iOS\WindowsAzureMobileServices.xcodeproj``` file in Xcode.
 2. Set the active scheme option to ```Framework\iOS Device```.
 3. Build the project using Command-B. The ```WindowsAzureMobileServices.framework``` folder should be found in the build output folder under ```Products\<build configuration>-iphoneos```.
-4. Drag and drop the ```WindowsAzureMobileServices.framework``` from a Finder window into the Frameworks folder of the Project Navigator panel of your iOS application XCode project.
+4. Drag and drop the ```WindowsAzureMobileServices.framework``` from a Finder window into the Frameworks folder of the Project Navigator panel of your iOS application Xcode project.
 
 ### Running the Tests
 
-1. Open the ```sdk\iOS\WindowsAzureMobileServices.xcodeproj``` file in XCode.
+1. Open the ```sdk\iOS\WindowsAzureMobileServices.xcodeproj``` file in Xcode.
 2. Set the active scheme option to ```WindowsAzureMobileServices\* Simulator```.
-3. Open the ```Test\WindowsAzureMobileServicesFunctionalTests.m``` file in the Project Navigator panel of XCode.
+3. Open the ```Test\WindowsAzureMobileServicesFunctionalTests.m``` file in the Project Navigator panel of Xcode.
 4. In the ```settings.plist``` file, set ```TestAppUrl``` and ```TestAppApplicationKey``` to a valid URL and Application Key for a working Mobile Service.
 5. Run the tests using Command-U.
 
