@@ -375,8 +375,16 @@ MobileServiceClient.prototype.invokeApi = Platform.async(
             body = options.body;
             headers = options.headers;
         }
+
+        headers = headers || {};
+
         if (_.isNull(method)) {
             method = "POST";
+        }
+
+        // if not specified, default to return results in JSON format
+        if (_.isNull(headers.accept)) {
+            headers.accept = 'application/json';
         }
 
         // Construct the URL

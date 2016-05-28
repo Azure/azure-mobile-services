@@ -70,7 +70,7 @@
                completion:(MSCompletionBlock)completion
 {
     NSString *name = registration[@"templateName"];
-    if (!name) {
+    if (!name || [name isKindOfClass:[NSNull class]]) {
         name = MSNativeRegistrationName;
     }
     

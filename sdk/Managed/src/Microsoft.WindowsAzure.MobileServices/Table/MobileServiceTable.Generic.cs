@@ -649,7 +649,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new InvalidOperationException(
                     string.Format(
                         CultureInfo.InvariantCulture,
-                        Resources.MobileServiceTable_NotSingleObject,
+                        "Could not get object from response {0}.",
                         responseStr));
             }
 

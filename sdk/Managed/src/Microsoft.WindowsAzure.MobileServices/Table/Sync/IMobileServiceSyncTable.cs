@@ -104,10 +104,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// </param>
         /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe
         /// </param>
+        /// <param name="pullOptions">
+        /// PullOptions that determine how to pull data from the remote table
+        /// </param>
         /// <returns>
         /// A task that completes when pull operation has finished.
         /// </returns>
-        Task PullAsync(string queryId, string query, IDictionary<string, string> parameters, bool pushOtherTables, CancellationToken cancellationToken);
+        Task PullAsync(string queryId, string query, IDictionary<string, string> parameters, bool pushOtherTables, CancellationToken cancellationToken, PullOptions pullOptions);
 
         /// <summary>
         /// Deletes all the items in local table that match the query.

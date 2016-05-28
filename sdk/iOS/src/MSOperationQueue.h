@@ -5,6 +5,7 @@
 #import <Foundation/Foundation.h>
 #import "MSTableOperation.h"
 #import "MSClient.h"
+#import "MSSyncContext.h"
 
 /// A simple queue interface to abstract access from implementation. For now this may just
 /// be an NSArray but long term this is liable to change

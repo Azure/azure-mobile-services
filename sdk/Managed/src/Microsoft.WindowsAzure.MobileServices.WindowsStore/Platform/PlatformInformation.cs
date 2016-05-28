@@ -2,6 +2,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
+using System.Linq;
+using System.Reflection;
 using Windows.ApplicationModel;
 
 namespace Microsoft.WindowsAzure.MobileServices
@@ -69,6 +71,14 @@ namespace Microsoft.WindowsAzure.MobileServices
             get
             {
                 return false;
+            }
+        }
+
+        public string Version
+        {
+            get
+            {
+                return this.GetVersionFromAssemblyFileVersion();
             }
         }
     }

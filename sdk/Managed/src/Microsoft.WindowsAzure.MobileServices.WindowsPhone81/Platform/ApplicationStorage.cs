@@ -62,7 +62,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                string message = Resources.IApplicationStorage_NullOrWhitespaceSettingName;
+                string message = "An application setting name must be provided. Null, empty or whitespace only names are not allowed.";
                 throw new ArgumentException(message);
             }
 
@@ -86,7 +86,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                string message = Resources.IApplicationStorage_NullOrWhitespaceSettingName;
+                string message = "An application setting name must be provided. Null, empty or whitespace only names are not allowed.";
                 throw new ArgumentException(message);
             }
 

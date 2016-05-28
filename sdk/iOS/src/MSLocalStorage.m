@@ -66,7 +66,7 @@ static NSString *const storageVersion = @"v1.0.0";
     
     for (int i = 0; i < [registrations count]; i++) {
         NSString *name = registrations[i][@"templateName"];
-        if (!name) {
+        if (!name || [name isKindOfClass:[NSNull class]]) {
             name = MSNativeRegistrationName;
         }
         
@@ -99,7 +99,7 @@ static NSString *const storageVersion = @"v1.0.0";
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     
     self.deviceToken = [defaults stringForKey:self.deviceTokenKey];
-    
+
     NSString *version = [defaults stringForKey:self.versionKey];
     self.isRefreshNeeded = version == nil || ![version isEqualToString:storageVersion];
     if(self.isRefreshNeeded) {

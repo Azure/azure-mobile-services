@@ -172,10 +172,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <param name="reader">An instance of <see cref="MobileServiceObjectReader"/></param>
         /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe
         /// </param>
+        /// <param name="pullOptions">
+        /// PullOptions that determine how to pull data from the remote table
+        /// </param>
         /// <returns>
         /// A task that completes when pull operation has finished.
         /// </returns>
-        public async Task PullAsync(string tableName, MobileServiceTableKind tableKind, string queryId, string query, MobileServiceRemoteTableOptions options, IDictionary<string, string> parameters, IEnumerable<string> relatedTables, MobileServiceObjectReader reader, CancellationToken cancellationToken)
+        public async Task PullAsync(string tableName, MobileServiceTableKind tableKind, string queryId, string query, MobileServiceRemoteTableOptions options, IDictionary<string, string> parameters, IEnumerable<string> relatedTables, MobileServiceObjectReader reader, CancellationToken cancellationToken, PullOptions pullOptions)
         {
             await this.EnsureInitializedAsync();
 
@@ -183,12 +186,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             {
                 if (parameters.Keys.Any(k => k.Equals(MobileServiceTable.IncludeDeletedParameterName, StringComparison.OrdinalIgnoreCase)))
                 {
-                    throw new ArgumentException(Resources.Pull_Cannot_Use_Reserved_Key.FormatInvariant(MobileServiceTable.IncludeDeletedParameterName));
+                    throw new ArgumentException("The key '{0}' is reserved and cannot be specified as a query parameter.".FormatInvariant(MobileServiceTable.IncludeDeletedParameterName));
                 }
 
                 if (parameters.Keys.Any(k => k.Equals(MobileServiceTable.SystemPropertiesQueryParameterName, StringComparison.OrdinalIgnoreCase)))
                 {
-                    throw new ArgumentException(Resources.Pull_Cannot_Use_Reserved_Key.FormatInvariant(MobileServiceTable.SystemPropertiesQueryParameterName));
+                    throw new ArgumentException("The key '{0}' is reserved and cannot be specified as a query parameter.".FormatInvariant(MobileServiceTable.SystemPropertiesQueryParameterName));
                 }
             }
 
@@ -199,7 +202,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             // local schema should be same as remote schema otherwise push can't function
             if (queryDescription.Selection.Any() || queryDescription.Projections.Any())
             {
-                throw new ArgumentException(Resources.MobileServiceSyncTable_PullWithSelectNotSupported, "query");
+                throw new ArgumentException("Pull query with select clause is not supported.", "query");
             }
 
             bool isIncrementalSync = !String.IsNullOrEmpty(queryId);
@@ -207,33 +210,34 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             {
                 if (queryDescription.Ordering.Any())
                 {
-                    throw new ArgumentException(Resources.MobileServiceSyncTable_IncrementalPullWithOrderNotAllowed, "query");
+                    throw new ArgumentException("Incremental pull query must not have orderby clause.", "query");
                 }
                 if (queryDescription.Top.HasValue || queryDescription.Skip.HasValue)
                 {
-                    throw new ArgumentException(Resources.MobileServiceSyncTable_IncrementalPullWithSkipTopNotSupported, "query");
+                    throw new ArgumentException("Incremental pull query must not have skip or top specified.", "query");
                 }
             }
 
             if (!options.HasFlag(MobileServiceRemoteTableOptions.OrderBy) && queryDescription.Ordering.Any())
             {
-                throw new ArgumentException(Resources.MobileServiceSyncTable_OrderByNotAllowed, "query");
+                throw new ArgumentException("The supported table options does not include orderby.", "query");
             }
 
             if (!options.HasFlag(MobileServiceRemoteTableOptions.Skip) && queryDescription.Skip.HasValue)
             {
-                throw new ArgumentException(Resources.MobileServiceSyncTable_SkipNotAllowed, "query");
+                throw new ArgumentException("The supported table options does not include skip.", "query");
             }
 
             if (!options.HasFlag(MobileServiceRemoteTableOptions.Top) && queryDescription.Top.HasValue)
             {
-                throw new ArgumentException(Resources.MobileServiceSyncTable_TopNotAllowed, "query");
+                throw new ArgumentException("The supported table options does not include top.", "query");
             }
 
             // let us not burden the server to calculate the count when we don't need it for pull
             queryDescription.IncludeTotalCount = false;
 
-            var action = new PullAction(table, tableKind, this, queryId, queryDescription, parameters, relatedTables, this.opQueue, this.settings, this.Store, options, reader, cancellationToken);
+            var action = new PullAction(table, tableKind, this, queryId, queryDescription, parameters, relatedTables,
+                this.opQueue, this.settings, this.Store, options, pullOptions, reader, cancellationToken);
             await this.ExecuteSyncAction(action);
         }
 
@@ -299,6 +303,30 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             });
         }
 
+        public Task UpdateOperationAsync(MobileServiceTableOperationError error, JObject item)
+        {
+            string itemId = error.Item.Value<string>(MobileServiceSystemColumns.Id);
+            return this.ExecuteOperationSafeAsync(itemId, error.TableName, async () =>
+            {
+                await this.TryUpdateOperation(error, item);
+                if (error.OperationKind != MobileServiceTableOperationKind.Delete)
+                {
+                    await this.Store.UpsertAsync(error.TableName, item, fromServer: true);
+                }
+            });
+        }
+
+        private async Task TryUpdateOperation(MobileServiceTableOperationError error, JObject item)
+        {
+            if (!await this.opQueue.UpdateAsync(error.Id, error.OperationVersion, item))
+            {
+                throw new InvalidOperationException("The operation has been updated and cannot be updated again");
+            }
+
+            // delete errors for updated operation
+            await this.Store.DeleteAsync(MobileServiceLocalSystemTables.SyncErrors, error.Id);
+        }
+
         public Task CancelAndDiscardItemAsync(MobileServiceTableOperationError error)
         {
             string itemId = error.Item.Value<string>(MobileServiceSystemColumns.Id);
@@ -339,7 +367,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         {
             if (!await this.opQueue.DeleteAsync(error.Id, error.OperationVersion))
             {
-                throw new InvalidOperationException(Resources.SyncError_OperationUpdated);
+                throw new InvalidOperationException("The operation has been updated and cannot be cancelled.");
             }
             // delete errors for cancelled operation
             await this.Store.DeleteAsync(MobileServiceLocalSystemTables.SyncErrors, error.Id);
@@ -349,7 +377,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         {
             if (this.initializeTask == null)
             {
-                throw new InvalidOperationException(Resources.SyncContext_NotInitialized);
+                throw new InvalidOperationException("SyncContext is not yet initialized.");
             }
             else
             {
@@ -378,7 +406,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                     {
                         throw;
                     }
-                    throw new MobileServiceLocalStoreException(Resources.SyncStore_OperationFailed, ex);
+                    throw new MobileServiceLocalStoreException("Failed to perform operation on local store.", ex);
                 }
 
                 if (existing != null)

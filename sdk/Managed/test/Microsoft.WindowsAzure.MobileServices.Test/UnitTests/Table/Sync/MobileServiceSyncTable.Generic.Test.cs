@@ -426,7 +426,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
-        public async Task PullAsync_UsesTopInQuery_IfLessThan50()
+        public async Task PullAsync_UsesTopInQuery_IfLessThanMaxPageSize()
         {
             var hijack = new TestHttpHandler();
             hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"How\"}]"); // first page
@@ -440,7 +440,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.IsFalse(store.TableMap.ContainsKey("stringId_test_table"));
 
-            await table.PullAsync(null, table.Take(49));
+            var pullOptions = new PullOptions
+            {
+                MaxPageSize = 50,
+            };
+
+            await table.PullAsync(null, table.Take(49), pullOptions);
 
             Assert.AreEqual(store.TableMap["stringId_test_table"].Count, 2);
 
@@ -449,7 +454,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
-        public async Task PullAsync_DefaultsTo50_IfGreaterThan50()
+        public async Task PullAsync_DefaultsTo50_IfGreaterThanMaxPageSize()
         {
             var hijack = new TestHttpHandler();
             hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"How\"}]"); // first page
@@ -463,14 +468,18 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.IsFalse(store.TableMap.ContainsKey("stringId_test_table"));
 
-            await table.PullAsync(null, table.Take(51));
+            var pullOptions = new PullOptions
+            {
+                MaxPageSize = 50,
+            };
+            await table.PullAsync(null, table.Take(51), pullOptions);
 
             Assert.AreEqual(store.TableMap["stringId_test_table"].Count, 2);
 
             AssertEx.MatchUris(hijack.Requests, "http://www.test.com/tables/stringId_test_table?$skip=0&$top=50&__includeDeleted=true&__systemproperties=__version%2C__deleted",
                                         "http://www.test.com/tables/stringId_test_table?$skip=2&$top=49&__includeDeleted=true&__systemproperties=__version%2C__deleted");
         }
-
+        
         [AsyncTestMethod]
         public async Task PullAsync_DoesNotFollowLink_IfMaxRecordsAreRetrieved()
         {
@@ -743,6 +752,33 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             await TestPullAsyncIncrementalWithOptions(MobileServiceRemoteTableOptions.OrderBy,
                 "http://test.com/tables/stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$orderby=__updatedAt&param1=val1&__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt%2C__deleted",
                 "http://test.com/tables/stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00'))&$orderby=__updatedAt&param1=val1&__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt%2C__deleted");
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_Incremental_PageSize()
+        {
+            var hijack = new TestHttpHandler();
+            hijack.OnSendingRequest = req =>
+            {
+                return Task.FromResult(req);
+            };
+            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey""}]");
+            hijack.AddResponseContent("[]"); // last page
+
+            var store = new MobileServiceLocalStoreMock();
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
+
+            IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
+            PullOptions pullOptions = new PullOptions
+            {
+                MaxPageSize = 10
+            };
+
+            await table.PullAsync("items", table.CreateQuery(), pullOptions: pullOptions);
+            AssertEx.MatchUris(hijack.Requests,
+                string.Format("http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top={0}&__includeDeleted=true&__systemproperties=__updatedAt%2C__version%2C__deleted", pullOptions.MaxPageSize),
+                string.Format("http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=1&$top={0}&__includeDeleted=true&__systemproperties=__updatedAt%2C__version%2C__deleted", pullOptions.MaxPageSize));
         }
 
         private static async Task TestPullAsyncIncrementalWithOptions(MobileServiceRemoteTableOptions options, params string[] uris)
@@ -1105,7 +1141,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(pushException.PushResult.Errors.Count(), 1);
 
             var delException = await ThrowsAsync<InvalidOperationException>(() => table.DeleteAsync(item));
-            Assert.AreEqual(delException.Message, "The item is in inconsistent state in the local store. Please complete the pending sync by calling PushAsync()before deleting the item.");
+            Assert.AreEqual(delException.Message, "The item is in inconsistent state in the local store. Please complete the pending sync by calling PushAsync() before deleting the item.");
 
             // insert still in queue
             Assert.AreEqual(service.SyncContext.PendingOperations, 1L);

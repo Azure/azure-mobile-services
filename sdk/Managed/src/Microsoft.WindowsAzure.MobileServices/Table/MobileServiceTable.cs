@@ -259,7 +259,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentException(
                         string.Format(
                             CultureInfo.InvariantCulture,
-                            Resources.MobileServiceTable_InsertWithExistingId,
+                            "Cannot insert if the {0} member is already set.",
                            MobileServiceSystemColumns.Id),
                             "instance");
             }

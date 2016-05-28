@@ -68,14 +68,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
             if (this.Item == null)
             {
-                throw new MobileServiceInvalidOperationException(Resources.MobileServiceTableOperation_ItemNotFound, request: null, response: null);
+                throw new MobileServiceInvalidOperationException("Operation must have an item associated with it.", request: null, response: null);
             }
 
             JToken response = await OnExecuteAsync();
             var result = response as JObject;
             if (response != null && result == null)
             {
-                throw new MobileServiceInvalidOperationException(Resources.MobileServiceTableOperation_ResultNotJObject, request: null, response: null);
+                throw new MobileServiceInvalidOperationException("Mobile Service table operation returned an unexpected response.", request: null, response: null);
             }
 
             return result;

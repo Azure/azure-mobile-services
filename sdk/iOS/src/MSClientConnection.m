@@ -52,7 +52,7 @@ static NSOperationQueue *delegateQueue;
 +(NSURLSession *)sessionWithDelegate:(id<NSURLSessionDelegate>)delegate delegateQueue:(NSOperationQueue *)queue
 {
 	NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
-	
+    
 	NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration
 											 delegate:delegate
 										delegateQueue:queue];
@@ -183,6 +183,8 @@ static NSOperationQueue *delegateQueue;
 		NSURLSession *session = [self sessionWithDelegate:delegate delegateQueue:taskQueue];
 		NSURLSessionDataTask *task = [session dataTaskWithRequest:request];
 		[task resume];
+        
+        [session finishTasksAndInvalidate];
     }
     else {
         

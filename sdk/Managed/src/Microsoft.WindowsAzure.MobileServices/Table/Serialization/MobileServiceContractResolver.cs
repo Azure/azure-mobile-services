@@ -157,7 +157,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 throw new InvalidOperationException(
                     string.Format(CultureInfo.InvariantCulture,
-                        Resources.MobileServiceContractResolver_MemberNotFound,
+                        "No '{0}' member found on type '{1}'.",
                         MobileServiceSystemColumns.Id,
                         type.FullName));
             }
@@ -278,7 +278,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 {
                     throw new NotSupportedException(
                             string.Format(CultureInfo.InvariantCulture,
-                            Resources.MobileServiceContractResolver_TypeNoDataContractButBaseWithDataContract,
+                            "The type '{0}' does not have a DataContractAttribute, but the type derives from the type '{1}', which does have a DataContractAttribute. If a type has a DataContractAttribute, any type that derives from that type must also have a DataContractAttribute.",
                             type.FullName,
                             baseTypeWithDataContract.FullName));
                 }
@@ -295,7 +295,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 {
                     throw new NotSupportedException(
                         string.Format(CultureInfo.InvariantCulture,
-                        Resources.MobileServiceContractResolver_TypeWithDataMemberButNoDataContract,
+                        "The type '{0}' has one or members with a DataMemberAttribute, but the type itself does not have a DataContractAttribute. Use the Newtonsoft.Json.JsonPropertyAttribute in place of the DataMemberAttribute and set the PropertyName to the desired name.",
                         type.FullName));
                 }
             }
@@ -430,7 +430,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                     {
                         throw new InvalidOperationException(
                             string.Format(CultureInfo.InvariantCulture,
-                            Resources.MobileServiceContractResolver_SamePropertyName,
+                            "Only one member may have the property name '{0}' (regardless of casing) on type '{1}'.",
                             property.PropertyName,
                             type.FullName));
                     }
@@ -460,7 +460,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 throw new InvalidOperationException(
                     string.Format(CultureInfo.InvariantCulture,
-                    Resources.MobileServiceContractResolver_SamePropertyName,
+                    "Only one member may have the property name '{0}' (regardless of casing) on type '{1}'.",
                     MobileServiceSystemColumns.Id,
                     type.FullName));
             }
@@ -469,7 +469,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 throw new InvalidOperationException(
                     string.Format(CultureInfo.InvariantCulture,
-                    Resources.MobileServiceContractResolver_MemberNotFound,
+                    "No '{0}' member found on type '{1}'.",
                     MobileServiceSystemColumns.Id,
                     type.FullName));
             }
@@ -517,7 +517,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                     {
                         throw new InvalidOperationException(
                             string.Format(CultureInfo.InvariantCulture,
-                            Resources.MobileServiceContractResolver_IntegerIdTypeWithSystemPropertyAttributes,
+                            "The type '{0}' has an integer id member and therefore can not have any members with the system property attribute '{1}'.",
                             member.DeclaringType.FullName,
                             systemProperty.SystemProperty));
                     }
@@ -526,7 +526,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                     {
                         throw new InvalidOperationException(
                             string.Format(CultureInfo.InvariantCulture,
-                            Resources.MobileServiceContractResolver_MultipleSystemPropertyAttributes,
+                            "A member can only have one system property attribute. The member '{0}' on type '{1}' has system property attributes '{2}' and '{3}'.",
                             member.Name,
                             member.DeclaringType.FullName,
                             systemProperty.SystemProperty,

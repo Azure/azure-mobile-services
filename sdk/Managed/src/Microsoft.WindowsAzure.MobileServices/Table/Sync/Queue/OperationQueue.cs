@@ -133,7 +133,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
             catch (Exception ex)
             {
-                throw new MobileServiceLocalStoreException(Resources.SyncStore_FailedToDeleteOperation, ex);
+                throw new MobileServiceLocalStoreException("Failed to delete operation from the local store.", ex);
             }
         }
 
@@ -145,7 +145,41 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
             catch (Exception ex)
             {
-                throw new MobileServiceLocalStoreException(Resources.SyncStore_FailedToUpdateOperation, ex);
+                throw new MobileServiceLocalStoreException("Failed to update operation in the local store.", ex);
+            }
+        }
+
+        public virtual async Task<bool> UpdateAsync(string id, long version, JObject item)
+        {
+            try
+            {
+                MobileServiceTableOperation op = await GetOperationAsync(id);                
+                if (op == null || op.Version != version)
+                {
+                    return false;
+                }
+
+                op.Version++;
+
+                // Change the operation state back to pending since this is a newly updated operation without any conflicts
+                op.State = MobileServiceTableOperationState.Pending;
+                
+                // if the operation type is delete then set the item property in the Operation table
+                if (op.Kind == MobileServiceTableOperationKind.Delete)
+                {
+                    op.Item = item;
+                }
+                else
+                {
+                    op.Item = null;
+                }
+
+                await this.UpdateAsync(op);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new MobileServiceLocalStoreException("Failed to update operation in the local store.", ex);
             }
         }
 

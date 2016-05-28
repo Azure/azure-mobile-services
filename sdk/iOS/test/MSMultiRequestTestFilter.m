@@ -45,19 +45,29 @@
     
     for (int i=0;i < statusCodes.count; i++) {
         NSNumber *number = (NSNumber *)statusCodes[i];
-        MSTestFilter *filter = [MSTestFilter testFilterWithStatusCode:number.integerValue data:data[i]];
+        MSTestFilter *filter = [MSTestFilter testFilterWithStatusCode:[number integerValue]];
         filter.ignoreNextFilter = YES;
-        __block NSURLRequest *actualRequest = [NSURLRequest new];
+        
+        id result = data[i];
+        if ([result isKindOfClass:[NSError class]]) {
+            filter.errorToUse = result;
+        } else if ([result isKindOfClass:[NSString class]]) {
+            filter.dataToUse = [result dataUsingEncoding:NSUTF8StringEncoding];
+        } else {
+            filter.dataToUse = result;
+        }
+        
         filter.onInspectRequest = ^(NSURLRequest *request) {
-            actualRequest = request;
             NSLog(@"%@", request.URL.absoluteString);
-            [requests addObject:actualRequest];
+            [requests addObject:request];
             return request;
         };
+        
         [filters addObject:filter];
     }
     multiFilter.testFilters = filters;
     multiFilter.actualRequests = requests;
+    
     return multiFilter;
 }
 
@@ -67,7 +77,6 @@
 {
     MSTestFilter *currentFilter = self.testFilters[self.currentIndex];
     self.currentIndex++;
-    
     [currentFilter handleRequest:request next:next response:response];
 }
 

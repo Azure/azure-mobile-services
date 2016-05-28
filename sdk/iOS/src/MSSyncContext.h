@@ -56,6 +56,10 @@ typedef void (^MSSyncPushCompletionBlock)(void);
 /// Provides the name of the table to track configuration data
 - (NSString *) configTableName;
 
+/// Indicates if the items passed to a sync table call should be saved by the SDK, if disabled, the local store will only
+/// recieve upserts/deletes for data calls originating from the server (pulls & pushes) plus the state tracking on the operation queue.
+@property (nonatomic) BOOL handlesSyncTableOperations;
+
 /// @}
 
 /// @name Fetching and Retrieving Data
@@ -109,7 +113,7 @@ typedef void (^MSSyncPushCompletionBlock)(void);
 @property (nonatomic, readonly) NSUInteger pendingOperationsCount;
 
 /// Executes all current pending operations on the queue
-- (void) pushWithCompletion:(MSSyncBlock)completion;
+- (NSOperation *) pushWithCompletion:(MSSyncBlock)completion;
 
 /// Specifies the delegate that will be used in the resolution of syncing issues
 @property (nonatomic, strong) id<MSSyncContextDelegate> delegate;

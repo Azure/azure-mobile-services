@@ -35,6 +35,10 @@
 /// for a list of Mobile Service's error codes
 @property (nonatomic, readonly) NSInteger code;
 
+/// Represents the domain of the error recieved while executing the table operation, this will typically
+/// be the MSErrorDomain, but may differ if the delegate chooses to return other error types
+@property (nonatomic, readonly) NSString *domain;
+
 /// A description of what caused the operation to fail
 @property (nonatomic, readonly) NSString *description;
 
@@ -66,11 +70,15 @@
 /// @name Initializing the MSTableOperationError Object
 /// @{
 
-/// Initializes the table operation error from the provided operation, item, and error objects.
-- (id) initWithOperation:(MSTableOperation *)operation item:(NSDictionary *)item error:(NSError *) error;
+/// Initializes the table operation error from the provided operation, item, error, and context objects.
+- (id) initWithOperation:(MSTableOperation *)operation item:(NSDictionary *)item context:(MSSyncContext *)context error:(NSError *) error;
 
-/// Initializes the table operation error from a serialized representationo of a MSTableOperationError.
-- (id) initWithSerializedItem:(NSDictionary *)item;
+- (id) initWithOperation:(MSTableOperation *)operation item:(NSDictionary *)item error:(NSError *) error __deprecated;
+
+/// Initializes the table operation error from a serialized representation of a MSTableOperationError.
+- (id) initWithSerializedItem:(NSDictionary *)item context:(MSSyncContext *)context;
+
+- (id) initWithSerializedItem:(NSDictionary *)item __deprecated;
 
 ///@}
 

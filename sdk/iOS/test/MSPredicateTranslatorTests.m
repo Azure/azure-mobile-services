@@ -19,13 +19,15 @@
     dateParts.month = 5;
     dateParts.day = 21;
     dateParts.calendar = [[NSCalendar alloc]
-                           initWithCalendarIdentifier:NSGregorianCalendar];
+                           initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
     dateParts.calendar.timeZone = [NSTimeZone timeZoneForSecondsFromGMT:0];
     
     NSDate *date1 = dateParts.date;
     dateParts.second = 29;
     NSDate *date2 = dateParts.date;
     NSDate *date3 = [date2 dateByAddingTimeInterval:0.3];
+    
+    NSUUID *guid = [[NSUUID alloc] initWithUUIDString: @"01234567-89ab-cdef-0123-456789abcdef"];
 
     // For each test case: the first element is the expected OData value;
     // the second element is the predicate format string; and all
@@ -146,6 +148,9 @@
     
         @[ @"((Zipcode eq (98007 add 1)) or (Zipcode eq (98007 sub 1)) or (Zipcode eq 98007))",
            @"Zipcode IN { %@ + 1, %@ - 1, %@ }", @98007, @98007, @98007],
+        
+        @[ @"(Id eq guid'01234567-89AB-CDEF-0123-456789ABCDEF')",
+           @"Id == %@", guid ],
     ];
     
     for (NSArray *testCase in testCases) {
@@ -186,7 +191,7 @@
     dateParts.month = 5;
     dateParts.day = 21;
     dateParts.calendar = [[NSCalendar alloc]
-                          initWithCalendarIdentifier:NSGregorianCalendar];
+                          initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
     dateParts.calendar.timeZone = [NSTimeZone timeZoneForSecondsFromGMT:0];
     
     NSDate *date1 = dateParts.date;

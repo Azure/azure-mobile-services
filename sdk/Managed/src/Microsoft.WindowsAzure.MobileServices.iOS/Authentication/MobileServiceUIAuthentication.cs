@@ -61,7 +61,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 NSAction completed = () =>
                 {
                     if (!e.IsAuthenticated)
-                        tcs.TrySetException(new InvalidOperationException(Resources.IAuthenticationBroker_AuthenticationCanceled));
+                        tcs.TrySetException(new InvalidOperationException("Authentication was cancelled by the user."));
                     else
                         tcs.TrySetResult(e.Account.Properties["token"]);
                 };

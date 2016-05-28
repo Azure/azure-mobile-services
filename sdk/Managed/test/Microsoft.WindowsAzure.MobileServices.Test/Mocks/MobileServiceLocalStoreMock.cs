@@ -120,7 +120,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             return Task.FromResult(0);
         }
 
-        public Task<JObject> LookupAsync(string tableName, string id)
+        public virtual Task<JObject> LookupAsync(string tableName, string id)
         {
             MockTable table = GetTable(tableName);
             JObject item;

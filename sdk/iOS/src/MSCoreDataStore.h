@@ -3,8 +3,8 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import <WindowsAzureMobileServices/WindowsAzureMobileServices.h>
 #import <CoreData/CoreData.h>
+#import "MSSyncContext.h"
 
 /// The MSCoreDataStore class is for use when using the offline capabilities
 /// of mobile services. This class is a local store which manages records and sync
@@ -24,6 +24,12 @@
 -(id) initWithManagedObjectContext:(NSManagedObjectContext *)context;
 
 /// @}
+
+/// Disables the store from recieving information about the items passed into all sync table
+/// calls (insert, delete, update). If set, the application is responsible for already having
+/// saved the item in the persisten store. This flag is intended to be used when application
+/// code is working directly with NSManagedObjects.
+@property (nonatomic) BOOL handlesSyncTableOperations;
 
 #pragma mark * Helper functions
 

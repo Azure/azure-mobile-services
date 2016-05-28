@@ -232,7 +232,7 @@
     dateParts.hour = 15;
     dateParts.minute = 44;
     dateParts.calendar = [[NSCalendar alloc]
-                          initWithCalendarIdentifier:NSGregorianCalendar];
+                          initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
     dateParts.calendar.timeZone = [NSTimeZone timeZoneForSecondsFromGMT:0];
     
     NSDate *date1 = dateParts.date;
@@ -509,12 +509,12 @@
     XCTAssertNotNil(date, @"date was nil after deserializing item.");
     
     NSCalendar *gregorian = [[NSCalendar alloc]
-                             initWithCalendarIdentifier:NSGregorianCalendar];
+                             initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
     [gregorian setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
     NSDateComponents *dateParts =
-        [gregorian components:(NSYearCalendarUnit |
-                               NSHourCalendarUnit |
-                               NSSecondCalendarUnit)
+        [gregorian components:(NSCalendarUnitYear |
+                               NSCalendarUnitHour |
+                               NSCalendarUnitSecond)
                      fromDate:date];
 
     XCTAssertEqual(dateParts.year, 1999);
@@ -540,12 +540,12 @@
     XCTAssertNotNil(date, @"date was nil after deserializing item.");
     
     NSCalendar *gregorian = [[NSCalendar alloc]
-                             initWithCalendarIdentifier:NSGregorianCalendar];
+                             initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
     [gregorian setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
     NSDateComponents *dateParts =
-    [gregorian components:(NSYearCalendarUnit |
-                           NSHourCalendarUnit |
-                           NSSecondCalendarUnit)
+    [gregorian components:(NSCalendarUnitYear |
+                           NSCalendarUnitHour |
+                           NSCalendarUnitSecond)
                  fromDate:date];
     
     XCTAssertEqual(dateParts.year, 1999);
@@ -664,12 +664,12 @@
     XCTAssertNotNil(date, @"date was nil after deserializing item.");
     
     NSCalendar *gregorian = [[NSCalendar alloc]
-                             initWithCalendarIdentifier:NSGregorianCalendar];
+                             initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
     [gregorian setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
     NSDateComponents *dateParts =
-    [gregorian components:(NSYearCalendarUnit |
-                           NSHourCalendarUnit |
-                           NSSecondCalendarUnit)
+    [gregorian components:(NSCalendarUnitYear |
+                           NSCalendarUnitHour |
+                           NSCalendarUnitSecond)
                  fromDate:date];
     
     
@@ -681,9 +681,9 @@
     XCTAssertNotNil(date2, @"date was nil after deserializing item.");
 
     NSDateComponents *dateParts2 =
-    [gregorian components:(NSYearCalendarUnit |
-                           NSHourCalendarUnit |
-                           NSSecondCalendarUnit)
+    [gregorian components:(NSCalendarUnitYear |
+                           NSCalendarUnitHour |
+                           NSCalendarUnitSecond)
                  fromDate:date2];
 
     XCTAssertEqual(dateParts2.year, 2012);

@@ -14,10 +14,14 @@
 }
 @property (nonatomic, strong) MSCoreDataStore *store;
 @property (nonatomic, strong) NSManagedObjectContext *context;
+@property (nonatomic, strong) MSClient *client;
 
 @end
 
 @implementation MSCoreDataStoreTests
+
+// Table used for running tests
+static NSString *const TableName = @"TodoItem";
 
 - (void)setUp
 {
@@ -25,6 +29,9 @@
     
     self.context = [MSCoreDataStore inMemoryManagedObjectContext];
     self.store = [[MSCoreDataStore alloc] initWithManagedObjectContext:self.context];
+    self.client = [MSClient clientWithApplicationURLString:@""];
+    self.client.syncContext = [[MSSyncContext alloc] initWithDelegate:nil dataSource:self.store callback:nil];
+    
     XCTAssertNotNil(self.store, @"In memory store could not be created");
     
     done = NO;
@@ -43,22 +50,71 @@
     XCTAssertNotNil(self.store, @"store creation failed");
 }
 
+// Tests MSCoreDataStore Read, Update and Delete operations are case insensitive for the Id column.
+-(void)testReadUpdateDelete_CaseInsensitiveIdOperations
+{
+    NSError *error;
+
+    // Seed data to be inserted in the table
+    NSString *originalItemId = @"itemid";
+    NSArray *originalItems = @[ @{ @"id" : originalItemId, @"text" : @"original text" } ];
+
+    // Data to be used for updating the table. The Id differs from the Id of the seed data only in case
+    NSString *updatedItemId = @"ITEMID";
+    NSString *updatedText = @"updated text";
+    NSArray *updatedItems = @[ @{ @"id" : updatedItemId, @"text" : updatedText } ];
+    
+    // Initialize table
+    MSSyncTable *syncTable = [[MSSyncTable alloc] initWithName:TableName client:self.client];
+
+    // Populate the table
+    [self.store upsertItems:originalItems table:TableName orError:&error];
+    XCTAssertNil(error, @"upsert failed: %@", error.description);
+
+    // Read the table using ID with different case
+    NSDictionary *item = [self.store readTable:TableName withItemId:updatedItemId orError:&error];
+    XCTAssertNil(error, @"readTable:withItemId: failed: %@", error.description);
+    XCTAssertNotNil(item, @"item should have been found in the table");
+
+    // Update the item using ID with different case
+    [self.store upsertItems:updatedItems table:TableName orError:&error];
+    XCTAssertNil(error, @"upsert failed: %@", error.description);
+
+    // Verify the original row got updated
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:syncTable predicate:nil];
+    MSSyncContextReadResult *result = [self.store readWithQuery:query orError:&error];
+    XCTAssertNil(error, @"readWithQuery: failed: %@", error.description);
+    XCTAssertEqual(result.items.count, 1, @"Expected exactly one item in the table");
+    XCTAssertTrue([result.items[0][@"id"] isEqualToString:updatedItemId], @"Incorrect item id. Did the query return wrong item?");
+    XCTAssertTrue([result.items[0][@"text"] isEqualToString:updatedText], @"Incorrect text. Did the query return wrong item?");
+
+    // Delete the row using an ID with different case
+    [self.store deleteItemsWithIds:@[originalItemId] table:TableName orError:&error];
+    XCTAssertNil(error, @"deleteItemsWithIds: failed: %@", error.description);
+
+    // Read to ensure the item is actually gone
+    result = [self.store readWithQuery:query orError:&error];
+    XCTAssertNil(error, @"readWithQuery: failed: %@", error.description);
+    XCTAssertEqual(result.items.count, 0, @"Expected the table to be empty");
+}
+
+
 -(void)testUpsertSingleRecordAndReadSuccess
 {
     NSError *error;
     NSArray *testArray = @[@{@"id":@"ABC", @"text": @"test1", @"__version":@"APPLE"}];
     
-    [self.store upsertItems:testArray table:@"TodoItem" orError:&error];
+    [self.store upsertItems:testArray table:TableName orError:&error];
     XCTAssertNil(error, @"upsert failed: %@", error.description);
     
-    NSDictionary *item = [self.store readTable:@"TodoItem" withItemId:@"ABC" orError:&error];
+    NSDictionary *item = [self.store readTable:TableName withItemId:@"ABC" orError:&error];
     XCTAssertNil(error, @"readTable:withItemId: failed: %@", error.description);
     XCTAssertNotNil(item, @"item should not have been nil");
     XCTAssertTrue([item[@"id"] isEqualToString:@"ABC"], @"Incorrect item id");
     XCTAssertNotNil(item[MSSystemColumnVersion], @"__version was missing");
     XCTAssertNil(item[@"ms_version"], @"__version was missing");
     
-    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoItem" client:nil];
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:TableName client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
     
     MSSyncContextReadResult *result = [self.store readWithQuery:query orError:&error];
@@ -79,16 +135,16 @@
                             @{@"id":@"B", @"text": @"test2"},
                             @{@"id":@"C", @"text": @"test3"}];
     
-    [self.store upsertItems:testArray table:@"TodoItem" orError:&error];
+    [self.store upsertItems:testArray table:TableName orError:&error];
     XCTAssertNil(error, @"upsert failed: %@", error.description);
     
-    NSDictionary *item = [self.store readTable:@"TodoItem" withItemId:@"B" orError:&error];
+    NSDictionary *item = [self.store readTable:TableName withItemId:@"B" orError:&error];
     XCTAssertNil(error, @"readTable:withItemId: failed: %@", error.description);
     XCTAssertNotNil(item);
     XCTAssertEqualObjects(item[@"id"], @"B");
     XCTAssertEqualObjects(item[@"text"], @"test2");
     
-    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoItem" client:nil];
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:TableName client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
     
     MSSyncContextReadResult *result = [self.store readWithQuery:query orError:&error];
@@ -111,7 +167,7 @@
     XCTAssertNil(item[MSSystemColumnVersion]);
     XCTAssertNil(item[@"ms_version"]);
     
-    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoNoVersion" client:nil];
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoNoVersion" client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
     
     MSSyncContextReadResult *result = [self.store readWithQuery:query orError:&error];
@@ -169,7 +225,8 @@
     
     // Repeat for query
     
-    MSSyncTable *manySystemColumns = [[MSSyncTable alloc] initWithName:@"ManySystemColumns" client:nil];
+    MSSyncTable *manySystemColumns = [[MSSyncTable alloc] initWithName:@"ManySystemColumns"
+                                                                client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:manySystemColumns predicate:nil];
     
     MSSyncContextReadResult *result = [self.store readWithQuery:query orError:&error];
@@ -192,6 +249,21 @@
     XCTAssertTrue(msKeys.count == 0, @"ms_ column keys were exposed");
 }
 
+-(void)testUpsertRelationships
+{
+    NSError *error;
+    NSDictionary *originalItem = @{@"id":@"A", @"name": @"test1", @"child":@"123"};
+    
+    [self.store upsertItems:@[originalItem] table:@"Parent" orError:&error];
+    XCTAssertNil(error, @"upsert failed: %@", error.description);
+    
+    NSDictionary *item = [self.store readTable:@"Parent" withItemId:@"A" orError:&error];
+    XCTAssertNil(error, @"readTable:withItemId: failed: %@", error.description);
+
+    XCTAssertEqual(item.count, 2);
+    XCTAssertNil(item[@"child"]);
+}
+
 -(void)testUpsertNoTableError
 {
     NSError *error;
@@ -203,13 +275,88 @@
     XCTAssertEqual(error.code, MSSyncTableLocalStoreError);
 }
 
+-(void)testReadTable_RecordWithNullPropertyValue
+{
+    NSError *error;
+    NSArray *testArray = @[@{@"id":@"ABC", @"text": [NSNull null]}];
+    
+    [self.store upsertItems:testArray table:TableName orError:&error];
+    XCTAssertNil(error, @"upsert failed: %@", error.description);
+    
+    NSDictionary *item = [self.store readTable:TableName withItemId:@"ABC" orError:&error];
+    XCTAssertNil(error, @"readTable:withItemId: failed: %@", error.description);
+    
+    XCTAssertEqual(item[@"text"], [NSNull null], @"Incorrect text value. Should have been null");
+}
+
+-(void)testReadTable_RecordWithRelationships
+{
+    NSError *error;
+    NSManagedObject *parent = [NSEntityDescription insertNewObjectForEntityForName:@"Parent"
+                                                            inManagedObjectContext:self.context];
+    NSManagedObject *child = [NSEntityDescription insertNewObjectForEntityForName:@"Child"
+                                                            inManagedObjectContext:self.context];
+    
+    [parent setValue:@"A" forKey:@"id"];
+    [parent setValue:@"TheParent" forKey:@"name"];
+    [child setValue:@"A-1" forKey:@"id"];
+    [child setValue:@12 forKey:@"value"];
+    [parent setValue:child forKey:@"child"];
+    
+    if (![self.context save:&error]) {
+        XCTFail(@"Failed to setup relationship data: %@", error.description);
+    }
+    
+    NSDictionary *item = [self.store readTable:@"Parent" withItemId:@"A" orError:&error];
+    XCTAssertNil(error, @"readTable:withItemId: failed: %@", error.description);
+    
+    XCTAssertEqualObjects(item[@"name"], @"TheParent");
+    XCTAssertNil(item[@"child"]);
+    
+    item = [self.store readTable:@"Child" withItemId:@"A-1" orError:&error];
+    XCTAssertNil(error, @"readTable:withItemId: failed: %@", error.description);
+    
+    XCTAssertEqualObjects(item[@"value"], @12);
+    XCTAssertNil(item[@"parent"]);
+    
+    MSSyncTable *parentTable = [[MSSyncTable alloc] initWithName:@"Parent" client:self.client];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:parentTable predicate:nil];
+    
+    MSSyncContextReadResult *result = [self.store readWithQuery:query orError:&error];
+    
+    XCTAssertNil(error, @"readWithQuery:orError failed: %@", error.description);
+    item = result.items[0];
+    XCTAssertEqualObjects(item[@"name"], @"TheParent");
+    XCTAssertNil(item[@"child"]);
+}
+
+-(void)testReadWithQuery_RecordWithNullPropertyValue
+{
+    NSError *error;
+    NSArray *testArray = @[@{@"id":@"ABC", @"text": [NSNull null]}];
+    
+    [self.store upsertItems:testArray table:TableName orError:&error];
+    XCTAssertNil(error, @"upsert failed: %@", error.description);
+    
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:TableName client:self.client];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
+    
+    MSSyncContextReadResult *result = [self.store readWithQuery:query orError:&error];
+    XCTAssertNil(error, @"readWithQuery: failed: %@", error.description);
+    XCTAssertEqual(result.items.count, 1);
+    
+    NSDictionary *item = (result.items)[0];
+    
+    XCTAssertEqual(item[@"text"], [NSNull null], @"Incorrect text value. Should have been null");
+}
+
 -(void)testReadWithQuery
 {
     NSError *error;
     
     [self populateTestData];
     
-    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoItem" client:nil];
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:TableName client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
     query.predicate = [NSPredicate predicateWithFormat:@"text == 'test3'"];
     
@@ -226,7 +373,7 @@
     
     [self populateTestData];
     
-    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoItem" client:nil];
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:TableName client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
     query.fetchLimit = 1;
     query.includeTotalCount = YES;
@@ -244,7 +391,7 @@
     
     [self populateTestData];
     
-    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoItem" client:nil];
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:TableName client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
     [query orderByAscending:@"sort"];
     
@@ -263,7 +410,7 @@
     
     [self populateTestData];
     
-    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoItem" client:nil];
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:TableName client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
     [query orderByDescending:@"sort"];
     
@@ -282,7 +429,7 @@
     
     [self populateTestData];
     
-    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoItem" client:nil];
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:TableName client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
     query.selectFields = @[@"sort", @"text"];
     
@@ -314,7 +461,8 @@
     XCTAssertNil(error, @"Upsert failed: %@", error.description);
     
     // Now check selecting subset of columns
-    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"ManySystemColumns" client:nil];
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"ManySystemColumns"
+                                                       client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
     query.selectFields = @[@"text", @"__version", @"__meaningOfLife"];
     
@@ -334,7 +482,7 @@
 {
     NSError *error;
 
-    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"NoSuchTable" client:nil];
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"NoSuchTable" client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
     
     MSSyncContextReadResult *result = [self.store readWithQuery:query orError:&error];
@@ -350,10 +498,10 @@
     
     [self populateTestData];
     
-    [self.store deleteItemsWithIds:@[@"B"] table:@"TodoItem" orError:&error];
+    [self.store deleteItemsWithIds:@[@"B"] table:TableName orError:&error];
     XCTAssertNil(error, @"deleteItemsWithIds: failed: %@", error.description);
 
-    NSDictionary *item = [self.store readTable:@"TodoItem" withItemId:@"B" orError:&error];
+    NSDictionary *item = [self.store readTable:TableName withItemId:@"B" orError:&error];
     XCTAssertNil(error, @"readTable:withItemId: failed: %@", error.description);
     XCTAssertNil(item, @"item should have been nil");
 }
@@ -364,14 +512,14 @@
     
     [self populateTestData];
     
-    [self.store deleteItemsWithIds:@[@"A", @"C"] table:@"TodoItem" orError:&error];
+    [self.store deleteItemsWithIds:@[@"A", @"C"] table:TableName orError:&error];
     XCTAssertNil(error, @"deleteItemsWithIds: failed: %@", error.description);
     
-    NSDictionary *item = [self.store readTable:@"TodoItem" withItemId:@"A" orError:&error];
+    NSDictionary *item = [self.store readTable:TableName withItemId:@"A" orError:&error];
     XCTAssertNil(error, @"readTable:withItemId: failed: %@", error.description);
     XCTAssertNil(item, @"item should have been nil");
 
-    item = [self.store readTable:@"TodoItem" withItemId:@"B" orError:&error];
+    item = [self.store readTable:TableName withItemId:@"B" orError:&error];
     XCTAssertNil(error, @"readTable:withItemId: failed: %@", error.description);
     XCTAssertNotNil(item, @"item should not have been nil");
 }
@@ -400,7 +548,7 @@
     
     [self populateTestData];
 
-    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoItem" client:nil];
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:TableName client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
     
     [self.store deleteUsingQuery:query orError:&error];
@@ -418,7 +566,7 @@
     
     [self populateTestData];
     
-    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"TodoItem" client:nil];
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:TableName client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
     query.predicate = [NSPredicate predicateWithFormat:@"text == 'test3'"];
     
@@ -438,7 +586,7 @@
 {
     NSError *error;
     
-    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"NoSuchTable" client:nil];
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"NoSuchTable" client:self.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
     query.predicate = [NSPredicate predicateWithFormat:@"text == 'test3'"];
     
@@ -453,7 +601,7 @@
     MSSystemProperties properties = [self.store systemPropertiesForTable:@"ManySystemColumns"];
     XCTAssertEqual(properties, MSSystemPropertyCreatedAt | MSSystemPropertyUpdatedAt | MSSystemPropertyVersion | MSSystemPropertyDeleted);
 
-    properties = [self.store systemPropertiesForTable:@"TodoItem"];
+    properties = [self.store systemPropertiesForTable:TableName];
     XCTAssertEqual(properties, MSSystemPropertyVersion);
 
     properties = [self.store systemPropertiesForTable:@"TodoItemNoVersion"];
@@ -464,7 +612,7 @@
 {
     [self populateTestData];
     
-    NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"TodoItem"];
+    NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:TableName];
     request.predicate = [NSPredicate predicateWithFormat:@"id == %@", @"A"];
     NSArray *results = [self.context executeFetchRequest:request error:nil];
     
@@ -492,7 +640,7 @@
                           @{@"id":@"B", @"text": @"test2", @"sort":@15, @"__version":@"APPLE"},
                           @{@"id":@"C", @"text": @"test3", @"sort":@5, @"__version":@"APPLE"}];
     
-    [self.store upsertItems:testArray table:@"TodoItem" orError:&error];
+    [self.store upsertItems:testArray table:TableName orError:&error];
     XCTAssertNil(error, @"upsert failed: %@", error.description);
 }
 

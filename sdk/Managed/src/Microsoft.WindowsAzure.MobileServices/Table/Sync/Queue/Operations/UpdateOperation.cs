@@ -32,7 +32,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
             if (newOperation is InsertOperation)
             {
-                throw new InvalidOperationException(Resources.SyncContext_UpdatePending);
+                throw new InvalidOperationException("An update operation on the item is already in the queue.");
             }
         }
 
