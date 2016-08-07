@@ -1,5 +1,5 @@
 function del(id, user, request) {
-    tables.current.where({id: id}).read({
+    tables.current.where(id).read({
         success: function(results) {
             if (results.length) {
                 var existingItem = results[0];
