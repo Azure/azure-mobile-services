@@ -19,18 +19,22 @@
 # Add Offline Data Sync to your Android Mobile Services app
 
 > [AZURE.SELECTOR]
-- [Android)](../articles/mobile-services/mobile-services-android-get-started-offline-data.md)
-- [iOS](../articles/mobile-services/mobile-services-ios-get-started-offline-data.md)
-- [Windows](../articles/mobile-services/mobile-services-windows-store-dotnet-get-started-offline-data.md)
+- [Android)](./
+mobile-services-android-get-started-offline-data.md)
+- [iOS](./
+mobile-services-ios-get-started-offline-data.md)
+- [Windows](./
+mobile-services-windows-store-dotnet-get-started-offline-data.md)
 - [Xamarin.Android](../mobile-services/articles/mobile-services-xamarin-android-get-started-offline-data.md)
-- [Xamarin.iOS](../articles/mobile-services/mobile-services-xamarin-ios-get-started-offline-data.md)
+- [Xamarin.iOS](./
+mobile-services-xamarin-ios-get-started-offline-data.md)
 
 
 &nbsp;
 
 >[AZURE.WARNING] This is an **Azure Mobile Services** topic.  This service has been superseded by Azure App Service Mobile Apps and is scheduled for removal from Azure.  We recommend using Azure Mobile Apps for all new mobile backend deployments.  Read [this announcement](https://azure.microsoft.com/blog/transition-of-azure-mobile-services/) to learn more about the pending deprecation of this service.  
 > 
-> Learn about [migrating your site to Azure App Service](../articles/app-service-mobile/app-service-mobile-migrating-from-mobile-services.md).
+> Learn about [migrating your site to Azure App Service](https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-migrating-from-mobile-services/).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
 > For the equivalent Mobile Apps version of this topic, see [Enable offline sync for your Android mobile app](../app-service-mobile/app-service-mobile-android-get-started-offline-data.md).
@@ -191,9 +195,9 @@ Lets test the following scenarios.
 
 ### Offline testing
 
-<!-- Now if you run the app and tap the refresh button, you should see all the items from the server. At that point you should be able to turn off the networking from the device by placing it in *Airplane Mode*, and continue making changes – the app will work just fine. When it’s time to sync the changes to the server, turn the network back on, and tap the **Refresh** button again.
+<!-- Now if you run the app and tap the refresh button, you should see all the items from the server. At that point you should be able to turn off the networking from the device by placing it in *Airplane Mode*, and continue making changes ??? the app will work just fine. When it???s time to sync the changes to the server, turn the network back on, and tap the **Refresh** button again.
 
-One thing which is important to point out: if there are pending changes in the local store, a pull operation will first push those changes to the server (so that if there are changes in the same row, the push operation will fail and the application has an opportunity to handle the conflicts appropriately). That means that the push call in the code above isn’t necessarily required, but I think it’s always a good practice to be explicit about what the code is doing.
+One thing which is important to point out: if there are pending changes in the local store, a pull operation will first push those changes to the server (so that if there are changes in the same row, the push operation will fail and the application has an opportunity to handle the conflicts appropriately). That means that the push call in the code above isn???t necessarily required, but I think it???s always a good practice to be explicit about what the code is doing.
 -->
 
 1. Place the device or simulator in *Airplane Mode*. This creates an offline scenario.

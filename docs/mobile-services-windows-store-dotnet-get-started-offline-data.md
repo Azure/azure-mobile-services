@@ -20,7 +20,7 @@
 
 >[AZURE.WARNING] This is an **Azure Mobile Services** topic.  This service has been superseded by Azure App Service Mobile Apps and is scheduled for removal from Azure.  We recommend using Azure Mobile Apps for all new mobile backend deployments.  Read [this announcement](https://azure.microsoft.com/blog/transition-of-azure-mobile-services/) to learn more about the pending deprecation of this service.  
 > 
-> Learn about [migrating your site to Azure App Service](../articles/app-service-mobile/app-service-mobile-migrating-from-mobile-services.md).
+> Learn about [migrating your site to Azure App Service](https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-migrating-from-mobile-services/).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
 
@@ -28,11 +28,15 @@
 
 
 > [AZURE.SELECTOR]
-- [Android)](../articles/mobile-services/mobile-services-android-get-started-offline-data.md)
-- [iOS](../articles/mobile-services/mobile-services-ios-get-started-offline-data.md)
-- [Windows](../articles/mobile-services/mobile-services-windows-store-dotnet-get-started-offline-data.md)
+- [Android)](./
+mobile-services-android-get-started-offline-data.md)
+- [iOS](./
+mobile-services-ios-get-started-offline-data.md)
+- [Windows](./
+mobile-services-windows-store-dotnet-get-started-offline-data.md)
 - [Xamarin.Android](../mobile-services/articles/mobile-services-xamarin-android-get-started-offline-data.md)
-- [Xamarin.iOS](../articles/mobile-services/mobile-services-xamarin-ios-get-started-offline-data.md)
+- [Xamarin.iOS](./
+mobile-services-xamarin-ios-get-started-offline-data.md)
 
 
 This tutorial shows you how to add offline support to a Windows Universal Store app using Azure Mobile Services. Offline support will allow you to interact with a local database when your app is in an offline scenario. Once your app is online with the backend database, you sync your local changes using the offline features.

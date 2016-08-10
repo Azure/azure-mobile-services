@@ -20,7 +20,7 @@
 
 >[AZURE.WARNING] This is an **Azure Mobile Services** topic.  This service has been superseded by Azure App Service Mobile Apps and is scheduled for removal from Azure.  We recommend using Azure Mobile Apps for all new mobile backend deployments.  Read [this announcement](https://azure.microsoft.com/blog/transition-of-azure-mobile-services/) to learn more about the pending deprecation of this service.  
 > 
-> Learn about [migrating your site to Azure App Service](../articles/app-service-mobile/app-service-mobile-migrating-from-mobile-services.md).
+> Learn about [migrating your site to Azure App Service](https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-migrating-from-mobile-services/).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
 
@@ -28,11 +28,16 @@
 
 
 > [AZURE.SELECTOR]
-- [Azure Active Directory](../articles/mobile-services/mobile-services-how-to-register-active-directory-authentication.md)
-- [Facebook](../articles/mobile-services/mobile-services-how-to-register-facebook-authentication.md)
-- [Google](../articles/mobile-services/mobile-services-how-to-register-google-authentication.md)
-- [Microsoft account](../articles/mobile-services/mobile-services-how-to-register-microsoft-authentication.md)
-- [Twitter](../articles/mobile-services/mobile-services-how-to-register-twitter-authentication.md)
+- [Azure Active Directory](./
+mobile-services-how-to-register-active-directory-authentication.md)
+- [Facebook](./
+mobile-services-how-to-register-facebook-authentication.md)
+- [Google](./
+mobile-services-how-to-register-google-authentication.md)
+- [Microsoft account](./
+mobile-services-how-to-register-microsoft-authentication.md)
+- [Twitter](./
+mobile-services-how-to-register-twitter-authentication.md)
 
 ##Overview
 
