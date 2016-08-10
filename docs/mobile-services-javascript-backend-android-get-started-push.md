@@ -37,7 +37,7 @@
 &nbsp;
 
 >[AZURE.WARNING] This is an **Azure Mobile Services** topic.  This service has been superseded by Azure App Service Mobile Apps and is scheduled for removal from Azure.  We recommend using Azure Mobile Apps for all new mobile backend deployments.  Read [this announcement](https://azure.microsoft.com/blog/transition-of-azure-mobile-services/) to learn more about the pending deprecation of this service.  
-> 
+>
 > Learn about [migrating your site to Azure App Service](../articles/app-service-mobile/app-service-mobile-migrating-from-mobile-services.md).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
@@ -49,7 +49,15 @@ This topic shows how to use Azure Mobile Services to send push notifications to 
 
 ## Prerequisites
 
-[AZURE.INCLUDE [mobile-services-android-prerequisites](../../includes/mobile-services-android-prerequisites.md)]
+This tutorial is based on the code you download in the Mobile Services quickstart. Before you start this tutorial, you must first complete either [Get started with Mobile Services] or [Add Mobile Services to an existing app].
+
+> [AZURE.IMPORTANT] If you completed the quickstart tutorial prior to the release of Azure Mobile Services Android SDK 2.0, you must re-do it, because the SDK is not backwards compatible. To verify the version, check the **dependencies** section of your project's **build.gradle** file.
+
+
+<!-- URLs.
+[Get started with Mobile Services]: ../articles/mobile-services-android-get-started.md
+[Add Mobile Services to an existing app]: ../articles/mobile-services-android-get-started-data.md
+-->
 
 ## Sample code
 To see the completed source code go [here](https://github.com/Azure/mobile-services-samples/tree/master/GettingStartedWithPush).
@@ -57,8 +65,8 @@ To see the completed source code go [here](https://github.com/Azure/mobile-servi
 ## Enable Google Cloud Messaging
 
 
-1. Navigate to the [Google Cloud Console](https://console.developers.google.com/project), sign in with your Google account credentials. 
- 
+1. Navigate to the [Google Cloud Console](https://console.developers.google.com/project), sign in with your Google account credentials.
+
 2. Click **Create Project**, type a project name, then click **Create**. If requested, carry out the SMS Verification, and click **Create** again.
 
    	![](./media/mobile-services-enable-google-cloud-messaging/mobile-services-google-new-project.png)   
@@ -70,13 +78,13 @@ To see the completed source code go [here](https://github.com/Azure/mobile-servi
    	![](./media/mobile-services-enable-google-cloud-messaging/notification-hubs-utilities-and-more.png)
 
 
-4. In the project dashboard, under **Mobile APIs**, click **Google Cloud Messaging**, then on the next page click **Enable API** and accept the terms of service. 
+4. In the project dashboard, under **Mobile APIs**, click **Google Cloud Messaging**, then on the next page click **Enable API** and accept the terms of service.
 
 	![Enabling GCM](./media/mobile-services-enable-google-cloud-messaging/enable-GCM.png)
 
-	![Enabling GCM](./media/mobile-services-enable-google-cloud-messaging/enable-gcm-2.png) 
+	![Enabling GCM](./media/mobile-services-enable-google-cloud-messaging/enable-gcm-2.png)
 
-5. In the project dashboard, Click **Credentials** > **Create Credential** > **API Key**. 
+5. In the project dashboard, Click **Credentials** > **Create Credential** > **API Key**.
 
    	![](./media/mobile-services-enable-google-cloud-messaging/mobile-services-google-create-server-key.png)
 
@@ -98,7 +106,7 @@ To see the completed source code go [here](https://github.com/Azure/mobile-servi
 
     >[AZURE.NOTE]When you set your GCM credentials for enhanced push notifications in the Push tab in the portal, they are shared with Notification Hubs to configure the notification hub with your app.
 
-Both your mobile service and your app are now configured to work with GCM and Notification Hubs. 
+Both your mobile service and your app are now configured to work with GCM and Notification Hubs.
 
 ## Add push notifications to your app
 
@@ -110,20 +118,183 @@ If you will be testing with an older device, then consult [Set Up Google Play Se
 
 ###Add Google Play Services to the project
 
-[AZURE.INCLUDE [Add Play Services](../../includes/mobile-services-add-google-play-services.md)]
+1. Open the Android SDK Manager by clicking the icon on the toolbar of Android Studio or by clicking **Tools** -> **Android** -> **SDK Manager** on the menu. Locate the target version of the Android SDK that is used in your project , open it, and choose **Google APIs**, if it is not already installed.
+
+2. Scroll down to **Extras**, expand it, and choose **Google Play Services**, as shown below. Click **Install Packages**. Note the SDK path, for use in the following step.
+
+   	![](./media/notification-hubs-android-get-started/notification-hub-create-android-app4.png)
+
+
+3. Open the **build.gradle** file in the app directory.
+
+	![](./media/mobile-services-android-get-started-push/android-studio-push-build-gradle.png)
+
+4. Add this line under *dependencies*:
+
+   		compile 'com.google.android.gms:play-services-gcm:8.4.0'
+
+5. Under *defaultConfig*, change *minSdkVersion* to 9.
+
+6. Click the **Sync Project with Gradle Files** icon in the tool bar.
+
+7. Open **AndroidManifest.xml** and add this tag to the *application* tag.
+
+        <meta-data android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+
+
+
+
 
 ###Add code
 
-[AZURE.INCLUDE [mobile-services-android-getting-started-with-push](../../includes/mobile-services-android-getting-started-with-push.md)]
+1. In your **app** project, open the file `AndroidManifest.xml`. In the code in the next two steps, replace _`**my_app_package**`_ with the name of the app package for your project, which is the value of the `package` attribute of the `manifest` tag.
+
+2. Add the following new permissions after the existing `uses-permission` element:
+
+        <permission android:name="**my_app_package**.permission.C2D_MESSAGE"
+            android:protectionLevel="signature" />
+        <uses-permission android:name="**my_app_package**.permission.C2D_MESSAGE" />
+        <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+        <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+        <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+3. Add the following code after the `application` opening tag:
+
+        <receiver android:name="com.microsoft.windowsazure.notifications.NotificationsBroadcastReceiver"
+            						 	android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <category android:name="**my_app_package**" />
+            </intent-filter>
+        </receiver>
+
+
+4. Add this line under *dependencies* in the **build.gradle** file in the app directory and re-sync gradle with the project:
+
+	    compile(group: 'com.microsoft.azure', name: 'azure-notifications-handler', version: '1.0.1', ext: 'jar')
+
+
+5. Open the file *ToDoItemActivity.java*, and add the following import statement:
+
+		import com.microsoft.windowsazure.notifications.NotificationsManager;
+
+
+6. Add the following private variable to the class: replace _`<PROJECT_NUMBER>`_ with the Project Number assigned by Google to your app in the preceding procedure:
+
+		public static final String SENDER_ID = "<PROJECT_NUMBER>";
+
+7. Change the definition of the *MobileServiceClient* from **private** to **public static**, so it now looks like this:
+
+		public static MobileServiceClient mClient;
+
+
+
+8. Next we need to add a new class to handle notifications. In the Project Explorer, open the **src** => **main** => **java** nodes, and right-click the  package name node: click **New**, then click **Java Class**.
+
+9. In **Name** type `MyHandler`, then click **OK**.
+
+
+	![](./media/mobile-services-android-get-started-push/android-studio-create-class.png)
+
+
+10. In the MyHandler file, replace the class declaration with
+
+		public class MyHandler extends NotificationsHandler {
+
+
+11. Add the following import statements for the `MyHandler` class:
+
+		import android.app.NotificationManager;
+		import android.app.PendingIntent;
+		import android.content.Context;
+		import android.content.Intent;
+		import android.os.AsyncTask;
+		import android.os.Bundle;
+		import android.support.v4.app.NotificationCompat;
+
+
+12. Next add the following members for the `MyHandler` class:
+
+		public static final int NOTIFICATION_ID = 1;
+		private NotificationManager mNotificationManager;
+		NotificationCompat.Builder builder;
+		Context ctx;
+
+
+13. In the `MyHandler` class, add the following code to override the **onRegistered** method, which registers your device with the mobile service Notification Hub.
+
+		@Override
+		public void onRegistered(Context context,  final String gcmRegistrationId) {
+		    super.onRegistered(context, gcmRegistrationId);
+
+		    new AsyncTask<Void, Void, Void>() {
+
+		    	protected Void doInBackground(Void... params) {
+		    		try {
+		    		    ToDoActivity.mClient.getPush().register(gcmRegistrationId, null);
+		    		    return null;
+	    		    }
+	    		    catch(Exception e) {
+			    		// handle error    		    
+	    		    }
+					return null;  		    
+	    		}
+		    }.execute();
+		}
+
+
+
+14. In the `MyHandler` class, add the following code to override the **onReceive** method, which causes the notification to display when it is received.
+
+		@Override
+		public void onReceive(Context context, Bundle bundle) {
+		    ctx = context;
+		    String nhMessage = bundle.getString("message");
+
+		    sendNotification(nhMessage);
+		}
+
+		private void sendNotification(String msg) {
+			mNotificationManager = (NotificationManager)
+		              ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+
+		    PendingIntent contentIntent = PendingIntent.getActivity(ctx, 0,
+		          new Intent(ctx, ToDoActivity.class), 0);
+
+		    NotificationCompat.Builder mBuilder =
+		          new NotificationCompat.Builder(ctx)
+		          .setSmallIcon(R.drawable.ic_launcher)
+		          .setContentTitle("Notification Hub Demo")
+		          .setStyle(new NotificationCompat.BigTextStyle()
+		                     .bigText(msg))
+		          .setContentText(msg);
+
+		     mBuilder.setContentIntent(contentIntent);
+		     mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+		}
+
+
+15. Back in the TodoActivity.java file, update the **onCreate** method of the *ToDoActivity* class to register the notification handler class. Make sure to add this code after the *MobileServiceClient* is instantiated.
+
+
+		NotificationsManager.handleNotifications(this, SENDER_ID, MyHandler.class);
+
+    Your app is now updated to support push notifications.
+
+<!-- URLs. -->
+[Mobile Services Android SDK]: http://aka.ms/Iajk6q
+
 
 
 ## Update the registered insert script in the Azure classic portal
 
 
-1. In the [Azure classic portal](https://manage.windowsazure.com/), click the **Data** tab and then click the **TodoItem** table. 
- 
+1. In the [Azure classic portal](https://manage.windowsazure.com/), click the **Data** tab and then click the **TodoItem** table.
+
 2. In **todoitem**, click the **Script** tab and select **Insert**.
-   
+
    	This displays the function that is invoked when an insert occurs in the **TodoItem** table.
 
 3. Replace the insert function with the following code, and then click **Save**:
@@ -156,7 +327,7 @@ If you will be testing with an older device, then consult [Set Up Google Play Se
 		  });
 		}
 
-   	This registers a new insert script, which uses the [gcm object](http://go.microsoft.com/fwlink/p/?LinkId=282645) to send a push notification to all registered devices after the insert succeeds. 
+   	This registers a new insert script, which uses the [gcm object](http://go.microsoft.com/fwlink/p/?LinkId=282645) to send a push notification to all registered devices after the insert succeeds.
 
 
 ## Test push notifications in your app
@@ -194,7 +365,27 @@ You have successfully completed this tutorial.
 
 ### Verify Android SDK Version
 
-[AZURE.INCLUDE [Verify SDK](../../includes/mobile-services-verify-android-sdk-version.md)]
+Because of ongoing development, the Android SDK version installed in Android Studio might not match the version in the code. The Android SDK referenced in this tutorial is version 21, the latest at the time of writing. The version number may increase as new releases of the SDK appear, and we recomend using the latest version available.
+
+Two symptoms of version mismatch are:
+
+1. When you Build or Rebuild the project, you may get Gradle error messages like "**failed to find target Google Inc.:Google APIs:n**".
+
+2. Standard Android objects in code that should resolve based on `import` statements may be generating error messages.
+
+If either of these appear, the version of the Android SDK installed in Android Studio might not match the SDK target of the downloaded project.  To verify the version, make the following changes:
+
+
+1. In Android Studio, click **Tools** => **Android** => **SDK Manager**. If you have not installed the latest version of the SDK Platform, then click to install it. Make a note of the version number.
+
+2. In the Project Explorer tab, under **Gradle Scripts**, open the file **build.gradle (modeule: app)**. Ensure that the **compileSdkVersion** and **buildToolsVersion** are set to the latest  SDK version installed. The tags might look like this:
+ 
+	 	    compileSdkVersion 'Google Inc.:Google APIs:21'
+    		buildToolsVersion "21.1.2"
+	
+3. In the Android Studio Project Explorer right-click the project node, choose **Properties**, and in the left column choose **Android**. Ensure that the **Project Build Target** is set to the same SDK version as the **targetSdkVersion**.
+
+4. In Android Studio, the manifest file is no longer used to specify the target SDK and minimum SDK version, unlike the case with Eclipse.
 
 ## Next steps
 

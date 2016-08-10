@@ -12,7 +12,7 @@
 	ms.workload="mobile"
 	ms.tgt_pltfrm="mobile-windows"
 	ms.devlang="dotnet"
-	ms.topic="get-started-article" 
+	ms.topic="get-started-article"
 	ms.date="07/21/2016"
 	ms.author="glenga"/>
 
@@ -36,7 +36,7 @@
 &nbsp;
 
 >[AZURE.WARNING] This is an **Azure Mobile Services** topic.  This service has been superseded by Azure App Service Mobile Apps and is scheduled for removal from Azure.  We recommend using Azure Mobile Apps for all new mobile backend deployments.  Read [this announcement](https://azure.microsoft.com/blog/transition-of-azure-mobile-services/) to learn more about the pending deprecation of this service.  
-> 
+>
 > Learn about [migrating your site to Azure App Service](../articles/app-service-mobile/app-service-mobile-migrating-from-mobile-services.md).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
@@ -46,7 +46,16 @@ This tutorial shows you how to add a cloud-based backend service to a universal 
 
 In this tutorial, you will create both a new mobile service and a simple *To do list* app that stores app data in the new mobile service. The mobile service that you will create uses JavaScript for server-side business logic. To create a mobile service that lets you write your server-side business logic in the supported .NET languages using Visual Studio, see the .NET backend version of this topic.
 
-[AZURE.INCLUDE [mobile-services-windows-universal-get-started](../../includes/mobile-services-windows-universal-get-started.md)]
+
+The following are screen captures from the completed app:
+
+![](./media/mobile-services-windows-universal-get-started/mobile-quickstart-completed.png)
+<br/>Windows Store app
+
+![](./media/mobile-services-windows-universal-get-started/mobile-quickstart-completed-wp8.png)
+<br/>Windows Phone Store app
+
+Completing this tutorial is a prerequisite for all other Mobile Services tutorials for Windows Store and Windows Phone Store apps.
 
 To complete this tutorial, you need the following:
 
@@ -70,7 +79,7 @@ Follow these steps to create a new mobile service.
 	![](./media/mobile-services-create-new-service/mobile-create-page1.png)
 
 	This displays the **Specify database settings** page.
-	
+
 	>[AZURE.NOTE]As part of this tutorial, you create a new SQL Database instance and server. You can reuse this new database and administer it as you would any other SQL Database instance. If you already have a database in the same region as the new mobile service, you can instead choose **Use existing Database** and then select that database. The use of a database in a different region is not recommended because of additional bandwidth costs and higher latencies.
 
 3.	In **Name**, type the name of the new database, then type **Login name**, which is the administrator login name for the new SQL Database server, type and confirm the password, and click the check button to complete the process.
@@ -104,7 +113,26 @@ In this section you will create a new universal Windows app that is connected to
 
 ## Run your Windows app
 
-[AZURE.INCLUDE [mobile-services-javascript-backend-run-app](../../includes/mobile-services-javascript-backend-run-app.md)]
+
+The final stage of this tutorial is to build and run your new app.
+
+1. Browse to the location where you saved the compressed project files, expand the files on your computer, and open the solution file in Visual Studio.
+
+2. Press the **F5** key to rebuild the project and start the app.
+
+3. In the app, type meaningful text, such as *Complete the tutorial*, in **Insert a TodoItem**, and then click **Save**.
+
+   	This sends a POST request to the new mobile service hosted in Azure. Data from the request is inserted into the TodoItem table. Items stored in the table are returned by the mobile service, and the data is displayed in the second column in the app.
+
+4. (Optional) In a universal Windows solution, change the default start up project to the other app and run the app again.
+
+	Notice that data saved from the previous step is loaded from the mobile service after the app starts.
+
+4. Back in the [Azure classic portal](https://manage.windowsazure.com/), click the **Data** tab and then click the **TodoItems** table.
+
+   	This lets you browse the data inserted by the app into the table.
+
+   	![](./media/mobile-services-javascript-backend-run-app/mobile-data-browse.png)
 
 >[AZURE.NOTE]You can review the code that accesses your mobile service to query and insert data, which is found in the MainPage.xaml.cs file.
 
@@ -123,7 +151,6 @@ Now that you have completed the quickstart, learn how to perform additional impo
 * [How to use the .NET client library](mobile-services-dotnet-how-to-use-client-library.md)  
  Learn how to query the mobile service, work with data, and access custom APIs.
 
-[AZURE.INCLUDE [app-service-disqus-feedback-slug](../../includes/app-service-disqus-feedback-slug.md)]
 
 <!-- Anchors. -->
 [Getting started with Mobile Services]:#getting-started
@@ -142,4 +169,3 @@ Now that you have completed the quickstart, learn how to perform additional impo
 [Visual Studio 2013 Express for Windows]: http://go.microsoft.com/fwlink/?LinkId=257546
 [Mobile Services SDK]: http://go.microsoft.com/fwlink/?LinkId=257545
 [Azure classic portal]: https://manage.windowsazure.com/
- 

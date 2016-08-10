@@ -64,7 +64,20 @@ You've now configured both your app and your mobile service to work with your au
 > [AZURE.IMPORTANT] Verify that you've set the correct redirect URI on your identity provider's developer site. As described in the linked instructions for each provider above, the redirect URI may be different for a .NET backend service vs. for a JavaScript backend service. An incorrectly configured redirect URI may result in the login screen not being displayed properly and the app malfunctioning in unexpected ways.
 
 
-[AZURE.INCLUDE [mobile-services-dotnet-backend-aad-server-extension](../../includes/mobile-services-dotnet-backend-aad-server-extension.md)]
+### (Optional) Configure your .NET Mobile Service for Azure Active Directory
+
+>[AZURE.NOTE] These steps are optional because they only apply to the Azure Active Directory login provider.
+
+1. Install the [WindowsAzure.MobileServices.Backend.Security NuGet package](https://www.nuget.org/packages/WindowsAzure.MobileServices.Backend.Security).
+
+2. In Visual Studio expand App_Start and open WebApiConfig.cs. Add the following `using` statement at the top:
+
+        using Microsoft.WindowsAzure.Mobile.Service.Security.Providers;
+
+3. Also in WebApiConfig.cs, add the following code to the `Register` method, immediately after `options` is instantiated:
+
+        options.LoginProviders.Remove(typeof(AzureActiveDirectoryLoginProvider));
+        options.LoginProviders.Add(typeof(AzureActiveDirectoryExtendedLoginProvider));
 
 ##<a name="permissions"></a>Restrict permissions to authenticated users
 
@@ -98,11 +111,67 @@ In Xcode, open the project. Press the **Run** button to  start the app. Verify t
 
 ##<a name="add-authentication"></a>Add authentication to app
 
-[AZURE.INCLUDE [mobile-services-ios-authenticate-app](../../includes/mobile-services-ios-authenticate-app.md)]
+* Open **QSTodoListViewController.m** and add the following method. Change _facebook_ to _microsoftaccount_, _twitter_, _google_, or _windowsazureactivedirectory_ if you're not using Facebook as your identity provider.
+
+```
+        - (void) loginAndGetData
+        {
+            MSClient *client = self.todoService.client;
+            if (client.currentUser != nil) {
+                return;
+            }
+
+            [client loginWithProvider:@"facebook" controller:self animated:YES completion:^(MSUser *user, NSError *error) {
+                [self refresh];
+            }];
+        }
+```
+
+* Replace `[self refresh]` in `viewDidLoad` with the following:
+
+```
+        [self loginAndGetData];
+```
+
+* Press  **Run** to start the app, and then log in. When you are logged in, you should be able to view the Todo list and make updates.
 
 ##<a name="store-authentication"></a>Store authentication tokens in app
 
-[AZURE.INCLUDE [mobile-services-ios-authenticate-app-with-token](../../includes/mobile-services-ios-authenticate-app-with-token.md)]
+
+The previous example contacts both the identity provider and the mobile service every time the app starts. Instead, you can cache the authorization token and try to use it first.
+
+* The recommended way to encrypt and store authentication tokens on an iOS client is use the iOS Keychain. We'll use [SSKeychain](https://github.com/soffes/sskeychain) -- a simple wrapper around the iOS Keychain. Follow the instructions on the SSKeychain page and add it to your project. Verify that the **Enable Modules** setting is enabled in the project's **Build Settings** (section **Apple LLVM - Languages - Modules**.)
+
+* Open **QSTodoListViewController.m** and add the following code:
+
+```
+		- (void) saveAuthInfo {
+				[SSKeychain setPassword:self.todoService.client.currentUser.mobileServiceAuthenticationToken forService:@"AzureMobileServiceTutorial" account:self.todoService.client.currentUser.userId]
+		}
+
+
+		- (void)loadAuthInfo {
+				NSString *userid = [[SSKeychain accountsForService:@"AzureMobileServiceTutorial"][0] valueForKey:@"acct"];
+		    if (userid) {
+		        NSLog(@"userid: %@", userid);
+		        self.todoService.client.currentUser = [[MSUser alloc] initWithUserId:userid];
+		         self.todoService.client.currentUser.mobileServiceAuthenticationToken = [SSKeychain passwordForService:@"AzureMobileServiceTutorial" account:userid];
+
+		    }
+		}
+```
+
+* In `loginAndGetData`, modify  `loginWithProvider:controller:animated:completion:`'s completion block. Add the following line right before `[self refresh]` to store the user ID and token properties:
+
+```
+				[self saveAuthInfo];
+```
+
+* Let's load the user ID and token when the app starts. In the `viewDidLoad` in **QSTodoListViewController.m**, add this right after`self.todoService` is initialized.
+
+```
+				[self loadAuthInfo];
+```
 
 ##<a name="next-steps"></a>Next steps
 

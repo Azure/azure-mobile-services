@@ -12,7 +12,7 @@
 	ms.workload="mobile"
 	ms.tgt_pltfrm="mobile-html5"
 	ms.devlang="javascript"
-	ms.topic="get-started-article" 
+	ms.topic="get-started-article"
 	ms.date="07/21/2016"
 	ms.author="glenga"/>
 
@@ -39,12 +39,12 @@
 >[AZURE.TIP] This topic shows you how to get started with Mobile Services as quickly as possible. It is designed for customers new to this Azure feature. If you are already familiar with Mobile Services or are looking for more in-depth information, please select a topic from the left-navigation or see the relevant links in [Next steps](#next-steps).
 
 
-##Overview 
+##Overview
 
-This tutorial shows you how to add a cloud-based backend service to an HTML app using Azure Mobile Services. In this tutorial, you will create both a new mobile service and a simple *To do list* app that stores app data in the new mobile service. You can view the following video version of this tutorial. 
+This tutorial shows you how to add a cloud-based backend service to an HTML app using Azure Mobile Services. In this tutorial, you will create both a new mobile service and a simple *To do list* app that stores app data in the new mobile service. You can view the following video version of this tutorial.
 
 > [AZURE.VIDEO mobile-get-started-html]
- 
+
 A screenshot from the completed app is below:
 
 ![][0]
@@ -64,7 +64,7 @@ The following are required to complete this tutorial:
 	You can use any web server to host the app, but these are the web servers that are supported by the downloaded scripts.  
 
 + A web browser that supports HTML5.
-+ An Azure account. If you don't have an account, you can create a free trial account in just a couple of minutes. For details, see [Azure Free Trial](https://azure.microsoft.com/pricing/free-trial/?WT.mc_id=A0E0E5C02&amp;returnurl=http%3A%2F%2Fazure.microsoft.com%2Fen-us%2Fdevelop%2Fmobile%2Ftutorials%2Fget-started-html%2F"%20target="_blank). 
++ An Azure account. If you don't have an account, you can create a free trial account in just a couple of minutes. For details, see [Azure Free Trial](https://azure.microsoft.com/pricing/free-trial/?WT.mc_id=A0E0E5C02&amp;returnurl=http%3A%2F%2Fazure.microsoft.com%2Fen-us%2Fdevelop%2Fmobile%2Ftutorials%2Fget-started-html%2F"%20target="_blank).
 
 
 ## <a name="create-new-service"> </a>Create a new mobile service
@@ -84,7 +84,7 @@ Follow these steps to create a new mobile service.
 	![](./media/mobile-services-create-new-service/mobile-create-page1.png)
 
 	This displays the **Specify database settings** page.
-	
+
 	>[AZURE.NOTE]As part of this tutorial, you create a new SQL Database instance and server. You can reuse this new database and administer it as you would any other SQL Database instance. If you already have a database in the same region as the new mobile service, you can instead choose **Use existing Database** and then select that database. The use of a database in a different region is not recommended because of additional bandwidth costs and higher latencies.
 
 3.	In **Name**, type the name of the new database, then type **Login name**, which is the administrator login name for the new SQL Database server, type and confirm the password, and click the check button to complete the process.
@@ -163,9 +163,6 @@ Now that you have completed the quickstart, learn how to perform additional impo
 * **[Mobile Services HTML/JavaScript How-to Conceptual Reference]**  
   Learn more about how to use Mobile Services with HTML/JavaScript
 
-
-[AZURE.INCLUDE [app-service-disqus-feedback-slug](../../includes/app-service-disqus-feedback-slug.md)]
-
 <!-- Anchors. -->
 [Getting started with Mobile Services]:#getting-started
 [Create a new mobile service]:#create-new-service
@@ -192,4 +189,3 @@ Now that you have completed the quickstart, learn how to perform additional impo
 [latest version of Python]: http://go.microsoft.com/fwlink/p/?LinkId=286342
 [Mobile Services HTML/JavaScript How-to Conceptual Reference]: mobile-services-html-how-to-use-client-library.md
 [Cross-origin resource sharing]: http://msdn.microsoft.com/library/azure/dn155871.aspx
- 

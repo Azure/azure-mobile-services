@@ -52,7 +52,16 @@ In this tutorial, you will create both a new mobile service and a simple *To do 
 
 >To add a mobile service to an Windows Phone 8.0 or Windows Phone Silverlight 8.1 app project, see [Add Mobile Services to an existing Windows Phone app](mobile-services-windows-phone-get-started-data.md).
 
-[AZURE.INCLUDE [mobile-services-windows-universal-get-started](../../includes/mobile-services-windows-universal-get-started.md)]
+
+The following are screen captures from the completed app:
+
+![](./media/mobile-services-windows-universal-get-started/mobile-quickstart-completed.png)
+<br/>Windows Store app
+
+![](./media/mobile-services-windows-universal-get-started/mobile-quickstart-completed-wp8.png)
+<br/>Windows Phone Store app
+
+Completing this tutorial is a prerequisite for all other Mobile Services tutorials for Windows Store and Windows Phone Store apps. 
 
 To complete this tutorial, you need the following:
 
@@ -61,7 +70,27 @@ To complete this tutorial, you need the following:
 
 ## Create a new mobile service
 
-[AZURE.INCLUDE [mobile-services-dotnet-backend-create-new-service](../../includes/mobile-services-dotnet-backend-create-new-service.md)]
+
+Follow these steps to create a new mobile service.
+
+1.	Log into the [Azure classic portal](https://manage.windowsazure.com/). At the bottom of the navigation pane, click **+NEW**. Expand **Compute** and **Mobile Service**, then click **Create**.
+	
+	![](./media/mobile-services-dotnet-backend-create-new-service/mobile-create.png)
+
+	This displays the **Create a Mobile Service** dialog.
+
+2.	In the **Create a Mobile Service** page, select **Create a free 20 MB SQL Database**, select **.NET** runtime, then type a subdomain name for the new mobile service in the **URL** textbox. Click the right arrow button to go to the next page.
+	
+	![](./media/mobile-services-dotnet-backend-create-new-service/mobile-create-page1.png)
+
+	This displays the **Specify database settings** page.
+
+	> [AZURE.NOTE] As part of this tutorial, you create a new SQL Database instance and server. You can reuse this new database and administer it as you would any other SQL Database instance. If you already have a database in the same region as the new mobile service, you can instead choose **Use existing Database** and then select that database. The use of a database in a different region is not recommended because of additional bandwidth costs and higher latencies.
+
+3.	In **Name**, type the name of the new database, then type **Login name**, which is the administrator login name for the new SQL Database server, type and confirm the password, and click the check button to complete the process.
+	![](./media/mobile-services-dotnet-backend-create-new-service/mobile-create-page2.png)
+
+You have now created a new mobile service that can be used by your mobile apps.
 
 ## Create a new universal Windows app
 
@@ -92,7 +121,10 @@ In this section you will create a new universal Windows app that is connected to
 
 ## Publish your mobile service
 
-[AZURE.INCLUDE [mobile-services-dotnet-backend-publish-service](../../includes/mobile-services-dotnet-backend-publish-service.md)]
+
+1. In Visual Studio, right-click the project, click **Publish** > **Microsoft Azure Mobile Services**. Instead of using Visual Studio, [you may also use Git](../articles/mobile-services/mobile-services-dotnet-backend-store-code-source-control.md).
+
+2. Sign in with Azure credentials and select your service from **Existing Mobile Services**. Visual Studio downloads your publish settings directly from Azure. Finally, click **Publish**.
 
 
 <ol start="4">

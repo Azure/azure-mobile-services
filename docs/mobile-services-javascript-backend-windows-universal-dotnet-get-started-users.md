@@ -70,13 +70,111 @@ You've now configured both your app and your mobile service to work with your au
 
 ##<a name="permissions"></a> Restrict permissions to authenticated users
 
-[AZURE.INCLUDE [mobile-services-restrict-permissions-windows](../../includes/mobile-services-restrict-permissions-windows.md)] 
+
+1. In the Server Explorer in Visual Studio, expand the **Azure** node, **Mobile Services**, and your mobile service.
+
+2. Right-click the **TodoItem** table, click **Edit Permissions**, set all permissions to **Only authenticated users**, and then click **Apply**. This ensures that all operations against the _TodoItem_ table require an authenticated user.
+
+3. Right-click the client app project, click **Debug**, then **Start new instance**; verify that an unhandled exception with a status code of 401 (Unauthorized) is raised after the app starts.
+
+	This happens because the app attempts to access Mobile Services as an unauthenticated user, but the *TodoItem* table now requires authentication.
+
+Next, you will update the app to authenticate users before requesting resources from the mobile service.
  
 >[AZURE.NOTE] When you use Visual Studio tools to connect your app to a Mobile Service, the tool generate two sets of **MobileServiceClient** definitions, one for each client platform. This is a good time to simplify the generated code by unifying the `#if...#endif` wrapped **MobileServiceClient** definitions into a single unwrapped definition used by both versions of the app. You won't need to do this if you downloaded the quickstart app from the [Azure classic portal].
 
 ##<a name="add-authentication"></a> Add authentication to the app
 
-[AZURE.INCLUDE [mobile-windows-universal-dotnet-authenticate-app](../../includes/mobile-windows-universal-dotnet-authenticate-app.md)] 
+
+1. Open the shared project file MainPage.cs and add the following code snippet to the MainPage class:
+	
+		// Define a member variable for storing the signed-in user. 
+        private MobileServiceUser user;
+
+        // Define a method that performs the authentication process
+        // using a Facebook sign-in. 
+        private async System.Threading.Tasks.Task<bool> AuthenticateAsync()
+        {
+            string message;
+            bool success = false;
+            try
+            {
+                // Change 'MobileService' to the name of your MobileServiceClient instance.
+                // Sign-in using Facebook authentication.
+                user = await App.MobileService
+                    .LoginAsync(MobileServiceAuthenticationProvider.Facebook);
+                message =
+                    string.Format("You are now signed in - {0}", user.UserId);
+
+                success = true;
+            }
+            catch (InvalidOperationException)
+            {
+                message = "You must log in. Login Required";
+            }
+
+            var dialog = new MessageDialog(message);
+            dialog.Commands.Add(new UICommand("OK"));
+            await dialog.ShowAsync();
+            return success;
+        }
+
+    This code authenticates the user with a Facebook login. If you are using an identity provider other than Facebook, change the value of **MobileServiceAuthenticationProvider** above to the value for your provider.
+
+3. Comment-out or delete the call to the **RefreshTodoItems** method in the existing **OnNavigatedTo** method override.
+
+	This prevents the data from being loaded before the user is authenticated. Next, you will add a **Sign in** button to the app that triggers authentication.
+
+4. Add the following code snippet to the MainPage class:
+
+        private async void ButtonLogin_Click(object sender, RoutedEventArgs e)
+        {
+            // Login the user and then load data from the mobile app.
+            if (await AuthenticateAsync())
+            {
+                // Hide the login button and load items from the mobile app.
+                ButtonLogin.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                //await InitLocalStoreAsync(); //offline sync support.
+                await RefreshTodoItems();
+            }
+        }
+		
+5. In the Windows Store app project, open the MainPage.xaml project file and add the following **Button** element just before the element that defines the **Save** button:
+
+		<Button Name="ButtonLogin" Click="ButtonLogin_Click" 
+                        Visibility="Visible">Sign in</Button>
+
+6. In the Windows Phone Store app project, add the following **Button** element in the **ContentPanel**, after the **TextBox** element:
+
+        <Button Grid.Row ="1" Grid.Column="1" Name="ButtonLogin" Click="ButtonLogin_Click" 
+        	Margin="10, 0, 0, 0" Visibility="Visible">Sign in</Button>
+
+8. Open the shared App.xaml.cs project file and add the following code:
+
+        protected override void OnActivated(IActivatedEventArgs args)
+        {
+			// Windows Phone 8.1 requires you to handle the respose from the WebAuthenticationBroker.
+            #if WINDOWS_PHONE_APP
+            if (args.Kind == ActivationKind.WebAuthenticationBrokerContinuation)
+            {
+				// Completes the sign-in process started by LoginAsync.
+				// Change 'MobileService' to the name of your MobileServiceClient instance. 
+                App.MobileService.LoginComplete(args as WebAuthenticationBrokerContinuationEventArgs);
+            }
+            #endif
+
+            base.OnActivated(args);
+        }
+
+	If the **OnActivated** method already exists, just add the `#if...#endif` code block.
+
+9. Press the F5 key to run the Windows Store app, click the **Sign in** button, and sign into the app with your chosen identity provider. 
+
+   	When you are successfully logged-in, the app should run without errors, and you should be able to query your backend and make updates to data.
+
+10. Right-click the Windows Phone Store app project, click **Set as StartUp Project**, then repeat the previous step to verify that the Windows Phone Store app also runs correctly.  
+
+ 
 
 Now, any user authenticated by your trusted identity providers can access the *TodoItem* table. To better secure user-specific data, you must also implement authorization. To do this you get the user ID of a given user, which can then be used to determine what level of access that user should have for a given resource.
 
@@ -86,7 +184,88 @@ The previous example showed a standard sign-in, which requires the client to con
 
 >[AZURE.NOTE]You can cache the token issued by Mobile Services regardless of whether you are using client-managed or service-managed authentication. This tutorial uses service-managed authentication.
 
-[AZURE.INCLUDE [mobile-windows-universal-dotnet-authenticate-app-with-token](../../includes/mobile-windows-universal-dotnet-authenticate-app-with-token.md)] 
+
+1. In the MainPage.xaml.cs project file, add the following **using** statements:
+
+		using System.Linq;		
+		using Windows.Security.Credentials;
+
+2. Replace the **AuthenticateAsync** method with the following code:
+
+        private async System.Threading.Tasks.Task<bool> AuthenticateAsync()
+        {
+            string message;
+            bool success = false;
+
+            // This sample uses the Facebook provider.
+            var provider = MobileServiceAuthenticationProvider.Facebook;
+
+            // Use the PasswordVault to securely store and access credentials.
+            PasswordVault vault = new PasswordVault();
+            PasswordCredential credential = null;
+
+            try
+            {
+                // Try to get an existing credential from the vault.
+                credential = vault.FindAllByResource(provider.ToString()).FirstOrDefault();
+            }
+            catch (Exception)
+            {
+                // When there is no matching resource an error occurs, which we ignore.
+            }
+
+            if (credential != null)
+            {
+                // Create a user from the stored credentials.
+                user = new MobileServiceUser(credential.UserName);
+                credential.RetrievePassword();
+                user.MobileServiceAuthenticationToken = credential.Password;
+
+                // Set the user from the stored credentials.
+                App.MobileService.CurrentUser = user;
+
+                // Consider adding a check to determine if the token is 
+                // expired, as shown in this post: http://aka.ms/jww5vp.
+
+                success = true;
+                message = string.Format("Cached credentials for user - {0}", user.UserId);
+            }
+            else
+            {
+                try
+                {
+                    // Login with the identity provider.
+                    user = await App.MobileService
+                        .LoginAsync(provider);
+
+                    // Create and store the user credentials.
+                    credential = new PasswordCredential(provider.ToString(),
+                        user.UserId, user.MobileServiceAuthenticationToken);
+                    vault.Add(credential);
+
+                    success = true;
+                    message = string.Format("You are now logged in - {0}", user.UserId);
+                }
+                catch (MobileServiceInvalidOperationException)
+                {
+                    message = "You must log in. Login Required";
+                }
+            }
+            
+            var dialog = new MessageDialog(message);
+            dialog.Commands.Add(new UICommand("OK"));
+            await dialog.ShowAsync();
+
+            return success;
+        }
+
+	In this version of **AuthenticateAsync**, the app tries to use credentials stored in the **PasswordVault** to access the service. A regular sign-in is also performed when there is no stored credential.
+
+	>[AZURE.NOTE]A cached token may be expired, and token expiration can also occur after authentication when the app is in use. To learn how to determine if a token is expired, see [Check for expired authentication tokens](http://aka.ms/jww5vp). For a solution to handling authorization errors related to expiring tokens, see the post [Caching and handling expired tokens in Azure Mobile Services managed SDK](http://blogs.msdn.com/b/carlosfigueira/archive/2014/03/13/caching-and-handling-expired-tokens-in-azure-mobile-services-managed-sdk.aspx). 
+
+3. Restart the app twice.
+
+	Notice that on the first start-up, sign-in with the provider is again required. However, on the second restart the cached credentials are used and sign-in is bypassed. 
 
 ## <a name="next-steps"> </a>Next steps
 

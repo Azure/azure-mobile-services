@@ -37,13 +37,13 @@
 &nbsp;
 
 >[AZURE.WARNING] This is an **Azure Mobile Services** topic.  This service has been superseded by Azure App Service Mobile Apps and is scheduled for removal from Azure.  We recommend using Azure Mobile Apps for all new mobile backend deployments.  Read [this announcement](https://azure.microsoft.com/blog/transition-of-azure-mobile-services/) to learn more about the pending deprecation of this service.  
-> 
+>
 > Learn about [migrating your site to Azure App Service](../articles/app-service-mobile/app-service-mobile-migrating-from-mobile-services.md).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
-> For the equivalent Mobile Apps version of this topic, see [Create a Windows app with Mobile Apps](../app-service-mobile/app-service-mobile-windows-store-dotnet-get-started.md).	
+> For the equivalent Mobile Apps version of this topic, see [Create a Windows app with Mobile Apps](../app-service-mobile/app-service-mobile-windows-store-dotnet-get-started.md).
 
-This tutorial shows you how to add a cloud-based backend service to a Windows Store JavaScript app using Azure Mobile Services. In this tutorial, you will create both a new mobile service and a simple *To do list* app that stores app data in the new mobile service. The mobile service that you will create uses JavaScript for server-side business logic. 
+This tutorial shows you how to add a cloud-based backend service to a Windows Store JavaScript app using Azure Mobile Services. In this tutorial, you will create both a new mobile service and a simple *To do list* app that stores app data in the new mobile service. The mobile service that you will create uses JavaScript for server-side business logic.
 
 To complete this tutorial, you need the following:
 
@@ -67,7 +67,7 @@ Follow these steps to create a new mobile service.
 	![](./media/mobile-services-create-new-service/mobile-create-page1.png)
 
 	This displays the **Specify database settings** page.
-	
+
 	>[AZURE.NOTE]As part of this tutorial, you create a new SQL Database instance and server. You can reuse this new database and administer it as you would any other SQL Database instance. If you already have a database in the same region as the new mobile service, you can instead choose **Use existing Database** and then select that database. The use of a database in a different region is not recommended because of additional bandwidth costs and higher latencies.
 
 3.	In **Name**, type the name of the new database, then type **Login name**, which is the administrator login name for the new SQL Database server, type and confirm the password, and click the check button to complete the process.
@@ -106,7 +106,7 @@ The final stage of this tutorial is to build and run your new app.
    	This sends a POST request to the new mobile service hosted in Azure. Data from the request is inserted into the TodoItem table. Items stored in the table are returned by the mobile service, and the data is displayed in the second column in the app.
 
 4. (Optional) Run the app again, and notice that data saved from the previous step is loaded from the mobile service after the app starts.
- 
+
 4. Back in the [Azure classic portal], click the **Data** tab and then click the **TodoItems** table.
 
    	This lets you browse the data inserted by the app into the table.
@@ -114,9 +114,8 @@ The final stage of this tutorial is to build and run your new app.
 >[AZURE.NOTE] You can review the code that accesses your mobile service to query and insert data, which is found in the default.js file.
 
 ## Next Steps
-Now that you have completed the quickstart, learn how to work with the [Mobile Services client for HTML/JavaScript](mobile-services-html-how-to-use-client-library.md). 
+Now that you have completed the quickstart, learn how to work with the [Mobile Services client for HTML/JavaScript](mobile-services-html-how-to-use-client-library.md).
 
-[AZURE.INCLUDE [app-service-disqus-feedback-slug](../../includes/app-service-disqus-feedback-slug.md)]
 
 <!-- Anchors. -->
 [Getting started with Mobile Services]:#getting-started

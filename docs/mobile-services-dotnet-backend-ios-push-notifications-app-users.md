@@ -17,7 +17,10 @@
 	ms.author="krisragh"/>
 
 # Send push notifications to authenticated users
-[AZURE.INCLUDE [mobile-services-selector-push-users](../../includes/mobile-services-selector-push-users.md)]
+> [AZURE.SELECTOR-LIST (Platform | Backend)]
+- [(iOS | JavaScript)](../articles/mobile-services-javascript-backend-ios-push-notifications-app-users.md)
+- [(Windows 8.x Store C# | .NET)](../articles/mobile-services-dotnet-backend-windows-store-dotnet-push-notifications-app-users.md)
+- [(Windows 8.x Store C# | JavaScript)](../articles/mobile-services-javascript-backend-windows-store-dotnet-push-notifications-app-users.md)
 
 &nbsp;
 
@@ -38,11 +41,25 @@ In this tutorial, you require users to authenticate first, register with the not
 
 ##<a name="update-app"></a>Update app to sign in before registration
 
-[AZURE.INCLUDE [mobile-services-ios-push-notifications-app-users-login](../../includes/mobile-services-ios-push-notifications-app-users-login.md)]
+
+Next, you need to change the way that push notifications are registered so that a user is authenticated before registration is attempted.
+
+1. In **QSAppDelegate.m**, remove the implementation of **didFinishLaunchingWithOptions** altogether.
+
+2. Open **QSTodoListViewController.m** and add the following code to the end of the **viewDidLoad** method:
+
+```
+// Register for remote notifications
+[[UIApplication sharedApplication] registerForRemoteNotificationTypes:
+UIRemoteNotificationTypeAlert | UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound];
+```
 
 ##<a name="test"></a>Test app
 
-[AZURE.INCLUDE [mobile-services-ios-push-notifications-app-users-test-app](../../includes/mobile-services-ios-push-notifications-app-users-test-app.md)]
+
+1. Press **Run** to start the app on a physical iOS device. In the app, add a new item, such as _A new Mobile Services task_, to the todo list.
+
+2. Verify that a notification is received. Additionally -- and optionally -- repeat the above steps on a different physical iOS device, once using the same log-in account and another time using a different log-in account. Verify that notifications are received only by devices authenticating with the same user account.
 
 <!-- Anchors. -->
 [Updating the service to require authentication for registration]: #register

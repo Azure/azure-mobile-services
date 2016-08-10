@@ -18,7 +18,10 @@
 
 # Add Mobile Services to an existing app
 
-[AZURE.INCLUDE [mobile-services-selector-get-started-data](../../includes/mobile-services-selector-get-started-data.md)]
+> [AZURE.SELECTOR-LIST (Platform | Backend )]
+- [(Windows Runtime 8.1 universal C# | .NET)](../articles/mobile-services-dotnet-backend-windows-universal-dotnet-get-started-data.md)
+- [(Windows Phone Silverlight 8.x | Javascript)](../articles/mobile-services-windows-phone-get-started-data.md)
+- [(Android | Javascript)](../articles/mobile-services-android-get-started-data.md)
  
 &nbsp;
 
@@ -81,7 +84,10 @@ In this section you will update the universal Windows app to use the mobile serv
 
 ##Publish the mobile service to Azure
 
-[AZURE.INCLUDE [mobile-services-dotnet-backend-publish-service](../../includes/mobile-services-dotnet-backend-publish-service.md)]
+
+1. In Visual Studio, right-click the project, click **Publish** > **Microsoft Azure Mobile Services**. Instead of using Visual Studio, [you may also use Git](../articles/mobile-services/mobile-services-dotnet-backend-store-code-source-control.md).
+
+2. Sign in with Azure credentials and select your service from **Existing Mobile Services**. Visual Studio downloads your publish settings directly from Azure. Finally, click **Publish**.
 
 
 ##Test the mobile service hosted in Azure

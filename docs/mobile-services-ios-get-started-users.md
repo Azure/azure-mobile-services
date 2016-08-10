@@ -79,11 +79,67 @@ To secure your endpoints, you must restrict access to only authenticated clients
 
 ##<a name="add-authentication"></a>Add Authentication to App
 
-[AZURE.INCLUDE [mobile-services-ios-authenticate-app](../../includes/mobile-services-ios-authenticate-app.md)]
+* Open **QSTodoListViewController.m** and add the following method. Change _facebook_ to _microsoftaccount_, _twitter_, _google_, or _windowsazureactivedirectory_ if you're not using Facebook as your identity provider.
+
+```
+        - (void) loginAndGetData
+        {
+            MSClient *client = self.todoService.client;
+            if (client.currentUser != nil) {
+                return;
+            }
+
+            [client loginWithProvider:@"facebook" controller:self animated:YES completion:^(MSUser *user, NSError *error) {
+                [self refresh];
+            }];
+        }
+```
+
+* Replace `[self refresh]` in `viewDidLoad` with the following:
+
+```
+        [self loginAndGetData];
+```
+
+* Press  **Run** to start the app, and then log in. When you are logged in, you should be able to view the Todo list and make updates.
 
 ##<a name="store-authentication"></a>Store Authentication Tokens in App
 
-[AZURE.INCLUDE [mobile-services-ios-authenticate-app-with-token](../../includes/mobile-services-ios-authenticate-app-with-token.md)]
+
+The previous example contacts both the identity provider and the mobile service every time the app starts. Instead, you can cache the authorization token and try to use it first.
+
+* The recommended way to encrypt and store authentication tokens on an iOS client is use the iOS Keychain. We'll use [SSKeychain](https://github.com/soffes/sskeychain) -- a simple wrapper around the iOS Keychain. Follow the instructions on the SSKeychain page and add it to your project. Verify that the **Enable Modules** setting is enabled in the project's **Build Settings** (section **Apple LLVM - Languages - Modules**.)
+
+* Open **QSTodoListViewController.m** and add the following code:
+
+```
+		- (void) saveAuthInfo {
+				[SSKeychain setPassword:self.todoService.client.currentUser.mobileServiceAuthenticationToken forService:@"AzureMobileServiceTutorial" account:self.todoService.client.currentUser.userId]
+		}
+
+
+		- (void)loadAuthInfo {
+				NSString *userid = [[SSKeychain accountsForService:@"AzureMobileServiceTutorial"][0] valueForKey:@"acct"];
+		    if (userid) {
+		        NSLog(@"userid: %@", userid);
+		        self.todoService.client.currentUser = [[MSUser alloc] initWithUserId:userid];
+		         self.todoService.client.currentUser.mobileServiceAuthenticationToken = [SSKeychain passwordForService:@"AzureMobileServiceTutorial" account:userid];
+
+		    }
+		}
+```
+
+* In `loginAndGetData`, modify  `loginWithProvider:controller:animated:completion:`'s completion block. Add the following line right before `[self refresh]` to store the user ID and token properties:
+
+```
+				[self saveAuthInfo];
+```
+
+* Let's load the user ID and token when the app starts. In the `viewDidLoad` in **QSTodoListViewController.m**, add this right after`self.todoService` is initialized.
+
+```
+				[self loadAuthInfo];
+```
 
 ## <a name="next-steps"></a>Next Steps
 

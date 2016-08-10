@@ -60,7 +60,27 @@ The downloaded quickstart project contains the Mobile Services SDK for Android.
 
 ## <a name="create-new-service"> </a>Create a new mobile service
 
-[AZURE.INCLUDE [mobile-services-dotnet-backend-create-new-service](../../includes/mobile-services-dotnet-backend-create-new-service.md)]
+
+Follow these steps to create a new mobile service.
+
+1.	Log into the [Azure classic portal](https://manage.windowsazure.com/). At the bottom of the navigation pane, click **+NEW**. Expand **Compute** and **Mobile Service**, then click **Create**.
+	
+	![](./media/mobile-services-dotnet-backend-create-new-service/mobile-create.png)
+
+	This displays the **Create a Mobile Service** dialog.
+
+2.	In the **Create a Mobile Service** page, select **Create a free 20 MB SQL Database**, select **.NET** runtime, then type a subdomain name for the new mobile service in the **URL** textbox. Click the right arrow button to go to the next page.
+	
+	![](./media/mobile-services-dotnet-backend-create-new-service/mobile-create-page1.png)
+
+	This displays the **Specify database settings** page.
+
+	> [AZURE.NOTE] As part of this tutorial, you create a new SQL Database instance and server. You can reuse this new database and administer it as you would any other SQL Database instance. If you already have a database in the same region as the new mobile service, you can instead choose **Use existing Database** and then select that database. The use of a database in a different region is not recommended because of additional bandwidth costs and higher latencies.
+
+3.	In **Name**, type the name of the new database, then type **Login name**, which is the administrator login name for the new SQL Database server, type and confirm the password, and click the check button to complete the process.
+	![](./media/mobile-services-dotnet-backend-create-new-service/mobile-create-page2.png)
+
+You have now created a new mobile service that can be used by your mobile apps.
 
 ## Download the mobile service to your local computer
 
@@ -78,11 +98,20 @@ Now that you have created the mobile service, download your personalized mobile 
 
 ## Test the mobile service
 
-[AZURE.INCLUDE [mobile-services-dotnet-backend-test-local-service](../../includes/mobile-services-dotnet-backend-test-local-service.md)]
+
+
+The mobile service project lets you run your new mobile service locally. This makes it easy to debug your service code before you even publish it to Azure.
+
+1. On your Windows PC, download your personalized server project, extract it, and then open it in Visual Studio.
+
+2. Press the **F5** key to rebuild the project and start the mobile service locally. A web page is displayed after the mobile service starts successfully.
 
 ## Publish your mobile service
 
-[AZURE.INCLUDE [mobile-services-dotnet-backend-publish-service](../../includes/mobile-services-dotnet-backend-publish-service.md)]
+
+1. In Visual Studio, right-click the project, click **Publish** > **Microsoft Azure Mobile Services**. Instead of using Visual Studio, [you may also use Git](../articles/mobile-services/mobile-services-dotnet-backend-store-code-source-control.md).
+
+2. Sign in with Azure credentials and select your service from **Existing Mobile Services**. Visual Studio downloads your publish settings directly from Azure. Finally, click **Publish**.
 
 ## Create a new Android app
 

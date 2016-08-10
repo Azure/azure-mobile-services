@@ -94,7 +94,39 @@ Both your mobile service and your app are now configured to work with GCM and No
 
 ## Update the mobile service to send push notifications
 
-[AZURE.INCLUDE [mobile-services-dotnet-backend-android-push-update-service](../../includes/mobile-services-dotnet-backend-android-push-update-service.md)]
+
+1. In Visual Studio Solution Explorer, expand the **Controllers** folder in the mobile service project. Open TodoItemController.cs. At the top of the file, add the following `using` statements:
+
+		using System;
+		using System.Collections.Generic;
+
+2. Update the `PostTodoItem` method definition with the following code:  
+
+        public async Task<IHttpActionResult> PostTodoItem(TodoItem item)
+        {
+            TodoItem current = await InsertAsync(item);
+
+            Dictionary<string, string> data = new Dictionary<string, string>()
+            {
+                { "message", item.Text}
+            };
+            GooglePushMessage message = new GooglePushMessage(data, TimeSpan.FromHours(1));
+
+            try
+            {
+                var result = await Services.Push.SendAsync(message);
+                Services.Log.Info(result.State.ToString());
+            }
+            catch (System.Exception ex)
+            {
+                Services.Log.Error(ex.Message, null, "Push.SendAsync Error");
+            }
+            return CreatedAtRoute("Tables", new { id = current.Id }, current);
+        }
+
+    This code will send a push notification (with the text of the inserted item) after inserting a todo item. In the event of an error, the code will add an error log entry which is viewable on the **Logs** tab of the mobile service in the [Azure classic portal](https://manage.windowsazure.com/).
+
+3. Republish your mobile service project to Azure.
 
 ## Add push notifications to your app
 
@@ -109,7 +141,34 @@ If you will be testing with an older device, then consult [Set Up Google Play Se
 
 ###Add Google Play Services to the project
 
-[AZURE.INCLUDE [Add Play Services](../../includes/mobile-services-add-google-play-services.md)]
+1. Open the Android SDK Manager by clicking the icon on the toolbar of Android Studio or by clicking **Tools** -> **Android** -> **SDK Manager** on the menu. Locate the target version of the Android SDK that is used in your project , open it, and choose **Google APIs**, if it is not already installed.
+
+2. Scroll down to **Extras**, expand it, and choose **Google Play Services**, as shown below. Click **Install Packages**. Note the SDK path, for use in the following step. 
+
+   	![](./media/notification-hubs-android-get-started/notification-hub-create-android-app4.png)
+
+
+3. Open the **build.gradle** file in the app directory.
+
+	![](./media/mobile-services-android-get-started-push/android-studio-push-build-gradle.png)
+
+4. Add this line under *dependencies*: 
+
+   		compile 'com.google.android.gms:play-services-gcm:8.4.0'
+
+5. Under *defaultConfig*, change *minSdkVersion* to 9.
+ 
+6. Click the **Sync Project with Gradle Files** icon in the tool bar.
+
+7. Open **AndroidManifest.xml** and add this tag to the *application* tag.
+
+        <meta-data android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+ 
+
+
+
+
 
 ###Add code
 
@@ -121,7 +180,28 @@ You can test the app by directly attaching an Android phone with a USB cable, or
 
 ### Enable push notifications for local testing
 
-[AZURE.INCLUDE [mobile-services-dotnet-backend-configure-local-push](../../includes/mobile-services-dotnet-backend-configure-local-push.md)]
+
+You can optionally test push notifications with your mobile service running on the local computer or VM before you publish to Azure. To do this, you must set information about the notification hub used by your app in the web.config file. This information is only used when running locally to connect to the notification hub; it is ignored when published to Azure.
+
+1. Back in the **Push** tab of your mobile service, click the **Notification Hub** link.
+
+	![](./media/mobile-services-dotnet-backend-configure-local-push/link-to-notification-hub.png)
+
+	This navigates to the notification hub used by your mobile service.
+
+2. In the notification hub page, make a note of the name of your notification hub, then click **View Connection String**.
+
+	![](./media/mobile-services-dotnet-backend-configure-local-push/notification-hub-page.png)
+
+3. In the **Access connection information**, copy the **DefaultFullSharedAccessSignature** connection string.
+
+	![](./media/mobile-services-dotnet-backend-configure-local-push/notification-hub-connection-string.png)
+
+4. In your mobile service project in Visual Studio, open the Web.config file for the service and in **connectionStrings**, replace the connection string for **MS_NotificationHubConnectionString** with the connection string from the previous step.
+
+5. In **appSettings**, replace the value of the **MS_NotificationHubName** app setting with the name of the notification hub.
+
+Now, the mobile service project is configured to connect to the notification hub in Azure when running locally. Note that it is important to use the same notification hub name and connection string as the portal because these Web.config project settings are overridden by the portal settings when running in Azure.
 
 
 4. Create a new class in the project called `ToDoBroadcastReceiver`.

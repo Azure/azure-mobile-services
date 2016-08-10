@@ -58,7 +58,33 @@ To complete this tutorial, you need the following:
 
 ##<a id="register"></a>Register your app for push notifications
 
-[AZURE.INCLUDE [mobile-services-create-new-push-vs2013](../../includes/mobile-services-create-new-push-vs2013.md)]
+The following steps registers your app with the Windows Store, configure your mobile service to enable push notifications, and add code to your app to register a device channel with your notification hub. Visual Studio 2013 connects to Azure and to the Windows Store by using the credentials that you provide. 
+
+1. In Visual Studio 2013, open Solution Explorer, right-click the Windows Store app project, click **Add** then **Push Notification...**. 
+
+	![Add Push Notification wizard in Visual Studio 2013](./media/mobile-services-create-new-push-vs2013/mobile-add-push-notifications-vs2013.png)
+
+	This starts the Add Push Notification Wizard.
+
+2. Click **Next**, sign in to your Windows Store account, then supply a name in **Reserve a new name** and click **Reserve**.
+
+	This creates a new app registration.
+
+3. Click the new registration in the **App Name** list, then click **Next**.
+
+4. In the **Select a service** page, click the name of your mobile service, then click **Next** and **Finish**. 
+
+	The notification hub used by your mobile service is updated with the Windows Notification Services (WNS) registration. You can now use Azure Notification Hubs to send notifications from Mobile Services to your app by using WNS. 
+
+	>[AZURE.NOTE]This tutorial demonstrates sending notifications from a mobile service backend. You can use the same notification hub registration to send notifications from any backend service. For more information, see [Notification Hubs Overview](http://msdn.microsoft.com/library/azure/jj927170.aspx).
+
+5. When you complete the wizard, a new **Push setup is almost complete** page is opened in Visual Studio. This page details an alternate method to configure your mobile service project to send notifications that is different from this tutorial. 
+
+	The code that is added to your universal Windows app solution by the Add Push Notification wizard is platform-specific. Later in this section, you will remove this redundancy by sharing the Mobile Services client code, which makes the universal app easier to maintain.  
+
+<!-- URLs. -->
+[Get started with Mobile Services]: /develop/mobile/tutorials/get-started/
+[Get started with data]: /develop/mobile/tutorials/get-started-with-data-dotnet/
 
 &nbsp;&nbsp;6. Browse to the `\Services\MobileServices\your_service_name` project folder, open the generated push.register.cs code file, and inspect the **UploadChannel** method that registers the device's channel URL with the notification hub.
 
@@ -74,12 +100,64 @@ Now that push notifications are enabled in the app, you must update the mobile s
 
 The following steps update the insert script registered to the TodoItem table. You can implement similar code in any server script or anywhere else in your backend services. 
 
-[AZURE.INCLUDE [mobile-services-javascript-update-script-notification-hubs](../../includes/mobile-services-javascript-update-script-notification-hubs.md)]
+
+
+Finally, you must update the script registered to the insert operation on the TodoItem table to send notifications.
+
+1. Click **TodoItem**, click **Script** and select **Insert**. 
+
+2. Replace the insert function with the following code, and then click **Save**:
+
+		function insert(item, user, request) {
+		// Define a payload for the Windows Store toast notification.
+		var payload = '<?xml version="1.0" encoding="utf-8"?><toast><visual>' +    
+		    '<binding template="ToastText01">  <text id="1">' +
+		    item.text + '</text></binding></visual></toast>';
+		
+		request.execute({
+		    success: function() {
+		        // If the insert succeeds, send a notification.
+		    	push.wns.send(null, payload, 'wns/toast', {
+		            success: function(pushResponse) {
+		                console.log("Sent push:", pushResponse);
+						request.respond();
+		                },              
+		                error: function (pushResponse) {
+		                    console.log("Error Sending push:", pushResponse);
+							request.respond(500, { error: pushResponse });
+		                    }
+		                });
+		            }
+		        });
+		}
+
+	This insert script sends a push notification (with the text of the inserted item) to all Windows Store app registrations after the insert succeeds.
+
 
 
 ##<a id="test"></a> Test push notifications in your app
 
-[AZURE.INCLUDE [mobile-services-javascript-backend-windows-universal-test-push](../../includes/mobile-services-javascript-backend-windows-universal-test-push.md)]
+
+1. In Visual Studio, right-click the Windows Store project, click **Set as StartUp Project**, then press the F5 key to run the Windows Store app.
+	
+	After the app starts, the device is registered for push notifications.
+
+2. Stop the Windows Store app and repeat the previous step to run the Windows Phone Store app.
+
+	At this point, both devices are registered to receive push notifications.
+
+3. Run the Windows Store app again, and type text in **Insert a TodoItem**, and then click **Save**.
+
+   	![](./media/mobile-services-javascript-backend-windows-universal-test-push/mobile-quickstart-push1.png)
+
+   	Note that after the insert completes, both the Windows Store and the Windows Phone apps receive a push notification from WNS.
+
+   	![](./media/mobile-services-javascript-backend-windows-universal-test-push/mobile-quickstart-push2.png)
+
+	The notification is displayed on Windows Phone even when the app isn't running.
+
+   	![](./media/mobile-services-javascript-backend-windows-universal-test-push/mobile-quickstart-push5-wp8.png)
+
 
 ## <a name="next-steps"> </a>Next steps
 

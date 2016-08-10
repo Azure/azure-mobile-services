@@ -19,7 +19,7 @@
 # How to Use iOS Client Library for Azure Mobile Services
 
 >[AZURE.WARNING] This is an **Azure Mobile Services** topic.  This service has been superseded by Azure App Service Mobile Apps and is scheduled for removal from Azure.  We recommend using Azure Mobile Apps for all new mobile backend deployments.  Read [this announcement](https://azure.microsoft.com/blog/transition-of-azure-mobile-services/) to learn more about the pending deprecation of this service.  
-> 
+>
 > Learn about [migrating your site to Azure App Service](../articles/app-service-mobile/app-service-mobile-migrating-from-mobile-services.md).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
@@ -27,13 +27,41 @@
 &nbsp;
 
 
-[AZURE.INCLUDE [mobile-services-selector-client-library](../../includes/mobile-services-selector-client-library.md)]
+> [AZURE.SELECTOR]
+- [Android](../articles/mobile-services-android-how-to-use-client-library.md)
+- [HTML/JavaScript](../articles/mobile-services-html-how-to-use-client-library.md)
+- [iOS](../articles/mobile-services-ios-how-to-use-client-library.md)
+- [Managed (Windows/Xamarin)](../articles/mobile-services-dotnet-how-to-use-client-library.md)
 
 This guide teaches you to perform common scenarios using the Azure Mobile Services [iOS SDK]. If you are new to Mobile Services, first complete [Mobile Services Quick Start] to configure your account, create a table, and create a mobile service.
 
 > [AZURE.NOTE] This guide uses the latest [iOS Mobile Services SDK](https://go.microsoft.com/fwLink/?LinkID=266533&clcid=0x409). If your project uses an older version of the SDK, first upgrade the framework in Xcode.
 
-[AZURE.INCLUDE [mobile-services-concepts](../../includes/mobile-services-concepts.md)]
+## <a name="what-is"></a>What is Mobile Services
+
+Azure Mobile Services is a highly scalable mobile application development platform that lets you add enhanced functionality to your mobile device apps by using Azure.
+
+With Mobile Services you can:
+
++ **Build native and cross platform apps** - Connect your iOS, Android, Windows, or cross-platform Xamarin or Cordova (Phonegap) apps to your backend mobile service using native SDKs.  
++ **Send push notifications to your users** - Send push notifications to your users of your app.
++ **Authenticate your users** - Leverage popular identity providers like Facebook and Twitter to authenticate your app users.
++ **Store data in the cloud** - Store user data in a SQL Database (by default) or in Mongo DB, DocumentDB, Azure Tables, or Azure Blobs.
++ **Build offline-ready apps with sync** - Make your apps work offline and use Mobile Services to sync data in the background.
++ **Monitor and scale your apps** - Monitor app usage and scale your backend as demand grows.
+
+## <a name="concepts"> </a>Mobile Services Concepts
+
+The following are important features and concepts in the Mobile Services:
+
++ **Application key:** a unique value that is used to limit access to your mobile service from random clients; this "key" is not a security token and is not used to authenticate users of your app.    
++ **Backend:** the mobile service instance that supports your app. A mobile service is implemented either as an ASP.NET Web API project (*.NET backend* ) or as a Node.js project (*JavaScript backend*).
++ **Identity provider:** an external service, trusted by Mobile Services, that authenticates your app's users. Supported providers include: Facebook, Twitter, Google, Microsoft Account, and Azure Active Directory.
++ **Push notification:** Service-initiated message that is sent to a registered device or user using Azure Notification Hubs.
++ **Scale:** The ability to add, for an additional cost, more processing power, performance, and storage as your app becomes more popular.
++ **Scheduled job:** Custom code that is run either on a pre-determined schedule or on-demand.
+
+For more information, see [Mobile Services Concepts](../articles/mobile-services/mobile-services-concepts-links.md).
 
 ##<a name="Setup"></a>Setup and Prerequisites
 
@@ -252,7 +280,64 @@ At minimum, the `id` attribute must be set when making deletes.
 
 A custom API enables you to define custom endpoints that expose server functionality that does not map to an insert, update, delete, or read operation. By using a custom API, you can have more control over messaging, including reading and setting HTTP message headers and defining a message body format other than JSON. For an example of how to create a custom API in your mobile service, see [How to: define a custom API endpoint](mobile-services-dotnet-backend-define-custom-api.md).
 
-[AZURE.INCLUDE [mobile-services-ios-call-custom-api](../../includes/mobile-services-ios-call-custom-api.md)]
+
+### Call custom API from iOS app
+
+To call this custom API from an iOS client, use the `MSClient invokeAPI` method. There are two versions of this method, one for JSON-formatted requests, and one for any data type:
+
+	/// Invokes a user-defined API of the Mobile Service.  The HTTP request and
+	/// response content will be treated as JSON.
+	-(void)invokeAPI:(NSString *)APIName
+	            body:(id)body
+	      HTTPMethod:(NSString *)method
+	      parameters:(NSDictionary *)parameters
+	         headers:(NSDictionary *)headers
+	      completion:(MSAPIBlock)completion;
+
+	/// Invokes a user-defined API of the Mobile Service.  The HTTP request and
+	/// response content can be of any media type.
+	-(void)invokeAPI:(NSString *)APIName
+	            data:(NSData *)data
+	      HTTPMethod:(NSString *)method
+	      parameters:(NSDictionary *)parameters
+	         headers:(NSDictionary *)headers
+	      completion:(MSAPIDataBlock)completion;
+
+
+For example, to send a JSON request to a custom API named "sendEmail", pass an `NSDictionary` for the request parameters:
+
+	NSDictionary *emailHeader = @{ @"to": @"email.com", @"subject" : @"value" };
+
+	[self.client invokeAPI:@"sendEmail"
+	     body:emailBody
+	     HTTPMethod:@"POST"
+	     parameters:emailHeader
+	     headers:nil
+	     completion:completion ];
+
+If you need the data returned then you can use something like this:
+
+	[self.client invokeAPI:apiName
+                 body:yourBody
+           HTTPMethod:httpMethod
+           parameters:parameters
+              headers:headers
+           completion:  ^(NSData *result,
+                          NSHTTPURLResponse *response,
+                          NSError *error){
+               // error is nil if no error occured
+               if(error) {
+                   NSLog(@"ERROR %@", error);
+               } else {
+
+		// do something with the result
+               }
+
+
+           }];
+
+
+
 
 
 ##<a name="authentication"></a>How to: Authenticate Users
@@ -271,7 +356,29 @@ When authentication succeeds, you get back a user object with a user ID value an
 
 Here is how you can add server-managed login to the [Mobile Services Quick Start] project; you may use similar code for your other projects. For more information and to see an end-to-end example in action, see [Authentication].
 
-[AZURE.INCLUDE [mobile-services-ios-authenticate-app](../../includes/mobile-services-ios-authenticate-app.md)]
+* Open **QSTodoListViewController.m** and add the following method. Change _facebook_ to _microsoftaccount_, _twitter_, _google_, or _windowsazureactivedirectory_ if you're not using Facebook as your identity provider.
+
+```
+        - (void) loginAndGetData
+        {
+            MSClient *client = self.todoService.client;
+            if (client.currentUser != nil) {
+                return;
+            }
+
+            [client loginWithProvider:@"facebook" controller:self animated:YES completion:^(MSUser *user, NSError *error) {
+                [self refresh];
+            }];
+        }
+```
+
+* Replace `[self refresh]` in `viewDidLoad` with the following:
+
+```
+        [self loginAndGetData];
+```
+
+* Press  **Run** to start the app, and then log in. When you are logged in, you should be able to view the Todo list and make updates.
 
 ### Client-managed Login (Single Sign-on)
 
@@ -289,7 +396,10 @@ The following example uses the [Live Connect SDK] to enable single sign-on for i
 
 ##<a name="caching-tokens"></a>How to: Cache Authentication Tokens
 
-Let's see how you may cache tokens in the [Mobile Services Quick Start] project; you may apply similar steps to any project. [AZURE.INCLUDE [mobile-services-ios-authenticate-app-with-token](../../includes/mobile-services-ios-authenticate-app-with-token.md)]
+Let's see how you may cache tokens in the [Mobile Services Quick Start] project; you may apply similar steps to any project.
+
+* The recommended way to encrypt and store authentication tokens on an iOS client is use the iOS Keychain. We'll use [SSKeychain](https://github.com/soffes/sskeychain) -- a simple wrapper around the iOS Keychain. Follow the instructions on the SSKeychain page and add it to your project. Verify that the **Enable Modules** setting is enabled in the project's **Build Settings** (section **Apple LLVM - Languages - Modules**.)
+
 
 ##<a name="errors"></a>How to: Handle Errors
 

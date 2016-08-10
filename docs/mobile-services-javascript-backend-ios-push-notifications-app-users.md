@@ -19,7 +19,10 @@
 
 # Send Push Notifications to Authenticated Users
 
-[AZURE.INCLUDE [mobile-services-selector-push-users](../../includes/mobile-services-selector-push-users.md)]
+> [AZURE.SELECTOR-LIST (Platform | Backend)]
+- [(iOS | JavaScript)](../articles/mobile-services-javascript-backend-ios-push-notifications-app-users.md)
+- [(Windows 8.x Store C# | .NET)](../articles/mobile-services-dotnet-backend-windows-store-dotnet-push-notifications-app-users.md)
+- [(Windows 8.x Store C# | JavaScript)](../articles/mobile-services-javascript-backend-windows-store-dotnet-push-notifications-app-users.md)
 
 &nbsp;
 
@@ -37,7 +40,49 @@ In this tutorial, you require users to authenticate first, register with the not
 
 ##<a name="register"></a>Update Service to Require Authentication to Register
 
-[AZURE.INCLUDE [mobile-services-javascript-backend-push-notifications-app-users](../../includes/mobile-services-javascript-backend-push-notifications-app-users.md)]
+
+1. Log on to the [Azure classic portal](https://manage.windowsazure.com/), click **Mobile Services**, and then click your mobile service.
+
+2. Click the **Push** tab, select **Only Authenticated Users** for **Permissions**, click **Save**, and then click **Edit Script**.
+	
+	This allows you to customize the push notification registration callback function. If you use Git to edit your source code, this same registration function is found in `.\service\extensions\push.js`.
+
+3. Replace the existing **register** function with the following code and then click **Save**:
+
+		exports.register = function (registration, registrationContext, done) {   
+		    // Get the ID of the logged-in user.
+			var userId = registrationContext.user.userId;    
+		    
+			// Perform a check here for any disallowed tags.
+			if (!validateTags(registration))
+			{
+				// Return a service error when the client tries 
+		        // to set a user ID tag, which is not allowed.		
+				done("You cannot supply a tag that is a user ID");		
+			}
+			else{
+				// Add a new tag that is the user ID.
+				registration.tags.push(userId);
+				
+				// Complete the callback as normal.
+				done();
+			}
+		};
+		
+		function validateTags(registration){
+		    for(var i = 0; i < registration.tags.length; i++) { 
+		        console.log(registration.tags[i]);           
+				if (registration.tags[i]
+				.search(/facebook:|twitter:|google:|microsoft:/i) !== -1){
+					return false;
+				}
+				return true;
+			}
+		}
+
+	This adds a tag to the registration that is the ID of the logged-in user. The supplied tags are validated to prevent a user from registering for another user's ID. When a notification is sent to this user, it is received on this and any other device registered by the user.
+
+4. Click the back arrow, click the **Data** tab, click **TodoItem**, click **Script**, and then select **Insert**. 
 
 Replace the `insert` function with the following code, then click **Save**. This insert script uses the user ID tag to send a push notification to all iOS app registrations from the logged-in user:
 
@@ -60,11 +105,25 @@ function insert(item, user, request) {
 
 ##<a name="update-app"></a>Update App to Login Before Registration
 
-[AZURE.INCLUDE [mobile-services-ios-push-notifications-app-users-login](../../includes/mobile-services-ios-push-notifications-app-users-login.md)]
+
+Next, you need to change the way that push notifications are registered so that a user is authenticated before registration is attempted.
+
+1. In **QSAppDelegate.m**, remove the implementation of **didFinishLaunchingWithOptions** altogether.
+
+2. Open **QSTodoListViewController.m** and add the following code to the end of the **viewDidLoad** method:
+
+```
+// Register for remote notifications
+[[UIApplication sharedApplication] registerForRemoteNotificationTypes:
+UIRemoteNotificationTypeAlert | UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound];
+```
 
 ##<a name="test"></a>Test App
 
-[AZURE.INCLUDE [mobile-services-ios-push-notifications-app-users-test-app](../../includes/mobile-services-ios-push-notifications-app-users-test-app.md)]
+
+1. Press **Run** to start the app on a physical iOS device. In the app, add a new item, such as _A new Mobile Services task_, to the todo list.
+
+2. Verify that a notification is received. Additionally -- and optionally -- repeat the above steps on a different physical iOS device, once using the same log-in account and another time using a different log-in account. Verify that notifications are received only by devices authenticating with the same user account.
 
 
 

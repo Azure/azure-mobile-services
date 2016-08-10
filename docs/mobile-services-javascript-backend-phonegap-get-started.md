@@ -12,7 +12,7 @@
 	ms.workload="mobile"
 	ms.tgt_pltfrm="mobile-phonegap"
 	ms.devlang="multiple"
-	ms.topic="get-started-article" 
+	ms.topic="get-started-article"
 	ms.date="07/21/2016"
 	ms.author="ggailey777"/>
 
@@ -76,7 +76,7 @@ Follow these steps to create a new mobile service.
 	![](./media/mobile-services-create-new-service/mobile-create-page1.png)
 
 	This displays the **Specify database settings** page.
-	
+
 	>[AZURE.NOTE]As part of this tutorial, you create a new SQL Database instance and server. You can reuse this new database and administer it as you would any other SQL Database instance. If you already have a database in the same region as the new mobile service, you can instead choose **Use existing Database** and then select that database. The use of a database in a different region is not recommended because of additional bandwidth costs and higher latencies.
 
 3.	In **Name**, type the name of the new database, then type **Login name**, which is the administrator login name for the new SQL Database server, type and confirm the password, and click the check button to complete the process.
@@ -201,8 +201,6 @@ Now that you have completed the quickstart, learn how to perform additional impo
 * **[Mobile Services HTML/JavaScript How-to Conceptual Reference](mobile-services-html-how-to-use-client-library.md)**  
   Learn more about how to use the JavaScript client library to access data, call custom APIs, and perform authentication.
 
-[AZURE.INCLUDE [app-service-disqus-feedback-slug](../../includes/app-service-disqus-feedback-slug.md)]
-
 <!-- Images. -->
 [0]: ./media/mobile-services-javascript-backend-phonegap-get-started/portal-screenshot1.png
 [1]: ./media/mobile-services-javascript-backend-phonegap-get-started/portal-screenshot2.png
@@ -216,4 +214,3 @@ Now that you have completed the quickstart, learn how to perform additional impo
 [Azure classic portal]: https://manage.windowsazure.com/
 [Xcode]: https://go.microsoft.com/fwLink/p/?LinkID=266532
 [Visual Studio 2012 Express for Windows Phone]: https://go.microsoft.com/fwLink/p/?LinkID=268374
- 

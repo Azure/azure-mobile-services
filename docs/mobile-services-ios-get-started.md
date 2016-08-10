@@ -37,7 +37,7 @@
 &nbsp;
 
 >[AZURE.WARNING] This is an **Azure Mobile Services** topic.  This service has been superseded by Azure App Service Mobile Apps and is scheduled for removal from Azure.  We recommend using Azure Mobile Apps for all new mobile backend deployments.  Read [this announcement](https://azure.microsoft.com/blog/transition-of-azure-mobile-services/) to learn more about the pending deprecation of this service.  
-> 
+>
 > Learn about [migrating your site to Azure App Service](../articles/app-service-mobile/app-service-mobile-migrating-from-mobile-services.md).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
@@ -66,7 +66,7 @@ Follow these steps to create a new mobile service.
 	![](./media/mobile-services-create-new-service/mobile-create-page1.png)
 
 	This displays the **Specify database settings** page.
-	
+
 	>[AZURE.NOTE]As part of this tutorial, you create a new SQL Database instance and server. You can reuse this new database and administer it as you would any other SQL Database instance. If you already have a database in the same region as the new mobile service, you can instead choose **Use existing Database** and then select that database. The use of a database in a different region is not recommended because of additional bandwidth costs and higher latencies.
 
 3.	In **Name**, type the name of the new database, then type **Login name**, which is the administrator login name for the new SQL Database server, type and confirm the password, and click the check button to complete the process.
@@ -89,7 +89,22 @@ You can follow an easy Quick Start in the Azure classic portal to create a new a
 
 ## Run your new iOS app
 
-[AZURE.INCLUDE [mobile-services-ios-run-app](../../includes/mobile-services-ios-run-app.md)]
+
+
+
+The final stage of this tutorial is to build and run your new app.
+
+1. Browse to the location where you saved the compressed project files, expand the files on your computer, and open the project file using Xcode.
+
+2. Press the **Run** button to build the project and start the app in the iPhone emulator.
+
+3. In the app, type meaningful text, such as _Complete the tutorial_ and then click the plus (**+**) icon.
+
+   	![](./media/mobile-services-ios-run-app/mobile-quickstart-startup-ios.png)
+
+   	This sends a POST request to the new mobile service hosted in Azure. Data from the request is inserted into the TodoItem table. Items stored in the table are returned by the mobile service, and the data is displayed in the list.
+
+ 	</div>
 
 <ol start="4">
 <li><p>Back in the [Azure classic portal], click the **DATA** tab and then click the **TodoItem** table. This lets you browse the data inserted by the app into the table.<p></li></ol></p>
@@ -105,8 +120,6 @@ Learn how to perform additional important tasks in Mobile Services:
 
 * [Add push notifications to an existing app]
 	<br/>Learn how to send a very basic push notification to your app.
-
-[AZURE.INCLUDE [app-service-disqus-feedback-slug](../../includes/app-service-disqus-feedback-slug.md)]
 
 
 <!-- Anchors. -->

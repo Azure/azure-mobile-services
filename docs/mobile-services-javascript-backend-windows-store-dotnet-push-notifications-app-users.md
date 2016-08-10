@@ -18,7 +18,10 @@
 
 # Send push notifications to authenticated users
 
-[AZURE.INCLUDE [mobile-services-selector-push-users](../../includes/mobile-services-selector-push-users.md)]
+> [AZURE.SELECTOR-LIST (Platform | Backend)]
+- [(iOS | JavaScript)](../articles/mobile-services-javascript-backend-ios-push-notifications-app-users.md)
+- [(Windows 8.x Store C# | .NET)](../articles/mobile-services-dotnet-backend-windows-store-dotnet-push-notifications-app-users.md)
+- [(Windows 8.x Store C# | JavaScript)](../articles/mobile-services-javascript-backend-windows-store-dotnet-push-notifications-app-users.md)
 
 &nbsp;
 
@@ -52,7 +55,49 @@ After you have completed both tutorials, you can prevent unauthenticated users f
 
 ##<a name="register"></a>Update the service to require authentication to register
 
-[AZURE.INCLUDE [mobile-services-javascript-backend-push-notifications-app-users](../../includes/mobile-services-javascript-backend-push-notifications-app-users.md)] 
+
+1. Log on to the [Azure classic portal](https://manage.windowsazure.com/), click **Mobile Services**, and then click your mobile service.
+
+2. Click the **Push** tab, select **Only Authenticated Users** for **Permissions**, click **Save**, and then click **Edit Script**.
+	
+	This allows you to customize the push notification registration callback function. If you use Git to edit your source code, this same registration function is found in `.\service\extensions\push.js`.
+
+3. Replace the existing **register** function with the following code and then click **Save**:
+
+		exports.register = function (registration, registrationContext, done) {   
+		    // Get the ID of the logged-in user.
+			var userId = registrationContext.user.userId;    
+		    
+			// Perform a check here for any disallowed tags.
+			if (!validateTags(registration))
+			{
+				// Return a service error when the client tries 
+		        // to set a user ID tag, which is not allowed.		
+				done("You cannot supply a tag that is a user ID");		
+			}
+			else{
+				// Add a new tag that is the user ID.
+				registration.tags.push(userId);
+				
+				// Complete the callback as normal.
+				done();
+			}
+		};
+		
+		function validateTags(registration){
+		    for(var i = 0; i < registration.tags.length; i++) { 
+		        console.log(registration.tags[i]);           
+				if (registration.tags[i]
+				.search(/facebook:|twitter:|google:|microsoft:/i) !== -1){
+					return false;
+				}
+				return true;
+			}
+		}
+
+	This adds a tag to the registration that is the ID of the logged-in user. The supplied tags are validated to prevent a user from registering for another user's ID. When a notification is sent to this user, it is received on this and any other device registered by the user.
+
+4. Click the back arrow, click the **Data** tab, click **TodoItem**, click **Script**, and then select **Insert**. 
 
 &nbsp;&nbsp;5. Replace the insert function with the following code, then click **Save**:
 
@@ -87,11 +132,91 @@ After you have completed both tutorials, you can prevent unauthenticated users f
 
 ##<a name="update-app"></a>Update the app to log in before registration
 
-[AZURE.INCLUDE [mobile-services-windows-store-dotnet-push-notifications-app-users](../../includes/mobile-services-windows-store-dotnet-push-notifications-app-users.md)] 
+
+Next, you need to change the way that push notifications are registered to make sure that the user is authenticated before registration is attempted. The client app updates depend on the way in which you implemented push notifications.
+
+###Using the Add Push Notification Wizard in Visual Studio 2013 Update 2 or a later version
+
+In this method, the wizard generated a new push.register.cs file in your project.
+
+1. In Visual Studio in Solution Explorer, open the app.xaml.cs project file and in the **OnLaunched** event handler comment-out or delete the call to the **UploadChannel** method. 
+
+2. Open the push.register.cs project file and replace the **UploadChannel** method, with the following code:
+
+		public async static void UploadChannel()
+		{
+		    var channel = 
+		        await Windows.Networking.PushNotifications.PushNotificationChannelManager
+		        .CreatePushNotificationChannelForApplicationAsync();
+		
+		    try
+		    {
+		        // Create a native push notification registration.
+		        await App.MobileService.GetPush().RegisterNativeAsync(channel.Uri);		        
+		
+		    }
+		    catch (Exception exception)
+		    {
+		        HandleRegisterException(exception);
+		    }
+		}
+
+	This makes sure that registration is done using the same client instance that has the authenticated user credentials. Otherwise, registration will fail with an Unauthorized (401) error.
+
+3. Open the shared MainPage.cs project file, and replace the **ButtonLogin_Click** handler with the following:
+
+        private async void ButtonLogin_Click(object sender, RoutedEventArgs e)
+        {
+            // Login the user and then load data from the mobile service.
+            await AuthenticateAsync();
+			todolistPush.UploadChannel();
+
+            // Hide the login button and load items from the mobile service.
+            this.ButtonLogin.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+            await RefreshTodoItems();
+        }
+
+	This makes sure that authentication occurs before push registration is attempted.
+
+4. 	In the previous code, replace the generated push class name (`todolistPush`) with the name of class generated by the wizard, usually in the format <code><em>mobile_service</em>Push</code>. 
+
+###Manually enabled push notifications		
+
+In this method, you added registration code from the tutorial directly to the app.xaml.cs project file.
+
+1. In Visual Studio in Solution Explorer, open the app.xaml.cs project file and in the **OnLaunched** event handler comment-out or delete the call to **InitNotificationsAsync**. 
+ 
+2. Change the accessibility of the **InitNotificationsAsync** method from `private` to `public` and add the `static` modifier. 
+
+3. Open the shared MainPage.cs project file, and replace the **ButtonLogin_Click** handler with the following:
+
+        private async void ButtonLogin_Click(object sender, RoutedEventArgs e)
+        {
+            // Login the user and then load data from the mobile service.
+            await AuthenticateAsync();
+			App.InitNotificationsAsync();
+
+            // Hide the login button and load items from the mobile service.
+            this.ButtonLogin.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+            await RefreshTodoItems();
+        }
+	
+	This makes sure that authentication occurs before push registration is attempted.
 
 ##<a name="test"></a>Test the app
 
-[AZURE.INCLUDE [mobile-services-windows-test-push-users](../../includes/mobile-services-windows-test-push-users.md)] 
+
+1. In Visual Studio, press the F5 key to run the app.
+
+2. Log in using the selected identity provider and verify that authentication succeeds. 
+
+3. In the app, type text in **Insert a TodoItem**, and then click **Save**.
+
+   	Note that after the insert completes, the app receives a push notification from WNS.
+
+4. (Optional) Repeat steps 1-3 on a different client device and using a different account when logging in.  
+
+	Verify that the notification is received only on this device, since the previous device was not tagged with the current user ID. 
 
 <!-- Anchors. -->
 [Updating the service to require authentication for registration]: #register
