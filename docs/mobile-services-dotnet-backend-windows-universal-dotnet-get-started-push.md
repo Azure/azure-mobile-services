@@ -92,11 +92,60 @@ Now that push notifications are enabled in the app, you must update the mobile s
 
 The following steps update the existing TodoItemController class to send a push notification to all registered devices when a new item is inserted. You can implement similar code in any custom [ApiController](https://msdn.microsoft.com/library/system.web.http.apicontroller.aspx), [TableController](https://msdn.microsoft.com/library/azure/microsoft.windowsazure.mobile.service.tables.tablecontroller.aspx), or anywhere else in your backend services.
 
-[AZURE.INCLUDE [mobile-services-dotnet-backend-update-server-push](../../includes/mobile-services-dotnet-backend-update-server-push.md)]
+
+1. In Visual Studio Solution Explorer, expand the **Controllers** folder in the mobile service project. Open TodoItemController.cs and update the `PostTodoItem` method definition with the following code:  
+
+        public async Task<IHttpActionResult> PostTodoItem(TodoItem item)
+        {
+            TodoItem current = await InsertAsync(item);
+
+            // Create a WNS native toast.
+            WindowsPushMessage message = new WindowsPushMessage();
+
+            // Define the XML paylod for a WNS native toast notification 
+			// that contains the text of the inserted item.
+            message.XmlPayload = @"<?xml version=""1.0"" encoding=""utf-8""?>" +
+                                 @"<toast><visual><binding template=""ToastText01"">" +
+                                 @"<text id=""1"">" + item.Text + @"</text>" +
+                                 @"</binding></visual></toast>";
+            try
+            {
+                var result = await Services.Push.SendAsync(message);
+                Services.Log.Info(result.State.ToString());
+            }
+            catch (System.Exception ex)
+            {
+                Services.Log.Error(ex.Message, null, "Push.SendAsync Error");
+            }
+            return CreatedAtRoute("Tables", new { id = current.Id }, current);
+        }
+
+    This code sends a push notification (with the text of the inserted item) after inserting a todo item. In the event of an error, the code will add an error log entry which is viewable on the **Logs** tab of the mobile service in the [Azure classic portal](https://manage.windowsazure.com/).
+
+	>[AZURE.NOTE] You can use template notifications to send a single push notification to clients on multiple platforms. For more information, see [Supporting multiple device platforms from a single mobile service](../articles/mobile-services-how-to-use-multiple-clients-single-service.md#push).
+
+2. Republish the mobile service project to Azure.
+
+
 
 ##<a id="local-testing"></a> Enable push notifications for local testing
 
-[AZURE.INCLUDE [mobile-services-dotnet-backend-configure-local-push-vs2013](../../includes/mobile-services-dotnet-backend-configure-local-push-vs2013.md)]
+
+You can optionally test push notifications with your mobile service running on the local computer or VM before you publish to Azure. To do this, you must set information about the notification hub used by your app in the web.config file. This information is only used when running locally to connect to the notification hub; it is ignored when published to Azure.
+
+1. Open the readme.html file in the mobile service project folder. 
+
+	This displays the **Push setup is almost complete** page, if you don't still have it open. The section **Step 3: Modify Web Config** contains the notification hub connection information.
+
+2. In your mobile service project in Visual Studio, open the Web.config file for the service, then in **connectionStrings**, add the **MS_NotificationHubConnectionString** connection string from the **Push setup is almost complete** page.
+
+3. In **appSettings**, replace the value of the **MS_NotificationHubName** app setting with the name of the notification hub found in the **Push setup is almost complete** page.
+
+4. Right-click the mobile service project and click **Debug** then **Start new instance** and make a note of the service root URL of the start up page displayed in the browser.
+
+	This is the URL of the local host for the .NET backend project. You will use this URL to test the app against the mobile service running on the local computer.
+
+Now, the mobile service project is configured to connect to the notification hub in Azure when running locally. Note that it is important to use the same notification hub name and connection string as the portal because these project settings in the Web.config file are overridden by the portal settings when running in Azure. 
 
 The remaining steps in this section are optional. They allow you to test your app against your mobile service running on a local computer. If you plan to test push notifications using the mobile service running in Azure, you can just skip to the last section. This is because the Add Push Notification wizard already configured your app to connect to your service running in Azure.
 
@@ -116,7 +165,27 @@ The remaining steps in this section are optional. They allow you to test your ap
 
 ##<a id="test"></a> Test push notifications in your app
 
-[AZURE.INCLUDE [mobile-services-dotnet-backend-windows-universal-test-push](../../includes/mobile-services-dotnet-backend-windows-universal-test-push.md)]
+
+1. Right-click the Windows Store project, click **Set as StartUp Project**, then press the F5 key to run the Windows Store app.
+	
+	After the app starts, the device is registered for push notifications.
+
+2. Stop the Windows Store app and repeat the previous step to run the Windows Phone Store app.
+
+	At this point, both devices are registered to receive push notifications.
+
+3. Run the Windows Store app again, and type text in **Insert a TodoItem**, and then click **Save**.
+
+   	![](./media/mobile-services-javascript-backend-windows-universal-test-push/mobile-quickstart-push1.png)
+
+   	Note that after the insert completes, both the Windows Store and the Windows Phone apps receive a push notification from WNS.
+
+   	![](./media/mobile-services-javascript-backend-windows-universal-test-push/mobile-quickstart-push2.png)
+
+	The notification is displayed on Windows Phone even when the app isn't running.
+
+   	![](./media/mobile-services-javascript-backend-windows-universal-test-push/mobile-quickstart-push5-wp8.png)
+
 
 ## <a name="next-steps"> </a>Next steps
 

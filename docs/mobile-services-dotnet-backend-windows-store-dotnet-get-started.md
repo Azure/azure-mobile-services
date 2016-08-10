@@ -114,7 +114,26 @@ In this section you will create a new universal Windows app that is connected to
 
 ## Test the app against the local mobile service
 
-[AZURE.INCLUDE [mobile-services-dotnet-backend-test-local-service-dotnet](../../includes/mobile-services-dotnet-backend-test-local-service-dotnet.md)]
+
+The mobile service project that you download lets you to run your new mobile service right on your local computer or virtual machine. This makes it easy to debug your service code before you even publish it to Azure.
+
+In this section, you will test your new app against the mobile service running locally.
+
+1. Browse to the location where you saved the compressed project files, expand the files on your computer, and open the solution file in Visual Studio.
+
+2. In the Solution Explorer in Visual Studio, right-click your service project, click **Set as StartUp Project**, and then press the **F5** key to build the project and start the mobile service locally.
+
+	![](./media/mobile-services-dotnet-backend-test-local-service-dotnet/mobile-service-startup.png)
+
+	A web page is displayed after the mobile service starts successfully.
+
+3. To test the store app, right-click your client app project, click **Set as StartUp Project**, and then press the **F5** key to rebuild the project and start the app.
+
+	This starts the app, which connects to the local mobile service instance.	
+
+4. In the app, type meaningful text, such as _Complete the tutorial_, in **Insert a TodoItem**, and then click **Save**.
+
+	This sends a POST request to the local mobile service. Data from the request is inserted into the TodoItem table. Items stored in the table are returned by the mobile service, and the data is displayed in the second column in the app.
 
 >[AZURE.NOTE]You can review the code that accesses your mobile service to query and insert data, which is found in the MainPage.xaml.cs file.
 
@@ -141,7 +160,20 @@ In this section you will create a new universal Windows app that is connected to
 
 Now that the mobile service is published and the client is connected to the remote mobile service hosted in Azure, we can run the app using Azure for item storage.
 
-[AZURE.INCLUDE [mobile-services-windows-universal-test-app](../../includes/mobile-services-windows-universal-test-app.md)]
+
+1. Press the F5 key to rebuild the project and start the Windows Store app.
+
+2. In the app, type meaningful text, such as *Complete the tutorial*, in **Insert a TodoItem**, and then click **Save**.
+
+	![](./media/mobile-services-windows-universal-test-app/mobile-quickstart-startup.png)
+
+	This sends a POST request to the new mobile service hosted in Azure.
+
+3. Stop debugging and change the default start up project in the universal Windows solution to the Windows Phone Store app and press F5 again.
+
+	![](./media/mobile-services-windows-universal-test-app/mobile-quickstart-completed-wp8.png)
+	
+	Notice that data saved from the previous step is loaded from the mobile service after the app starts.
 
 
 ## Next Steps
@@ -164,7 +196,8 @@ Now that you have completed the quickstart, learn how to perform additional impo
 
 For more information about universal Windows apps, see [Supporting multiple device platforms from a single mobile service](mobile-services-how-to-use-multiple-clients-single-service.md#shared-vs).
 
-[AZURE.INCLUDE [app-service-disqus-feedback-slug](../../includes/app-service-disqus-feedback-slug.md)]
+
+ 
 
 <!-- Anchors. -->
 

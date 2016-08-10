@@ -132,7 +132,27 @@ Both your mobile service and your app are now configured to work with GCM and No
 
 ###Verify Android SDK Version
 
-[AZURE.INCLUDE [mobile-services-verify-android-sdk-version](../../includes/mobile-services-verify-android-sdk-version.md)]
+Because of ongoing development, the Android SDK version installed in Android Studio might not match the version in the code. The Android SDK referenced in this tutorial is version 21, the latest at the time of writing. The version number may increase as new releases of the SDK appear, and we recomend using the latest version available.
+
+Two symptoms of version mismatch are:
+
+1. When you Build or Rebuild the project, you may get Gradle error messages like "**failed to find target Google Inc.:Google APIs:n**".
+
+2. Standard Android objects in code that should resolve based on `import` statements may be generating error messages.
+
+If either of these appear, the version of the Android SDK installed in Android Studio might not match the SDK target of the downloaded project.  To verify the version, make the following changes:
+
+
+1. In Android Studio, click **Tools** => **Android** => **SDK Manager**. If you have not installed the latest version of the SDK Platform, then click to install it. Make a note of the version number.
+
+2. In the Project Explorer tab, under **Gradle Scripts**, open the file **build.gradle (modeule: app)**. Ensure that the **compileSdkVersion** and **buildToolsVersion** are set to the latest  SDK version installed. The tags might look like this:
+ 
+	 	    compileSdkVersion 'Google Inc.:Google APIs:21'
+    		buildToolsVersion "21.1.2"
+	
+3. In the Android Studio Project Explorer right-click the project node, choose **Properties**, and in the left column choose **Android**. Ensure that the **Project Build Target** is set to the same SDK version as the **targetSdkVersion**.
+
+4. In Android Studio, the manifest file is no longer used to specify the target SDK and minimum SDK version, unlike the case with Eclipse.
 
 
 Your next step is to install Google Play services. Google Cloud Messaging has some minimum API level requirements for development and testing, which the **minSdkVersion** property in the Manifest must conform to.
@@ -172,7 +192,142 @@ If you will be testing with an older device, then consult [Set Up Google Play Se
 
 ###Add code
 
-[AZURE.INCLUDE [mobile-services-android-getting-started-with-push](../../includes/mobile-services-android-getting-started-with-push.md)]
+1. In your **app** project, open the file `AndroidManifest.xml`. In the code in the next two steps, replace _`**my_app_package**`_ with the name of the app package for your project, which is the value of the `package` attribute of the `manifest` tag. 
+
+2. Add the following new permissions after the existing `uses-permission` element:
+
+        <permission android:name="**my_app_package**.permission.C2D_MESSAGE" 
+            android:protectionLevel="signature" />
+        <uses-permission android:name="**my_app_package**.permission.C2D_MESSAGE" /> 
+        <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+        <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+        <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+3. Add the following code after the `application` opening tag: 
+
+        <receiver android:name="com.microsoft.windowsazure.notifications.NotificationsBroadcastReceiver"
+            						 	android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <category android:name="**my_app_package**" />
+            </intent-filter>
+        </receiver>
+
+
+4. Add this line under *dependencies* in the **build.gradle** file in the app directory and re-sync gradle with the project: 
+
+	    compile(group: 'com.microsoft.azure', name: 'azure-notifications-handler', version: '1.0.1', ext: 'jar')
+
+
+5. Open the file *ToDoItemActivity.java*, and add the following import statement:
+
+		import com.microsoft.windowsazure.notifications.NotificationsManager;
+
+
+6. Add the following private variable to the class: replace _`<PROJECT_NUMBER>`_ with the Project Number assigned by Google to your app in the preceding procedure:
+
+		public static final String SENDER_ID = "<PROJECT_NUMBER>";
+
+7. Change the definition of the *MobileServiceClient* from **private** to **public static**, so it now looks like this:
+
+		public static MobileServiceClient mClient;
+
+
+
+8. Next we need to add a new class to handle notifications. In the Project Explorer, open the **src** => **main** => **java** nodes, and right-click the  package name node: click **New**, then click **Java Class**.
+
+9. In **Name** type `MyHandler`, then click **OK**. 
+
+
+	![](./media/mobile-services-android-get-started-push/android-studio-create-class.png)
+
+
+10. In the MyHandler file, replace the class declaration with 
+
+		public class MyHandler extends NotificationsHandler {
+
+
+11. Add the following import statements for the `MyHandler` class:
+
+		import android.app.NotificationManager;
+		import android.app.PendingIntent;
+		import android.content.Context;
+		import android.content.Intent;
+		import android.os.AsyncTask;
+		import android.os.Bundle;
+		import android.support.v4.app.NotificationCompat;
+
+	
+12. Next add the following members for the `MyHandler` class:
+
+		public static final int NOTIFICATION_ID = 1;
+		private NotificationManager mNotificationManager;
+		NotificationCompat.Builder builder;
+		Context ctx;
+
+
+13. In the `MyHandler` class, add the following code to override the **onRegistered** method, which registers your device with the mobile service Notification Hub.
+
+		@Override
+		public void onRegistered(Context context,  final String gcmRegistrationId) {
+		    super.onRegistered(context, gcmRegistrationId);
+	
+		    new AsyncTask<Void, Void, Void>() {
+		    		    	
+		    	protected Void doInBackground(Void... params) {
+		    		try {
+		    		    ToDoActivity.mClient.getPush().register(gcmRegistrationId, null);
+		    		    return null;
+	    		    }
+	    		    catch(Exception e) { 
+			    		// handle error    		    
+	    		    }
+					return null;  		    
+	    		}
+		    }.execute();
+		}
+
+
+
+14. In the `MyHandler` class, add the following code to override the **onReceive** method, which causes the notification to display when it is received.
+
+		@Override
+		public void onReceive(Context context, Bundle bundle) {
+		    ctx = context;
+		    String nhMessage = bundle.getString("message");
+	
+		    sendNotification(nhMessage);
+		}
+	
+		private void sendNotification(String msg) {
+			mNotificationManager = (NotificationManager)
+		              ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+	
+		    PendingIntent contentIntent = PendingIntent.getActivity(ctx, 0,
+		          new Intent(ctx, ToDoActivity.class), 0);
+	
+		    NotificationCompat.Builder mBuilder =
+		          new NotificationCompat.Builder(ctx)
+		          .setSmallIcon(R.drawable.ic_launcher)
+		          .setContentTitle("Notification Hub Demo")
+		          .setStyle(new NotificationCompat.BigTextStyle()
+		                     .bigText(msg))
+		          .setContentText(msg);
+	
+		     mBuilder.setContentIntent(contentIntent);
+		     mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+		}
+
+
+15. Back in the TodoActivity.java file, update the **onCreate** method of the *ToDoActivity* class to register the notification handler class. Make sure to add this code after the *MobileServiceClient* is instantiated.
+
+
+		NotificationsManager.handleNotifications(this, SENDER_ID, MyHandler.class);
+
+    Your app is now updated to support push notifications.
+
+<!-- URLs. -->
+[Mobile Services Android SDK]: http://aka.ms/Iajk6q
 
 ## Test the app against the published mobile service
 

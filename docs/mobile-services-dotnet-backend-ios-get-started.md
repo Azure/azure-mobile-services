@@ -137,7 +137,8 @@ Learn how to perform additional important tasks in Mobile Services:
 * [Troubleshoot Mobile Services .NET backend]
   <br/> Learn how to diagnose and fix issues that can arise with a Mobile Services .NET backend.
 
-[AZURE.INCLUDE [app-service-disqus-feedback-slug](../../includes/app-service-disqus-feedback-slug.md)]
+
+ 
 
 <!-- Anchors. -->
 [Getting started with Mobile Services]:#getting-started

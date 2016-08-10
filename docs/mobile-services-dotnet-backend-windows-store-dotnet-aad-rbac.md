@@ -27,7 +27,9 @@
 &nbsp;
 
 
-[AZURE.INCLUDE [mobile-services-selector-rbac](../../includes/mobile-services-selector-rbac.md)]
+> [AZURE.SELECTOR-LIST (Platform | Backend)]
+- [(Windows 8.x Store C# | .NET)](../articles/mobile-services-dotnet-backend-windows-store-dotnet-aad-rbac.md)
+ 
 
 ##Overview
 
@@ -53,13 +55,84 @@ This tutorial requires the following:
 
 During the [Add Authentication to your app] tutorial, you created a registration for the integrated application when you completed the [Register to use an Azure Active Directory Login] step. In this section you generate a key to be used when reading directory information with that integrated application's client ID.
 
-[AZURE.INCLUDE [mobile-services-generate-aad-app-registration-access-key](../../includes/mobile-services-generate-aad-app-registration-access-key.md)]
+1. Click **Applications** tab on your directory page in the [Azure classic portal](https://manage.windowsazure.com/).
+  
+2. Click your integrated application registration.
+
+3. Click **Configure** on the application page and scroll down the the **keys** section of the page. 
+4. Click **1 year** duration for a new key. Then click **Save** and the portal will display your new key value.
+5. Copy the **Client ID** and **Key** shown after you save. Note that the key value will only be shown to you a single time after you have saved. 
+
+    ![](./media/mobile-services-generate-aad-app-registration-access-key/client-id-and-key.png)
+
+6. Scroll down to the bottom of the integrated application configuration page and enable the **Read directory data** permission for the application and click **Save**.
+
+    ![](./media/mobile-services-generate-aad-app-registration-access-key/app-perms.png)
+
+
+7. In the [Azure classic portal](https://manage.windowsazure.com/), navigate back to your mobile service and click the **Configure** tab. Scroll down to the **app settings** section and add the following app settings and click **Save**. 
+
+    <table border="1">
+    <tr>
+    <th>App Setting Name</th><th>Description</th>
+    </tr>
+    <tr>
+    <td>AAD_CLIENT_ID</td><td>The client id you copied from your integrated app in the steps above.</td>
+    </tr>
+    <tr>
+    <td>AAD_CLIENT_KEY</td><td>The app key you generated in your AAD integrated app in the steps above.</td>
+    </tr>
+    <tr>
+    <td>AAD_TENANT_DOMAIN</td><td>Your AAD domain name. Should be similar to "mydomain.onmicrosoft.com"</td>
+    </tr>
+    </table><br/>
+
+ 
+    ![](./media/mobile-services-generate-aad-app-registration-access-key/aad-app-settings.png)
+  
 
 
 
 ##Create a Sales group with membership
 
-[AZURE.INCLUDE [mobile-services-aad-rbac-create-sales-group](../../includes/mobile-services-aad-rbac-create-sales-group.md)]
+In this section you add two new users to your directory along with the new Sales group. One of the users will be granted membership to the sales group. The other user will not be granted membership to the group. 
+
+### Create the users
+
+
+1. In the [Azure classic portal](https://manage.windowsazure.com) navigate to the directory that you previously configured for authentication when you completed the tutorial to add authentication to your app.
+2. Click **Users** at the top of the page. Then click the **Add User** button at the bottom. 
+3. Complete the new user dialogs creating to create a user named **Bob**. Note the temporary password for the user. 
+4. Create another user named **Dave**. Note the temporary password for the user.
+5. The new users should look similar to what is shown below.
+
+    ![](./media/mobile-services-aad-rbac-create-sales-group/users.png)    
+
+
+### Create the Sales group
+
+
+1. On the directory page, click **Groups** at the top of the page. Then click the **Add Group** button at the bottom. 
+2. Enter **Sales** for the name of the group and press the complete button on the dialog to create the group. 
+
+    ![](./media/mobile-services-aad-rbac-create-sales-group/sales-group.png)
+
+### Add user membership to the Sales group.
+
+
+1. Click **Groups** at the top of the directory page. Then click the **Sales** group to go to the sales group page. 
+2. On the Sales group page, click **Add Members**. Add the user named **Bob** to the sales group. The user named **Dave** should not be a member of the group.
+
+    ![](./media/mobile-services-aad-rbac-create-sales-group/group-membership.png)
+
+3. On the Sales group page, click **Properties**, then copy the **Object ID** for the sales group at the bottom of the page. 
+
+   
+    ![](./media/mobile-services-aad-rbac-create-sales-group/sales-group-id.png)
+
+4. Navigate back to your mobile service configuration page and add the object id as an app setting named **AAD\_SALES\_GROUP\_ID**. This tutorial uses group's object id as an app setting instead of looking up the id based on the group name. This is because the group name may change where the id stays the same.
+
+    ![](./media/mobile-services-aad-rbac-create-sales-group/sales-group-id-app-setting.png)
 
 
 
@@ -376,7 +449,27 @@ In this section you will create a new custom authorization attribute that can be
 
 ##Test the client's access
 
-[AZURE.INCLUDE [mobile-services-aad-rbac-test-app](../../includes/mobile-services-aad-rbac-test-app.md)]
+
+The instructions and screenshots below apply to testing a Windows Store client but, you can test this on any of the other platforms supported by Azure Mobile Services. 
+
+1. In Visual Studio,run the client app and attempt to authenticate with the user account we created named Dave. 
+
+    ![](./media/mobile-services-aad-rbac-test-app/dave-login.png)
+
+2. Dave doesn't have membership to the Sales group. So the role based access check will denied access to the table operations. Close the client app.
+
+    ![](./media/mobile-services-aad-rbac-test-app/unauthorized.png)
+
+3. In Visual Studio, run the client app again. This time authenticate with the user account we created named Bob.
+
+    ![](./media/mobile-services-aad-rbac-test-app/bob-login.png)
+
+4. Bob does have membership to the Sales group. So the role based access check will allow access to the table operations.
+
+    ![](./media/mobile-services-aad-rbac-test-app/success.png)
+
+
+
 
 
 

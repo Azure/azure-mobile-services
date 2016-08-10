@@ -134,15 +134,461 @@ Next, you will update the app to authenticate users before requesting resources 
 
 ##<a name="add-authentication"></a>Add authentication to the app
 
-[AZURE.INCLUDE [mobile-android-authenticate-app](../../includes/mobile-android-authenticate-app.md)]
+
+1. In **Project Explorer** in Android Studio, open the ToDoActivity.java file and add the following import statements.
+
+		import java.util.concurrent.ExecutionException;
+		import java.util.concurrent.atomic.AtomicBoolean;
+
+		import android.content.Context;
+		import android.content.SharedPreferences;
+		import android.content.SharedPreferences.Editor;
+
+		import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceAuthenticationProvider;
+		import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceUser;
+
+2. Add the following method to the **ToDoActivity** class: 
+	
+		private void authenticate() {
+		    // Login using the Google provider.
+		    
+			ListenableFuture<MobileServiceUser> mLogin = mClient.login(MobileServiceAuthenticationProvider.Google);
+	
+	    	Futures.addCallback(mLogin, new FutureCallback<MobileServiceUser>() {
+	    		@Override
+	    		public void onFailure(Throwable exc) {
+	    			createAndShowDialog((Exception) exc, "Error");
+	    		}   		
+	    		@Override
+	    		public void onSuccess(MobileServiceUser user) {
+	    			createAndShowDialog(String.format(
+	                        "You are now logged in - %1$2s",
+	                        user.getUserId()), "Success");
+	    			createTable();	
+	    		}
+	    	});   	
+		}
+
+
+	This creates a new method to handle the authentication process. The user is authenticated by using a Google login. A dialog is displayed which displays the ID of the authenticated user. You cannot proceed without a positive authentication.
+
+    > [AZURE.NOTE] If you are using an identity provider other than Google, change the value passed to the **login** method above to one of the following: _MicrosoftAccount_, _Facebook_, _Twitter_, or _windowsazureactivedirectory_.
+
+3. In the **onCreate** method, add the following line of code after the code that instantiates the `MobileServiceClient` object.
+
+		authenticate();
+
+	This call starts the authentication process.
+
+4. Move the remaining code after `authenticate();` in the **onCreate** method to a new **createTable** method, which looks like this:
+
+		private void createTable() {
+	
+			// Get the table instance to use.
+			mToDoTable = mClient.getTable(ToDoItem.class);
+	
+			mTextNewToDo = (EditText) findViewById(R.id.textNewToDo);
+	
+			// Create an adapter to bind the items with the view.
+			mAdapter = new ToDoItemAdapter(this, R.layout.row_list_to_do);
+			ListView listViewToDo = (ListView) findViewById(R.id.listViewToDo);
+			listViewToDo.setAdapter(mAdapter);
+	
+			// Load the items from Azure.
+			refreshItemsFromTable();
+		}
+
+9. From the **Run** menu, then click **Run app** to start the app and sign in with your chosen identity provider. 
+
+   	When you are successfully logged-in, the app should run without errors, and you should be able to query the backend service and make updates to data.
+ 
 
 ## <a name="cache-tokens"></a>Cache authentication tokens on the client
 
-[AZURE.INCLUDE [mobile-android-authenticate-app-with-token](../../includes/mobile-android-authenticate-app-with-token.md)]
+
+The previous example showed a standard sign-in, which requires the client to contact both the identity provider and the backend Azure service every time that the app starts. Not only is this method inefficient, you can run into usage-related issues should many customers try to start you app at the same time. A better approach is to cache the authorization token returned by the Azure service and try to use this first before using a provider-based sign-in. 
+
+>[AZURE.NOTE]You can cache the token issued by the backend Azure service regardless of whether you are using client-managed or service-managed authentication. This tutorial uses service-managed authentication.
+
+
+1. Open the ToDoActivity.java file and add the following import statements:
+
+        import android.content.Context;
+        import android.content.SharedPreferences;
+        import android.content.SharedPreferences.Editor;
+
+2. Add the the following members to the `ToDoActivity` class.
+
+    	public static final String SHAREDPREFFILE = "temp";	
+	    public static final String USERIDPREF = "uid";	
+    	public static final String TOKENPREF = "tkn";	
+
+
+3. In the ToDoActivity.java file, add the the following definition for the `cacheUserToken` method.
+ 
+    	private void cacheUserToken(MobileServiceUser user)
+	    {
+    		SharedPreferences prefs = getSharedPreferences(SHAREDPREFFILE, Context.MODE_PRIVATE);
+    	    Editor editor = prefs.edit();
+	        editor.putString(USERIDPREF, user.getUserId());
+    	    editor.putString(TOKENPREF, user.getAuthenticationToken());
+	        editor.commit();
+    	}	
+  
+    This method stores the user id and token in a preference file that is marked private. This should protect access to the cache so that other apps on the device do not have access to the token because the preference is sandboxed for the app. However, if someone gains access to the device, it is possible that they may gain access to the token cache through other means. 
+
+    >[AZURE.NOTE]You can further protect the token with encryption if token access to your data is considered highly sensitive and someone may gain access to the device. However, a completely secure solution is beyond the scope of this tutorial and dependent on your security requirements.
+
+
+4. In the ToDoActivity.java file, add the the following definition for the `loadUserTokenCache` method.
+
+    	private boolean loadUserTokenCache(MobileServiceClient client)
+	    {
+	        SharedPreferences prefs = getSharedPreferences(SHAREDPREFFILE, Context.MODE_PRIVATE);
+    	    String userId = prefs.getString(USERIDPREF, null); 
+	        if (userId == null)
+	            return false;
+    	    String token = prefs.getString(TOKENPREF, null); 
+    	    if (token == null)
+    	        return false;
+        	    
+    	    MobileServiceUser user = new MobileServiceUser(userId);
+    	    user.setAuthenticationToken(token);
+    	    client.setCurrentUser(user);
+        	    
+    	    return true;
+	    }
+
+
+
+5. In the *ToDoActivity.java* file, replace the `authenticate` method with the following method which uses a token cache. Change the login provider if you want to use an account other than Google.
+
+		private void authenticate() {
+			// We first try to load a token cache if one exists.
+		    if (loadUserTokenCache(mClient))
+		    {
+		        createTable();
+		    }
+		    // If we failed to load a token cache, login and create a token cache
+		    else
+		    {
+			    // Login using the Google provider.    
+				ListenableFuture<MobileServiceUser> mLogin = mClient.login(MobileServiceAuthenticationProvider.Google);
+		
+		    	Futures.addCallback(mLogin, new FutureCallback<MobileServiceUser>() {
+		    		@Override
+		    		public void onFailure(Throwable exc) {
+		    			createAndShowDialog("You must log in. Login Required", "Error");
+		    		}   		
+		    		@Override
+		    		public void onSuccess(MobileServiceUser user) {
+		    			createAndShowDialog(String.format(
+		                        "You are now logged in - %1$2s",
+		                        user.getUserId()), "Success");
+		    			cacheUserToken(mClient.getCurrentUser());
+		    			createTable();	
+		    		}
+		    	});
+		    }
+		}
+
+6. Build the app and test authentication using a valid account. Run it at least twice. During the first run, you should receive a prompt to login and create the token cache. After that, each run will attempt to load the token cache for authentication and you should not be required to login.
+
+
+
+ 
 
 ## <a name="refresh-tokens"></a>Refresh the token cache
 
-[AZURE.INCLUDE [mobile-android-authenticate-app-refresh-token](../../includes/mobile-android-authenticate-app-refresh-token.md)]
+Our token cache should work in a simple case but, what happens when the token expires or is revoked? The token could expire when the app is not running. This would mean the token cache is invalid. The token could also expire while the app is actually running. The result is an HTTP status code 401 "Unauthorized". 
+
+We need to be able to detect an expired token, and refresh it. To do this we use a [ServiceFilter](http://dl.windowsazure.com/androiddocs/com/microsoft/windowsazure/mobileservices/ServiceFilter.html) from the [Android client library](http://dl.windowsazure.com/androiddocs/).
+
+In this section you will define a ServiceFilter that will detect a HTTP status code 401 response and trigger a refresh of the token and the token cache. Additionally, this ServiceFilter will block other outbound requests during authentication so that those requests can use the refreshed token.
+
+1. Open the ToDoActivity.java file and add the following import statements:
+ 
+        import java.util.concurrent.atomic.AtomicBoolean;
+		import java.util.concurrent.ExecutionException;
+
+		import com.microsoft.windowsazure.mobileservices.MobileServiceException;
+ 
+2. Add the following members to the `ToDoActivity` class. 
+
+    	public boolean bAuthenticating = false;
+	    public final Object mAuthenticationLock = new Object();
+
+    These will be used to help synchronize the authentication of the user. We only want to authenticate once. Any calls during an authentication should wait and use the new token from the authentication in progress.
+
+3. In the ToDoActivity.java file, add the following method to the ToDoActivity class that will be used to block outbound calls on other threads while authentication is in progress.
+
+	    /**
+    	 * Detects if authentication is in progress and waits for it to complete. 
+         * Returns true if authentication was detected as in progress. False otherwise.
+    	 */
+    	public boolean detectAndWaitForAuthentication()
+    	{
+    		boolean detected = false;
+    		synchronized(mAuthenticationLock)
+    		{
+    			do
+    			{
+    				if (bAuthenticating == true)
+    					detected = true;
+    				try
+    				{
+    					mAuthenticationLock.wait(1000);
+    				}
+    				catch(InterruptedException e)
+    				{}
+    			}
+    			while(bAuthenticating == true);
+    		}
+    		if (bAuthenticating == true)
+    			return true;
+    		
+    		return detected;
+    	}
+    	
+
+4. In the ToDoActivity.java file, add the following method to the ToDoActivity class. This method triggers the wait and then update the token on outbound requests when authentication is complete. 
+
+    	
+    	/**
+    	 * Waits for authentication to complete then adds or updates the token 
+    	 * in the X-ZUMO-AUTH request header.
+    	 * 
+    	 * @param request
+    	 *            The request that receives the updated token.
+    	 */
+    	private void waitAndUpdateRequestToken(ServiceFilterRequest request)
+    	{
+    		MobileServiceUser user = null;
+    		if (detectAndWaitForAuthentication())
+    		{
+    			user = mClient.getCurrentUser();
+    			if (user != null)
+    			{
+    				request.removeHeader("X-ZUMO-AUTH");
+    				request.addHeader("X-ZUMO-AUTH", user.getAuthenticationToken());
+    			}
+    		}
+    	}
+
+
+5. In the ToDoActivity.java file, update the `authenticate` method of the ToDoActivity class so that it accepts a boolean parameter to allow forcing the refresh of the token and token cache. We also need to notify any blocked threads when authentication is completed so they can pick up the new token.
+
+	    /**
+    	 * Authenticates with the desired login provider. Also caches the token. 
+    	 * 
+    	 * If a local token cache is detected, the token cache is used instead of an actual 
+	     * login unless bRefresh is set to true forcing a refresh.
+    	 * 
+	     * @param bRefreshCache
+    	 *            Indicates whether to force a token refresh. 
+	     */
+    	private void authenticate(boolean bRefreshCache) {
+	        
+		    bAuthenticating = true;
+		    
+		    if (bRefreshCache || !loadUserTokenCache(mClient))
+	        {
+	            // New login using the provider and update the token cache.
+	            mClient.login(MobileServiceAuthenticationProvider.MicrosoftAccount,
+	                    new UserAuthenticationCallback() {
+	                        @Override
+	                        public void onCompleted(MobileServiceUser user,
+	                                Exception exception, ServiceFilterResponse response) {
+    
+	                    		synchronized(mAuthenticationLock)
+	                    		{
+		                        	if (exception == null) {
+		                                cacheUserToken(mClient.getCurrentUser());
+                                        createTable();
+		                            } else {
+		                                createAndShowDialog(exception.getMessage(), "Login Error");
+		                            }
+		            				bAuthenticating = false;
+		            				mAuthenticationLock.notifyAll();
+	                    		}
+	                        }
+	                    });
+	        }
+		    else
+		    {
+		    	// Other threads may be blocked waiting to be notified when 
+		    	// authentication is complete.
+		    	synchronized(mAuthenticationLock)
+		    	{
+		    		bAuthenticating = false;
+		    		mAuthenticationLock.notifyAll();
+		    	}
+                createTable();
+		    }
+	    }   
+
+
+
+6. In the ToDoActivity.java file, add this code for a new `RefreshTokenCacheFilter` class inside the ToDoActivity class:
+
+		/**
+		* The RefreshTokenCacheFilter class filters responses for HTTP status code 401. 
+		 * When 401 is encountered, the filter calls the authenticate method on the 
+		 * UI thread. Out going requests and retries are blocked during authentication. 
+		 * Once authentication is complete, the token cache is updated and 
+		 * any blocked request will receive the X-ZUMO-AUTH header added or updated to 
+		 * that request.   
+		 */
+		private class RefreshTokenCacheFilter implements ServiceFilter {
+		 
+	        AtomicBoolean mAtomicAuthenticatingFlag = new AtomicBoolean();                     
+	        
+	        @Override
+	        public ListenableFuture<ServiceFilterResponse> handleRequest(
+	        		final ServiceFilterRequest request, 
+	        		final NextServiceFilterCallback nextServiceFilterCallback
+	        		)
+	        {
+	            // In this example, if authentication is already in progress we block the request
+	            // until authentication is complete to avoid unnecessary authentications as 
+	            // a result of HTTP status code 401. 
+	            // If authentication was detected, add the token to the request.
+	            waitAndUpdateRequestToken(request);
+	 
+	            // Send the request down the filter chain
+	            // retrying up to 5 times on 401 response codes.
+	            ListenableFuture<ServiceFilterResponse> future = null;
+	            ServiceFilterResponse response = null;
+	            int responseCode = 401;
+	            for (int i = 0; (i < 5 ) && (responseCode == 401); i++)
+	            {
+	                future = nextServiceFilterCallback.onNext(request);
+	                try {
+	                    response = future.get();
+	                    responseCode = response.getStatus().getStatusCode();
+	                } catch (InterruptedException e) {
+	                   e.printStackTrace();
+	                } catch (ExecutionException e) {
+	                    if (e.getCause().getClass() == MobileServiceException.class)
+	                    {
+	                        MobileServiceException mEx = (MobileServiceException) e.getCause();
+	                        responseCode = mEx.getResponse().getStatus().getStatusCode();
+	                        if (responseCode == 401)
+	                        {
+	                            // Two simultaneous requests from independent threads could get HTTP status 401. 
+	                            // Protecting against that right here so multiple authentication requests are
+	                            // not setup to run on the UI thread.
+	                            // We only want to authenticate once. Requests should just wait and retry 
+	                            // with the new token.
+	                            if (mAtomicAuthenticatingFlag.compareAndSet(false, true))                                                                                                      
+	                            {
+	                                // Authenticate on UI thread
+	                                runOnUiThread(new Runnable() {
+	                                    @Override
+	                                    public void run() {
+	                                        // Force a token refresh during authentication.
+	                                        authenticate(true);
+	                                    }
+	                                });
+	                            }
+	
+				                // Wait for authentication to complete then update the token in the request. 
+				                waitAndUpdateRequestToken(request);
+				                mAtomicAuthenticatingFlag.set(false);                                                  
+	                        }
+	                    }
+	                }
+	            }
+	            return future;
+	        }
+		}
+
+
+    This service filter will check each response for HTTP status code 401 "Unauthorized". If a 401 is encountered, a new login request to obtain a new token will be setup on the UI thread. Other calls will be blocked until the login is completed, or until 5 attempts have failed. If the new token is obtained, the request that triggered the 401 will be retried with the new token and any blocked calls will be retried with the new token. 
+
+7. In the ToDoActivity.java file, add this code for a new `ProgressFilter` class inside the ToDoActivity class:
+		
+		/**
+		* The ProgressFilter class renders a progress bar on the screen during the time the App is waiting for the response of a previous request.
+		* the filter shows the progress bar on the beginning of the request, and hides it when the response arrived.
+		*/
+		private class ProgressFilter implements ServiceFilter {
+			@Override
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+
+				runOnUiThread(new Runnable() {
+
+					@Override
+					public void run() {
+						if (mProgressBar != null) mProgressBar.setVisibility(ProgressBar.VISIBLE);
+					}
+				});
+
+				ListenableFuture<ServiceFilterResponse> future = nextServiceFilterCallback.onNext(request);
+
+				Futures.addCallback(future, new FutureCallback<ServiceFilterResponse>() {
+					@Override
+					public void onFailure(Throwable e) {
+						resultFuture.setException(e);
+					}
+
+					@Override
+					public void onSuccess(ServiceFilterResponse response) {
+						runOnUiThread(new Runnable() {
+
+							@Override
+							public void run() {
+								if (mProgressBar != null) mProgressBar.setVisibility(ProgressBar.GONE);
+							}
+						});
+
+						resultFuture.set(response);
+					}
+				});
+
+				return resultFuture;
+			}
+		}
+		
+	This filter will show the progress bar on the beginning of the request and will hide it when the response arrived.
+
+8. In the ToDoActivity.java file, update the `onCreate` method as follows:
+
+		@Override
+	    public void onCreate(Bundle savedInstanceState) {
+		    super.onCreate(savedInstanceState);
+		    
+		    setContentView(R.layout.activity_to_do);
+		    mProgressBar = (ProgressBar) findViewById(R.id.loadingProgressBar);
+        
+		    // Initialize the progress bar
+		    mProgressBar.setVisibility(ProgressBar.GONE);
+        
+		    try {
+		    	// Create the Mobile Service Client instance, using the provided
+		    	// Mobile Service URL and key
+		    	mClient = new MobileServiceClient(
+		    			"https://<YOUR MOBILE SERVICE>.azure-mobile.net/",
+		    			"<YOUR MOBILE SERVICE KEY>", this)
+                           .withFilter(new ProgressFilter())
+                           .withFilter(new RefreshTokenCacheFilter());
+            
+		    	// Authenticate passing false to load the current token cache if available.
+		    	authenticate(false);
+		        	
+		    } catch (MalformedURLException e) {
+			    createAndShowDialog(new Exception("Error creating the Mobile Service. " +
+			        "Verify the URL"), "Error");
+		    }
+	    }
+
+
+       In this code, `RefreshTokenCacheFilter` is used in addition to `ProgressFilter`. Also during `onCreate` we want to load the token cache. So `false` is passed in to the `authenticate` method.
+
+
+ 
 
 ##<a name="next-steps"></a>Next steps
 
