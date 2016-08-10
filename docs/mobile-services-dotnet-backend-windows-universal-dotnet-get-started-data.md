@@ -19,9 +19,9 @@
 # Add Mobile Services to an existing app
 
 > [AZURE.SELECTOR-LIST (Platform | Backend )]
-- [(Windows Runtime 8.1 universal C# | .NET)](../articles/mobile-services-dotnet-backend-windows-universal-dotnet-get-started-data.md)
-- [(Windows Phone Silverlight 8.x | Javascript)](../articles/mobile-services-windows-phone-get-started-data.md)
-- [(Android | Javascript)](../articles/mobile-services-android-get-started-data.md)
+- [(Windows Runtime 8.1 universal C# | .NET)](mobile-services-dotnet-backend-windows-universal-dotnet-get-started-data.md)
+- [(Windows Phone Silverlight 8.x | Javascript)](mobile-services-windows-phone-get-started-data.md)
+- [(Android | Javascript)](mobile-services-android-get-started-data.md)
  
 &nbsp;
 
@@ -150,7 +150,7 @@ At this point, both the Windows Store and Windows Phone Store apps are connected
  
 	![](./media/mobile-services-dotnet-backend-test-local-service-api-documentation/service-try-this-out-get-todoitems.png)
 
-	This sends a GET request to the local mobile service to return all rows in the TodoItem table. Because the table is seeded by the initializer, two TodoItem objects are returned in the body of the response message. For more information about initializers, see [How to make data model changes to a .NET backend mobile service](../articles/mobile-services-dotnet-backend-how-to-use-code-first-migrations.md).
+	This sends a GET request to the local mobile service to return all rows in the TodoItem table. Because the table is seeded by the initializer, two TodoItem objects are returned in the body of the response message. For more information about initializers, see [How to make data model changes to a .NET backend mobile service](mobile-services-dotnet-backend-how-to-use-code-first-migrations.md).
 
 	![](./media/mobile-services-dotnet-backend-test-local-service-api-documentation/service-try-this-out-get-response.png)
 

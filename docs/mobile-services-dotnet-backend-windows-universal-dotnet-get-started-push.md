@@ -19,16 +19,16 @@
 # Add push notifications to your Mobile Services app
 
 > [AZURE.SELECTOR-LIST (Platform | Backend )]
-- [(iOS | .NET)](../articles/mobile-services-dotnet-backend-ios-get-started-push.md)
-- [(iOS | JavaScript)](../articles/mobile-services-javascript-backend-ios-get-started-push.md)
-- [(Windows Runtime 8.1 universal C# | .NET)](../articles/mobile-services-dotnet-backend-windows-universal-dotnet-get-started-push.md)
-- [(Windows Runtime 8.1 universal C# | Javascript)](../articles/mobile-services-javascript-backend-windows-universal-dotnet-get-started-push.md)
-- [(Windows Phone Silverlight 8.x | Javascript)](../articles/mobile-services-javascript-backend-windows-phone-get-started-push.md)
-- [(Android | .NET)](../articles/mobile-services-dotnet-backend-android-get-started-push.md)
-- [(Android | Javascript)](../articles/mobile-services-javascript-backend-android-get-started-push.md)
+- [(iOS | .NET)](mobile-services-dotnet-backend-ios-get-started-push.md)
+- [(iOS | JavaScript)](mobile-services-javascript-backend-ios-get-started-push.md)
+- [(Windows Runtime 8.1 universal C# | .NET)](mobile-services-dotnet-backend-windows-universal-dotnet-get-started-push.md)
+- [(Windows Runtime 8.1 universal C# | Javascript)](mobile-services-javascript-backend-windows-universal-dotnet-get-started-push.md)
+- [(Windows Phone Silverlight 8.x | Javascript)](mobile-services-javascript-backend-windows-phone-get-started-push.md)
+- [(Android | .NET)](mobile-services-dotnet-backend-android-get-started-push.md)
+- [(Android | Javascript)](mobile-services-javascript-backend-android-get-started-push.md)
 - [(Xamarin.iOS | Javascript)](../articles/partner-xamarin-mobile-services-ios-get-started-push.md)
 - [(Xamarin.Android | Javascript)](../articles/partner-xamarin-mobile-services-android-get-started-push.md)
-- [(Xamarin.Android | .NET)](../articles/mobile-services-dotnet-backend-xamarin-android-get-started-push.md)
+- [(Xamarin.Android | .NET)](mobile-services-dotnet-backend-xamarin-android-get-started-push.md)
 - [(Xamarin.Forms | JavaScript)](../articles/partner-xamarin-mobile-services-xamarin-forms-get-started-push.md)
 
 &nbsp;
@@ -122,7 +122,7 @@ The following steps update the existing TodoItemController class to send a push 
 
     This code sends a push notification (with the text of the inserted item) after inserting a todo item. In the event of an error, the code will add an error log entry which is viewable on the **Logs** tab of the mobile service in the [Azure classic portal](https://manage.windowsazure.com/).
 
-	>[AZURE.NOTE] You can use template notifications to send a single push notification to clients on multiple platforms. For more information, see [Supporting multiple device platforms from a single mobile service](../articles/mobile-services-how-to-use-multiple-clients-single-service.md#push).
+	>[AZURE.NOTE] You can use template notifications to send a single push notification to clients on multiple platforms. For more information, see [Supporting multiple device platforms from a single mobile service](mobile-services-how-to-use-multiple-clients-single-service.md#push).
 
 2. Republish the mobile service project to Azure.
 

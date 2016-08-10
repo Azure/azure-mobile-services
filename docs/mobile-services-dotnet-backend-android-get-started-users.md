@@ -19,17 +19,17 @@
 # Add authentication to your Mobile Services Android app
 
 > [AZURE.SELECTOR-LIST (Platform | Backend )]
-- [(iOS | .NET)](../articles/mobile-services-dotnet-backend-ios-get-started-users.md)
-- [(iOS | JavaScript)](../articles/mobile-services-ios-get-started-users.md)
-- [(Windows Runtime 8.1 universal C# | .NET)](../articles/mobile-services-dotnet-backend-windows-universal-dotnet-get-started-users.md)
-- [(Windows Runtime 8.1 universal C# | Javascript)](../articles/mobile-services-javascript-backend-windows-universal-dotnet-get-started-users.md)
-- [(Windows Phone Silverlight 8.x | Javascript)](../articles/mobile-services-windows-phone-get-started-users.md)
-- [(Android | Javascript)](../articles/mobile-services-android-get-started-users.md)
-- [(Xamarin.iOS | .NET)](../articles/mobile-services-dotnet-backend-xamarin-ios-get-started-users.md)
+- [(iOS | .NET)](mobile-services-dotnet-backend-ios-get-started-users.md)
+- [(iOS | JavaScript)](mobile-services-ios-get-started-users.md)
+- [(Windows Runtime 8.1 universal C# | .NET)](mobile-services-dotnet-backend-windows-universal-dotnet-get-started-users.md)
+- [(Windows Runtime 8.1 universal C# | Javascript)](mobile-services-javascript-backend-windows-universal-dotnet-get-started-users.md)
+- [(Windows Phone Silverlight 8.x | Javascript)](mobile-services-windows-phone-get-started-users.md)
+- [(Android | Javascript)](mobile-services-android-get-started-users.md)
+- [(Xamarin.iOS | .NET)](mobile-services-dotnet-backend-xamarin-ios-get-started-users.md)
 - [(Xamarin.iOS | Javascript)](../articles/partner-xamarin-mobile-services-ios-get-started-users.md)
-- [(Xamarin.Android | .NET)](../articles/mobile-services-dotnet-backend-xamarin-android-get-started-users.md)
+- [(Xamarin.Android | .NET)](mobile-services-dotnet-backend-xamarin-android-get-started-users.md)
 - [(Xamarin.Android | Javascript)](../articles/partner-xamarin-mobile-services-android-get-started-users.md)
-- [(HTML | Javascript)](../articles/mobile-services-html-get-started-users.md)
+- [(HTML | Javascript)](mobile-services-html-get-started-users.md)
 
 
 &nbsp;
@@ -56,8 +56,8 @@ This tutorial is based on the code you download in the Mobile Services quickstar
 
 
 <!-- URLs. 
-[Get started with Mobile Services]: ../articles/mobile-services-android-get-started.md
-[Add Mobile Services to an existing app]: ../articles/mobile-services-android-get-started-data.md
+[Get started with Mobile Services]: mobile-services-android-get-started.md
+[Add Mobile Services to an existing app]: mobile-services-android-get-started-data.md
 -->
 
 ##<a name="register"></a>Register your app for authentication and configure Mobile Services

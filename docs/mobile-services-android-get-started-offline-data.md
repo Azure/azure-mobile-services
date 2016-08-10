@@ -33,7 +33,7 @@ mobile-services-xamarin-ios-get-started-offline-data.md)
 &nbsp;
 
 >[AZURE.WARNING] This is an **Azure Mobile Services** topic.  This service has been superseded by Azure App Service Mobile Apps and is scheduled for removal from Azure.  We recommend using Azure Mobile Apps for all new mobile backend deployments.  Read [this announcement](https://azure.microsoft.com/blog/transition-of-azure-mobile-services/) to learn more about the pending deprecation of this service.  
-> 
+>
 > Learn about [migrating your site to Azure App Service](https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-migrating-from-mobile-services/).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
@@ -50,15 +50,9 @@ Whether you are offline or connected, conflicts can arise any time multiple chan
 
 ## What you need to get started
 
-This tutorial is based on the code you download in the Mobile Services quickstart. Before you start this tutorial, you must first complete either [Get started with Mobile Services] or [Add Mobile Services to an existing app]. 
+This tutorial is based on the code you download in the Mobile Services quickstart. Before you start this tutorial, you must first complete either [Get started with Mobile Services] or [Add Mobile Services to an existing app].
 
 > [AZURE.IMPORTANT] If you completed the quickstart tutorial prior to the release of Azure Mobile Services Android SDK 2.0, you must re-do it, because the SDK is not backwards compatible. To verify the version, check the **dependencies** section of your project's **build.gradle** file.
-
-
-<!-- URLs. 
-[Get started with Mobile Services]: ../articles/mobile-services-android-get-started.md
-[Add Mobile Services to an existing app]: ../articles/mobile-services-android-get-started-data.md
--->
 
 ## Update the app to support offline sync
 
@@ -233,11 +227,9 @@ One thing which is important to point out: if there are pending changes in the l
 [Change the sync behavior of the app]: #setup-sync
 [Test the app]: #test-app
 
-
-[Mobile Services sample repository on GitHub]: https://github.com/Azure/mobile-services-samples
-
-
 [Get started with Mobile Services]: mobile-services-android-get-started.md
+[Add Mobile Services to an existing app]: mobile-services-android-get-started-data.md
+[Mobile Services sample repository on GitHub]: https://github.com/Azure/mobile-services-samples
 [Handling Conflicts with Offline Support for Mobile Services]:  mobile-services-android-handling-conflicts-offline-data.md
 [Soft Delete]: mobile-services-using-soft-delete.md
 
