@@ -18,7 +18,11 @@
 
 # Get started with custom authentication
 
-[AZURE.INCLUDE [mobile-service-note-mobile-apps](../../includes/mobile-services-note-mobile-apps.md)]
+>[AZURE.WARNING] This is an **Azure Mobile Services** topic.  This service has been superseded by Azure App Service Mobile Apps and is scheduled for removal from Azure.  We recommend using Azure Mobile Apps for all new mobile backend deployments.  Read [this announcement](https://azure.microsoft.com/blog/transition-of-azure-mobile-services/) to learn more about the pending deprecation of this service.  
+> 
+> Learn about [migrating your site to Azure App Service](../articles/app-service-mobile/app-service-mobile-migrating-from-mobile-services.md).
+>
+> Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
 > For the equivalent Mobile Apps version of this topic, see [How to: Use custom authentication for your application](../app-service-mobile/app-service-mobile-dotnet-backend-how-to-use-server-sdk.md#custom-auth).
 
 
@@ -395,7 +399,7 @@ This section describes the steps needed to access the custom authentication endp
 
 2. Use the appropriate **invokeApi** method on the **MobileServiceClient** in the client library to call the **CustomRegistration** endpoint, passing the runtime-supplied username and password in the message body.
 
-	You only need to call the **CustomRegistration** endpoint once to create an account for a given user, as long as you keep the user login information in the Accounts table. For examples of how to call a custom API on the various supported client platforms, see the article [Custom API in Azure Mobile Services – client SDKs](http://blogs.msdn.com/b/carlosfigueira/archive/2013/06/19/custom-api-in-azure-mobile-services-client-sdks.aspx).
+	You only need to call the **CustomRegistration** endpoint once to create an account for a given user, as long as you keep the user login information in the Accounts table. For examples of how to call a custom API on the various supported client platforms, see the article [Custom API in Azure Mobile Services ??? client SDKs](http://blogs.msdn.com/b/carlosfigueira/archive/2013/06/19/custom-api-in-azure-mobile-services-client-sdks.aspx).
 
 	> [AZURE.IMPORTANT] Because this user provisioning step occurs only once, you should consider creating the user account in some out-of-band fashion. For a public registration endpoint, you should also consider implementing an SMS-based or email-based verification process, or some other safeguard to prevent the generation of fruadulent accounts. You can use Twilio to send SMS messages from Mobile services. You can also use SendGrid to send emails from Mobile Services. For more inforation on using SendGrid, see [Send email from Mobile Services with SendGrid](store-sendgrid-mobile-services-send-email-scripts.md).
 
