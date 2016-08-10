@@ -27,7 +27,9 @@
 &nbsp;
 
 
-[AZURE.INCLUDE [mobile-services-selector-adal-sso](../../includes/mobile-services-selector-adal-sso.md)]
+> [AZURE.SELECTOR-LIST (Platform | Backend)]
+- [(iOS | .NET)](../articles/mobile-services-dotnet-backend-ios-adal-sso-authentication.md)
+- [(Windows 8.x Store C# | .NET)](../articles/mobile-services-windows-store-dotnet-adal-sso-authentication.md)
 
 ##Overview
 
@@ -48,7 +50,45 @@ This tutorial requires the following:
 * Microsoft Azure Mobile Services SDK NuGet package
 * Active Directory Authentication Library NuGet package
 
-[AZURE.INCLUDE [mobile-services-dotnet-adal-register-service](../../includes/mobile-services-dotnet-adal-register-service.md)]
+## <a name="register-mobile-service-aad"></a>Register your mobile service with the Azure Active Directory
+
+
+In this section you will register your mobile service with the Azure Active Directory and configure permissions to allow single sign-on impersonation.
+
+1. Register your application with your Azure Active Directory by following the [How to Register with the Azure Active Directory] topic.
+
+2. In the [Azure classic portal](https://manage.windowsazure.com/), go back to the Azure Active Directory extension and click on your active directory
+
+3. Click the **Applications** tab and then click your application.
+
+4. Click **Manage Manifest**. Then click **Download Manifest** and save the application manifest to a local directory.
+
+   ![](./media/mobile-services-dotnet-adal-register-service/mobile-services-aad-app-manage-manifest.png)
+
+5. Open the application manifest file with Visual Studio. At the top of the file find the app permissions line that looks as follows:
+
+        "oauth2Permissions": [],
+
+    Replace that line with the following app permissions and save the file.
+
+        "oauth2Permissions": [
+            {
+                "adminConsentDescription": "Allow the application access to the mobile service",
+                "adminConsentDisplayName": "Have full access to the mobile service",
+                "id": "b69ee3c9-c40d-4f2a-ac80-961cd1534e40",
+                "isEnabled": true,
+                "origin": "Application",
+                "type": "User",
+                "userConsentDescription": "Allow the application full access to the mobile service on your behalf",
+                "userConsentDisplayName": "Have full access to the mobile service",
+                "value": "user_impersonation"
+            }
+        ],
+
+6. In the [Azure classic portal](https://manage.windowsazure.com/), click **Manage Manifest** for the application again and click **Upload Manifest**.  Browse to the location of the application manifest that you just updated and upload the manifest.
+
+<!-- URLs. -->
+[How to Register with the Azure Active Directory]: ../articles/mobile-services/mobile-services-how-to-register-active-directory-authentication.md
 
 ##Register your app with the Azure Active Directory
 
@@ -119,13 +159,41 @@ Your mobile service is now configured in AAD to receive single sign-on logins fr
 
 ##Configure the mobile service to require authentication
 
-[AZURE.INCLUDE [mobile-services-restrict-permissions-dotnet-backend](../../includes/mobile-services-restrict-permissions-dotnet-backend.md)]
+
+
+By default, all requests to mobile service resources are restricted to clients that present the application key, which does not strictly secure access to resources. To secure your resources, you must restrict access to only authenticated clients.
+
+1. In Visual Studio, open your mobile service project, expand the Controllers folder, and open **TodoItemController.cs**. The **TodoItemController** class implements data access for the TodoItem table. Add the following `using` statement:
+
+		using Microsoft.WindowsAzure.Mobile.Service.Security;
+
+2. Apply the following _AuthorizeLevel_ attribute to the **TodoItemController** class. 
+
+		[AuthorizeLevel(AuthorizationLevel.User)]
+
+	This makes sure that all operations against the _TodoItem_ table require an authenticated user. You can also apply the *AuthorizeLevel* attribute at the method level.
+
+3. (Optional) If you wish to debug authentication locally, expand the `App_Start` folder, open **WebApiConfig.cs**, and add the following code to the **Register** method.  
+
+		config.SetIsHosted(true);
+
+	This tells the local mobile service project to run as if it is being hosted in Azure, including honoring the *AuthorizeLevel* settings. Without this setting, all HTTP requests to localhost are permitted without authentication despite the *AuthorizeLevel* setting. When you enable self-hosted mode, you also need to set a value for the local application key.
+
+4. (Optional) In the web.config project file, set a string value for the `MS_ApplicationKey` app setting. 
+
+	This is the password that you use (with no username) to test the API help pages when you run the service locally.  This string value is not used by the live site in Azure, and you do not need to use the actual application key; any valid string value will work.
+ 
+4. Republish your project.
 
 ##Add authentication code to the client app
 
 1. Open your Windows store client app project in Visual Studio.
 
-[AZURE.INCLUDE [mobile-services-dotnet-adal-install-nuget](../../includes/mobile-services-dotnet-adal-install-nuget.md)]
+1. In the Solution Explorer window of Visual Studio, right click the project and click **Manage NuGet Packages**.
+
+2. In the NuGet Package manager, click **Online**. Enter **Microsoft.IdentityModel.Clients.ActiveDirectory** as a search term. Then click **Install** to install the Active Directory Authentication Library Nuget package. 
+
+   ![](./media/mobile-services-dotnet-adal-install-nuget/mobile-services-adal-nuget-package.png)
 
 4. In the Solution Explorer window of Visual Studio, open the MainPage.cs file and add the following using statements.
 

@@ -18,7 +18,21 @@
 
 # <a name="getting-started"> </a>Get started with Mobile Services
 
-[AZURE.INCLUDE [mobile-services-selector-get-started](../../includes/mobile-services-selector-get-started.md)]
+> [AZURE.SELECTOR-LIST (Platform | Backend )]
+- [(iOS | .NET)](../articles/mobile-services-dotnet-backend-ios-get-started.md)
+- [(iOS | JavaScript)](../articles/mobile-services-ios-get-started.md)
+- [(Windows Runtime 8.1 universal C# | .NET)](../articles/mobile-services-dotnet-backend-windows-store-dotnet-get-started.md)
+- [(Windows Runtime 8.1 universal C# | Javascript)](../articles/mobile-services-javascript-backend-windows-store-dotnet-get-started.md)
+- [(Windows Runtime 8.1 universal JavaScript | Javascript)](../articles/mobile-services-javascript-backend-windows-store-javascript-get-started.md)
+- [(Android | .NET)](../articles/mobile-services-dotnet-backend-android-get-started.md)
+- [(Android | Javascript)](../articles/mobile-services-android-get-started.md)
+- [(Xamarin.iOS | .NET)](../articles/mobile-services-dotnet-backend-xamarin-ios-get-started.md)
+- [(Xamarin.iOS | Javascript)](../articles/partner-xamarin-mobile-services-ios-get-started.md)
+- [(Xamarin.Android | .NET)](../articles/mobile-services-dotnet-backend-xamarin-android-get-started.md)
+- [(Xamarin.Android | Javascript)](../articles/partner-xamarin-mobile-services-android-get-started.md)
+- [(HTML | Javascript)](../articles/mobile-services-html-get-started.md)
+- [(PhoneGap | Javascript)](../articles/mobile-services-javascript-backend-phonegap-get-started.md)
+- [(Sencha | Javascript)](../articles/partner-sencha-mobile-services-get-started.md)
 
 &nbsp;
 
@@ -37,7 +51,29 @@ In this tutorial, you will create both a new mobile service and a simple _To do 
 
 ## <a name="create-new-service"> </a>Create a new mobile service
 
-[AZURE.INCLUDE [mobile-services-create-new-service](../../includes/mobile-services-create-new-service.md)]
+
+
+Follow these steps to create a new mobile service.
+
+1.	Log into the [Azure classic portal](https://manage.windowsazure.com/). At the bottom of the navigation pane, click **+NEW**. Expand **Compute** and **Mobile Service**, then click **Create**.
+
+	![](./media/mobile-services-create-new-service/mobile-create.png)
+
+	This displays the **Create a Mobile Service** dialog.
+
+2.	In the **Create a Mobile Service** dialog, select **Create a free 20 MB SQL Database**, select **JavaScript** runtime, then type a subdomain name for the new mobile service in the **URL** textbox. Click the right arrow button to go to the next page.
+
+	![](./media/mobile-services-create-new-service/mobile-create-page1.png)
+
+	This displays the **Specify database settings** page.
+	
+	>[AZURE.NOTE]As part of this tutorial, you create a new SQL Database instance and server. You can reuse this new database and administer it as you would any other SQL Database instance. If you already have a database in the same region as the new mobile service, you can instead choose **Use existing Database** and then select that database. The use of a database in a different region is not recommended because of additional bandwidth costs and higher latencies.
+
+3.	In **Name**, type the name of the new database, then type **Login name**, which is the administrator login name for the new SQL Database server, type and confirm the password, and click the check button to complete the process.
+	![](./media/mobile-services-create-new-service/mobile-create-page2.png)
+
+You have now created a new mobile service that can be used by your mobile apps.
+
 
 ## Create a new iOS app
 

@@ -21,7 +21,18 @@
 
 # Add push notifications to your Mobile Services Android app
 
-[AZURE.INCLUDE [mobile-services-selector-get-started-push](../../includes/mobile-services-selector-get-started-push.md)]
+> [AZURE.SELECTOR-LIST (Platform | Backend )]
+- [(iOS | .NET)](../articles/mobile-services-dotnet-backend-ios-get-started-push.md)
+- [(iOS | JavaScript)](../articles/mobile-services-javascript-backend-ios-get-started-push.md)
+- [(Windows Runtime 8.1 universal C# | .NET)](../articles/mobile-services-dotnet-backend-windows-universal-dotnet-get-started-push.md)
+- [(Windows Runtime 8.1 universal C# | Javascript)](../articles/mobile-services-javascript-backend-windows-universal-dotnet-get-started-push.md)
+- [(Windows Phone Silverlight 8.x | Javascript)](../articles/mobile-services-javascript-backend-windows-phone-get-started-push.md)
+- [(Android | .NET)](../articles/mobile-services-dotnet-backend-android-get-started-push.md)
+- [(Android | Javascript)](../articles/mobile-services-javascript-backend-android-get-started-push.md)
+- [(Xamarin.iOS | Javascript)](../articles/partner-xamarin-mobile-services-ios-get-started-push.md)
+- [(Xamarin.Android | Javascript)](../articles/partner-xamarin-mobile-services-android-get-started-push.md)
+- [(Xamarin.Android | .NET)](../articles/mobile-services-dotnet-backend-xamarin-android-get-started-push.md)
+- [(Xamarin.Forms | JavaScript)](../articles/partner-xamarin-mobile-services-xamarin-forms-get-started-push.md)
 
 &nbsp;
 
@@ -45,11 +56,49 @@ To see the completed source code go [here](https://github.com/Azure/mobile-servi
 
 ## Enable Google Cloud Messaging
 
-[AZURE.INCLUDE [mobile-services-enable-Google-cloud-messaging](../../includes/mobile-services-enable-google-cloud-messaging.md)]
+
+1. Navigate to the [Google Cloud Console](https://console.developers.google.com/project), sign in with your Google account credentials. 
+ 
+2. Click **Create Project**, type a project name, then click **Create**. If requested, carry out the SMS Verification, and click **Create** again.
+
+   	![](./media/mobile-services-enable-google-cloud-messaging/mobile-services-google-new-project.png)   
+
+	 Type in your new **Project name** and click **Create project**.
+
+3. Click the **Utilities and More** button and then click **Project Information**. Make a note of the **Project Number**. You will need to set this value as the `SenderId` variable in the client app.
+
+   	![](./media/mobile-services-enable-google-cloud-messaging/notification-hubs-utilities-and-more.png)
+
+
+4. In the project dashboard, under **Mobile APIs**, click **Google Cloud Messaging**, then on the next page click **Enable API** and accept the terms of service. 
+
+	![Enabling GCM](./media/mobile-services-enable-google-cloud-messaging/enable-GCM.png)
+
+	![Enabling GCM](./media/mobile-services-enable-google-cloud-messaging/enable-gcm-2.png) 
+
+5. In the project dashboard, Click **Credentials** > **Create Credential** > **API Key**. 
+
+   	![](./media/mobile-services-enable-google-cloud-messaging/mobile-services-google-create-server-key.png)
+
+6. In **Create a new key**, click **Server key**, type a name for your key, then click **Create**.
+
+7. Make a note of the **API KEY** value.
+
+	You will use this API key value to enable Azure to authenticate with GCM and send push notifications on behalf of your app.
+
 
 ## Configure Mobile Services to send push requests
 
-[AZURE.INCLUDE [mobile-services-android-configure-push](../../includes/mobile-services-android-configure-push.md)]
+
+1. Log on to the [Azure classic portal](https://manage.windowsazure.com/), click **Mobile Services**, and then click your app.
+
+2. Click the **Push** tab, enter the **API Key** value obtained from GCM in the previous procedure, then click **Save**.
+
+   	![](./media/mobile-services-android-configure-push/mobile-push-tab-android.png)
+
+    >[AZURE.NOTE]When you set your GCM credentials for enhanced push notifications in the Push tab in the portal, they are shared with Notification Hubs to configure the notification hub with your app.
+
+Both your mobile service and your app are now configured to work with GCM and Notification Hubs. 
 
 ## Add push notifications to your app
 
@@ -70,7 +119,44 @@ If you will be testing with an older device, then consult [Set Up Google Play Se
 
 ## Update the registered insert script in the Azure classic portal
 
-[AZURE.INCLUDE [mobile-services-javascript-backend-android-push-insert-script](../../includes/mobile-services-javascript-backend-android-push-insert-script.md)]
+
+1. In the [Azure classic portal](https://manage.windowsazure.com/), click the **Data** tab and then click the **TodoItem** table. 
+ 
+2. In **todoitem**, click the **Script** tab and select **Insert**.
+   
+   	This displays the function that is invoked when an insert occurs in the **TodoItem** table.
+
+3. Replace the insert function with the following code, and then click **Save**:
+
+		function insert(item, user, request) {
+		// Define a simple payload for a GCM notification.
+	    var payload = {
+	        "data": {
+	            "message": item.text
+	        }
+	    };		
+		request.execute({
+		    success: function() {
+		        // If the insert succeeds, send a notification.
+		        push.gcm.send(null, payload, {
+		            success: function(pushResponse) {
+		                console.log("Sent push:", pushResponse, payload);
+		                request.respond();
+		                },              
+		            error: function (pushResponse) {
+		                console.log("Error Sending push:", pushResponse);
+		                request.respond(500, { error: pushResponse });
+		                }
+		            });
+		        },
+		    error: function(err) {
+		        console.log("request.execute error", err)
+		        request.respond();
+		    }
+		  });
+		}
+
+   	This registers a new insert script, which uses the [gcm object](http://go.microsoft.com/fwlink/p/?LinkId=282645) to send a push notification to all registered devices after the insert succeeds. 
 
 
 ## Test push notifications in your app

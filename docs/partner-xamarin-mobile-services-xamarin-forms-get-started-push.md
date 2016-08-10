@@ -18,7 +18,18 @@
 
 # Add push notifications to your Xamarin.Forms app
 
-[AZURE.INCLUDE [mobile-services-selector-get-started-push](../../includes/mobile-services-selector-get-started-push.md)]
+> [AZURE.SELECTOR-LIST (Platform | Backend )]
+- [(iOS | .NET)](../articles/mobile-services-dotnet-backend-ios-get-started-push.md)
+- [(iOS | JavaScript)](../articles/mobile-services-javascript-backend-ios-get-started-push.md)
+- [(Windows Runtime 8.1 universal C# | .NET)](../articles/mobile-services-dotnet-backend-windows-universal-dotnet-get-started-push.md)
+- [(Windows Runtime 8.1 universal C# | Javascript)](../articles/mobile-services-javascript-backend-windows-universal-dotnet-get-started-push.md)
+- [(Windows Phone Silverlight 8.x | Javascript)](../articles/mobile-services-javascript-backend-windows-phone-get-started-push.md)
+- [(Android | .NET)](../articles/mobile-services-dotnet-backend-android-get-started-push.md)
+- [(Android | Javascript)](../articles/mobile-services-javascript-backend-android-get-started-push.md)
+- [(Xamarin.iOS | Javascript)](../articles/partner-xamarin-mobile-services-ios-get-started-push.md)
+- [(Xamarin.Android | Javascript)](../articles/partner-xamarin-mobile-services-android-get-started-push.md)
+- [(Xamarin.Android | .NET)](../articles/mobile-services-dotnet-backend-xamarin-android-get-started-push.md)
+- [(Xamarin.Forms | JavaScript)](../articles/partner-xamarin-mobile-services-xamarin-forms-get-started-push.md)
 
 &nbsp;
 
@@ -55,7 +66,41 @@ In this topic:
 
 ## <a name="create-service"></a>Create a New Mobile Service
 
-[AZURE.INCLUDE [mobile-services-create-new-service-data](../../includes/mobile-services-create-new-service-data.md)]
+
+
+Next, you will create a new mobile service to replace the in-memory list for data storage. Follow these steps to create a new mobile service.
+
+1. Log into the [Azure classic portal](https://manage.windowsazure.com/). 
+2.	At the bottom of the navigation pane, click **+NEW**.
+
+	![plus-new](./media/mobile-services-create-new-service-data/plus-new.png)
+
+3.	Expand **Compute** and **Mobile Service**, then click **Create**.
+
+	![mobile-create](./media/mobile-services-create-new-service-data/mobile-create.png)
+
+    This displays the **New Mobile Service** dialog.
+
+4.	In the **Create a mobile service** page, select **Create a free 20 MB SQL Database**, then type a subdomain name for the new mobile service in the **URL** textbox and wait for name verification. Once name verification completes, click the right arrow button to go to the next page.	
+
+	![mobile-create-page1](./media/mobile-services-create-new-service-data/mobile-create-page1.png)
+
+    This displays the **Specify database settings** page.
+
+    
+	> [AZURE.NOTE] As part of this tutorial, you create a new SQL Database instance and server. You can reuse this new database and administer it as you would any other SQL Database instance. If you already have a database in the same region as the new mobile service, you can instead choose **Use existing Database** and then select that database. The use of a database in a different region is not recommended because of additional bandwidth costs and higher latencies.
+
+5.	In **Name**, type the name of the new database, then type **Login name**, which is the administrator login name for the new SQL Database server, type and confirm the password, and click the check button to complete the process.
+
+	![mobile-create-page2](./media/mobile-services-create-new-service-data/mobile-create-page2.png)
+
+    
+	> [AZURE.NOTE] When the password that you supply does not meet the minimum requirements or when there is a mismatch, a warning is displayed.  
+	>
+	> We recommend that you make a note of the administrator login name and password that you specify; you will need this information to reuse the SQL Database instance or the server in the future.
+
+You have now created a new mobile service that can be used by your mobile apps. Next, you will add a new table in which to store app data. This table will be used by the app in place of the in-memory collection.
+
 
 To be able to store app data in the new mobile service, you must first create a new table.
 
@@ -389,11 +434,49 @@ You'll add push notifications to the Android app by using the Google Cloud Messa
 
 ###<a id="register"></a>Enable Google Cloud Messaging
 
-[AZURE.INCLUDE [mobile-services-enable-Google-cloud-messaging](../../includes/mobile-services-enable-google-cloud-messaging.md)]
+
+1. Navigate to the [Google Cloud Console](https://console.developers.google.com/project), sign in with your Google account credentials. 
+ 
+2. Click **Create Project**, type a project name, then click **Create**. If requested, carry out the SMS Verification, and click **Create** again.
+
+   	![](./media/mobile-services-enable-google-cloud-messaging/mobile-services-google-new-project.png)   
+
+	 Type in your new **Project name** and click **Create project**.
+
+3. Click the **Utilities and More** button and then click **Project Information**. Make a note of the **Project Number**. You will need to set this value as the `SenderId` variable in the client app.
+
+   	![](./media/mobile-services-enable-google-cloud-messaging/notification-hubs-utilities-and-more.png)
+
+
+4. In the project dashboard, under **Mobile APIs**, click **Google Cloud Messaging**, then on the next page click **Enable API** and accept the terms of service. 
+
+	![Enabling GCM](./media/mobile-services-enable-google-cloud-messaging/enable-GCM.png)
+
+	![Enabling GCM](./media/mobile-services-enable-google-cloud-messaging/enable-gcm-2.png) 
+
+5. In the project dashboard, Click **Credentials** > **Create Credential** > **API Key**. 
+
+   	![](./media/mobile-services-enable-google-cloud-messaging/mobile-services-google-create-server-key.png)
+
+6. In **Create a new key**, click **Server key**, type a name for your key, then click **Create**.
+
+7. Make a note of the **API KEY** value.
+
+	You will use this API key value to enable Azure to authenticate with GCM and send push notifications on behalf of your app.
+
 
 ###<a id="configure"></a>Configure your mobile service to send push requests
 
-[AZURE.INCLUDE [mobile-services-android-configure-push](../../includes/mobile-services-android-configure-push.md)]
+
+1. Log on to the [Azure classic portal](https://manage.windowsazure.com/), click **Mobile Services**, and then click your app.
+
+2. Click the **Push** tab, enter the **API Key** value obtained from GCM in the previous procedure, then click **Save**.
+
+   	![](./media/mobile-services-android-configure-push/mobile-push-tab-android.png)
+
+    >[AZURE.NOTE]When you set your GCM credentials for enhanced push notifications in the Push tab in the portal, they are shared with Notification Hubs to configure the notification hub with your app.
+
+Both your mobile service and your app are now configured to work with GCM and Notification Hubs. 
 
 ###<a id="update-scripts"></a>Update the registered insert script to send notifications
 

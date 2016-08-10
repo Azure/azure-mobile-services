@@ -18,7 +18,13 @@
 
 # Get Started with Offline Data Sync in Mobile Services
 
-[AZURE.INCLUDE [mobile-services-selector-offline](../../includes/mobile-services-selector-offline.md)]
+> [AZURE.SELECTOR]
+- [Android)](../articles/mobile-services/mobile-services-android-get-started-offline-data.md)
+- [iOS](../articles/mobile-services/mobile-services-ios-get-started-offline-data.md)
+- [Windows](../articles/mobile-services/mobile-services-windows-store-dotnet-get-started-offline-data.md)
+- [Xamarin.Android](../mobile-services/articles/mobile-services-xamarin-android-get-started-offline-data.md)
+- [Xamarin.iOS](../articles/mobile-services/mobile-services-xamarin-ios-get-started-offline-data.md)
+
 
 &nbsp;
 
