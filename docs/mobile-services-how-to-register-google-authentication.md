@@ -77,4 +77,4 @@ You are now ready to configure your mobile service to use Google sign-in for aut
 <!-- URLs. -->
 
 [Google apis]: http://go.microsoft.com/fwlink/p/?LinkId=268303
-[Get started with authentication]: /develop/mobile/tutorials/get-started-with-users-dotnet/
+[Get started with authentication]: https://azure.microsoft.com/develop/mobile/tutorials/get-started-with-users-dotnet/

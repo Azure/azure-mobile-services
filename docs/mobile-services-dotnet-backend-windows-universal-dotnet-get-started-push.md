@@ -74,8 +74,8 @@ The following steps registers your app with the Windows Store, configure your mo
 	The code that is added to your universal Windows app solution by the Add Push Notification wizard is platform-specific. Later in this section, you will remove this redundancy by sharing the Mobile Services client code, which makes the universal app easier to maintain.  
 
 <!-- URLs. -->
-[Get started with Mobile Services]: /develop/mobile/tutorials/get-started/
-[Get started with data]: /develop/mobile/tutorials/get-started-with-data-dotnet/
+[Get started with Mobile Services]: https://azure.microsoft.com/develop/mobile/tutorials/get-started/
+[Get started with data]: https://azure.microsoft.com/develop/mobile/tutorials/get-started-with-data-dotnet/
 
 &nbsp;&nbsp;6. Browse to the `\Services\MobileServices\your_service_name` project folder, open the generated push.register.cs code file, and inspect the **UploadChannel** method that registers the device's channel URL with the notification hub.
 

@@ -73,6 +73,6 @@ This tutorial is based on the Mobile Services Quick Start and builds on the [Add
 [Windows Push Notifications & Live Connect]: http://go.microsoft.com/fwlink/p/?LinkID=257677
 [Mobile Services server script reference]: http://go.microsoft.com/fwlink/p/?LinkId=262293
 [My Apps dashboard]: http://go.microsoft.com/fwlink/p/?LinkId=262039
-[Add Authentication to Existing Mobile Services App]: /develop/mobile/tutorials/get-started-with-users-ios
+[Add Authentication to Existing Mobile Services App]: https://azure.microsoft.com/develop/mobile/tutorials/get-started-with-users-ios
 
 [Azure classic portal]: https://manage.windowsazure.com/

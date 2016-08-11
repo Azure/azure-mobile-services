@@ -307,7 +307,7 @@ When we wanted to synchronize the local store with the server, we used the `IMob
 <!-- URLs. -->
 [Handling conflicts with offline support for Mobile Services]: mobile-services-windows-store-dotnet-handling-conflicts-offline-data.md
 [TodoList Offline Sample]: http://go.microsoft.com/fwlink/?LinkId=394777
-[Get started with Mobile Services]: /develop/mobile/tutorials/get-started/#create-new-service
+[Get started with Mobile Services]: https://azure.microsoft.com/develop/mobile/tutorials/get-started/#create-new-service
 [Getting Started]: mobile-services-dotnet-backend-windows-phone-get-started.md
 [Get started with Mobile Services]: mobile-services-windows-store-get-started.md
 [SQLite for Windows 8.1]: http://go.microsoft.com/fwlink/?LinkId=394776

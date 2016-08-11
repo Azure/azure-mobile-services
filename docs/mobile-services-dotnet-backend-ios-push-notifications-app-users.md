@@ -162,4 +162,4 @@ UIRemoteNotificationTypeAlert | UIRemoteNotificationTypeBadge | UIRemoteNotifica
 <!-- URLs. -->
 [Get started with authentication]: mobile-services-dotnet-backend-ios-get-started-users.md
 [Get started with push notifications]: mobile-services-dotnet-backend-ios-get-started-push.md
-[Mobile Services .NET How-to Conceptual Reference]: /develop/mobile/how-to-guides/work-with-net-client-library
+[Mobile Services .NET How-to Conceptual Reference]: https://azure.microsoft.com/develop/mobile/how-to-guides/work-with-net-client-library

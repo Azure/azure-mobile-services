@@ -299,8 +299,8 @@ This tutorial demonstrated the basics of enabling a universal Windows app projec
 
 
 <!-- URLs. -->
-[Validate and modify data with scripts]: /develop/mobile/tutorials/validate-modify-and-augment-data-dotnet
-[Refine queries with paging]: /develop/mobile/tutorials/add-paging-to-data-dotnet
+[Validate and modify data with scripts]: https://azure.microsoft.com/develop/mobile/tutorials/validate-modify-and-augment-data-dotnet
+[Refine queries with paging]: https://azure.microsoft.com/develop/mobile/tutorials/add-paging-to-data-dotnet
 [Get started with Mobile Services]: mobile-services-dotnet-backend-windows-store-dotnet-get-started.md
 [Get started with authentication]: mobile-services-dotnet-backend-windows-store-dotnet-get-started-users.md
 [Get started with push notifications]: mobile-services-dotnet-backend-windows-store-dotnet-get-started-push.md

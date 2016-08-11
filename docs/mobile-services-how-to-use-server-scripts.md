@@ -986,7 +986,7 @@ To avoid overloading your log, you should remove or disable calls to console.log
 
 <!-- URLs. -->
 [Mobile Services server script reference]: http://msdn.microsoft.com/library/windowsazure/jj554226.aspx
-[Schedule backend jobs in Mobile Services]: /develop/mobile/tutorials/schedule-backend-tasks/
+[Schedule backend jobs in Mobile Services]: https://azure.microsoft.com/develop/mobile/tutorials/schedule-backend-tasks/
 [request object]: http://msdn.microsoft.com/library/windowsazure/jj554218.aspx
 [response object]: http://msdn.microsoft.com/library/windowsazure/dn303373.aspx
 [User object]: http://msdn.microsoft.com/library/windowsazure/jj554220.aspx
@@ -1013,15 +1013,15 @@ To avoid overloading your log, you should remove or disable calls to console.log
 [Modify the response]: http://msdn.microsoft.com/library/windowsazure/jj631631.aspx
 [Azure classic portal]: https://manage.windowsazure.com/
 [Schedule jobs]: http://msdn.microsoft.com/library/windowsazure/jj860528.aspx
-[Validate and modify data in Mobile Services by using server scripts]: /develop/mobile/tutorials/validate-modify-and-augment-data-dotnet/
+[Validate and modify data in Mobile Services by using server scripts]: https://azure.microsoft.com/develop/mobile/tutorials/validate-modify-and-augment-data-dotnet/
 [Commands to manage Azure Mobile Services]: https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-command-line-tools/#Mobile_Scripts
-[Windows Store Push]: /develop/mobile/tutorials/get-started-with-push-dotnet/
-[Windows Phone Push]: /develop/mobile/tutorials/get-started-with-push-wp8/
-[iOS Push]: /develop/mobile/tutorials/get-started-with-push-ios/
-[Android Push]: /develop/mobile/tutorials/get-started-with-push-android/
+[Windows Store Push]: https://azure.microsoft.com/develop/mobile/tutorials/get-started-with-push-dotnet/
+[Windows Phone Push]: https://azure.microsoft.com/develop/mobile/tutorials/get-started-with-push-wp8/
+[iOS Push]: https://azure.microsoft.com/develop/mobile/tutorials/get-started-with-push-ios/
+[Android Push]: https://azure.microsoft.com/develop/mobile/tutorials/get-started-with-push-android/
 [Azure SDK for Node.js]: http://go.microsoft.com/fwlink/p/?LinkId=275539
 [Send HTTP request]: http://msdn.microsoft.com/library/windowsazure/jj631641.aspx
-[Send email from Mobile Services with SendGrid]: /develop/mobile/tutorials/send-email-with-sendgrid/
+[Send email from Mobile Services with SendGrid]: https://azure.microsoft.com/develop/mobile/tutorials/send-email-with-sendgrid/
 [Get started with authentication]: http://go.microsoft.com/fwlink/p/?LinkId=287177
 [crypto API]: http://go.microsoft.com/fwlink/p/?LinkId=288802
 [path API]: http://go.microsoft.com/fwlink/p/?LinkId=288803
@@ -1030,12 +1030,12 @@ To avoid overloading your log, you should remove or disable calls to console.log
 [util API]: http://go.microsoft.com/fwlink/p/?LinkId=288806
 [zlib API]: http://go.microsoft.com/fwlink/p/?LinkId=288807
 [Custom API]: http://msdn.microsoft.com/library/windowsazure/dn280974.aspx
-[Call a custom API from the client]: /develop/mobile/tutorials/call-custom-api-dotnet/#define-custom-api
+[Call a custom API from the client]: https://azure.microsoft.com/develop/mobile/tutorials/call-custom-api-dotnet/#define-custom-api
 [express.js library]: http://go.microsoft.com/fwlink/p/?LinkId=309046
-[Define a custom API that supports periodic notifications]: /develop/mobile/tutorials/create-pull-notifications-dotnet/
+[Define a custom API that supports periodic notifications]: https://azure.microsoft.com/develop/mobile/tutorials/create-pull-notifications-dotnet/
 [express object in express.js]: http://expressjs.com/api.html#express
-[Store server scripts in source control]: /develop/mobile/tutorials/store-scripts-in-source-control/
-[Leverage shared code and Node.js modules in your server scripts]: /develop/mobile/tutorials/store-scripts-in-source-control/#use-npm
+[Store server scripts in source control]: https://azure.microsoft.com/develop/mobile/tutorials/store-scripts-in-source-control/
+[Leverage shared code and Node.js modules in your server scripts]: https://azure.microsoft.com/develop/mobile/tutorials/store-scripts-in-source-control/#use-npm
 [service object]: http://msdn.microsoft.com/library/windowsazure/dn303371.aspx
 [App settings]: http://msdn.microsoft.com/library/dn529070.aspx
 [config module]: http://msdn.microsoft.com/library/dn508125.aspx

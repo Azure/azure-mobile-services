@@ -172,10 +172,10 @@ Now that you have completed the quickstart, learn how to perform additional impo
 
 
 <!-- URLs. -->
-[Get started with data]: /develop/mobile/tutorials/get-started-with-data-xamarin-android
+[Get started with data]: https://azure.microsoft.com/develop/mobile/tutorials/get-started-with-data-xamarin-android
 [Get started with offline data sync]: mobile-services-xamarin-android-get-started-offline-data.md
-[Get started with authentication]: /develop/mobile/tutorials/get-started-with-users-xamarin-android
-[Get started with push notifications]: /develop/mobile/tutorials/get-started-with-push-xamarin-android
+[Get started with authentication]: https://azure.microsoft.com/develop/mobile/tutorials/get-started-with-users-xamarin-android
+[Get started with push notifications]: https://azure.microsoft.com/develop/mobile/tutorials/get-started-with-push-xamarin-android
 [Mobile Services Android SDK]: https://go.microsoft.com/fwLink/p/?LinkID=266533
 [Azure]: http://azure.microsoft.com/
 [Azure classic portal]: https://manage.windowsazure.com/

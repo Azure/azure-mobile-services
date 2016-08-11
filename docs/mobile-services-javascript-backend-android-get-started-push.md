@@ -431,10 +431,10 @@ Learn more about Mobile Services and Notification Hubs in the following topics:
 [My Applications]: http://go.microsoft.com/fwlink/p/?LinkId=262039
 [Get started with Mobile Services]: mobile-services-android-get-started.md
 [Get started with authentication]: mobile-services-android-get-started-users.md
-[Get started with push notifications]: /develop/mobile/tutorials/get-started-with-push-js
-[Push notifications to app users]: /develop/mobile/tutorials/push-notifications-to-users-js
-[Authorize users with scripts]: /develop/mobile/tutorials/authorize-users-in-scripts-js
-[JavaScript and HTML]: /develop/mobile/tutorials/get-started-with-push-js
+[Get started with push notifications]: https://azure.microsoft.com/develop/mobile/tutorials/get-started-with-push-js
+[Push notifications to app users]: https://azure.microsoft.com/develop/mobile/tutorials/push-notifications-to-users-js
+[Authorize users with scripts]: https://azure.microsoft.com/develop/mobile/tutorials/authorize-users-in-scripts-js
+[JavaScript and HTML]: https://azure.microsoft.com/develop/mobile/tutorials/get-started-with-push-js
 [Set Up Google Play Services SDK]: http://go.microsoft.com/fwlink/?LinkId=389801
 [Azure classic portal]: https://manage.windowsazure.com/
 [How to use the Android client library for Mobile Services]: mobile-services-android-how-to-use-client-library.md

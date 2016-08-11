@@ -764,8 +764,8 @@ Now when you run the app, it communicates with the real service.
 
 <!-- URLs. -->
 
-[Learn more about Azure Mobile Services]: /develop/mobile/resources/
+[Learn more about Azure Mobile Services]: https://azure.microsoft.com/develop/mobile/resources/
 [Learn more about Web API]: http://asp.net/web-api
 [Handle database write conflicts]: mobile-services-windows-store-dotnet-handle-database-conflicts.md
 [Add push notifications]: https://azure.microsoft.com/en-us/documentation/articles/notification-hubs-windows-store-dotnet-get-started-wns-push-notification/
-[Get started with authentication]: /develop/mobile/tutorials/get-started-with-users-dotnet
+[Get started with authentication]: https://azure.microsoft.com/develop/mobile/tutorials/get-started-with-users-dotnet

@@ -378,14 +378,14 @@ This tutorial demonstrated how to enable a Windows Store app to handle write con
 
 <!-- URLs. -->
 [Optimistic Concurrency Control]: http://go.microsoft.com/fwlink/?LinkId=330935
-[Get started with Mobile Services]: /develop/mobile/tutorials/get-started/#create-new-service
+[Get started with Mobile Services]: https://azure.microsoft.com/develop/mobile/tutorials/get-started/#create-new-service
 [Azure Account]: http://www.windowsazure.com/pricing/free-trial/
-[Validate and modify data with scripts]: /develop/mobile/tutorials/validate-modify-and-augment-data-dotnet
-[Refine queries with paging]: /develop/mobile/tutorials/add-paging-to-data-dotnet
-[Get started with Mobile Services]: /develop/mobile/tutorials/get-started
-[Get started with data]: /develop/mobile/tutorials/get-started-with-data-dotnet
-[Add authentication to your app]: /develop/mobile/tutorials/get-started-with-users-dotnet
-[Add push notifications to your app]: /develop/mobile/tutorials/get-started-with-push-dotnet
+[Validate and modify data with scripts]: https://azure.microsoft.com/develop/mobile/tutorials/validate-modify-and-augment-data-dotnet
+[Refine queries with paging]: https://azure.microsoft.com/develop/mobile/tutorials/add-paging-to-data-dotnet
+[Get started with Mobile Services]: https://azure.microsoft.com/develop/mobile/tutorials/get-started
+[Get started with data]: https://azure.microsoft.com/develop/mobile/tutorials/get-started-with-data-dotnet
+[Add authentication to your app]: https://azure.microsoft.com/develop/mobile/tutorials/get-started-with-users-dotnet
+[Add push notifications to your app]: https://azure.microsoft.com/develop/mobile/tutorials/get-started-with-push-dotnet
 
 [Azure classic portal]: https://manage.windowsazure.com/
 [Windows Phone 8 SDK]: http://go.microsoft.com/fwlink/p/?LinkID=268374

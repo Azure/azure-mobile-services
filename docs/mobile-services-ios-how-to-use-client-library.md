@@ -440,7 +440,7 @@ The file [`<WindowsAzureMobileServices/MSError.h>`](https://github.com/Azure/azu
 [Mobile Services Quick Start]: mobile-services-ios-get-started.md
 [Get started with Mobile Services]: mobile-services-ios-get-started.md
 [Mobile Services SDK]: https://go.microsoft.com/fwLink/p/?LinkID=266533
-[Authentication]: /develop/mobile/tutorials/get-started-with-users-ios
+[Authentication]: https://azure.microsoft.com/develop/mobile/tutorials/get-started-with-users-ios
 [iOS SDK]: https://developer.apple.com/xcode
 
 [Handling Expired Tokens]: http://go.microsoft.com/fwlink/p/?LinkId=301955
