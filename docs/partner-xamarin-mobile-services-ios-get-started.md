@@ -26,12 +26,12 @@
 - [(Android | .NET)](mobile-services-dotnet-backend-android-get-started.md)
 - [(Android | Javascript)](mobile-services-android-get-started.md)
 - [(Xamarin.iOS | .NET)](mobile-services-dotnet-backend-xamarin-ios-get-started.md)
-- [(Xamarin.iOS | Javascript)](../articles/partner-xamarin-mobile-services-ios-get-started.md)
+- [(Xamarin.iOS | Javascript)](partner-xamarin-mobile-services-ios-get-started.md)
 - [(Xamarin.Android | .NET)](mobile-services-dotnet-backend-xamarin-android-get-started.md)
-- [(Xamarin.Android | Javascript)](../articles/partner-xamarin-mobile-services-android-get-started.md)
+- [(Xamarin.Android | Javascript)](partner-xamarin-mobile-services-android-get-started.md)
 - [(HTML | Javascript)](mobile-services-html-get-started.md)
 - [(PhoneGap | Javascript)](mobile-services-javascript-backend-phonegap-get-started.md)
-- [(Sencha | Javascript)](../articles/partner-sencha-mobile-services-get-started.md)
+- [(Sencha | Javascript)](partner-sencha-mobile-services-get-started.md)
 &nbsp;
 
 >[AZURE.WARNING] This is an **Azure Mobile Services** topic.  This service has been superseded by Azure App Service Mobile Apps and is scheduled for removal from Azure.  We recommend using Azure Mobile Apps for all new mobile backend deployments.  Read [this announcement](https://azure.microsoft.com/blog/transition-of-azure-mobile-services/) to learn more about the pending deprecation of this service.  
@@ -39,7 +39,6 @@
 > Learn about [migrating your site to Azure App Service](https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-migrating-from-mobile-services/).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
-> For the equivalent Mobile Apps version of this topic, see [Create a Xamarin.iOS App](../app-service-mobile/app-service-mobile-xamarin-ios-get-started.md).
 
 This tutorial shows you how to add a cloud-based backend service to a Xamarin.iOS app using Azure Mobile Services. In this tutorial, you will create both a new mobile service and a simple *To do list* app that stores app data in the new mobile service.
 

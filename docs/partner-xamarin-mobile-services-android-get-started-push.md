@@ -26,19 +26,18 @@
 - [(Windows Phone Silverlight 8.x | Javascript)](mobile-services-javascript-backend-windows-phone-get-started-push.md)
 - [(Android | .NET)](mobile-services-dotnet-backend-android-get-started-push.md)
 - [(Android | Javascript)](mobile-services-javascript-backend-android-get-started-push.md)
-- [(Xamarin.iOS | Javascript)](../articles/partner-xamarin-mobile-services-ios-get-started-push.md)
-- [(Xamarin.Android | Javascript)](../articles/partner-xamarin-mobile-services-android-get-started-push.md)
+- [(Xamarin.iOS | Javascript)](partner-xamarin-mobile-services-ios-get-started-push.md)
+- [(Xamarin.Android | Javascript)](partner-xamarin-mobile-services-android-get-started-push.md)
 - [(Xamarin.Android | .NET)](mobile-services-dotnet-backend-xamarin-android-get-started-push.md)
-- [(Xamarin.Forms | JavaScript)](../articles/partner-xamarin-mobile-services-xamarin-forms-get-started-push.md)
+- [(Xamarin.Forms | JavaScript)](partner-xamarin-mobile-services-xamarin-forms-get-started-push.md)
 
 &nbsp;
 
 >[AZURE.WARNING] This is an **Azure Mobile Services** topic.  This service has been superseded by Azure App Service Mobile Apps and is scheduled for removal from Azure.  We recommend using Azure Mobile Apps for all new mobile backend deployments.  Read [this announcement](https://azure.microsoft.com/blog/transition-of-azure-mobile-services/) to learn more about the pending deprecation of this service.  
-> 
+>
 > Learn about [migrating your site to Azure App Service](https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-migrating-from-mobile-services/).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
-> For the equivalent Mobile Apps version of this topic, see [Add push notifications to your Xamarin.Android app](../app-service-mobile/app-service-mobile-xamarin-android-get-started-push.md).
 
 ##Overview
 This topic shows you how to use Azure Mobile Services to send push notifications to a Xamarin.Android app. In this tutorial you add push notifications using the Google Cloud Messaging (GCM) service to the [Get started with Mobile Services] project. When complete, your mobile service will send a push notification each time a record is inserted.
@@ -53,8 +52,8 @@ You should already have Xamarin and the [Azure Mobile Services Component] instal
 ##<a id="register"></a>Enable Google Cloud Messaging
 
 
-1. Navigate to the [Google Cloud Console](https://console.developers.google.com/project), sign in with your Google account credentials. 
- 
+1. Navigate to the [Google Cloud Console](https://console.developers.google.com/project), sign in with your Google account credentials.
+
 2. Click **Create Project**, type a project name, then click **Create**. If requested, carry out the SMS Verification, and click **Create** again.
 
    	![](./media/mobile-services-enable-google-cloud-messaging/mobile-services-google-new-project.png)   
@@ -66,13 +65,13 @@ You should already have Xamarin and the [Azure Mobile Services Component] instal
    	![](./media/mobile-services-enable-google-cloud-messaging/notification-hubs-utilities-and-more.png)
 
 
-4. In the project dashboard, under **Mobile APIs**, click **Google Cloud Messaging**, then on the next page click **Enable API** and accept the terms of service. 
+4. In the project dashboard, under **Mobile APIs**, click **Google Cloud Messaging**, then on the next page click **Enable API** and accept the terms of service.
 
 	![Enabling GCM](./media/mobile-services-enable-google-cloud-messaging/enable-GCM.png)
 
-	![Enabling GCM](./media/mobile-services-enable-google-cloud-messaging/enable-gcm-2.png) 
+	![Enabling GCM](./media/mobile-services-enable-google-cloud-messaging/enable-gcm-2.png)
 
-5. In the project dashboard, Click **Credentials** > **Create Credential** > **API Key**. 
+5. In the project dashboard, Click **Credentials** > **Create Credential** > **API Key**.
 
    	![](./media/mobile-services-enable-google-cloud-messaging/mobile-services-google-create-server-key.png)
 
@@ -94,17 +93,17 @@ You should already have Xamarin and the [Azure Mobile Services Component] instal
 
     >[AZURE.NOTE]When you set your GCM credentials for enhanced push notifications in the Push tab in the portal, they are shared with Notification Hubs to configure the notification hub with your app.
 
-Both your mobile service and your app are now configured to work with GCM and Notification Hubs. 
+Both your mobile service and your app are now configured to work with GCM and Notification Hubs.
 
 ##<a id="update-scripts"></a>Update the registered insert script to send notifications
 
 >[AZURE.TIP] The following steps show you how to update the script registered to the insert operation on the TodoItem table in the Azure classic portal. You can also access and edit this mobile service script directly in Visual Studio, in the Azure node of Server Explorer.
 
 
-1. In the [Azure classic portal](https://manage.windowsazure.com/), click the **Data** tab and then click the **TodoItem** table. 
- 
+1. In the [Azure classic portal](https://manage.windowsazure.com/), click the **Data** tab and then click the **TodoItem** table.
+
 2. In **todoitem**, click the **Script** tab and select **Insert**.
-   
+
    	This displays the function that is invoked when an insert occurs in the **TodoItem** table.
 
 3. Replace the insert function with the following code, and then click **Save**:
@@ -137,7 +136,7 @@ Both your mobile service and your app are now configured to work with GCM and No
 		  });
 		}
 
-   	This registers a new insert script, which uses the [gcm object](http://go.microsoft.com/fwlink/p/?LinkId=282645) to send a push notification to all registered devices after the insert succeeds. 
+   	This registers a new insert script, which uses the [gcm object](http://go.microsoft.com/fwlink/p/?LinkId=282645) to send a push notification to all registered devices after the insert succeeds.
 
 
 ##<a id="configure-app"></a>Configure the existing project for push notifications
@@ -149,7 +148,7 @@ Both your mobile service and your app are now configured to work with GCM and No
 
 		using Gcm.Client;
 
-3. In the **ToDoActivity** class, add the following new code: 
+3. In the **ToDoActivity** class, add the following new code:
 
         // Create a new instance field for this activity.
         static ToDoActivity instance = new ToDoActivity();
@@ -209,13 +208,13 @@ Your **ToDoActivity** is now prepared for adding push notifications.
 		[assembly: UsesPermission(Name = "android.permission.WAKE_LOCK")]
 
 7. Replace the existing **ToDoBroadcastReceiver** class definition with the following:
- 
+
 	    [BroadcastReceiver(Permission = Gcm.Client.Constants.PERMISSION_GCM_INTENTS)]
-	    [IntentFilter(new string[] { Gcm.Client.Constants.INTENT_FROM_GCM_MESSAGE }, 
+	    [IntentFilter(new string[] { Gcm.Client.Constants.INTENT_FROM_GCM_MESSAGE },
 	        Categories = new string[] { "@PACKAGE_NAME@" })]
-	    [IntentFilter(new string[] { Gcm.Client.Constants.INTENT_FROM_GCM_REGISTRATION_CALLBACK }, 
+	    [IntentFilter(new string[] { Gcm.Client.Constants.INTENT_FROM_GCM_REGISTRATION_CALLBACK },
 	        Categories = new string[] { "@PACKAGE_NAME@" })]
-	    [IntentFilter(new string[] { Gcm.Client.Constants.INTENT_FROM_GCM_LIBRARY_RETRY }, 
+	    [IntentFilter(new string[] { Gcm.Client.Constants.INTENT_FROM_GCM_LIBRARY_RETRY },
         Categories = new string[] { "@PACKAGE_NAME@" })]
         public class ToDoBroadcastReceiver : GcmBroadcastReceiverBase<PushHandlerService>
         {
@@ -223,16 +222,16 @@ Your **ToDoActivity** is now prepared for adding push notifications.
 	        public static string[] senderIDs = new string[] { "<PROJECT_NUMBER>" };
         }
 
-	In the above code, you must replace _`<PROJECT_NUMBER>`_ with the project number assigned by Google when you provisioned your app in the Google developer portal. 
+	In the above code, you must replace _`<PROJECT_NUMBER>`_ with the project number assigned by Google when you provisioned your app in the Google developer portal.
 
 8. In the ToDoBroadcastReceiver.cs project file, add the following code that defines the **PushHandlerService** class:
- 
+
 		// The ServiceAttribute must be applied to the class.
-    	[Service] 
+    	[Service]
     	public class PushHandlerService : GcmServiceBase
     	{
         	public static string RegistrationID { get; private set; }
- 
+
         	public PushHandlerService() : base(ToDoBroadcastReceiver.senderIDs) { }
     	}
 
@@ -240,12 +239,12 @@ Your **ToDoActivity** is now prepared for adding push notifications.
 
 	>[AZURE.NOTE]The **GcmServiceBase** class implements the **OnRegistered()**, **OnUnRegistered()**, **OnMessage()** and **OnError()** methods. You must override these methods in the **PushHandlerService** class.
 
-5. Add the following code to the **PushHandlerService** class that overrides the **OnRegistered** event handler. 
+5. Add the following code to the **PushHandlerService** class that overrides the **OnRegistered** event handler.
 
         protected override void OnRegistered(Context context, string registrationId)
         {
             System.Diagnostics.Debug.WriteLine("The device has been registered with GCM.", "Success!");
-            
+
             // Get the MobileServiceClient from the current activity instance.
             MobileServiceClient client = ToDoActivity.CurrentActivity.CurrentClient;           
             var push = client.GetPush();
@@ -257,7 +256,7 @@ Your **ToDoActivity** is now prepared for adding push notifications.
 
             try
             {
-                // Make sure we run the registration on the same thread as the activity, 
+                // Make sure we run the registration on the same thread as the activity,
                 // to avoid threading errors.
                 ToDoActivity.CurrentActivity.RunOnUiThread(
                     async () => await push.RegisterNativeAsync(registrationId, tags));
@@ -284,12 +283,12 @@ Your **ToDoActivity** is now prepared for adding push notifications.
                 var title = "New item added:";
 
                 // Create a notification manager to send the notification.
-                var notificationManager = 
+                var notificationManager =
                     GetSystemService(Context.NotificationService) as NotificationManager;
 
-                // Create a new intent to show the notification in the UI. 
-                PendingIntent contentIntent = 
-					PendingIntent.GetActivity(context, 0, 
+                // Create a new intent to show the notification in the UI.
+                PendingIntent contentIntent =
+					PendingIntent.GetActivity(context, 0,
 					new Intent(this, typeof(ToDoActivity)), 0);	          
 
                 // Create the notification using the builder.
@@ -344,13 +343,13 @@ You can test the app by directly attaching an Android phone with a USB cable, or
 		[assembly: UsesPermission(Name = "android.permission.WAKE_LOCK")]
 
 7. Replace the existing **ToDoBroadcastReceiver** class definition with the following:
- 
+
 	    [BroadcastReceiver(Permission = Gcm.Client.Constants.PERMISSION_GCM_INTENTS)]
-	    [IntentFilter(new string[] { Gcm.Client.Constants.INTENT_FROM_GCM_MESSAGE }, 
+	    [IntentFilter(new string[] { Gcm.Client.Constants.INTENT_FROM_GCM_MESSAGE },
 	        Categories = new string[] { "@PACKAGE_NAME@" })]
-	    [IntentFilter(new string[] { Gcm.Client.Constants.INTENT_FROM_GCM_REGISTRATION_CALLBACK }, 
+	    [IntentFilter(new string[] { Gcm.Client.Constants.INTENT_FROM_GCM_REGISTRATION_CALLBACK },
 	        Categories = new string[] { "@PACKAGE_NAME@" })]
-	    [IntentFilter(new string[] { Gcm.Client.Constants.INTENT_FROM_GCM_LIBRARY_RETRY }, 
+	    [IntentFilter(new string[] { Gcm.Client.Constants.INTENT_FROM_GCM_LIBRARY_RETRY },
         Categories = new string[] { "@PACKAGE_NAME@" })]
         public class ToDoBroadcastReceiver : GcmBroadcastReceiverBase<PushHandlerService>
         {
@@ -358,12 +357,12 @@ You can test the app by directly attaching an Android phone with a USB cable, or
 	        public static string[] senderIDs = new string[] { "<PROJECT_NUMBER>" };
         }
 
-	In the above code, you must replace _`<PROJECT_NUMBER>`_ with the project number assigned by Google when you provisioned your app in the Google developer portal. 
+	In the above code, you must replace _`<PROJECT_NUMBER>`_ with the project number assigned by Google when you provisioned your app in the Google developer portal.
 
 8. In the ToDoBroadcastReceiver.cs project file, add the following code that defines the **PushHandlerService** class:
- 
+
 		// The ServiceAttribute must be applied to the class.
-    	[Service] 
+    	[Service]
     	public class PushHandlerService : GcmServiceBase
     	{
         	public static string RegistrationID { get; private set; }
@@ -402,7 +401,7 @@ Learn more about Mobile Services and Notification Hubs in the following topics:
 * [Get started with authentication](mobile-services-android-get-started-users.md)
   <br/>Learn how to authenticate users of your app with different account types using mobile services.
 
-* [What are Notification Hubs?](../notification-hubs/notification-hubs-push-notification-overview.md)
+* [What are Notification Hubs?](https://azure.microsoft.com/en-us/documentation/articles/notification-hubs-push-notification-overview/)
   <br/>Learn more about how Notification Hubs works to deliver notifications to your apps across all major client platforms.
 
 * [Debug Notification Hubs applications](http://go.microsoft.com/fwlink/p/?linkid=386630)

@@ -20,7 +20,7 @@
 # Handling conflicts with offline data sync in Mobile Services
 
 >[AZURE.WARNING] This is an **Azure Mobile Services** topic.  This service has been superseded by Azure App Service Mobile Apps and is scheduled for removal from Azure.  We recommend using Azure Mobile Apps for all new mobile backend deployments.  Read [this announcement](https://azure.microsoft.com/blog/transition-of-azure-mobile-services/) to learn more about the pending deprecation of this service.  
-> 
+>
 > Learn about [migrating your site to Azure App Service](https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-migrating-from-mobile-services/).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
@@ -167,11 +167,10 @@ When a push is canceled, `PushAsync` will throw a `MobileServicePushFailedExcept
 
 <!-- URLs -->
 [Handling conflicts code sample]: http://go.microsoft.com/fwlink/?LinkId=394787
-[Get started with Mobile Services]: ../mobile-services-windows-store-get-started.md
+[Get started with Mobile Services]: mobile-services-windows-store-get-started.md
 [Get started with offline data]: mobile-services-windows-store-dotnet-get-started-offline-data.md
 [SQLite for Windows 8.1]: http://go.microsoft.com/fwlink/?LinkId=394776
 [Azure classic portal]: https://manage.windowsazure.com/
 [Handling Database Conflicts]: mobile-services-windows-store-dotnet-handle-database-conflicts.md#test-app
 [Mobile Services Samples GitHub Repository]: http://go.microsoft.com/fwlink/?LinkId=512865
 [Todo Offline Mobile Services sample]: http://go.microsoft.com/fwlink/?LinkId=512866
-

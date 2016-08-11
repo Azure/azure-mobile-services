@@ -27,12 +27,12 @@
 - [(Android | .NET)](mobile-services-dotnet-backend-android-get-started.md)
 - [(Android | Javascript)](mobile-services-android-get-started.md)
 - [(Xamarin.iOS | .NET)](mobile-services-dotnet-backend-xamarin-ios-get-started.md)
-- [(Xamarin.iOS | Javascript)](../articles/partner-xamarin-mobile-services-ios-get-started.md)
+- [(Xamarin.iOS | Javascript)](partner-xamarin-mobile-services-ios-get-started.md)
 - [(Xamarin.Android | .NET)](mobile-services-dotnet-backend-xamarin-android-get-started.md)
-- [(Xamarin.Android | Javascript)](../articles/partner-xamarin-mobile-services-android-get-started.md)
+- [(Xamarin.Android | Javascript)](partner-xamarin-mobile-services-android-get-started.md)
 - [(HTML | Javascript)](mobile-services-html-get-started.md)
 - [(PhoneGap | Javascript)](mobile-services-javascript-backend-phonegap-get-started.md)
-- [(Sencha | Javascript)](../articles/partner-sencha-mobile-services-get-started.md)
+- [(Sencha | Javascript)](partner-sencha-mobile-services-get-started.md)
 
 &nbsp;
 
@@ -41,7 +41,6 @@
 > Learn about [migrating your site to Azure App Service](https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-migrating-from-mobile-services/).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
-> For the equivalent Mobile Apps version of this topic, see [Create a Windows app with Mobile Apps](../app-service-mobile/app-service-mobile-windows-store-dotnet-get-started.md).
 
 This tutorial shows you how to add a cloud-based backend service to a Windows Store JavaScript app using Azure Mobile Services. In this tutorial, you will create both a new mobile service and a simple *To do list* app that stores app data in the new mobile service. The mobile service that you will create uses JavaScript for server-side business logic.
 

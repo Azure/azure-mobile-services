@@ -19,11 +19,10 @@
 # Get started with custom authentication
 
 >[AZURE.WARNING] This is an **Azure Mobile Services** topic.  This service has been superseded by Azure App Service Mobile Apps and is scheduled for removal from Azure.  We recommend using Azure Mobile Apps for all new mobile backend deployments.  Read [this announcement](https://azure.microsoft.com/blog/transition-of-azure-mobile-services/) to learn more about the pending deprecation of this service.  
-> 
+>
 > Learn about [migrating your site to Azure App Service](https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-migrating-from-mobile-services/).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
-> For the equivalent Mobile Apps version of this topic, see [How to: Use custom authentication for your application](../app-service-mobile/app-service-mobile-dotnet-backend-how-to-use-server-sdk.md#custom-auth).
 
 
 ## Overview
@@ -354,7 +353,7 @@ By default, all requests to mobile service resources are restricted to clients t
 
 		using Microsoft.WindowsAzure.Mobile.Service.Security;
 
-2. Apply the following _AuthorizeLevel_ attribute to the **TodoItemController** class. 
+2. Apply the following _AuthorizeLevel_ attribute to the **TodoItemController** class.
 
 		[AuthorizeLevel(AuthorizationLevel.User)]
 
@@ -366,10 +365,10 @@ By default, all requests to mobile service resources are restricted to clients t
 
 	This tells the local mobile service project to run as if it is being hosted in Azure, including honoring the *AuthorizeLevel* settings. Without this setting, all HTTP requests to localhost are permitted without authentication despite the *AuthorizeLevel* setting. When you enable self-hosted mode, you also need to set a value for the local application key.
 
-4. (Optional) In the web.config project file, set a string value for the `MS_ApplicationKey` app setting. 
+4. (Optional) In the web.config project file, set a string value for the `MS_ApplicationKey` app setting.
 
 	This is the password that you use (with no username) to test the API help pages when you run the service locally.  This string value is not used by the live site in Azure, and you do not need to use the actual application key; any valid string value will work.
- 
+
 4. Republish your project.
 
 
@@ -448,7 +447,7 @@ This completes this tutorial.
 
 
 <!-- URLs. -->
-[Add authentication to your app]: ../mobile-services-dotnet-backend-windows-store-dotnet-get-started-users.md
+[Add authentication to your app]: mobile-services-dotnet-backend-windows-store-dotnet-get-started-users.md
 [Get started with Mobile Services]: mobile-services-dotnet-backend-windows-store-dotnet-get-started.md
 
 [ClaimsIdentity]: https://msdn.microsoft.com/library/system.security.claims.claimsidentity(v=vs.110).aspx

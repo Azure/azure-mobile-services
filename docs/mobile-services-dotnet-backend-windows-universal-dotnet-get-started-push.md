@@ -26,19 +26,18 @@
 - [(Windows Phone Silverlight 8.x | Javascript)](mobile-services-javascript-backend-windows-phone-get-started-push.md)
 - [(Android | .NET)](mobile-services-dotnet-backend-android-get-started-push.md)
 - [(Android | Javascript)](mobile-services-javascript-backend-android-get-started-push.md)
-- [(Xamarin.iOS | Javascript)](../articles/partner-xamarin-mobile-services-ios-get-started-push.md)
-- [(Xamarin.Android | Javascript)](../articles/partner-xamarin-mobile-services-android-get-started-push.md)
+- [(Xamarin.iOS | Javascript)](partner-xamarin-mobile-services-ios-get-started-push.md)
+- [(Xamarin.Android | Javascript)](partner-xamarin-mobile-services-android-get-started-push.md)
 - [(Xamarin.Android | .NET)](mobile-services-dotnet-backend-xamarin-android-get-started-push.md)
-- [(Xamarin.Forms | JavaScript)](../articles/partner-xamarin-mobile-services-xamarin-forms-get-started-push.md)
+- [(Xamarin.Forms | JavaScript)](partner-xamarin-mobile-services-xamarin-forms-get-started-push.md)
 
 &nbsp;
 
 >[AZURE.WARNING] This is an **Azure Mobile Services** topic.  This service has been superseded by Azure App Service Mobile Apps and is scheduled for removal from Azure.  We recommend using Azure Mobile Apps for all new mobile backend deployments.  Read [this announcement](https://azure.microsoft.com/blog/transition-of-azure-mobile-services/) to learn more about the pending deprecation of this service.  
-> 
+>
 > Learn about [migrating your site to Azure App Service](https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-migrating-from-mobile-services/).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
-> For the equivalent Mobile Apps version of this topic, see [Add push notifications to your Windows app](../app-service-mobile/app-service-mobile-windows-store-dotnet-get-started-push.md).
 
 ##Overview
 This topic shows you how to use Azure Mobile Services with a .NET backend to send push notifications to a universal Windows app. In this tutorial you enable push notifications using Azure Notification Hubs in a universal Windows app project. When complete, your mobile service will send a push notification from the .NET backend to all registered Windows Store and Windows Phone Store apps each time a record is inserted in the TodoList table. The notification hub that you create is free with your mobile service, can be managed independent of the mobile service, and can be used by other applications and services.
@@ -50,7 +49,7 @@ To complete this tutorial, you need the following:
 
 ##<a id="register"></a>Register your app for push notifications
 
-The following steps registers your app with the Windows Store, configure your mobile service to enable push notifications, and add code to your app to register a device channel with your notification hub. Visual Studio 2013 connects to Azure and to the Windows Store by using the credentials that you provide. 
+The following steps registers your app with the Windows Store, configure your mobile service to enable push notifications, and add code to your app to register a device channel with your notification hub. Visual Studio 2013 connects to Azure and to the Windows Store by using the credentials that you provide.
 
 1. In Visual Studio 2013, open Solution Explorer, right-click the Windows Store app project, click **Add** then **Push Notification...**. 
 
@@ -64,13 +63,13 @@ The following steps registers your app with the Windows Store, configure your mo
 
 3. Click the new registration in the **App Name** list, then click **Next**.
 
-4. In the **Select a service** page, click the name of your mobile service, then click **Next** and **Finish**. 
+4. In the **Select a service** page, click the name of your mobile service, then click **Next** and **Finish**.
 
-	The notification hub used by your mobile service is updated with the Windows Notification Services (WNS) registration. You can now use Azure Notification Hubs to send notifications from Mobile Services to your app by using WNS. 
+	The notification hub used by your mobile service is updated with the Windows Notification Services (WNS) registration. You can now use Azure Notification Hubs to send notifications from Mobile Services to your app by using WNS.
 
 	>[AZURE.NOTE]This tutorial demonstrates sending notifications from a mobile service backend. You can use the same notification hub registration to send notifications from any backend service. For more information, see [Notification Hubs Overview](http://msdn.microsoft.com/library/azure/jj927170.aspx).
 
-5. When you complete the wizard, a new **Push setup is almost complete** page is opened in Visual Studio. This page details an alternate method to configure your mobile service project to send notifications that is different from this tutorial. 
+5. When you complete the wizard, a new **Push setup is almost complete** page is opened in Visual Studio. This page details an alternate method to configure your mobile service project to send notifications that is different from this tutorial.
 
 	The code that is added to your universal Windows app solution by the Add Push Notification wizard is platform-specific. Later in this section, you will remove this redundancy by sharing the Mobile Services client code, which makes the universal app easier to maintain.  
 
@@ -102,7 +101,7 @@ The following steps update the existing TodoItemController class to send a push 
             // Create a WNS native toast.
             WindowsPushMessage message = new WindowsPushMessage();
 
-            // Define the XML paylod for a WNS native toast notification 
+            // Define the XML paylod for a WNS native toast notification
 			// that contains the text of the inserted item.
             message.XmlPayload = @"<?xml version=""1.0"" encoding=""utf-8""?>" +
                                  @"<toast><visual><binding template=""ToastText01"">" +
@@ -133,7 +132,7 @@ The following steps update the existing TodoItemController class to send a push 
 
 You can optionally test push notifications with your mobile service running on the local computer or VM before you publish to Azure. To do this, you must set information about the notification hub used by your app in the web.config file. This information is only used when running locally to connect to the notification hub; it is ignored when published to Azure.
 
-1. Open the readme.html file in the mobile service project folder. 
+1. Open the readme.html file in the mobile service project folder.
 
 	This displays the **Push setup is almost complete** page, if you don't still have it open. The section **Step 3: Modify Web Config** contains the notification hub connection information.
 
@@ -145,7 +144,7 @@ You can optionally test push notifications with your mobile service running on t
 
 	This is the URL of the local host for the .NET backend project. You will use this URL to test the app against the mobile service running on the local computer.
 
-Now, the mobile service project is configured to connect to the notification hub in Azure when running locally. Note that it is important to use the same notification hub name and connection string as the portal because these project settings in the Web.config file are overridden by the portal settings when running in Azure. 
+Now, the mobile service project is configured to connect to the notification hub in Azure when running locally. Note that it is important to use the same notification hub name and connection string as the portal because these project settings in the Web.config file are overridden by the portal settings when running in Azure.
 
 The remaining steps in this section are optional. They allow you to test your app against your mobile service running on a local computer. If you plan to test push notifications using the mobile service running in Azure, you can just skip to the last section. This is because the Add Push Notification wizard already configured your app to connect to your service running in Azure.
 
@@ -167,7 +166,7 @@ The remaining steps in this section are optional. They allow you to test your ap
 
 
 1. Right-click the Windows Store project, click **Set as StartUp Project**, then press the F5 key to run the Windows Store app.
-	
+
 	After the app starts, the device is registered for push notifications.
 
 2. Stop the Windows Store app and repeat the previous step to run the Windows Phone Store app.
@@ -222,7 +221,7 @@ Learn more about Mobile Services and Notification Hubs in the following topics:
 
 [Send push notifications to authenticated users]: mobile-services-dotnet-backend-windows-store-dotnet-push-notifications-app-users.md
 
-[What are Notification Hubs?]: ../notification-hubs-overview.md
+[What are Notification Hubs?]: https://azure.microsoft.com/en-us/documentation/articles/notification-hubs-push-notification-overview/
 
 [How to use a .NET client for Azure Mobile Services]: mobile-services-windows-dotnet-how-to-use-client-library.md
 [MobileServiceClient]: http://msdn.microsoft.com/library/azure/microsoft.windowsazure.mobileservices.mobileserviceclient.aspx

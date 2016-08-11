@@ -27,10 +27,10 @@
 - [(Windows Phone Silverlight 8.x | Javascript)](mobile-services-javascript-backend-windows-phone-get-started-push.md)
 - [(Android | .NET)](mobile-services-dotnet-backend-android-get-started-push.md)
 - [(Android | Javascript)](mobile-services-javascript-backend-android-get-started-push.md)
-- [(Xamarin.iOS | Javascript)](../articles/partner-xamarin-mobile-services-ios-get-started-push.md)
-- [(Xamarin.Android | Javascript)](../articles/partner-xamarin-mobile-services-android-get-started-push.md)
+- [(Xamarin.iOS | Javascript)](partner-xamarin-mobile-services-ios-get-started-push.md)
+- [(Xamarin.Android | Javascript)](partner-xamarin-mobile-services-android-get-started-push.md)
 - [(Xamarin.Android | .NET)](mobile-services-dotnet-backend-xamarin-android-get-started-push.md)
-- [(Xamarin.Forms | JavaScript)](../articles/partner-xamarin-mobile-services-xamarin-forms-get-started-push.md)
+- [(Xamarin.Forms | JavaScript)](partner-xamarin-mobile-services-xamarin-forms-get-started-push.md)
 
 ##Overview
 
@@ -151,16 +151,16 @@ Finally, you must update the script registered to the insert operation on the To
 
 This tutorial demonstrated the basics of enabling a Windows Store app to use Mobile Services and Notification Hubs to send push notifications. Next, consider completing one of the following tutorials:
 
-+ [Send broadcast notifications to subscribers](../notification-hubs/notification-hubs-windows-phone-push-xplat-segmented-mpns-notification.md)
++ [Send broadcast notifications to subscribers](https://azure.microsoft.com/en-us/documentation/articles/notification-hubs-windows-phone-push-xplat-segmented-mpns-notification/)
 	<br/>Learn how users can register and receive push notifications for categories they're interested in.
 
-+ [Send platform-agnostic notifications to subscribers](../notification-hubs/notification-hubs-aspnet-cross-platform-notification.md)
++ [Send platform-agnostic notifications to subscribers](https://azure.microsoft.com/en-us/documentation/articles/notification-hubs-aspnet-cross-platform-notification/)
 	<br/>Learn how to use templates to send push notifications from your mobile service, without having to craft platform-specific payloads in your back-end.
 
 
 Learn more about Mobile Services and Notification Hubs in the following topics:
 
-* [Azure Notification Hubs - Diagnosis guidelines](../notification-hubs/notification-hubs-push-notification-fixer.md)
+* [Azure Notification Hubs - Diagnosis guidelines](https://azure.microsoft.com/en-us/documentation/articles/notification-hubs-push-notification-fixer/)
 	<br/>Learn how to troubleshoot your push notification issues.
 
 * [Get started with authentication]
@@ -192,4 +192,4 @@ Learn more about Mobile Services and Notification Hubs in the following topics:
 [Mobile Services server script reference]: http://go.microsoft.com/fwlink/?LinkId=262293
 [Mobile Services .NET How-to Conceptual Reference]: mobile-services-windows-dotnet-how-to-use-client-library.md
 
-[What are Notification Hubs?]: ../notification-hubs/notification-hubs-overview.md
+[What are Notification Hubs?]: https://azure.microsoft.com/en-us/documentation/articles/notification-hubs-push-notification-overview/

@@ -27,24 +27,23 @@
 - [(Windows Phone Silverlight 8.x | Javascript)](mobile-services-javascript-backend-windows-phone-get-started-push.md)
 - [(Android | .NET)](mobile-services-dotnet-backend-android-get-started-push.md)
 - [(Android | Javascript)](mobile-services-javascript-backend-android-get-started-push.md)
-- [(Xamarin.iOS | Javascript)](../articles/partner-xamarin-mobile-services-ios-get-started-push.md)
-- [(Xamarin.Android | Javascript)](../articles/partner-xamarin-mobile-services-android-get-started-push.md)
+- [(Xamarin.iOS | Javascript)](partner-xamarin-mobile-services-ios-get-started-push.md)
+- [(Xamarin.Android | Javascript)](partner-xamarin-mobile-services-android-get-started-push.md)
 - [(Xamarin.Android | .NET)](mobile-services-dotnet-backend-xamarin-android-get-started-push.md)
-- [(Xamarin.Forms | JavaScript)](../articles/partner-xamarin-mobile-services-xamarin-forms-get-started-push.md)
+- [(Xamarin.Forms | JavaScript)](partner-xamarin-mobile-services-xamarin-forms-get-started-push.md)
 
 &nbsp;
 
 >[AZURE.WARNING] This is an **Azure Mobile Services** topic.  This service has been superseded by Azure App Service Mobile Apps and is scheduled for removal from Azure.  We recommend using Azure Mobile Apps for all new mobile backend deployments.  Read [this announcement](https://azure.microsoft.com/blog/transition-of-azure-mobile-services/) to learn more about the pending deprecation of this service.  
-> 
+>
 > Learn about [migrating your site to Azure App Service](https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-migrating-from-mobile-services/).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
-> For the equivalent Mobile Apps version of this topic, see [Add Push Notifications to your iOS App](../app-service-mobile/app-service-mobile-ios-get-started-push.md).
 
 This topic shows you how to add push notifications to the [quickstart project](mobile-services-dotnet-backend-ios-get-started.md), so that your mobile service sends a push notification each time a record is inserted. You must complete [Get Started with Mobile Services] first.
 
 
-* [Register an App ID for your app](https://developer.apple.com/library/ios/documentation/IDEs/Conceptual/AppDistributionGuide/MaintainingProfiles/MaintainingProfiles.html#//apple_ref/doc/uid/TP40012582-CH30-SW991). Create an explicit App ID (not a wildcard App ID) and for **Bundle ID**, use the exact **Bundle ID** that is in your Xcode quickstart project. It is also crucial that you check the **Push Notifications** option. 
+* [Register an App ID for your app](https://developer.apple.com/library/ios/documentation/IDEs/Conceptual/AppDistributionGuide/MaintainingProfiles/MaintainingProfiles.html#//apple_ref/doc/uid/TP40012582-CH30-SW991). Create an explicit App ID (not a wildcard App ID) and for **Bundle ID**, use the exact **Bundle ID** that is in your Xcode quickstart project. It is also crucial that you check the **Push Notifications** option.
 
 * Next, [configuring push notifications](https://developer.apple.com/library/ios/documentation/IDEs/Conceptual/AppDistributionGuide/AddingCapabilities/AddingCapabilities.html#//apple_ref/doc/uid/TP40012582-CH26-SW6). You may create either a "Development" or "Distribution" SSL certificate (remember to select the corresponding option in the Azure portal later.)
 
@@ -154,7 +153,7 @@ mobile-services-dotnet-backend-store-code-source-control.md).
 
 * Verify that a notification is received, then click **OK** to dismiss the notification. You have now successfully completed this tutorial.
 
-  	![](../articles/media/mobile-services-ios-get-started-push/mobile-quickstart-push3-ios.png)
+  	![](media/mobile-services-ios-get-started-push/mobile-quickstart-push3-ios.png)
 
 <!-- Anchors.  -->
 [Generate the certificate signing request]: #certificates
@@ -217,6 +216,6 @@ mobile-services-dotnet-backend-store-code-source-control.md).
 
 [Get started with authentication]: mobile-services-dotnet-backend-ios-get-started-users.md
 [Mobile Services Objective-C how-to conceptual reference]: mobile-services-windows-dotnet-how-to-use-client-library.md
-[What are Notification Hubs?]: ../notification-hubs-overview.md
-[Send broadcast notifications to subscribers]: ../notification-hubs-ios-send-breaking-news.md
-[Send template-based notifications to subscribers]: ../notification-hubs-ios-send-localized-breaking-news.md
+[What are Notification Hubs?]: https://azure.microsoft.com/en-us/documentation/articles/notification-hubs-push-notification-overview/
+[Send broadcast notifications to subscribers]: https://azure.microsoft.com/en-us/documentation/articles/notification-hubs-ios-xplat-segmented-apns-push-notification/
+[Send template-based notifications to subscribers]: https://azure.microsoft.com/en-us/documentation/articles/notification-hubs-ios-xplat-localized-apns-push-notification/

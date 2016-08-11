@@ -26,9 +26,9 @@
 - [(Windows Phone Silverlight 8.x | Javascript)](mobile-services-windows-phone-get-started-users.md)
 - [(Android | Javascript)](mobile-services-android-get-started-users.md)
 - [(Xamarin.iOS | .NET)](mobile-services-dotnet-backend-xamarin-ios-get-started-users.md)
-- [(Xamarin.iOS | Javascript)](../articles/partner-xamarin-mobile-services-ios-get-started-users.md)
+- [(Xamarin.iOS | Javascript)](partner-xamarin-mobile-services-ios-get-started-users.md)
 - [(Xamarin.Android | .NET)](mobile-services-dotnet-backend-xamarin-android-get-started-users.md)
-- [(Xamarin.Android | Javascript)](../articles/partner-xamarin-mobile-services-android-get-started-users.md)
+- [(Xamarin.Android | Javascript)](partner-xamarin-mobile-services-android-get-started-users.md)
 - [(HTML | Javascript)](mobile-services-html-get-started-users.md)
 
 

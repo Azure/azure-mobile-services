@@ -28,21 +28,20 @@
 - [(Android | .NET)](mobile-services-dotnet-backend-android-get-started.md)
 - [(Android | Javascript)](mobile-services-android-get-started.md)
 - [(Xamarin.iOS | .NET)](mobile-services-dotnet-backend-xamarin-ios-get-started.md)
-- [(Xamarin.iOS | Javascript)](../articles/partner-xamarin-mobile-services-ios-get-started.md)
+- [(Xamarin.iOS | Javascript)](partner-xamarin-mobile-services-ios-get-started.md)
 - [(Xamarin.Android | .NET)](mobile-services-dotnet-backend-xamarin-android-get-started.md)
-- [(Xamarin.Android | Javascript)](../articles/partner-xamarin-mobile-services-android-get-started.md)
+- [(Xamarin.Android | Javascript)](partner-xamarin-mobile-services-android-get-started.md)
 - [(HTML | Javascript)](mobile-services-html-get-started.md)
 - [(PhoneGap | Javascript)](mobile-services-javascript-backend-phonegap-get-started.md)
-- [(Sencha | Javascript)](../articles/partner-sencha-mobile-services-get-started.md)
+- [(Sencha | Javascript)](partner-sencha-mobile-services-get-started.md)
 
 &nbsp;
 
 >[AZURE.WARNING] This is an **Azure Mobile Services** topic.  This service has been superseded by Azure App Service Mobile Apps and is scheduled for removal from Azure.  We recommend using Azure Mobile Apps for all new mobile backend deployments.  Read [this announcement](https://azure.microsoft.com/blog/transition-of-azure-mobile-services/) to learn more about the pending deprecation of this service.  
-> 
+>
 > Learn about [migrating your site to Azure App Service](https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-migrating-from-mobile-services/).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
-> For the equivalent Mobile Apps version of this topic, see [Create a Windows app with Mobile Apps](../app-service-mobile/app-service-mobile-windows-store-dotnet-get-started.md).
 
 This tutorial shows you how to add a cloud-based backend service to a universal Windows app using Azure Mobile Services. Universal Windows app solutions include projects for both Windows Store 8.1 and Windows Phone Store 8.1 apps and a common shared project. For more information, see [Build universal Windows apps that target Windows and Windows Phone](http://msdn.microsoft.com/library/windows/apps/xaml/dn609832.aspx).
 
@@ -61,7 +60,7 @@ The following are screen captures from the completed app:
 ![](./media/mobile-services-windows-universal-get-started/mobile-quickstart-completed-wp8.png)
 <br/>Windows Phone Store app
 
-Completing this tutorial is a prerequisite for all other Mobile Services tutorials for Windows Store and Windows Phone Store apps. 
+Completing this tutorial is a prerequisite for all other Mobile Services tutorials for Windows Store and Windows Phone Store apps.
 
 To complete this tutorial, you need the following:
 
@@ -74,13 +73,13 @@ To complete this tutorial, you need the following:
 Follow these steps to create a new mobile service.
 
 1.	Log into the [Azure classic portal](https://manage.windowsazure.com/). At the bottom of the navigation pane, click **+NEW**. Expand **Compute** and **Mobile Service**, then click **Create**.
-	
+
 	![](./media/mobile-services-dotnet-backend-create-new-service/mobile-create.png)
 
 	This displays the **Create a Mobile Service** dialog.
 
 2.	In the **Create a Mobile Service** page, select **Create a free 20 MB SQL Database**, select **.NET** runtime, then type a subdomain name for the new mobile service in the **URL** textbox. Click the right arrow button to go to the next page.
-	
+
 	![](./media/mobile-services-dotnet-backend-create-new-service/mobile-create-page1.png)
 
 	This displays the **Specify database settings** page.
@@ -129,7 +128,7 @@ In this section, you will test your new app against the mobile service running l
 
 3. To test the store app, right-click your client app project, click **Set as StartUp Project**, and then press the **F5** key to rebuild the project and start the app.
 
-	This starts the app, which connects to the local mobile service instance.	
+	This starts the app, which connects to the local mobile service instance.
 
 4. In the app, type meaningful text, such as _Complete the tutorial_, in **Insert a TodoItem**, and then click **Save**.
 
@@ -173,7 +172,7 @@ Now that the mobile service is published and the client is connected to the remo
 3. Stop debugging and change the default start up project in the universal Windows solution to the Windows Phone Store app and press F5 again.
 
 	![](./media/mobile-services-windows-universal-test-app/mobile-quickstart-completed-wp8.png)
-	
+
 	Notice that data saved from the previous step is loaded from the mobile service after the app starts.
 
 
@@ -198,7 +197,7 @@ Now that you have completed the quickstart, learn how to perform additional impo
 For more information about universal Windows apps, see [Supporting multiple device platforms from a single mobile service](mobile-services-how-to-use-multiple-clients-single-service.md#shared-vs).
 
 
- 
+
 
 <!-- Anchors. -->
 

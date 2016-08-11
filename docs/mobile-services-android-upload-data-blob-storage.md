@@ -26,7 +26,7 @@
 &nbsp;&nbsp;
 
 >[AZURE.WARNING] This is an **Azure Mobile Services** topic.  This service has been superseded by Azure App Service Mobile Apps and is scheduled for removal from Azure.  We recommend using Azure Mobile Apps for all new mobile backend deployments.  Read [this announcement](https://azure.microsoft.com/blog/transition-of-azure-mobile-services/) to learn more about the pending deprecation of this service.  
-> 
+>
 > Learn about [migrating your site to Azure App Service](https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-migrating-from-mobile-services/).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
@@ -42,7 +42,7 @@ Before you start this tutorial, you must first complete the Mobile Services quic
 
 This tutorial also requires the following:
 
-+ An [Azure Storage account](../storage/storage-create-storage-account.md)
++ An [Azure Storage account](https://azure.microsoft.com/en-us/documentation/articles/storage-create-storage-account/)
 + An Android device with a camera
 
 ## How the app works
@@ -56,7 +56,7 @@ Uploading the photo image is a multistep process:
 
 So what is a SAS?
 
-It's not safe to store the credentials needed to upload data to the Azure Storage service inside your client app. Instead, you store these credentials in your mobile service and use them to generate a Shared Access Signature (SAS) that grants permission to upload a new image. The SAS, a credential with a 5 minute expiration, is returned securely by Mobile Services to the client app. The app then uses this temporary credential to upload the image. For more information, see [Shared Access Signatures, Part 1: Understanding the SAS Model](../storage/storage-dotnet-shared-access-signature-part-1.md)
+It's not safe to store the credentials needed to upload data to the Azure Storage service inside your client app. Instead, you store these credentials in your mobile service and use them to generate a Shared Access Signature (SAS) that grants permission to upload a new image. The SAS, a credential with a 5 minute expiration, is returned securely by Mobile Services to the client app. The app then uses this temporary credential to upload the image. For more information, see [Shared Access Signatures, Part 1: Understanding the SAS Model](https://azure.microsoft.com/en-us/documentation/articles/storage-dotnet-shared-access-signature-part-1/)
 
 ## Code Sample
 [Here](https://github.com/Azure/mobile-services-samples/tree/master/UploadImages) is the completed client source code part of this app. To run it you must complete the Mobile Services backend parts of this tutorial.
@@ -65,9 +65,9 @@ It's not safe to store the credentials needed to upload data to the Azure Storag
 
 A new insert script is registered that generates an SAS when a new Todo item is inserted.
 
-0. If you haven't yet created your storage account, see [How To Create a Storage Account](../articles/storage/storage-create-storage-account.md).
+0. If you haven't yet created your storage account, see [How To Create a Storage Account](https://azure.microsoft.com/en-us/documentation/articles/storage-create-storage-account/).
 
-1. In the [Azure classic portal](https://manage.windowsazure.com/), click **Storage**, click the storage account, then click **Manage Keys**. 
+1. In the [Azure classic portal](https://manage.windowsazure.com/), click **Storage**, click the storage account, then click **Manage Keys**.
 
 2. Make a note of the **Storage Account Name** and **Access Key**.
 
@@ -84,33 +84,33 @@ A new insert script is registered that generates an SAS when a new Todo item is 
 
 4. In the Configure tab, make sure that [Dynamic schema](http://msdn.microsoft.com/library/windowsazure/b6bb7d2d-35ae-47eb-a03f-6ee393e170f7) is enabled. You need dynamic schema enabled to be able to add new columns to the TodoItem table. Dynamic schema should not be enabled in any production service.
 
-4. Click the **Data** tab and then click the **TodoItem** table. 
+4. Click the **Data** tab and then click the **TodoItem** table.
 
 5.  In **todoitem**, click the **Script** tab and select **Insert**, replace the insert function with the following code, then click **Save**:
 
 		var azure = require('azure');
 		var qs = require('querystring');
 		var appSettings = require('mobileservice-config').appSettings;
-		
+
 		function insert(item, user, request) {
-		    // Get storage account settings from app settings. 
+		    // Get storage account settings from app settings.
 		    var accountName = appSettings.STORAGE_ACCOUNT_NAME;
 		    var accountKey = appSettings.STORAGE_ACCOUNT_ACCESS_KEY;
 		    var host = accountName + '.blob.core.windows.net';
-		
+
 		    if ((typeof item.containerName !== "undefined") && (
 		    item.containerName !== null)) {
 		        // Set the BLOB store container name on the item, which must be lowercase.
 		        item.containerName = item.containerName.toLowerCase();
-		
-		        // If it does not already exist, create the container 
+
+		        // If it does not already exist, create the container
 		        // with public read access for blobs.        
 		        var blobService = azure.createBlobService(accountName, accountKey, host);
 		        blobService.createContainerIfNotExists(item.containerName, {
 		            publicAccessLevel: 'blob'
 		        }, function(error) {
 		            if (!error) {
-		
+
 		                // Provide write access to the container for the next 5 mins.        
 		                var sharedAccessPolicy = {
 		                    AccessPolicy: {
@@ -118,19 +118,19 @@ A new insert script is registered that generates an SAS when a new Todo item is 
 		                        Expiry: new Date(new Date().getTime() + 5 * 60 * 1000)
 		                    }
 		                };
-		
+
 		                // Generate the upload URL with SAS for the new image.
-		                var sasQueryUrl = 
-		                blobService.generateSharedAccessSignature(item.containerName, 
+		                var sasQueryUrl =
+		                blobService.generateSharedAccessSignature(item.containerName,
 		                item.resourceName, sharedAccessPolicy);
-		
+
 		                // Set the query string.
 		                item.sasQueryString = qs.stringify(sasQueryUrl.queryString);
-		
-		                // Set the full path on the new new item, 
-		                // which is used for data binding on the client. 
+
+		                // Set the full path on the new new item,
+		                // which is used for data binding on the client.
 		                item.imageUri = sasQueryUrl.baseUrl + sasQueryUrl.path;
-		
+
 		            } else {
 		                console.error(error);
 		            }
@@ -143,12 +143,12 @@ A new insert script is registered that generates an SAS when a new Todo item is 
 
    	This replaces the function that is invoked when an insert occurs in the TodoItem table with a new script. This new script generates a new SAS for the insert, which is valid for 5 minutes, and assigns the value of the generated SAS to the `sasQueryString` property of the returned item. The `imageUri` property is also set to the resource path of the new BLOB to enable image display during binding in the client UI.
 
-	>[AZURE.NOTE] This code creates an SAS for an individual BLOB. If you need to upload multiple blobs to a container using the same SAS, you can instead call the [generateSharedAccessSignature method](http://go.microsoft.com/fwlink/?LinkId=390455)</a> with an empty blob resource name, like this: 
+	>[AZURE.NOTE] This code creates an SAS for an individual BLOB. If you need to upload multiple blobs to a container using the same SAS, you can instead call the [generateSharedAccessSignature method](http://go.microsoft.com/fwlink/?LinkId=390455)</a> with an empty blob resource name, like this:
 	>                 
 	>     blobService.generateSharedAccessSignature(containerName, '', sharedAccessPolicy);
 
 Next, you will update the quickstart app to add image upload functionality by using the SAS generated on insert.
- 
+
 <!-- Anchors. -->
 
 <!-- Images. -->
@@ -519,7 +519,7 @@ Now that you have been able to securely upload images by integrating your mobile
 [Get started with Mobile Services]: mobile-services-javascript-backend-windows-store-dotnet-get-started.md
 
 [Azure classic portal]: https://manage.windowsazure.com/
-[How To Create a Storage Account]: ../storage-create-storage-account.md
+[How To Create a Storage Account]: https://azure.microsoft.com/en-us/documentation/articles/storage-create-storage-account/
 [Azure Storage Client library for Store apps]: http://go.microsoft.com/fwlink/p/?LinkId=276866
 [Mobile Services .NET How-to Conceptual Reference]: mobile-services-windows-dotnet-how-to-use-client-library.md
 [App settings]: http://msdn.microsoft.com/library/windowsazure/b6bb7d2d-35ae-47eb-a03f-6ee393e170f7

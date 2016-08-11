@@ -19,15 +19,11 @@
 # Add Offline Data Sync to your Android Mobile Services app
 
 > [AZURE.SELECTOR]
-- [Android)](./
-mobile-services-android-get-started-offline-data.md)
-- [iOS](./
-mobile-services-ios-get-started-offline-data.md)
-- [Windows](./
-mobile-services-windows-store-dotnet-get-started-offline-data.md)
-- [Xamarin.Android](../mobile-services/articles/mobile-services-xamarin-android-get-started-offline-data.md)
-- [Xamarin.iOS](./
-mobile-services-xamarin-ios-get-started-offline-data.md)
+- [Android)](mobile-services-android-get-started-offline-data.md)
+- [iOS](mobile-services-ios-get-started-offline-data.md)
+- [Windows](mobile-services-windows-store-dotnet-get-started-offline-data.md)
+- [Xamarin.Android](mobile-services-xamarin-android-get-started-offline-data.md)
+- [Xamarin.iOS](mobile-services-xamarin-ios-get-started-offline-data.md)
 
 
 &nbsp;
@@ -37,7 +33,6 @@ mobile-services-xamarin-ios-get-started-offline-data.md)
 > Learn about [migrating your site to Azure App Service](https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-migrating-from-mobile-services/).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
-> For the equivalent Mobile Apps version of this topic, see [Enable offline sync for your Android mobile app](../app-service-mobile/app-service-mobile-android-get-started-offline-data.md).
 
 ## Summary
 

@@ -19,7 +19,7 @@
 # Build a .NET backend mobile service that uses Table storage
 
 >[AZURE.WARNING] This is an **Azure Mobile Services** topic.  This service has been superseded by Azure App Service Mobile Apps and is scheduled for removal from Azure.  We recommend using Azure Mobile Apps for all new mobile backend deployments.  Read [this announcement](https://azure.microsoft.com/blog/transition-of-azure-mobile-services/) to learn more about the pending deprecation of this service.  
-> 
+>
 > Learn about [migrating your site to Azure App Service](https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-migrating-from-mobile-services/).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
@@ -40,7 +40,7 @@ First, you need to configure your mobile service and .NET backend code project t
 
   	This adds support for Azure storage services to the .NET backend mobile service project.
 
-3. If you haven't yet created your storage account, see [How To Create a Storage Account](../storage/storage-create-storage-account.md).
+3. If you haven't yet created your storage account, see [How To Create a Storage Account](https://azure.microsoft.com/en-us/documentation/articles/storage-create-storage-account/).
 
 4. In the [Azure classic portal], click **Storage**, click the storage account, then click **Manage Keys**.
 
@@ -157,5 +157,5 @@ Now that you have seen how easy it is to use Table storage with .NET backend, co
 <!-- URLs. -->
 [Get started with Mobile Services]: mobile-services-dotnet-backend-windows-store-dotnet-get-started.md
 [Azure classic portal]: https://manage.windowsazure.com/
-[What is the Table Service]: ../storage-dotnet-how-to-use-tables.md#what-is
+[What is the Table Service]: https://azure.microsoft.com/en-us/documentation/articles/storage-dotnet-how-to-use-tables/#what-is
 [MongoLab Add-on Page]: /gallery/store/mongolab/mongolab

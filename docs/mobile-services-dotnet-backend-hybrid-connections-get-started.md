@@ -20,13 +20,12 @@
 # Connect to an on-premises SQL Server from Azure Mobile Services using Hybrid Connections
 
 >[AZURE.WARNING] This is an **Azure Mobile Services** topic.  This service has been superseded by Azure App Service Mobile Apps and is scheduled for removal from Azure.  We recommend using Azure Mobile Apps for all new mobile backend deployments.  Read [this announcement](https://azure.microsoft.com/blog/transition-of-azure-mobile-services/) to learn more about the pending deprecation of this service.  
-> 
+>
 > Learn about [migrating your site to Azure App Service](https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-migrating-from-mobile-services/).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
-> For the equivalent Mobile Apps version of this topic, see [Access on-premises resources using hybrid connections in Azure App Service](../app-service-web/web-sites-hybrid-connection-get-started.md).
 
-When your enterprise transitions to the cloud, you might not be able to migrate all of your assets to Azure right away. Hybrid Connections lets Azure Mobile Services securely connect to your on-premises assets. In this way, you can make your on-premises data accessible to your mobile clients by using Azure. Supported assets include any resource that runs on a static TCP port, including Microsoft SQL Server, MySQL, HTTP Web APIs, and most custom web services. Hybrid Connections use Shared Access Signature (SAS) authorization to secure the connections from your mobile service and the on-premises Hybrid Connection Manager to the hybrid connection. For more information, see [Hybrid Connections Overview](../biztalk-services/integration-hybrid-connection-overview.md).
+When your enterprise transitions to the cloud, you might not be able to migrate all of your assets to Azure right away. Hybrid Connections lets Azure Mobile Services securely connect to your on-premises assets. In this way, you can make your on-premises data accessible to your mobile clients by using Azure. Supported assets include any resource that runs on a static TCP port, including Microsoft SQL Server, MySQL, HTTP Web APIs, and most custom web services. Hybrid Connections use Shared Access Signature (SAS) authorization to secure the connections from your mobile service and the on-premises Hybrid Connection Manager to the hybrid connection. For more information, see [Hybrid Connections Overview](https://azure.microsoft.com/en-us/documentation/articles/integration-hybrid-connection-overview/).
 
 In this tutorial, you will learn how to modify a .NET backend mobile service to use a local on-premises SQL Server database instead of the default Azure SQL Database provisioned with your service. Hybrid Connections are also supported for a JavaScript backend mobile service, as described in [this article](http://blogs.msdn.com/b/azuremobile/archive/2014/05/12/connecting-to-an-external-database-with-node-js-backend-in-azure-mobile-services.aspx).
 
@@ -37,7 +36,7 @@ This tutorial requires you to have the following:
 - **An existing .NET backend mobile service** <br/>Follow the tutorial [Get started with Mobile Services] to create and download a new .NET backend mobile service from the [Azure classic portal].
 
 
-- **Visual Studio 2013** <br/>This a requirement for using To download a free trial version of Visual Studio 2013, see [Visual Studio Downloads](http://www.visualstudio.com/downloads/download-visual-studio-vs). 
+- **Visual Studio 2013** <br/>This a requirement for using To download a free trial version of Visual Studio 2013, see [Visual Studio Downloads](http://www.visualstudio.com/downloads/download-visual-studio-vs).
 
 - **SQL Server 2014 Express with Tools** <br/>Download Microsoft SQL Server Express for free at the [Microsoft SQL Server Express Edition page](http://www.microsoft.com/en-us/server-cloud/Products/sql-server-editions/sql-server-express.aspx). Choose the **Download SQL Server Express** and fill out your profile, choosing **SQL Server 2014 Express with Tools**, then click continue. This starts the download of the installer for both SQL Server Express and the SQL Server Express Management Tools. Save the installer package to your on-premises computer.
 
@@ -46,7 +45,7 @@ This tutorial requires you to have the following:
 	- Be able to connect to Azure over port 5671.
 	- Be able to access the *hostname*:*portnumber* of the computer running your SQL Server instance.  
 
-	For more information see [Hybrid Connections Overview](../articles/integration-hybrid-connection-overview.md).
+	For more information see [Hybrid Connections Overview](https://azure.microsoft.com/en-us/documentation/articles/integration-hybrid-connection-overview/).
 
 ## Install SQL Server Express, enable TCP/IP, and create a SQL Server database on-premises
 
@@ -58,22 +57,22 @@ This section shows you how to install a SQL Server Express, enable TCP/IP, set a
 To use an on-premises SQL Server or SQL Server Express database with a hybrid connection, TCP/IP needs to be enabled on a static port. Default instances on SQL Server use static port 1433, whereas named instances do not. Because of this, we will install the default instance. If you already have the default instance of SQL Server Express installed, you can skip this section.
 
 1. To install SQL Server Express, run the **SQLEXPRWT_x64_ENU.exe** or **SQLEXPR_x86_ENU.exe** file that you downloaded. The SQL Server Installation Center wizard appears.
-	
+
 2. Choose **New SQL Server stand-alone installation or add features to an existing installation**, follow the instructions, accepting the default choices and settings, until you get to the **Instance Configuration** page.
-	
+
 3. On the **Instance Configuration** page, choose **Default instance**, then accept the default settings on the **Server Configuration** page.
 
-	>[AZURE.NOTE]If you already have a default instance of SQL Server installed, you can skip to the next section and use this instance with Hybrid Connections. 
-	
+	>[AZURE.NOTE]If you already have a default instance of SQL Server installed, you can skip to the next section and use this instance with Hybrid Connections.
+
 5. On the **Database Engine Configuration** page, under **Authentication Mode**, choose **Mixed Mode (SQL Server authentication and Windows authentication)**, and provide a secure password for the built-in **sa** administrator account.
-	
+
 	In this tutorial, you will be using SQL Server authentication. Be sure to remember the password that you provide, because you will need it later.
-	
+
 6. Finish the wizard to complete the installation.
 
 ###Enable TCP/IP and setting a static port
 
-This section uses SQL Server Configuration Manager, which was installed when you installed SQL Server Express, to enable TCP/IP and set a static IP address. 
+This section uses SQL Server Configuration Manager, which was installed when you installed SQL Server Express, to enable TCP/IP and set a static IP address.
 
 1. Follow the steps in [Enable TCP/IP Network Protocol for SQL Server](http://technet.microsoft.com/library/hh231672%28v=sql.110%29.aspx) to enable TCP/IP access to the instance.
 
@@ -86,13 +85,13 @@ This section uses SQL Server Configuration Manager, which was installed when you
 1. In SQL Server Management Studio, connect to the SQL Server you just installed. (If the **Connect to Server** dialog does not appear automatically, navigate to **Object Explorer** in the left pane, click **Connect**, and then click **Database Engine**.) 	
 
 	![Connect to Server](./media/hybrid-connections-create-on-premises-database/A04SSMSConnectToServer.png)
-	
-	For **Server type**, choose **Database Engine**. For **Server name**, you can use **localhost** or the name of the computer where you installed SQL Server. Choose **SQL Server authentication**, and supply the password for the sa login that you created earlier. 
-	
+
+	For **Server type**, choose **Database Engine**. For **Server name**, you can use **localhost** or the name of the computer where you installed SQL Server. Choose **SQL Server authentication**, and supply the password for the sa login that you created earlier.
+
 2. To create a new database by using SQL Server Management Studio, right-click **Databases** in Object Explorer, and then click **New Database**.
-	
-3. In the **New Database** dialog, type `OnPremisesDB`, and then click **OK**. 
-	
+
+3. In the **New Database** dialog, type `OnPremisesDB`, and then click **OK**.
+
 4. In Object Explorer, if you expand **Databases**, you will see that the new database is created.
 
 ###Create a new SQL Server login and set permissions
@@ -105,19 +104,19 @@ Finally, you will create a new SQL Server login with restricted permissions. You
 
 		USE [master]
 		GO
-		
-		/* Replace the PASSWORD in the following statement with a secure password. 
-		   If you save this script, make sure that you secure the file to 
-		   securely maintain the password. */ 
-		CREATE LOGIN [HybridConnectionLogin] WITH PASSWORD=N'<**secure_password**>', 
-			DEFAULT_DATABASE=[OnPremisesDB], DEFAULT_LANGUAGE=[us_english], 
+
+		/* Replace the PASSWORD in the following statement with a secure password.
+		   If you save this script, make sure that you secure the file to
+		   securely maintain the password. */
+		CREATE LOGIN [HybridConnectionLogin] WITH PASSWORD=N'<**secure_password**>',
+			DEFAULT_DATABASE=[OnPremisesDB], DEFAULT_LANGUAGE=[us_english],
 			CHECK_EXPIRATION=OFF, CHECK_POLICY=ON
 		GO
-	
+
 		USE [OnPremisesDB]
 		GO
-	
-		CREATE USER [HybridConnectionLogin] FOR LOGIN [HybridConnectionLogin] 
+
+		CREATE USER [HybridConnectionLogin] FOR LOGIN [HybridConnectionLogin]
 		WITH DEFAULT_SCHEMA=[dbo]
 		GO
 
@@ -125,7 +124,7 @@ Finally, you will create a new SQL Server login with restricted permissions. You
 		GRANT CREATE TABLE TO [HybridConnectionLogin]
 		GRANT CREATE SCHEMA TO [HybridConnectionLogin]
 		GO  
-   
+
 3. In the above script, replace the string `<**secure_password**>` with a secure password for the new *HybridConnectionsLogin*.
 
 4. **Execute** the query to create the new login and grant the required permissions in the on-premises database.
@@ -138,7 +137,7 @@ Finally, you will create a new SQL Server login with restricted permissions. You
 
 2. At the bottom of the navigation pane, select **+NEW** > **App Services** > **BizTalk Service** > **Custom Create**.
 
-3. Provide a **BizTalk Service Name** and select an **Edition**. 
+3. Provide a **BizTalk Service Name** and select an **Edition**.
 
 	This tutorial uses **mobile1**. You will need to supply a unique name for your new BizTalk Service.
 
@@ -148,8 +147,8 @@ Finally, you will create a new SQL Server login with restricted permissions. You
 
 	This creates a new hybrid connection.
 
-5. Provide a **Name** and **Host Name** for your hybrid connection and set **Port** to `1433`. 
-  
+5. Provide a **Name** and **Host Name** for your hybrid connection and set **Port** to `1433`.
+
 	![Configure Hybrid Connection](./media/hybrid-connections-create-new/4.png)
 
 	The host name is the name of the on-premises server. This configures the hybrid connection to access SQL Server running on port 1433. If you are using a named SQL Server instance, instead use the static port you defined earlier.
@@ -177,7 +176,7 @@ The Hybrid Connection Manager enables your on-premises machine to connect to Azu
 
 3. Complete the rest of the setup steps for the Connection Manager.
 
-	After the installation is complete, the hybrid connection status will change to **1 Instance Connected**. You may need to refresh the browser and wait a few minutes. 
+	After the installation is complete, the hybrid connection status will change to **1 Instance Connected**. You may need to refresh the browser and wait a few minutes.
 
 The hybrid connection setup is now complete.
 
@@ -245,11 +244,11 @@ Before publishing to Azure and using the hybrid connection, it's a good idea to 
 4. Click the **GET tables/TodoItem** link.
 
 	![](./media/mobile-services-dotnet-backend-test-local-service-api-documentation/service-api-documentation-page.png)
-   	
+
 	This displays the GET response page for the API.
 
 5. Click **try this out** and then click **send**.
- 
+
 	![](./media/mobile-services-dotnet-backend-test-local-service-api-documentation/service-try-this-out-get-todoitems.png)
 
 	This sends a GET request to the local mobile service to return all rows in the TodoItem table. Because the table is seeded by the initializer, two TodoItem objects are returned in the body of the response message. For more information about initializers, see [How to make data model changes to a .NET backend mobile service](mobile-services-dotnet-backend-how-to-use-code-first-migrations.md).
@@ -292,8 +291,8 @@ Now that you have verified the database connection, you need to add an app setti
 ##See Also##
 
 + [Hybrid Connections web site](https://azure.microsoft.com/services/biztalk-services/)
-+ [Hybrid Connections overview](../biztalk-services/integration-hybrid-connection-overview.md)
-+ [BizTalk Services: Dashboard, Monitor, Scale, Configure, and Hybrid Connection tabs](../biztalk-services/biztalk-dashboard-monitor-scale-tabs.md)
++ [Hybrid Connections overview](https://azure.microsoft.com/en-us/documentation/articles/integration-hybrid-connection-overview/)
++ [BizTalk Services: Dashboard, Monitor, Scale, Configure, and Hybrid Connection tabs](https://azure.microsoft.com/en-us/documentation/articles/biztalk-dashboard-monitor-scale-tabs/)
 + [How to make data model changes to a .NET backend mobile service](mobile-services-dotnet-backend-how-to-use-code-first-migrations.md)
 
 <!-- IMAGES -->

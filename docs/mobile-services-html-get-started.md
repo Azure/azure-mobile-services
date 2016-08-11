@@ -28,12 +28,12 @@
 - [(Android | .NET)](mobile-services-dotnet-backend-android-get-started.md)
 - [(Android | Javascript)](mobile-services-android-get-started.md)
 - [(Xamarin.iOS | .NET)](mobile-services-dotnet-backend-xamarin-ios-get-started.md)
-- [(Xamarin.iOS | Javascript)](../articles/partner-xamarin-mobile-services-ios-get-started.md)
+- [(Xamarin.iOS | Javascript)](partner-xamarin-mobile-services-ios-get-started.md)
 - [(Xamarin.Android | .NET)](mobile-services-dotnet-backend-xamarin-android-get-started.md)
-- [(Xamarin.Android | Javascript)](../articles/partner-xamarin-mobile-services-android-get-started.md)
+- [(Xamarin.Android | Javascript)](partner-xamarin-mobile-services-android-get-started.md)
 - [(HTML | Javascript)](mobile-services-html-get-started.md)
 - [(PhoneGap | Javascript)](mobile-services-javascript-backend-phonegap-get-started.md)
-- [(Sencha | Javascript)](../articles/partner-sencha-mobile-services-get-started.md)
+- [(Sencha | Javascript)](partner-sencha-mobile-services-get-started.md)
 &nbsp;
 
 >[AZURE.TIP] This topic shows you how to get started with Mobile Services as quickly as possible. It is designed for customers new to this Azure feature. If you are already familiar with Mobile Services or are looking for more in-depth information, please select a topic from the left-navigation or see the relevant links in [Next steps](#next-steps).

@@ -25,11 +25,10 @@
 &nbsp;
 
 >[AZURE.WARNING] This is an **Azure Mobile Services** topic.  This service has been superseded by Azure App Service Mobile Apps and is scheduled for removal from Azure.  We recommend using Azure Mobile Apps for all new mobile backend deployments.  Read [this announcement](https://azure.microsoft.com/blog/transition-of-azure-mobile-services/) to learn more about the pending deprecation of this service.  
-> 
+>
 > Learn about [migrating your site to Azure App Service](https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-migrating-from-mobile-services/).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
-> For the equivalent Mobile Apps version of this topic, see [How to: Send push notifications to an authenticated user](../app-service-mobile/app-service-mobile-dotnet-backend-how-to-use-server-sdk.md#push-user).
 
 In this topic, you learn how to send push notifications to an authenticated user on iOS. Before starting this tutorial, complete [Get started with authentication] and [Get started with push notifications] first.
 
@@ -42,10 +41,10 @@ In this tutorial, you require users to authenticate first, register with the not
 
 2. Add the following line of code to the Register method after the **ConfigOptions** definition:
 
-        options.PushAuthorization = 
+        options.PushAuthorization =
             Microsoft.WindowsAzure.Mobile.Service.Security.AuthorizationLevel.User;
- 
-	This enforces user authentication before registering for push notifications. 
+
+	This enforces user authentication before registering for push notifications.
 
 2. Right-click the project, click **Add** then click **Class...**.
 
@@ -53,15 +52,15 @@ In this tutorial, you require users to authenticate first, register with the not
 
 4. At the top of the code page, add the following **using** statements:
 
-		using System.Threading.Tasks; 
-		using System.Web.Http; 
-		using System.Web.Http.Controllers; 
-		using Microsoft.WindowsAzure.Mobile.Service; 
-		using Microsoft.WindowsAzure.Mobile.Service.Notifications; 
-		using Microsoft.WindowsAzure.Mobile.Service.Security; 
+		using System.Threading.Tasks;
+		using System.Web.Http;
+		using System.Web.Http.Controllers;
+		using Microsoft.WindowsAzure.Mobile.Service;
+		using Microsoft.WindowsAzure.Mobile.Service.Notifications;
+		using Microsoft.WindowsAzure.Mobile.Service.Security;
 
 5. Replace the existing **PushRegistrationHandler** class with the following code:
- 
+
 	    public class PushRegistrationHandler : INotificationHandler
 	    {
 	        public Task Register(ApiServices services, HttpRequestContext context,
@@ -75,13 +74,13 @@ In this tutorial, you require users to authenticate first, register with the not
 	                    throw new InvalidOperationException(
 	                        "You cannot supply a tag that is a user ID.");                    
 	                }
-	
+
 	                // Get the logged-in user.
 	                var currentUser = context.Principal as ServiceUser;
-	
+
 	                // Add a new tag that is the user ID.
 	                registration.Tags.Add(currentUser.Id);
-	
+
 	                services.Log.Info("Registered tag for userId: " + currentUser.Id);
 	            }
 	            catch(Exception ex)
@@ -90,14 +89,14 @@ In this tutorial, you require users to authenticate first, register with the not
 	            }
 	                return Task.FromResult(true);
 	        }
-	
+
 	        private bool ValidateTags(NotificationRegistration registration)
 	        {
 	            // Create a regex to search for disallowed tags.
 	            System.Text.RegularExpressions.Regex searchTerm =
 	            new System.Text.RegularExpressions.Regex(@"facebook:|google:|twitter:|microsoftaccount:",
 	                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-	
+
 	            foreach (string tag in registration.Tags)
 	            {
 	                if (searchTerm.IsMatch(tag))
@@ -107,8 +106,8 @@ In this tutorial, you require users to authenticate first, register with the not
 	            }
 	            return true;
 	        }
-		
-	        public Task Unregister(ApiServices services, HttpRequestContext context, 
+
+	        public Task Unregister(ApiServices services, HttpRequestContext context,
 	            string deviceId)
 	        {
 	            // This is where you can hook into registration deletion.
@@ -116,20 +115,20 @@ In this tutorial, you require users to authenticate first, register with the not
 	        }
 	    }
 
-	The **Register** method is called during registration. This lets you add a tag to the registration that is the ID of the logged-in user. The supplied tags are validated to prevent a user from registering for another user's ID. When a notification is sent to this user, it is received on this and any other device registered by the user. 
+	The **Register** method is called during registration. This lets you add a tag to the registration that is the ID of the logged-in user. The supplied tags are validated to prevent a user from registering for another user's ID. When a notification is sent to this user, it is received on this and any other device registered by the user.
 
 6. Expand the Controllers folder, open the TodoItemController.cs project file, locate the **PostTodoItem** method and replace the line of code that calls **SendAsync** with the following code:
 
         // Get the logged-in user.
 		var currentUser = this.User as ServiceUser;
-		
+
 		// Use a tag to only send the notification to the logged-in user.
         var result = await Services.Push.SendAsync(message, currentUser.Id);
 
 7. Republish the mobile service project.
 
 Now, the service uses the user ID tag to send a push notification (with the text of the inserted item) to all registrations created by the logged-in user.
- 
+
 
 ##<a name="update-app"></a>Update app to sign in before registration
 

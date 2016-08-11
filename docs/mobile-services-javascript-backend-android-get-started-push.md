@@ -29,10 +29,10 @@
 - [(Windows Phone Silverlight 8.x | Javascript)](mobile-services-javascript-backend-windows-phone-get-started-push.md)
 - [(Android | .NET)](mobile-services-dotnet-backend-android-get-started-push.md)
 - [(Android | Javascript)](mobile-services-javascript-backend-android-get-started-push.md)
-- [(Xamarin.iOS | Javascript)](../articles/partner-xamarin-mobile-services-ios-get-started-push.md)
-- [(Xamarin.Android | Javascript)](../articles/partner-xamarin-mobile-services-android-get-started-push.md)
+- [(Xamarin.iOS | Javascript)](partner-xamarin-mobile-services-ios-get-started-push.md)
+- [(Xamarin.Android | Javascript)](partner-xamarin-mobile-services-android-get-started-push.md)
 - [(Xamarin.Android | .NET)](mobile-services-dotnet-backend-xamarin-android-get-started-push.md)
-- [(Xamarin.Forms | JavaScript)](../articles/partner-xamarin-mobile-services-xamarin-forms-get-started-push.md)
+- [(Xamarin.Forms | JavaScript)](partner-xamarin-mobile-services-xamarin-forms-get-started-push.md)
 
 &nbsp;
 
@@ -41,7 +41,6 @@
 > Learn about [migrating your site to Azure App Service](https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-migrating-from-mobile-services/).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
-> For the equivalent Mobile Apps version of this topic, see [Add push notifications to your Android app](../app-service-mobile/app-service-mobile-android-get-started-push.md).
 
 ## Summary
 
@@ -379,10 +378,10 @@ If either of these appear, the version of the Android SDK installed in Android S
 1. In Android Studio, click **Tools** => **Android** => **SDK Manager**. If you have not installed the latest version of the SDK Platform, then click to install it. Make a note of the version number.
 
 2. In the Project Explorer tab, under **Gradle Scripts**, open the file **build.gradle (modeule: app)**. Ensure that the **compileSdkVersion** and **buildToolsVersion** are set to the latest  SDK version installed. The tags might look like this:
- 
+
 	 	    compileSdkVersion 'Google Inc.:Google APIs:21'
     		buildToolsVersion "21.1.2"
-	
+
 3. In the Android Studio Project Explorer right-click the project node, choose **Properties**, and in the left column choose **Android**. Ensure that the **Project Build Target** is set to the same SDK version as the **targetSdkVersion**.
 
 4. In Android Studio, the manifest file is no longer used to specify the target SDK and minimum SDK version, unlike the case with Eclipse.
@@ -443,6 +442,6 @@ Learn more about Mobile Services and Notification Hubs in the following topics:
 [gcm object]: http://go.microsoft.com/fwlink/p/?LinkId=282645
 
 [Mobile Services server script reference]: http://go.microsoft.com/fwlink/?LinkId=262293
-[What are Notification Hubs?]: ../notification-hubs-overview.md
-[Send broadcast notifications to subscribers]: ../notification-hubs-android-send-breaking-news.md
-[Send template-based notifications to subscribers]: ../notification-hubs-android-send-localized-breaking-news.md
+[What are Notification Hubs?]: https://azure.microsoft.com/en-us/documentation/articles/notification-hubs-push-notification-overview/
+[Send broadcast notifications to subscribers]: https://azure.microsoft.com/en-us/documentation/articles/notification-hubs-aspnet-backend-android-xplat-segmented-gcm-push-notification/
+[Send template-based notifications to subscribers]: https://azure.microsoft.com/en-us/documentation/articles/notification-hubs-aspnet-backend-android-xplat-segmented-gcm-push-notification/

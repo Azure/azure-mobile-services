@@ -28,12 +28,11 @@
 &nbsp;
 
 >[AZURE.WARNING] This is an **Azure Mobile Services** topic.  This service has been superseded by Azure App Service Mobile Apps and is scheduled for removal from Azure.  We recommend using Azure Mobile Apps for all new mobile backend deployments.  Read [this announcement](https://azure.microsoft.com/blog/transition-of-azure-mobile-services/) to learn more about the pending deprecation of this service.  
-> 
+>
 > Learn about [migrating your site to Azure App Service](https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-migrating-from-mobile-services/).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
-> For the equivalent Mobile Apps version of this topic, see [How to use the Android client library for Mobile Apps](../app-service-mobile/app-service-mobile-android-how-to-use-client-library.md).
- 
+
 This guide shows you how to perform common scenarios using the Android client for Azure Mobile Services.  The scenarios covered include querying for data; inserting, updating, and deleting data, authenticating users, handling errors, and customizing the client.
 
 If you are new to Mobile Services, you should first complete the quickstart tutorial [Get started with Mobile Services]. Successfully completing that tutorial ensures that you will have  installed Android Studio; it will help you configure your account and create your first mobile service, and install the Mobile Services SDK, which supports Android version 2.2 or later, but we recommend building against Android version 4.2 or later.
@@ -42,16 +41,16 @@ You can find the Javadocs API reference for the Android client library [here](ht
 
 ## <a name="what-is"></a>What is Mobile Services
 
-Azure Mobile Services is a highly scalable mobile application development platform that lets you add enhanced functionality to your mobile device apps by using Azure. 
+Azure Mobile Services is a highly scalable mobile application development platform that lets you add enhanced functionality to your mobile device apps by using Azure.
 
-With Mobile Services you can: 
+With Mobile Services you can:
 
 + **Build native and cross platform apps** - Connect your iOS, Android, Windows, or cross-platform Xamarin or Cordova (Phonegap) apps to your backend mobile service using native SDKs.  
 + **Send push notifications to your users** - Send push notifications to your users of your app.
 + **Authenticate your users** - Leverage popular identity providers like Facebook and Twitter to authenticate your app users.
-+ **Store data in the cloud** - Store user data in a SQL Database (by default) or in Mongo DB, DocumentDB, Azure Tables, or Azure Blobs. 
++ **Store data in the cloud** - Store user data in a SQL Database (by default) or in Mongo DB, DocumentDB, Azure Tables, or Azure Blobs.
 + **Build offline-ready apps with sync** - Make your apps work offline and use Mobile Services to sync data in the background.
-+ **Monitor and scale your apps** - Monitor app usage and scale your backend as demand grows. 
++ **Monitor and scale your apps** - Monitor app usage and scale your backend as demand grows.
 
 ## <a name="concepts"> </a>Mobile Services Concepts
 
@@ -59,7 +58,7 @@ The following are important features and concepts in the Mobile Services:
 
 + **Application key:** a unique value that is used to limit access to your mobile service from random clients; this "key" is not a security token and is not used to authenticate users of your app.    
 + **Backend:** the mobile service instance that supports your app. A mobile service is implemented either as an ASP.NET Web API project (*.NET backend* ) or as a Node.js project (*JavaScript backend*).
-+ **Identity provider:** an external service, trusted by Mobile Services, that authenticates your app's users. Supported providers include: Facebook, Twitter, Google, Microsoft Account, and Azure Active Directory. 
++ **Identity provider:** an external service, trusted by Mobile Services, that authenticates your app's users. Supported providers include: Facebook, Twitter, Google, Microsoft Account, and Azure Active Directory.
 + **Push notification:** Service-initiated message that is sent to a registered device or user using Azure Notification Hubs.
 + **Scale:** The ability to add, for an additional cost, more processing power, performance, and storage as your app becomes more popular.
 + **Scheduled job:** Custom code that is run either on a pre-determined schedule or on-demand.
@@ -692,12 +691,12 @@ You must also call the adapter any time you modify the *ToDoItem* table if you w
 A custom API enables you to define custom endpoints that expose server functionality that does not map to an insert, update, delete, or read operation. By using a custom API, you can have more control over messaging, including reading and setting HTTP message headers and defining a message body format other than JSON. For an example of how to create a custom API in your mobile service, see [How to: define a custom API endpoint](mobile-services-dotnet-backend-define-custom-api.md).
 
 
- 
+
 ###<a name="update-app"></a>Update the app to call the custom API
 
 1. We will add a button labelled "Complete All" next to the existing button, and move both buttons down a line. In Android Studio, open the *res\layout\activity_to_do.xml* file in your quickstart project, locate the **LinearLayout** element that contains the **Button** element named `buttonAddToDo`. Copy the **LinearLayout** and paste it immediately following the original one. Delete the **Button** element from the first **LinearLayout**.
 
-2. In the second **LinearLayout**, delete the **EditText** element, and add the following  code immediately following the existing **Button** element: 
+2. In the second **LinearLayout**, delete the **EditText** element, and add the following  code immediately following the existing **Button** element:
 
         <Button
             android:id="@+id/buttonCompleteItem"
@@ -711,8 +710,8 @@ A custom API enables you to define custom endpoints that expose server functiona
 3. The second **LinearLayout** now looks like this:
 
 	     <LinearLayout
-	        android:layout_width="match_parent" 
-	        android:layout_height="wrap_content" 
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
 	        android:background="#71BCFA"
 	        android:padding="6dip"  >
 	        <Button
@@ -728,7 +727,7 @@ A custom API enables you to define custom endpoints that expose server functiona
 	            android:onClick="completeItem"
 	            android:text="@string/complete_button_text" />
 	    </LinearLayout>
-	
+
 
 4. Open the res\values\string.xml file and add the following line of code:
 
@@ -739,21 +738,21 @@ A custom API enables you to define custom endpoints that expose server functiona
 5. In Project Explorer, right click the project name in the *src* folder (`com.example.{your projects name}`), choose **New** then **Class**. In the dialog, enter **MarkAllResult** in the class name field, choose OK, and replace the resulting class definition with the following code:
 
 		import com.google.gson.annotations.SerializedName;
-		
+
 		public class MarkAllResult {
 		    @SerializedName("count")
 		    public int mCount;
-		    
+
 		    public int getCount() {
 		        return mCount;
 			}
-		
+
 			public void setCount(int count) {
 			        this.mCount = count;
 			}
 		}
 
-	This class is used to hold the row count value returned by the custom API. 
+	This class is used to hold the row count value returned by the custom API.
 
 6. Locate the **refreshItemsFromTable** method in the **ToDoActivity.java** file, and make sure that the first line of code in the `try` block looks like this:
 
@@ -770,23 +769,23 @@ A custom API enables you to define custom endpoints that expose server functiona
 8. In the **ToDoActivity.java** file, add the following method:
 
 	public void completeItem(View view) {
-	    
-	    ListenableFuture<MarkAllResult> result = mClient.invokeApi( "completeAll2", MarkAllResult.class ); 
-	    	
+
+	    ListenableFuture<MarkAllResult> result = mClient.invokeApi( "completeAll2", MarkAllResult.class );
+
 	    	Futures.addCallback(result, new FutureCallback<MarkAllResult>() {
 	    		@Override
 	    		public void onFailure(Throwable exc) {
 	    			createAndShowDialog((Exception) exc, "Error");
 	    		}
-	    		
+
 	    		@Override
 	    		public void onSuccess(MarkAllResult result) {
 	    			createAndShowDialog(result.getCount() + " item(s) marked as complete.", "Completed Items");
-	                refreshItemsFromTable();	
+	                refreshItemsFromTable();
 	    		}
 	    	});
 	    }
-	
+
 	This method handles the **Click** event for the new button. The **invokeApi** method is called on the client, which sends a POST request to the new custom API. The result returned by the custom API is displayed in a message dialog, as are any errors.
 
 ### Test the app

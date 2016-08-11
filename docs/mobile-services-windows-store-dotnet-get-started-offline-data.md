@@ -19,7 +19,7 @@
 # Using offline data sync in Mobile Services
 
 >[AZURE.WARNING] This is an **Azure Mobile Services** topic.  This service has been superseded by Azure App Service Mobile Apps and is scheduled for removal from Azure.  We recommend using Azure Mobile Apps for all new mobile backend deployments.  Read [this announcement](https://azure.microsoft.com/blog/transition-of-azure-mobile-services/) to learn more about the pending deprecation of this service.  
-> 
+>
 > Learn about [migrating your site to Azure App Service](https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-migrating-from-mobile-services/).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
@@ -28,15 +28,11 @@
 
 
 > [AZURE.SELECTOR]
-- [Android)](./
-mobile-services-android-get-started-offline-data.md)
-- [iOS](./
-mobile-services-ios-get-started-offline-data.md)
-- [Windows](./
-mobile-services-windows-store-dotnet-get-started-offline-data.md)
-- [Xamarin.Android](../mobile-services/articles/mobile-services-xamarin-android-get-started-offline-data.md)
-- [Xamarin.iOS](./
-mobile-services-xamarin-ios-get-started-offline-data.md)
+- [Android)](mobile-services-android-get-started-offline-data.md)
+- [iOS](mobile-services-ios-get-started-offline-data.md)
+- [Windows](mobile-services-windows-store-dotnet-get-started-offline-data.md)
+- [Xamarin.Android](mobile-services-xamarin-android-get-started-offline-data.md)
+- [Xamarin.iOS](mobile-services-xamarin-ios-get-started-offline-data.md)
 
 
 This tutorial shows you how to add offline support to a Windows Universal Store app using Azure Mobile Services. Offline support will allow you to interact with a local database when your app is in an offline scenario. Once your app is online with the backend database, you sync your local changes using the offline features.
@@ -266,7 +262,7 @@ When we wanted to synchronize the local store with the server, we used the `IMob
 *  To push changes to the server, we called `IMobileServiceSyncContext.PushAsync()`. This method is a member of `IMobileServicesSyncContext` instead of the sync table because it will push changes across all tables.
 
     Only records that have been modified in some way locally (through CUD operations) will be sent to the server.
-   
+
 * To pull data from a table on the server to the app, we called `IMobileServiceSyncTable.PullAsync`.
 
     A pull always issues a push first. This is to ensure all tables in the local store along with relationships remain consistent.
@@ -312,8 +308,8 @@ When we wanted to synchronize the local store with the server, we used the `IMob
 [Handling conflicts with offline support for Mobile Services]: mobile-services-windows-store-dotnet-handling-conflicts-offline-data.md
 [TodoList Offline Sample]: http://go.microsoft.com/fwlink/?LinkId=394777
 [Get started with Mobile Services]: /develop/mobile/tutorials/get-started/#create-new-service
-[Getting Started]: ../mobile-services-dotnet-backend-windows-phone-get-started.md
-[Get started with Mobile Services]: ../mobile-services-windows-store-get-started.md
+[Getting Started]: mobile-services-dotnet-backend-windows-phone-get-started.md
+[Get started with Mobile Services]: mobile-services-windows-store-get-started.md
 [SQLite for Windows 8.1]: http://go.microsoft.com/fwlink/?LinkId=394776
 [SQLite for Windows Phone 8.1]: http://go.microsoft.com/fwlink/?LinkId=397953
 [Soft Delete]: mobile-services-using-soft-delete.md

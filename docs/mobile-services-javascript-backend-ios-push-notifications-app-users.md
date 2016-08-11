@@ -27,11 +27,10 @@
 &nbsp;
 
 >[AZURE.WARNING] This is an **Azure Mobile Services** topic.  This service has been superseded by Azure App Service Mobile Apps and is scheduled for removal from Azure.  We recommend using Azure Mobile Apps for all new mobile backend deployments.  Read [this announcement](https://azure.microsoft.com/blog/transition-of-azure-mobile-services/) to learn more about the pending deprecation of this service.  
-> 
+>
 > Learn about [migrating your site to Azure App Service](https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-migrating-from-mobile-services/).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
-> For the equivalent Mobile Apps version of this topic, see [How to: Send push notifications to an authenticated user using tags](../app-service-mobile/app-service-mobile-node-backend-how-to-use-server-sdk.md#push-user).
 
 In this topic, you learn how to send push notifications to an authenticated user on iOS. Before starting this tutorial, complete [Get started with authentication] and [Get started with push notifications] first.
 
@@ -44,7 +43,7 @@ In this tutorial, you require users to authenticate first, register with the not
 1. Log on to the [Azure classic portal](https://manage.windowsazure.com/), click **Mobile Services**, and then click your mobile service.
 
 2. Click the **Push** tab, select **Only Authenticated Users** for **Permissions**, click **Save**, and then click **Edit Script**.
-	
+
 	This allows you to customize the push notification registration callback function. If you use Git to edit your source code, this same registration function is found in `.\service\extensions\push.js`.
 
 3. Replace the existing **register** function with the following code and then click **Save**:
@@ -52,25 +51,25 @@ In this tutorial, you require users to authenticate first, register with the not
 		exports.register = function (registration, registrationContext, done) {   
 		    // Get the ID of the logged-in user.
 			var userId = registrationContext.user.userId;    
-		    
+
 			// Perform a check here for any disallowed tags.
 			if (!validateTags(registration))
 			{
-				// Return a service error when the client tries 
+				// Return a service error when the client tries
 		        // to set a user ID tag, which is not allowed.		
 				done("You cannot supply a tag that is a user ID");		
 			}
 			else{
 				// Add a new tag that is the user ID.
 				registration.tags.push(userId);
-				
+
 				// Complete the callback as normal.
 				done();
 			}
 		};
-		
+
 		function validateTags(registration){
-		    for(var i = 0; i < registration.tags.length; i++) { 
+		    for(var i = 0; i < registration.tags.length; i++) {
 		        console.log(registration.tags[i]);           
 				if (registration.tags[i]
 				.search(/facebook:|twitter:|google:|microsoft:/i) !== -1){
@@ -82,7 +81,7 @@ In this tutorial, you require users to authenticate first, register with the not
 
 	This adds a tag to the registration that is the ID of the logged-in user. The supplied tags are validated to prevent a user from registering for another user's ID. When a notification is sent to this user, it is received on this and any other device registered by the user.
 
-4. Click the back arrow, click the **Data** tab, click **TodoItem**, click **Script**, and then select **Insert**. 
+4. Click the back arrow, click the **Data** tab, click **TodoItem**, click **Script**, and then select **Insert**.
 
 Replace the `insert` function with the following code, then click **Save**. This insert script uses the user ID tag to send a push notification to all iOS app registrations from the logged-in user:
 

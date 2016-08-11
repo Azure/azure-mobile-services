@@ -27,21 +27,20 @@
 - [(Android | .NET)](mobile-services-dotnet-backend-android-get-started.md)
 - [(Android | Javascript)](mobile-services-android-get-started.md)
 - [(Xamarin.iOS | .NET)](mobile-services-dotnet-backend-xamarin-ios-get-started.md)
-- [(Xamarin.iOS | Javascript)](../articles/partner-xamarin-mobile-services-ios-get-started.md)
+- [(Xamarin.iOS | Javascript)](partner-xamarin-mobile-services-ios-get-started.md)
 - [(Xamarin.Android | .NET)](mobile-services-dotnet-backend-xamarin-android-get-started.md)
-- [(Xamarin.Android | Javascript)](../articles/partner-xamarin-mobile-services-android-get-started.md)
+- [(Xamarin.Android | Javascript)](partner-xamarin-mobile-services-android-get-started.md)
 - [(HTML | Javascript)](mobile-services-html-get-started.md)
 - [(PhoneGap | Javascript)](mobile-services-javascript-backend-phonegap-get-started.md)
-- [(Sencha | Javascript)](../articles/partner-sencha-mobile-services-get-started.md)
+- [(Sencha | Javascript)](partner-sencha-mobile-services-get-started.md)
 
 &nbsp;
 
 >[AZURE.WARNING] This is an **Azure Mobile Services** topic.  This service has been superseded by Azure App Service Mobile Apps and is scheduled for removal from Azure.  We recommend using Azure Mobile Apps for all new mobile backend deployments.  Read [this announcement](https://azure.microsoft.com/blog/transition-of-azure-mobile-services/) to learn more about the pending deprecation of this service.  
-> 
+>
 > Learn about [migrating your site to Azure App Service](https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-migrating-from-mobile-services/).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
-> For the equivalent Mobile Apps version of this topic, see [Create an Android app in Azure Mobile Apps](../app-service-mobile/app-service-mobile-android-get-started.md).
 
 This tutorial shows you how to add a cloud-based backend service to an Android app using Azure Mobile Services. In this tutorial, you will create both a new mobile service and a simple **To do list** app that stores app data in the new mobile service.
 
@@ -77,7 +76,7 @@ Follow these steps to create a new mobile service.
 	![](./media/mobile-services-create-new-service/mobile-create-page1.png)
 
 	This displays the **Specify database settings** page.
-	
+
 	>[AZURE.NOTE]As part of this tutorial, you create a new SQL Database instance and server. You can reuse this new database and administer it as you would any other SQL Database instance. If you already have a database in the same region as the new mobile service, you can instead choose **Use existing Database** and then select that database. The use of a database in a different region is not recommended because of additional bandwidth costs and higher latencies.
 
 3.	In **Name**, type the name of the new database, then type **Login name**, which is the administrator login name for the new SQL Database server, type and confirm the password, and click the check button to complete the process.
@@ -151,7 +150,7 @@ You can run the app using the emulator, or using an actual device.
    	This lets you browse the data inserted by the app into the table.
 
    	![](./media/mobile-services-android-get-started/mobile-data-browse.png)
- 
+
 
 
 ## <a name="next-steps"> </a>Next Steps
@@ -168,7 +167,7 @@ Now that you have completed the quickstart, learn how to perform additional impo
 
 
 
- 
+
 
 
 <!-- URLs. -->
@@ -177,4 +176,3 @@ Now that you have completed the quickstart, learn how to perform additional impo
 [Get started with authentication]: mobile-services-android-get-started-users.md
 [Get started with push notifications]: mobile-services-javascript-backend-android-get-started-push.md
 [Mobile Services Android SDK]: https://go.microsoft.com/fwLink/p/?LinkID=266533
-

@@ -8,19 +8,19 @@
 	editor="mollybos"/>
 
 
-<tags 
-	ms.service="mobile-services" 
-	ms.workload="mobile" 
-	ms.tgt_pltfrm="na" 
-	ms.devlang="multiple" 
-	ms.topic="article" 
-	ms.date="07/21/2016" 
+<tags
+	ms.service="mobile-services"
+	ms.workload="mobile"
+	ms.tgt_pltfrm="na"
+	ms.devlang="multiple"
+	ms.topic="article"
+	ms.date="07/21/2016"
 	ms.author="donnam;ricksal"/>
 
 # Scale mobile services backed by Azure SQL Database
 
 >[AZURE.WARNING] This is an **Azure Mobile Services** topic.  This service has been superseded by Azure App Service Mobile Apps and is scheduled for removal from Azure.  We recommend using Azure Mobile Apps for all new mobile backend deployments.  Read [this announcement](https://azure.microsoft.com/blog/transition-of-azure-mobile-services/) to learn more about the pending deprecation of this service.  
-> 
+>
 > Learn about [migrating your site to Azure App Service](https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-migrating-from-mobile-services/).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
@@ -78,10 +78,10 @@ Once you are familiar with the different database tiers, we can explore database
 6. Ensure the relevant metrics are displayed by using the **Add Metrics** button. Include the following
     - *CPU Percentage* (available only in Basic/Standard/Premium tiers)
 
-    - *Data IO Percentage* (available only in Basic/Standard/Premium tiers) 
+    - *Data IO Percentage* (available only in Basic/Standard/Premium tiers)
     - *Log IO Percentage* (available only in Basic/Standard/Premium tiers)
-    - *Storage* 
-7. Inspect the metrics over the time window when your service was experiencing issues. 
+    - *Storage*
+7. Inspect the metrics over the time window when your service was experiencing issues.
 
     ![Azure classic portal - SQL Database Metrics][PortalSqlMetrics]
 
@@ -114,7 +114,7 @@ It is frequently useful to configure alerts for key database metrics as a proact
     ![Azure Management Portal - SQL Alert Name and Description][PortalSqlAddAlert2]
 
 5. Specify the value to use as the alert threshold. Consider using **80%** to allow for some reaction time. Also be sure to specify an email address that you actively monitor.
- 
+
     ![Azure Management Portal - SQL Alert Threshold and Email][PortalSqlAddAlert3]
 
 
@@ -210,8 +210,8 @@ For more information on improving query design, including how to analyze query p
 
 Imagine a scenario where you are about to send a push notification to all your customers to check out some new content in your app. As they tap on the notification, the app launches, which possibly triggers a call to your mobile service and a query execution against your SQL database. As potentially millions of customers take this action over the span of just a few minutes, this will generate a surge of SQL load, which may be orders of magnitude higher than your app's steady state load. This could be addressed by scaling your app to a higher SQL tier during the spike and then scaling it back down, however that solution requires manual intervention and comes with increased cost. Frequently slight tweaks in your mobile service architecture can significantly balance out the load clients drive to your SQL database and eliminate problematic spikes in demand. These modifications can often be implemented easily with minimal impact to your customer's experience. Here are some examples:
 
-- **Spread out the load over time.** If you control the timing of certain events (for example, a broadcast push notification), which are expected to generate a spike in demand, and the timing of those events is not critical, consider spreading them out over time. In the example above, perhaps it is acceptable for your app customers to get notified of the new app content in batches over the span of a day instead of nearly simultaneously. Consider batching up your customers into groups which will allow staggered delivery to each batch. If using Notification Hubs, applying an additional tag to track the batch, and then delivering a push notification to that tag provides an easy way to implement this strategy. For more information on tags, see [Use Notification Hubs to send breaking news](../notification-hubs/notification-hubs-windows-notification-dotnet-push-xplat-segmented-wns.md).
-- **Use Blob and Table Storage whenever appropriate.** Frequently the content that the customers will view during the spike is fairly static and doesn't need to be stored in a SQL database since you are unlikely to need relational querying capabilities over that content. In that case, consider storing the content in Blob or Table Storage. You can access public blobs in Blob Storage directly from the device. To access blobs in a secure way or use Table Storage, you will need to go through a Mobile Services Custom API in order to protect your storage access key. For more information, see [Upload images to Azure Storage by using Mobile Services](../mobile-services/mobile-services-dotnet-backend-windows-universal-dotnet-upload-data-blob-storage.md).
+- **Spread out the load over time.** If you control the timing of certain events (for example, a broadcast push notification), which are expected to generate a spike in demand, and the timing of those events is not critical, consider spreading them out over time. In the example above, perhaps it is acceptable for your app customers to get notified of the new app content in batches over the span of a day instead of nearly simultaneously. Consider batching up your customers into groups which will allow staggered delivery to each batch. If using Notification Hubs, applying an additional tag to track the batch, and then delivering a push notification to that tag provides an easy way to implement this strategy. For more information on tags, see [Use Notification Hubs to send breaking news](https://azure.microsoft.com/en-us/documentation/articles/notification-hubs-windows-notification-dotnet-push-xplat-segmented-wns/).
+- **Use Blob and Table Storage whenever appropriate.** Frequently the content that the customers will view during the spike is fairly static and doesn't need to be stored in a SQL database since you are unlikely to need relational querying capabilities over that content. In that case, consider storing the content in Blob or Table Storage. You can access public blobs in Blob Storage directly from the device. To access blobs in a secure way or use Table Storage, you will need to go through a Mobile Services Custom API in order to protect your storage access key. For more information, see [Upload images to Azure Storage by using Mobile Services](mobile-services-dotnet-backend-windows-universal-dotnet-upload-data-blob-storage.md).
 - **Use an in-memory cache**. Another alternative is to store data, which would commonly be accessed during a traffic spike, in an in-memory cache such as [Azure Cache](https://azure.microsoft.com/services/cache/). This means incoming requests would be able to fetch the information they need from memory, instead of repeatedly querying the database.
 
 <a name="Advanced"></a>
@@ -222,7 +222,7 @@ This section covers some more advanced diagnostic tasks, which may be useful if 
 To perform some of the diagnostic tasks in this section, you need access to a management tool for SQL databases such as **SQL Server Management Studio** or the management functionality built into the **Azure classic portal**.
 
 
-SQL Server Management Studio is a free Windows application, which offers the most advanced capabilities. If you do not have access to a Windows machine (for example if you are using a Mac), consider provisioning a Virtual Machine in Azure as shown in [Create a Virtual Machine Running Windows Server](../virtual-machines/virtual-machines-windows-hero-tutorial.md) and then connecting remotely to it. If you intend to use the VM primarily for the purpose of running SQL Server Management Studio, a **Basic A0** (formerly "Extra Small") instance should be sufficient.
+SQL Server Management Studio is a free Windows application, which offers the most advanced capabilities. If you do not have access to a Windows machine (for example if you are using a Mac), consider provisioning a Virtual Machine in Azure as shown in [Create a Virtual Machine Running Windows Server](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-hero-tutorial/) and then connecting remotely to it. If you intend to use the VM primarily for the purpose of running SQL Server Management Studio, a **Basic A0** (formerly "Extra Small") instance should be sufficient.
 
 
 The Azure classic portal offers a built-in management experience, which is more limited, but is available without a local install.
@@ -391,9 +391,9 @@ The following example query runs a join across these tables to get a list of the
 For more information, see [Monitoring SQL Database Using Dynamic Management Views][] and [Missing Index Dynamic Management Views][].
 
 <a name="AdvancedQuery" ></a>
-### Advanced Query Design 
+### Advanced Query Design
 
-Frequently it's difficult to diagnose what queries are most expensive for the database. 
+Frequently it's difficult to diagnose what queries are most expensive for the database.
 
 
 #### Finding top N queries
@@ -499,4 +499,3 @@ To analyze the query plan in the **SQL Database Management Portal**, use the hig
 
 <!-- BLOG LINKS -->
 [How much does that key cost?]: http://www.sqlskills.com/blogs/kimberly/how-much-does-that-key-cost-plus-sp_helpindex9/
-

@@ -19,25 +19,20 @@
 # Using offline data sync in Mobile Services
 
 > [AZURE.SELECTOR]
-- [Android)](./
-mobile-services-android-get-started-offline-data.md)
-- [iOS](./
-mobile-services-ios-get-started-offline-data.md)
-- [Windows](./
-mobile-services-windows-store-dotnet-get-started-offline-data.md)
-- [Xamarin.Android](../mobile-services/articles/mobile-services-xamarin-android-get-started-offline-data.md)
-- [Xamarin.iOS](./
-mobile-services-xamarin-ios-get-started-offline-data.md)
+- [Android)](mobile-services-android-get-started-offline-data.md)
+- [iOS](mobile-services-ios-get-started-offline-data.md)
+- [Windows](mobile-services-windows-store-dotnet-get-started-offline-data.md)
+- [Xamarin.Android](mobile-services-xamarin-android-get-started-offline-data.md)
+- [Xamarin.iOS](mobile-services-xamarin-ios-get-started-offline-data.md)
 
 
 &nbsp;
 
 >[AZURE.WARNING] This is an **Azure Mobile Services** topic.  This service has been superseded by Azure App Service Mobile Apps and is scheduled for removal from Azure.  We recommend using Azure Mobile Apps for all new mobile backend deployments.  Read [this announcement](https://azure.microsoft.com/blog/transition-of-azure-mobile-services/) to learn more about the pending deprecation of this service.  
-> 
+>
 > Learn about [migrating your site to Azure App Service](https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-migrating-from-mobile-services/).
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
-> For the equivalent Mobile Apps version of this topic, see [Enable offline sync for your Xamarin.iOS mobile app](../app-service-mobile/app-service-mobile-xamarin-ios-get-started-offline-data.md).
 
 This topic walks through the offline sync capabilities of Azure Mobile Services in the todo list quickstart app. Offline sync allows you to easily create apps that are usable even when the end user has no network access.
 
@@ -60,7 +55,7 @@ This tutorial walks you through these basic steps:
 
 This tutorial requires the following:
 
-* Visual Studio with Xamarin. See [Setup and install for Visual Studio and Xamarin](https://msdn.microsoft.com/library/mt613162.aspx) for instructions. 
+* Visual Studio with Xamarin. See [Setup and install for Visual Studio and Xamarin](https://msdn.microsoft.com/library/mt613162.aspx) for instructions.
 * A Mac with Xcode v7.0 or later and Xamarin Studio Community installed. See [Setup and install for Visual Studio and Xamarin](https://msdn.microsoft.com/library/mt613162.aspx) and [Setup, install, and verifications for Mac users](https://msdn.microsoft.com/library/mt488770.aspx) (MSDN).
 * Completion of the [Get started with Mobile Services] tutorial.
 
@@ -187,7 +182,7 @@ When we wanted to synchronize the local store with the server, we used the `IMob
 *  To push changes to the server, we called `IMobileServiceSyncContext.PushAsync()`. This method is a member of `IMobileServicesSyncContext` instead of the sync table because it will push changes across all tables.
 
     Only records that have been modified in some way locally (through CUD operations) will be sent to the server.
-   
+
 * To pull data from a table on the server to the app, we called `IMobileServiceSyncTable.PullAsync`.
 
     A pull always issues a push first. This is to ensure all tables in the local store along with relationships remain consistent.

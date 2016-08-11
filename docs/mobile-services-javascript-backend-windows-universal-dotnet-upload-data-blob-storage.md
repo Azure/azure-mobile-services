@@ -36,7 +36,7 @@ In this tutorial you add functionality to the Mobile Services quickstart app to 
 This tutorial requires the following:
 
 + Microsoft Visual Studio 2013 Update 3, or a later version
-+ [Azure Storage account](../storage/storage-create-storage-account.md)
++ [Azure Storage account](https://azure.microsoft.com/en-us/documentation/articles/storage-create-storage-account/)
 + A camera or other image capture device attached to your computer.
 
 This tutorial is based on the Mobile Services quickstart. Before you start this tutorial, you must first complete [Get started with Mobile Services].
@@ -45,9 +45,9 @@ This tutorial is based on the Mobile Services quickstart. Before you start this 
 
 A new insert script is registered that generates an SAS when a new Todo item is inserted.
 
-0. If you haven't yet created your storage account, see [How To Create a Storage Account](../articles/storage/storage-create-storage-account.md).
+0. If you haven't yet created your storage account, see [How To Create a Storage Account](https://azure.microsoft.com/en-us/documentation/articles/storage-create-storage-account/).
 
-1. In the [Azure classic portal](https://manage.windowsazure.com/), click **Storage**, click the storage account, then click **Manage Keys**. 
+1. In the [Azure classic portal](https://manage.windowsazure.com/), click **Storage**, click the storage account, then click **Manage Keys**.
 
 2. Make a note of the **Storage Account Name** and **Access Key**.
 
@@ -64,33 +64,33 @@ A new insert script is registered that generates an SAS when a new Todo item is 
 
 4. In the Configure tab, make sure that [Dynamic schema](http://msdn.microsoft.com/library/windowsazure/b6bb7d2d-35ae-47eb-a03f-6ee393e170f7) is enabled. You need dynamic schema enabled to be able to add new columns to the TodoItem table. Dynamic schema should not be enabled in any production service.
 
-4. Click the **Data** tab and then click the **TodoItem** table. 
+4. Click the **Data** tab and then click the **TodoItem** table.
 
 5.  In **todoitem**, click the **Script** tab and select **Insert**, replace the insert function with the following code, then click **Save**:
 
 		var azure = require('azure');
 		var qs = require('querystring');
 		var appSettings = require('mobileservice-config').appSettings;
-		
+
 		function insert(item, user, request) {
-		    // Get storage account settings from app settings. 
+		    // Get storage account settings from app settings.
 		    var accountName = appSettings.STORAGE_ACCOUNT_NAME;
 		    var accountKey = appSettings.STORAGE_ACCOUNT_ACCESS_KEY;
 		    var host = accountName + '.blob.core.windows.net';
-		
+
 		    if ((typeof item.containerName !== "undefined") && (
 		    item.containerName !== null)) {
 		        // Set the BLOB store container name on the item, which must be lowercase.
 		        item.containerName = item.containerName.toLowerCase();
-		
-		        // If it does not already exist, create the container 
+
+		        // If it does not already exist, create the container
 		        // with public read access for blobs.        
 		        var blobService = azure.createBlobService(accountName, accountKey, host);
 		        blobService.createContainerIfNotExists(item.containerName, {
 		            publicAccessLevel: 'blob'
 		        }, function(error) {
 		            if (!error) {
-		
+
 		                // Provide write access to the container for the next 5 mins.        
 		                var sharedAccessPolicy = {
 		                    AccessPolicy: {
@@ -98,19 +98,19 @@ A new insert script is registered that generates an SAS when a new Todo item is 
 		                        Expiry: new Date(new Date().getTime() + 5 * 60 * 1000)
 		                    }
 		                };
-		
+
 		                // Generate the upload URL with SAS for the new image.
-		                var sasQueryUrl = 
-		                blobService.generateSharedAccessSignature(item.containerName, 
+		                var sasQueryUrl =
+		                blobService.generateSharedAccessSignature(item.containerName,
 		                item.resourceName, sharedAccessPolicy);
-		
+
 		                // Set the query string.
 		                item.sasQueryString = qs.stringify(sasQueryUrl.queryString);
-		
-		                // Set the full path on the new new item, 
-		                // which is used for data binding on the client. 
+
+		                // Set the full path on the new new item,
+		                // which is used for data binding on the client.
 		                item.imageUri = sasQueryUrl.baseUrl + sasQueryUrl.path;
-		
+
 		            } else {
 		                console.error(error);
 		            }
@@ -123,12 +123,12 @@ A new insert script is registered that generates an SAS when a new Todo item is 
 
    	This replaces the function that is invoked when an insert occurs in the TodoItem table with a new script. This new script generates a new SAS for the insert, which is valid for 5 minutes, and assigns the value of the generated SAS to the `sasQueryString` property of the returned item. The `imageUri` property is also set to the resource path of the new BLOB to enable image display during binding in the client UI.
 
-	>[AZURE.NOTE] This code creates an SAS for an individual BLOB. If you need to upload multiple blobs to a container using the same SAS, you can instead call the [generateSharedAccessSignature method](http://go.microsoft.com/fwlink/?LinkId=390455)</a> with an empty blob resource name, like this: 
+	>[AZURE.NOTE] This code creates an SAS for an individual BLOB. If you need to upload multiple blobs to a container using the same SAS, you can instead call the [generateSharedAccessSignature method](http://go.microsoft.com/fwlink/?LinkId=390455)</a> with an empty blob resource name, like this:
 	>                 
 	>     blobService.generateSharedAccessSignature(containerName, '', sharedAccessPolicy);
 
 Next, you will update the quickstart app to add image upload functionality by using the SAS generated on insert.
- 
+
 <!-- Anchors. -->
 
 <!-- Images. -->
@@ -142,7 +142,7 @@ To be able to use an SAS to upload images to Blob storage, you must first add th
 
 1. In **Solution Explorer** in Visual Studio, right-click the project name, and then select **Manage NuGet Packages**.
 
-2. In the left pane, select the **Online** category, search for `WindowsAzure.Storage`, click **Install** on the **Azure Storage** package, then accept the license agreements. 
+2. In the left pane, select the **Online** category, search for `WindowsAzure.Storage`, click **Install** on the **Azure Storage** package, then accept the license agreements.
 
   	![](./media/mobile-services-windows-universal-dotnet-upload-to-blob-storage/mobile-add-storage-nuget-package-dotnet.png)
 
@@ -155,11 +155,11 @@ Next, you will update the quickstart app to capture and upload images.
 1. In Visual Studio, open the Package.appxmanifest file for the Windows app project and in the **Capabilities** tab enable the **Webcam** and **Microphone** capabilities.
 
    	![](./media/mobile-services-windows-universal-dotnet-upload-to-blob-storage/mobile-app-manifest-camera.png)
- 
+
    	This makes sure that your app can use a camera attached to the computer. Users will be requested to allow camera access the first time that the app is run.
 
 2. Repeat the step above for the Windows Phone app project.
- 
+
 3. In the Windows app project, open the MainPage.xaml file and replace the **StackPanel** element directly after the first **QuickStartTask** element with the following code:
 
 		<StackPanel Orientation="Horizontal" Margin="72,0,0,0">
@@ -184,25 +184,25 @@ Next, you will update the quickstart app to capture and upload images.
 2. Replace the **StackPanel** element in the **DataTemplate** with the following code:
 
         <StackPanel Orientation="Vertical">
-            <CheckBox Name="CheckBoxComplete" IsChecked="{Binding Complete, Mode=TwoWay}" 
-                        Checked="CheckBoxComplete_Checked" Content="{Binding Text}" 
+            <CheckBox Name="CheckBoxComplete" IsChecked="{Binding Complete, Mode=TwoWay}"
+                        Checked="CheckBoxComplete_Checked" Content="{Binding Text}"
                         Margin="10,5" VerticalAlignment="Center"/>
             <Image Name="ImageUpload" Source="{Binding ImageUri, Mode=OneWay}"
                     MaxHeight="250"/>
-        </StackPanel> 
+        </StackPanel>
 
    	This adds an image to the **ItemTemplate** and sets its binding source as the URI of the uploaded image in the Blob Storage service.
 
 3. In the Windows Phone app project, open the MainPage.xaml file and replace the **ButtonSave** element with the following code:
 
         <StackPanel Grid.Row ="1" Grid.Column="1"  Orientation="Horizontal">
-            <AppBarButton Label="Photo" Icon="Camera" Name="ButtonCapture" 
+            <AppBarButton Label="Photo" Icon="Camera" Name="ButtonCapture"
                           Click="ButtonCapture_Click" Height="78" Width="62" />
-            <AppBarButton Label="Upload" Icon="Upload" Name="ButtonSave" 
+            <AppBarButton Label="Upload" Icon="Upload" Name="ButtonSave"
                           Click="ButtonSave_Click"/>
         </StackPanel>
-        <Grid Grid.Row="2" Name="captureGrid" Grid.RowSpan="3" Grid.ColumnSpan="2" 
-              Canvas.ZIndex="99" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" 
+        <Grid Grid.Row="2" Name="captureGrid" Grid.RowSpan="3" Grid.ColumnSpan="2"
+              Canvas.ZIndex="99" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
               Visibility="Collapsed">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
@@ -210,12 +210,12 @@ Next, you will update the quickstart app to capture and upload images.
             </Grid.RowDefinitions>
             <CaptureElement Grid.Row="0" x:Name="previewElement" Tapped="previewElement_Tapped" />                    
             <Image Grid.Row="0" Name="imagePreview" Visibility="Collapsed" />
-            <StackPanel Grid.Row="1" Name="captureButtons" 
+            <StackPanel Grid.Row="1" Name="captureButtons"
                         Orientation="Horizontal" Visibility="Collapsed">
                 <TextBlock Name="TextCapture" VerticalAlignment="Bottom" />
-                <AppBarButton Label="Retake" Icon="Redo" Name="ButtonRetake" 
+                <AppBarButton Label="Retake" Icon="Redo" Name="ButtonRetake"
                               Click="ButtonRetake_Click" />
-                <AppBarButton Label="Cancel" Icon="Cancel" Name="ButtonCancel" 
+                <AppBarButton Label="Cancel" Icon="Cancel" Name="ButtonCancel"
                               Click="ButtonCancel_Click" />
             </StackPanel>
         </Grid>
@@ -223,10 +223,10 @@ Next, you will update the quickstart app to capture and upload images.
 2. Replace the **StackPanel** element in the **DataTemplate** with the following code:
 
         <StackPanel Orientation="Vertical">
-            <CheckBox Name="CheckBoxComplete" IsChecked="{Binding Complete, Mode=TwoWay}" 
-                      Checked="CheckBoxComplete_Checked" Content="{Binding Text}" 
+            <CheckBox Name="CheckBoxComplete" IsChecked="{Binding Complete, Mode=TwoWay}"
+                      Checked="CheckBoxComplete_Checked" Content="{Binding Text}"
                       Margin="10,5" VerticalAlignment="Center"/>
-            <Image Name="ImageUpload" Source="{Binding ImageUri, Mode=OneWay}" 
+            <Image Name="ImageUpload" Source="{Binding ImageUri, Mode=OneWay}"
                    MaxHeight="150"/>
         </StackPanel>
 
@@ -234,18 +234,18 @@ Next, you will update the quickstart app to capture and upload images.
 
         [JsonProperty(PropertyName = "containerName")]
         public string ContainerName { get; set; }
-		
+
         [JsonProperty(PropertyName = "resourceName")]
         public string ResourceName { get; set; }
-		
+
         [JsonProperty(PropertyName = "sasQueryString")]
         public string SasQueryString { get; set; }
-		
+
         [JsonProperty(PropertyName = "imageUri")]
-        public string ImageUri { get; set; } 
+        public string ImageUri { get; set; }
 
 3. Open the shared MainPage.cs project file and add the following **using** statements:
-	
+
 		using Windows.Media.Capture;
 		using Windows.Media.MediaProperties;
 		using Windows.Storage;
@@ -311,7 +311,7 @@ Next, you will update the quickstart app to capture and upload images.
         {
             // It's safest to return this back onto the UI thread to show the message dialog.
             MessageDialog dialog = new MessageDialog(errorEventArgs.Message);
-            await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, 
+            await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,
                 async () => { await dialog.ShowAsync(); });            
         }
 
@@ -352,7 +352,7 @@ Next, you will update the quickstart app to capture and upload images.
   	This code displays the UI used to capture an image, and saves the image to a storage file.
 
 6. Replace the existing `InsertTodoItem` method with the following code:
- 
+
         private async Task InsertTodoItem(TodoItem todoItem)
         {
             string errorString = string.Empty;
@@ -373,7 +373,7 @@ Next, you will update the quickstart app to capture and upload images.
             // If we have a returned SAS, then upload the blob.
             if (!string.IsNullOrEmpty(todoItem.SasQueryString))
             {
-                // Get the URI generated that contains the SAS 
+                // Get the URI generated that contains the SAS
                 // and extract the storage credentials.
                 StorageCredentials cred = new StorageCredentials(todoItem.SasQueryString);
                 var imageUri = new Uri(todoItem.ImageUri);
@@ -405,7 +405,7 @@ Next, you will update the quickstart app to capture and upload images.
 	This code sends a request to the mobile service to insert a new TodoItem. The response contains the SAS, which is then used to upload the image from local storage to Azure Blob storage. The URL of the uploaded image is used in data binding.
 
 The final step is to test both versions of the app and validate that uploads succeed from both devices.
-		
+
 ##<a name="test"></a>Test uploading the images in your app
 
 1. In Visual Studio, make sure that the Windows project is set as the default project, then press the F5 key to run the app.
@@ -471,7 +471,7 @@ Now that you have been able to securely upload images by integrating your mobile
 [Send push notifications to Windows Store apps using Service Bus from a .NET back-end]: http://go.microsoft.com/fwlink/?LinkId=277073&clcid=0x409
 [Mobile Services server script reference]: mobile-services-how-to-use-server-scripts.md
 [Get started with Mobile Services]: mobile-services-javascript-backend-windows-store-dotnet-get-started.md
-[How To Create a Storage Account]: ../storage-create-storage-account.md
+[How To Create a Storage Account]: https://azure.microsoft.com/en-us/documentation/articles/storage-create-storage-account/
 [Azure Storage Client library for Store apps]: http://go.microsoft.com/fwlink/p/?LinkId=276866
 [Mobile Services .NET How-to Conceptual Reference]: mobile-services-windows-dotnet-how-to-use-client-library.md
 [App settings]: http://msdn.microsoft.com/library/windowsazure/b6bb7d2d-35ae-47eb-a03f-6ee393e170f7
