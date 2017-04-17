@@ -32,7 +32,7 @@
 - [(Xamarin.Android | .NET)](mobile-services-dotnet-backend-xamarin-android-get-started-push.md)
 - [(Xamarin.Forms | JavaScript)](partner-xamarin-mobile-services-xamarin-forms-get-started-push.md)
 
-##Overview
+## Overview
 
 This topic shows you how to use Azure Mobile Services to send push notifications to a Windows Phone Silverlight app. In this tutorial you enable push notifications using Azure Notification Hubs to the quickstart project. When complete, your mobile service will send a push notification using Notification Hubs each time a record is inserted. The notification hub that you create is free with your mobile service, can be managed independent of the mobile service, and can be used by other applications and services.
 
@@ -40,7 +40,7 @@ This tutorial is based on the TodoList sample app. Before you start this tutoria
 
 >[AZURE.NOTE] To send push notifications to a Windows Phone 8.1 Store app, follow the [Windows Store app](mobile-services-javascript-backend-windows-universal-dotnet-get-started-push.md) version of this tutorial.
 
-##<a id="update-app"></a> Update the app to register for notifications
+## <a id="update-app"></a> Update the app to register for notifications
 
 Before your app can receive push notifications, you must register a notification channel.
 
@@ -91,7 +91,7 @@ Before your app can receive push notifications, you must register a notification
 
    	This makes sure that your app can raise toast notifications.
 
-##<a id="update-scripts"></a> Update server scripts to send push notifications
+## <a id="update-scripts"></a> Update server scripts to send push notifications
 
 Finally, you must update the script registered to the insert operation on the TodoItem table to send notifications.
 
@@ -131,7 +131,7 @@ Finally, you must update the script registered to the insert operation on the To
 
 	>[AZURE.NOTE]This tutorial uses MPNS in unauthenticated mode. In this mode, MPNS limits the number of notifications that can be sent to a device channel. To remove this restriction, you must generate and upload a certificate by clicking **Upload** and selecting the certificate. For more information on generating the certificate, see [Setting up an authenticated web service to send push notifications for Windows Phone].
 
-##<a id="test"></a> Test push notifications in your app
+## <a id="test"></a> Test push notifications in your app
 
 1. In Visual Studio, press the F5 key to run the app.
 

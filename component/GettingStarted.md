@@ -1,4 +1,4 @@
-##Getting Started
+## Getting Started
 
 Follow the tutorial for the appropriate platform:
 
@@ -23,6 +23,6 @@ Follow the tutorial for the appropriate platform:
 - Contact: mobileservices@microsoft.com
 - Twitter: @paulbatum @joshtwist @cloudnick @chrisrisner @mlunes90
 
-###Legal 
+### Legal 
 
 - Terms & Conditions: http://www.windowsazure.com/en-us/support/legal/

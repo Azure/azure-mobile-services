@@ -41,7 +41,7 @@ This tutorial walks you through how to use the job scheduler to create a schedul
 
 >[AZURE.NOTE]This tutorial uses the third-party LINQ to Twitter library to simplify OAuth 2.0 access to Twitter v1.1. APIs. You must download and install the LINQ to Twitter NuGet package to complete this tutorial. For more information, see the [LINQ to Twitter CodePlex project].
 
-##<a name="get-oauth-credentials"></a>Register for access to Twitter v1.1 APIs and store credentials
+## <a name="get-oauth-credentials"></a>Register for access to Twitter v1.1 APIs and store credentials
 
 
 
@@ -92,7 +92,7 @@ mobile-services-how-to-register-twitter-authentication.md
 
 The mobile service uses these stored settings when it runs on the local computer, which lets you test the scheduled job before you publish it. When running in Azure, the mobile service instead uses values set in the portal and ignores these project settings.
 
-##<a name="install-linq2twitter"></a>Download and install the LINQ to Twitter library
+## <a name="install-linq2twitter"></a>Download and install the LINQ to Twitter library
 
 1. In **Solution Explorer** in Visual Studio, right-click the project name, and then select **Manage NuGet Packages**.
 
@@ -104,7 +104,7 @@ The mobile service uses these stored settings when it runs on the local computer
 
 Next, you need to create a new table in which to store tweets.
 
-##<a name="create-table"></a>Create the new Updates table
+## <a name="create-table"></a>Create the new Updates table
 
 1. In the Solution Explorer in Visual Studio, right-click the DataObjects folder, expand **Add**, click **Class**,   type `Updates` for **Name**, then click **Add**.
 
@@ -143,7 +143,7 @@ Next, you need to create a new table in which to store tweets.
 
 Next, you create the scheduled job that accesses Twitter and stores tweet data in the new Updates table.
 
-##<a name="add-job"></a>Create a new scheduled job
+## <a name="add-job"></a>Create a new scheduled job
 
 1. Expand the ScheduledJobs folder and open the SampleJob.cs project file.
 
@@ -264,7 +264,7 @@ Next, you create the scheduled job that accesses Twitter and stores tweet data i
 
 	In the above code, the **ExecuteAsync** override method calls the Twitter query API using stored credentials to request recent tweets that contain the hashtag `#mobileservices`. Duplicate tweets and replies are removed from the results before they are stored in the table.
 
-##<a name="run-job-locally"></a>Test the scheduled job locally
+## <a name="run-job-locally"></a>Test the scheduled job locally
 
 Schedule jobs can be tested locally before being published to Azure and registered in the portal.
 
@@ -286,7 +286,7 @@ Schedule jobs can be tested locally before being published to Azure and register
 
 	The new tweets are entered as rows in the data table.
 
-##<a name="register-job"></a>Publish the service and register the new job
+## <a name="register-job"></a>Publish the service and register the new job
 
 The job must be registered in the **Scheduler** tab so that Mobile Services can run it on the schedule that you define.
 

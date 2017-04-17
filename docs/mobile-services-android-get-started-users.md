@@ -49,7 +49,7 @@ This topic shows you how to authenticate users in Azure Mobile Services from you
 This tutorial walks you through the basic steps to enable authentication in your app.
 
 
-##Prerequisites
+## Prerequisites
 
 This tutorial is based on the code you download in the Mobile Services quickstart. Before you start this tutorial, you must first complete either [Get started with Mobile Services] or [Add Mobile Services to an existing app].
 

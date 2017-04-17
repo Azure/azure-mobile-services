@@ -21,7 +21,7 @@
 
 This article provides detailed information about and examples of how to work with a JavaScript backend in Azure Mobile Services.
 
-##<a name="intro"></a>Introduction
+## <a name="intro"></a>Introduction
 
 In a JavaScript backend mobile service, you can define custom business logic as JavaScript code that's stored and executed on the server. This server script code is assigned to one of the following server functions:
 
@@ -34,7 +34,7 @@ The signature of the main function in the server script depends on the context o
 For descriptions of individual server script objects and functions, see [Mobile Services server script reference].
 
 
-##<a name="table-scripts"></a>Table operations
+## <a name="table-scripts"></a>Table operations
 
 A table operation script is a server script that is registered to an operation on a table&mdash;insert, read, update, or delete (*del*). This section describes how to work with table operations in a JavaScript backend, which includes the following sections:
 
@@ -47,7 +47,7 @@ A table operation script is a server script that is registered to an operation o
 + [How to: Add custom parameters]
 + [How to: Work with table users][How to: Work with users]
 
-###<a name="basic-table-ops"></a>Overview of table operations
+### <a name="basic-table-ops"></a>Overview of table operations
 
 The name of the script must match the kind of operation for which it is registered. Only one script can be registered for a given table operation. The script is executed every time that the given operation is invoked by a REST request&mdash;for example, when a POST request is received to insert an item into the table. Mobile Services does not preserve state between script executions. Because a new global context is created every time a script is run, any state variables that are defined in the script are reinitialized. If you want to store state from one request to another, create a table in your mobile service, and then read and write the state to the table. For more information, see [How to: Access tables from scripts].
 
@@ -85,7 +85,7 @@ Here are the canonical main-function signatures for the table operations:
 
 Every server script has a main function, and may have optional helper functions. Even though a server script may have been created for a specific table, it can also reference other tables in the same database. You can also define common functions as modules that can be shared across scripts. For more information, see [Source control and shared code][Source control, shared code, and helper functions].
 
-###<a name="register-table-scripts"></a>How to: Register table scripts
+### <a name="register-table-scripts"></a>How to: Register table scripts
 
 You can define server scripts that are registered to a table operation in one of the following ways:
 
@@ -141,7 +141,7 @@ When the **execute** function is called, the `item`, [query][query object], or `
 For more examples, see [Read and write data], [Modify the request] and [Validate data].
 
 
-###<a name="override-response"></a>How to: Override the default response
+### <a name="override-response"></a>How to: Override the default response
 
 You can also use a script to implement validation logic that can override the default response behavior. If validation fails, just call the **respond** function instead of the **execute** function and write the response to the client:
 
@@ -156,7 +156,7 @@ You can also use a script to implement validation logic that can override the de
 
 In this example, the request is rejected when the inserted item does not have a `userId` property that matches the `userId` of the [user object] that's supplied for the authenticated client. In this case, a database operation (*insert*) does not occur, and a response that has a 403 HTTP status code and a custom error message is returned to the client. For more examples, see [Modify the response].
 
-###<a name="override-success"></a>How to: Override execute success
+### <a name="override-success"></a>How to: Override execute success
 
 By default in a table operation, the **execute** function writes responses automatically. However, you can pass two optional parameters to the execute function that override its behavior on success and/or on error.
 
@@ -178,7 +178,7 @@ When you provide a **success** handler to the **execute** function, you must als
 
 >[AZURE.NOTE]You can call **respond** without arguments to invoke the default response only after you first call the **execute** function.
 
-###<a name="override-error"></a>How to: Override default error handling
+### <a name="override-error"></a>How to: Override default error handling
 
 The **execute** function can fail if there is a loss of connectivity to the database, an invalid object, or an incorrect query. By default when an error occurs, server scripts log the error and write an error result to the response. Because Mobile Services provides default error handling, you don't have to handle errors that may occur in the service.
 
@@ -198,7 +198,7 @@ When you provide an error handler, Mobile Services returns an error result to th
 
 You can also provide both a **success** and an **error** handler if you wish.
 
-###<a name="generate-guids"></a>How to: Generate unique ID values
+### <a name="generate-guids"></a>How to: Generate unique ID values
 
 Mobile Services supports unique custom string values for the table's **id** column. This allows applications to use custom values such as email addresses or user names for the ID.
 
@@ -233,7 +233,7 @@ The value for the `id` must be unique and it must not include characters from th
 You can also use integer IDs for your tables. To use an integer ID, you must create your table with the `mobile table create` command using the `--integerId` option. This command is used with the Command-line Interface (CLI) for Azure. For more information on using the CLI, see [CLI to manage Mobile Services tables](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-command-line-tools/#Mobile_Tables).
 
 
-###<a name="access-headers"></a>How to: Access custom parameters
+### <a name="access-headers"></a>How to: Access custom parameters
 
 When you send a request to your mobile service, you can include custom parameters in the URI of the request to instruct your table operation scripts how to process a given request. You then modify your script to inspect the parameter to determine the processing path.
 
@@ -287,7 +287,7 @@ In JavaScript it is a compact version of the lengthier equivalent:
 		}
 
 
-###<a name="work-with-users"></a>How to: Work with users
+### <a name="work-with-users"></a>How to: Work with users
 
 In Azure Mobile Services, you can use an identity provider to authenticate users. For more information, see [Get started with authentication]. When an authenticated user invokes a table operation, Mobile Services uses the [user object] to supply information about the user to the registered script function. The **userId** property can be used to store and retrieve user-specific information. The following example sets the owner property of an item based on the **userId** of an authenticated user:
 
@@ -305,7 +305,7 @@ The next example adds an additional filter to the query based on the **userId** 
 	    request.execute();
 	}
 
-##<a name="custom-api"></a>Custom APIs
+## <a name="custom-api"></a>Custom APIs
 
 This section describes how you create and work with custom API endpoints, which includes the following sections:
 
@@ -316,7 +316,7 @@ This section describes how you create and work with custom API endpoints, which 
 + [How to: Work with users and headers in a custom API]
 + [How to: Define multiple routes in a custom API]
 
-###<a name="custom-api-overview"></a>Overview of custom APIs
+### <a name="custom-api-overview"></a>Overview of custom APIs
 
 A custom API is an endpoint in your mobile service that is accessed by one or more of the standard HTTP methods: GET, POST, PUT, PATCH, DELETE. A separate function export can be defined for each HTTP method supported by the custom API, all in a single script file. The registered script is invoked when a request to the custom API using the given method is received. For more information, see [Custom API].
 
@@ -332,7 +332,7 @@ The **send** function on the [response object] returns your desired response to 
 
 The global state is maintained between executions.
 
-###<a name="define-custom-api"></a>How to: Define a custom API
+### <a name="define-custom-api"></a>How to: Define a custom API
 
 You can define server scripts that are registered to HTTP methods in a custom API endpoint in one of the following ways:
 
@@ -346,7 +346,7 @@ You can define server scripts that are registered to HTTP methods in a custom AP
 
 + From the command prompt by using the Azure command line tool. For more information, see [Using the command line tool].
 
-###<a name="handle-methods"></a>How to: Implement HTTP methods
+### <a name="handle-methods"></a>How to: Implement HTTP methods
 
 A custom API can handle one or more of the HTTP methods, GET, POST, PUT, PATCH, and DELETE. An exported function is defined for each HTTP method handled by the custom API. A single custom API code file can export one or all of the following functions:
 
@@ -358,7 +358,7 @@ A custom API can handle one or more of the HTTP methods, GET, POST, PUT, PATCH, 
 
 The custom API endpoint cannot be called using an HTTP method that has not been implemented in the server script, and a 405 (Method Not Allowed) error response is returned. Separate permission levels can be assigned to each support HTTP method.
 
-###<a name="api-return-xml"></a>How to: Send and receive data as XML
+### <a name="api-return-xml"></a>How to: Send and receive data as XML
 
 When clients store and retrieve data, Mobile Services uses JavaScript Object Notation (JSON) to represent data in the message body. However, there are scenarios where you instead want to use an XML payload. For example, Windows Store apps have a built-in periodic notifications functionality that requires the service to emit XML. For more information, see [Define a custom API that supports periodic notifications].
 
@@ -374,7 +374,7 @@ This custom API function is invoked by an HTTP GET request to the following endp
 
 		https://todolist.azure-mobile.net/api/orderpizza
 
-###<a name="get-api-user"></a>How to: Work with users and headers in a custom API
+### <a name="get-api-user"></a>How to: Work with users and headers in a custom API
 
 In Azure Mobile Services, you can use an identity provider to authenticate users. For more information, see [Get started with authentication]. When an authenticated user requests a custom API, Mobile Services uses the [user object] to provide information about the user to custom API code. The [user object] is accessed from the user property of the [request object]. The **userId** property can be used to store and retrieve user-specific information.
 
@@ -405,7 +405,7 @@ You can also access a specific HTTP header from the [request object], as shown i
 
 This simple example reads a custom header named `my-custom-header`, then returns the value in the response.
 
-###<a name="api-routes"></a>How to: Define multiple routes in a custom API
+### <a name="api-routes"></a>How to: Define multiple routes in a custom API
 
 Mobile Services enables you to define multiple paths, or routes, in a custom API. For example, HTTP GET requests to the following URLs in a **calculator** custom API will invoke an **add** or **subtract** function, respectively:
 
@@ -441,13 +441,13 @@ The two routes in the above custom API example can be invoked by HTTP GET reques
 
 		{"result":-2}
 
-##<a name="scheduler-scripts"></a>Job Scheduler
+## <a name="scheduler-scripts"></a>Job Scheduler
 
 Mobile Services enables you to define server scripts that are executed either as jobs on a fixed schedule or on-demand from the Azure classic portal. Scheduled jobs are useful for performing periodic tasks such as cleaning-up table data and batch processing. For more information, see [Schedule jobs].
 
 Scripts that are registered to scheduled jobs have a main function with the same name as the scheduled job. Because a scheduled script is not invoked by an HTTP request, there is no context that can be passed by the server runtime and the function takes no parameters. Like other kinds of scripts, you can have subroutine functions and require shared modules. For more information, see [Source control, shared code, and helper functions].
 
-###<a name="scheduler-scripts"></a>How to: Define scheduled job scripts
+### <a name="scheduler-scripts"></a>How to: Define scheduled job scripts
 
 A server script can be assigned to a job that's defined in the Mobile Services Scheduler. These scripts belong to the job and are executed according to the job schedule. (You can also use the [Azure classic portal] to run jobs on demand.) A script that defines a scheduled job has no parameters because Mobile Services doesn't pass it any data; it's executed as a regular JavaScript function and doesn't interact with Mobile Services directly.
 
@@ -463,7 +463,7 @@ You define scheduled jobs in one of the following ways:
 
 >[AZURE.NOTE]When you have source control enabled, you can edit scheduled job script files directly in the .\service\scheduler subfolder in your git repository. For more information, see [How to: Share code by using source control].
 
-##<a name="shared-code"></a>Source control, shared code, and helper functions
+## <a name="shared-code"></a>Source control, shared code, and helper functions
 
 This sections shows you how to leverage source control to add your own custom node.js modules, shared code and other code reuse strategies, including the following sections:
 
@@ -473,7 +473,7 @@ This sections shows you how to leverage source control to add your own custom no
 + [How to: Share code by using source control]
 + [How to: Work with app settings]
 
-###<a name="leverage-source-control"></a>Overview of leveraging shared code
+### <a name="leverage-source-control"></a>Overview of leveraging shared code
 
 Because Mobile Services uses Node.js on the server, your scripts already have access to the built-in Node.js modules. You can also use source control to define your own modules or add other Node.js modules to your service.
 
@@ -489,7 +489,7 @@ The following are just some of the more useful modules that can be leveraged in 
 + **util**: Contains various utilities, such as string formatting and object type checking. For more information, see the [Node.js documentation][util API].
 + **zlib**: Exposes compression functionality, such as gzip and deflate. For more information, see the [Node.js documentation][zlib API].
 
-###<a name="modules-helper-functions"></a>How to: Leverage modules
+### <a name="modules-helper-functions"></a>How to: Leverage modules
 
 Mobile Services exposes a set of modules that scripts can load by using the global **require** function. For example, a script can require **request** to make HTTP requests:
 
@@ -501,7 +501,7 @@ Mobile Services exposes a set of modules that scripts can load by using the glob
 	}
 
 
-###<a name="shared-code-source-control"></a>How to: Share code by using source control
+### <a name="shared-code-source-control"></a>How to: Share code by using source control
 
 You can use source control with the Node.js package manager (npm) to control which modules are available to your mobile service. There are two ways to do this:
 
@@ -515,7 +515,7 @@ After you commit the package.json file or custom modules to the repository for y
 
 >[AZURE.NOTE] Modules that you specify in package.json or upload to your mobile service are only used in your server script code. These modules are not used by the Mobile Services runtime.
 
-###<a name="helper-functions"></a>How to: Use helper functions
+### <a name="helper-functions"></a>How to: Use helper functions
 
 In addition to requiring modules, individual server scripts can include helper functions. These are functions that are separate from the main function, which can be used to factor code in the script.
 
@@ -560,7 +560,7 @@ In this example, you must pass both a [tables object] and a [user object] to the
 
 Script files are uploaded to the shared directory either by using [source control][How to: Share code by using source control] or by using the [command line tool][Using the command line tool].
 
-###<a name="app-settings"></a>How to: Work with app settings
+### <a name="app-settings"></a>How to: Work with app settings
 
 Mobile Services enables you to securely store values as app settings, which can be accessed by your server scripts at runtime.  When you add data to the app settings of your mobile service, the name/value pairs are stored encrypted and you can access them in your server scripts without hard-coding them in the script file. For more information, see [App settings].
 
@@ -633,7 +633,7 @@ The following command returns information about every script file maintained in 
 
 For more information, see [Commands to manage Azure Mobile Services].
 
-##<a name="working-with-tables"></a>Working with tables
+## <a name="working-with-tables"></a>Working with tables
 
 This section details strategies for working directly with SQL Database table data, including the following sections:
 
@@ -643,13 +643,13 @@ This section details strategies for working directly with SQL Database table dat
 + [How to: Map JSON types to database types]
 + [Using Transact-SQL to access tables]
 
-###<a name="overview-tables"></a>Overview of working with tables
+### <a name="overview-tables"></a>Overview of working with tables
 
 Many scenarios in Mobile Services require server scripts to access tables in the database. For example. because Mobile Services does not preserve state between script executions, any data that needs to be persisted between script executions must be stored in tables. You might also want to examine entries in a permissions table or store audit data instead of just writing to the log, where data has a limited duration and cannot be accessed programmatically.
 
 Mobile Services has two ways of accessing tables, either by using a [table object] proxy or by composing Transact-SQL queries using the [mssql object]. The [table object] makes it easy to access table data from your sever script code, but the [mssql object] supports more complex data operations and provides the most flexibility.
 
-###<a name="access-tables"></a>How to: Access tables from scripts
+### <a name="access-tables"></a>How to: Access tables from scripts
 
 The easiest way to access tables from your script is by using the [tables object]. The **getTable** function returns a [table object] instance that's a proxy for accessing the requested table. You can then call functions on the proxy to access and change data.
 
@@ -707,7 +707,7 @@ The next example writes auditing information to an **audit** table:
 
 A final example is in the code sample here: [How to: Access custom parameters][How to: Add custom parameters].
 
-###<a name="bulk-inserts"></a>How to: Perform Bulk Inserts
+### <a name="bulk-inserts"></a>How to: Perform Bulk Inserts
 
 If you use a **for** or **while** loop to directly insert a large number of items (1000, for example) into a  table , you may encounter a SQL connection limit that causes some of the inserts to fail. Your request may never complete or it may return a HTTP 500 Internal Server Error.  To avoid this problem, you can insert the items in batches of 10 or so. After the first batch is inserted, submit the next batch, and so on.
 
@@ -757,7 +757,7 @@ By using the following script, you can set the size of a batch of records to ins
 
 The entire code sample, and accompanying discussion, can be found in this [blog posting](http://blogs.msdn.com/b/jpsanders/archive/2013/03/20/server-script-to-insert-table-items-in-windows-azure-mobile-services.aspx). If you use this code, you can adapt it to your specific situation, and thoroughly test it.
 
-###<a name="JSON-types"></a>How to: Map JSON types to database types
+### <a name="JSON-types"></a>How to: Map JSON types to database types
 
 The collections of data types on the client and in a Mobile Services database table are different. Sometimes they map easily to one another, and other times they don't. Mobile Services performs a number of type transformations in the mapping:
 
@@ -782,7 +782,7 @@ Object|Not supported
 Array|Not supported
 Stream|Not supported
 
-###<a name="TSQL"></a>Using Transact-SQL to access tables
+### <a name="TSQL"></a>Using Transact-SQL to access tables
 
 The easiest way to work table data from server scripts is by using a [table object] proxy. However, there are more advanced scenarios that are not supported by the [table object], such as as join queries and other complex queries and invoking stored procedures. In these cases, you must execute Transact-SQL statements directly against the relational table by using the [mssql object]. This object provides the following functions:
 
@@ -798,7 +798,7 @@ These methods give you increasingly more low-level control over the query proces
 + [How to: Run a query that returns *raw* results]
 + [How to: Get access to a database connection]
 
-####<a name="static-query"></a>How to: Run a static query
+#### <a name="static-query"></a>How to: Run a static query
 
 The following query has no parameters and returns three records from the `statusupdate` table. The rowset is in standard JSON format.
 
@@ -812,7 +812,7 @@ The following query has no parameters and returns three records from the `status
 		});
 
 
-####<a name="dynamic-query"></a>How to: Run a dynamic parameterized query
+#### <a name="dynamic-query"></a>How to: Run a dynamic parameterized query
 
 The following example implements custom authorization by reading permissions for each user from the permissions table. The placeholder (?) is replaced with the supplied parameter when the query is executed.
 
@@ -833,7 +833,7 @@ The following example implements custom authorization by reading permissions for
 		    });
 
 
-####<a name="joins"></a>How to: Join relational tables
+#### <a name="joins"></a>How to: Join relational tables
 
 You can join two tables by using the **query** method of the [mssql object] to pass in the TSQL code that implements the join. Let's assume we have some items in our **ToDoItem** table and each item in the table has a **priority** property, which corresponds to a column in the table. An item may look like this:
 
@@ -858,7 +858,7 @@ The script joins the two tables and writes the results to the log. The resulting
 		{ text: 'Take out the trash', complete: false, description: 'Critical'}
 
 
-####<a name="raw"></a>How to: Run a query that returns *raw* results
+#### <a name="raw"></a>How to: Run a query that returns *raw* results
 
 This example executes the query, as before, but returns the resultset in "raw" format which requires you to parse it, row by row, and column by column. A possible scenario for this is if you need access to data types that Mobile Services does not support. This code simply writes the output to the console log so you can inspect the raw format.
 
@@ -901,7 +901,7 @@ Here is the output from running this query. It contains metadata about each colu
 		     [ 4, 'we need to fix this one real soon now', null, 1 ],
 		   ] }
 
-####<a name="connection"></a>How to: Get access to a database connection
+#### <a name="connection"></a>How to: Get access to a database connection
 
 You can use the **open** method to get access to the database connection. One reason to do this might be if you need to use database transactions.
 
@@ -916,11 +916,11 @@ Successful execution of the **open** causes the database connection to be passed
 				}
 		    });
 
-##<a name="debugging"></a>Debugging and troubleshooting
+## <a name="debugging"></a>Debugging and troubleshooting
 
 The primary way to debug and troubleshoot your server scripts is by writing to the service log. By default, Mobile Services writes errors that occur during service script execution to the service logs. Your scripts can also write to the logs. Writing to logs is great way to debug your scripts and validate that they are behaving as desired.
 
-###<a name="write-to-logs"></a>How to: Write output to the mobile service logs
+### <a name="write-to-logs"></a>How to: Write output to the mobile service logs
 
 To write to the logs, use the global [console object]. Use the **log** or **info** function to log information-level warnings. The **warning** and **error** functions log their respective levels, which are called-out in the logs.
 

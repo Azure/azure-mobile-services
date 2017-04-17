@@ -55,7 +55,7 @@ mobile-services-concepts-links.md).
 
 The [overview topic](https://msdn.microsoft.com/library/azure/jj193167.aspx) describes the benefits of using Mobile Services and what tasks can be performed in the Azure classic portal. For more general information about Mobile Services and examples of how to use Mobile Services in your apps, see [Mobile Services Tutorials and Resources](https://azure.microsoft.com/documentation/services/mobile-services/).
 
-##Configuration
+## Configuration
 The following topics provide information about creating, deleting and configuring Mobile Services:
 
 - [Create a mobile service](https://msdn.microsoft.com/library/azure/jj193169.aspx)
@@ -65,7 +65,7 @@ The following topics provide information about creating, deleting and configurin
 - [Scaling a mobile service](https://msdn.microsoft.com/library/azure/jj193178.aspx)
 - [Configure identity](https://msdn.microsoft.com/library/azure/jj591527.aspx)
 
-##Data access
+## Data access
 The following topics provide information about accessing and changing app data stored in Mobile Services:
 
 - [Work with data](https://msdn.microsoft.com/library/azure/jj631634.aspx)
@@ -77,27 +77,27 @@ The following topics provide information about accessing and changing app data s
 - [Manage columns](https://msdn.microsoft.com/library/azure/jj193177.aspx)
 - [System columns](https://msdn.microsoft.com/library/azure/dn518225.aspx)
 
-##Push notifications
+## Push notifications
 The following topics provide information about configuring push notifications in Mobile Services:
 
 - [Configure push notifications](https://msdn.microsoft.com/library/azure/jj591526.aspx)
 - [Register endpoint](https://msdn.microsoft.com/library/azure/dn771685.aspx)
 - [Send push notifications](https://msdn.microsoft.com/library/azure/jj631630.aspx)
 
-##Scheduled jobs
+## Scheduled jobs
 The following topics provide information about working with scheduled jobs:
 
 - [Schedule jobs](https://msdn.microsoft.com/library/azure/jj860528.aspx)
 - [Configure jobs](https://msdn.microsoft.com/library/azure/jj899833.aspx)
 - [Register job scripts](https://msdn.microsoft.com/library/azure/jj899832.aspx)
 
-##Custom APIs
+## Custom APIs
 The following topics provide information about defining custom HTTP endpoints in Mobile Services:
 
 - [Custom API](https://msdn.microsoft.com/library/azure/dn280974.aspx)
 - [Content types and headers](https://msdn.microsoft.com/library/azure/dn303369.aspx)
 
-##JavaScript backend server scripts
+## JavaScript backend server scripts
 The following topics provide examples of how to perform tasks using server scripts in a JavaScript backend mobile services:
 
 - [Using scripts](https://msdn.microsoft.com/library/azure/jj193174.aspx)

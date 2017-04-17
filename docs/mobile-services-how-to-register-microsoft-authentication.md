@@ -43,7 +43,7 @@ mobile-services-how-to-register-twitter-authentication.md)
 
 This topic shows you how to register your mobile app to be able to use Microsoft account as an identity provider with Azure Mobile Services. The same steps apply for both service-directed authentication and client-directed authentication using the Live SDK.
 
-##Register your Windows Store app at the Windows Dev Center
+## Register your Windows Store app at the Windows Dev Center
 
 Windows Store apps must first be registered with the Windows Dev Center. By registering, your Windows app will be able to use single sign-on behaviors.
 

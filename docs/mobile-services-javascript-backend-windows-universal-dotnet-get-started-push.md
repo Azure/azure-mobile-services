@@ -55,7 +55,7 @@ To complete this tutorial, you need the following:
 * An active [Microsoft Store account](http://go.microsoft.com/fwlink/p/?LinkId=280045).
 * [Visual Studio 2013 Express for Windows](http://go.microsoft.com/fwlink/?LinkId=257546) with Update 3, or a later version
 
-##<a id="register"></a>Register your app for push notifications
+## <a id="register"></a>Register your app for push notifications
 
 The following steps registers your app with the Windows Store, configure your mobile service to enable push notifications, and add code to your app to register a device channel with your notification hub. Visual Studio 2013 connects to Azure and to the Windows Store by using the credentials that you provide.
 
@@ -95,7 +95,7 @@ The following steps registers your app with the Windows Store, configure your mo
 
 Now that push notifications are enabled in the app, you must update the mobile service to send push notifications.
 
-##<a id="update-service"></a>Update the service to send push notifications
+## <a id="update-service"></a>Update the service to send push notifications
 
 The following steps update the insert script registered to the TodoItem table. You can implement similar code in any server script or anywhere else in your backend services.
 
@@ -134,7 +134,7 @@ Finally, you must update the script registered to the insert operation on the To
 
 
 
-##<a id="test"></a> Test push notifications in your app
+## <a id="test"></a> Test push notifications in your app
 
 
 1. In Visual Studio, right-click the Windows Store project, click **Set as StartUp Project**, then press the F5 key to run the Windows Store app.

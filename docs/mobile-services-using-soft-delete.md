@@ -27,7 +27,7 @@
 &nbsp;
 
 
-##Overview
+## Overview
 
 Tables created with either the JavaScript or .NET backend can optionally have soft delete enabled. When using soft delete, a new column called *\__deleted* of [SQL bit type] is added to the database. With soft delete enabled, a delete operation does not physically delete rows from the database, but rather sets the value of the deleted column to TRUE.
 
@@ -47,7 +47,7 @@ However, soft deleted records take up space in the database, so you should consi
 
 
 
-##Enabling soft delete for the .NET backend
+## Enabling soft delete for the .NET backend
 
 Soft delete support for the .NET backend first released with version 1.0.402 of the Microsoft Azure Mobile Services .NET Backend. The latest NuGet packages are available here, [Microsoft Azure Mobile Services .NET Backend](http://go.microsoft.com/fwlink/?LinkId=513165).
 
@@ -67,7 +67,7 @@ The following steps guide you on how to enable soft delete for a .NET backend mo
         }
 
 
-##Enabling soft delete for the JavaScript backend
+## Enabling soft delete for the JavaScript backend
 
 If you are creating a new table for your mobile service, you can enable soft delete on the table creation page.
 

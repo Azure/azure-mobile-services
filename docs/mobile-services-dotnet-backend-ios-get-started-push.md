@@ -54,7 +54,7 @@ This topic shows you how to add push notifications to the [quickstart project](m
 
 * In the Azure classic portal, click **Mobile Services** > your app > the **Push** tab > **apple push notification settings** > "**Upload**. Upload the .p12 file, making sure that the correct **Mode** is selected (either Sandbox or Production, corresponding to whether the client SSL certificate you generated was Development or Distribution.) Your mobile service is now configured to work with push notifications on iOS!
 
-##<a id="update-server"></a>Update Backend Code to Send Push Notifications
+## <a id="update-server"></a>Update Backend Code to Send Push Notifications
 
 * Open Visual Studio project > **Controllers** folder > **TodoItemController.cs** > method `PostTodoItem`. Replace the method with the following. When a todo item is inserted, this code sends out a push notification with the item text. If there's an error, the code adds an error log entry that is viewable via the logs section of the portal.
 
@@ -79,7 +79,7 @@ This topic shows you how to add push notifications to the [quickstart project](m
         }
 ```
 
-##<a name="publish-the-service"></a>Publish Mobile Service to Azure
+## <a name="publish-the-service"></a>Publish Mobile Service to Azure
 
 
 1. In Visual Studio, right-click the project, click **Publish** > **Microsoft Azure Mobile Services**. Instead of using Visual Studio, [you may also use Git](./

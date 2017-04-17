@@ -35,7 +35,7 @@ This topic shows you how to use the source control provided by Azure Mobile Serv
 
 To complete this tutorial, you must have already created a mobile service by completing either the [Get started with Mobile Services] tutorial.
 
-##<a name="enable-source-control"></a>Enable source control in your mobile service
+## <a name="enable-source-control"></a>Enable source control in your mobile service
 
 To be able to store app data in the new mobile service, you must first create a new table in the associated SQL Database instance.
 
@@ -58,7 +58,7 @@ To be able to store app data in the new mobile service, you must first create a 
 With source control enabled in your mobile service, you can use Git to clone the repository to your local computer.
  
 
-##<a name="clone-repo"></a>Install Git and create the local repository
+## <a name="clone-repo"></a>Install Git and create the local repository
 
 1. Install Git on your local computer.
 
@@ -86,7 +86,7 @@ With source control enabled in your mobile service, you can use Git to clone the
 
 Now that you have created your local repository, you can publish your .NET backend service project from this repository.
 
-##<a name="deploy-scripts"></a>Publish your project by using Git
+## <a name="deploy-scripts"></a>Publish your project by using Git
 
 1. Create a new .NET backend mobile service project in Visual Studio 2013, or move an existing project into your new local repository.
 

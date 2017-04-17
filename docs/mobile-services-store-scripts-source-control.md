@@ -35,7 +35,7 @@ This topic shows you how to use the source control provided by Azure Mobile Serv
 
 To complete this tutorial, you must have already created a mobile service by completing the [Get started with Mobile Services] tutorial.
 
-##<a name="enable-source-control"></a>Enable source control in your mobile service
+## <a name="enable-source-control"></a>Enable source control in your mobile service
 
 To be able to store app data in the new mobile service, you must first create a new table in the associated SQL Database instance.
 
@@ -58,7 +58,7 @@ To be able to store app data in the new mobile service, you must first create a 
 With source control enabled in your mobile service, you can use Git to clone the repository to your local computer.
  
 
-##<a name="clone-repo"></a>Install Git and create the local repository
+## <a name="clone-repo"></a>Install Git and create the local repository
 
 1. Install Git on your local computer.
 
@@ -94,7 +94,7 @@ With source control enabled in your mobile service, you can use Git to clone the
 
 Now that you have created your local repository, you can make changes to server scripts and push the changes back to the mobile service.
 
-##<a name="deploy-scripts"></a>Deploy updated script files to your mobile service
+## <a name="deploy-scripts"></a>Deploy updated script files to your mobile service
 
 1. Browse to the .\service\table subfolder, and if a file todoitem.insert.js files doesn't already exist, create it now.
 
@@ -124,7 +124,7 @@ Now that you have created your local repository, you can make changes to server 
 
 6. Back in the [Azure classic portal], click the **Data** tab, then click the **TodoItem** table, click  **Script**, then select the **Insert** operation. Notice that the displayed insert operation script is the same as the JavaScript code that you just uploaded to the repository.
 
-##<a name="use-npm"></a>Leverage shared code and Node.js modules in your server scripts
+## <a name="use-npm"></a>Leverage shared code and Node.js modules in your server scripts
 
 Mobile Services provides access to the full set of core Node.js modules, which you can use in your code by using the **require** function. Your mobile service can also use Node.js modules that are not part of the core Node.js package, and you can even define your own shared code as Node.js modules. For more information about creating modules, see [Modules] in the Node.js API reference documentation.
 

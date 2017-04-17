@@ -39,7 +39,7 @@ This topic shows you how to use the job scheduler functionality in the Azure cla
 
 This tutorial shows you how to use the job scheduler to create a scheduled job that requests tweet data from Twitter and stores the tweets in a new Updates table.
 
-##<a name="get-oauth-credentials"></a>Register for access to Twitter v1.1 APIs and store credentials
+## <a name="get-oauth-credentials"></a>Register for access to Twitter v1.1 APIs and store credentials
 
 
 
@@ -81,7 +81,7 @@ mobile-services-how-to-register-twitter-authentication.md
 [Twitter Developers]: http://go.microsoft.com/fwlink/p/?LinkId=268300
 [App settings]: http://msdn.microsoft.com/library/azure/b6bb7d2d-35ae-47eb-a03f-6ee393e170f7
 
-##<a name="create-table"></a>Create the new Updates table
+## <a name="create-table"></a>Create the new Updates table
 
 Next, you need to create a new table in which to store tweets.
 
@@ -89,7 +89,7 @@ Next, you need to create a new table in which to store tweets.
 
 3. In **Table name** type _Updates_, then click the check button.
 
-##<a name="add-job"></a>Create a new scheduled job
+## <a name="add-job"></a>Create a new scheduled job
 
 Now, you can create the scheduled job that accesses Twitter and stores tweet data in the new Updates table.
 

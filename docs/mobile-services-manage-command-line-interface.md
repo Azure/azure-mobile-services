@@ -27,7 +27,7 @@
 &nbsp;
 
 
-##Overview
+## Overview
 
 This topic shows you how to use the Azure command-line tools to automate the creation and management of Azure Mobile Services. This topic shows you how to install and get started using the command-line tools and use them to perform key Mobile Services.
 
@@ -35,7 +35,7 @@ When combined into a single script or batch file, these individual commands auto
 
 This topic covers a selection of common administration tasks supported by the Azure command-line tools. For more information, see [Azure command-line tools documentation][reference-docs].
 
-##Install the Azure Command-Line Tools
+## Install the Azure Command-Line Tools
 
 The following list contains information for installing the command-line tools, depending on your operating system:
 
@@ -49,7 +49,7 @@ The following list contains information for installing the command-line tools, d
 
 To test the installation, type `azure` at the command prompt. When the installation is successful, you will see a list of all the available `azure` commands.
 
-##How to download and import publish settings
+## How to download and import publish settings
 
 To get started, you must first download and import your publish settings. Then you can use the tools to create and manage Azure Services. To download your publish settings, use the `account download` command:
 
@@ -71,7 +71,7 @@ To see a list of options for `account` commands, use the `-help` option:
 
 After importing your publish settings, you should delete the `.publishsettings` file for security reasons. For more information, see [How to install the Azure Command-Line Tools for Mac and Linux]. You are now ready to begin creating and managing Azure Mobile Services from the command line or in batch files.
 
-##How to create a mobile service
+## How to create a mobile service
 
 You can use the command-line tools to create a new mobile service instance. While creating the mobile service, you also create a SQL Database instance in a new server.
 
@@ -81,7 +81,7 @@ The following command creates a new mobile service instance in your subscription
 
 The `mobile create` command fails when the specified mobile service exists. In your automation scripts, you should attempt to delete a mobile service before attempting to recreate it.
 
-##How to list existing mobile services in a subscription
+## How to list existing mobile services in a subscription
 
 > [AZURE.NOTE] Commands in the CLI related to "list" and "script" only work with the JavaScript backend.
 
@@ -91,7 +91,7 @@ The following command returns a list of all the mobile services in an Azure subs
 
 This command also shows the current state and URL of each mobile service.
 
-##How to delete an existing mobile service
+## How to delete an existing mobile service
 
 You can use the command-line tools to delete an existing mobile service, along with the related SQL Database and server. The following command deletes the mobile service, where `<service-name>` is the name of the mobile service to delete:
 
@@ -101,7 +101,7 @@ By including `-a` and `-q` parameters, this command also deletes the SQL Databas
 
 > [AZURE.NOTE] If you do not specify the <code>-q</code> parameter along with <code>-a</code> or <code>-d</code>, execution is paused and you are prompted to select delete options for your SQL Database. Only use the <code>-a</code> parameter when no other service uses the database or server; otherwise use the <code>-d</code> parameter to only delete data that belongs to the mobile service being deleted.
 
-##How to create a table in the mobile service
+## How to create a table in the mobile service
 
 The following command creates a table in the specified mobile service, where `<service-name>` is the name of the mobile service and `<table-name>` is the name of the table to create:
 
@@ -124,7 +124,7 @@ The following table shows the script permission value compared to the permission
 
 The `mobile table create` command fails when the specified table already exists. In your automation scripts, you should attempt to delete a table before attempting to recreate it.
 
-##How to list existing tables in a mobile service
+## How to list existing tables in a mobile service
 
 The following command returns a list of all of the tables in a mobile service, where `<service-name>` is the name of the mobile service:
 
@@ -132,7 +132,7 @@ The following command returns a list of all of the tables in a mobile service, w
 
 This command also shows the number of indexes on each table and the number of data rows currently in the table.
 
-##How to delete an existing table from the mobile service
+## How to delete an existing table from the mobile service
 
 The following command deletes a table from the mobile service, where `<service-name>` is the name of the mobile service and `<table-name>` is the name of the table to delete:
 
@@ -140,7 +140,7 @@ The following command deletes a table from the mobile service, where `<service-n
 
 In automation scripts, use the `-q` parameter to delete the table without displaying a confirmation prompt that blocks execution.
 
-##How to register a script to a table operation
+## How to register a script to a table operation
 
 The following command uploads and registers a function to an operation on a table, where `<service-name>` is the name of the mobile service, `<table-name>` is the name of the table, and `<operation>` is the table operation, which can be `read`, `insert`, `update`, or `delete`:
 

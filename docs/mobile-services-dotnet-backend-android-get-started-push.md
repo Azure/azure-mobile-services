@@ -129,7 +129,7 @@ Both your mobile service and your app are now configured to work with GCM and No
 
 ## Add push notifications to your app
 
-###Verify Android SDK Version
+### Verify Android SDK Version
 
 Because of ongoing development, the Android SDK version installed in Android Studio might not match the version in the code. The Android SDK referenced in this tutorial is version 21, the latest at the time of writing. The version number may increase as new releases of the SDK appear, and we recomend using the latest version available.
 
@@ -158,7 +158,7 @@ Your next step is to install Google Play services. Google Cloud Messaging has so
 
 If you will be testing with an older device, then consult [Set Up Google Play Services SDK] to determine how low you can set this value, and set it appropriately.
 
-###Add Google Play Services to the project
+### Add Google Play Services to the project
 
 1. Open the Android SDK Manager by clicking the icon on the toolbar of Android Studio or by clicking **Tools** -> **Android** -> **SDK Manager** on the menu. Locate the target version of the Android SDK that is used in your project , open it, and choose **Google APIs**, if it is not already installed.
 
@@ -189,7 +189,7 @@ If you will be testing with an older device, then consult [Set Up Google Play Se
 
 
 
-###Add code
+### Add code
 
 1. In your **app** project, open the file `AndroidManifest.xml`. In the code in the next two steps, replace _`**my_app_package**`_ with the name of the app package for your project, which is the value of the `package` attribute of the `manifest` tag.
 
@@ -401,7 +401,7 @@ Now, the mobile service project is configured to connect to the notification hub
     	{
         	public static string RegistrationID { get; private set; }
 
-###Setting up the Android emulator for testing
+### Setting up the Android emulator for testing
 When you run this app in the emulator, make sure that you use an Android Virtual Device (AVD) that supports Google APIs.
 
 > [AZURE.IMPORTANT] In order to receive push notifications, you must set up a Google account on your Android Virtual Device (in the emulator, navigate to **Settings** and click **Add Account**). Also, make sure that the emulator is connected to the Internet.
@@ -418,7 +418,7 @@ When you run this app in the emulator, make sure that you use an Android Virtual
 
   The app retrieves the *registrationId* from GCM and registers with the Notification Hub.
 
-###Inserting a new item generates a notification.
+### Inserting a new item generates a notification.
 
 1. In the app, type meaningful text, such as _A new Mobile Services task_ and then click the **Add** button.
 

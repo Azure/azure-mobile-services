@@ -42,7 +42,7 @@
 
 In this tutorial, you add authentication to the Quick Start project using a supported identity provider. This tutorial is based on the [Mobile Services Quick Start tutorial], which you must complete first.
 
-##<a name="register"></a>Register app for authentication and configure Mobile Services
+## <a name="register"></a>Register app for authentication and configure Mobile Services
 
 
 1. In the [Azure classic portal](https://manage.windowsazure.com/), click **Mobile Services** > your mobile service > **Dashboard**, and make a note of the **Mobile Service URL** value.
@@ -83,7 +83,7 @@ You've now configured both your app and your mobile service to work with your au
         options.LoginProviders.Remove(typeof(AzureActiveDirectoryLoginProvider));
         options.LoginProviders.Add(typeof(AzureActiveDirectoryExtendedLoginProvider));
 
-##<a name="permissions"></a>Restrict permissions to authenticated users
+## <a name="permissions"></a>Restrict permissions to authenticated users
 
 
 
@@ -113,7 +113,7 @@ By default, all requests to mobile service resources are restricted to clients t
 
 In Xcode, open the project. Press the **Run** button to  start the app. Verify that an exception with a status code of 401 (Unauthorized) is raised after the app starts. This happens because the app attempts to access Mobile Services as an unauthenticated user, but the _TodoItem_ table now requires authentication.
 
-##<a name="add-authentication"></a>Add authentication to app
+## <a name="add-authentication"></a>Add authentication to app
 
 * Open **QSTodoListViewController.m** and add the following method. Change _facebook_ to _microsoftaccount_, _twitter_, _google_, or _windowsazureactivedirectory_ if you're not using Facebook as your identity provider.
 
@@ -139,7 +139,7 @@ In Xcode, open the project. Press the **Run** button to  start the app. Verify t
 
 * Press  **Run** to start the app, and then log in. When you are logged in, you should be able to view the Todo list and make updates.
 
-##<a name="store-authentication"></a>Store authentication tokens in app
+## <a name="store-authentication"></a>Store authentication tokens in app
 
 
 The previous example contacts both the identity provider and the mobile service every time the app starts. Instead, you can cache the authorization token and try to use it first.
@@ -177,7 +177,7 @@ The previous example contacts both the identity provider and the mobile service 
 				[self loadAuthInfo];
 ```
 
-##<a name="next-steps"></a>Next steps
+## <a name="next-steps"></a>Next steps
 
 In the next tutorial, [Service-side authorization of Mobile Services users], you will user the user ID value to filter returned data.
 

@@ -47,7 +47,7 @@ This tutorial is based on the Mobile Services quickstart. You must also first co
 
 >[AZURE.NOTE]This tutorial shows you how to use server-directed authentication for users in Windows Store and Windows Phone Store 8.1 apps. Fore information about client-directed authentication, see [Logging in with Google, Microsoft and Facebook SDKs to Azure Mobile Services](https://azure.microsoft.com/blog/2014/10/27/logging-in-with-google-microsoft-and-facebook-sdks-to-azure-mobile-services/).
 
-##<a name="register"></a>Register your app for authentication and configure Mobile Services
+## <a name="register"></a>Register your app for authentication and configure Mobile Services
 
 
 1. In the [Azure classic portal](https://manage.windowsazure.com/), click **Mobile Services** > your mobile service > **Dashboard**, and make a note of the **Mobile Service URL** value.
@@ -88,7 +88,7 @@ You've now configured both your app and your mobile service to work with your au
         options.LoginProviders.Remove(typeof(AzureActiveDirectoryLoginProvider));
         options.LoginProviders.Add(typeof(AzureActiveDirectoryExtendedLoginProvider));
 
-##<a name="permissions"></a>Restrict permissions to authenticated users
+## <a name="permissions"></a>Restrict permissions to authenticated users
 
 
 
@@ -128,10 +128,10 @@ By default, all requests to mobile service resources are restricted to clients t
 
 Next, you will update the app to authenticate users before requesting resources from the mobile service.
 
-##<a name="add-authentication"></a>Add authentication to the app
+## <a name="add-authentication"></a>Add authentication to the app
 
 
-##Install the storage client in the mobile service project
+## Install the storage client in the mobile service project
 
 To be able to generate an SAS to upload images to Blob storage, you must first add the NuGet package that installs Storage client library in the mobile service project.
 
@@ -236,7 +236,7 @@ To be able to generate an SAS to upload images to Blob storage, you must first a
 
 >[AZURE.NOTE]If you registered your Windows Store app package information with Mobile Services, you should call the <a href="http://go.microsoft.com/fwlink/p/?LinkId=311594" target="_blank">LoginAsync</a> method by supplying a value of **true** for the *useSingleSignOn* parameter. If you do not do this, your users will continue to be presented with a login prompt every time that the login method is called.
 
-##<a name="tokens"></a>Store the authorization tokens on the client
+## <a name="tokens"></a>Store the authorization tokens on the client
 
 The previous example showed a standard sign-in, which requires the client to contact both the identity provider and the mobile service every time that the app starts. Not only is this method inefficient, you can run into usage-related issues should many customers try to start your app at the same time. A better approach is to cache the authorization token returned by Mobile Services and try to use this first before using a provider-based sign-in.
 
@@ -331,7 +331,7 @@ The previous example showed a standard sign-in, which requires the client to con
 
 In the next tutorial, [Service-side authorization of Mobile Services users][Authorize users with scripts], you will take the user ID value provided by Mobile Services based on an authenticated user and use it to filter the data returned by Mobile Services.
 
-##See also
+## See also
 
 + [Enhanced users feature](https://azure.microsoft.com/blog/2014/10/02/custom-login-scopes-single-sign-on-new-asp-net-web-api-updates-to-the-azure-mobile-services-net-backend/)<br/>
 You can get additional user data maintained by the identity provider in your mobile service by by calling the **ServiceUser.GetIdentitiesAsync()** method in a .NET backend.

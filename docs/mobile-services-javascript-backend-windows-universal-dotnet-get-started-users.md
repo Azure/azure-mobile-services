@@ -46,7 +46,7 @@ This tutorial is based on the Mobile Services quickstart. You must also first co
 
 >[AZURE.NOTE]This tutorial shows you how to authenticate users in Windows Store and Windows Phone Store 8.1 apps. For a Windows Phone 8.0 or Windows Phone Silverlight 8.1 app, see this version of [Get started with authentication in Mobile Services](mobile-services-windows-phone-get-started-users.md).
 
-##<a name="register"></a> Register your app for authentication and configure Mobile Services
+## <a name="register"></a> Register your app for authentication and configure Mobile Services
 
 
 1. In the [Azure classic portal](https://manage.windowsazure.com/), click **Mobile Services** > your mobile service > **Dashboard**, and make a note of the **Mobile Service URL** value.
@@ -72,7 +72,7 @@ You've now configured both your app and your mobile service to work with your au
 > [AZURE.IMPORTANT] Verify that you've set the correct redirect URI on your identity provider's developer site. As described in the linked instructions for each provider above, the redirect URI may be different for a .NET backend service vs. for a JavaScript backend service. An incorrectly configured redirect URI may result in the login screen not being displayed properly and the app malfunctioning in unexpected ways.
 
 
-##<a name="permissions"></a> Restrict permissions to authenticated users
+## <a name="permissions"></a> Restrict permissions to authenticated users
 
 
 1. In the Server Explorer in Visual Studio, expand the **Azure** node, **Mobile Services**, and your mobile service.
@@ -87,7 +87,7 @@ Next, you will update the app to authenticate users before requesting resources 
 
 >[AZURE.NOTE] When you use Visual Studio tools to connect your app to a Mobile Service, the tool generate two sets of **MobileServiceClient** definitions, one for each client platform. This is a good time to simplify the generated code by unifying the `#if...#endif` wrapped **MobileServiceClient** definitions into a single unwrapped definition used by both versions of the app. You won't need to do this if you downloaded the quickstart app from the [Azure classic portal].
 
-##<a name="add-authentication"></a> Add authentication to the app
+## <a name="add-authentication"></a> Add authentication to the app
 
 
 1. Open the shared project file MainPage.cs and add the following code snippet to the MainPage class:
@@ -182,7 +182,7 @@ Next, you will update the app to authenticate users before requesting resources 
 
 Now, any user authenticated by your trusted identity providers can access the *TodoItem* table. To better secure user-specific data, you must also implement authorization. To do this you get the user ID of a given user, which can then be used to determine what level of access that user should have for a given resource.
 
-##<a name="tokens"></a>Store the authorization token on the client
+## <a name="tokens"></a>Store the authorization token on the client
 
 The previous example showed a standard sign-in, which requires the client to contact both the identity provider and the mobile service every time that the app starts. Not only is this method inefficient, you can run into usage-related issues should many customers try to start your app at the same time. A better approach is to cache the authorization token returned by Mobile Services and try to use this first before using a provider-based sign-in.
 
@@ -275,7 +275,7 @@ The previous example showed a standard sign-in, which requires the client to con
 
 In the next tutorial, [Service-side authorization of Mobile Services users](mobile-services-javascript-backend-service-side-authorization.md), you will take the user ID value provided by Mobile Services based on an authenticated user and use it to filter the data returned by Mobile Services.
 
-##See also
+## See also
 
 + [Enhanced users feature](http://go.microsoft.com/fwlink/p/?LinkId=506605)<br/>
 You can get additional user data maintained by the identity provider in your mobile service by by calling the **user.getIdentities()** function in server scripts.

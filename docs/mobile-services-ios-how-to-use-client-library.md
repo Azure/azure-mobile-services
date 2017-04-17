@@ -64,11 +64,11 @@ The following are important features and concepts in the Mobile Services:
 For more information, see [Mobile Services Concepts](./
 mobile-services-concepts-links.md).
 
-##<a name="Setup"></a>Setup and Prerequisites
+## <a name="Setup"></a>Setup and Prerequisites
 
 This guide assumes that you have created a mobile service with a table. For more information see [Create a table], or reuse the `TodoItem` table created in [Mobile Services Quick Start]. This guide assumes that the table has the same schema as the tables in those tutorials. This guide also assumes that your Xcode references `WindowsAzureMobileServices.framework` and imports `WindowsAzureMobileServices/WindowsAzureMobileServices.h`.
 
-##<a name="create-client"></a>How to: Create Mobile Services Client
+## <a name="create-client"></a>How to: Create Mobile Services Client
 
 To access an Azure mobile service in your project, create an `MSClient` client object. Replace `AppUrl` and `AppKey` with the mobile service URL and the application key Dashboard values, respectively.
 
@@ -76,7 +76,7 @@ To access an Azure mobile service in your project, create an `MSClient` client o
 MSClient *client = [MSClient clientWithApplicationURLString:@"AppUrl" applicationKey:@"AppKey"];
 ```
 
-##<a name="table-reference"></a>How to: Create Table Reference
+## <a name="table-reference"></a>How to: Create Table Reference
 
 To access or update data for your Azure mobile service, create a reference to the table. Replace `TodoItem` with the name of your table.
 
@@ -84,7 +84,7 @@ To access or update data for your Azure mobile service, create a reference to th
 	MSTable *table = [client tableWithName:@"TodoItem"];
 ```
 
-##<a name="querying"></a>How to: Query Data
+## <a name="querying"></a>How to: Query Data
 
 To create a database query, query the `MSTable` object. The following query gets all the items in `TodoItem` and logs the text of each item.
 
@@ -100,7 +100,7 @@ To create a database query, query the `MSTable` object. The following query gets
 }];
 ```
 
-##<a name="filtering"></a>How to: Filter Returned Data
+## <a name="filtering"></a>How to: Filter Returned Data
 
 To filter results, there are many available options.
 
@@ -121,7 +121,7 @@ NSPredicate * predicate = [NSPredicate predicateWithFormat:@"complete == NO"];
 }];
 ```
 
-##<a name="query-object"></a>How to: Use MSQuery
+## <a name="query-object"></a>How to: Use MSQuery
 
 To perform a complex query (including sorting and paging), create an `MSQuery` object, directly or by using a predicate:
 
@@ -215,7 +215,7 @@ To include additional query string parameters in the server request (for example
 	};
 ```
 
-##<a name="inserting"></a>How to: Insert Data
+## <a name="inserting"></a>How to: Insert Data
 
 To insert a new table row, create a new `NSDictionary` and invoke `table insert`. Mobile Services automatically generates new columns based on the `NSDictionary` if [Dynamic Schema] is not disabled.
 
@@ -235,7 +235,7 @@ If `id` is not provided, the backend automatically generates a new unique ID. Pr
 	}];
 ```
 
-##<a name="modifying"></a>How to: Modify Data
+## <a name="modifying"></a>How to: Modify Data
 
 To update an existing row, modify an item and call `update`:
 
@@ -257,7 +257,7 @@ Alternatively, supply the row ID and the updated field:
 
 At minimum, the `id` attribute must be set when making updates.
 
-##<a name="deleting"></a>How to: Delete Data
+## <a name="deleting"></a>How to: Delete Data
 
 To delete an item, invoke `delete` with the item:
 
@@ -277,7 +277,7 @@ Alternatively, delete by providing a row ID:
 
 At minimum, the `id` attribute must be set when making deletes.
 
-##<a name="#custom-api"></a>How to: Call a custom API
+## <a name="#custom-api"></a>How to: Call a custom API
 
 A custom API enables you to define custom endpoints that expose server functionality that does not map to an insert, update, delete, or read operation. By using a custom API, you can have more control over messaging, including reading and setting HTTP message headers and defining a message body format other than JSON. For an example of how to create a custom API in your mobile service, see [How to: define a custom API endpoint](mobile-services-dotnet-backend-define-custom-api.md).
 
@@ -341,7 +341,7 @@ If you need the data returned then you can use something like this:
 
 
 
-##<a name="authentication"></a>How to: Authenticate Users
+## <a name="authentication"></a>How to: Authenticate Users
 
 Azure Mobile Services supports various identity providers. For a basic tutorial, see [Authentication].
 
@@ -395,14 +395,14 @@ The following example uses the [Live Connect SDK] to enable single sign-on for i
 	}];
 ```
 
-##<a name="caching-tokens"></a>How to: Cache Authentication Tokens
+## <a name="caching-tokens"></a>How to: Cache Authentication Tokens
 
 Let's see how you may cache tokens in the [Mobile Services Quick Start] project; you may apply similar steps to any project.
 
 * The recommended way to encrypt and store authentication tokens on an iOS client is use the iOS Keychain. We'll use [SSKeychain](https://github.com/soffes/sskeychain) -- a simple wrapper around the iOS Keychain. Follow the instructions on the SSKeychain page and add it to your project. Verify that the **Enable Modules** setting is enabled in the project's **Build Settings** (section **Apple LLVM - Languages - Modules**.)
 
 
-##<a name="errors"></a>How to: Handle Errors
+## <a name="errors"></a>How to: Handle Errors
 
 When you call a mobile service, the completion block contains an `NSError *error` parameter. When an error occurs, this parameter is non-nil. In your code, you should check this parameter and handle the error as needed.
 

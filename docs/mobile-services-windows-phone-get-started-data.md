@@ -33,20 +33,20 @@
 - [(Windows Phone Silverlight 8.x | Javascript)](mobile-services-windows-phone-get-started-data.md)
 - [(Android | Javascript)](mobile-services-android-get-started-data.md)
 
-##Overview
+## Overview
 
 This topic shows you how to use Azure Mobile Services to leverage data in a Windows Phone 8 app. In this tutorial, you will download an app that stores data in memory, create a new mobile service, integrate the mobile service with the app, and then login to the [Azure classic portal] to view changes to data made when running the app.
 
 You can also see Nick Harris demonstrate this in the following video:
 >[AZURE.VIDEO mobile-get-started-with-data-windows-phone]
 
-##Prerequisites
+## Prerequisites
 
 + Visual Studio 2012 Express for Windows Phone 8 and the [Windows Phone 8 SDK] running on Windows 8. To complete this tutorial to create a Windows Phone 8.1 app, you must use Visual Studio 2013 Update 2, or a later version.
 
 + An Azure account. If you don't have an account, you can create a free trial account in just a couple of minutes. For details, see [Azure Free Trial](https://azure.microsoft.com/pricing/free-trial/?WT.mc_id=A756A2826&amp;returnurl=http%3A%2F%2Fazure.microsoft.com%2Farticles%2Fdocumentation%2Fmobile-services-windows-phone-get-started-data%2F).
 
-##<a name="download-app"></a>Download the GetStartedWithData project
+## <a name="download-app"></a>Download the GetStartedWithData project
 
 This tutorial is built on the [GetStartedWithData app][Developer Code Samples site], which is a Windows Phone Silverlight 8 app project.
 
@@ -66,7 +66,7 @@ This tutorial is built on the [GetStartedWithData app][Developer Code Samples si
 
    	Notice that the saved text is displayed in the list below.
 
-##<a name="create-service"></a>Create a new mobile service in the Azure classic portal
+## <a name="create-service"></a>Create a new mobile service in the Azure classic portal
 
 
 
@@ -104,7 +104,7 @@ Next, you will create a new mobile service to replace the in-memory list for dat
 You have now created a new mobile service that can be used by your mobile apps. Next, you will add a new table in which to store app data. This table will be used by the app in place of the in-memory collection.
 
 
-##<a name="add-table"></a>Add a new table to the mobile service
+## <a name="add-table"></a>Add a new table to the mobile service
 
 To be able to store app data in the new mobile service, you must first create a new table in the associated SQL Database instance.
 
@@ -157,7 +157,7 @@ To be able to store app data in the new mobile service, you must first create a 
 
 You are now ready to use the new mobile service as data storage for the app.
 
-##<a name="update-app"></a>Update the app to use the mobile service for data access
+## <a name="update-app"></a>Update the app to use the mobile service for data access
 
 Now that your mobile service is ready, you can update the app to store items in Mobile Services instead of the local collection.
 
@@ -236,7 +236,7 @@ Now that your mobile service is ready, you can update the app to store items in 
 
 Now that the app has been updated to use Mobile Services for backend storage, it's time to test the app against Mobile Services.
 
-##<a name="test-app"></a>Test the app against your new mobile service
+## <a name="test-app"></a>Test the app against your new mobile service
 
 1. In Visual Studio, press the F5 key to run the app.
 
