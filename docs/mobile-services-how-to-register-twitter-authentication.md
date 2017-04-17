@@ -17,7 +17,7 @@
 	ms.date="07/21/2016" 
 	ms.author="glenga"/>
 
-#Register your apps for Twitter login with Mobile Services
+# Register your apps for Twitter login with Mobile Services
 
 >[AZURE.WARNING] This is an **Azure Mobile Services** topic.  This service has been superseded by Azure App Service Mobile Apps and is scheduled for removal from Azure.  We recommend using Azure Mobile Apps for all new mobile backend deployments.  Read [this announcement](https://azure.microsoft.com/blog/transition-of-azure-mobile-services/) to learn more about the pending deprecation of this service.  
 > 

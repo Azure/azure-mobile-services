@@ -44,7 +44,7 @@ In this tutorial, you add authentication to the [Mobile Services Quick Start tut
 
 We recommend that you complete the [Mobile Services Quick Start tutorial] first. Alternatively, just download the Quick Start iOS project from the [Azure classic portal] click  **Mobile Services** > your mobile service > the cloud sign on top left > **iOS** > **Create a New iOS App** > **Download and run your app** > **Objective-C** > **Download**. Remember to click **Create TodoItem Table** before you click **Download**, if you haven't already created the table.
 
-##<a name="register"></a>Register App for Authentication
+## <a name="register"></a>Register App for Authentication
 
 
 1. In the [Azure classic portal](https://manage.windowsazure.com/), click **Mobile Services** > your mobile service > **Dashboard**, and make a note of the **Mobile Service URL** value.
@@ -70,7 +70,7 @@ You've now configured both your app and your mobile service to work with your au
 > [AZURE.IMPORTANT] Verify that you've set the correct redirect URI on your identity provider's developer site. As described in the linked instructions for each provider above, the redirect URI may be different for a .NET backend service vs. for a JavaScript backend service. An incorrectly configured redirect URI may result in the login screen not being displayed properly and the app malfunctioning in unexpected ways.
 
 
-##<a name="permissions"></a>Restrict Data Permissions to Authenticated Users
+## <a name="permissions"></a>Restrict Data Permissions to Authenticated Users
 
 
 To secure your endpoints, you must restrict access to only authenticated clients.
@@ -81,7 +81,7 @@ To secure your endpoints, you must restrict access to only authenticated clients
 
 	 This ensures that all operations against the table require an authenticated user, which is required for this tutorial. You can set different permissions on each operations to support your specific scenario.  
 
-##<a name="add-authentication"></a>Add Authentication to App
+## <a name="add-authentication"></a>Add Authentication to App
 
 * Open **QSTodoListViewController.m** and add the following method. Change _facebook_ to _microsoftaccount_, _twitter_, _google_, or _windowsazureactivedirectory_ if you're not using Facebook as your identity provider.
 
@@ -107,7 +107,7 @@ To secure your endpoints, you must restrict access to only authenticated clients
 
 * Press  **Run** to start the app, and then log in. When you are logged in, you should be able to view the Todo list and make updates.
 
-##<a name="store-authentication"></a>Store Authentication Tokens in App
+## <a name="store-authentication"></a>Store Authentication Tokens in App
 
 
 The previous example contacts both the identity provider and the mobile service every time the app starts. Instead, you can cache the authorization token and try to use it first.

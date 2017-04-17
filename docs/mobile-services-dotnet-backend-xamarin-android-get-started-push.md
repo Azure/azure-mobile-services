@@ -39,7 +39,7 @@
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
 
-##Overview
+## Overview
 
 This topic shows you how to use Azure Mobile Services to send push notifications to a Xamarin.Android app. In this tutorial you add push notifications using the Google Cloud Messaging (GCM) service to the [Get started with Mobile Services] project. When complete, your mobile service will send a push notification each time a record is inserted.
 
@@ -50,7 +50,7 @@ This tutorial requires the following:
 
 You should already have the Xamarin.Android and [Azure Mobile Services][Azure Mobile Services Component] components installed in your project from when you completed [Get started with Mobile Services].
 
-##<a id="register"></a>Enable Google Cloud Messaging
+## <a id="register"></a>Enable Google Cloud Messaging
 
 
 1. Navigate to the [Google Cloud Console](https://console.developers.google.com/project), sign in with your Google account credentials.
@@ -83,7 +83,7 @@ You should already have the Xamarin.Android and [Azure Mobile Services][Azure Mo
 	You will use this API key value to enable Azure to authenticate with GCM and send push notifications on behalf of your app.
 
 
-##<a id="configure"></a>Configure your mobile service to send push requests
+## <a id="configure"></a>Configure your mobile service to send push requests
 
 
 1. Log on to the [Azure classic portal](https://manage.windowsazure.com/), click **Mobile Services**, and then click your app.
@@ -96,7 +96,7 @@ You should already have the Xamarin.Android and [Azure Mobile Services][Azure Mo
 
 Both your mobile service and your app are now configured to work with GCM and Notification Hubs.
 
-##<a id="update-server"></a>Update the mobile service to send push notifications
+## <a id="update-server"></a>Update the mobile service to send push notifications
 
 
 1. In Visual Studio Solution Explorer, expand the **Controllers** folder in the mobile service project. Open TodoItemController.cs. At the top of the file, add the following `using` statements:
@@ -132,7 +132,7 @@ Both your mobile service and your app are now configured to work with GCM and No
 
 3. Republish your mobile service project to Azure.
 
-##<a id="configure-app"></a>Configure the existing project for push notifications
+## <a id="configure-app"></a>Configure the existing project for push notifications
 
 
 1. In the Solution view (or **Solution Explorer** in Visual Studio), right-click the **Components** folder, click  **Get More Components...**, search for the **Google Cloud Messaging Client** component and add it to the project.
@@ -179,7 +179,7 @@ Both your mobile service and your app are now configured to work with GCM and No
 
 Your **ToDoActivity** is now prepared for adding push notifications.
 
-##<a id="add-push"></a>Add push notifications code to your app
+## <a id="add-push"></a>Add push notifications code to your app
 
 
 4. Create a new class in the project called `ToDoBroadcastReceiver`.
@@ -312,11 +312,11 @@ Your **ToDoActivity** is now prepared for adding push notifications.
                 string.Format("Error occurred in the notification: {0}.", errorId));
         }
 
-##<a name="test-app"></a>Test the app against the published mobile service
+## <a name="test-app"></a>Test the app against the published mobile service
 
 You can test the app by directly attaching an Android phone with a USB cable, or by using a virtual device in the emulator.
 
-###<a id="local-testing"></a> Enable push notifications for local testing
+### <a id="local-testing"></a> Enable push notifications for local testing
 
 
 You can optionally test push notifications with your mobile service running on the local computer or VM before you publish to Azure. To do this, you must set information about the notification hub used by your app in the web.config file. This information is only used when running locally to connect to the notification hub; it is ignored when published to Azure.
@@ -385,7 +385,7 @@ Now, the mobile service project is configured to connect to the notification hub
     	{
         	public static string RegistrationID { get; private set; }
 
-###Setting up the Android emulator for testing
+### Setting up the Android emulator for testing
 When you run this app in the emulator, make sure that you use an Android Virtual Device (AVD) that supports Google APIs.
 
 > [AZURE.IMPORTANT] In order to receive push notifications, you must set up a Google account on your Android Virtual Device (in the emulator, navigate to **Settings** and click **Add Account**). Also, make sure that the emulator is connected to the Internet.
@@ -402,7 +402,7 @@ When you run this app in the emulator, make sure that you use an Android Virtual
 
   The app retrieves the *registrationId* from GCM and registers with the Notification Hub.
 
-###Inserting a new item generates a notification.
+### Inserting a new item generates a notification.
 
 1. In the app, type meaningful text, such as _A new Mobile Services task_ and then click the **Add** button.
 

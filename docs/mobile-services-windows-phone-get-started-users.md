@@ -40,7 +40,7 @@
 - [(Xamarin.Android | Javascript)](partner-xamarin-mobile-services-android-get-started-users.md)
 - [(HTML | Javascript)](mobile-services-html-get-started-users.md)
 
-##Overview
+## Overview
 
 This topic shows you how to authenticate users in Azure Mobile Services from your app. In this tutorial, you add authentication to the quickstart project using an identity provider that is supported by Mobile Services. After being successfully authenticated and authorized by Mobile Services, the user ID value is displayed.
 
@@ -52,7 +52,7 @@ This tutorial is based on the Mobile Services quickstart. You must also first co
 
 >[AZURE.NOTE]This tutorial demonstrates the authentication flow managed by Mobile Services using a variety of identity providers. This method is easy to configure and supports multiple providers. By using client-managed authentication, your app has access to additional user data maintained by the identity provider. You can get the same user data in your mobile service by by calling the **user.getIdentities()** function in server scripts. For more information, see [this post](http://go.microsoft.com/fwlink/p/?LinkId=506605).
 
-##<a name="register"></a>Register your app for authentication and configure Mobile Services
+## <a name="register"></a>Register your app for authentication and configure Mobile Services
 
 
 1. In the [Azure classic portal](https://manage.windowsazure.com/), click **Mobile Services** > your mobile service > **Dashboard**, and make a note of the **Mobile Service URL** value.
@@ -78,7 +78,7 @@ You've now configured both your app and your mobile service to work with your au
 > [AZURE.IMPORTANT] Verify that you've set the correct redirect URI on your identity provider's developer site. As described in the linked instructions for each provider above, the redirect URI may be different for a .NET backend service vs. for a JavaScript backend service. An incorrectly configured redirect URI may result in the login screen not being displayed properly and the app malfunctioning in unexpected ways.
 
 
-##<a name="permissions"></a>Restrict permissions to authenticated users
+## <a name="permissions"></a>Restrict permissions to authenticated users
 
 
 To secure your endpoints, you must restrict access to only authenticated clients.
@@ -96,7 +96,7 @@ To secure your endpoints, you must restrict access to only authenticated clients
 
 Next, you will update the app to authenticate users before requesting resources from the mobile service.
 
-##<a name="add-authentication"></a>Add authentication to the app
+## <a name="add-authentication"></a>Add authentication to the app
 
 1. Open the project file mainpage.xaml.cs and add the following code snippet to the MainPage class:
 
@@ -151,7 +151,7 @@ Next, you will update the app to authenticate users before requesting resources 
 
    	When you are successfully logged-in, the app should run without errors, and you should be able to query Mobile Services and make updates to data.
 
-##<a name="tokens"></a>Store the authorization tokens on the client
+## <a name="tokens"></a>Store the authorization tokens on the client
 
 
 The previous example showed a standard sign-in, which requires the client to contact both the identity provider and the mobile service every time that the app starts. Not only is this method inefficient, you can run into usage-relates issues should many customers try to start you app at the same time. A better approach is to cache the authorization token returned by Mobile Services and try to use this first before using a provider-based sign-in.

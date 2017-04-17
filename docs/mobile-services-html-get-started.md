@@ -39,7 +39,7 @@
 >[AZURE.TIP] This topic shows you how to get started with Mobile Services as quickly as possible. It is designed for customers new to this Azure feature. If you are already familiar with Mobile Services or are looking for more in-depth information, please select a topic from the left-navigation or see the relevant links in [Next steps](#next-steps).
 
 
-##Overview
+## Overview
 
 This tutorial shows you how to add a cloud-based backend service to an HTML app using Azure Mobile Services. In this tutorial, you will create both a new mobile service and a simple *To do list* app that stores app data in the new mobile service. You can view the following video version of this tutorial.
 
@@ -51,7 +51,7 @@ A screenshot from the completed app is below:
 
 Completing this tutorial is a prerequisite for all other Mobile Services tutorials for HTML apps. For a PhoneGap/Cordova app, see the the [PhoneGap/Cordova version](mobile-services-javascript-backend-phonegap-get-started.md) of this tutorial.
 
-##Prerequisites
+## Prerequisites
 
 The following are required to complete this tutorial:
 

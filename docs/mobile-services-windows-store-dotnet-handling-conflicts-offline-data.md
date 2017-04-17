@@ -33,7 +33,7 @@
 - [(Windows Runtime 8.1 universal C# | Any)](mobile-services-windows-store-dotnet-handling-conflicts-offline-data.md)
 
 
-##Overview
+## Overview
 
 This topic shows you how to synchronize data and handle conflicts when using the offline capabilities of Azure Mobile Services.
 
@@ -46,12 +46,12 @@ In this tutorial, you download a universal Windows C# solution for an app that s
 This tutorial builds on the steps and the sample app from the previous tutorial [Get started with offline data]. Before you begin this tutorial, you should first complete [Get started with offline data].
 
 
-##Prerequisites
+## Prerequisites
 
 This tutorial requires Visual Studio 2013 running on Windows 8.1.
 
 
-##Download the sample project
+## Download the sample project
 
 ![][0]
 
@@ -72,7 +72,7 @@ Note that the app is not yet connected to any mobile service, so the buttons **P
 
 
 
-##Test the app against your  mobile service
+## Test the app against your  mobile service
 
 Now it's time to test the app against Mobile Services.
 
@@ -90,7 +90,7 @@ Now it's time to test the app against Mobile Services.
     ![][0]
 
 
-##Update the data in the backend to create a conflict
+## Update the data in the backend to create a conflict
 
 In a real world scenario, a sync conflict would occur when one app pushes updates to a record in the database, and then another app tries to push an update to the same record using an outdated version field in that record. If you recall from the [Get started with offline data], the version system property is required to support the offline syncing features. This version information is examined with each database update. If an instance of the app tries to update a record using an outdated version, a conflict will occur and be caught as a `MobileServicePreconditionFailedException` in the app. If the app doesn't catch the `MobileServicePreconditionFailedException` then a `MobileServicePushFailedException` will end up being thrown describing how many sync errors were encountered.
 
@@ -121,7 +121,7 @@ The following steps show the Windows Phone 8.1 and Windows Store 8.1 clients run
 
 
 
-##Review of the code for handling sync conflicts
+## Review of the code for handling sync conflicts
 
 In order to use the offline features for Mobile Services, you must include the version column in both your local database and your data transfer object. This is accomplished by updating the `TodoItem` class the following member:
 

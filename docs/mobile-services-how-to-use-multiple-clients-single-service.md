@@ -28,7 +28,7 @@
 
 One of the major benefits of using Azure Mobile Services in your mobile app development is the ability to use a single backend service that supports your app on multiple client platforms. Mobile Services provides native client libraries for all major device platforms, which makes it easier to develop apps using a single backend service and by using cross-platform developer tools. This topic discusses considerations for getting your app running on multiple client platforms while using a single mobile service backend.
 
-##<a id="push"></a>Cross-platform push notifications
+## <a id="push"></a>Cross-platform push notifications
 
 Mobile Services uses Azure Notification Hubs for sending push notifications to your client apps on all major device platforms. Notification Hubs provide a consistent and unified infrastructure for creating and managing device registrations and for sending cross-platform push notifications. Notification Hubs supports sending push notifications by using the following platform-specific notification services:
 
@@ -47,7 +47,7 @@ Client registrations are created by using the register function in the platform-
 
 Tables in the following sections link to the client-specific tutorials that show you how to implement push notifications from both .NET and JavaScript backend mobile services.
 
-###.NET backend
+### .NET backend
 
 In a .NET backend mobile service, you send notifications by calling the [SendAsync] method on the [PushClient](http://msdn.microsoft.com/library/azure/microsoft.windowsazure.mobile.service.notifications.pushclient.aspx) object obtained from the [ApiServices.Push](http://msdn.microsoft.com/library/azure/microsoft.windowsazure.mobile.service.apiservices.push.aspx) property. The push notification sent (native or template) depends on the specific [IPushMessage](http://msdn.microsoft.com/library/azure/microsoft.windowsazure.mobile.service.notifications.ipushmessage.aspx)-derived object that is passed to the [SendAsync] method, as shown in the following table:
 
@@ -82,7 +82,7 @@ When you use template client registrations rather than native client registratio
 	// Send a push notification to all template registrations.
     await Services.Push.SendAsync(templatePayload);
 
-###JavaScript backend
+### JavaScript backend
 
 In a JavaScript backend mobile service, you send notifications by calling the **send** method on the platform-specific object obtained from the global [push object], as shown in the following table:
 
@@ -137,7 +137,7 @@ When you use template client registrations rather than native client registratio
                     }
                 });
 
-##<a id="xplat-app-dev"></a>Cross-platform app development
+## <a id="xplat-app-dev"></a>Cross-platform app development
 Developing native mobile device apps for all of the major mobile device platforms requires you (or your organization) to have expertise in at least Objective-C, Java, and C# or JavaScript programming languages. Because of the expense of developing across these disparate platforms, some developers choose a fully web browser-based experience for their apps. However, such web-based experiences cannot access most of the native resources that provide the rich experience that users have come to expect on their mobile devices.
 
 Cross-platform tools are available that provide a richer native experience on a mobile device, while still sharing a single code base, usually JavaScript. Mobile Services makes it easy to create and manage a backend service for cross-platform app development platforms by providing quickstart tutorials for the following development platforms:

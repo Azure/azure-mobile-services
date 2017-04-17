@@ -29,7 +29,7 @@ When your enterprise transitions to the cloud, you might not be able to migrate 
 
 In this tutorial, you will learn how to modify a .NET backend mobile service to use a local on-premises SQL Server database instead of the default Azure SQL Database provisioned with your service. Hybrid Connections are also supported for a JavaScript backend mobile service, as described in [this article](http://blogs.msdn.com/b/azuremobile/archive/2014/05/12/connecting-to-an-external-database-with-node-js-backend-in-azure-mobile-services.aspx).
 
-##Prerequisites##
+## Prerequisites ##
 
 This tutorial requires you to have the following:
 
@@ -52,7 +52,7 @@ This tutorial requires you to have the following:
 
 This section shows you how to install a SQL Server Express, enable TCP/IP, set a static port, and create a database that can be used with Hybrid Connections.  
 
-###Install SQL Server Express
+### Install SQL Server Express
 
 To use an on-premises SQL Server or SQL Server Express database with a hybrid connection, TCP/IP needs to be enabled on a static port. Default instances on SQL Server use static port 1433, whereas named instances do not. Because of this, we will install the default instance. If you already have the default instance of SQL Server Express installed, you can skip this section.
 
@@ -70,7 +70,7 @@ To use an on-premises SQL Server or SQL Server Express database with a hybrid co
 
 6. Finish the wizard to complete the installation.
 
-###Enable TCP/IP and setting a static port
+### Enable TCP/IP and setting a static port
 
 This section uses SQL Server Configuration Manager, which was installed when you installed SQL Server Express, to enable TCP/IP and set a static IP address.
 
@@ -80,7 +80,7 @@ This section uses SQL Server Configuration Manager, which was installed when you
 
 3. (Optional) If needed, add exceptions in the firewall to allow remote access to the SQL Server process (sqlservr.exe).
 
-###Create a new database in the on-premises SQL Server instance
+### Create a new database in the on-premises SQL Server instance
 
 1. In SQL Server Management Studio, connect to the SQL Server you just installed. (If the **Connect to Server** dialog does not appear automatically, navigate to **Object Explorer** in the left pane, click **Connect**, and then click **Database Engine**.) 	
 
@@ -94,7 +94,7 @@ This section uses SQL Server Configuration Manager, which was installed when you
 
 4. In Object Explorer, if you expand **Databases**, you will see that the new database is created.
 
-###Create a new SQL Server login and set permissions
+### Create a new SQL Server login and set permissions
 
 Finally, you will create a new SQL Server login with restricted permissions. Your Azure service will connect to the on-premise SQL Server using this login instead of the built-in sa login, which has full permissions on the server.
 
@@ -218,7 +218,7 @@ In this step, you define a connection string for the on-premises database and mo
 
 	The service will now use the new connection to the SQL Server database.
 
-##Test the database connection locally
+## Test the database connection locally
 
 Before publishing to Azure and using the hybrid connection, it's a good idea to make sure that the database connection works when running locally. That way you can more easily diagnose and correct any connection issues before you republish and start using the hybrid connection.
 
@@ -288,7 +288,7 @@ Now that you have verified the database connection, you need to add an app setti
 
 	Note that changes generated in your app have been saved by your mobile service to your on-premises database using the hybrid connection.
 
-##See Also##
+## See Also ##
 
 + [Hybrid Connections web site](https://azure.microsoft.com/services/biztalk-services/)
 + [Hybrid Connections overview](https://azure.microsoft.com/en-us/documentation/articles/integration-hybrid-connection-overview/)

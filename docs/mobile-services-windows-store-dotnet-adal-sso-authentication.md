@@ -31,7 +31,7 @@
 - [(iOS | .NET)](mobile-services-dotnet-backend-ios-adal-sso-authentication.md)
 - [(Windows 8.x Store C# | .NET)](mobile-services-windows-store-dotnet-adal-sso-authentication.md)
 
-##Overview
+## Overview
 
 In this tutorial, you add authentication to the quickstart project using the Active Directory Authentication Library to support [client-directed login operations](http://msdn.microsoft.com/library/azure/jj710106.aspx) with Azure Active Directory. To support [service-directed login operations](http://msdn.microsoft.com/library/azure/dn283952.aspx) with Azure Active Directory, start with the [Add authentication to your Mobile Services app](mobile-services-dotnet-backend-windows-universal-dotnet-get-started-users.md) tutorial.
 
@@ -41,7 +41,7 @@ To be able to authenticate users, you must register your application with the Az
 >[AZURE.NOTE] This tutorial is intended to help you better understand how Mobile Services enables you to do single sign-on Azure Active Directory authentication for Windows Store apps using a [client-directed login operation](http://msdn.microsoft.com/library/azure/jj710106.aspx). If this is your first experience with Mobile Services, complete the tutorial [Get started with Mobile Services].
 
 
-##Prerequisites
+## Prerequisites
 
 This tutorial requires the following:
 
@@ -91,12 +91,12 @@ In this section you will register your mobile service with the Azure Active Dire
 [How to Register with the Azure Active Directory]: ./
 mobile-services-how-to-register-active-directory-authentication.md
 
-##Register your app with the Azure Active Directory
+## Register your app with the Azure Active Directory
 
 To register the app with Azure Active Directory, you must associate it to the Windows Store and have a package security identifier (SID) for the app. The package SID gets registered with the native application settings in the Azure Active Directory.
 
 
-###Associate the app with a new store app name
+### Associate the app with a new store app name
 
 1. In Visual Studio, right click the client app project and click **Store** and **Associate App with the Store**
 
@@ -113,7 +113,7 @@ To register the app with Azure Active Directory, you must associate it to the Wi
 5. Click **Associate** to associate the app with the store name.
 
 
-###Retrieve the package SID for your app.
+### Retrieve the package SID for your app.
 
 Now you need to retrieve your package SID which will be configured with the native app settings.
 
@@ -126,7 +126,7 @@ Now you need to retrieve your package SID which will be configured with the nati
     ![][4]
 
 
-###Create the native app registration
+### Create the native app registration
 
 1. Navigate to **Active Directory** in the [classic portal], then click your directory.
 
@@ -158,7 +158,7 @@ Your mobile service is now configured in AAD to receive single sign-on logins fr
 
 
 
-##Configure the mobile service to require authentication
+## Configure the mobile service to require authentication
 
 
 
@@ -186,7 +186,7 @@ By default, all requests to mobile service resources are restricted to clients t
  
 4. Republish your project.
 
-##Add authentication code to the client app
+## Add authentication code to the client app
 
 1. Open your Windows store client app project in Visual Studio.
 
@@ -252,7 +252,7 @@ By default, all requests to mobile service resources are restricted to clients t
         }
 
 
-##Test the client using authentication
+## Test the client using authentication
 
 1. In Visual Studio,run the client app.
 2. You will receive a prompt to login against your Azure Active Directory.

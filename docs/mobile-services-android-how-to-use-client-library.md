@@ -66,7 +66,7 @@ The following are important features and concepts in the Mobile Services:
 For more information, see [Mobile Services Concepts](./
 mobile-services-concepts-links.md).
 
-##<a name="setup"></a>Setup and Prerequisites
+## <a name="setup"></a>Setup and Prerequisites
 
 We assume that you have created a mobile service and a table. For more information see [Create a table](http://go.microsoft.com/fwlink/p/?LinkId=298592). In the code used in this topic, we assume the table is named *ToDoItem*, and that it has the following columns:
 
@@ -84,7 +84,7 @@ The corresponding typed client side object is the following:
 
 When dynamic schema is enabled, Azure Mobile Services automatically generates new columns based on the object in the insert or update request. For more information, see [Dynamic schema](http://go.microsoft.com/fwlink/p/?LinkId=296271).
 
-##<a name="create-client"></a>How to: Create the Mobile Services client
+## <a name="create-client"></a>How to: Create the Mobile Services client
 The following code creates the [MobileServiceClient](http://dl.windowsazure.com/androiddocs/com/microsoft/windowsazure/mobileservices/MobileServiceClient.html) object that is used to access your mobile service. The code goes in the `onCreate` method of the Activity class specified in *AndroidManifest.xml* as a **MAIN** action and **LAUNCHER** category.
 
 		MobileServiceClient mClient = new MobileServiceClient(
@@ -94,7 +94,7 @@ The following code creates the [MobileServiceClient](http://dl.windowsazure.com/
 
 In the code above, replace `MobileServiceUrl` and `AppKey` with the mobile service URL and application key, in that order. Both of these are available on the Azure classic portal, by selecting your mobile service and then clicking on *Dashboard*.
 
-##<a name="instantiating"></a>How to: Create a table reference
+## <a name="instantiating"></a>How to: Create a table reference
 
 The easiest way to query or modify data in the mobile service is by using the *typed programming model*, since Java is a strongly typed language (later on we will discuss the *untyped* model). This model provides seamless serialization and deserialization to JSON using the [gson](http://go.microsoft.com/fwlink/p/?LinkId=290801) library when sending data between the client and the mobile service: the developer doesn't have to do anything, the framework handles it all.
 
@@ -121,7 +121,7 @@ The [2nd overload](http://go.microsoft.com/fwlink/p/?LinkId=296840) is used when
 Since version 2.0 of the client library, mobile services table operations use the [Future](http://developer.android.com/reference/java/util/concurrent/Future.html) and [AsyncTask](http://developer.android.com/reference/android/os/AsyncTask.html) objects in all of the asynchronous operations such as methods involving queries and operations like inserts, updates and deletes. This makes it easier to perform multiple operations (while on a background thread) without having to deal with multiple nested callbacks.
 
 
-##<a name="querying"></a>How to: Query data from a mobile service
+## <a name="querying"></a>How to: Query data from a mobile service
 
 This section describes how to issue queries to the mobile service. Subsections describe diffent aspects such as sorting, filtering, and paging. Finally, we discuss how you can concatenate these operations together.
 
@@ -266,7 +266,7 @@ Here's a code sample where *mToDoTable* is a reference to the mobile services *T
 The main requirement in chaining methods together is that the *where* method and predicates need to come first. After that, you can call subsequent methods in the order that best meets the needs of your application.
 
 
-##<a name="inserting"></a>How to: Insert data into a mobile service
+## <a name="inserting"></a>How to: Insert data into a mobile service
 
 The following code shows how to insert a new row into a table.
 
@@ -342,7 +342,7 @@ The value for the `id` must be unique and it must not include characters from th
 You can alternatively use integer Ids for your tables. In order to use an integer Id you must create your table with the `mobile table create` command using the `--integerId` option. This command is used with the Command-line Interface (CLI) for Azure. For more information on using the CLI, see [CLI to manage Mobile Services tables].
 
 
-##<a name="updating"></a>How to: Update data in a mobile service
+## <a name="updating"></a>How to: Update data in a mobile service
 
 The following code shows how to update data in a table. In this example, *item* is a reference to a row in the *ToDoItem* table, which has had some changes made to it. The following method updates the table and the UI adapter.
 
@@ -373,7 +373,7 @@ The following code shows how to update data in a table. In this example, *item* 
 	    }.execute();
 	}
 
-##<a name="deleting"></a>How to: Delete data in a mobile service
+## <a name="deleting"></a>How to: Delete data in a mobile service
 
 The following code shows how to delete data from a table. It deletes an existing item from the ToDoItem table that has had the **Completed** check box on the UI checked.
 
@@ -432,7 +432,7 @@ The following code illustrates another way to do this. It deletes an existing it
         }.execute();
     }
 
-##<a name="lookup"></a>How to: Look up a specific item
+## <a name="lookup"></a>How to: Look up a specific item
 Sometimes you want to look up a specific item by its *id*, unlike querying where you typically get a collection of items that satisfy some criteria. The following code shows how to do this, for an *id* value of `0380BAFB-BCFF-443C-B7D5-30199F730335`. In an actual app you would pick up the ID somehow and pass it in as a variable. Here, to simplify testing, you can go to your service in the Azure classic portal, click the **Data** tab and copy an ID that you wish to test with.
 
     /**
@@ -461,7 +461,7 @@ Sometimes you want to look up a specific item by its *id*, unlike querying where
         }.execute();
     }
 
-##<a name="untyped"></a>How to: Work with untyped data
+## <a name="untyped"></a>How to: Work with untyped data
 
 The untyped programming model gives you exact control over the JSON serialization, and there are some scenarios where you may wish to use it, for example, if your mobile service table contains a large number of columns and you only need to reference a few of them. Using the typed model requires you to define all of the mobile service table's columns in your data class. But with the untyped model you only define the columns you need to use.
 
@@ -573,7 +573,7 @@ The following code shows how to retrieve an entire table. Since you are using a 
 You can do filtering, sorting and paging by concatenating  methods that have the same names as those used in the typed programming model.
 
 
-##<a name="binding"></a>How to: Bind data to the user interface
+## <a name="binding"></a>How to: Bind data to the user interface
 
 Data binding involves three components:
 
@@ -686,13 +686,13 @@ You are now ready to use data binding. The following code shows how to get the i
 
 You must also call the adapter any time you modify the *ToDoItem* table if you want to display the results of doing that. Since modifications are done on a record by record basis, you will be dealing with a single row instead of a collection. When you insert an item you call the *add* method on the adapter, when deleting, you call the *remove* method.
 
-##<a name="custom-api"></a>How to: Call a custom API
+## <a name="custom-api"></a>How to: Call a custom API
 
 A custom API enables you to define custom endpoints that expose server functionality that does not map to an insert, update, delete, or read operation. By using a custom API, you can have more control over messaging, including reading and setting HTTP message headers and defining a message body format other than JSON. For an example of how to create a custom API in your mobile service, see [How to: define a custom API endpoint](mobile-services-dotnet-backend-define-custom-api.md).
 
 
 
-###<a name="update-app"></a>Update the app to call the custom API
+### <a name="update-app"></a>Update the app to call the custom API
 
 1. We will add a button labelled "Complete All" next to the existing button, and move both buttons down a line. In Android Studio, open the *res\layout\activity_to_do.xml* file in your quickstart project, locate the **LinearLayout** element that contains the **Button** element named `buttonAddToDo`. Copy the **LinearLayout** and paste it immediately following the original one. Delete the **Button** element from the first **LinearLayout**.
 
@@ -806,7 +806,7 @@ A custom API enables you to define custom endpoints that expose server functiona
 	A message dialog is displayed that indicates the number of items marked complete and the filtered query is executed again, which clears all items from the list.
 
 
-##<a name="authentication"></a>How to: Authenticate users
+## <a name="authentication"></a>How to: Authenticate users
 
 Mobile Services supports authenticating and authorizing app users using a variety of external identity providers: Facebook, Google, Microsoft Account, Twitter, and Azure Active Directory. You can set permissions on tables to restrict access for specific operations to only authenticated users. You can also use the identity of authenticated users to implement authorization rules in your backend. For more information, see [Get started with authentication](http://go.microsoft.com/fwlink/p/?LinkId=296316).
 
@@ -937,7 +937,7 @@ The following code snippet demonstrates obtaining a token for a Microsoft Accoun
 So what happens if your token expires? In this case, when you try to use it to connect, you will get a *401 unauthorized* response. The user must then log in to obtain new tokens. You can avoid having to write code to handle this in every place in your app that calls your mobile service by using filters, which allow you to intercept calls to and responses from Mobile Services. The filter code will then test the response for a 401, trigger the sign-in process if needed, and then resume the request that generated the 401.
 
 
-##<a name="customizing"></a>How to: Customize the client
+## <a name="customizing"></a>How to: Customize the client
 
 There are several ways for you to customize the default behavior of the Mobile Services client.
 

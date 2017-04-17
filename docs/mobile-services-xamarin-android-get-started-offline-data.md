@@ -155,7 +155,7 @@ In this section you will reconnect the app to the mobile service. This simulates
 
 5. Check the database for your mobile service to confirm that changes have been synchronized.
 
-##Summary
+## Summary
 
 In order to support the offline features of mobile services, we used the `IMobileServiceSyncTable` interface and initialized `MobileServiceClient.SyncContext` with a local store. In this case the local store was a SQLite database.
 

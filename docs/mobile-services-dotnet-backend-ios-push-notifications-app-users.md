@@ -34,7 +34,7 @@ In this topic, you learn how to send push notifications to an authenticated user
 
 In this tutorial, you require users to authenticate first, register with the notification hub for push notifications, and update server scripts to send those notifications to only authenticated users.
 
-##<a name="register"></a>Update service to require authentication to register
+## <a name="register"></a>Update service to require authentication to register
 
 
 1. In Solution Explorer in Visual Studio, expand the App_Start folder and open the WebApiConfig.cs project file.
@@ -130,7 +130,7 @@ In this tutorial, you require users to authenticate first, register with the not
 Now, the service uses the user ID tag to send a push notification (with the text of the inserted item) to all registrations created by the logged-in user.
 
 
-##<a name="update-app"></a>Update app to sign in before registration
+## <a name="update-app"></a>Update app to sign in before registration
 
 
 Next, you need to change the way that push notifications are registered so that a user is authenticated before registration is attempted.
@@ -145,7 +145,7 @@ Next, you need to change the way that push notifications are registered so that 
 UIRemoteNotificationTypeAlert | UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound];
 ```
 
-##<a name="test"></a>Test app
+## <a name="test"></a>Test app
 
 
 1. Press **Run** to start the app on a physical iOS device. In the app, add a new item, such as _A new Mobile Services task_, to the todo list.

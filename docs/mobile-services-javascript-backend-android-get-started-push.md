@@ -115,7 +115,7 @@ Your next step is to install Google Play services. Google Cloud Messaging has so
 
 If you will be testing with an older device, then consult [Set Up Google Play Services SDK] to determine how low you can set this value, and set it appropriately.
 
-###Add Google Play Services to the project
+### Add Google Play Services to the project
 
 1. Open the Android SDK Manager by clicking the icon on the toolbar of Android Studio or by clicking **Tools** -> **Android** -> **SDK Manager** on the menu. Locate the target version of the Android SDK that is used in your project , open it, and choose **Google APIs**, if it is not already installed.
 
@@ -146,7 +146,7 @@ If you will be testing with an older device, then consult [Set Up Google Play Se
 
 
 
-###Add code
+### Add code
 
 1. In your **app** project, open the file `AndroidManifest.xml`. In the code in the next two steps, replace _`**my_app_package**`_ with the name of the app package for your project, which is the value of the `package` attribute of the `manifest` tag.
 
@@ -333,7 +333,7 @@ If you will be testing with an older device, then consult [Set Up Google Play Se
 
 You can test the app by directly attaching an Android phone with a USB cable, or by using a virtual device in the emulator.
 
-###Setting up the Android emulator for testing
+### Setting up the Android emulator for testing
 
 When you run this app in the emulator, make sure that you use an Android Virtual Device (AVD) that supports Google APIs.
 
@@ -347,7 +347,7 @@ When you run this app in the emulator, make sure that you use an Android Virtual
 
 	This targets the AVD to use Google APIs.
 
-###Running the test
+### Running the test
 
 1. From the **Run** menu item, click **Run app** to start the app.
 

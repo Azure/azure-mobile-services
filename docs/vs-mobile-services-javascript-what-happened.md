@@ -18,19 +18,19 @@
 
 # What happens to my Javascript project when I add Azure Mobile Services using Connected Visual Studio Services?
 
-##NuGet package added
+## NuGet package added
 
 The **WindowsAzure.MobileServices.WinJS** NuGet package was installed, including the Azure Mobile Service library in the `js\MobileServices.js` file.
   
-##Connection string values for Mobile Services 
+## Connection string values for Mobile Services 
 
 In the `services\mobileServices\settings` folder, a new JavaScript (.js) file with a **MobileServiceClient** was generated that contains the selected mobile service's application URL and application key.  
 
-##References added to default.html
+## References added to default.html
 
 References to `MobileServices.js` and the settings file were added to `default.html`.  
 
-##Connected services files added
+## Connected services files added
 
 In the services folder, Connected Services configuration files were added.
 

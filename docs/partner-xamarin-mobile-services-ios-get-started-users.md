@@ -53,7 +53,7 @@ This tutorial is based on the Mobile Services quickstart. You must also first co
 
 Completing this tutorial requires [Xamarin Studio], XCode 6.0, and iOS 7.0 or later versions.
 
-##<a name="register"></a>Register your app for authentication and configure Mobile Services
+## <a name="register"></a>Register your app for authentication and configure Mobile Services
 
 
 1. In the [Azure classic portal](https://manage.windowsazure.com/), click **Mobile Services** > your mobile service > **Dashboard**, and make a note of the **Mobile Service URL** value.
@@ -79,7 +79,7 @@ You've now configured both your app and your mobile service to work with your au
 > [AZURE.IMPORTANT] Verify that you've set the correct redirect URI on your identity provider's developer site. As described in the linked instructions for each provider above, the redirect URI may be different for a .NET backend service vs. for a JavaScript backend service. An incorrectly configured redirect URI may result in the login screen not being displayed properly and the app malfunctioning in unexpected ways.
 
 
-##<a name="permissions"></a>Restrict permissions to authenticated users
+## <a name="permissions"></a>Restrict permissions to authenticated users
 
 
 
@@ -100,7 +100,7 @@ To secure your endpoints, you must restrict access to only authenticated clients
 
 Next, you will update the app to authenticate users before requesting resources from the mobile service.
 
-##<a name="add-authentication"></a>Add authentication to the app
+## <a name="add-authentication"></a>Add authentication to the app
 
 1. Open the **QSToDoService** project file and add the following variables
 

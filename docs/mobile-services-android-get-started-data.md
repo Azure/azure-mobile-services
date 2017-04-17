@@ -45,7 +45,7 @@ To see the completed source code, go [here](https://github.com/Azure/mobile-serv
 
 ## Download the GetStartedWithData project
 
-###Get the sample code
+### Get the sample code
 
 This tutorial is built on **GetStartedWithData**, which is an Android app. The UI for this app is identical to the one in the Mobile Services Android quickstart, except that items that are added to the list are stored locally in memory. You will add the code needed to persist the data to storage.
 

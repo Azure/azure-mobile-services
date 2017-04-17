@@ -39,7 +39,7 @@
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
 
-##Overview
+## Overview
 This topic shows you how to use Azure Mobile Services with a .NET backend to send push notifications to a universal Windows app. In this tutorial you enable push notifications using Azure Notification Hubs in a universal Windows app project. When complete, your mobile service will send a push notification from the .NET backend to all registered Windows Store and Windows Phone Store apps each time a record is inserted in the TodoList table. The notification hub that you create is free with your mobile service, can be managed independent of the mobile service, and can be used by other applications and services.
 
 To complete this tutorial, you need the following:
@@ -47,7 +47,7 @@ To complete this tutorial, you need the following:
 * An active [Microsoft Store account](http://go.microsoft.com/fwlink/p/?LinkId=280045).
 * [Visual Studio Community 2013](https://go.microsoft.com/fwLink/p/?LinkID=391934).
 
-##<a id="register"></a>Register your app for push notifications
+## <a id="register"></a>Register your app for push notifications
 
 The following steps registers your app with the Windows Store, configure your mobile service to enable push notifications, and add code to your app to register a device channel with your notification hub. Visual Studio 2013 connects to Azure and to the Windows Store by using the credentials that you provide.
 
@@ -87,7 +87,7 @@ The following steps registers your app with the Windows Store, configure your mo
 
 Now that push notifications are enabled in the app, you must update the mobile service to send push notifications.
 
-##<a id="update-service"></a>Update the service to send push notifications
+## <a id="update-service"></a>Update the service to send push notifications
 
 The following steps update the existing TodoItemController class to send a push notification to all registered devices when a new item is inserted. You can implement similar code in any custom [ApiController](https://msdn.microsoft.com/library/system.web.http.apicontroller.aspx), [TableController](https://msdn.microsoft.com/library/azure/microsoft.windowsazure.mobile.service.tables.tablecontroller.aspx), or anywhere else in your backend services.
 
@@ -127,7 +127,7 @@ The following steps update the existing TodoItemController class to send a push 
 
 
 
-##<a id="local-testing"></a> Enable push notifications for local testing
+## <a id="local-testing"></a> Enable push notifications for local testing
 
 
 You can optionally test push notifications with your mobile service running on the local computer or VM before you publish to Azure. To do this, you must set information about the notification hub used by your app in the web.config file. This information is only used when running locally to connect to the notification hub; it is ignored when published to Azure.
@@ -162,7 +162,7 @@ The remaining steps in this section are optional. They allow you to test your ap
 
 &nbsp;&nbsp;Using this [MobileServiceClient], the app will connect to the local service instead of the version hosted in Azure. When you want to switch back and run app against the mobile service hosted in Azure, change back to the original [MobileServiceClient] definitions.
 
-##<a id="test"></a> Test push notifications in your app
+## <a id="test"></a> Test push notifications in your app
 
 
 1. Right-click the Windows Store project, click **Set as StartUp Project**, then press the F5 key to run the Windows Store app.

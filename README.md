@@ -38,7 +38,7 @@ as a Nuget package or you can download the source using the instructions above. 
 
 The SDK requires Visual Studio 2013.
 
-###Building and Referencing the SDK
+### Building and Referencing the SDK
 
 The managed portable library solution includes a core portable assembly and platform-specific assemblies for each of the supported platforms: Windows 8,
 Windows Phone 8 and .NET 4.5. The core portable platform project is ```Microsoft.WindowsAzure.Mobile```. The platform-specific assembly projects are
@@ -66,7 +66,7 @@ Add a cloud backend to your iOS application in minutes with our iOS client SDK. 
 
 The SDK requires Xcode 4.6.3 or greater.
 
-###Building and Referencing the SDK
+### Building and Referencing the SDK
 
 1. Open the ```sdk\iOS\WindowsAzureMobileServices.xcodeproj``` file in Xcode.
 2. Set the active scheme option to ```Framework\iOS Device```.

@@ -31,7 +31,7 @@
 - [(iOS | .NET)](mobile-services-dotnet-backend-ios-adal-sso-authentication.md)
 - [(Windows 8.x Store C# | .NET)](mobile-services-windows-store-dotnet-adal-sso-authentication.md)
 
-##Overview
+## Overview
 
 In this tutorial, you add authentication to the quickstart project using the Active Directory Authentication Library.
 
@@ -41,7 +41,7 @@ To be able to authenticate users, you must register your application with the Az
 >[AZURE.NOTE] This tutorial is intended to help you better understand how Mobile Services enables you to do single sign-on Azure Active Directory authentication for iOS apps. If this is your first experience with Mobile Services, complete the tutorial [Get started with Mobile Services].
 
 
-##Prerequisites
+## Prerequisites
 
 
 This tutorial requires the following:
@@ -82,7 +82,7 @@ This tutorial requires the following:
 
 Your mobile service is now configured in AAD to receive single sign-on logins from your app.
 
-##Configure the mobile service to require authentication
+## Configure the mobile service to require authentication
 
 
 
@@ -110,7 +110,7 @@ By default, all requests to mobile service resources are restricted to clients t
  
 4. Republish your project.
 
-##Add authentication code to the client app
+## Add authentication code to the client app
 
 1. Download the [Active Directory Authentication Library for iOS] and include it in your project. Be sure to also add the storyboards from the ADAL source.
 
@@ -167,7 +167,7 @@ By default, all requests to mobile service resources are restricted to clients t
 
         [self loginAndGetData];
 
-##Test the client using authentication
+## Test the client using authentication
 
 1. From the Product menu, click Run to start the app
 2. You will receive a prompt to login against your Azure Active Directory.

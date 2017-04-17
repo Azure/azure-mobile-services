@@ -28,7 +28,7 @@ This topic shows you how to use a non-relational data store for your .NET backen
 
 The tutorial requires completion of the [Get started with Mobile Services] tutorial. You will also need an Azure storage account.
 
-##Configure Azure Table storage in your .NET backend mobile service
+## Configure Azure Table storage in your .NET backend mobile service
 
 First, you need to configure your mobile service and .NET backend code project to connect to Azure storage.
 
@@ -137,7 +137,7 @@ You are now ready to test the app.
 
 	The app and mobile service should behave as before, except now your data is being stored in your non-relational store instead of in the SQL Database.
 
-##Next Steps
+## Next Steps
 
 Now that you have seen how easy it is to use Table storage with .NET backend, consider exploring some other backend storage options:
 

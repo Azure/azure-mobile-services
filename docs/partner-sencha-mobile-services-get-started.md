@@ -47,7 +47,7 @@
 >[AZURE.TIP] This topic shows you how to get started with Mobile Services as quickly as possible. It is designed for customers new to this Azure feature. If you are already familiar with Mobile Services or are looking for more in-depth information, please select a topic from the left-navigation or see the relevant links in [Next steps](#next-steps).
 
 
-##Overview
+## Overview
 
 This tutorial shows you how to leverage Azure Mobile Services in your Sencha Touch application. You will create a simple *To Do List* app using Sencha Touch that utilizes a mobile service you define through the Azure classic portal. This tutorial is intended for intermediate to advanced web application developers who have a good understanding of JavaScript and who are familiar with the Sencha Touch framework.
 
@@ -60,7 +60,7 @@ A screenshot from the completed app is shown below:
 
 ![][0]
 
-##Requirements
+## Requirements
 
 - Download and install [Sencha Touch](http://wwww.sencha.com/products/touch/download" target="_blank").
 
@@ -95,7 +95,7 @@ Follow these steps to create a new mobile service.
 You have now created a new mobile service that can be used by your mobile apps.
 
 
-##Create a TodoItems Table
+## Create a TodoItems Table
 
 Once you have created your mobile service, you can follow an easy quickstart in the Azure classic portal to create
 a new database table for use in your mobile service.
@@ -123,7 +123,7 @@ a new database table for use in your mobile service.
 
     ![Setup CORS for localhost](./media/partner-sencha-mobile-services-get-started/mobile-services-set-cors-localhost.png)
 
-##Generate your Touch application
+## Generate your Touch application
 
 Generating a Sencha Touch template application is a simple task using Sencha Cmd and is a great way to get an application up and running very quickly.
 
@@ -133,11 +133,11 @@ From the directory where you installed the Touch framework, issue the following 
 
 This generates a template Touch application with an application name of 'Basic'. To launch your application, simply point your browser to the directory /path/to/application and you should be presented with the standard Touch sample application.
 
-##Installing the Sencha Touch Extensions for Azure
+## Installing the Sencha Touch Extensions for Azure
 
 The extension for Azure is installed either manually or as a Sencha Package. The method you use is totally up to you.
 
-###Manual installation
+### Manual installation
 
 In most Touch applications, if you wish to add an external library of classes, you simply download the package, unpack it in your application directory and configure the Touch loader with the location of the library.
 
@@ -154,7 +154,7 @@ You can manually add the Azure extensions to your application using the followin
     This creates an **azure** directory containing the entire package source, examples and documentation. The source will reside in the **azure/src** directory.
 
 
-###Installation as a Sencha package
+### Installation as a Sencha package
 
 > [AZURE.NOTE] You can only use this method when you have generated your application using the <code>sencha generate app</code> command.
 
@@ -181,7 +181,7 @@ Both **sencha app build** and **sencha app refresh** will both now perform the s
 
 Whichever command you run, Sencha Cmd will download and expand the package to your "packages" folder. After this you will find a "packages/touch-azure" folder in your workspace.
 
-##Include and configure Azure
+## Include and configure Azure
 
 **Filename**: app.js
 
@@ -243,11 +243,11 @@ Now that the Azure extension has been downloaded and installed in your applicati
 
 Congratulations! Your application should now have access to your mobile service.
 
-##Build the ToDo app
+## Build the ToDo app
 
 Now that we have configured your application to include the Azure extension, and provided it with your mobile service credentials, we can move on to creating a Touch application which utilizes your mobile service for viewing and editing your ToDo list data stored in the service.
 
-###Configure the Azure data proxy
+### Configure the Azure data proxy
 
 **Filename:** app/model/TodoItem.js
 
@@ -294,7 +294,7 @@ The Azure proxy will automatically set all HTTP headers with the appropriate CRU
 	});
 
 
-###Store your ToDo items
+### Store your ToDo items
 
 **Filename**: app/store/TodoItems.js
 
@@ -320,7 +320,7 @@ We also have some additional configuration options for the store such as specify
 	});
 
 
-###View and edit your ToDo items
+### View and edit your ToDo items
 
 **Filename**: app/view/DataItem.js
 
@@ -398,7 +398,7 @@ The view below is comprised of a ListItem which defines how each record will be 
 	});
 
 
-###Create your primary view
+### Create your primary view
 
 **Filename**: app/view/Main.js
 
@@ -465,7 +465,7 @@ Now that we have defined the layout of an individual ToDo list item (above) we w
     	}
 	});
 
-###Make everything work together
+### Make everything work together
 
 **Filename**: app/controller/Main.js
 
@@ -622,7 +622,7 @@ The final step in our application is to respond to button presses (delete, save,
     	}
 	});
 
-###Put it all together
+### Put it all together
 
 **Filename**: app.js
 
@@ -704,7 +704,7 @@ Our final step is to finish editing the main application file, and provide infor
    		}
 	});
 
-###Host and run your Sencha Touch app
+### Host and run your Sencha Touch app
 
 The final stage of this tutorial is to host and run your new app on your local computer.
 
@@ -735,7 +735,7 @@ The final stage of this tutorial is to host and run your new app on your local c
 
     ![browse todo table](./media/partner-sencha-mobile-services-get-started/mobile-data-browse.png)
 
-##Next Steps
+## Next Steps
 Now that you have completed the Getting Started Guide, learn how to perform additional important tasks in Mobile Services with Sencha.
 
 [Download](https://github.com/arthurakay/sencha-touch-azure-example) a completed sample app with additional styling and features to see what else Sencha Touch can do!
@@ -748,13 +748,13 @@ Then, dive into more information about the Sencha Touch Extensions for Azure:
   * Using Sencha With Azure Mobile Services: [(Video)](http://channel9.msdn.com/Shows/Cloud+Cover/Episode-126-Using-Sencha-With-Windows-Azure-Mobile-Services)
 
 
-##Additional Resources
+## Additional Resources
 
   * [Download Sencha Touch](http://pages.sencha.com/touch-for-azure.html)
   * [Sencha Touch Extensions for Azure](https://market.sencha.com/extensions/sencha-extensions-for-microsoft-azure)
 
 
-##Summary
+## Summary
 
 The example outlined here is provided in the Sencha Touch Extension for Azure package and is located in the examples directory as the Basic Data example. There are a few more examples which are provided which demonstrated other functionality of this extension along with detailed comments and explanations.
 

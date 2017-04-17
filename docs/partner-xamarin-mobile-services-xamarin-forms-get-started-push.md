@@ -39,7 +39,7 @@
 >
 > Get started with Azure Mobile Apps, see the [Azure Mobile Apps documentation center](https://azure.microsoft.com/documentation/learning-paths/appservice-mobileapps/).
 
-##Overview
+## Overview
 
 This tutorial shows you how to use Azure Mobile Services to send push notifications to the iOS, Android, and Windows Phone app of your Xamarin.Forms solution. Start by creating a mobile service. Then, you'll download a starter sample, register with the appropriate push notification services, and add code to the solution to receive notifications from those services.
 
@@ -431,7 +431,7 @@ You have successfully completed this tutorial.
 
 You'll add push notifications to the Android app by using the Google Cloud Messaging (GCM) service. You'll need an active Google account, and the [Google Cloud Messaging Client Component].
 
-###<a id="register"></a>Enable Google Cloud Messaging
+### <a id="register"></a>Enable Google Cloud Messaging
 
 
 1. Navigate to the [Google Cloud Console](https://console.developers.google.com/project), sign in with your Google account credentials.
@@ -464,7 +464,7 @@ You'll add push notifications to the Android app by using the Google Cloud Messa
 	You will use this API key value to enable Azure to authenticate with GCM and send push notifications on behalf of your app.
 
 
-###<a id="configure"></a>Configure your mobile service to send push requests
+### <a id="configure"></a>Configure your mobile service to send push requests
 
 
 1. Log on to the [Azure classic portal](https://manage.windowsazure.com/), click **Mobile Services**, and then click your app.
@@ -477,7 +477,7 @@ You'll add push notifications to the Android app by using the Google Cloud Messa
 
 Both your mobile service and your app are now configured to work with GCM and Notification Hubs.
 
-###<a id="update-scripts"></a>Update the registered insert script to send notifications
+### <a id="update-scripts"></a>Update the registered insert script to send notifications
 
 >[AZURE.NOTE] The following steps show you how to update the script registered to the insert operation on the TodoItem table in the Azure classic portal. You can also access and edit this mobile service script directly in Visual Studio, in the Azure node of Server Explorer.
 
@@ -524,7 +524,7 @@ This displays the function that is invoked when an insert occurs in the **TodoIt
    >[AZURE.NOTE] This script delays sending the notification to give you time to close the app to receive a toast notification.
 
 
-###<a id="configure-app"></a>Configure the existing project for push notifications
+### <a id="configure-app"></a>Configure the existing project for push notifications
 
 1. In the Solution view, expand the **Components** folder in the Xamarin.Android app and make sure that Azure Mobile Services package is installed.
 
@@ -558,7 +558,7 @@ This displays the function that is invoked when an insert occurs in the **TodoIt
 
 Your **MainActivity** is now prepared for adding push notifications.
 
-###<a id="add-push"></a>Add push notifications code to your app
+### <a id="add-push"></a>Add push notifications code to your app
 
 5. In the ToDoAzure.Droid project, create a new class in the project called `GcmService`.
 
@@ -716,7 +716,7 @@ Your **MainActivity** is now prepared for adding push notifications.
             Log.Error(PushHandlerBroadcastReceiver.TAG, "GCM Error: " + errorId);
         }
 
-###<a id="test"></a>Test push notifications in your app
+### <a id="test"></a>Test push notifications in your app
 
 You can test the app by directly attaching an Android phone with a USB cable, or by using a virtual device in the emulator.
 
@@ -746,7 +746,7 @@ When you run this app in the emulator, make sure that you use an Android Virtual
 
 This section shows you how to use Azure Mobile Services to send push notifications to the Windows Phone Silverlight app that is included in your Xamarin.Forms solution.
 
-###<a id="update-app"></a> Update the app to register for notifications
+### <a id="update-app"></a> Update the app to register for notifications
 
 Before your app can receive push notifications, you must register a notification channel.
 
@@ -801,7 +801,7 @@ Before your app can receive push notifications, you must register a notification
 
    	This makes sure that your app can raise toast notifications.
 
-###<a id="update-scripts"></a> Update server scripts to send push notifications
+### <a id="update-scripts"></a> Update server scripts to send push notifications
 
 Finally, you must update the script registered to the insert operation on the TodoItem table to send notifications.
 
@@ -851,7 +851,7 @@ Finally, you must update the script registered to the insert operation on the To
 
 	>[AZURE.NOTE]This tutorial uses MPNS in unauthenticated mode. In this mode, MPNS limits the number of notifications that can be sent to a device channel. To remove this restriction, you must generate and upload a certificate by clicking **Upload** and selecting the certificate. For more information on generating the certificate, see [Setting up an authenticated web service to send push notifications for Windows Phone].
 
-###<a id="test"></a> Test push notifications in your app
+### <a id="test"></a> Test push notifications in your app
 
 1. In Visual Studio, press the F5 key to run the app.
 

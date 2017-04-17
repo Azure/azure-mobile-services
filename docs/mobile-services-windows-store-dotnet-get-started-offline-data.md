@@ -45,7 +45,7 @@ In this tutorial, you update the Universal app project from the [Get started wit
 
 >[AZURE.NOTE] This tutorial is intended to help you better understand how Mobile Services enables you to use Azure to store and retrieve data in a Windows Store app. If this is your first experience with Mobile Services, you should complete the tutorial [Get started with Mobile Services] first.
 
-##Prerequisites
+## Prerequisites
 
 This tutorial requires the following:
 
@@ -251,7 +251,7 @@ In this section you reconnect the app to the mobile service. This simulates the 
     ![][10]
 
 
-##Summary
+## Summary
 
 In order to support the offline features of mobile services, we used the `IMobileServiceSyncTable` interface and initialized `MobileServiceClient.SyncContext` with a local store. In this case the local store was a SQLite database.
 

@@ -31,7 +31,7 @@
 - [(Windows 8.x Store C# | .NET)](mobile-services-dotnet-backend-windows-store-dotnet-aad-rbac.md)
  
 
-##Overview
+## Overview
 
 Roles-based access control (RBAC) is the practice of assigning permissions to roles that your users can hold. It nicely defines boundaries on what certain classes of users can and cannot do. This tutorial will walk you through how to add basic RBAC to Azure Mobile Services.
 
@@ -40,7 +40,7 @@ This tutorial will demonstrate role based access control, checking each user's m
 
 >[AZURE.NOTE] The intent of this tutorial is to extend your knowledge of authentication to include authorization practices. It is expected that you first complete the [Add Authentication to your app] tutorial using the Azure Active Directory authentication provider. This tutorial continues to update the TodoItem application used in the [Add Authentication to your app] tutorial.
 
-##Prerequisites
+## Prerequisites
 
 This tutorial requires the following:
 
@@ -50,7 +50,7 @@ This tutorial requires the following:
 
 
 
-##Generate a key for the Integrated Application
+## Generate a key for the Integrated Application
 
 
 During the [Add Authentication to your app] tutorial, you created a registration for the integrated application when you completed the [Register to use an Azure Active Directory Login] step. In this section you generate a key to be used when reading directory information with that integrated application's client ID.
@@ -93,7 +93,7 @@ During the [Add Authentication to your app] tutorial, you created a registration
 
 
 
-##Create a Sales group with membership
+## Create a Sales group with membership
 
 In this section you add two new users to your directory along with the new Sales group. One of the users will be granted membership to the sales group. The other user will not be granted membership to the group. 
 
@@ -136,7 +136,7 @@ In this section you add two new users to your directory along with the new Sales
 
 
 
-##Create a custom authorization attribute on the mobile service
+## Create a custom authorization attribute on the mobile service
 
 In this section you will create a new custom authorization attribute that can be used to perform access checks on mobile service operations. The attribute will look up an Active Directory group based on the role name passed to it. It will then perform access checks based on that group's membership.
 
@@ -405,7 +405,7 @@ In this section you will create a new custom authorization attribute that can be
 
 12. Save your changes to AuthorizeAadRole.cs.
 
-##Add role based access checking to the database operations
+## Add role based access checking to the database operations
 
 1. In Visual Studio, expand the **Controllers** folder under the mobile service project. Open TodoItemController.cs.
 
@@ -447,7 +447,7 @@ In this section you will create a new custom authorization attribute that can be
 5. Publish the mobile service to your Azure account.
 
 
-##Test the client's access
+## Test the client's access
 
 
 The instructions and screenshots below apply to testing a Windows Store client but, you can test this on any of the other platforms supported by Azure Mobile Services. 

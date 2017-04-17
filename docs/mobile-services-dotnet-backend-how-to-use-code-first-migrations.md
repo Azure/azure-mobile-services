@@ -132,11 +132,11 @@ Before you use Code First Migrations with your .NET backend project, you should 
         SetSqlGenerator("System.Data.SqlClient", new EntityTableSqlGenerator());
     }
 
-##<a name="seeding"></a>Seeding data in migrations
+## <a name="seeding"></a>Seeding data in migrations
 
 You can have Migrations add seed data to the database when a migration is executed. The **Configuration** class has a **Seed** method that you can override to insert or update data. The Configuration.cs code file is added to the Migrations folder when Migrations are enabled. These examples show how to override the [Seed] method to seed data to the **TodoItems** table. The [Seed] method is called after migrating to the latest version.
 
-###Seed a new table
+### Seed a new table
 
 The following code seeds the **TodoItems** table with new rows of data:
 
@@ -152,7 +152,7 @@ The following code seeds the **TodoItems** table with new rows of data:
         }
         base.Seed(context);
 
-###Seed a new column in a table
+### Seed a new column in a table
 
 The following code seeds just the UserId column:
 

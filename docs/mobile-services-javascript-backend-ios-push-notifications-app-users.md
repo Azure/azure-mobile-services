@@ -37,7 +37,7 @@ In this topic, you learn how to send push notifications to an authenticated user
 In this tutorial, you require users to authenticate first, register with the notification hub for push notifications, and update server scripts to send those notifications to only authenticated users.
 
 
-##<a name="register"></a>Update Service to Require Authentication to Register
+## <a name="register"></a>Update Service to Require Authentication to Register
 
 
 1. Log on to the [Azure classic portal](https://manage.windowsazure.com/), click **Mobile Services**, and then click your mobile service.
@@ -102,7 +102,7 @@ function insert(item, user, request) {
 }
 ```
 
-##<a name="update-app"></a>Update App to Login Before Registration
+## <a name="update-app"></a>Update App to Login Before Registration
 
 
 Next, you need to change the way that push notifications are registered so that a user is authenticated before registration is attempted.
@@ -117,7 +117,7 @@ Next, you need to change the way that push notifications are registered so that 
 UIRemoteNotificationTypeAlert | UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound];
 ```
 
-##<a name="test"></a>Test App
+## <a name="test"></a>Test App
 
 
 1. Press **Run** to start the app on a physical iOS device. In the app, add a new item, such as _A new Mobile Services task_, to the todo list.
