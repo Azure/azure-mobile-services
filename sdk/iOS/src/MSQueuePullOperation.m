@@ -305,7 +305,7 @@
     
     if (self.deltaToken) {
         MSDateOffset *offset = [[MSDateOffset alloc]initWithDate:self.deltaToken];
-        NSPredicate *updatedAt = [NSPredicate predicateWithFormat:@"%K >= %@", MSSystemColumnUpdatedAt, offset];
+        NSPredicate *updatedAt = [NSPredicate predicateWithFormat:@"%K > %@", MSSystemColumnUpdatedAt, offset];
         if (self.originalPredicate) {
             self.query.predicate = [NSCompoundPredicate andPredicateWithSubpredicates:@[self.originalPredicate, updatedAt]];
         }
