@@ -21,10 +21,73 @@
 #import "MSPullSettingsInternal.h"
 #import "MSClientInternal.h"
 
+static NSString *const TodoTable = @"TodoItem";
 static NSString *const TodoTableNoVersion = @"TodoNoVersion";
 static NSString *const TodoTable = @"TodoItem";
 static NSString *const AllColumnTypesTable = @"ColumnTypes";
 static NSString *const SyncContextQueueName = @"Sync Context: Operation Callbacks";
+
+@interface TestSyncContextDelegate: NSObject<MSSyncContextDelegate>
+{
+    BOOL _isContinueTriggered;
+    MSSyncItemBlock _operationCompletion;
+}
+
+@property NSCondition* continueCondition;
+
+@property NSCondition* executingPushCondition;
+
+@property BOOL isExecutingPush;
+
+@end
+
+@implementation TestSyncContextDelegate
+
+- (TestSyncContextDelegate*)initWithOperationCompletion:(MSSyncItemBlock)operationCompletion
+{
+    self = [super init];
+    if (self)
+    {
+        _operationCompletion = operationCompletion;
+        _isContinueTriggered = NO;
+        _isExecutingPush = NO;
+        self.continueCondition = [[NSCondition alloc] init];
+        self.executingPushCondition = [[NSCondition alloc] init];
+    }
+    return self;
+}
+
+- (void)tableOperation:(MSTableOperation *)operation onComplete:(MSSyncItemBlock)completion
+{
+    [self.executingPushCondition lock];
+    _isExecutingPush = YES;
+    [self.executingPushCondition signal];
+    [self.executingPushCondition unlock];
+    
+    [operation executeWithCompletion:^(id itemOrItemId, NSError *error) {
+        _operationCompletion(itemOrItemId, error);
+        NSLog(@"TestSyncContextDelegate: Waiting for continue condition to be triggered...");
+        [self.continueCondition lock];
+        if (!_isContinueTriggered)
+        {
+            [self.continueCondition waitUntilDate:[NSDate dateWithTimeIntervalSinceNow:5]];
+        }
+        _isContinueTriggered = NO;
+        [self.continueCondition unlock];
+        NSLog(@"TestSyncContextDelegate: continue triggered.");
+        completion(itemOrItemId, error);
+    }];
+}
+
+- (void)triggerContinue
+{
+    [self.continueCondition lock];
+    _isContinueTriggered = YES;
+    [self.continueCondition signal];
+    [self.continueCondition unlock];
+}
+
+@end
 
 @interface MSSyncTableTests : XCTestCase {
     MSClient *client;
@@ -418,6 +481,146 @@ static NSString *const SyncContextQueueName = @"Sync Context: Operation Callback
     }];
     XCTAssertNotNil(push);
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
+}
+
+
+
+-(void) testInsertUpdateWhilePushing
+{
+    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    
+    NSString* initialVersion = @"AAAAAAAALNU=";
+    NSString* secondVersion = @"AAAAAAANEXT=";
+    NSString* secondName = @"second name";
+    
+    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
+                                   initWithURL:[NSURL URLWithString:@"https://someUrl/tables/TodoItem?__systemProperties=__version"]
+                                   statusCode:200
+                                   HTTPVersion:nil
+                                   headerFields:@{ @"Etag" : [NSString stringWithFormat:@"\"%@\"", initialVersion] }
+                                   ];
+    
+    NSString* stringData = [NSString stringWithFormat:@"{\"id\": \"test1\", \"name\":\"test name\"}"];
+    NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
+    
+    BOOL __block insertRanToServer = NO;
+    
+    testFilter.responseToUse = response;
+    testFilter.dataToUse = data;
+    testFilter.ignoreNextFilter = YES;
+    testFilter.onInspectRequest =  ^(NSURLRequest *request) {
+        insertRanToServer = YES;
+        return request;
+    };
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:TodoTable];
+    
+    // Install the sync context delegate
+    TestSyncContextDelegate* testSyncContextDelegate = [[TestSyncContextDelegate alloc] initWithOperationCompletion:^(NSDictionary *item, NSError *error) {
+        XCTAssertEqualObjects(initialVersion, [item objectForKey:MSSystemColumnVersion],
+                              @"inserted item should have a server-provided version");
+    }];
+    filteredClient.syncContext.delegate = testSyncContextDelegate;
+    
+    // Create the item
+    NSMutableDictionary *item = [@{ @"id": @"test1", @"name":@"test name" } mutableCopy];
+    
+    // Insert the item
+    done = NO;
+    [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
+        XCTAssertNil(error, @"error should have been nil.");
+        done = YES;
+    }];
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    
+    [client.syncContext pushWithCompletion:^(NSError *error) {
+        XCTAssertNil(error, @"error should have been nil.");
+        XCTAssertTrue(insertRanToServer, @"the insert call didn't go to the server");
+        
+        // Check to see that the version is now the second version
+        done = NO;
+        [todoTable readWithId:@"test1" completion:^(NSDictionary *item, NSError *error) {
+            XCTAssertEqualObjects(secondVersion, [item objectForKey:MSSystemColumnVersion],
+                                  @"inserted item should have a server-provided version");
+            done = YES;
+        }];
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    }];
+    
+    // Update the item while the push is "in progress"
+    XCTAssertEqual(filteredClient.syncContext.pendingOperationsCount, 1, @"Should have a single operation pending");
+    
+    // Ensure the push is actually in progress
+    [testSyncContextDelegate.executingPushCondition lock];
+    if (!testSyncContextDelegate.isExecutingPush)
+    {
+        [testSyncContextDelegate.executingPushCondition waitUntilDate:[NSDate dateWithTimeIntervalSinceNow:5]];
+    }
+    testSyncContextDelegate.isExecutingPush = NO;
+    [testSyncContextDelegate.executingPushCondition unlock];
+    
+    // Perform the concurrent update
+    done = NO;
+    [item setValue:secondName forKey:@"name"];
+    [todoTable update:item completion:^(NSError *error) {
+        XCTAssertNil(error, @"error should have been nil.");
+        XCTAssertNil([item objectForKey:MSSystemColumnVersion],
+                              @"updated item shouldn't have a version number from the server yet");
+        done = YES;
+    }];
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    
+    // Concurrent update should have added an aditional pending update operation
+    XCTAssertEqual(filteredClient.syncContext.pendingOperationsCount, 2, @"Should have 2 pending operations");
+    
+    // Allow the push operation callback to finish and return
+    [testSyncContextDelegate triggerContinue];
+    
+    // Wait for the second update operation to begin, ensuring the previous operation was complete.
+    // This is also ensuring the second operation hasn't written any results back to the local store.
+    [testSyncContextDelegate.executingPushCondition lock];
+    if (!testSyncContextDelegate.isExecutingPush)
+    {
+        [testSyncContextDelegate.executingPushCondition waitUntilDate:[NSDate dateWithTimeIntervalSinceNow:5]];
+    }
+    testSyncContextDelegate.isExecutingPush = NO;
+    [testSyncContextDelegate.executingPushCondition unlock];
+    
+    // Query the item and see what the version is set to
+    done = NO;
+    [todoTable readWithId:@"test1" completion:^(NSDictionary *item, NSError *error) {
+        XCTAssertEqualObjects(initialVersion, [item objectForKey:MSSystemColumnVersion],
+                              @"inserted item should have a server-provided version");
+        done = YES;
+    }];
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    
+    // Update the filter for the second request
+    NSHTTPURLResponse *secondResponse = [[NSHTTPURLResponse alloc]
+                                         initWithURL:[NSURL URLWithString:@"https://someUrl/tables/TodoItem?__systemProperties=__version"]
+                                         statusCode:200
+                                         HTTPVersion:nil
+                                         headerFields:@{ @"Etag" : [NSString stringWithFormat:@"\"%@\"", secondVersion] }
+                                         ];
+    
+    NSString* secondDataString = [NSString stringWithFormat:@"{\"id\": \"test1\", \"name\":\"%@\"}", secondName];
+    NSData* secondData = [secondDataString dataUsingEncoding:NSUTF8StringEncoding];
+
+    testFilter.dataToUse = secondData;
+    testFilter.responseToUse = secondResponse;
+    testFilter.ignoreNextFilter = YES;
+    testFilter.onInspectRequest = ^(NSURLRequest *request) {
+        // Check the version header on the request
+        XCTAssertEqualObjects(request.allHTTPHeaderFields[@"If-Match"], ([NSString stringWithFormat:@"\"%@\"", initialVersion]), @"If-Match header have contained the proper version");
+        return request;
+    };
+
+    // Allow the push for the second update to complete.
+    [testSyncContextDelegate triggerContinue];
+    
+    // Wait for pusWithCompletion callback.
+    XCTAssertTrue([self waitForTest:1.0], @"Test timed out.");
 }
 
 -(void) testInsertItemWithValidIdConflict
