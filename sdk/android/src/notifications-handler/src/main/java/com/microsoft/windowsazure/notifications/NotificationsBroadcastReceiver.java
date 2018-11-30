@@ -7,11 +7,19 @@ import android.content.Intent;
 public class NotificationsBroadcastReceiver extends BroadcastReceiver {
 
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public void onMessageReceived(RemoteMessage remoteMessage) {
+
+        Context context = getApplicationContext();
         NotificationsHandler handler = NotificationsManager.getHandler(context);
 
         if (handler != null) {
-            handler.onReceive(context, intent.getExtras());
+
+            Bundle bundle = new Bundle();
+            for (Map.Entry<String, String> entry : remoteMessage.getData().entrySet()) {
+                bundle.putString(entry.getKey(), entry.getValue());
+            }
+
+            handler.onReceive(context, bundle);
         }
     }
 }
