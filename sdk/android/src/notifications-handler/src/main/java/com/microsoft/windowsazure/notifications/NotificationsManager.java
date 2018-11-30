@@ -50,7 +50,7 @@ public class NotificationsManager {
                     FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(new OnSuccessListener<InstanceIdResult>() {
                         @Override
                         public void onSuccess(InstanceIdResult instanceIdResult) {
-                            String registrationId = instanceIdResult.getToken();
+                            String registrationId = fcmAppId;
 
                             setRegistrationId(registrationId, context);
 
